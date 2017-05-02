@@ -6,7 +6,7 @@ sourceCompatibility = pSourceCompatibility
 sourceSets{
 	main{
 		java{
-			srcDir 'src/java'
+			srcDir 'src'
 		}
 	}
 }
