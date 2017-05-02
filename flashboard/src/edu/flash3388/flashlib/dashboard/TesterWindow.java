@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.io.IOException;
 
-import edu.flash3388.dashboard.controls.Tester;
+import edu.flash3388.flashlib.dashboard.controls.Tester;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;

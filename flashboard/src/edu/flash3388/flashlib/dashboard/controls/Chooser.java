@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

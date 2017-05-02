@@ -4,8 +4,8 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-import edu.flash3388.dashboard.controls.Tester;
-import edu.flash3388.dashboard.controls.Tester.TesterMotor;
+import edu.flash3388.flashlib.dashboard.controls.Tester;
+import edu.flash3388.flashlib.dashboard.controls.Tester.TesterMotor;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

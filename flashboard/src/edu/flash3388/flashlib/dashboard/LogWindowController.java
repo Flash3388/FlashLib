@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.dashboard;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import edu.flash3388.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

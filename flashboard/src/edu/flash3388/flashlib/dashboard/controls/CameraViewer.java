@@ -15,13 +15,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import edu.flash3388.dashboard.Dashboard;
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Dashboard;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ImagePipeline;
-import edu.flash3388.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

@@ -4,7 +4,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathd;
 

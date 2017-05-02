@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

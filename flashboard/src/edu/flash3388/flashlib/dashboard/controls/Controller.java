@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathd;
-import edu.flash3388.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;

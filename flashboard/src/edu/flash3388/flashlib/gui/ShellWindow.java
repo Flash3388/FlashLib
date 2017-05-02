@@ -10,9 +10,9 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
-import edu.flash3388.dashboard.Remote;
-import edu.flash3388.dashboard.Remote.RemoteHost;
-import edu.flash3388.dashboard.Remote.User;
+import edu.flash3388.flashlib.dashboard.Remote;
+import edu.flash3388.flashlib.dashboard.Remote.RemoteHost;
+import edu.flash3388.flashlib.dashboard.Remote.User;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;

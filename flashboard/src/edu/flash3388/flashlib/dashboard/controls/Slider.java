@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.beans.property.SimpleDoubleProperty;

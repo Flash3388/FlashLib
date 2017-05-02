@@ -1,13 +1,6 @@
 package edu.flash3388.flashlib.dashboard;
 
-import edu.flash3388.dashboard.controls.BooleanProperty;
-import edu.flash3388.dashboard.controls.Button;
-import edu.flash3388.dashboard.controls.Chooser;
-import edu.flash3388.dashboard.controls.Controller;
-import edu.flash3388.dashboard.controls.DoubleProperty;
-import edu.flash3388.dashboard.controls.InputField;
-import edu.flash3388.dashboard.controls.PDP;
-import edu.flash3388.dashboard.controls.Tester;
+import edu.flash3388.flashlib.dashboard.controls.*;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;

@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-import edu.flash3388.dashboard.controls.PDP;
+import edu.flash3388.flashlib.dashboard.controls.PDP;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

@@ -9,7 +9,7 @@ import java.util.Vector;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
-import edu.flash3388.dashboard.controls.CameraViewer;
+import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.Properties;
 import edu.flash3388.flashlib.vision.CvProcessing;
 import edu.flash3388.flashlib.vision.CvRunner;
 import edu.flash3388.flashlib.vision.ProcessingParam;
-import edu.flash3388.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
