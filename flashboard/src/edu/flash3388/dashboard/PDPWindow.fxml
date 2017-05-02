@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<fx:root prefHeight="341.0" prefWidth="385.0" type="BorderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.flash3388.dashboard.PDPWindowController">
+   <center>
+      <VBox prefHeight="341.0" prefWidth="356.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="BOTTOM_CENTER" prefHeight="65.0" prefWidth="385.0" spacing="5.0">
+               <children>
+                  <Label fx:id="volt" text="Voltage:" />
+                  <Label fx:id="temp" text="Temperature:" />
+                  <Label fx:id="tCurrent" text="Total Current:" />
+               </children>
+            </HBox>
+            <HBox prefHeight="242.0" prefWidth="349.0">
+               <children>
+                  <VBox fx:id="channelsLeft" alignment="CENTER_RIGHT" prefHeight="212.0" prefWidth="101.0" spacing="5.0">
+                     <HBox.margin>
+                        <Insets top="30.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <VBox alignment="CENTER" prefHeight="242.0" prefWidth="155.0">
+                     <children>
+                        <ImageView fx:id="pdpView" fitHeight="225.0" fitWidth="163.0" pickOnBounds="true" preserveRatio="true" rotate="180.0" />
+                     </children>
+                  </VBox>
+                  <VBox fx:id="channelsRight" alignment="CENTER_LEFT" prefHeight="212.0" prefWidth="100.0" spacing="5.0">
+                     <HBox.margin>
+                        <Insets top="30.0" />
+                     </HBox.margin>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+   <top>
+      <HBox alignment="CENTER" prefHeight="38.0" prefWidth="385.0" BorderPane.alignment="CENTER">
+         <children>
+            <ComboBox fx:id="pdpBox" prefHeight="25.0" prefWidth="128.0">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </ComboBox>
+         </children>
+      </HBox>
+   </top>
+</fx:root>
