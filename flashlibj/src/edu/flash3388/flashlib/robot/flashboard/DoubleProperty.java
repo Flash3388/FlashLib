@@ -15,6 +15,7 @@ public class DoubleProperty extends Sendable{
 	
 	public DoubleProperty(String name, DoubleDataSource data) {
 		super(name, FlashboardSendableType.DOUBLE);
+		src = data;
 	}
 	public DoubleProperty(String name){
 		this(name, new DoubleDataSource.VarDataSource());
@@ -39,6 +40,7 @@ public class DoubleProperty extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
+		if(src == null) return false;
 		value = src.get();
 		return changed || Math.abs(value - lastValue) > CHAGNE_DIFFERENCE;
 	}

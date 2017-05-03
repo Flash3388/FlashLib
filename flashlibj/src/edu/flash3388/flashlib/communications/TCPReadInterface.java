@@ -10,8 +10,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
 public class TCPReadInterface implements ReadInterface{
 
 	private static final byte SEPERATOR_START = (byte)'<';
@@ -96,7 +94,6 @@ public class TCPReadInterface implements ReadInterface{
 			}
 			
 			if(server){
-				System.out.println("Listening");
 				socket = serverSocket.accept();
 			}
 			else{
@@ -106,7 +103,6 @@ public class TCPReadInterface implements ReadInterface{
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
 			reset = true;
-			System.out.println("Connected");
 		} catch (IOException e) {	
 		}
 	}
@@ -134,14 +130,23 @@ public class TCPReadInterface implements ReadInterface{
 	public boolean read(Packet packet) {
 		if(!isOpened()) return false;
 		try {
-			int start = getPacket(leftoverData, packet);
-			if(start >= 0){
-				if(packet.length + start + 2 > leftoverData.length - 1)
-					leftoverData = new byte[0];
-				else 
-					leftoverData = Arrays.copyOfRange(leftoverData, packet.length + start + 2, leftoverData.length - 1);
-				return true;
+			int start = -1;
+			if(leftoverData.length > 0){
+				int startI = indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_START);
+				int endI = indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_END);
+				if(endI < startI)
+					leftoverData = Arrays.copyOfRange(leftoverData, endI + 1, leftoverData.length - 1);
+				
+				start = getPacket(leftoverData, packet, startI, endI);
+				if(start >= 0){
+					if(packet.length + start + 2 > leftoverData.length - 1)
+						leftoverData = new byte[0];
+					else 
+						leftoverData = Arrays.copyOfRange(leftoverData, packet.length + start + 2, leftoverData.length - 1);
+					return true;
+				}
 			}
+			
 			int len = in.read(data);
 			if(len < 1){
 				packet.length = 0;
@@ -233,16 +238,20 @@ public class TCPReadInterface implements ReadInterface{
 			if(data[i] == ch) return i;
 		return -1;
 	}
-	private static int getPacket(byte[] data, Packet packet){
-		int start = indexOf(data, 0, data.length-1, SEPERATOR_START);
-		int end = indexOf(data, 0, data.length-1, SEPERATOR_END);
-		if(end < start || start < 0) 
+	private static int getPacket(byte[] data, Packet packet, int start, int end){
+		start = start < 0 ? indexOf(data, 0, data.length-1, SEPERATOR_START) : start;
+		end = end < 0 ? indexOf(data, 0, data.length-1, SEPERATOR_END) : end;
+		if(end < start || start < 0 || start == end){ 
 			return -1;
+		}
 		
 		byte[] p = new byte[end - start - 1];
 		System.arraycopy(data, start + 1, p, 0, p.length);
 		packet.data = p;
 		packet.length = p.length;
 		return start;
+	}
+	private static int getPacket(byte[] data, Packet packet){
+		return getPacket(data, packet, -1, -1);
 	}
 }
