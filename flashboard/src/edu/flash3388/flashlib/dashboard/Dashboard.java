@@ -121,8 +121,8 @@ public class Dashboard extends Application {
 				   try {
 					String host = getProperty(PROP_REMOTE_HOST);
 					String protocol = getProperty(PROP_COMM_PROTOCOL);
-					if(host == null || protocol == null || (!protocol.equalsIgnoreCase("udp") &&
-							!protocol.equalsIgnoreCase("tcp"))) {
+					if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
+							(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 						if(!commSettingError){
 							FlashUtil.getLog().reportError("Error to initialize communications: validate values of "+
 									PROP_REMOTE_HOST + " and " + PROP_COMM_PROTOCOL);

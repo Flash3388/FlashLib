@@ -1,0 +1,12 @@
+Time: 03:14:17
+edu.flash3388.flashlib.dashboard.Remote: Jsch initialized: 0.1.54
+Dashboard: Loading opencv natives: opencv_java300 ...
+Dashboard: opencv version: 3.0.0
+Dashboard: Loading settings and properties...
+Dashboard: Properties: 
+host.robot:roborio-3388-frc.local
+comm.protocol:tcp
+
+Dashboard: Done
+Dashboard: Creating shutdown hook...
+Dashboard: Done

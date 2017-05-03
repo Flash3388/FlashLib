@@ -12,6 +12,7 @@ public class BooleanProperty extends Sendable{
 	
 	public BooleanProperty(String name, BooleanDataSource data) {
 		super(name, FlashboardSendableType.BOOLEAN);
+		src = data;
 	}
 	public BooleanProperty(String name){
 		this(name, new BooleanDataSource.VarDataSource());
@@ -36,7 +37,7 @@ public class BooleanProperty extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return lastValue != (value = src.get()) || changed;
+		return src != null && (lastValue != (value = src.get()) || changed);
 	}
 	@Override
 	public void onConnection() {
