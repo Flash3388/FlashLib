@@ -129,4 +129,14 @@ public abstract class Action {
 	
 	protected abstract void execute();
 	protected abstract void end();
+	
+	public static Action stopAction(Action action){
+		return new InstantAction(){
+			@Override
+			protected void execute() {
+				if(action.isRunning())
+					action.cancel();
+			}
+		};
+	}
 }

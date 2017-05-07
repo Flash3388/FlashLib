@@ -17,12 +17,6 @@ public abstract class HIDSendable extends Sendable{
 	protected abstract HID getHID();
 	
 	private void update(){
-		if(stick == null){
-			stick = getHID();
-			if(stick == null)
-				return;
-		}
-		
 		for(int i = 0; i < 6; i++){
 			double get = stick.getRawAxis(i);
 			bytes[i] = (byte) ((get < 0)? get * 128 : get * 127);
@@ -45,7 +39,11 @@ public abstract class HIDSendable extends Sendable{
 
 	@Override
 	public boolean hasChanged() {
-		if(stick == null) return false;
+		if(stick == null){
+			stick = getHID();
+			if(stick == null) return false;
+		}
+		
 		update();
 		if(justConnected){
 			justConnected = false;

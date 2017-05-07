@@ -48,7 +48,8 @@ public class MainController implements Initializable{
 		MainController controller;
 		boolean lastconnectionC = false, lastconnectionS = false;
 		Runnable dxUpdate = ()->{
-			controller.update(); 
+			if(Dashboard.communicationsConnected())
+				controller.update(); 
 			CvRunner vision = Dashboard.getVision();
 			if(vision != null){
 				if(vision.isLocalParameters() && vision.getParameters() == null)
@@ -60,6 +61,9 @@ public class MainController implements Initializable{
 			if(Dashboard.communicationsConnected() != lastconnectionC){
 				lastconnectionC = !lastconnectionC;
 				controller.connectionRect.setFill(lastconnectionC ? Color.GREEN : Color.RED);
+				
+				if(!lastconnectionC)
+					controller.resetDisplay();
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
 				lastconnectionS = !lastconnectionS;
@@ -540,6 +544,16 @@ public class MainController implements Initializable{
 		case Manual: addToManual(n);
 			break;
 		}
+	}
+	public void resetDisplay(){
+		manual_controls.getChildren().clear();
+		camera_node.getChildren().clear();
+		sensor_node.getChildren().clear();
+		controller_node.getChildren().clear();
+		
+		for (Enumeration<Displayble> denum = Dashboard.getDisplaybles(); denum.hasMoreElements();)
+			denum.nextElement().reset();
+		Dashboard.resetDisplaybles();
 	}
 	public void update(){
 		for (Enumeration<Displayble> denum = Dashboard.getDisplaybles(); denum.hasMoreElements();) {

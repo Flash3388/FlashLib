@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.VBox?>
 
-<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="245.0" prefWidth="470.0" spacing="5.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.flash3388.flashlib.dashboard.TesterWindowController">
+<fx:root maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="245.0" prefWidth="462.0" spacing="5.0" type="VBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.flash3388.flashlib.dashboard.TesterWindowController">
    <children>
       <MenuBar>
         <menus>
@@ -36,7 +36,7 @@
                   </Label>
                </children>
                <padding>
-                  <Insets top="5.0" bottom="5.0"/>
+                  <Insets bottom="5.0" top="5.0" />
                </padding>
             </HBox>
             <TableView fx:id="table" prefHeight="200.0" prefWidth="200.0">

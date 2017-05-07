@@ -167,6 +167,7 @@ public class Tester extends Sendable{
 	private static Tester instance;
 	private Vector<TesterMotor> motors = new Vector<TesterMotor>();
 	private byte[] confirm = {0};
+	private boolean send = false;
 	
 	public Tester(int id) {
 		super("", id, FlashboardSendableType.MOTOR);
@@ -174,6 +175,7 @@ public class Tester extends Sendable{
 
 	@Override
 	public void newData(byte[] bytes) {
+		send = false;
 	}
 	@Override
 	public byte[] dataForTransmition() {
@@ -181,7 +183,7 @@ public class Tester extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return false;
+		return send;
 	}
 	@Override
 	public void onConnection() {}
@@ -191,6 +193,7 @@ public class Tester extends Sendable{
 	public void enable(boolean en){
 		FlashUtil.getLog().log("Enabled "+en);
 		confirm[0] = (byte) (en? 1 : 0);
+		send = true;
 	}
 	public Sendable addMotor(int id){
 		TesterMotor m = new TesterMotor(id);

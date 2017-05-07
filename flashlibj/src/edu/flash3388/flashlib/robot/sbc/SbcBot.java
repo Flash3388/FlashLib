@@ -7,10 +7,10 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.flash3388.flashlib.communications.CommInfo;
+import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.ReadInterface;
-import edu.flash3388.flashlib.communications.TCPReadInterface;
-import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.flashboard.Flashboard;
@@ -106,7 +106,7 @@ public abstract class SbcBot {
 		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
 		log.log("Initializing Communications...");
-		ReadInterface inter = null;
+		CommInterface inter = null;
 		try {
 			inter = setupCommInterface();
 			if(inter == null)
@@ -146,14 +146,14 @@ public abstract class SbcBot {
 		communications.start();
 		userClass.startRobot();
 	}
-	private static ReadInterface setupCommInterface() throws IOException{
+	private static CommInterface setupCommInterface() throws IOException{
 		int port = properties.getIntegerProperty(PROP_COMM_PORT);
 		if(port <= 0) return null;
 		String interfaceType = properties.getProperty(PROP_COMM_TYPE);
 		if(interfaceType.equalsIgnoreCase("udp"))
-			return new UDPReadInterface(port);
+			return new UdpCommInterface(port);
         else if(interfaceType.equalsIgnoreCase("tcp"))
-			return new TCPReadInterface(port);
+			return new TcpCommInterface(port);
 		return null;
 	}
 	private static int getPortByBoard(){

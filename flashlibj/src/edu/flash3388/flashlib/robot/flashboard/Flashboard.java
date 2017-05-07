@@ -6,11 +6,11 @@ import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
 import edu.flash3388.flashlib.communications.CameraServer;
 import edu.flash3388.flashlib.communications.CommInfo;
+import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.ReadInterface;
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.communications.TCPReadInterface;
-import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
@@ -95,10 +95,10 @@ public class Flashboard {
 		if(!instance || info == null){
 			Flashboard.tcp = tcp;
 			try {
-				ReadInterface readi;
+				CommInterface readi;
 				if(tcp)
-					readi = new TCPReadInterface(info.localPort);
-				else readi = new UDPReadInterface(info.localPort);
+					readi = new TcpCommInterface(info.localPort);
+				else readi = new UdpCommInterface(info.localPort);
 				
 				communications = new Communications("Flashboard", readi);
 				vision = new RemoteVision();

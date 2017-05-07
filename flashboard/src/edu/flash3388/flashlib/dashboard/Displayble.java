@@ -15,6 +15,9 @@ public abstract class Displayble extends Sendable{
 
 	private boolean init = true;
 	
+	public void reset(){
+		init = true;
+	}
 	public Node setDisplay(){ 
 		init = false;
 		return getNode();

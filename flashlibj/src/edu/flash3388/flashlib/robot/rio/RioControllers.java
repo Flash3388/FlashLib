@@ -190,4 +190,7 @@ public class RioControllers implements FlashSpeedController{
 				return null;
 		}
 	}
+	public static RioControllers create(ControllerType t, int channel){
+		return new RioControllers(t, channel);
+	}
 }

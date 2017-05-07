@@ -5,12 +5,12 @@ import java.net.InetAddress;
 import java.util.Scanner;
 
 import edu.flash3388.flashlib.communications.CommInfo;
+import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.ReadInterface;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
-import edu.flash3388.flashlib.communications.TCPReadInterface;
-import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class MainComm {
@@ -35,73 +35,102 @@ public class MainComm {
 	static Communications server;
 	static Communications client;
 	static Scanner in = new Scanner(System.in);
+	static int preEchoNum = 1;
 	
 	public static void main(String[] args) throws Exception{
 		FlashUtil.setStart();
-		
-		InetAddress remote = InetAddress.getByName("roborio-3388-frc.local");
-		InetAddress add = CommInfo.getInterfaceAddress(remote);
-		System.err.println();
-		
-		/*server = new Communications(getInterface(true));
-		server.attach(new Echo("echo1", true));
+		server = new Communications(getInterface(true));
 		server.start();
 		
 		Thread clientThread = new Thread(new ClientTask());
 		clientThread.start();
 		
-		in.next();
+		String line = in.nextLine();
+		while(!line.equalsIgnoreCase("done")){
+			parseInstruction(line);
+			line = in.nextLine();
+		}
+		
 		System.out.println("Done");
 		client.close();
 		server.close();
 		if (clientThread.isAlive()) {
 			clientThread.interrupt();
-		}*/
+		}
 	}
 	
-	private static ReadInterface getInterface(boolean server) throws IOException{
+	private static void parseInstruction(String str){
+		String[] params = str.split(" ");
+		if(params.length < 1){
+			System.out.println("Error: Empty Instruction");
+			return;
+		}
+		
+		if(params[0].equals("echo")){
+			if(params.length != 2){
+				System.out.println("Error: Currect syntax: echo [num]");
+				return;
+			}
+			int num = -1;
+			try{
+				num = Integer.parseInt(params[1]);
+			}catch(NumberFormatException e){
+				System.out.println("Error: parameter is not a valid integer");
+				return;
+			}
+			if(num < 0){
+				System.out.println("Error: parameter must be non negative");
+				return;
+			}
+			
+			addEchos(num);
+			System.out.println("Added "+num+" Echos");
+		}
+	}
+	private static void addEchos(int echos){
+		for(int i = 0; i < echos; i++)
+			server.attach(new Echo("echo"+(i+preEchoNum)));
+		preEchoNum += echos;
+	}
+	private static CommInterface getInterface(boolean server) throws IOException{
 		if(server){
-			if(TCP) return new TCPReadInterface(InetAddress.getLoopbackAddress(), 11000);
-			return new UDPReadInterface(InetAddress.getLoopbackAddress(), 11000);
+			if(TCP) return new TcpCommInterface(InetAddress.getLoopbackAddress(), 11000);
+			return new UdpCommInterface(InetAddress.getLoopbackAddress(), 11000);
 		}else{
-			if(TCP) return new TCPReadInterface(InetAddress.getLoopbackAddress(), InetAddress.getLoopbackAddress(), 11001, 11000);
-			return new UDPReadInterface(InetAddress.getLoopbackAddress(), 11001, 11000);
+			if(TCP) return new TcpCommInterface(InetAddress.getLoopbackAddress(), InetAddress.getLoopbackAddress(), 11001, 11000);
+			return new UdpCommInterface(InetAddress.getLoopbackAddress(), 11001, 11000);
 		}
 	}
 	
 	public static class Echo extends Sendable{
 		
 		private byte[] origindata;
-		private byte[][] byteData = new byte[2][0];
-		private int byteindex = 0; boolean rec = false;
+		private byte[] byteData = new byte[0];
+		private boolean rec = false;
 		
-		public Echo(String name, boolean sender) {
+		public Echo(String name) {
 			super(name, (byte)0x0);
-			if(sender)
-				origindata = name.getBytes();
+			origindata = name.getBytes();
 		}
-		public Echo(String name, int id, boolean sender){
+		public Echo(String name, int id){
 			super(name, id, (byte)0x0);
-			if(sender)
-				origindata = name.getBytes();
 		}
 
 		@Override
 		public void newData(byte[] data) {
-			if(data.length != byteData[1 - byteindex].length)
-				byteData[1 - byteindex] = new byte[data.length];
-			System.arraycopy(data, 0, byteData[1 - byteindex], 0, 
+			if(data.length != byteData.length)
+				byteData = new byte[data.length];
+			System.arraycopy(data, 0, byteData, 0, 
 					data.length);
-			System.out.println(getName()+": "+new String(data, 0, 
-					data.length));
+			String dstr = new String(data, 0, data.length);
+			System.out.println(getName()+": "+dstr);
 
-			byteindex ^= 1;
 			rec = true;
 		}
 		@Override
 		public byte[] dataForTransmition() {
-			byte[] data = new byte[byteData[byteindex].length];
-			System.arraycopy(byteData[byteindex], 0, data, 0, data.length);
+			byte[] data = new byte[byteData.length];
+			System.arraycopy(byteData, 0, data, 0, data.length);
 			rec = false;
 			return data;
 		}
@@ -111,14 +140,13 @@ public class MainComm {
 		}
 		@Override
 		public void onConnection() {
-			byteindex = 0;
 			if(origindata == null){
 				rec = false;
 			}else{
 				rec = true;
-				if(byteData[byteindex].length != origindata.length)
-					byteData[byteindex] = new byte[origindata.length];
-				System.arraycopy(origindata, 0, byteData[byteindex], 0, origindata.length);
+				if(byteData.length != origindata.length)
+					byteData = new byte[origindata.length];
+				System.arraycopy(origindata, 0, byteData, 0, origindata.length);
 			}
 		}
 		@Override
@@ -128,7 +156,7 @@ public class MainComm {
 
 		@Override
 		public Sendable create(String name, int id, byte type) {
-			if(type == 0) return new Echo("echo"+id, id, false);
+			if(type == 0) return new Echo(name+"-c", id);
 			return null;
 		}
 	}

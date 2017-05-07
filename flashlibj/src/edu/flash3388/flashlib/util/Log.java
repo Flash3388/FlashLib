@@ -12,38 +12,50 @@ import java.util.Vector;
 import edu.flash3388.flashlib.io.FileStream;
 
 /**
- * Allows to log certain events in a file on the robot.
- * 
+ * <p>
+ * Convenience class for logging states and errors into files, allowing for real-time and post-run code debugging.
+ * There are two types of log: Stream or Buffered. Each offers different advantages and is useful for a different type of
+ * software.
+ * </p>
+ * <p>
+ * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
+ * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
+ * who do not require logs for emergency situations like power outs, where the log data might be lost.
+ * <br/>
+ * Buffer log stores logging data in a buffer and flushes the data into a file manually, on a time base or when the buffer 
+ * is full. The buffer allows us to avoid data loss in a case of power loss thanks to the file being closed when the buffer
+ * is not flushing the data. Recommended for robot software tracking.
+ * </p>
+ * <p>
+ * There are several types of logging which can be used simultaneously:
+ * <ul>
+ * 		<li>File writing: MODE_WRITE</li>
+ * 		<li>PrintStream writing: MODE_PRINT (System.out.println)</li>
+ * 		<li>External logging interfaces: MODE_INTERFACES ({@link edu.flash3388.flashlib.util.LoggingInterface LoggingInterface})</li>
+ * </ul>
+ * </p>
  * @author Tom Tzook.
  */
 public class Log{
 	
+	/**
+	 * <p>
+	 * Enumeration representing logging types. There are two types of log: Stream or Buffered. Each offers different advantages and is useful for a different type of
+	 * software.
+	 * </p>
+	 * <p>
+	 * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
+	 * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
+	 * who do not require logs for emergency situations like power outs, where the log data might be lost.
+	 * <br/>
+	 * Buffer log stores logging data in a buffer and flushes the data into a file manually, on a time base or when the buffer 
+	 * is full. The buffer allows us to avoid data loss in a case of power loss thanks to the file being closed when the buffer
+	 * is not flushing the data. Recommended for robot software tracking.
+	 * </p>
+	 * @author Tom Tzook
+	 */
 	public static enum LoggingType{
 		Stream, Buffered
-	}
-	
-	private static class TimedFlush implements Runnable{
-		private long flushTimeout = -1, lastFlush = -1;
-		private Log log;
-		
-		public TimedFlush(Log log, long timeout){
-			this.log = log;
-			flushTimeout = timeout;
-		}
-		public TimedFlush(Log log){
-			this(log, -1);
-		}
-		
-		@Override
-		public void run() {
-			long millis = FlashUtil.millis();
-			if(lastFlush <= 0)
-				lastFlush = millis;
-			if(flushTimeout > 0 && millis - lastFlush >= flushTimeout){
-				log.save();
-				lastFlush = millis;
-			}
-		}
 	}
 	
 	public static final byte MODE_DISABLED = 0x00;

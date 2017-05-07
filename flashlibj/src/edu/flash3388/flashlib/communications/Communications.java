@@ -31,7 +31,7 @@ public class Communications {
 						comm.sendAll();
 						comm.read();
 						
-						comm.readInterface.update(FlashUtil.millis());
+						comm.commInterface.update(FlashUtil.millis());
 						FlashUtil.delay(10);
 					}
 					comm.onDisconnect();
@@ -47,37 +47,37 @@ public class Communications {
 		}
 	}
 	
-	public static final int READ_TIMEOUT = 20;
 	public static final int MAX_REC_LENGTH = 100;
 	
 	private static int instances = 0;
 	
-	private Vector<Sendable> sendables;
+	private Vector<Sendable> sendables, attachedSendables;
 	
 	private long currentMillis = -1, readStart = -1;
 	private int readTimeout;
 	private Packet packet = new Packet();
-	private ReadInterface readInterface;
+	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
 	private String name, logName;
 	
 	private Thread commThread;
 	private CommTask commTask;
 	
-	public Communications(String name, ReadInterface readIn){
+	public Communications(String name, CommInterface readIn){
 		instances++;
 		this.name = name;
-		this.readInterface = readIn;
+		this.commInterface = readIn;
 		this.logName = name+"-Comm";
 		
 		initializeConcurrency();
 		FlashUtil.getLog().log("Initialized", logName);
 		
 		sendables = new Vector<Sendable>();
+		attachedSendables = new Vector<Sendable>();
 		setBufferSize(MAX_REC_LENGTH);
-		readInterface.open();
+		commInterface.open();
 	}
-	public Communications(ReadInterface readIn){
+	public Communications(CommInterface readIn){
 		this(""+instances, readIn);
 	}
 	
@@ -86,7 +86,7 @@ public class Communications {
 		commThread = new Thread(commTask, name+"-Communications");
 	}
 	private Packet receivePacket(){
-		if(!readInterface.read(packet))
+		if(!commInterface.read(packet))
 			return null;
 		return packet;
 	}
@@ -116,9 +116,13 @@ public class Communications {
 		}
 	}
 	private void resetAll(){
-		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements())
-			resetSendable(sendablesEnum.nextElement());
+		sendables.clear();
+		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
+		while (sendablesEnum.hasMoreElements()) {
+			Sendable sendable = sendablesEnum.nextElement();
+			sendables.addElement(sendable);
+			resetSendable(sendable);
+		}
 	} 
 	private void resetSendable(Sendable sen){
 		sen.setRemoteInit(false);
@@ -159,7 +163,7 @@ public class Communications {
 	}
 	private void write(byte[] bytes){
 		if(!isConnected()) return;
-		readInterface.write(bytes);
+		commInterface.write(bytes);
 	}
 	
 	private void send(byte[] data, Sendable sendable){
@@ -177,6 +181,7 @@ public class Communications {
 	public void attach(Sendable sendable){
 		if(getByID(sendable.getID()) == null){
 			sendables.add(sendable);
+			attachedSendables.add(sendable);
 			sendable.setAttached(true);
 			if(isConnected())
 				resetSendable(sendable);
@@ -184,6 +189,7 @@ public class Communications {
 	}
 	public boolean detach(Sendable sendable){
 		if(sendables.remove(sendable)){
+			attachedSendables.remove(sendable);
 			sendable.setAttached(false);
 			if(isConnected())
 				handleDisconnection(sendable);
@@ -193,6 +199,7 @@ public class Communications {
 	public boolean detach(int index){
 		Sendable sen = sendables.get(index);
 		if(sen != null) {
+			attachedSendables.remove(sen);
 			sendables.remove(index);
 			sen.setAttached(false);
 			if(isConnected())
@@ -203,6 +210,7 @@ public class Communications {
 	public boolean detachByID(int id){
 		Sendable sen = getByID(id);
 		if(sen != null) {
+			attachedSendables.remove(sen);
 			sendables.remove(sen);
 			sen.setAttached(false);
 			if(isConnected())
@@ -227,15 +235,15 @@ public class Communications {
 	public String getName(){
 		return name;
 	}
-	public ReadInterface getReadInterface(){
-		return readInterface;
+	public CommInterface getCommInterface(){
+		return commInterface;
 	}
 	public boolean connect() throws IOException{
 		if(isConnected()) return true;
 		updateClock();
-		readInterface.connect(packet);
+		commInterface.connect(packet);
 		if(isConnected()){
-			setReadTimeout(READ_TIMEOUT);
+			setReadTimeout(CommInterface.READ_TIMEOUT);
 			return true;
 		}
 		return false;
@@ -243,15 +251,15 @@ public class Communications {
 	public void disconnect(){
 		if(isConnected()){
 			commTask.stop();
-			readInterface.disconnect();
+			commInterface.disconnect();
 		}
 	}
 	public boolean isConnected(){
-		return readInterface.isConnected();
+		return commInterface.isConnected();
 	}
 	public void setReadTimeout(int timeout){
 		readTimeout = timeout;
-		readInterface.setReadTimeout(readTimeout);
+		commInterface.setReadTimeout(readTimeout);
 	}
 	public int getReadTimeout(){
 		return readTimeout;
@@ -260,7 +268,7 @@ public class Communications {
 		sendableCreator = creator;
 	}
 	public void setBufferSize(int size){
-		readInterface.setMaxBufferSize(size);
+		commInterface.setMaxBufferSize(size);
 	}
 	public SendableCreator getSendableCreator(){
 		return sendableCreator;
@@ -271,12 +279,61 @@ public class Communications {
 	}
 	public void close() {
 		disconnect();
-		readInterface.close();
+		commInterface.close();
 		detachAll();
 	}
 	public void sendDataForSendable(Sendable sendable, byte[] data){
 		if(getByID(sendable.getID()) == null)
 			return;
 		send(data, sendable);
+	}
+	
+	
+	public static boolean handshakeServer(CommInterface commInterface, Packet packet){
+		commInterface.setReadTimeout(CommInterface.READ_TIMEOUT * 4);
+		commInterface.read(packet);
+		if(!isHandshakeClient(packet.data, packet.length))
+			return false;
+		
+		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_SERVER);
+		commInterface.read(packet);
+		if(!isHandshakeClient(packet.data, packet.length))
+			return false;
+		return true;
+	}
+	public static boolean handshakeClient(CommInterface commInterface, Packet packet){
+		commInterface.setReadTimeout(CommInterface.READ_TIMEOUT);
+		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_CLIENT);
+		
+		commInterface.read(packet);
+		if(!isHandshakeServer(packet.data, packet.length))
+			return false;
+		
+		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_CLIENT);
+		return true;
+	}
+	public static boolean isHandshake(byte[] bytes, int length){
+		if(length != ManualCommInterface.HANDSHAKE.length) return false;
+		for(int i = 0; i < length; i++){
+			if(bytes[i] != ManualCommInterface.HANDSHAKE[i])
+				return false;
+		}
+		return true;
+	}
+	public static boolean isHandshakeServer(byte[] bytes, int length){
+		if(length != ManualCommInterface.HANDSHAKE_CONNECT_SERVER.length) return false;
+		for(int i = 0; i < length; i++){
+			if(bytes[i] != ManualCommInterface.HANDSHAKE_CONNECT_SERVER[i])
+				return false;
+		}
+		return true;
+	}
+	public static boolean isHandshakeClient(byte[] bytes, int length){
+		if(length != ManualCommInterface.HANDSHAKE_CONNECT_CLIENT.length) return false;
+		for(int i = 0; i < length; i++){
+			if(bytes[i] != ManualCommInterface.HANDSHAKE_CONNECT_CLIENT[i])
+				return false;
+		}
+		return true;
 	}
 }

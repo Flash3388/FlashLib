@@ -33,7 +33,7 @@ public class TesterWindow extends Stage{
 			root = loader.load();
 			controller = loader.getController();
 			controller.setWindow(this);
-			return new Scene(root, 1080, 300);
+			return new Scene(root, 462, 245);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

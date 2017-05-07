@@ -2,6 +2,13 @@ package edu.flash3388.flashlib.util;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class FlashUtil {
 	
@@ -10,6 +17,7 @@ public class FlashUtil {
 	private FlashUtil(){}
 	private static long startTime = 0;
 	private static Log mainLog;
+	private static ExecutorService executor;
 	
 	//--------------------------------------------------------------------
 	//--------------------------Time--------------------------------------
@@ -29,6 +37,18 @@ public class FlashUtil {
 	public static double secs(){
 		return startTime != 0? millis() / 1000.0 : -1;
 	}
+	public static <T> T executeForTime(Callable<T> callable, long ms){
+		if(executor == null)
+			executor = Executors.newCachedThreadPool();
+		
+		Future<T> future = executor.submit(callable);
+		try {
+			return future.get(ms, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			return null;
+		}
+	}
+	
 	protected static void setStartTime(long time){
 		if(startTime == 0)
 			startTime = time;
@@ -49,6 +69,72 @@ public class FlashUtil {
 	//--------------------------Arrays------------------------------------
 	//--------------------------------------------------------------------
 	
+	public static int indexOf(byte[] data, int start, int end, byte ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(short[] data, int start, int end, short ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(int[] data, int start, int end, int ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(long[] data, int start, int end, long ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(double[] data, int start, int end, double ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(float[] data, int start, int end, float ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(char[] data, int start, int end, char ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i] == ch) return i;
+		return -1;
+	}
+	public static int indexOf(String[] data, int start, int end, String ch){
+		for (int i = start; i <= end; i++) 
+			if(data[i].equals(ch)) return i;
+		return -1;
+	}
+	
+	public static boolean arrayContains(byte[] data, int start, int end, byte ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(short[] data, int start, int end, short ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(int[] data, int start, int end, int ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(long[] data, int start, int end, long ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(float[] data, int start, int end, float ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(double[] data, int start, int end, double ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(char[] data, int start, int end, char ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	public static boolean arrayContains(String[] data, int start, int end, String ch){
+		return indexOf(data, start, end, ch) >= 0;
+	}
+	
 	public static void printBytes(byte[] s){
 		for(byte i : s)
 			System.out.print((char)i + " ");
@@ -57,32 +143,54 @@ public class FlashUtil {
 		for(byte i : s)
 			System.out.println((int)i);
 	}
-	public static void printArray(int[] s){
-		for(int i : s)
-			System.out.println(i);
-	}
-	public static void printArray(double[] s){
-		for(double d : s)
-			System.out.println(d);
-	}
 	public static void printArray(short[] s){
 		for(short sh : s)
 			System.out.println(sh);
 	}
-	public static void printArray(float[] s){
-		for(float f : s)
-			System.out.println(f);
+	public static void printArray(int[] s){
+		for(int i : s)
+			System.out.println(i);
 	}
 	public static void printArray(long[] s){
 		for(float l : s)
 			System.out.println(l);
 	}
-	public static <T> void printArray(T[] s){
-		for(T f : s)
+	public static void printArray(double[] s){
+		for(double d : s)
+			System.out.println(d);
+	}
+	public static void printArray(float[] s){
+		for(float f : s)
 			System.out.println(f);
 	}
+	public static void printArray(char[] s){
+		for(char c : s)
+			System.out.println(c);
+	}
+	public static void printArray(String[] s){
+		for(String str : s)
+			System.out.println(str);
+	}
 	
+	public static void shiftArrayL(byte[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(short[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
 	public static void shiftArrayL(int[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(long[] arr, int start, int end){
 		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
 			throw new IllegalArgumentException("Illegal shift arguments");
 		for (int i = start; i < end; i++) 
@@ -100,19 +208,13 @@ public class FlashUtil {
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
-	public static void shiftArrayL(long[] arr, int start, int end){
+	public static void shiftArrayL(char[] arr, int start, int end){
 		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
 			throw new IllegalArgumentException("Illegal shift arguments");
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
-	public static void shiftArrayL(byte[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
-	}
-	public static void shiftArrayL(short[] arr, int start, int end){
+	public static void shiftArrayL(String[] arr, int start, int end){
 		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
 			throw new IllegalArgumentException("Illegal shift arguments");
 		for (int i = start; i < end; i++) 
@@ -152,7 +254,38 @@ public class FlashUtil {
 		bytes[start] = (byte) ((value >> 24) & 0xff);
 		return bytes;
 	}
+	public static void fillByteArray(long value, byte[] bytes){
+		fillByteArray(value, 0, bytes);
+	}
+	public static void fillByteArray(long value, int start, byte[] bytes) {
+	    for (int i = start + 7; i >= start; i--) {
+	    	bytes[i] = (byte)(value & 0xFF);
+	        value >>= 8;
+	    }
+	}
 	
+	public static byte[] toByteArray(long value){
+	    byte[] bytes = new byte[8];
+	    fillByteArray(value, bytes);
+	    return bytes;
+	}
+	public static long toLong(byte[] b) {
+	    long result = 0;
+	    for (int i = 0; i < 8; i++) {
+	        result <<= 8;
+	        result |= (b[i] & 0xFF);
+	    }
+	    return result;
+	}
+	public static long toLong(byte[] b, int s) {
+	    long result = 0;
+	    int e = s+8;
+	    for (int i = s; i < e; i++) {
+	        result <<= 8;
+	        result |= (b[i] & 0xFF);
+	    }
+	    return result;
+	}
 	public static byte[] toByteArray(int value){
 	    byte[] bytes = new byte[4];
 	    fillByteArray(value, bytes);

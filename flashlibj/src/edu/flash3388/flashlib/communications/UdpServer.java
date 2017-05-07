@@ -125,7 +125,7 @@ public class UdpServer {
 	private Vector<Client> clients = new Vector<Client>();
 	
 	private Packet packet = new Packet();
-	private UDPReadInterface readInterface;
+	private UdpCommInterface readInterface;
 	private SendableCreator sendableCreator;
 	private String logName;
 	
@@ -137,7 +137,7 @@ public class UdpServer {
 		this.logName = name+"-Comm";
 		
 		try {
-			readInterface = new UDPReadInterface(addr, port);
+			readInterface = new UdpCommInterface(addr, port);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}

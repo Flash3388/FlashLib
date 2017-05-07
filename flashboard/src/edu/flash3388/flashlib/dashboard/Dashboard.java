@@ -114,7 +114,7 @@ public class Dashboard extends Application {
 		updateTask = new UpdateTask();
 		updateThread = new Thread(updateTask);
 	    updateThread.start();
-	    camViewer = new CameraViewer("RoboRIO-CamViewer", -1);
+	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
 		addRunnableForUpdate(()->{
 			   if(readInterface == null){
@@ -141,10 +141,10 @@ public class Dashboard extends Application {
 						readInterface = new TCPReadInterface(local, ad, CommInfo.FLASHBOARD_PORT_BOARD, CommInfo.FLASHBOARD_PORT_ROBORIO);
 					}
 					
-					communications = new Communications("RoboRIO", readInterface);
+					communications = new Communications("Robot", readInterface);
 					communications.setSendableCreator(new FlashboardSendableCreator());
 					communications.start();
-					camClient = new CameraClient("RoboRIO CAMServer", CommInfo.FLASHBOARD_CAMERA_PORT_BOARD, ad, CommInfo.FLASHBOARD_CAMERA_PORT_ROBORIO, CameraClient.DEFUALT_MAX_BYTES);
+					camClient = new CameraClient("Robot", CommInfo.FLASHBOARD_CAMERA_PORT_BOARD, ad, CommInfo.FLASHBOARD_CAMERA_PORT_ROBORIO, CameraClient.DEFUALT_MAX_BYTES);
 					camClient.addListener(camViewer);
 				   } catch (IOException e) {
 					   FlashUtil.getLog().reportError(e.getMessage());
@@ -177,6 +177,14 @@ public class Dashboard extends Application {
 	
 	public static Enumeration<Displayble> getDisplaybles(){
 		return displayables.elements();
+	}
+	public static void resetDisplaybles(){
+		displayables.clear();
+		if(visionInitialized()){
+			vision.close();
+			vision = null;
+		}
+		addDisplayable(camViewer);
 	}
 	public static String getProperty(String prop){
 		return properties.getProperty(prop);
