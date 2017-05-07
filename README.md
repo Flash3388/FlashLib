@@ -1,5 +1,5 @@
 # FlashLib
-FlashLib is robotics software development library originaly designed to improve and help FRC teams, but can now work on other platforms such as Raspberry PI and BeagleBone Black.
+FlashLib is a robotics software development library originaly designed to improve and help FRC teams, but can now work on other platforms such as Raspberry PI and BeagleBone Black.
 FlashLib is currently available for Java users only, but a C++ version is in development.
 
 FlashLib is still in a beta stage.
@@ -26,13 +26,18 @@ The library provides several different tools that can be both used for a robot d
 - Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
 
 # Communication Mangement System
-The communications manager takes a network connection through a single port and splits it into mini-networks. The ammount of mini-networks possible is not defined, but the more there are the slower the manager.
+The communications manager takes a network connection through a single port and splits it into mini-networks. The amount of mini-networks possible is not defined, but the more there are the slower the manager.
 A Sendable objects defines one end of the network and it has a type which is defined by the user. The type helps identify the type of data the will be sent and received through the mini-network.
 A mini-network is created by attaching a Sendable object to the manager, which in turn sends information about that Sendable to the other end causing the creation of a Sendable object on that side to communicate with the attached Sendable. The Sendable object created depends on its type.
 
 The manager can interface and communicate in any way the user wants, be it IP sockets or a Bus of some kind. 
 
 # Action Scheduling System
+For easier system and multi-tasking management in your robot code, flashlib introduces a simple scheduling system.
+The system divides each robot system into a seperate class which allows for easy system tracking. Programmers can now run 
+"Actions" on the robot systems, where only one action can run on a system at any given time. The Scheduler runs and manages the Actions and Systems, avoiding collisions between Actions.
+
+This system is similar to the concept introduced by WPILib for FRC, but improves upon it.
 
 # Dependencies
 FlashLib depends on several libraries for its functionalities:
@@ -45,8 +50,8 @@ All of those libraries are available in the "libs" folder of their respective pr
 
 # Building
 Building the library requires gradle. 
-To build flashlib, run the batch or bash script (depending on your os) located in the version you wish to use (flashlibj, flashlibc).
-The script will run gradle and build the project into build->libs. Required libraries for building the library are located at the libs folder. Those libraries are required for several funcationslities of the library.
+To build flashlib, run the batch or bash script (bash for linux, batch for windows) located in the version you wish to use (flashlibj, flashlibc).
+The script will run gradle and build the project into build->libs. Required libraries for building the library are located in the libs folder. Those libraries are required for several funcationslities of the library.
 
 To build flashboard, make sure the latest version of flashlibj is located in the libs folder, where the rest of the required libraries are located. Run the build script to build and then run the prep script. The software will now be fully ready in build->flashboard.
 
