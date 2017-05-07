@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: 'edu.flash3388.flashlib.dashboard.Dashboard'
-Class-Path: . flashboard_lib/flashlib-0.1.0.jar flashboard_lib/jsch-01
- 54.jar flashboard_lib/opencv-300.jar
-
