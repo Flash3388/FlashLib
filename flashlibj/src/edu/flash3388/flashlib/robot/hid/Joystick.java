@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ScheduledTask;
-import edu.flash3388.flashlib.robot.flashboard.HIDSendable;
 
 public class Joystick extends HIDSendable implements HID, ScheduledTask{
 

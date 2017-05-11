@@ -1,11 +1,10 @@
-package edu.flash3388.flashlib.robot.flashboard;
+package edu.flash3388.flashlib.flashboard;
 
 import java.io.IOException;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
 import edu.flash3388.flashlib.communications.CameraServer;
-import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
@@ -15,6 +14,11 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
 public class Flashboard {
+	
+	public static final int PORT_ROBOT = 5801;
+	public static final int PORT_BOARD = 5800;
+	public static final int CAMERA_PORT_ROBOT = 5803;
+	public static final int CAMERA_PORT_BOARD = 5802;
 	
 	private static boolean instance = false, tcp = false;
 	private static CameraView camViewer;
@@ -88,26 +92,29 @@ public class Flashboard {
 		return camServer;
 	}
 	
-	public static void init(CommInfo info){
-		init(info, tcp);
+	public static void init(){
+		init(tcp);
 	}
-	public static void init(CommInfo info, boolean tcp){
-		if(!instance || info == null){
+	public static void init(boolean tcp){
+		init(PORT_ROBOT, CAMERA_PORT_ROBOT, tcp);
+	}
+	public static void init(int port, int camport, boolean tcp){
+		if(!instance){
 			Flashboard.tcp = tcp;
 			try {
 				CommInterface readi;
 				if(tcp)
-					readi = new TcpCommInterface(info.localPort);
-				else readi = new UdpCommInterface(info.localPort);
+					readi = new TcpCommInterface(port);
+				else readi = new UdpCommInterface(port);
 				
 				communications = new Communications("Flashboard", readi);
 				vision = new RemoteVision();
 				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
-				camServer = new CameraServer("Flashboard", info.camPort, camViewer);
+				camServer = new CameraServer("Flashboard", camport, camViewer);
 				communications.attach(vision);
 				
 				instance = true;
-				FlashUtil.getLog().logTime("FLASHBoard: Initialized at port " + info.localPort);
+				FlashUtil.getLog().logTime("Flashboard: Initialized at port " + port);
 			} catch (IOException e) {
 				FlashUtil.getLog().reportError(e.getMessage());
 			}

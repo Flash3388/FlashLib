@@ -1,10 +1,9 @@
-package edu.flash3388.flashlib.robot.flashboard;
+package edu.flash3388.flashlib.flashboard;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class DashboardChooser<T> extends Sendable{

@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.flashboard;
+package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraViewSelector;

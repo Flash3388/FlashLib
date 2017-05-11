@@ -10,18 +10,19 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
+import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.CommInfo;
+import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.ReadInterface;
-import edu.flash3388.flashlib.communications.TCPReadInterface;
-import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Properties;
 import edu.flash3388.flashlib.vision.CvProcessing;
 import edu.flash3388.flashlib.vision.CvRunner;
 import edu.flash3388.flashlib.vision.ProcessingParam;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -52,8 +53,12 @@ public class Dashboard extends Application {
 		boolean removeWhenFinished;
 	}
 	
-	public static final String PROP_REMOTE_HOST = "host.robot";
+	public static final String PROP_HOST_ROBOT = "host.robot";
 	public static final String PROP_COMM_PROTOCOL = "comm.protocol";
+	public static final String PROP_COMM_PORT_LOCAL = "comm.port.local";
+	public static final String PROP_COMM_PORT_REMOTE = "comm.port.remote";
+	public static final String PROP_CAM_PORT_LOCAL = "cam.port.local";
+	public static final String PROP_CAM_PORT_REMOTE = "cam.port.remote";
 	
 	public static final String EXT_VISION_PARAM = "imgproc";
 	public static final String PROP_VISION_DEFAULT_PARAM = "vision.default";
@@ -71,7 +76,7 @@ public class Dashboard extends Application {
 	private static Dashboard instance;
 	private static UpdateTask updateTask;
 	private static Thread updateThread;
-	private static ReadInterface readInterface;
+	private static CommInterface commInterface;
 	private static Communications communications;
 	private static CameraClient camClient;
 	private static CameraViewer camViewer;
@@ -85,6 +90,7 @@ public class Dashboard extends Application {
 	
 	public static void main(String[] args) throws Exception{
 		FlashUtil.setStart();
+		FlashUtil.getLog().log("FlashLib version: "+FlashUtil.VERSION);
 		Remote.initializeJSCH();
 		FlashUtil.getLog().log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -92,6 +98,7 @@ public class Dashboard extends Application {
 		FlashUtil.getLog().log("Loading settings and properties...", "Dashboard");
 		loadSettings();
 		validateBasicSettings();
+		printSettings();
 		FlashUtil.getLog().log("Done", "Dashboard");
 		
 		FlashUtil.getLog().log("Creating shutdown hook...", "Dashboard");
@@ -117,15 +124,29 @@ public class Dashboard extends Application {
 	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
 		addRunnableForUpdate(()->{
-			   if(readInterface == null){
+			   if(commInterface == null){
 				   try {
-					String host = getProperty(PROP_REMOTE_HOST);
+					String host = getProperty(PROP_HOST_ROBOT);
 					String protocol = getProperty(PROP_COMM_PROTOCOL);
+					int localport = getProperties().getIntegerProperty(PROP_COMM_PORT_LOCAL);
+					int remoteport = getProperties().getIntegerProperty(PROP_COMM_PORT_REMOTE);
+					int localcamport = getProperties().getIntegerProperty(PROP_CAM_PORT_LOCAL);
+					int remotecamport = getProperties().getIntegerProperty(PROP_CAM_PORT_REMOTE);
 					if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
 							(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 						if(!commSettingError){
-							FlashUtil.getLog().reportError("Error to initialize communications: validate values of "+
-									PROP_REMOTE_HOST + " and " + PROP_COMM_PROTOCOL);
+							FlashUtil.getLog().reportError("Failed to initialize communications: validate values of "+
+									PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
+							commSettingError = true;
+						}
+						
+						return;
+					}
+					if(localport < 100 || remoteport < 100 || localcamport < 100 || remotecamport < 100){
+						if(!commSettingError){
+							FlashUtil.getLog().reportError("Failed to initialize communications: validate values of "+
+									PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE + ", " + PROP_CAM_PORT_LOCAL +
+									" and " + PROP_CAM_PORT_REMOTE);
 							commSettingError = true;
 						}
 						
@@ -135,19 +156,19 @@ public class Dashboard extends Application {
 					InetAddress ad = InetAddress.getByName(host);
 					FlashUtil.getLog().log("Found host: "+host, "Dashboard");
 					if(protocol.equals("udp"))
-						readInterface = new UDPReadInterface(ad, CommInfo.FLASHBOARD_PORT_BOARD, CommInfo.FLASHBOARD_PORT_ROBORIO);
+						commInterface = new UdpCommInterface(ad, localport, remoteport);
 					else if(protocol.equals("tcp")){
 						InetAddress local = CommInfo.getInterfaceAddress(ad);
-						readInterface = new TCPReadInterface(local, ad, CommInfo.FLASHBOARD_PORT_BOARD, CommInfo.FLASHBOARD_PORT_ROBORIO);
+						commInterface = new TcpCommInterface(local, ad, localport, remoteport);
 					}
 					
-					communications = new Communications("Robot", readInterface);
+					communications = new Communications("Robot", commInterface);
 					communications.setSendableCreator(new FlashboardSendableCreator());
 					communications.start();
-					camClient = new CameraClient("Robot", CommInfo.FLASHBOARD_CAMERA_PORT_BOARD, ad, CommInfo.FLASHBOARD_CAMERA_PORT_ROBORIO, CameraClient.DEFUALT_MAX_BYTES);
+					camClient = new CameraClient("Robot", localcamport, ad, remotecamport, CameraClient.DEFUALT_MAX_BYTES);
 					camClient.addListener(camViewer);
 				   } catch (IOException e) {
-					   FlashUtil.getLog().reportError(e.getMessage());
+					   //FlashUtil.getLog().reportError(e.getMessage());
 				   }
 			   }
 		 });
@@ -159,10 +180,6 @@ public class Dashboard extends Application {
 				Mat m = FlashFxUtils.bufferedImage2Mat(img);
 				vision.newImage(m, 0);
 			}
-		});
-		addRunnableForUpdate(()->{
-			if(camViewer.updateTimeout())
-				camViewer.setTimeoutDisplay();
 		});
 	}
 
@@ -248,32 +265,46 @@ public class Dashboard extends Application {
 		Dashboard.vision = vision;
 		CvProcessing.pipeline = camViewer;
 	}
+	private static boolean emptyProperty(String prop){
+		String propv = getProperty(prop);
+		return propv == null || propv.equals("");
+	}
 	private static void validateBasicSettings() throws Exception{
 		if(getProperty(PROP_VISION_DEFAULT_PARAM) == null)
 			putProperty(PROP_VISION_DEFAULT_PARAM, "");
-		if(getProperty(PROP_REMOTE_HOST) == null){
-			putProperty(PROP_REMOTE_HOST, "");
-			FlashUtil.getLog().reportError("Missing Property: "+PROP_REMOTE_HOST);
+		if(getProperty(PROP_HOST_ROBOT) == null){
+			putProperty(PROP_HOST_ROBOT, "");
+			FlashUtil.getLog().reportError("Missing Property: "+PROP_HOST_ROBOT);
 		}
 		if(getProperty(PROP_COMM_PROTOCOL) == null)
 			putProperty(PROP_COMM_PROTOCOL, "udp");
 		else if(!getProperty(PROP_COMM_PROTOCOL).equals("tcp") && !getProperty(PROP_COMM_PROTOCOL).equals("udp"))
 			FlashUtil.getLog().reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
+		if(emptyProperty(PROP_COMM_PORT_LOCAL))
+			getProperties().putIntegerProperty(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
+		if(emptyProperty(PROP_COMM_PORT_REMOTE))
+			getProperties().putIntegerProperty(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
+		if(emptyProperty(PROP_CAM_PORT_LOCAL))
+			getProperties().putIntegerProperty(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
+		if(emptyProperty(PROP_CAM_PORT_REMOTE))
+			getProperties().putIntegerProperty(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
 	}
 	private static void loadSettings(){
 		properties.loadFromFile(SETTINGS_FILE);
-		String[] keys = properties.keys();
-		String[] values = properties.values();
-		String props = "Properties: \n";
-		for (int i = 0; i < values.length; i++) 
-			props += keys[i]+":"+values[i]+"\n";
-		FlashUtil.getLog().log(props, "Dashboard");
 		
 		try {
 			Remote.loadHosts(REMOTE_HOSTS_FILE);
 		} catch (NullPointerException | IOException e) {
 			FlashUtil.getLog().reportError(e.getMessage());
 		}
+	}
+	private static void printSettings(){
+		String[] keys = properties.keys();
+		String[] values = properties.values();
+		String props = "Properties: \n";
+		for (int i = 0; i < values.length; i++) 
+			props += keys[i]+":"+values[i]+"\n";
+		FlashUtil.getLog().log(props, "Dashboard");
 	}
 	private static void saveSettings(){
 		properties.saveToFile(SETTINGS_FILE);

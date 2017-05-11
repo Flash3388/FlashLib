@@ -35,11 +35,8 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	
 	private ImageView view;
 	private Image image;
-	private Image timeoutImage;
 	private Runnable updater;
 	private DisplayMode mode = DisplayMode.Normal;
-	private long lastUpdate = -1;
-	private boolean timeoutSet = false;
 	
 	public CameraViewer(String name, int id) {
 		super(name, id, FlashboardSendableType.CAM);
@@ -47,11 +44,6 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 		view.setFitHeight(420);
 		view.setFitWidth(640);
 		image = new WritableImage(640, 420);
-		try {
-			timeoutImage = FlashFxUtils.bufferedImage2FxImage(ImageIO.read(new File("data/res/Donald-Trump.jpg")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		view.setImage(image);
 		
 		updater = new Runnable(){
@@ -97,9 +89,7 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 		    ImageReadParam param = reader.getDefaultReadParam();
 		    BufferedImage image = reader.read(0, param); 
 		    Dashboard.setForVision(image);
-		    timeoutSet = false;
 		    setImage(image);
-		    lastUpdate = FlashUtil.millis();
 		} catch (IOException e) {
 		}
 	}
@@ -123,18 +113,7 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	public DisplayType getDisplayType(){
 		return DisplayType.Cam;
 	}
-
-	public boolean updateTimeout(){
-		return (lastUpdate > 0 || !Dashboard.communicationsConnected()) && FlashUtil.millis() - lastUpdate > 2000 && !timeoutSet;
-	}
-	public void setTimeoutDisplay(){
-		if(timeoutImage != null){
-			image = null;
-			view.setImage(timeoutImage);
-			FlashUtil.getLog().log("Set timeout image");
-			timeoutSet = true;
-		}
-	}
+	
 	public void setDisplayMode(DisplayMode m){
 		mode = m;
 	}

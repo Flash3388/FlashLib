@@ -1,13 +1,11 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.communications.CommInfo;
+import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
-import edu.flash3388.flashlib.robot.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class FlashRoboUtil {
 	private FlashRoboUtil(){}
@@ -65,15 +63,15 @@ public class FlashRoboUtil {
 		FlashUtil.getLog().logTime("INITIALIZING...");
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
-			Flashboard.init(implType.equals(RobotFactory.ImplType.RIO)? CommInfo.Roborio2Flashboard :
-				CommInfo.Roborio2Flashboard);
+			Flashboard.init();
 			Flashboard.attach(new SendableLog());
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
 			Scheduler.init();
 		}
 		
-		FlashUtil.getLog().logTime("FLASHLib INIT - DONE - 0x" + Integer.toHexString(mode) + " - "+implType);
+		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - 0x" +
+								Integer.toHexString(mode) + " - "+implType);
 		
 		initCode = mode;
 		init = true;

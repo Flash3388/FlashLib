@@ -1,9 +1,8 @@
-package edu.flash3388.flashlib.robot.flashboard;
+package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.LoggingInterface;
 

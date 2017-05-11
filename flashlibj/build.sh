@@ -1,2 +1,3 @@
 #!/bin/bash
-gradle build
+echo "Building flashlib for java";
+gradle build;

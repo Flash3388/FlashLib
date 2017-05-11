@@ -5,16 +5,35 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.flash3388.flashlib.io.FileReader;
 import edu.flash3388.flashlib.io.FileStream;
 
 public class Properties {
 
+	public static enum MapType{
+		Hash, ConcurrentHash, Tree
+	}
+	
 	private Map<String, String> properties;
 	
 	public Properties(){
-		properties = new HashMap<String, String>();
+		this(MapType.Hash);
+	}
+	public Properties(MapType type){
+		switch(type){
+			case ConcurrentHash:
+				properties = new ConcurrentHashMap<String, String>();
+				break;
+			case Tree:
+				properties = new TreeMap<String, String>();
+				break;
+			default:
+				properties = new HashMap<String, String>();
+				break;
+		}
 	}
 	
 	public Map<String, String> getMap(){

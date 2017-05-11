@@ -1,11 +1,10 @@
-package edu.flash3388.flashlib.robot.flashboard;
+package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.Jaguar;

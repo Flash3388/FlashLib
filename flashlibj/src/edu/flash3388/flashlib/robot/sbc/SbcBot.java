@@ -6,14 +6,13 @@ import static edu.flash3388.flashlib.robot.Scheduler.*;
 import java.io.File;
 import java.io.IOException;
 
-import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
 import edu.flash3388.flashlib.communications.UdpCommInterface;
+import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.flashboard.Flashboard;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.Properties;
@@ -29,31 +28,36 @@ import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 
 public abstract class SbcBot {
 	
-	public static enum SbcState{
-		Disabled((byte)0x00), Enabled((byte)0x01);
+	public static class SbcState{
 		
 		public final byte value;
-		SbcState(byte value){
+		protected SbcState(byte value){
 			this.value = value;
 		}
 		
 		public static final byte DISABLED = 0x00;
-		public static final byte ENABLED = 0x01;
+		public static final byte TELEOP = 0x01;
+		public static final byte AUTONOMOUS = 0x02;
+		
+		public static final SbcState Disabled = new SbcState(DISABLED);
+		public static final SbcState Teleop = new SbcState(TELEOP);
+		public static final SbcState Autonomous = new SbcState(AUTONOMOUS);
 		
 		public static SbcState byValue(byte val){
 			switch (val) {
 				case DISABLED: return SbcState.Disabled;
-				case ENABLED: return SbcState.Enabled;
+				case TELEOP: return SbcState.Teleop;
+				case AUTONOMOUS: return SbcState.Autonomous;
 			}
 			return null;
 		}
 	}
 	
 	public static final String PROP_USER_CLASS = "user.class";
-	public static final String PROP_SHUTDOWN_ON_EXIT = "board.shutdown";
-	public static final String PROP_COMM_PORT = "board.commport";
-	public static final String PROP_COMM_TYPE = "board.commtype";
-	public static final String PROP_FLASHBOARD_INIT = "lib.flashboard.init";
+	public static final String PROP_BOARD_SHUTDOWN = "board.shutdown";
+	public static final String PROP_COMM_PORT = "comm.port";
+	public static final String PROP_COMM_INTERFACE = "comm.interface";
+	public static final String PROP_FLASHBOARD_INIT = "flashboard.init";
 	
 	private static final String NATIVE_LIBRARY_NAME = "";
 	private static final String PROPERTIES_FILE = "robot.ini";
@@ -110,7 +114,7 @@ public abstract class SbcBot {
 		try {
 			inter = setupCommInterface();
 			if(inter == null)
-				throw new Exception("Failure to initialize read interface (null)");
+				throw new Exception("Failure to initialize comm interface (null)");
 		} catch (Exception e) {
 			log.reportError(e.getMessage());
 			shutdown(1);
@@ -142,6 +146,7 @@ public abstract class SbcBot {
 		if(Flashboard.flashboardInit())
 			FlashRoboUtil.startFlashboard();
 		currentState = SbcState.Disabled;
+		stateSelector = new SbcControlStation.CsStateSelector(controlStation);
 		userImplement = userClass;
 		communications.start();
 		userClass.startRobot();
@@ -149,20 +154,15 @@ public abstract class SbcBot {
 	private static CommInterface setupCommInterface() throws IOException{
 		int port = properties.getIntegerProperty(PROP_COMM_PORT);
 		if(port <= 0) return null;
-		String interfaceType = properties.getProperty(PROP_COMM_TYPE);
+		String interfaceType = properties.getProperty(PROP_COMM_INTERFACE);
 		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UdpCommInterface(port);
         else if(interfaceType.equalsIgnoreCase("tcp"))
 			return new TcpCommInterface(port);
+        else if(interfaceType.startsWith("serial")){
+        	
+        }
 		return null;
-	}
-	private static int getPortByBoard(){
-		String name = getBoardName();
-		if(name.contains("Raspberry"))
-			return CommInfo.ROBORIO2RASPBERRY_PORT_RASPBERRY;
-		else if(name.contains("BeagleBone"))
-			return CommInfo.ROBORIO2BEAGLEBONE_PORT_BEAGLEBONE;
-		return 0;
 	}
 	private static void loadSettings(String[] args){
 		for (int i = 0; i < args.length; i++) {
@@ -172,12 +172,14 @@ public abstract class SbcBot {
 		}
 	}
 	private static void loadDefaultSettings(){
-		if(properties.getProperty(PROP_SHUTDOWN_ON_EXIT) == null)
-			properties.putBooleanProperty(PROP_SHUTDOWN_ON_EXIT, false);
-		if(properties.getProperty(PROP_COMM_PORT) == null)
-			properties.putIntegerProperty(PROP_COMM_PORT, getPortByBoard());
-		if(properties.getProperty(PROP_COMM_TYPE) == null)
-			properties.putProperty(PROP_COMM_TYPE, "udp");
+		if(properties.getProperty(PROP_BOARD_SHUTDOWN) == null)
+			properties.putBooleanProperty(PROP_BOARD_SHUTDOWN, false);
+		if(properties.getProperty(PROP_COMM_PORT) == null){
+			properties.putIntegerProperty(PROP_COMM_PORT, 0);
+			FlashUtil.getLog().reportError("Missing Property: "+PROP_COMM_PORT);
+		}
+		if(properties.getProperty(PROP_COMM_INTERFACE) == null)
+			properties.putProperty(PROP_COMM_INTERFACE, "udp");
 		if(properties.getProperty(PROP_FLASHBOARD_INIT) == null)
 			properties.putBooleanProperty(PROP_FLASHBOARD_INIT, true);
 	}
@@ -247,9 +249,6 @@ public abstract class SbcBot {
 	}
 	public static boolean isDisabled(){
 		return currentState.value == SbcState.DISABLED;
-	}
-	public static boolean isEnabled(){
-		return currentState.value == SbcState.ENABLED;
 	}
 	
 	public static ShellExecutor getShell(){
