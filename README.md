@@ -1,10 +1,9 @@
 # FlashLib
-FlashLib is a robotics software development library originaly designed to improve and help FRC teams, but can now work on other platforms such as Raspberry PI and BeagleBone Black.
-FlashLib is currently available for Java users only, but a C++ version is in development.
+FlashLib is a robotics software development library originaly designed to improve and help FRC teams, but can work on other platforms, specifically Raspberry PI and BeagleBone Black.
+FlashLib is currently available for Java users only, but a C++ version is in planning.
 
 FlashLib is still in a beta stage.
 
-Current version is: 0.1.0
 
 The library was moved here from the original repository in GitLab: https://gitlab.com/FLASH3388/FLASHLib
 
@@ -16,7 +15,7 @@ The library provides several different tools that can be both used for a robot d
 - Communication Managment: Management of communications between two sides, including camera data communications and general communications, Interfacing with any port or bus: Ip sockets, Serial ports, SPI or I2C busses and more.
 - Image Processing: A dynamic vision system which require little to no knowledge about image processing. Can interface with any image processing library, but openCV interfacing is already built-in. 
 - Camera interfacing using openCV.
-- IO Interfacing: Available for RoboRio, Raspberry PI and BeagleBone Black platforms thanks to WPILib and Bulldog Libraries.
+- IO Interfacing: Available for RoboRio, Raspberry PI and BeagleBone Black platforms thanks to WPILib and Bulldog Libraries. (Planned)
 - Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors for Raspberry PI and BeagleBone Black platforms.
 - Human Interface Devices Interfacing: Remote control of robots using Human Interfacing Devices.
 - Control Station: Pre-Made control software for robots using Raspberry PI and BeagleBone Black platforms.
@@ -54,6 +53,8 @@ To build flashlib, run the batch or bash script (bash for linux, batch for windo
 The script will run gradle and build the project into build->libs. Required libraries for building the library are located in the libs folder. Those libraries are required for several funcationslities of the library.
 
 To build flashboard, make sure the latest version of flashlibj is located in the libs folder, where the rest of the required libraries are located. Run the build script to build and then run the prep script. The software will now be fully ready in build->flashboard.
+
+To build all the project, run the buildall script in the repository.
 
 # Disclaimer
 The FlashLib uses the following libraries, but those libraries do not belong to us:
