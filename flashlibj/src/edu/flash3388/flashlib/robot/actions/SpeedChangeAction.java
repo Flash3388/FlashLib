@@ -9,10 +9,9 @@ public class SpeedChangeAction extends Action{
 	
 	private double to_speed;
 	private double change_speed;
-	private int direction;
+	private byte dir;
 	private double error_margin;
 	private FlashSpeedController controllers;
-	
 	private boolean end = false;
 	
 	public SpeedChangeAction(FlashSpeedController controllers, double toSpeed, double changeSpeed){
@@ -31,8 +30,8 @@ public class SpeedChangeAction extends Action{
 	protected void initialize(){
 		end = false;
 		double cSpeed = controllers.get();
-		this.direction = (int) (cSpeed / Math.abs(cSpeed));
-		this.error_margin = ERROR_MARGIN * direction;
+		this.dir = (byte) (cSpeed / Math.abs(cSpeed));
+		this.error_margin = ERROR_MARGIN * dir;
 	}
 	@Override
 	protected void execute() {
@@ -40,7 +39,7 @@ public class SpeedChangeAction extends Action{
 		if(to_speed <= cSpeed - error_margin  && cSpeed + error_margin >= to_speed)
 			end = true;
 		
-		controllers.set(cSpeed - (change_speed * direction));
+		controllers.set(cSpeed - (change_speed * dir));
 	}
 	@Override
 	protected boolean isFinished(){

@@ -16,11 +16,11 @@ public class VisionApproach extends Action implements VisionAction{
 	private Vision vision;
 	private boolean targetFound, horizontalDistance;
 	private double speed, lastSpeed, distanceThreshold, currentDistance, distanceMargin, minSpeed = -1, maxSpeed = 1;
-	private long timeout, timeLost, pastTimeout, timePassed;
-	private int lastDir;
+	private int timeout, timeLost, pastTimeout, timePassed;
+	private byte lastDir;
 	
 	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed, boolean horizontal, 
-			double distanceThreshold, double margin,  long timeout, long pastTimeout){
+			double distanceThreshold, double margin,  int timeout, int pastTimeout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
 		this.speed = speed;
@@ -63,7 +63,7 @@ public class VisionApproach extends Action implements VisionAction{
 	@Override
 	protected void execute() {
 		double moveSpeed = 0;
-		int dir = 0;
+		byte dir = 0;
 		if(vision.hasNewAnalysis()){
 			Analysis an = vision.getAnalysis();
 			currentDistance = horizontalDistance? calculateHorizontalDistance(an.targetDistance) :
@@ -71,18 +71,18 @@ public class VisionApproach extends Action implements VisionAction{
 			targetFound = true;
 			if(inDistanceThreshold()){
 				if(timePassed == -1)
-					timePassed = FlashUtil.millis();
-				else if(FlashUtil.millis() - timePassed >= pastTimeout/2)
+					timePassed = FlashUtil.millisInt();
+				else if(FlashUtil.millisInt() - timePassed >= pastTimeout/2)
 					moveSpeed = 0;
 			}else{
 				double offset = distanceThreshold - currentDistance;
 				moveSpeed = speed;
-				dir = offset < 0? 1 : -1;
+				dir = (byte) (offset < 0? 1 : -1);
 				moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 			}
 		}else{
 			if(targetFound)
-				timeLost = FlashUtil.millis();
+				timeLost = FlashUtil.millisInt();
 			targetFound = false;
 			moveSpeed = lastSpeed > 0? minSpeed : 0;
 			dir = lastDir;
@@ -93,7 +93,7 @@ public class VisionApproach extends Action implements VisionAction{
 	}
 	@Override
 	protected boolean isFinished() {
-		long millis = FlashUtil.millis();
+		int millis = FlashUtil.millisInt();
 		return (!targetFound && millis - timeLost >= timeout) || 
 				(finiteApproachTimeout() && inDistanceThreshold() && millis - timePassed >= pastTimeout);
 	}
@@ -119,11 +119,11 @@ public class VisionApproach extends Action implements VisionAction{
 		return targetFound;
 	}
 	@Override
-	public long getLossTimeout(){
+	public int getLossTimeout(){
 		return timeout;
 	}
 	@Override
-	public void setLossTimeout(long millis){
+	public void setLossTimeout(int millis){
 		timeout = millis;
 	}
 	@Override
@@ -168,10 +168,10 @@ public class VisionApproach extends Action implements VisionAction{
 		return currentDistance > 0 && 
 		(currentDistance >= distanceThreshold - distanceMargin && currentDistance <= distanceThreshold + distanceMargin);
 	}
-	public long getPastTimeout(){
+	public int getPastTimeout(){
 		return pastTimeout;
 	}
-	public void setPastTimeout(long millis){
+	public void setPastTimeout(int millis){
 		pastTimeout = millis;
 	}
 	public double getDistanceThreshold(){

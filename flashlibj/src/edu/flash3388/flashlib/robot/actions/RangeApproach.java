@@ -15,12 +15,12 @@ public class RangeApproach extends Action implements VoltageScalable{
 	private YAxisMovable driveTrain;
 	private ModableMotor modable;
 	private RangeFinder finder;
-	private double speed, distanceThreshold, currentDistance, distanceMargin, minSpeed = -1, maxSpeed = 1;
-	private long pastTimeout, timePassed;
+	private double speed, distanceThreshold, currentDistance, distanceMargin, minSpeed = 0.1, maxSpeed = 1;
+	private int pastTimeout, timePassed;
 	private boolean scaleVoltage = false;
 	
 	public RangeApproach(YAxisMovable driveTrain, RangeFinder finder, double speed,
-			double distanceThreshold, double margin, long pastTimeout){
+			double distanceThreshold, double margin, int pastTimeout){
 		this.driveTrain = driveTrain;
 		this.speed = speed;
 		this.distanceThreshold = distanceThreshold;
@@ -55,27 +55,25 @@ public class RangeApproach extends Action implements VoltageScalable{
 	@Override
 	protected void execute() {
 		double moveSpeed = 0;
-		int dir = 0;
+		byte dir = 0;
 		currentDistance = finder.getRangeCM();
 		if(inDistanceThreshold()){
 			if(timePassed == -1)
-				timePassed = FlashUtil.millis();
+				timePassed = FlashUtil.millisInt();
 			moveSpeed = 0;
 		}else{
 			double offset = distanceThreshold - currentDistance;
-			dir = offset < 0? 1 : -1;
+			dir = (byte) (offset < 0? 1 : -1);
 			moveSpeed = speed * Math.abs(offset) / 100.0;
 			moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 		}
 		if(isVoltageScaling() && moveSpeed != 0)
 			moveSpeed = FlashRoboUtil.scaleVoltageBus(moveSpeed);
-		FlashUtil.getLog().log("Speed: "+moveSpeed+" Dir: "+dir + " Dist: "+currentDistance + " Thres: "+distanceThreshold);
 		driveTrain.driveY(moveSpeed, dir);
 	}
 	@Override
 	protected boolean isFinished() {
-		long millis = FlashUtil.millis();
-		return (finiteApproachTimeout() && inDistanceThreshold() && millis - timePassed >= pastTimeout);
+		return (finiteApproachTimeout() && inDistanceThreshold() && FlashUtil.millisInt() - timePassed >= pastTimeout);
 	}
 	@Override
 	protected void end() {
@@ -120,10 +118,10 @@ public class RangeApproach extends Action implements VoltageScalable{
 		return currentDistance > 0 && 
 		(currentDistance >= distanceThreshold - distanceMargin && currentDistance <= distanceThreshold + distanceMargin);
 	}
-	public long getPastTimeout(){
+	public int getPastTimeout(){
 		return pastTimeout;
 	}
-	public void setPastTimeout(long millis){
+	public void setPastTimeout(int millis){
 		pastTimeout = millis;
 	}
 	public double getDistanceThreshold(){

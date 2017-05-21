@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class UdpCommInterface implements ManualCommInterface{
+public class UdpCommInterface implements CommInterface{
 	
 	private DatagramSocket socket;
 	private int portOut = -1;
@@ -22,12 +22,6 @@ public class UdpCommInterface implements ManualCommInterface{
 	private long lastRead = -1, timeLastTimeout = -1;
 	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
 	
-	public UdpCommInterface(CommInfo info) throws SocketException, UnknownHostException{
-		outInet = InetAddress.getByName(info.hostname);
-		socket = new DatagramSocket(info.localPort);
-		portOut = info.remotePort;
-		server = false;
-	}
 	public UdpCommInterface(InetAddress remote, int localport, int remoteport) throws SocketException{
 		outInet = remote;
 		socket = new DatagramSocket(localport);

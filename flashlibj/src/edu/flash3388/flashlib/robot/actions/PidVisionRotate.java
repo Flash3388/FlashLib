@@ -1,33 +1,58 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.PidController;
+import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PidType;
+import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.VoltageScalable;
+import edu.flash3388.flashlib.robot.systems.ModableMotor;
+import edu.flash3388.flashlib.robot.systems.Rotatable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
-import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.System;
-import edu.flash3388.flashlib.robot.systems.ModableMotor;
-import edu.flash3388.flashlib.robot.systems.XAxisMovable;
 
-public class VisionShift extends Action implements VisionAction{
+public class PidVisionRotate extends Action implements VisionAction, VoltageScalable{
+
+	private static class DoublePidSource implements PidSource{
+		private double d;
+		
+		public void set(double d){
+			this.d = d;
+		}
+		@Override
+		public double pidGet() {
+			return d;
+		}
+		@Override
+		public PidType getType() {
+			return PidType.Displacement;
+		}
+	}
 	
-	private XAxisMovable driveTrain;
+	private Rotatable driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontal;
-	private double speed, lastSpeed, minSpeed, maxSpeed;
-	private byte lastDir, margin;
+	private DoublePidSource source;
+	private PidController pidcontroller;
+	private boolean horizontal, targetFound, centered, scaleVoltage = false;
+	private byte margin = 0, lastDir;
+	private double minSpeed, maxSpeed, lastSpeed;
 	private int timeout, timeLost, centeredTimeout, timeCentered;
 	
-	public VisionShift(XAxisMovable driveTrain, Vision vision, double speed, boolean horizontal, int margin, 
-			int timeout, int centeredTime){
+	public PidVisionRotate(Rotatable driveTrain, Vision vision, double kp, double ki, double kd, 
+			boolean horizontal, int timeout, int centeredTime){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
-		this.speed = speed;
-		this.horizontal = horizontal;
-		this.margin = (byte) margin;
 		this.timeout = timeout;
 		this.centeredTimeout = centeredTime;
+		
+		pidcontroller = new PidController(kp, ki, kd, 0);
+		source = new DoublePidSource();
+		pidcontroller.setPIDSource(source);
+		pidcontroller.setInputLimit(360);
 		
 		System s = null;
 		if((s = driveTrain.getSystem()) != null)
@@ -35,11 +60,11 @@ public class VisionShift extends Action implements VisionAction{
 		if(driveTrain instanceof ModableMotor)
 			modable = (ModableMotor)driveTrain;
 	}
-	public VisionShift(XAxisMovable driveTrain, Vision vision, double speed, boolean horizontal){
-		this(driveTrain, vision, speed, horizontal, ACCURACY_MARGIN, LOSS_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
+	public PidVisionRotate(Rotatable driveTrain, Vision vision, double kp, double ki, double kd, boolean horizontal){
+		this(driveTrain, vision, kp, ki, kd, horizontal, LOSS_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
-	public VisionShift(XAxisMovable driveTrain, Vision vision, double speed){
-		this(driveTrain, vision, speed, true);
+	public PidVisionRotate(Rotatable driveTrain, Vision vision, double kp, double ki, double kd){
+		this(driveTrain, vision, kp, ki, kd, true, LOSS_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
 	
 	@Override
@@ -48,8 +73,9 @@ public class VisionShift extends Action implements VisionAction{
 		centered = false;
 		timeCentered = -1;
 		timeLost = -1;
+		lastDir = 0;
 		lastSpeed = 0;
-
+		
 		if(minSpeed <= 0)
 			minSpeed = DEFAULT_MIN_SPEED;
 		if(maxSpeed > 1 || maxSpeed <= 0)
@@ -62,13 +88,17 @@ public class VisionShift extends Action implements VisionAction{
 	}
 	@Override
 	protected void execute() {
-		byte dir = 1; 
+		int dir = 1; 
 		double rotateSpeed = 0;
 		int offset = 0;
 		if(vision.hasNewAnalysis()){
 			Analysis an = vision.getAnalysis();
+			an.print();
 			offset = horizontal? an.horizontalDistance : -an.verticalDistance;
 			targetFound = true;
+			
+			dir = offset > 0 ? 1 : -1;
+			offset = Math.abs(offset);
 			
 			if(offset > -margin && offset < margin){//centered on target
 				rotateSpeed = 0;
@@ -81,8 +111,8 @@ public class VisionShift extends Action implements VisionAction{
 			}else{//not centered on target
 				centered = false;
 				timeCentered = -1;
-				dir = (byte) (offset > 0 ? 1 : -1);
-				rotateSpeed = speed * (Math.abs(offset) / 100.0);
+				source.set(offset);
+				rotateSpeed = pidcontroller.calculate();
 				rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 			}
 		}else{
@@ -92,13 +122,13 @@ public class VisionShift extends Action implements VisionAction{
 			rotateSpeed = lastSpeed > 0? minSpeed : 0;
 			dir = lastDir;
 		}
-		driveTrain.driveX(rotateSpeed, dir);
-		lastDir = dir;
-		lastSpeed = rotateSpeed;
+		if(scaleVoltage && rotateSpeed != 0)
+			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
+		driveTrain.rotate(rotateSpeed, dir);
 	}
 	@Override
 	protected boolean isFinished() {
-		int millis = FlashUtil.millisInt();
+		long millis = FlashUtil.millis();
 		return (!targetFound && millis - timeLost >= timeout) || 
 				(finiteCenteredTimeout() && isCentered() && millis - timeCentered >= centeredTimeout);
 	}
@@ -134,13 +164,9 @@ public class VisionShift extends Action implements VisionAction{
 		this.vision = vision;
 	}
 	@Override
-	public double getSpeed(){
-		return speed;
-	}
+	public double getSpeed(){return 0;}
 	@Override
-	public void setSpeed(double sp){
-		speed = sp;
-	}
+	public void setSpeed(double sp){}
 	@Override
 	public double getMinSpeed(){
 		return minSpeed;
@@ -170,10 +196,24 @@ public class VisionShift extends Action implements VisionAction{
 	public void setPixelMargin(int pixels){
 		margin = (byte) pixels;
 	}
-	public long getCenterTimeout(){
+	public int getCenterTimeout(){
 		return centeredTimeout;
 	}
 	public void setCenterTimeout(int millis){
 		centeredTimeout = millis;
+	}
+	public boolean isHorizontalRotate(){
+		return horizontal;
+	}
+	public void setHorizontalRotate(boolean s){
+		horizontal = s;
+	}
+	@Override
+	public void enableVoltageScaling(boolean en) {
+		scaleVoltage = en;
+	}
+	@Override
+	public boolean isVoltageScaling() {
+		return scaleVoltage;
 	}
 }

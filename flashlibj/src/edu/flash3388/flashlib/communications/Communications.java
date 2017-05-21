@@ -109,6 +109,7 @@ public class Communications {
 				String str = new String(packet.data, 5, packet.length - 5);
 				sen = sendableCreator.create(str, id, packet.data[4]);
 				if(sen != null){
+					FlashUtil.getLog().log("New sendable");
 					sendables.add(sen);
 					sen.setAttached(true);
 				}
@@ -171,6 +172,7 @@ public class Communications {
 		FlashUtil.fillByteArray(sendable.getID(), bytes);
 		bytes[4] = sendable.getType();
 		System.arraycopy(data, 0, bytes, 5, data.length);
+		FlashUtil.getLog().log("Sent: "+bytes.length);
 		write(bytes);
 	}
 	
@@ -180,11 +182,13 @@ public class Communications {
 	}
 	public void attach(Sendable sendable){
 		if(getByID(sendable.getID()) == null){
-			sendables.add(sendable);
 			attachedSendables.add(sendable);
 			sendable.setAttached(true);
-			if(isConnected())
+			if(isConnected()){
+				FlashUtil.getLog().log("Attached");
+				sendables.addElement(sendable);
 				resetSendable(sendable);
+			}
 		}
 	}
 	public boolean detach(Sendable sendable){
@@ -295,7 +299,7 @@ public class Communications {
 		if(!isHandshakeClient(packet.data, packet.length))
 			return false;
 		
-		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_SERVER);
+		commInterface.write(CommInterface.HANDSHAKE_CONNECT_SERVER);
 		commInterface.read(packet);
 		if(!isHandshakeClient(packet.data, packet.length))
 			return false;
@@ -303,35 +307,35 @@ public class Communications {
 	}
 	public static boolean handshakeClient(CommInterface commInterface, Packet packet){
 		commInterface.setReadTimeout(CommInterface.READ_TIMEOUT);
-		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_CLIENT);
+		commInterface.write(CommInterface.HANDSHAKE_CONNECT_CLIENT);
 		
 		commInterface.read(packet);
 		if(!isHandshakeServer(packet.data, packet.length))
 			return false;
 		
-		commInterface.write(ManualCommInterface.HANDSHAKE_CONNECT_CLIENT);
+		commInterface.write(CommInterface.HANDSHAKE_CONNECT_CLIENT);
 		return true;
 	}
 	public static boolean isHandshake(byte[] bytes, int length){
-		if(length != ManualCommInterface.HANDSHAKE.length) return false;
+		if(length != CommInterface.HANDSHAKE.length) return false;
 		for(int i = 0; i < length; i++){
-			if(bytes[i] != ManualCommInterface.HANDSHAKE[i])
+			if(bytes[i] != CommInterface.HANDSHAKE[i])
 				return false;
 		}
 		return true;
 	}
 	public static boolean isHandshakeServer(byte[] bytes, int length){
-		if(length != ManualCommInterface.HANDSHAKE_CONNECT_SERVER.length) return false;
+		if(length != CommInterface.HANDSHAKE_CONNECT_SERVER.length) return false;
 		for(int i = 0; i < length; i++){
-			if(bytes[i] != ManualCommInterface.HANDSHAKE_CONNECT_SERVER[i])
+			if(bytes[i] != CommInterface.HANDSHAKE_CONNECT_SERVER[i])
 				return false;
 		}
 		return true;
 	}
 	public static boolean isHandshakeClient(byte[] bytes, int length){
-		if(length != ManualCommInterface.HANDSHAKE_CONNECT_CLIENT.length) return false;
+		if(length != CommInterface.HANDSHAKE_CONNECT_CLIENT.length) return false;
 		for(int i = 0; i < length; i++){
-			if(bytes[i] != ManualCommInterface.HANDSHAKE_CONNECT_CLIENT[i])
+			if(bytes[i] != CommInterface.HANDSHAKE_CONNECT_CLIENT[i])
 				return false;
 		}
 		return true;

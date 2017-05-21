@@ -9,19 +9,19 @@ import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 
-public class HolonomicVisionToTarget extends Action implements VisionAction{
+public class HolonomicVision extends Action implements VisionAction{
 	
 	private HolonomicDriveSystem driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
 	private boolean targetFound, centered, horizontalD, rotate, sideways = false;
-	private int margin;
+	private byte margin;
 	private double speed, lastY, lastX, currentDistance, distanceThreshold, minSpeed, distanceMargin, maxSpeed;
-	private long timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
+	private int timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
 	
-	public HolonomicVisionToTarget(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
+	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
 			boolean rotate, boolean horizontalD,
-			int margin, double distanceThreshold, long timeout, long passedTimeout, long centeredtimout){
+			byte margin, double distanceThreshold, int timeout, int passedTimeout, int centeredtimout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
 		this.speed = speed;
@@ -39,12 +39,12 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 			requires(s);
 		modable = driveTrain;
 	}
-	public HolonomicVisionToTarget(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
+	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
 			boolean rotate, boolean horizontalD){
 		this(driveTrain, vision, speed, rotate, horizontalD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
 				ACTION_VALIDATION_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
-	public HolonomicVisionToTarget(HolonomicDriveSystem driveTrain, Vision vision, double speed){
+	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed){
 		this(driveTrain, vision, speed, false, false);
 	}
 	
@@ -69,7 +69,7 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 	@Override
 	protected void execute() {
 		double speedX = 0, speedY = 0;
-		long millis = FlashUtil.millis();
+		int millis = FlashUtil.millisInt();
 		
 		if(vision.hasNewAnalysis()){
 			targetFound = true;
@@ -118,17 +118,17 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 			FlashUtil.getLog().log("Centered time");
 			speedX = 0;
 		}
-		FlashUtil.getLog().log("SpeedX: "+speedX+" SpeedY: "+speedY + " sideways: "+sideways+" rotate: "+rotate+
-				" centered: "+centered);
+		
 		if(sideways) driveTrain.holonomicCartesian(-speedY * 2, speedX, 0);
 		else if(!rotate) driveTrain.holonomicCartesian(speedX, speedY, 0);
 		else driveTrain.holonomicCartesian(0, speedY, -speedX);
+		
 		lastX = speedX;
 		lastY = speedY;
 	}
 	@Override
 	protected boolean isFinished() {
-		long millis = FlashUtil.millis();
+		int millis = FlashUtil.millisInt();
 		return (!targetFound && millis - timeLost >= timeout) || 
 				((finiteCenteredTimeout() && isCentered() && millis - timecentered >= centeredTimeout) &&
 						(finiteApproachTimeout() && inDistanceThreshold() && millis - timepassed >= passedTimeout));
@@ -156,11 +156,11 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 		return targetFound;
 	}
 	@Override
-	public long getLossTimeout(){
+	public int getLossTimeout(){
 		return timeout;
 	}
 	@Override
-	public void setLossTimeout(long millis){
+	public void setLossTimeout(int millis){
 		timeout = millis;
 	}
 	@Override
@@ -218,22 +218,22 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 	public void setDistanceMargin(double margin){
 		distanceMargin = margin;
 	}
-	public int getPixelMargin(){
+	public byte getPixelMargin(){
 		return margin;
 	}
 	public void setPixelMargin(int pixels){
-		margin = pixels;
+		margin = (byte) pixels;
 	}
 	public long getCenterTimeout(){
 		return centeredTimeout;
 	}
-	public void setCenterTimeout(long millis){
+	public void setCenterTimeout(int millis){
 		centeredTimeout = millis;
 	}
-	public long getPastTimeout(){
+	public int getPastTimeout(){
 		return passedTimeout;
 	}
-	public void setPastTimeout(long millis){
+	public void setPastTimeout(int millis){
 		passedTimeout = millis;
 	}
 	public double getDistanceThreshold(){

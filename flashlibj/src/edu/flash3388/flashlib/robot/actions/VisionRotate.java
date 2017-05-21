@@ -18,15 +18,16 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	private Vision vision;
 	private boolean targetFound, centered, horizontal, scaleVoltage = false;
 	private double speed, lastSpeed, minSpeed, maxSpeed, baseSpeed;
-	private int lastDir, margin, lastPixels, pixelDifference, differences;
-	private long timeout, timeLost, centeredTimeout, timeCentered;
+	private byte lastDir, margin, lastPixels, pixelDifference, differences;
+	private int timeout, timeLost, centeredTimeout, timeCentered;
 	
-	public VisionRotate(Rotatable driveTrain, Vision vision, double speed, boolean horizontal, int margin, long timeout, long centeredTime){
+	public VisionRotate(Rotatable driveTrain, Vision vision, double speed, boolean horizontal, int margin, 
+			int timeout, int centeredTime){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
 		this.baseSpeed = speed;
 		this.horizontal = horizontal;
-		this.margin = margin;
+		this.margin = (byte) margin;
 		this.timeout = timeout;
 		this.centeredTimeout = centeredTime;
 		
@@ -67,17 +68,17 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	}
 	@Override
 	protected void execute() {
-		int dir = 1; 
+		byte dir = 1; 
 		double rotateSpeed = 0;
-		int offset = 0;
+		byte offset = 0;
 		if(vision.hasNewAnalysis()){
 			Analysis an = vision.getAnalysis();
 			an.print();
-			offset = horizontal? an.horizontalDistance : -an.verticalDistance;
+			offset = (byte) (horizontal? an.horizontalDistance : -an.verticalDistance);
 			targetFound = true;
 			
-			dir = offset > 0 ? 1 : -1;
-			offset = Math.abs(offset);
+			dir = (byte) (offset > 0 ? 1 : -1);
+			offset = (byte) Math.abs(offset);
 			
 			if(offset > -margin && offset < margin){//centered on target
 				rotateSpeed = 0;
@@ -85,7 +86,7 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 					modable.enableBrakeMode(true);
 				if(!centered){
 					centered = true;
-					timeCentered = FlashUtil.millis();
+					timeCentered = FlashUtil.millisInt();
 				}
 			}else{//not centered on target
 				centered = false;
@@ -95,13 +96,13 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 			}
 			
 			if(lastPixels >= 0){
-				pixelDifference = Math.abs(offset - lastPixels);
+				pixelDifference = (byte) Math.abs(offset - lastPixels);
 				differences++;
 			}
 			lastPixels = offset;
 		}else{
 			if(targetFound)
-				timeLost = FlashUtil.millis();
+				timeLost = FlashUtil.millisInt();
 			targetFound = false;
 			rotateSpeed = lastSpeed > 0? minSpeed : 0;
 			dir = lastDir;
@@ -124,7 +125,7 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	}
 	@Override
 	protected boolean isFinished() {
-		long millis = FlashUtil.millis();
+		long millis = FlashUtil.millisInt();
 		return (!targetFound && millis - timeLost >= timeout) || 
 				(finiteCenteredTimeout() && isCentered() && millis - timeCentered >= centeredTimeout);
 	}
@@ -144,11 +145,11 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 		return targetFound;
 	}
 	@Override
-	public long getLossTimeout(){
+	public int getLossTimeout(){
 		return timeout;
 	}
 	@Override
-	public void setLossTimeout(long millis){
+	public void setLossTimeout(int millis){
 		timeout = millis;
 	}
 	@Override
@@ -194,12 +195,12 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 		return margin;
 	}
 	public void setPixelMargin(int pixels){
-		margin = pixels;
+		margin = (byte) pixels;
 	}
-	public long getCenterTimeout(){
+	public int getCenterTimeout(){
 		return centeredTimeout;
 	}
-	public void setCenterTimeout(long millis){
+	public void setCenterTimeout(int millis){
 		centeredTimeout = millis;
 	}
 	public boolean isHorizontalRotate(){

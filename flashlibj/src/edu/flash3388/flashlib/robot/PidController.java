@@ -1,71 +1,61 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathd;
-import edu.flash3388.flashlib.util.FlashUtil;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.flash3388.flashlib.robot.devices.Gyro;
 
-public class PIDController {
+public class PidController {
 	
-	public static class PIDTask implements Runnable{
-		PIDController controller;
-		boolean stop = false;
+	public static class GyroPidSource implements PidSource{
+
+		private PidType type;
+		private Gyro gyro;
 		
-		public PIDTask(PIDController controller){
-			this.controller = controller;
+		public GyroPidSource(Gyro gyro, PidType t){
+			this.gyro = gyro;
+			this.type = t;
+		}
+		public GyroPidSource(Gyro gyro){
+			this(gyro, PidType.Displacement);
 		}
 		
 		@Override
-		public void run(){
-			while(!stop){
-				controller.run();
-				FlashUtil.delay(controller.period);
-			}
+		public double pidGet() {
+			return gyro.getAngle();
+		}
+		@Override
+		public PidType getType() {
+			return type;
 		}
 	}
 	
-	public static final double DEFAULT_PERIOD = 0.05;
-	
-	private PIDSource source;
-	private PIDOutput output;
+	private PidSource source;
 	private double setPoint;
 	private double minimumInput = -1, maximumInput = 1;
 	private double minimumOutput = -1, maximumOutput = 1;
-	private double period;
 	private double kp, ki, kd;
 	private double totalError, error, preError;
-	private boolean enabled;
+	private boolean enabled = true;
 	
-	public PIDController(double kp, double ki, double kd, double setPoint, double period, PIDSource source, PIDOutput output){
+	public PidController(double kp, double ki, double kd, double setPoint, PidSource source){
 		this.kp = kp;
 		this.ki = ki;
 		this.kd = kd;
 		this.setPoint = setPoint;
 		this.source = source;
-		this.output = output;
 	}
-	public PIDController(double kp, double ki, double kd, double setPoint, double period){
-		this(kp, ki, kd, setPoint, period, null, null);
+	public PidController(double kp, double ki, double kd, double setPoint){
+		this(kp, ki, kd, setPoint, null);
 	}
-	public PIDController(double kp, double ki, double kd, double setPoint){
-		this(kp, ki, kd, setPoint, DEFAULT_PERIOD, null, null);
-	}
-	public PIDController(double kp, double ki, double kd){
+	public PidController(double kp, double ki, double kd){
 		this(kp, ki, kd, 0);
 	}
-	public PIDController(double kp, double kd){
+	public PidController(double kp, double kd){
 		this(kp, 0, kd, 0);
 	}
-	public PIDController(double kp){
+	public PidController(double kp){
 		this(kp, 0, 0, 0);
 	}
 	
-	public void run(){
-		if(!enabled) return;
-		if(output != null)
-			output.pidWrite(calculate());
-	}
 	public double calculate(){
 		if(!enabled) return 0;
 		if(source == null)
@@ -75,7 +65,7 @@ public class PIDController {
 		double result = 0;
 		error = setPoint - currentVal;
 		
-		if(source.getPIDSourceType().equals(PIDSourceType.kRate)){
+		if(source.getType() == PidType.Rate){
 			double pGain = (totalError + error) * kp;
 			if(Mathd.limited(pGain, minimumOutput, maximumOutput))
 				totalError += error;
@@ -114,9 +104,6 @@ public class PIDController {
 	public double getMinimumOutput(){
 		return minimumOutput;
 	}
-	public double getPeriod(){
-		return period;
-	}
 	public double getP(){
 		return kp;
 	}
@@ -135,11 +122,8 @@ public class PIDController {
 	public double getSetPoint(){
 		return setPoint;
 	}
-	public PIDSource getSource(){
+	public PidSource getSource(){
 		return source;
-	}
-	public PIDOutput getOutput(){
-		return output;
 	}
 	
 	public void setMaximumInput(double m){
@@ -165,12 +149,6 @@ public class PIDController {
 		this.minimumOutput = -l;
 		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
-	public void setPeriod(double seconds){
-		this.period = seconds;
-	}
-	public void setPeriod(long millis){
-		this.period = millis / 1000.0;
-	}
 	public void setP(double p){
 		this.kp = p;
 	}
@@ -194,11 +172,8 @@ public class PIDController {
 	public void setSetPoint(double setpoint){
 		this.setPoint = Mathd.limit(setpoint, minimumOutput, maximumOutput);
 	}
-	public void setPIDSource(PIDSource source){
+	public void setPIDSource(PidSource source){
 		this.source = source;
-	}
-	public void setPIDOutput(PIDOutput output){
-		this.output = output;
 	}
 	
 	public boolean isEnabled(){

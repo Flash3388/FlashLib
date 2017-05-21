@@ -20,8 +20,6 @@ public class EchoSendable extends Sendable{
 			byteData = new byte[data.length];
 		System.arraycopy(data, 0, byteData, 0, 
 				data.length);
-		String dstr = new String(data, 0, data.length);
-		System.out.println(getName()+": "+dstr);
 
 		rec = true;
 	}

@@ -8,50 +8,38 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
-public class TcpCommInterface implements StreamCommInterface{
+public class TcpCommInterface extends StreamCommInterface{
 	
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private int portOut, localPort;
 	private InetAddress outInet, localInet;
 	
-	private boolean closed = false, server, reset = false;
-	private byte[] data = new byte[BUFFER_SIZE], leftoverData = new byte[0];
+	private boolean closed = false, reset = false;
 	
 	private OutputStream out;
 	private InputStream in;
 	
-	public TcpCommInterface(CommInfo info) throws IOException{
-		outInet = InetAddress.getByName(info.hostname);
-		portOut = info.remotePort;
-		localPort = info.localPort;
-		localInet = InetAddress.getLocalHost();
-		createSocket();
-		server = false;
-	}
 	public TcpCommInterface(InetAddress remote, int localport, int remoteport) throws UnknownHostException, IOException{
 		this(InetAddress.getLocalHost(), remote, localport, remoteport);
 	}
 	public TcpCommInterface(InetAddress local, InetAddress remote, int localport, int remoteport) throws UnknownHostException, IOException{
+		super(false, false);
 		outInet = remote;
 		portOut = remoteport;
 		localPort = localport;
 		localInet = local;
 		createSocket();
-		server = false;
 	}
 	public TcpCommInterface(int localPort) throws IOException{
 		this(InetAddress.getLocalHost(), localPort);
 	}
 	public TcpCommInterface(InetAddress localAddr, int localPort) throws IOException{
+		super(true, false);
 		localInet = localAddr;
 		this.localPort = localPort;
 		serverSocket = new ServerSocket(localPort, 20, localAddr);
-		server = true;
 	}
 	
 	private void createSocket() throws IOException{
@@ -65,7 +53,7 @@ public class TcpCommInterface implements StreamCommInterface{
 	@Override
 	public void close(){
 		try {
-			if(server) 
+			if(isBoundAsServer()) 
 				serverSocket.close();
 			if(socket != null)
 				socket.close();
@@ -79,18 +67,16 @@ public class TcpCommInterface implements StreamCommInterface{
 
 		try {
 			if(reset){
-				leftoverData = new byte[0];
-				for (int i = 0; i < data.length; i++) 
-					data[i] = 0;
+				resetBuffers();
 				
 				if(socket != null && !socket.isClosed())
 					socket.close();
-				if(!server)
+				if(!isBoundAsServer())
 					createSocket();
 				reset = false;
 			}
 			
-			if(server){
+			if(isBoundAsServer()){
 				socket = serverSocket.accept();
 			}
 			else{
@@ -114,7 +100,7 @@ public class TcpCommInterface implements StreamCommInterface{
 			}
 			socket = null;
 		}
-		if(!server){
+		if(!isBoundAsServer()){
 			try {
 				createSocket();
 			} catch (IOException e) {
@@ -123,51 +109,6 @@ public class TcpCommInterface implements StreamCommInterface{
 		}
 	}
 	
-	@Override
-	public boolean read(Packet packet) {
-		if(!isOpened()) return false;
-		try {
-			int start = -1, startI = -1, endI = -1;
-			if(leftoverData.length > 0){
-				startI = FlashUtil.indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_START);
-				endI = FlashUtil.indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_END);
-				
-				start = getPacket(leftoverData, packet, startI, endI);
-				if(start >= 0){
-					if(packet.length + start + 2 > leftoverData.length - 1)
-						leftoverData = new byte[0];
-					else 
-						leftoverData = Arrays.copyOfRange(leftoverData, packet.length + start + 2, leftoverData.length - 1);
-					return true;
-				}
-			}
-			
-			int len = in.read(data);
-			if(len < 1){
-				packet.length = 0;
-				return false;
-			}
-			
-			leftoverData = Arrays.copyOf(leftoverData, leftoverData.length + len);
-			System.arraycopy(data, 0, leftoverData, leftoverData.length - len, len);
-			
-			startI = FlashUtil.indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_START);
-			endI = FlashUtil.indexOf(leftoverData, 0, leftoverData.length-1, SEPERATOR_END);
-			
-			start = getPacket(leftoverData, packet, startI, endI);
-			if(start >= 0){
-				if(packet.length + start + 2 > leftoverData.length - 1)
-					leftoverData = new byte[0];
-				else 
-					leftoverData = Arrays.copyOfRange(leftoverData, packet.length + start + 2, leftoverData.length - 1);
-				return true;
-			}
-			return false;
-		} catch (IOException e) {
-			packet.length = 0;
-			return false;
-		}
-	}
 	@Override
 	public void setReadTimeout(long millis) {
 		try {
@@ -182,37 +123,10 @@ public class TcpCommInterface implements StreamCommInterface{
 		} catch (IOException e) {}
 		return -1;
 	}
-	@Override
-	public void write(byte[] data) {
-		write(data, 0, data.length);
-	}
-	@Override
-	public void write(byte[] data, int start, int length) {
-		if(!isOpened()) return;
-		try {
-			byte[] sendData = new byte[length + 2];
-			sendData[0] = SEPERATOR_START;
-			sendData[sendData.length-1] = SEPERATOR_END;
-			System.arraycopy(data, start, sendData, 1, length);
-			out.write(sendData);
-		} catch (IOException e) {}
-	}
 	
 	@Override
 	public boolean isOpened() {
 		return !closed;
-	}
-	@Override
-	public void setMaxBufferSize(int bytes) {
-		data = new byte[bytes];
-	}
-	@Override
-	public int getMaxBufferSize() {
-		return data.length;
-	}
-	
-	public boolean boundAsServer(){
-		return server;
 	}
 	@Override
 	public boolean isConnected() {
@@ -229,21 +143,23 @@ public class TcpCommInterface implements StreamCommInterface{
 		return outInet;
 	}
 	
+	@Override
 	public void update(long millis){}
 	
-	private static int getPacket(byte[] data, Packet packet, int start, int end){
-		if(end < start || start < 0 || start == end){ 
-			return -1;
+	@Override
+	protected void writeData(byte[] data) {
+		try {
+			out.write(data);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		
-		byte[] p = new byte[end - start - 1];
-		System.arraycopy(data, start + 1, p, 0, p.length);		
-		packet.data = p;
-		packet.length = p.length;
-		return start;
 	}
-	private static int getPacket(byte[] data, Packet packet){
-		return getPacket(data, packet, FlashUtil.indexOf(data, 0, data.length-1, SEPERATOR_START), 
-				FlashUtil.indexOf(data, 0, data.length-1, SEPERATOR_END));
+	@Override
+	protected int readData(byte[] buffer) {
+		try {
+			return in.read(buffer);
+		} catch (IOException e) {
+			return 0;
+		}
 	}
 }

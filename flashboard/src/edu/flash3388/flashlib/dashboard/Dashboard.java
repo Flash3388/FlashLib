@@ -13,7 +13,6 @@ import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
-import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
@@ -158,7 +157,7 @@ public class Dashboard extends Application {
 					if(protocol.equals("udp"))
 						commInterface = new UdpCommInterface(ad, localport, remoteport);
 					else if(protocol.equals("tcp")){
-						InetAddress local = CommInfo.getInterfaceAddress(ad);
+						InetAddress local = FlashUtil.getLocalAddress(ad);
 						commInterface = new TcpCommInterface(local, ad, localport, remoteport);
 					}
 					

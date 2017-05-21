@@ -10,12 +10,12 @@ public class Rotate extends Action{
 	private Rotatable drive;
 	private ModableMotor modable;
 	private double speed;
-	private int direction;
+	private byte dir;
 	
-	public Rotate(Rotatable driveTrain, double speed, int direction, long millis){
+	public Rotate(Rotatable driveTrain, double speed, int direction, int millis){
 		this.drive = driveTrain;
 		this.speed = speed;
-		this.direction = direction;
+		this.dir = (byte) direction;
 		
 		setTimeOut(millis);
 		System s = null;
@@ -25,7 +25,7 @@ public class Rotate extends Action{
 			modable = (ModableMotor)driveTrain;
 	}
 	public Rotate(Rotatable driveTrain, double speed, int direction, double seconds){
-		this(driveTrain, speed, direction, (long)(seconds * 1000));
+		this(driveTrain, speed, direction, (int)(seconds * 1000));
 	}
 	public Rotate(Rotatable driveTrain, double speed, int direction){
 		this(driveTrain, speed, direction, -1);
@@ -33,7 +33,7 @@ public class Rotate extends Action{
 	
 	@Override
 	protected void execute() {
-		drive.rotate(speed, direction);
+		drive.rotate(speed, dir);
 	}
 	@Override
 	protected void end() {
@@ -51,10 +51,10 @@ public class Rotate extends Action{
 		return speed;
 	}
 	public void setDirection(int direction){
-		this.direction = direction;
+		this.dir = (byte) direction;
 	}
 	public double getDirection(){
-		return direction;
+		return dir;
 	}
 	public void setModable(ModableMotor modable){
 		this.modable = modable;

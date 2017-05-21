@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Scanner;
 
-import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;

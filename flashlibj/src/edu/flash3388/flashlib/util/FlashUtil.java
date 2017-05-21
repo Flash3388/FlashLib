@@ -1,7 +1,18 @@
 package edu.flash3388.flashlib.util;
 
+import java.lang.reflect.Array;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,8 +30,10 @@ public class FlashUtil {
 	private static Log mainLog;
 	private static ExecutorService executor;
 	
+
+	
 	//--------------------------------------------------------------------
-	//--------------------------Time--------------------------------------
+	//-----------------------General--------------------------------------
 	//--------------------------------------------------------------------
 	
 	public static void delay(long ms){
@@ -34,20 +47,13 @@ public class FlashUtil {
 	public static long millis(){
 		return startTime != 0? System.currentTimeMillis() - startTime : -1;
 	}
+	public static int millisInt(){
+		return (int) (startTime != 0? System.currentTimeMillis() - startTime : -1);
+	}
 	public static double secs(){
 		return startTime != 0? millis() / 1000.0 : -1;
 	}
-	public static <T> T executeForTime(Callable<T> callable, long ms){
-		if(executor == null)
-			executor = Executors.newCachedThreadPool();
-		
-		Future<T> future = executor.submit(callable);
-		try {
-			return future.get(ms, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			return null;
-		}
-	}
+
 	
 	protected static void setStartTime(long time){
 		if(startTime == 0)
@@ -64,11 +70,80 @@ public class FlashUtil {
 	public static Log getLog(){
 		return mainLog;
 	}
+
+	//--------------------------------------------------------------------
+	//-----------------------Executor-------------------------------------
+	//--------------------------------------------------------------------
+
+	private static void initExecutor(){
+		if (executor == null)
+			executor = Executors.newCachedThreadPool();
+	}
+	private static boolean isExecutorInit(){
+		return executor != null;
+	}
 	
+	public static void awaitExecutorTermination(){
+		if(isExecutorInit()) return;
+		executor.shutdown();
+	}
+	public static void terminateExecutor(){
+		if(isExecutorInit()) return;
+		executor.shutdownNow();
+	}
+	public static boolean isExecutorShutdown(){
+		return isExecutorInit() && executor.isShutdown();
+	}
+	
+	public static void execute(Runnable r){
+		initExecutor();
+		executor.execute(r);
+	}
+	public static <T> T executeForTime(Callable<T> callable, long ms){
+		initExecutor();
+		
+		Future<T> future = executor.submit(callable); 
+		try {
+			return future.get(ms, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			return null;
+		}
+	}
+
 	//--------------------------------------------------------------------
 	//--------------------------Arrays------------------------------------
 	//--------------------------------------------------------------------
 	
+    public static boolean isEmpty(String s) {
+        return s == null || s.length() == 0;
+    }
+	
+    //------------is empty---------------
+    
+    public static boolean isEmpty(byte[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(short[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(int[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(long[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(float[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(double[] arr) {
+        return arr == null || arr.length == 0; 
+    }
+    public static boolean isEmpty(Object[] objects) {
+        return objects == null || objects.length == 0; 
+    }
+    
+    //------------index of---------------
+    
 	public static int indexOf(byte[] data, int start, int end, byte ch){
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -104,11 +179,13 @@ public class FlashUtil {
 			if(data[i] == ch) return i;
 		return -1;
 	}
-	public static int indexOf(String[] data, int start, int end, String ch){
+	public static int indexOf(Object[] data, int start, int end, Object ch){
 		for (int i = start; i <= end; i++) 
 			if(data[i].equals(ch)) return i;
 		return -1;
 	}
+	
+	//------------contains---------------
 	
 	public static boolean arrayContains(byte[] data, int start, int end, byte ch){
 		return indexOf(data, start, end, ch) >= 0;
@@ -131,9 +208,11 @@ public class FlashUtil {
 	public static boolean arrayContains(char[] data, int start, int end, char ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
-	public static boolean arrayContains(String[] data, int start, int end, String ch){
+	public static boolean arrayContains(Object[] data, int start, int end, Object ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	
+	//------------print---------------
 	
 	public static void printBytes(byte[] s){
 		for(byte i : s)
@@ -167,10 +246,12 @@ public class FlashUtil {
 		for(char c : s)
 			System.out.println(c);
 	}
-	public static void printArray(String[] s){
-		for(String str : s)
+	public static void printArray(Object[] s){
+		for(Object str : s)
 			System.out.println(str);
 	}
+	
+	//------------shift left---------------
 	
 	public static void shiftArrayL(byte[] arr, int start, int end){
 		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
@@ -214,21 +295,95 @@ public class FlashUtil {
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
-	public static void shiftArrayL(String[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
-	}
-	public static <T> void shiftArrayL(T[] arr, int start, int end){
+	public static void shiftArrayL(Object[] arr, int start, int end){
 		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
 			throw new IllegalArgumentException("Illegal shift arguments");
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
 	
+	//------------resize---------------
+	
+	public static byte[] resize(byte[] arr, int newSize){
+		byte[] nArr = new byte[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr;
+	}
+	public static short[] resize(short[] arr, int newSize){
+		short[] nArr = new short[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr;
+	}
+	public static int[] resize(int[] arr, int newSize){
+		int[] nArr = new int[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr;
+	}
+	public static long[] resize(long[] arr, int newSize){
+		long[] nArr = new long[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr; 
+	}
+	public static float[] resize(float[] arr, int newSize){
+		float[] nArr = new float[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr;
+	}
+	public static double[] resize(double[] arr, int newSize){
+		double[] nArr = new double[newSize];
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr; 
+	}
+	@SuppressWarnings("unchecked")
+	public static <T> T[] resize(T[] arr, int newSize){
+		Class<?> type = arr.getClass().getComponentType();
+		T[] nArr = (T[]) Array.newInstance(type, newSize);
+		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
+		return nArr;
+	}
+	
+	//------------copy---------------
+	
+	public static byte[] copy(byte[] arr){
+		byte[] nArr = new byte[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr;
+	}
+	public static short[] copy(short[] arr){
+		short[] nArr = new short[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr;
+	}
+	public static int[] copy(int[] arr){
+		int[] nArr = new int[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr;
+	}
+	public static long[] copy(long[] arr){
+		long[] nArr = new long[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr; 
+	}
+	public static float[] copy(float[] arr){
+		float[] nArr = new float[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr;
+	}
+	public static double[] copy(double[] arr){
+		double[] nArr = new double[arr.length];
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr; 
+	}
+	@SuppressWarnings("unchecked")
+	public static <T> T[] copy(T[] arr){
+		Class<?> type = arr.getClass().getComponentType();
+		T[] nArr = (T[]) Array.newInstance(type, arr.length);
+		System.arraycopy(arr, 0, nArr, 0, arr.length);
+		return nArr;
+	}
+	
 	//--------------------------------------------------------------------
-	//--------------------------Byte Arrays-------------------------------
+	//--------------------------Conversion--------------------------------
 	//--------------------------------------------------------------------
 	
 	public static byte[] fillByteArray(double value, byte[] bytes){
@@ -356,4 +511,83 @@ public class FlashUtil {
 		}catch(NumberFormatException e){}
 		return defaultVal;
 	}
+	
+	//--------------------------------------------------------------------
+	//--------------------------Parsing-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static Map<String, String> parseValueParameters(String line){
+		String[] split = line.split(" ");
+		return parseValueParameters(split);
+	}
+	public static Map<String, String> parseValueParameters(String[] args){
+		Map<String, String> map = new HashMap<String, String>();
+		for (String param : args) {
+			String[] vals = param.split("=");
+			if(vals.length != 2)
+				continue;
+			map.put(vals[0].trim(), vals[1].trim());
+		}
+		return map;
+	}
+	public static String[] parseParameters(String line){
+		String[] split = line.trim().split("-");
+		for (int i = 0; i < split.length; i++) {
+			split[i] = split[i].trim();
+		}
+		return split;
+	}
+	
+	//--------------------------------------------------------------------
+	//--------------------------Reflection--------------------------------
+	//--------------------------------------------------------------------
+	
+	public static boolean isAssignable(Class<?> cl, Class<?> suCl){
+		return suCl.isAssignableFrom(cl);
+	}
+	
+    public static Set<Class<?>> getSuperTypes(Class<?> type) {
+        Set<Class<?>> supers = new LinkedHashSet<>();
+        Class<?> superclass = type.getSuperclass();
+        Class<?>[] interfaces = type.getInterfaces();
+        
+        if (superclass != null && !superclass.equals(Object.class)) 
+        	supers.add(superclass);
+        if (interfaces != null && interfaces.length > 0) 
+        	supers.addAll(Arrays.asList(interfaces));
+        return supers;
+    }
+	
+	//--------------------------------------------------------------------
+	//----------------------Communications--------------------------------
+	//--------------------------------------------------------------------
+	
+	public static InetAddress getLocalAddress(InetAddress remote) throws SocketException{
+		byte[] remoteAddrByte = remote.getAddress();
+		Enumeration<NetworkInterface> interEnum = NetworkInterface.getNetworkInterfaces();
+		
+		while(interEnum.hasMoreElements()){
+			NetworkInterface inter = interEnum.nextElement();
+			List<InterfaceAddress> addresses = inter.getInterfaceAddresses();
+			for (int i = 0; i < addresses.size(); i++) {
+				InterfaceAddress address = addresses.get(i);
+				byte[] byteAddr = address.getAddress().getAddress();
+				
+				if(byteAddr.length != remoteAddrByte.length)
+					continue;
+				
+				boolean error = false;
+				for(int j = 0; j < remoteAddrByte.length - 1; j++){
+					if(byteAddr[j] != remoteAddrByte[j]){
+						error = true;
+						break;
+					}
+				}
+				if(!error)
+					return address.getAddress();
+			}
+		}
+		return null;
+	}
+	
 }

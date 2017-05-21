@@ -33,8 +33,12 @@ public class FileStream {
 	public static FileReader openReader(String file) throws NullPointerException, FileNotFoundException{
 		return new FileReader(file);
 	}
-	public static File wrap(String file){
-		return new File(file);
+	public static File wrap(String filename){
+        File file = new File(filename);
+        File parent = file.getAbsoluteFile().getParentFile();
+        if (!parent.exists()) 
+            parent.mkdirs();
+        return file;
 	}
 	
 	public static String[] readAllLines(String file) throws NullPointerException, IOException{

@@ -7,30 +7,29 @@ import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
-import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.VoltageScalable;
 
-public class AngleRotateAction extends Action implements VoltageScalable{
+public class AngleRotate extends Action implements VoltageScalable{
 	
-	public static final double ANGLE_MARGIN = 10;
-	public static final int MAX_MISSES = 5;
+	public static final byte ANGLE_MARGIN = 10;
+	public static final byte MAX_MISSES = 5;
 	
-	private double currentAngle, toAngle, desiredAngle, angleMargin, angleConversion, angleAddition;
-	private int direction, lastDir, misses, maxMisses;
+	private double currentAngle, toAngle, desiredAngle, angleConversion, angleAddition;
+	private byte dir, lastDir, misses, maxMisses, angleMargin;
 	private double speed, minSpeed, maxSpeed;
 	private boolean absolute, scaleVoltage = false;
 	private Rotatable drive;
 	private ModableMotor modable;
 	private Gyro gyro;
 	
-	public AngleRotateAction(Rotatable drive, Gyro gyro, double speed, boolean absolute, double destAngle, int maxMisses){
+	public AngleRotate(Rotatable drive, Gyro gyro, double speed, boolean absolute, double destAngle, int maxMisses){
 		this.drive = drive;
 		this.gyro = gyro;
 		this.absolute = absolute;
 		this.speed = speed;
 		this.desiredAngle = destAngle;
-		this.maxMisses = maxMisses;
+		this.maxMisses = (byte) maxMisses;
 		
 		if(drive instanceof ModableMotor)
 			modable = (ModableMotor)drive;
@@ -38,13 +37,13 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 		if(s != null)
 			requires(s);
 	}
-	public AngleRotateAction(Rotatable drive, Gyro gyro, double speed, boolean absolute, double destAngle){
+	public AngleRotate(Rotatable drive, Gyro gyro, double speed, boolean absolute, double destAngle){
 		this(drive, gyro, speed, absolute, destAngle, MAX_MISSES);
 	}
-	public AngleRotateAction(Rotatable drive, Gyro gyro, double speed, boolean absolute){
+	public AngleRotate(Rotatable drive, Gyro gyro, double speed, boolean absolute){
 		this(drive, gyro, speed, absolute, 0);
 	}
-	public AngleRotateAction(Rotatable drive, Gyro gyro, double speed){
+	public AngleRotate(Rotatable drive, Gyro gyro, double speed){
 		this(drive, gyro, speed, false);
 	}
 	
@@ -64,30 +63,26 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 			maxSpeed = 1;
 		
 		calculatePositioning();
-		lastDir = direction;
+		lastDir = dir;
 		misses = 0;
-		FlashUtil.getLog().log("Dest angle: "+desiredAngle);
 	}
 	@Override
 	protected void execute() {
 		calculatePositioning();
 		
-		if(lastDir != direction){
-			lastDir = direction;
+		if(lastDir != dir){
+			lastDir = dir;
 			misses++;
 			speed /= 2;
 		}
 		
-		double angularDistance = direction == Direction.RIGHT ? toAngle : 360 - toAngle;
+		double angularDistance = dir == Direction.RIGHT ? toAngle : 360 - toAngle;
 		double rotateSpeed = speed * (angularDistance / 100.0);
-		FlashUtil.getLog().log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
-				+" To angle: "+toAngle);
 		rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 		if(scaleVoltage)
 			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
-		FlashUtil.getLog().log("After speed n:"+rotateSpeed+"\n");
 		
-		drive.rotate(rotateSpeed, direction);
+		drive.rotate(rotateSpeed, dir);
 	}
 	@Override 
 	protected boolean isFinished(){
@@ -107,7 +102,7 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 	private void calculatePositioning(){
 		currentAngle = Mathd.limitAngle(gyro.getAngle() - angleConversion);
 		toAngle = Mathd.limitAngle(desiredAngle - currentAngle + angleAddition);
-		direction = (toAngle <= 180)? Direction.RIGHT : Direction.LEFT;
+		dir = (toAngle <= 180)? Direction.RIGHT : Direction.LEFT;
 	}
 	
 	public void setSpeed(double speed){
@@ -136,15 +131,15 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 		return desiredAngle;
 	}
 	public void setMaxMisses(int misses){
-		maxMisses = misses;
+		maxMisses = (byte) misses;
 	}
 	public int getMaxMisses(){
 		return maxMisses;
 	}
-	public void setAngleMargin(double margin){
-		angleMargin = margin;
+	public void setAngleMargin(int margin){
+		angleMargin = (byte) margin;
 	}
-	public double getAngleMargin(){
+	public int getAngleMargin(){
 		return angleMargin;
 	}
 	public void setRotationMode(boolean absolute){

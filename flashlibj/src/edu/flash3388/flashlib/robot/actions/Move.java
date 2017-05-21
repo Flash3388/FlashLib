@@ -12,12 +12,12 @@ public class Move extends Action{
 	private XAxisMovable xdrive;
 	private ModableMotor modable;
 	private double speed;
-	private int direction;
+	private byte dir;
 	
-	public Move(YAxisMovable driveTrain, double speed, int direction, long millis){
+	public Move(YAxisMovable driveTrain, double speed, int dir, int millis){
 		this.ydrive = driveTrain;
 		this.speed = speed;
-		this.direction = direction;
+		this.dir = (byte) dir;
 		
 		setTimeOut(millis);
 		System s = null;
@@ -26,17 +26,17 @@ public class Move extends Action{
 		if(driveTrain instanceof ModableMotor)
 			modable = (ModableMotor)driveTrain;
 	}
-	public Move(YAxisMovable driveTrain, double speed, int direction, double seconds){
-		this(driveTrain, speed, direction, (long)(seconds * 1000));
+	public Move(YAxisMovable driveTrain, double speed, int dir, double seconds){
+		this(driveTrain, speed, dir, (int)(seconds * 1000));
 	}
-	public Move(YAxisMovable driveTrain, double speed, int direction){
-		this(driveTrain, speed, direction, -1);
+	public Move(YAxisMovable driveTrain, double speed, int dir){
+		this(driveTrain, speed, dir, -1);
 	}
 	
-	public Move(XAxisMovable driveTrain, double speed, int direction, long millis){
+	public Move(XAxisMovable driveTrain, double speed, int dir, int millis){
 		this.xdrive = driveTrain;
 		this.speed = speed;
-		this.direction = direction;
+		this.dir = (byte) dir;
 		
 		setTimeOut(millis);
 		System s = null;
@@ -45,25 +45,25 @@ public class Move extends Action{
 		if(driveTrain instanceof ModableMotor)
 			modable = (ModableMotor)driveTrain;
 	}
-	public Move(XAxisMovable driveTrain, double speed, int direction, double seconds){
-		this(driveTrain, speed, direction, (long)(seconds * 1000));
+	public Move(XAxisMovable driveTrain, double speed, int dir, double seconds){
+		this(driveTrain, speed, dir, (int)(seconds * 1000));
 	}
-	public Move(XAxisMovable driveTrain, double speed, int direction){
-		this(driveTrain, speed, direction, -1);
+	public Move(XAxisMovable driveTrain, double speed, int dir){
+		this(driveTrain, speed, dir, -1);
 	}
 	
 	private void stop(){
 		if(ydrive != null) ydrive.stop();
 		else xdrive.stop();
 	}
-	private void drive(double speed, int direction){
-		if(ydrive != null) ydrive.driveY(speed, direction);
-		else xdrive.driveX(speed, direction);
+	private void drive(double speed, int dir){
+		if(ydrive != null) ydrive.driveY(speed, dir);
+		else xdrive.driveX(speed, dir);
 	}
 	
 	@Override
 	protected void execute() {
-		drive(speed, direction);
+		drive(speed, dir);
 	}
 	@Override
 	protected void end() {
@@ -80,11 +80,11 @@ public class Move extends Action{
 	public double getSpeed(){
 		return speed;
 	}
-	public void setDirection(int direction){
-		this.direction = direction;
+	public void setDirection(int dir){
+		this.dir = (byte) dir;
 	}
 	public double getDirection(){
-		return direction;
+		return dir;
 	}
 	public void setModable(ModableMotor modable){
 		this.modable = modable;

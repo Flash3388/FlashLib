@@ -2,11 +2,11 @@ package edu.flash3388.flashlib.robot.sbc;
 
 import java.io.IOException;
 
-import edu.flash3388.flashlib.communications.BusCommInterface;
+import edu.flash3388.flashlib.communications.PortCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 import io.silverspoon.bulldog.core.io.serial.SerialPort;
 
-public class SbcSerialCommInterface extends BusCommInterface{
+public class SbcSerialCommInterface extends PortCommInterface{
 	
 	private SerialPort port;
 	private SbcReadCallable task;
@@ -50,7 +50,7 @@ public class SbcSerialCommInterface extends BusCommInterface{
 	}
 
 	@Override
-	protected void writePort(byte[] data) {
+	protected void writeData(byte[] data) {
 		try {
 			port.writeBytes(data);
 		} catch (IOException e) {
@@ -58,7 +58,7 @@ public class SbcSerialCommInterface extends BusCommInterface{
 		}
 	}
 	@Override
-	protected int readPort(byte[] buffer) {
+	protected int readData(byte[] buffer) {
 		task.setBuffer(buffer);
 		return FlashUtil.executeForTime(task, readtimeout);
 	}
