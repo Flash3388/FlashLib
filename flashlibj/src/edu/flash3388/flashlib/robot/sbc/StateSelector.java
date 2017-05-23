@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.robot.sbc.SbcBot.SbcState;
-
+@FunctionalInterface
 public interface StateSelector {
-	SbcState getState();
+	byte getState();
 }

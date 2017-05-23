@@ -16,9 +16,9 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	private Rotatable driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontal, scaleVoltage = false;
+	private boolean targetFound, centered, horizontal, scaleVoltage = false, lastDir;
 	private double speed, lastSpeed, minSpeed, maxSpeed, baseSpeed;
-	private byte lastDir, margin, lastPixels, pixelDifference, differences;
+	private byte margin, lastPixels, pixelDifference, differences;
 	private int timeout, timeLost, centeredTimeout, timeCentered;
 	
 	public VisionRotate(Rotatable driveTrain, Vision vision, double speed, boolean horizontal, int margin, 
@@ -68,7 +68,7 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	}
 	@Override
 	protected void execute() {
-		byte dir = 1; 
+		boolean dir = true; 
 		double rotateSpeed = 0;
 		byte offset = 0;
 		if(vision.hasNewAnalysis()){
@@ -77,7 +77,7 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 			offset = (byte) (horizontal? an.horizontalDistance : -an.verticalDistance);
 			targetFound = true;
 			
-			dir = (byte) (offset > 0 ? 1 : -1);
+			dir = offset > 0;
 			offset = (byte) Math.abs(offset);
 			
 			if(offset > -margin && offset < margin){//centered on target

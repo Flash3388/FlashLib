@@ -54,7 +54,7 @@ public class PidAngleRotate extends Action implements VoltageScalable{
 	@Override
 	protected void execute() {
 		double rotateSpeed = pidcontroller.calculate();
-		byte dir = (byte) (rotateSpeed > 0? 1 : -1);
+		boolean dir = rotateSpeed > 0;
 		rotateSpeed = Math.abs(rotateSpeed);
 		rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 		if(scaleVoltage)

@@ -14,9 +14,9 @@ public class VisionShift extends Action implements VisionAction{
 	private XAxisMovable driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontal;
+	private boolean targetFound, centered, horizontal, lastDir;
 	private double speed, lastSpeed, minSpeed, maxSpeed;
-	private byte lastDir, margin;
+	private byte margin;
 	private int timeout, timeLost, centeredTimeout, timeCentered;
 	
 	public VisionShift(XAxisMovable driveTrain, Vision vision, double speed, boolean horizontal, int margin, 
@@ -62,7 +62,7 @@ public class VisionShift extends Action implements VisionAction{
 	}
 	@Override
 	protected void execute() {
-		byte dir = 1; 
+		boolean dir = true;
 		double rotateSpeed = 0;
 		int offset = 0;
 		if(vision.hasNewAnalysis()){
@@ -81,7 +81,7 @@ public class VisionShift extends Action implements VisionAction{
 			}else{//not centered on target
 				centered = false;
 				timeCentered = -1;
-				dir = (byte) (offset > 0 ? 1 : -1);
+				dir = offset > 0;
 				rotateSpeed = speed * (Math.abs(offset) / 100.0);
 				rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 			}

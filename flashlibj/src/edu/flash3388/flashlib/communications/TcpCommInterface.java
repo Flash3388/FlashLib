@@ -7,7 +7,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class TcpCommInterface extends StreamCommInterface{
 	
@@ -58,30 +61,27 @@ public class TcpCommInterface extends StreamCommInterface{
 			if(socket != null)
 				socket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		closed = true;
 	}
 	@Override
 	public void connect(Packet packet){
-
 		try {
 			if(reset){
 				resetBuffers();
 				
 				if(socket != null && !socket.isClosed())
 					socket.close();
-				if(!isBoundAsServer())
+				if (!isBoundAsServer())
 					createSocket();
+				
 				reset = false;
 			}
 			
-			if(isBoundAsServer()){
+			if(isBoundAsServer())
 				socket = serverSocket.accept();
-			}
-			else{
+			else
 				socket.connect(new InetSocketAddress(outInet, portOut));
-			}
 			
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
@@ -92,20 +92,13 @@ public class TcpCommInterface extends StreamCommInterface{
 	@Override
 	public void disconnect() {
 		if(!isConnected()) return;
+		
 		if(socket != null){
 			try {
 				socket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 			socket = null;
-		}
-		if(!isBoundAsServer()){
-			try {
-				createSocket();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -151,15 +144,18 @@ public class TcpCommInterface extends StreamCommInterface{
 		try {
 			out.write(data);
 		} catch (IOException e) {
-			e.printStackTrace();
+			disconnect();
 		}
 	}
 	@Override
 	protected int readData(byte[] buffer) {
 		try {
 			return in.read(buffer);
-		} catch (IOException e) {
+		} catch (SocketTimeoutException e) {
 			return 0;
-		}
+		} catch (IOException e) {
+			disconnect();
+			return 0;
+		} 
 	}
 }

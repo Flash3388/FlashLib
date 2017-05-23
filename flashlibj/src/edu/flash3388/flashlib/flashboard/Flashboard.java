@@ -20,7 +20,7 @@ public class Flashboard {
 	public static final int CAMERA_PORT_ROBOT = 5803;
 	public static final int CAMERA_PORT_BOARD = 5802;
 	
-	private static boolean instance = false, tcp = false;
+	private static boolean instance = false, tcp = true;
 	private static CameraView camViewer;
 	private static CameraServer camServer;
 	private static RemoteVision vision;

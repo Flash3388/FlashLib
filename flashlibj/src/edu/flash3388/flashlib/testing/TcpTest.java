@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import edu.flash3388.flashlib.communications.BandwidthTracker;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.EchoSendable;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
@@ -87,35 +86,35 @@ public class TcpTest implements CodeTest{
 		}else out.println("Wait: "+wait+"ms");
 		
 		try {
-			InetAddress loopback = InetAddress.getLoopbackAddress();
-			TcpCommInterface commI = new TcpCommInterface(loopback, loopback, 1000, 1001);
-			client = new Communications("Client", new BandwidthTracker(commI));
+			InetAddress local = FlashUtil.getLocalAddress(InetAddress.getByName("Flash3388"));//InetAddress.getLoopbackAddress();
+			TcpCommInterface commI;// = new TcpCommInterface(local, local, 1000, 1001);
+			/*client = new Communications("Client", new BandwidthTracker(commI));
 			client.setSendableCreator(new SendableCreator(){
 				@Override
 				public Sendable create(String name, int id, byte type) {
 					return new Echo(name, id, type);
 				}
-			});
+			});*/
 			
-			commI = new TcpCommInterface(loopback, 1001);
+			commI = new TcpCommInterface(local, 1001);
 			server = new Communications("Server", new BandwidthTracker(commI));
 		} catch (IOException e) {
 		}
 		
-		if(server == null || client == null){
+		if(server == null){
 			out.println("Error executing test");
 			return;
 		}
 		
 		out.println("Starting communications");
 		server.start();
-		client.start();
+		//client.start();
 		
 		out.println("Awaiting connection");
 		long tTime = FlashUtil.millis();
 		while(!server.isConnected()){
 			FlashUtil.delay(10);
-			if(FlashUtil.millis() - tTime > 2000){
+			if(FlashUtil.millis() - tTime > 5000){
 				out.println("Unable to create connection");
 				close();
 				return;
@@ -128,10 +127,6 @@ public class TcpTest implements CodeTest{
 		for (; i <= echos; i++) {
 			if(!server.isConnected()){
 				out.println("Server lost connection");
-				break;
-			}
-			if(!client.isConnected()){
-				out.println("Client lost connection");
 				break;
 			}
 			
@@ -158,7 +153,7 @@ public class TcpTest implements CodeTest{
 	}
 	private void close(){
 		server.close();
-		client.close();
+		//client.close();
 		FlashUtil.delay(100);
 	}
 }

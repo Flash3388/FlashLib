@@ -276,7 +276,7 @@ public class Dashboard extends Application {
 			FlashUtil.getLog().reportError("Missing Property: "+PROP_HOST_ROBOT);
 		}
 		if(getProperty(PROP_COMM_PROTOCOL) == null)
-			putProperty(PROP_COMM_PROTOCOL, "udp");
+			putProperty(PROP_COMM_PROTOCOL, "tcp");
 		else if(!getProperty(PROP_COMM_PROTOCOL).equals("tcp") && !getProperty(PROP_COMM_PROTOCOL).equals("udp"))
 			FlashUtil.getLog().reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
 		if(emptyProperty(PROP_COMM_PORT_LOCAL))

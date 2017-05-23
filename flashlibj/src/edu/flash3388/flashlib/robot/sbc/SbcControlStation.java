@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.robot.sbc;
 import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.sbc.SbcBot.SbcState;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public final class SbcControlStation extends Sendable{
@@ -17,8 +16,8 @@ public final class SbcControlStation extends Sendable{
 		}
 		
 		@Override
-		public SbcState getState() {
-			return SbcState.byValue(cs.getState());
+		public byte getState() {
+			return cs.getState();
 		}
 	}
 	private static class ControllerButtons{

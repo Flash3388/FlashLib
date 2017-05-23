@@ -4,7 +4,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Queue;
 
 public class ActionGroup extends Action{
 
@@ -16,7 +15,6 @@ public class ActionGroup extends Action{
 	private Vector<Entry> actions = new Vector<Entry>(5);
 	private int index = -1;
 	private Vector<Entry> current = new Vector<Entry>(5);
-	private Queue<Entry> entries = new Queue<Entry>();
 	
 	public ActionGroup(){}
 	public ActionGroup(Action...actions){

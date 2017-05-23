@@ -96,7 +96,7 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	protected void initDefaultAction() {}
 	
 	@Override
-	public void rotate(double speed, int direction) {
+	public void rotate(double speed, boolean direction) {
 		driveY(speed, direction);
 	}
 	@Override
@@ -108,7 +108,7 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 		backward(speed);
 	}
 	@Override
-	public void driveX(double speed, int direction) {
+	public void driveX(double speed, boolean direction) {
 		driveY(speed, direction);
 	}
 	@Override
@@ -120,8 +120,8 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 		backward(speed);
 	}
 	@Override
-	public void driveY(double speed, int direction) {
-		if(direction > 0) forward(speed);
+	public void driveY(double speed, boolean direction) {
+		if(direction) forward(speed);
 		else backward(speed);
 	}
 	@Override

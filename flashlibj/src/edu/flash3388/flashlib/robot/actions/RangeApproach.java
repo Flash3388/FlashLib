@@ -55,7 +55,7 @@ public class RangeApproach extends Action implements VoltageScalable{
 	@Override
 	protected void execute() {
 		double moveSpeed = 0;
-		byte dir = 0;
+		boolean dir = true;
 		currentDistance = finder.getRangeCM();
 		if(inDistanceThreshold()){
 			if(timePassed == -1)
@@ -63,7 +63,7 @@ public class RangeApproach extends Action implements VoltageScalable{
 			moveSpeed = 0;
 		}else{
 			double offset = distanceThreshold - currentDistance;
-			dir = (byte) (offset < 0? 1 : -1);
+			dir = offset < 0;
 			moveSpeed = speed * Math.abs(offset) / 100.0;
 			moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 		}

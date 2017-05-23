@@ -55,7 +55,7 @@ public class CameraServer {
 			        cmillis = FlashUtil.millis();
 			        long dt = cmillis - t0;
 
-		            if (dt < period)
+		            if (dt > 0 && dt < period)
 		            	FlashUtil.delay(dt);
 		            
 		            cmillis = FlashUtil.millis();

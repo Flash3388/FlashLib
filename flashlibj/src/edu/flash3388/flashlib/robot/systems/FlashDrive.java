@@ -1,11 +1,9 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.hid.Stick;
 import edu.wpi.first.wpilibj.Joystick;
 
@@ -90,40 +88,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		}
 	}
 	
-	/**
-	 * This class allows for representing the sides where motors are placed.
-	 * 
-	 * @author Tom Tzook
-	 */
-	public static class MotorSide {
-		public final int value;
-		static final int LEFT = 0;
-		static final int RIGHT = 1;
-		static final int FRONT = 2;
-		static final int REAR = 3;
-		
-		/**
-		 * Represents the left side of the robot.
-		 */
-		public static final MotorSide Left = new MotorSide(LEFT);
-
-		/**
-		 * Represents the right side of the robot.
-		 */
-		public static final MotorSide Right = new MotorSide(RIGHT);
-
-		/**
-		 * Represents the front side of the robot.
-		 */
-		public static final MotorSide Front = new MotorSide(FRONT);
-
-		/**
-		 * Represents the rear side of the robot.
-		 */
-		public static final MotorSide Rear = new MotorSide(REAR);
-		
-		private MotorSide(int v){ value = v;}
-		
+	public static enum MotorSide{
+		Front, Rear, Right, Left
 	}
 	
 	public final Action FORWARD = new SystemAction(this, new Action(){
@@ -179,9 +145,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	private FlashSpeedController rear_controllers;
 	
 	private InterfaceAction interface_action;
-	private Gyro gyro;
 	
-	private boolean brake = false;
 	private double speed_limit = 1;
 	private double default_speed = 0.5;
 	
@@ -219,16 +183,6 @@ public class FlashDrive extends System implements TankDriveSystem{
 		enableBrakeMode(false);
 	}
 	
-	
-	public void setGyro(Gyro gyro){
-		this.gyro = gyro;
-	}
-	public double getAngle(){
-		if(gyro == null)
-			return -1;
-		return gyro.getAngle();
-	}
-	
 	/**
 	 * Sets whether all the motors in a side are inverted or not (forward is backward and other wise).
 	 * 
@@ -236,40 +190,36 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param inverted A boolean representing whether the motors are inverted or not.
 	 */
 	public void setInverted(MotorSide s, boolean inverted){
-		switch(s.value){
-			case MotorSide.LEFT:
+		switch(s){
+			case Left:
 				left_controllers.setInverted(inverted);
 				break;
-			case MotorSide.RIGHT:
+			case Right:
 				right_controllers.setInverted(inverted);
 				break;
-			case MotorSide.FRONT:
+			case Front:
 				front_controllers.setInverted(inverted);
 				break;
-			case MotorSide.REAR:
+			case Rear:
 				rear_controllers.setInverted(inverted);
 				break;
 		}
 	}
 	
 	public FlashSpeedController getControllers(MotorSide s){
-		switch(s.value){
-			case MotorSide.LEFT:
+		switch(s){
+			case Left:
 				return left_controllers;
-			case MotorSide.RIGHT:
+			case Right:
 				return right_controllers;
-			case MotorSide.FRONT:
+			case Front:
 				return front_controllers;
-			case MotorSide.REAR:
+			case Rear:
 				return rear_controllers;
 			default: return null;
 		}
 	}
 	
-	public void enableBrake(boolean enable){
-		brake = enable;
-		if(brake) stop();
-	}
 	public void setSpeedLimit(double limit){
 		speed_limit = Math.abs(limit);
 	}
@@ -285,13 +235,13 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param left The speed value of the left side of motors 1 to -1.
 	 */
 	public void tankDrive(double right, double left){
-		if(brake) return;
-		
 		right = limit(right);
 		left = limit(left);
 		
-		if(right_controllers != null) right_controllers.set(right);
-		if(left_controllers != null) left_controllers.set(left);
+		if(right_controllers != null) 
+			right_controllers.set(right);
+		if(left_controllers != null) 
+			left_controllers.set(left);
 	}
 	
 	/**
@@ -370,11 +320,6 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param rotateValue The value to rotate right or left 1 to -1.
 	 */
 	public void arcadeDrive(double moveValue, double rotateValue){
-		if(brake) return;
-		
-		moveValue = limit(moveValue);
-		rotateValue = limit(rotateValue);
-		
 		double rSpeed = 0, lSpeed = 0;
 		
 		if (moveValue > 0.0) {
@@ -395,8 +340,13 @@ public class FlashDrive extends System implements TankDriveSystem{
   	      }
   	    }
 		
-		if(right_controllers != null) right_controllers.set(rSpeed);
-		if(left_controllers != null) left_controllers.set(lSpeed);
+		rSpeed = limit(rSpeed);
+		lSpeed = limit(lSpeed);
+		
+		if(right_controllers != null)
+			right_controllers.set(rSpeed);
+		if(left_controllers != null)
+			left_controllers.set(lSpeed);
 	}
 	
 	/**
@@ -489,15 +439,17 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param x The speed to move the motors on the front and back of the robot.
 	 */
 	public void omniDrive(double y, double x){
-		if(brake) return;
-		
 		y = limit(y);
 		x = limit(x);
 		
-		if(right_controllers != null) right_controllers.set(y);
-		if(left_controllers != null) left_controllers.set(y);
-		if(front_controllers != null) front_controllers.set(x);
-		if(rear_controllers != null) rear_controllers.set(x);
+		if(right_controllers != null) 
+			right_controllers.set(y);
+		if(left_controllers != null) 
+			left_controllers.set(y);
+		if(front_controllers != null) 
+			front_controllers.set(x);
+		if(rear_controllers != null) 
+			rear_controllers.set(x);
 	}
 	
 	/**
@@ -581,20 +533,20 @@ public class FlashDrive extends System implements TankDriveSystem{
 	}
 	
 	@Override
-	public void driveY(double speed, int direction){
-		if(direction > 0) forward(speed);
-		else if(direction < 0) backward(speed);
+	public void driveY(double speed, boolean direction){
+		if(direction) forward(speed);
+		else backward(speed);
 	}
 	
 	@Override
 	public void forward(double r, double l){
-		if(brake) return;
-		
+		l= limit(l);
 		r = limit(r);
-		l = limit(l);
-		
-		if(right_controllers != null) right_controllers.set(r);
-		if(left_controllers != null) left_controllers.set(l);
+				
+		if(right_controllers != null) 
+			right_controllers.set(r);
+		if(left_controllers != null) 
+			left_controllers.set(l);
 	}
 	@Override 
 	public void forward(double speed){
@@ -606,13 +558,13 @@ public class FlashDrive extends System implements TankDriveSystem{
 	
 	@Override
 	public void backward(double r, double l){
-		if(brake) return;
-		
+		l= limit(l);
 		r = limit(r);
-		l = limit(l);
 		
-		if(right_controllers != null) right_controllers.set(r * Direction.BACKWARD);
-		if(left_controllers != null) left_controllers.set(l * Direction.BACKWARD);
+		if(right_controllers != null) 
+			right_controllers.set(-r);
+		if(left_controllers != null) 
+			left_controllers.set(-l);
 	}
 	@Override 
 	public void backward(double speed){
@@ -623,9 +575,9 @@ public class FlashDrive extends System implements TankDriveSystem{
 	}
 	
 	@Override
-	public void driveX(double speed, int direction){
-		if(direction > 0) right(speed);
-		else if(direction < 0) left(speed);
+	public void driveX(double speed, boolean direction){
+		if(direction) right(speed);
+		else left(speed);
 	}
 	
 	/**
@@ -635,13 +587,13 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param speed The speed in which to move right, between 0 and 1.
 	 */
 	public void right(double f, double r){
-		if(brake) return;
-		
 		f = limit(f);
 		r = limit(r);
 		
-		if(front_controllers != null) front_controllers.set(f * Direction.FORWARD);
-		if(rear_controllers != null) rear_controllers.set(r * Direction.FORWARD);
+		if(front_controllers != null) 
+			front_controllers.set(f);
+		if(rear_controllers != null) 
+			rear_controllers.set(r);
 	}
 	@Override 
 	public void right(double speed){
@@ -657,13 +609,13 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param speed The speed in which to move left, between 0 and 1.
 	 */
 	public void left(double f, double r){
-		if(brake) return;
-		
 		f = limit(f);
 		r = limit(r);
 		
-		if(front_controllers != null) front_controllers.set(f * Direction.BACKWARD);
-		if(rear_controllers != null) rear_controllers.set(r * Direction.BACKWARD);
+		if(front_controllers != null) 
+			front_controllers.set(-f);
+		if(rear_controllers != null) 
+			rear_controllers.set(-r);
 	}
 	@Override 
 	public void left(double speed){
@@ -680,17 +632,20 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param direction The direction in which to rotate. 1 for right, -1 for left
 	 */
 	@Override 
-	public void rotate(double speed, int direction){
-		if(brake) return;
-		
+	public void rotate(double speed, boolean direction){
 		speed = limit(speed);
-		direction = (direction != 1 && direction != -1)? direction/Math.abs(direction) : direction;
+		if(!direction) 
+			speed = -speed;
 		
-		if(right_controllers != null) right_controllers.set(speed * direction * Direction.BACKWARD);
-		if(left_controllers != null) left_controllers.set(speed * direction * Direction.FORWARD);
+		if(right_controllers != null) 
+			right_controllers.set(-speed);
+		if(left_controllers != null) 
+			left_controllers.set(speed);
 		
-		if(front_controllers != null) front_controllers.set(speed * direction * Direction.BACKWARD); 
-		if(rear_controllers != null) rear_controllers.set(speed * direction * Direction.FORWARD); 
+		if(front_controllers != null) 
+			front_controllers.set(-speed); 
+		if(rear_controllers != null) 
+			rear_controllers.set(speed); 
 	}
 	
 	/*public void rotate(int angle){
@@ -716,14 +671,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 */
 	@Override 
 	public void rotateRight(double speed){
-		if(brake) return;
-		
-		speed = limit(speed);
-		
-		if(right_controllers != null) right_controllers.set(speed * Direction.BACKWARD);
-		if(left_controllers != null) left_controllers.set(speed * Direction.FORWARD);
-		if(front_controllers != null) front_controllers.set(speed * Direction.BACKWARD); 
-		if(rear_controllers != null) rear_controllers.set(speed * Direction.FORWARD); 
+		rotate(speed, true);
 	}
 	public void rotateRight(){
 		rotateRight(default_speed);
@@ -736,14 +684,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 */
 	@Override 
 	public void rotateLeft(double speed){
-		if(brake) return;
-		
-		speed = limit(speed);
-		
-		if(right_controllers != null) right_controllers.set(speed * Direction.FORWARD);
-		if(left_controllers != null) left_controllers.set(speed * Direction.BACKWARD);
-		if(front_controllers != null) front_controllers.set(speed * Direction.FORWARD); 
-		if(rear_controllers != null) rear_controllers.set(speed * Direction.BACKWARD); 
+		rotate(speed, false); 
 	}
 	public void rotateLeft(){
 		rotateLeft(default_speed);
@@ -753,10 +694,14 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 */
 	@Override 
 	public void stop(){
-		if(right_controllers != null) right_controllers.stop();
-		if(left_controllers != null) left_controllers.stop();
-		if(front_controllers != null) front_controllers.stop(); 
-		if(rear_controllers != null) rear_controllers.stop(); 
+		if(right_controllers != null) 
+			right_controllers.stop();
+		if(left_controllers != null) 
+			left_controllers.stop();
+		if(front_controllers != null) 
+			front_controllers.stop(); 
+		if(rear_controllers != null) 
+			rear_controllers.stop(); 
 	}
 	
 	
@@ -766,7 +711,6 @@ public class FlashDrive extends System implements TankDriveSystem{
 	}
 	
 	private double limit(double speed){
-		//return (speed < -1 || speed > 1)? speed/Math.abs(speed) : speed;
 		speed *= speed_limit;
 		if(speed > speed_limit) speed = speed_limit;
 		else if(speed < -speed_limit) speed = -speed_limit;
@@ -803,20 +747,24 @@ public class FlashDrive extends System implements TankDriveSystem{
 
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		if(front_controllers != null)
-			front_controllers.enableBrakeMode(mode);
-		if(left_controllers != null)
-			left_controllers.enableBrakeMode(mode);
-		if(right_controllers != null)
-			right_controllers.enableBrakeMode(mode);
-		if(rear_controllers != null)
-			rear_controllers.enableBrakeMode(mode);
+		if(front_controllers != null && front_controllers instanceof ModableMotor)
+			((ModableMotor)front_controllers).enableBrakeMode(mode);
+		if(left_controllers != null && left_controllers instanceof ModableMotor)
+			((ModableMotor)left_controllers).enableBrakeMode(mode);
+		if(right_controllers != null && right_controllers instanceof ModableMotor)
+			((ModableMotor)right_controllers).enableBrakeMode(mode);
+		if(rear_controllers != null && rear_controllers instanceof ModableMotor)
+			((ModableMotor)rear_controllers).enableBrakeMode(mode);
 	}
 	@Override
 	public boolean inBrakeMode() {
-		return (front_controllers == null || front_controllers.inBrakeMode()) && 
-				(left_controllers == null || left_controllers.inBrakeMode()) &&
-				(right_controllers == null || right_controllers.inBrakeMode()) && 
-				(rear_controllers == null || rear_controllers.inBrakeMode());
+		return (front_controllers == null || (front_controllers instanceof ModableMotor && 
+												((ModableMotor)front_controllers).inBrakeMode())) && 
+				(left_controllers == null || left_controllers instanceof ModableMotor && 
+												((ModableMotor)left_controllers).inBrakeMode()) &&
+				(right_controllers == null || right_controllers instanceof ModableMotor && 
+												((ModableMotor)right_controllers).inBrakeMode()) && 
+				(rear_controllers == null || rear_controllers instanceof ModableMotor && 
+												((ModableMotor)rear_controllers).inBrakeMode());
 	}
 }

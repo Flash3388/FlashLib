@@ -10,12 +10,12 @@ public class Rotate extends Action{
 	private Rotatable drive;
 	private ModableMotor modable;
 	private double speed;
-	private byte dir;
+	private boolean dir;
 	
-	public Rotate(Rotatable driveTrain, double speed, int direction, int millis){
+	public Rotate(Rotatable driveTrain, double speed, boolean direction, int millis){
 		this.drive = driveTrain;
 		this.speed = speed;
-		this.dir = (byte) direction;
+		this.dir = direction;
 		
 		setTimeOut(millis);
 		System s = null;
@@ -24,10 +24,10 @@ public class Rotate extends Action{
 		if(driveTrain instanceof ModableMotor)
 			modable = (ModableMotor)driveTrain;
 	}
-	public Rotate(Rotatable driveTrain, double speed, int direction, double seconds){
+	public Rotate(Rotatable driveTrain, double speed, boolean direction, double seconds){
 		this(driveTrain, speed, direction, (int)(seconds * 1000));
 	}
-	public Rotate(Rotatable driveTrain, double speed, int direction){
+	public Rotate(Rotatable driveTrain, double speed, boolean direction){
 		this(driveTrain, speed, direction, -1);
 	}
 	
@@ -50,10 +50,10 @@ public class Rotate extends Action{
 	public double getSpeed(){
 		return speed;
 	}
-	public void setDirection(int direction){
-		this.dir = (byte) direction;
+	public void setDirection(boolean direction){
+		this.dir = direction;
 	}
-	public double getDirection(){
+	public boolean getDirection(){
 		return dir;
 	}
 	public void setModable(ModableMotor modable){

@@ -19,7 +19,6 @@ public abstract class FlashRio extends SampleRobot {
 	
 	private Log log;
 	private Log powerLog;
-	private double powerDrawTotal = 0;
 	private double powerDrawState = 0;
 	private double warningVoltage = WARNING_VOLTAGE;
 	private double warningPowerDraw = POWER_DRAW_WARNING;
@@ -57,11 +56,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InDisabled(false);
-				powerDrawTotal += powerDrawState;
 				log.logTime("DISABLED - DONE");
-				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + " >> SCurrent: "+powerDrawState +
-						" >> TCurrent: "+powerDrawTotal,
-						powerLogTime());
+				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
+						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else if(isAutonomous()){
 				log.logTime("NEW STATE - AUTONOMOUS");
 				powerLog.logTime("New State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage(),
@@ -80,11 +77,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InAutonomous(false);
-				powerDrawTotal += powerDrawState;
 				log.logTime("AUTONOMOUS - DONE");
-				powerLog.logTime("Done State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage() + " >> SCurrent: "+powerDrawState +
-						" >> TCurrent: "+powerDrawTotal,
-						powerLogTime());
+				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
+						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else if(isTest()){
 				log.logTime("NEW STATE - TEST");
 				powerLog.logTime("New State: Test >> Voltage: "+m_ds.getBatteryVoltage(),
@@ -103,11 +98,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InTest(false);
-				powerDrawTotal += powerDrawState;
 				log.logTime("TEST - DONE");
-				powerLog.logTime("Done State: Test >> Voltage: "+m_ds.getBatteryVoltage() + " >> SCurrent: "+powerDrawState +
-						" >> TCurrent: "+powerDrawTotal,
-						powerLogTime());
+				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
+						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else{
 				log.logTime("NEW STATE - TELEOP");
 				powerLog.logTime("New State: Teleop >> Voltage: "+m_ds.getBatteryVoltage(),
@@ -126,11 +119,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InOperatorControl(false);
-				powerDrawTotal += powerDrawState;
 				log.logTime("TELEOP - DONE");
-				powerLog.logTime("Done State: Teleop >> Voltage: "+m_ds.getBatteryVoltage() + " >> SCurrent: "+powerDrawState +
-						" >> TCurrent: "+powerDrawTotal,
-						powerLogTime());
+				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
+						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}
 		}
 	}

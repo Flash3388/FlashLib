@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
@@ -15,10 +14,10 @@ public class AngleRotate extends Action implements VoltageScalable{
 	public static final byte ANGLE_MARGIN = 10;
 	public static final byte MAX_MISSES = 5;
 	
-	private double currentAngle, toAngle, desiredAngle, angleConversion, angleAddition;
-	private byte dir, lastDir, misses, maxMisses, angleMargin;
+	private double currentAngle, toAngle, desiredAngle, angleConversion;
+	private byte misses, maxMisses, angleMargin;
 	private double speed, minSpeed, maxSpeed;
-	private boolean absolute, scaleVoltage = false;
+	private boolean absolute, scaleVoltage = false, dir, lastDir;
 	private Rotatable drive;
 	private ModableMotor modable;
 	private Gyro gyro;
@@ -50,14 +49,8 @@ public class AngleRotate extends Action implements VoltageScalable{
 	
 	@Override
 	protected void initialize(){
-		if(absolute) {
-			angleConversion = 0;
-			angleAddition = 360;
-		}
-		else {
-			angleConversion = Mathd.limitAngle(gyro.getAngle());
-			angleAddition = 0;
-		}
+		if(absolute) angleConversion = 0;
+		else angleConversion = Mathd.limitAngle(gyro.getAngle());
 		
 		if(maxSpeed <= minSpeed)
 			maxSpeed = 1;
@@ -76,7 +69,7 @@ public class AngleRotate extends Action implements VoltageScalable{
 			speed /= 2;
 		}
 		
-		double angularDistance = dir == Direction.RIGHT ? toAngle : 360 - toAngle;
+		double angularDistance = dir? toAngle : 360 - toAngle;
 		double rotateSpeed = speed * (angularDistance / 100.0);
 		rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 		if(scaleVoltage)
@@ -101,8 +94,8 @@ public class AngleRotate extends Action implements VoltageScalable{
 	}
 	private void calculatePositioning(){
 		currentAngle = Mathd.limitAngle(gyro.getAngle() - angleConversion);
-		toAngle = Mathd.limitAngle(desiredAngle - currentAngle + angleAddition);
-		dir = (toAngle <= 180)? Direction.RIGHT : Direction.LEFT;
+		toAngle = Mathd.limitAngle(desiredAngle - currentAngle + (absolute? 360 : 0));
+		dir = toAngle <= 180;
 	}
 	
 	public void setSpeed(double speed){

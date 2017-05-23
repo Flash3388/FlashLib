@@ -516,6 +516,14 @@ public class FlashUtil {
 	//--------------------------Parsing-----------------------------------
 	//--------------------------------------------------------------------
 	
+	public static String splitAndGet(String str, String seperator, int index){
+		if(index < 0)
+			throw new IllegalArgumentException("Index must be non-negative");
+		String[] splits = str.split(seperator);
+		if(splits.length < index + 1)
+			throw new ArrayIndexOutOfBoundsException("Index is out of splited array bounds");
+		return splits[index];
+	}
 	public static Map<String, String> parseValueParameters(String line){
 		String[] split = line.split(" ");
 		return parseValueParameters(split);

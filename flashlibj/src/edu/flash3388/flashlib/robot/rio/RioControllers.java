@@ -1,125 +1,72 @@
 package edu.flash3388.flashlib.robot.rio;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.ctre.CANTalon;
 
-import edu.flash3388.flashlib.robot.Direction;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 
-public class RioControllers implements FlashSpeedController{
+public class RioControllers implements FlashSpeedController, ModableMotor{
 
-	public enum ControllerType {
+	public static enum ControllerType {
 		Talon, Jaguar, Victor, CANTalon, CANJaguar
 	}
 	
-	private List<SpeedController> motor_controllers;
+	private SpeedController[] motor_controllers;
 	private boolean brakeMode = false, inverted = false;
 	
 	public RioControllers(int c, ControllerType t){
 		this(controllerFromType(t, c));
 	}
-	
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for a single motor controller.
-	 * 
-	 * @param c An instance of the FlashSpeedController class representing the motor controller.
-	 */
-	public RioControllers(SpeedController c){
-		this(Arrays.asList(c));
-	}
 	public RioControllers(int front, int back, ControllerType t){
 		this(controllerFromType(t, front), controllerFromType(t, back));
 	}
-	
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for two motor controllers.
-	 * 
-	 * @param front The PWM channel of the front motor controller.
-	 * @param tf The ControllerType of the front motor controller.
-	 * @param back The PWM channel of the rear motor controller.
-	 * @param tb The ControllerType of the rear motor controller.
-	 */
 	public RioControllers(int front, ControllerType tf, int back, ControllerType tb){
 		this(controllerFromType(tf, front), controllerFromType(tb, back));
 	}
-	
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for two Talon type motor controllers.
-	 * 
-	 * @param front The PWM channel of the front motor controller.
-	 * @param back The PWM channel of the rear motor controller.
-	 */
 	public RioControllers(int front, int back){
 		this(controllerFromType(ControllerType.Talon, front), controllerFromType(ControllerType.Talon, back));
 	}
-	
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for two motor controllers.
-	 * 
-	 * @param front An instance of the FlashSpeedController class representing the front motor controller.
-	 * @param back An instance of the FlashSpeedController class representing the rear motor controller.
-	 */
-	public RioControllers(SpeedController front, SpeedController back){
-		this(Arrays.asList(front, back));
-	}
-	
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for three motor controllers.
-	 * 
-	 * @param front An instance of the FlashSpeedController class representing the front motor controller.
-	 * @param middle An instance of the FlashSpeedController class representing the center motor controller.
-	 * @param back An instance of the FlashSpeedController class representing the rear motor controller.
-	 */
-	public RioControllers(SpeedController front, SpeedController middle, SpeedController back){
-		this(Arrays.asList(front, middle, back));
-	}
-	
 	public RioControllers(SpeedController...controllers) {
-		this(Arrays.asList(controllers));
-	}
-	
-	public RioControllers(ControllerType t, int...controllers){
-		motor_controllers = new ArrayList<SpeedController>(controllers.length);
+		motor_controllers = new SpeedController[controllers.length];
 		for (int i = 0; i < controllers.length; i++)
-			motor_controllers.add(controllerFromType(t, controllers[i]));
+			motor_controllers[i] = controllers[i];
+	}
+	public RioControllers(ControllerType t, int...controllers){
+		motor_controllers = new SpeedController[controllers.length];
+		for (int i = 0; i < controllers.length; i++)
+			motor_controllers[i] = controllerFromType(t, controllers[i]);
 		enableBrakeMode(false);
 		setInverted(false);
 	}
-	/**
-	 * Creates an instance of the Controllers class. The instance is created for an unlimited amount of
-	 * motor controllers.
-	 * 
-	 * @param controllers An array of FlashSpeedController class instances representing all the motor controllers for
-	 * 					for this side.
-	 * @throws IllegalArgumentException if controllers is null
-	 */
 	public RioControllers(List<SpeedController> controllers){
 		if(controllers == null) return;
-		motor_controllers = controllers;
+		motor_controllers = new SpeedController[controllers.size()];
+		for (int i = 0; i < controllers.size(); i++)
+			motor_controllers[i] = controllers.get(i);
 		enableBrakeMode(false);
 		setInverted(false);
 	}
 	
 	public SpeedController getController(int index){
 		if(index < 0) throw new IllegalArgumentException("Index must be non-negative");
-		else if(index >= motor_controllers.size()) 
-			throw new IndexOutOfBoundsException("Index out of bounds of list - " + motor_controllers.size());
+		else if(index >= motor_controllers.length) 
+			throw new IndexOutOfBoundsException("Index out of bounds of list - " + motor_controllers.length);
 		
-		return motor_controllers.get(index);
+		return motor_controllers[index];
 	}
 	
 	public int getControllerCount(){
-		return motor_controllers.size();
+		return motor_controllers.length;
 	}
 	
-	public List<SpeedController> getCollection(){
+	public SpeedController[] getControllers(){
 		return motor_controllers;
 	}
 	
@@ -138,18 +85,17 @@ public class RioControllers implements FlashSpeedController{
 
 	@Override
 	public void set(double speed) {
-		if(speed == 0) set(0, 0);
-		set(Math.abs(speed), (int) (speed/Math.abs(speed)));
+		Mathd.limit(speed, -1, 1);
+		for(SpeedController c : motor_controllers)
+			c.set(speed);
 	}
 	@Override
 	public void set(double speed, int direction) {
-		if(speed < 0) speed = Math.abs(speed);
-		speed = (speed > 1)? 1 : speed;
-		if(direction != 1 && direction != -1 && direction != 0) 
-			return;
-		
-		for(SpeedController c : motor_controllers)
-			c.set(speed * direction);
+		set(direction >= 0? speed : -speed);
+	}
+	@Override
+	public void set(double speed, boolean direction) {
+		set(direction? speed : -speed);
 	}
 	@Override
 	public void stop() {
@@ -162,7 +108,7 @@ public class RioControllers implements FlashSpeedController{
 		double sp = 0;
 		for(SpeedController c : motor_controllers)
 			sp += c.get();
-		return sp / motor_controllers.size();
+		return sp / motor_controllers.length;
 	}
 
 	@Override

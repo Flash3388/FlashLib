@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public abstract class IterativeSbc extends SbcBot{
@@ -10,20 +11,25 @@ public abstract class IterativeSbc extends SbcBot{
 	protected void startRobot() {
 		robotInit();
 		
-		SbcState lastObsState = null;
+		byte lastObsState = -1;
+		byte state = STATE_DISABLED;
 		while (!stop) {
-			SbcState state = getCurrentState();
-			if(lastObsState == null || state.value != lastObsState.value){
+			state = getCurrentState();
+			if(lastObsState < 0 || state != lastObsState){
 				FlashUtil.getLog().save();
-				FlashUtil.getLog().logTime("NEW STATE - "+state.toString());
+				FlashUtil.getLog().logTime("NEW STATE - "+state);
 				lastObsState = state;
-				if(state.value == SbcState.DISABLED)
+				if(isDisabled())
 					disabledInit();
 				else stateInit(state);
 			}
-			if(state.value == SbcState.DISABLED)
+			if(isDisabled())
 				disabledPeriodic();
-			else statePeriodic(state);
+			else {
+				if(Scheduler.schedulerHasInstance())
+					Scheduler.runScheduler();
+				statePeriodic(state);
+			}
 			
 			FlashUtil.delay(5);
 		}
@@ -38,6 +44,6 @@ public abstract class IterativeSbc extends SbcBot{
 	protected abstract void robotShutdown();
 	protected abstract void disabledInit();
 	protected abstract void disabledPeriodic();
-	protected abstract void stateInit(SbcState state);
-	protected abstract void statePeriodic(SbcState state);
+	protected abstract void stateInit(byte state);
+	protected abstract void statePeriodic(byte state);
 }

@@ -61,14 +61,11 @@ public abstract class StreamCommInterface implements CommInterface{
 		if(leftoverData.length < 4)
 			return false;
 		int datalen = FlashUtil.toInt(leftoverData);
-		if(leftoverData.length < datalen + crclen)
+		if(leftoverData.length < 4 + datalen + crclen)
 			return false;
 		
 		boolean ret = disassemblePacket(leftoverData, 4, datalen, packet);
-		if(4 + datalen + crclen > leftoverData.length-1)
-			leftoverData = new byte[0];
-		else
-			leftoverData = Arrays.copyOfRange(leftoverData, 4 + datalen + crclen, leftoverData.length-1);
+		leftoverData = Arrays.copyOfRange(leftoverData, 4 + datalen + crclen, leftoverData.length);
 		
 		return ret;
 	}
@@ -80,12 +77,6 @@ public abstract class StreamCommInterface implements CommInterface{
 		if(!isOpened())
 			return false;
 		
-		if(isBoundAsServer()){
-			packet.length = -1;
-		}else{
-			packet.length = -1;
-		}
-		
 		if(handleData(packet))
 			return true;
 		
@@ -94,8 +85,6 @@ public abstract class StreamCommInterface implements CommInterface{
 			packet.length = 0;
 			return false;
 		}
-		
-		if(!isBoundAsServer()) FlashUtil.getLog().log("Rec: "+len); 
 		
 		leftoverData = Arrays.copyOf(leftoverData, leftoverData.length + len);
 		System.arraycopy(dataBuffer, 0, leftoverData, leftoverData.length - len, len);

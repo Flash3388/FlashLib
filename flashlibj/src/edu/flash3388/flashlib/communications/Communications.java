@@ -47,9 +47,9 @@ public class Communications {
 		}
 	}
 	
-	public static final int MAX_REC_LENGTH = 100;
+	public static final short MAX_REC_LENGTH = 100;
 	
-	private static int instances = 0;
+	private static byte instances = 0;
 	
 	private Vector<Sendable> sendables, attachedSendables;
 	
@@ -109,7 +109,6 @@ public class Communications {
 				String str = new String(packet.data, 5, packet.length - 5);
 				sen = sendableCreator.create(str, id, packet.data[4]);
 				if(sen != null){
-					FlashUtil.getLog().log("New sendable");
 					sendables.add(sen);
 					sen.setAttached(true);
 				}
@@ -172,7 +171,6 @@ public class Communications {
 		FlashUtil.fillByteArray(sendable.getID(), bytes);
 		bytes[4] = sendable.getType();
 		System.arraycopy(data, 0, bytes, 5, data.length);
-		FlashUtil.getLog().log("Sent: "+bytes.length);
 		write(bytes);
 	}
 	
@@ -185,7 +183,6 @@ public class Communications {
 			attachedSendables.add(sendable);
 			sendable.setAttached(true);
 			if(isConnected()){
-				FlashUtil.getLog().log("Attached");
 				sendables.addElement(sendable);
 				resetSendable(sendable);
 			}

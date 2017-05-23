@@ -317,8 +317,8 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		return Mathd.roundToMultiplier(angle, angleRound);
 	}
 	@Override
-	public void rotate(double speed, int direction) {
-		mecanumDrive_polar(0, 0, speed * direction);
+	public void rotate(double speed, boolean direction) {
+		mecanumDrive_polar(0, 0, direction? speed : -speed);
 	}
 	@Override
 	public void rotateRight(double speed) {
@@ -329,10 +329,10 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		mecanumDrive_polar(0, 0, -speed);
 	}
 	@Override
-	public void driveY(double speed, int direction) {
-		if (direction > 0)
+	public void driveY(double speed, boolean direction) {
+		if (direction)
 			forward(speed);
-		else if (direction < 0)
+		else if (direction)
 			backward(speed);
 	}
 	@Override
@@ -344,10 +344,10 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		mecanumDrive_polar(speed, 180, 0);
 	}
 	@Override
-	public void driveX(double speed, int direction) {
-		if (direction > 0)
+	public void driveX(double speed, boolean direction) {
+		if (direction)
 			right(speed);
-		else if (direction < 0)
+		else if (direction)
 			left(speed);
 	}
 	@Override
@@ -383,14 +383,20 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 	}
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		front_left.enableBrakeMode(mode);
-		front_right.enableBrakeMode(mode);
-		rear_right.enableBrakeMode(mode);
-		rear_left.enableBrakeMode(mode);
+		if(front_left instanceof ModableMotor)
+			((ModableMotor)front_left).enableBrakeMode(mode);
+		if(front_right instanceof ModableMotor)
+			((ModableMotor)front_right).enableBrakeMode(mode);
+		if(rear_right instanceof ModableMotor)
+			((ModableMotor)rear_right).enableBrakeMode(mode);
+		if(rear_left instanceof ModableMotor)
+			((ModableMotor)rear_left).enableBrakeMode(mode);
 	}
 	@Override
 	public boolean inBrakeMode() {
-		return front_left.inBrakeMode() && front_right.inBrakeMode() &&
-				rear_right.inBrakeMode() && rear_left.inBrakeMode();
+		return (front_left instanceof ModableMotor && ((ModableMotor)front_left).inBrakeMode()) && 
+			   (front_right instanceof ModableMotor && ((ModableMotor)front_right).inBrakeMode()) &&
+			   (rear_right instanceof ModableMotor && ((ModableMotor)rear_right).inBrakeMode()) && 
+			   (rear_left instanceof ModableMotor && ((ModableMotor)rear_left).inBrakeMode());
 	}
 }

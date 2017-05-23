@@ -37,8 +37,8 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 	private Vision vision;
 	private DoublePidSource source;
 	private PidController pidcontroller;
-	private boolean horizontal, targetFound, centered, scaleVoltage = false;
-	private byte margin = 0, lastDir;
+	private boolean horizontal, targetFound, centered, scaleVoltage = false, lastDir;
+	private byte margin = 0;
 	private double minSpeed, maxSpeed, lastSpeed;
 	private int timeout, timeLost, centeredTimeout, timeCentered;
 	
@@ -73,7 +73,7 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 		centered = false;
 		timeCentered = -1;
 		timeLost = -1;
-		lastDir = 0;
+		lastDir = true;
 		lastSpeed = 0;
 		
 		if(minSpeed <= 0)
@@ -88,7 +88,7 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 	}
 	@Override
 	protected void execute() {
-		int dir = 1; 
+		boolean dir = false; 
 		double rotateSpeed = 0;
 		int offset = 0;
 		if(vision.hasNewAnalysis()){
@@ -97,7 +97,7 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 			offset = horizontal? an.horizontalDistance : -an.verticalDistance;
 			targetFound = true;
 			
-			dir = offset > 0 ? 1 : -1;
+			dir = offset > 0;
 			offset = Math.abs(offset);
 			
 			if(offset > -margin && offset < margin){//centered on target

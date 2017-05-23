@@ -1,56 +1,42 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import io.silverspoon.bulldog.core.pin.Pin;
 
-public class PwmSpeedController implements FlashSpeedController {
+public class PwmSpeedController extends SafePwm implements FlashSpeedController{
 
-	@Override
-	public void enableBrakeMode(boolean mode) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean inBrakeMode() {
-		// TODO Auto-generated method stub
-		return false;
+	private boolean inverted = false;
+	
+	public PwmSpeedController(Pin port) {
+		super(port);
 	}
 
 	@Override
 	public void set(double speed) {
-		// TODO Auto-generated method stub
-		
+		setSpeed(inverted? -speed : speed);
+		feed();
 	}
-
 	@Override
 	public void set(double speed, int direction) {
-		// TODO Auto-generated method stub
-		
+		set(direction >= 0 ? speed : -speed);
 	}
-
 	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
-		
+	public void set(double speed, boolean direction) {
+		set(direction ? speed : -speed);
 	}
 
 	@Override
 	public double get() {
-		// TODO Auto-generated method stub
-		return 0;
+		return getSpeed();
 	}
 
 	@Override
 	public boolean isInverted() {
-		// TODO Auto-generated method stub
-		return false;
+		return inverted;
 	}
-
 	@Override
 	public void setInverted(boolean inverted) {
-		// TODO Auto-generated method stub
-		
+		this.inverted = inverted;
 	}
 
 }

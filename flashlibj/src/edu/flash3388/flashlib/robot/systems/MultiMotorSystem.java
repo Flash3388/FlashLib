@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
@@ -81,7 +80,7 @@ public class MultiMotorSystem extends System implements YAxisMovable, XAxisMovab
 	@Override
 	protected void initDefaultAction() {}
 	@Override
-	public void rotate(double speed, int direction) {
+	public void rotate(double speed, boolean direction) {
 		driveY(speed, direction);
 	}
 	@Override
@@ -93,7 +92,7 @@ public class MultiMotorSystem extends System implements YAxisMovable, XAxisMovab
 		backward(speed);
 	}
 	@Override
-	public void driveX(double speed, int direction) {
+	public void driveX(double speed, boolean direction) {
 		driveY(speed, direction);
 	}
 	@Override
@@ -105,8 +104,8 @@ public class MultiMotorSystem extends System implements YAxisMovable, XAxisMovab
 		backward(speed);
 	}
 	@Override
-	public void driveY(double speed, int direction) {
-		if(direction > 0) forward(speed);
+	public void driveY(double speed, boolean direction) {
+		if(direction) forward(speed);
 		else backward(speed);
 	}
 	@Override

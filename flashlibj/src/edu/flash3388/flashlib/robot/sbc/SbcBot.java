@@ -28,30 +28,7 @@ import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 
 public abstract class SbcBot {
 	
-	public static class SbcState{
-		
-		public final byte value;
-		protected SbcState(byte value){
-			this.value = value;
-		}
-		
-		public static final byte DISABLED = 0x00;
-		public static final byte TELEOP = 0x01;
-		public static final byte AUTONOMOUS = 0x02;
-		
-		public static final SbcState Disabled = new SbcState(DISABLED);
-		public static final SbcState Teleop = new SbcState(TELEOP);
-		public static final SbcState Autonomous = new SbcState(AUTONOMOUS);
-		
-		public static SbcState byValue(byte val){
-			switch (val) {
-				case DISABLED: return SbcState.Disabled;
-				case TELEOP: return SbcState.Teleop;
-				case AUTONOMOUS: return SbcState.Autonomous;
-			}
-			return null;
-		}
-	}
+	public static final byte STATE_DISABLED = 0x00;
 	
 	public static final String PROP_USER_CLASS = "user.class";
 	public static final String PROP_BOARD_SHUTDOWN = "board.shutdown";
@@ -66,7 +43,7 @@ public abstract class SbcBot {
 	private static SbcControlStation controlStation;
 	private static ShellExecutor executor;
 	private static Communications communications;
-	private static SbcState currentState;
+	private static byte currentState;
 	private static StateSelector stateSelector;
 	private static SbcBot userImplement;
 	private static Properties properties = new Properties();
@@ -145,9 +122,9 @@ public abstract class SbcBot {
 		log.logTime("Starting Robot");
 		if(Flashboard.flashboardInit())
 			FlashRoboUtil.startFlashboard();
-		currentState = SbcState.Disabled;
-		stateSelector = new SbcControlStation.CsStateSelector(controlStation);
+		currentState = STATE_DISABLED;
 		userImplement = userClass;
+		stateSelector = userImplement.initStateSelector();
 		communications.start();
 		userClass.startRobot();
 	}
@@ -160,7 +137,11 @@ public abstract class SbcBot {
         else if(interfaceType.equalsIgnoreCase("tcp"))
 			return new TcpCommInterface(port);
         else if(interfaceType.startsWith("serial")){
-        	
+        	String data = FlashUtil.splitAndGet(interfaceType, "=", 1);
+        	SerialPort sport = getSerialPort(data);
+        	if(sport == null)
+        		return null;
+        	return new SbcSerialCommInterface(sport, true);
         }
 		return null;
 	}
@@ -240,15 +221,15 @@ public abstract class SbcBot {
 		return properties;
 	}
 	
-	public static SbcState getCurrentState(){
-		if (stateSelector != null) {
-			SbcState nState = stateSelector.getState();
-			currentState = nState != null? nState : SbcState.Disabled;
-		}
+	public static byte getCurrentState(){
+		if (stateSelector != null) 
+			currentState = stateSelector.getState();
+		else currentState = STATE_DISABLED;
+		
 		return currentState;
 	}
 	public static boolean isDisabled(){
-		return currentState.value == SbcState.DISABLED;
+		return currentState == STATE_DISABLED;
 	}
 	
 	public static ShellExecutor getShell(){
@@ -283,6 +264,14 @@ public abstract class SbcBot {
 	}
 	public static IOPort getIOPort(String name){
 		return board.getIOPortByName(name);
+	}
+	
+	//--------------------------------------------------------------------
+	//----------------------Implementable---------------------------------
+	//--------------------------------------------------------------------
+	
+	protected StateSelector initStateSelector(){
+		return new SbcControlStation.CsStateSelector(getControlStation());
 	}
 	
 	protected abstract void startRobot();

@@ -17,7 +17,7 @@ public class VisionApproach extends Action implements VisionAction{
 	private boolean targetFound, horizontalDistance;
 	private double speed, lastSpeed, distanceThreshold, currentDistance, distanceMargin, minSpeed = -1, maxSpeed = 1;
 	private int timeout, timeLost, pastTimeout, timePassed;
-	private byte lastDir;
+	private boolean lastDir;
 	
 	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed, boolean horizontal, 
 			double distanceThreshold, double margin,  int timeout, int pastTimeout){
@@ -50,7 +50,7 @@ public class VisionApproach extends Action implements VisionAction{
 		timeLost = -1;
 		lastSpeed = 0;
 		timePassed = -1;
-		lastDir = 0;
+		lastDir = true;
 		
 		if(minSpeed <= 0)
 			minSpeed = DEFAULT_MIN_SPEED;
@@ -63,7 +63,7 @@ public class VisionApproach extends Action implements VisionAction{
 	@Override
 	protected void execute() {
 		double moveSpeed = 0;
-		byte dir = 0;
+		boolean dir = true;
 		if(vision.hasNewAnalysis()){
 			Analysis an = vision.getAnalysis();
 			currentDistance = horizontalDistance? calculateHorizontalDistance(an.targetDistance) :
@@ -77,7 +77,7 @@ public class VisionApproach extends Action implements VisionAction{
 			}else{
 				double offset = distanceThreshold - currentDistance;
 				moveSpeed = speed;
-				dir = (byte) (offset < 0? 1 : -1);
+				dir = offset < 0;
 				moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 			}
 		}else{

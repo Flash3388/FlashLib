@@ -1,9 +1,7 @@
 package edu.flash3388.flashlib.robot.devices;
 
-import edu.flash3388.flashlib.util.Log;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.SensorBase;
 
 public class MaxbotixUltrasonic extends SensorBase implements RangeFinder{
