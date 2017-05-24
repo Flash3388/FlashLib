@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.io.FileStream;
  * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
  * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
  * who do not require logs for emergency situations like power outs, where the log data might be lost.
- * <br/>
+ * <br>
  * Buffer log stores logging data in a buffer and flushes the data into a file manually, on a time base or when the buffer 
  * is full. The buffer allows us to avoid data loss in a case of power loss thanks to the file being closed when the buffer
  * is not flushing the data. Recommended for robot software tracking.
@@ -33,7 +33,6 @@ import edu.flash3388.flashlib.io.FileStream;
  * 		<li>PrintStream writing: MODE_PRINT (System.out.println)</li>
  * 		<li>External logging interfaces: MODE_INTERFACES ({@link edu.flash3388.flashlib.util.LoggingInterface LoggingInterface})</li>
  * </ul>
- * </p>
  * @author Tom Tzook.
  */
 public class Log{
@@ -47,7 +46,7 @@ public class Log{
 	 * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
 	 * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
 	 * who do not require logs for emergency situations like power outs, where the log data might be lost.
-	 * <br/>
+	 * <br>
 	 * Buffer log stores logging data in a buffer and flushes the data into a file manually, on a time base or when the buffer 
 	 * is full. The buffer allows us to avoid data loss in a case of power loss thanks to the file being closed when the buffer
 	 * is not flushing the data. Recommended for robot software tracking.

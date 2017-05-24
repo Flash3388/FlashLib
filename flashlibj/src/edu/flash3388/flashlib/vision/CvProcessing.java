@@ -1,11 +1,14 @@
 package edu.flash3388.flashlib.vision;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -14,6 +17,8 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import edu.flash3388.flashlib.math.Mathd;
 
 public class CvProcessing {
 
@@ -25,6 +30,295 @@ public class CvProcessing {
 	private static class Scores {
 		public Point center;
 		public double distanceToTarget;
+	}
+	public static class CvSource implements VisionSource{
+		
+		private Mat mat, threshold = new Mat(), contoursHierarchy = new Mat();
+		private List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		private Analysis analysis;
+
+		public Mat getThreshold(){
+			return threshold;
+		}
+		public List<MatOfPoint> getContours(){
+			return contours;
+		}
+		
+		private void detectContours(){
+			contours.clear();
+			Imgproc.findContours(threshold, contours, contoursHierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		}
+		private Rect getRectFromArr(Rect[] rects, MatOfPoint contour, int i){
+			Rect r = rects[i] != null ? rects[i] : Imgproc.boundingRect(contour);
+			if(rects[i] == null) 
+				rects[i] = r;
+			return r;
+		}
+		private boolean impossibleSize(Rect rect, double maxHeight, double minHeight, double maxWidth, double minWidth){
+			return rect.height > maxHeight || rect.height < minHeight || rect.width > maxWidth || rect.width < minWidth;
+		}
+		private void setAnalysisForRatio(Rect[] rects, int i1, int i2){
+			Rect r = getRectFromArr(rects, contours.get(i1), i1);
+			Rect r2 = getRectFromArr(rects, contours.get(i2), i2);
+			
+			Point center = new Point(r.x+r.width+(r2.x - (r.x + r.width))/2, 
+					r.y + r.height + (r2.y - (r.y + r.height)) / 2);
+			
+			analysis = new Analysis();
+			analysis.centerPointX = center.x;
+			analysis.centerPointY = center.y;
+			analysis.verticalDistance = (int) (center.y - mat.height() * 0.5);
+			analysis.horizontalDistance = (int) (center.x - mat.width() * 0.5);
+		}
+		private double getAvgForRatio(Rect r, Rect r2, double heightRatio, double widthRatio, double dy, double dx){
+			int count = 0;
+			double sum = 0;
+			
+			if(heightRatio > 0){
+				count++;
+				sum += Math.abs(heightRatio - ((double)r.height / r2.height));
+			}
+			if(widthRatio > 0){
+				count++;
+				sum += Math.abs(widthRatio - ((double)r.width / r2.width));
+			}
+			if(dy > 0){
+				count++;
+				sum += Math.abs(dy - (double)r.height / ((double)r.y - r2.y));
+			}
+			if(dx > 0){
+				count++;
+				sum += Math.abs(dx - (double)r.width / ((double)r.x - r2.x));
+			}
+			
+			return sum / count;
+		}
+		
+		public void prep(Mat mat){
+			this.mat = mat;
+			analysis = null;
+		}
+		
+		@Override
+		public Analysis getResult() {
+			if(analysis != null)
+				return analysis;
+			if(contours.size() != 1)
+				return null;
+			
+			MatOfPoint contour = contours.get(0);
+			analysis = new Analysis();
+			CvProcessing.setAnalysisForContour(mat, contour, analysis);
+			
+			return analysis;
+		}
+		@Override
+		public Analysis[] getResults() {
+			Analysis[] ans = new Analysis[contours.size()];
+			
+			for (int i = 0; i < ans.length; i++) {
+				ans[i] = new Analysis();
+				CvProcessing.setAnalysisForContour(mat, contours.get(i), ans[i]);
+			}
+			return ans;
+		}
+		
+		@Override
+		public void filterHsv(int minH, int minS, int minV, int maxH, int maxS, int maxV) {
+			if(mat == null) return;
+			
+			Imgproc.cvtColor(mat, threshold, Imgproc.COLOR_RGB2HSV);
+			Core.inRange(threshold, 
+					new Scalar(minH, minS, minV), 
+					new Scalar(maxH, maxS, maxV), 
+					threshold);
+			detectContours();
+		}
+		@Override
+		public void filterRgb(int minR, int minG, int minB, int maxR, int maxG, int maxB) {
+			if(mat == null) return;
+			
+			Core.inRange(mat, 
+					new Scalar(minR, minG, minB), 
+					new Scalar(maxR, maxG, maxB), 
+					threshold);
+			detectContours();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> void filterByComparator(int amount, Comparator<T> comparator) {
+			contours.sort((Comparator<MatOfPoint>) comparator);
+			
+			int size = amount < contours.size()? amount : contours.size();
+			for (int i = contours.size() - 1; i >= size; i--)
+				contours.remove(i);
+		}
+		@Override
+		public void lowestContours(int amount) {
+			Comparator<MatOfPoint> heightComparer = (MatOfPoint o1, MatOfPoint o2) ->{
+				double y1 = contourCenter(o1).y, y2 = contourCenter(o2).y;
+				if(y1 > y2) return 1;
+				else if(y2 > y1) return -1;
+				return 0;
+			};
+			filterByComparator(amount, heightComparer);
+		}
+		@Override
+		public void highestContours(int amount) {
+			Comparator<MatOfPoint> heightComparer = (MatOfPoint o1, MatOfPoint o2) ->{
+				double y1 = contourCenter(o1).y, y2 = contourCenter(o2).y;
+				if(y1 < y2) return 1;
+				else if(y2 < y1) return -1;
+				return 0;
+			};
+			filterByComparator(amount, heightComparer);
+		}
+		@Override
+		public void largestContours(int amount) {
+			Comparator<MatOfPoint> sizeComparer = (MatOfPoint o1, MatOfPoint o2) ->{
+				if(o1.total() < o2.total()) return 1;
+				else if(o2.total() < o1.total()) return -1;
+				return 0;
+			};
+			filterByComparator(amount, sizeComparer);
+		}
+
+		@Override
+		public void detectShapes(int amount, int vertecies, double accuracy) {
+			detectShapes(vertecies, accuracy);
+			if(amount < contours.size()){
+				for (int i = contours.size() - 1; i >= amount; i--)
+					contours.remove(i);
+			}
+		}
+		@Override
+		public void detectShapes(int vertecies, double accuracy) {
+			MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+			MatOfPoint2f approxCurve = new MatOfPoint2f();
+			
+			for(int idx = contours.size() - 1; idx >= 0; idx--){
+				MatOfPoint contour = contours.get(idx);
+			   
+			    matOfPoint2f.fromList(contour.toList());
+			    Imgproc.approxPolyDP(matOfPoint2f, approxCurve, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+			    long total = approxCurve.total();
+			    
+			    if (total != vertecies)
+			    	contours.remove(idx);
+			}
+		}
+
+		@Override
+		public void contourRatio(double heightRatio, double widthRatio, double dy, double dx, 
+				double maxScore, double minScore, 
+				double maxHeight, double minHeight, double maxWidth, double minWidth) {
+			Rect[] rects = new Rect[contours.size()];
+			MatOfPoint c1 = new MatOfPoint(), c2 = new MatOfPoint();
+			boolean foundBest = false;
+			double best = 1;
+			int bestIdx1 = -1, bestIdx2 = -1;
+			
+			for(int i = 0; i < contours.size() && !foundBest; i++){
+				c1 = contours.get(i);
+			
+				Rect r = getRectFromArr(rects, c1, i);
+				
+				if(impossibleSize(r, maxHeight, minHeight, maxWidth, minWidth))
+					continue;
+				
+				for(int j = 0; j < contours.size() && !foundBest; j++){
+					if(i == j)
+						continue;
+					c2 = contours.get(j);
+					Rect r2 = getRectFromArr(rects, c2, j);
+					
+					if(impossibleSize(r2, maxHeight, minHeight, maxWidth, minWidth))
+						continue;
+					
+					double avg = getAvgForRatio(r, r2, heightRatio, widthRatio, dy, dx);
+					if(Math.abs(1 - avg) < best){
+						best = Math.abs(1 - avg);
+						bestIdx1 = i;
+						bestIdx2 = j;
+						
+						if(avg < minScore)
+							foundBest = true;
+					}
+				}
+				if(best < minScore)
+					break;
+			}
+			if(best > maxScore || bestIdx1 < 0 || bestIdx2 < 0){
+				contours.clear();
+				return;
+			}
+			
+			setAnalysisForRatio(rects, bestIdx1, bestIdx2);
+		}
+
+		@Override
+		public void closestToLeft(int amount) {
+			Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
+				Point p1 = contourCenter(o1), p2 = contourCenter(o2);
+				double d1 = p1.x,
+					   d2 = p2.x;
+				if(d1 > d2) return 1;
+				else if(d2 > d1) return -1;
+				return 0;
+			};
+			filterByComparator(amount, comparator);
+		}
+		@Override
+		public void closestToRight(int amount) {
+			Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
+				Point p1 = contourCenter(o1), p2 = contourCenter(o2);
+				double d1 = Math.abs(mat.width() - p1.x),
+					   d2 = Math.abs(mat.width() - p2.x);
+				if(d1 > d2) return 1;
+				else if(d2 > d1) return -1;
+				return 0;
+			};
+			filterByComparator(amount, comparator);
+		}
+
+		@Override
+		public void closestToCoordinate(double x, double y) {
+			Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
+				Point p1 = contourCenter(o1), p2 = contourCenter(o2);
+				double d1 = Mathd.pythagorasTheorem(p1.x - x, p1.y - y),
+					   d2 = Mathd.pythagorasTheorem(p2.x - x, p2.y - y);
+				if(d1 > d2) return 1;
+				else if(d2 > d1) return -1;
+				return 0;
+			};
+			filterByComparator(1, comparator);
+		}
+
+		@Override
+		public void closestToCenterY() {
+			Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
+				Point p1 = contourCenter(o1), p2 = contourCenter(o2);
+				double d1 = Math.abs(mat.height() * 0.5 - p1.y),
+					   d2 = Math.abs(mat.height() * 0.5 - p2.y);
+				if(d1 > d2) return 1;
+				else if(d2 > d1) return -1;
+				return 0;
+			};
+			filterByComparator(1, comparator);
+		}
+		@Override
+		public void closestToCenterX() {
+			Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
+				Point p1 = contourCenter(o1), p2 = contourCenter(o2);
+				double d1 = Math.abs(mat.width() * 0.5 - p1.x),
+					   d2 = Math.abs(mat.width() * 0.5 - p2.x);
+				if(d1 > d2) return 1;
+				else if(d2 > d1) return -1;
+				return 0;
+			};
+			filterByComparator(1, comparator);
+		}
 	}
 		
 	//------------------------------------------------------------------
@@ -240,13 +534,6 @@ public class CvProcessing {
 	//---------------------Contour Locating-----------------------------
 	//------------------------------------------------------------------
 	
-	private static List<MatOfPoint> detectContours(Mat threshold) {
-		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		Mat hierarchy = new Mat();
-		
-		Imgproc.findContours(threshold, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-		return contours;
-	}
 	
 	//returns the couple largest contours 
 	private static List<MatOfPoint> largestContours(List<MatOfPoint> contours) {
@@ -322,7 +609,7 @@ public class CvProcessing {
 		    final int FOUR_SIDES = 4;
 		    final int FIVE_SIDES = 5;
 		    if (total >= FOUR_SIDES && total <= FIVE_SIDES) {
-		    	drawContours(new Scalar(25, 255, 25), contour);
+		    	drawContours(feed, new Scalar(25, 255, 25), contour);
 		    	ret.add(contour);
 		    }
 		}
@@ -368,7 +655,7 @@ public class CvProcessing {
 		Point currPoint;
 		int sumX = 0;
 		int sumY = 0;
-		for( int y = 0; y<size; y++){
+		for(int y = 0; y < size; y++){
 			currPoint = pointArr.get(y);
 			sumX += (int)currPoint.x;
 			sumY += (int)currPoint.y;					
@@ -497,7 +784,7 @@ public class CvProcessing {
 			double gh = groupHeight(r.tl(), r2.br(), r.height);
 			double dt = dTop(r.tl(), r2.tl(), r2.br());
 			double le = lEdge(r.tl(), r2.tl(), r.width);
-			return avg(rh, rw, gh, dt, le);
+			return Mathd.avg(rh, rw, gh, dt, le);
 		}
 		
 		public static double ratioToScore(double ratio) {
@@ -541,7 +828,7 @@ public class CvProcessing {
 			double gh = groupWidthLift(r.tl(), r.br(), r2.tl(), r2.br());
 			double dt = dTopLift(r.tl(), r2.tl(), r2.br());
 			double le = lEdgeLift(r.tl(), r2.tl(), r.height);
-			return avg(rh, rw, gh, dt, le);
+			return Mathd.avg(rh, rw, gh, dt, le);
 		}
 		
 		private static double lEdgeLift(Point l1, Point l2, double height){
@@ -615,48 +902,132 @@ public class CvProcessing {
 		System.out.println("->>>>>>>>>>>>>> H: "+width+" :: "+feed.width()+" :::: "+20);
 		return (20*feed.width()/(2*width*Math.tan(Math.toRadians(19.09089))));
 	}
+	
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	
+	public static Mat rgbToHsv(Mat mat, Mat hsv){
+		Imgproc.cvtColor(mat, hsv, Imgproc.COLOR_RGB2HSV);
+		return hsv;
+	}
+	public static Mat rgbToHsv(Mat mat){
+		Mat hsv = new Mat();
+		return rgbToHsv(mat, hsv);
+	}
+	
+	public static Mat filterMatColors(Mat mat, Mat threshold, int min1, int max1, int min2, int max2, int min3, int max3){
+		Core.inRange(mat, 
+				new Scalar(min1, min2, min3), 
+				new Scalar(max1, max2, max3), 
+				threshold);
+		return threshold;
+	}
+	public static Mat filterMatColors(Mat mat, int min1, int max1, int min2, int max2, int min3, int max3){
+		Mat threshold = new Mat();
+		return filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
+	}
+	
+	public static List<MatOfPoint> detectContours(Mat threshold, List<MatOfPoint> contours, Mat hierarchy) {
+		Imgproc.findContours(threshold, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+		return contours;
+	}
+	public static List<MatOfPoint> detectContours(Mat threshold){
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		Mat hierarchy = new Mat();
+		
+		return detectContours(threshold, contours, hierarchy);
+	}
+	
+	public static void detectContoursByShape(List<MatOfPoint> contours, int vertecies, double accuracy){
+		MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+		MatOfPoint2f approxCurve = new MatOfPoint2f();
+		
+		for(int idx = contours.size() - 1; idx >= 0; idx--){
+			MatOfPoint contour = contours.get(idx);
+		   
+		    matOfPoint2f.fromList(contour.toList());
+		    Imgproc.approxPolyDP(matOfPoint2f, approxCurve, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+		    long total = approxCurve.total();
+		    
+		    if (total != vertecies)
+		    	contours.remove(idx);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> void filterByComparator(List<MatOfPoint> contours, int amount, Comparator<T> comparator) {
+		contours.sort((Comparator<MatOfPoint>) comparator);
+		
+		int size = amount < contours.size() && amount > 0? amount : contours.size();
+		for (int i = contours.size() - 1; i >= size; i--)
+			contours.remove(i);
+	}
+	
 	//------------------------------------------------------------------
 	//---------------------Contour Drawing------------------------------
 	//------------------------------------------------------------------
 	
-	private static void drawContours(List<MatOfPoint> contours, Scalar color) {
+	
+	public static void drawContours(Mat feed, List<MatOfPoint> contours, Scalar color) {
 		for(int i = 0; i < contours.size(); i++)
 			Imgproc.drawContours(feed, contours, i, color);
 	}
-	private static void drawContours(List<MatOfPoint> contours, int r, int g, int b) {
-		drawContours(contours, new Scalar(r, g, b));
+	public static void drawContours(Mat feed, List<MatOfPoint> contours, int r, int g, int b) {
+		drawContours(feed, contours, new Scalar(r, g, b));
 	}
-	private static void drawContours(List<MatOfPoint> contours) {
-		drawContours(contours, new Scalar(51, 51, 51));
+	public static void drawContours(Mat feed, List<MatOfPoint> contours) {
+		drawContours(feed, contours, new Scalar(51, 51, 51));
 	}
-	private static void drawContours(Scalar color, MatOfPoint...contours) {
-		drawContours(Arrays.asList(contours), color);
+	public static void drawContours(Mat feed, Scalar color, MatOfPoint...contours) {
+		drawContours(feed, Arrays.asList(contours), color);
 	}
-	private static void drawContours(int r, int g, int b, MatOfPoint...contours) {
-		drawContours(new Scalar(r, g, b), contours);
+	public static void drawContours(Mat feed, int r, int g, int b, MatOfPoint...contours) {
+		drawContours(feed, new Scalar(r, g, b), contours);
 	}
-	private static void drawContours(MatOfPoint...contours) {
-		drawContours(new Scalar(51, 51, 51), contours);
+	public static void drawContours(Mat feed, MatOfPoint...contours) {
+		drawContours(feed, new Scalar(51, 51, 51), contours);
 	}
-	private static void drawRect(Rect r, Scalar color){
+	public static void drawRect(Mat feed, Rect r, Scalar color){
 		Imgproc.rectangle(feed, r.tl(), r.br(), color);
+	}
+	public static void drawPostProcessing(Mat feed, Scalar color, Analysis... an){
+		for (int i = 0; i < an.length; i++) {
+			Analysis analysis = an[i];
+			Imgproc.circle(feed, new Point(analysis.centerPointX, analysis.centerPointY), 3, color, 2);
+		}
+		Imgproc.line(feed, new Point(feed.width()/2, 0), new Point(feed.width()/2, feed.height()), new Scalar(0, 51, 255));
+	}
+	public static void drawPostProcessing(Mat feed, Analysis... an){
+		drawPostProcessing(feed, new Scalar(51,255, 51), an);
 	}
 	
 	//------------------------------------------------------------------
 	//---------------------------Util-----------------------------------
 	//------------------------------------------------------------------
-	
-	private static List<List<Point>> contoursToPointList(List<MatOfPoint> contours) {
+
+	public static Mat bufferedImage2Mat(BufferedImage image){
+		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();  		  
+		Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);  		  
+		mat.put(0, 0, data);  		  		  
+		return mat;  
+	}
+	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
+		Point center = contourCenter(contour);
+		
+		analysis.centerPointX = center.x;
+		analysis.centerPointY = center.y;
+		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
+		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
+	}
+	public static List<List<Point>> contoursToPointList(List<MatOfPoint> contours) {
 		List<List<Point>> returnStruct = new ArrayList<List<Point>>();
 		for(int i = 0; i < contours.size(); i++){
 			returnStruct.add(contours.get(i).toList());
 		}
 		return returnStruct;
-	}
-	public static double avg(double...ds) {
-		double all = 0;
-		for(double d : ds)
-			all += d;
-		return all / ds.length;
 	}
 }

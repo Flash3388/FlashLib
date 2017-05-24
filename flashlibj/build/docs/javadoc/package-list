@@ -1,0 +1,15 @@
+edu.flash3388.flashlib.cams
+edu.flash3388.flashlib.communications
+edu.flash3388.flashlib.flashboard
+edu.flash3388.flashlib.io
+edu.flash3388.flashlib.math
+edu.flash3388.flashlib.robot
+edu.flash3388.flashlib.robot.actions
+edu.flash3388.flashlib.robot.devices
+edu.flash3388.flashlib.robot.hid
+edu.flash3388.flashlib.robot.rio
+edu.flash3388.flashlib.robot.sbc
+edu.flash3388.flashlib.robot.systems
+edu.flash3388.flashlib.testing
+edu.flash3388.flashlib.util
+edu.flash3388.flashlib.vision

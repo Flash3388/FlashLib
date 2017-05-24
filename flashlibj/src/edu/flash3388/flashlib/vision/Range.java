@@ -1,10 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
 public class Range {
-	public static final Range HUE = new Range(0, 180);
-	public static final Range SATURATION = new Range(0, 255);
-	public static final Range VALUE = new Range(0, 255);
-	
 	public int end;
 	public int start;
 	

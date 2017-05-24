@@ -37,6 +37,7 @@ public class FlashUtil {
 	//--------------------------------------------------------------------
 	
 	public static void delay(long ms){
+		if(ms <= 0) return;
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {}
@@ -382,6 +383,20 @@ public class FlashUtil {
 		return nArr;
 	}
 	
+	
+	public static double[] toDoubleArray(String[] str){
+		double[] d = new double[str.length];
+		for (int i = 0; i < d.length; i++) 
+			d[i] = FlashUtil.toDouble(str[i]);
+		return d;
+	}
+	public static String[] toStringArray(double[] d){
+		String[] str = new String[d.length];
+		for (int i = 0; i < d.length; i++) 
+			str[i] = String.valueOf(d[i]);
+		return str;
+	}
+
 	//--------------------------------------------------------------------
 	//--------------------------Conversion--------------------------------
 	//--------------------------------------------------------------------
@@ -516,6 +531,12 @@ public class FlashUtil {
 	//--------------------------Parsing-----------------------------------
 	//--------------------------------------------------------------------
 	
+	public static String toDataString(String[] str, String sep){
+		String s = "";
+		for (int i = 0; i < str.length; i++) 
+			s += str[i] + sep;
+		return s.substring(0, s.length());
+	}
 	public static String splitAndGet(String str, String seperator, int index){
 		if(index < 0)
 			throw new IllegalArgumentException("Index must be non-negative");
@@ -564,6 +585,9 @@ public class FlashUtil {
         if (interfaces != null && interfaces.length > 0) 
         	supers.addAll(Arrays.asList(interfaces));
         return supers;
+    }
+    public static boolean instanceOf(Object obj, Class<?> cl){
+    	return obj.getClass() == cl || isAssignable(obj.getClass(), cl);
     }
 	
 	//--------------------------------------------------------------------

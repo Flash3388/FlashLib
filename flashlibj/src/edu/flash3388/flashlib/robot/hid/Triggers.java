@@ -44,7 +44,7 @@ public class Triggers{
 	
 	/**
 	 * Gets the value of both triggers
-	 * @return
+	 * @return Combined value of both triggers
 	 */
 	public double getCombined() { return combined; }
 	

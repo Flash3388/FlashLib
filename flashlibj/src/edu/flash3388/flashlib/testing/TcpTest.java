@@ -35,8 +35,10 @@ public class TcpTest implements CodeTest{
 		@Override
 		public void newData(byte[] data) {
 			send = true;
-			if(!origin)
+			if(!origin){
 				toSend = new String(data);
+				System.out.println(getName()+": "+toSend);
+			}
 		}
 		@Override
 		public byte[] dataForTransmition() {
@@ -86,15 +88,16 @@ public class TcpTest implements CodeTest{
 		}else out.println("Wait: "+wait+"ms");
 		
 		try {
-			InetAddress local = FlashUtil.getLocalAddress(InetAddress.getByName("Flash3388"));//InetAddress.getLoopbackAddress();
-			TcpCommInterface commI;// = new TcpCommInterface(local, local, 1000, 1001);
-			/*client = new Communications("Client", new BandwidthTracker(commI));
+			InetAddress local = InetAddress.getLoopbackAddress();
+			TcpCommInterface commI = new TcpCommInterface(local, local, 1000, 1001);
+			client = new Communications("Client", new BandwidthTracker(commI));
 			client.setSendableCreator(new SendableCreator(){
 				@Override
 				public Sendable create(String name, int id, byte type) {
+					System.out.println("Created");
 					return new Echo(name, id, type);
 				}
-			});*/
+			});
 			
 			commI = new TcpCommInterface(local, 1001);
 			server = new Communications("Server", new BandwidthTracker(commI));
@@ -108,7 +111,7 @@ public class TcpTest implements CodeTest{
 		
 		out.println("Starting communications");
 		server.start();
-		//client.start();
+		client.start();
 		
 		out.println("Awaiting connection");
 		long tTime = FlashUtil.millis();
@@ -127,6 +130,10 @@ public class TcpTest implements CodeTest{
 		for (; i <= echos; i++) {
 			if(!server.isConnected()){
 				out.println("Server lost connection");
+				break;
+			}
+			if(!client.isConnected()){
+				out.println("Client lost connection");
 				break;
 			}
 			
@@ -153,7 +160,7 @@ public class TcpTest implements CodeTest{
 	}
 	private void close(){
 		server.close();
-		//client.close();
+		client.close();
 		FlashUtil.delay(100);
 	}
 }

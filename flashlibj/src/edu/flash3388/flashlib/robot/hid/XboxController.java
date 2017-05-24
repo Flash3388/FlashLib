@@ -16,62 +16,22 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	private int channel;
 	private Button[] buttons = new Button[10];
 	
-	/**
-	 * The A button on the controller.
-	 */
 	public final Button A;
-	/**
-	 * The B button on the controller.
-	 */
     public final Button B;
-    /**
-	 * The X button on the controller.
-	 */
     public final Button X;
-    /**
-	 * The Y button on the controller.
-	 */
     public final Button Y;
-    /**
-	 * The LB button on the controller.
-	 */
     public final Button LB;
-    /**
-	 * The RB button on the controller.
-	 */
     public final Button RB;
-    /**
-	 * The Back button on the controller.
-	 */
     public final Button Back;
-    /**
-	 * The Start button on the controller.
-	 */
     public final Button Start;
-    /**
-	 * The left stick button on the controller.
-	 */
     public final Button LeftStickButton;
-    /**
-	 * The right stick button on the controller.
-	 */
     public final Button RightStickButton;
-	
-	/**
-	 * The left stick of the controller
-	 */
+    
 	public final Stick LeftStick;
-	/**
-	 * The right stick of the controller
-	 */
 	public final Stick RightStick;
-	/**
-	 * The DPad buttons represented in an instance of <code>POV<code> class
-	 */
+	
 	public final DPad DPad;
-	/**
-	 * The triggers (RT, LT) represented in an instance of <code>Triggers<code> class
-	 */
+	
 	public final Triggers Triggers;
 	
 	private XboxController next;

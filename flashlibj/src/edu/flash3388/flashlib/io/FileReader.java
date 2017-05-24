@@ -27,8 +27,8 @@ public class FileReader {
 	 * Opens a file at the give URI for reading.
 	 * 
 	 * @param uri The location of the file.
-	 * @throws NullPointerException If there is no file at the give URI.
-	 * @throws FileNotFoundException 
+	 * @throws NullPointerException If given URI is null
+	 * @throws FileNotFoundException If file was now found
 	 */
 	public FileReader(String uri) throws NullPointerException, FileNotFoundException{
 		if(!uri.startsWith(PARENT_DIRECTORY))

@@ -176,7 +176,7 @@ public class Dashboard extends Application {
 			visionImageNext[visionImageIndex] = null;
 			visionImageIndex ^= 1;
 			if(vision != null && img != null){
-				Mat m = FlashFxUtils.bufferedImage2Mat(img);
+				Mat m = CvProcessing.bufferedImage2Mat(img);
 				vision.newImage(m, 0);
 			}
 		});
@@ -320,7 +320,8 @@ public class Dashboard extends Application {
 		BorderPane root = new BorderPane();
 		
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("WorldWindow.fxml"));
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(Dashboard.class.getResource("WorldWindow.fxml"));
 			loader.setRoot(root);
 			root = loader.load();
 			controller = loader.getController(); 

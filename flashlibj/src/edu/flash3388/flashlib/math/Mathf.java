@@ -41,8 +41,8 @@ public class Mathf {
 	/**
 	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
 	 * will be changed to meet the limit accordingly:
-	 * value > max -> value = max
-	 * value < min -> value = min
+	 * value bigger than max : value = max
+	 * value smaller than min : value = min
 	 * 
 	 * @param value The value to limit
 	 * @param min The minimum limit
@@ -95,10 +95,10 @@ public class Mathf {
 	 * 
 	 * This method implements it in a 3d space.
 	 * 
-	 * @param a
-	 * @param b
-	 * @param c
-	 * @return
+	 * @param a a
+	 * @param b a
+	 * @param c a
+	 * @return The result for pythagorasTheorem for given values
 	 */
 	public static float pythagorasTheorem(float a, float b, float c){
 		return (float) Math.sqrt((a * a) + (b * b) + (c * c));
@@ -111,8 +111,8 @@ public class Mathf {
 	 * (the side opposite the right angle) is equal to the sum of the areas of the squares whose 
 	 * sides are the two legs (the two sides that meet at a right angle).
 	 * 
-	 * @param a
-	 * @param b
+	 * @param a a
+	 * @param b a
 	 * @return The area of the square whose side is the hypotenuse
 	 */
 	public static float pythagorasTheorem(float a, float b){

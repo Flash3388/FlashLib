@@ -7,6 +7,10 @@ sourceSets{
 		java{
 			srcDir 'src'
 		}
+		resources {
+            srcDirs 'src'
+            includes = ["**/*.fxml"]
+        }
 	}
 }
 repositories {

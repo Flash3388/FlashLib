@@ -71,9 +71,7 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
         image = FlashFxUtils.bufferedImage2FxImage(bf);
 	}
 	public void setMatImage(Mat mat){
-		MatOfByte buffer = new MatOfByte();
-		Imgcodecs.imencode(".png", mat, buffer);
-		image = new Image(new ByteArrayInputStream(buffer.toArray()));
+		image = FlashFxUtils.cvMat2FxImage(mat);
 	}
 	@Override
 	public void newData(byte[] bytes) {

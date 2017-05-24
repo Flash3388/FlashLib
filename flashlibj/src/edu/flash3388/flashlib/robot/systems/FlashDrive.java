@@ -580,12 +580,6 @@ public class FlashDrive extends System implements TankDriveSystem{
 		else left(speed);
 	}
 	
-	/**
-	 * Implements a joystick-free right movement at a given speed. If no motors are capable of moving
-	 * right then nothing will happen.
-	 * 
-	 * @param speed The speed in which to move right, between 0 and 1.
-	 */
 	public void right(double f, double r){
 		f = limit(f);
 		r = limit(r);
@@ -602,12 +596,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	public void right(){
 		right(default_speed);
 	}
-	/**
-	 * Implements a joystick-free left movement at a given speed. If no motors are capable of moving
-	 * left then nothing will happen.
-	 * 
-	 * @param speed The speed in which to move left, between 0 and 1.
-	 */
+	
 	public void left(double f, double r){
 		f = limit(f);
 		r = limit(r);
