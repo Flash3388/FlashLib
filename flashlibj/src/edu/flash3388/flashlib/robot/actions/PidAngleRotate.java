@@ -10,12 +10,12 @@ import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
 
-public class PidAngleRotate extends Action implements VoltageScalable{
+public class PidAngleRotate extends Action{
 	
 	private double desiredAngle;
 	private byte angleMargin;
 	private double minSpeed, maxSpeed;
-	private boolean absolute, scaleVoltage = false;
+	private boolean absolute;
 	private Rotatable drive;
 	private ModableMotor modable;
 	private PidController pidcontroller;
@@ -57,8 +57,6 @@ public class PidAngleRotate extends Action implements VoltageScalable{
 		boolean dir = rotateSpeed > 0;
 		rotateSpeed = Math.abs(rotateSpeed);
 		rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
-		if(scaleVoltage)
-			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
 		
 		drive.rotate(rotateSpeed, dir);
 	}
@@ -68,14 +66,7 @@ public class PidAngleRotate extends Action implements VoltageScalable{
 	}
 	@Override
 	protected void end() {
-		boolean changed = false;
-		if(modable != null && !modable.inBrakeMode()){
-			modable.enableBrakeMode(true);
-			changed = true;
-		}
 		drive.stop();
-		if(modable != null && changed)
-			modable.enableBrakeMode(false);
 	}
 	private double calculatePositioning(){
 		double currentAngle = absolute? Mathd.limitAngle(getAngle()) : 0;
@@ -121,13 +112,5 @@ public class PidAngleRotate extends Action implements VoltageScalable{
 	
 	public void setMotorSourceMode(ModableMotor modable){
 		this.modable = modable;
-	}
-	@Override
-	public void enableVoltageScaling(boolean en) {
-		scaleVoltage = en;
-	}
-	@Override
-	public boolean isVoltageScaling() {
-		return scaleVoltage;
 	}
 }

@@ -83,14 +83,7 @@ public class AngleRotate extends Action implements VoltageScalable{
 	}
 	@Override
 	protected void end() {
-		boolean changed = false;
-		if(modable != null && !modable.inBrakeMode()){
-			modable.enableBrakeMode(true);
-			changed = true;
-		}
 		drive.stop();
-		if(modable != null && changed)
-			modable.enableBrakeMode(false);
 	}
 	private void calculatePositioning(){
 		currentAngle = Mathd.limitAngle(gyro.getAngle() - angleConversion);

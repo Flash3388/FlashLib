@@ -58,18 +58,17 @@ public class Communications {
 	private Packet packet = new Packet();
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
-	private String name, logName;
+	private String logName;
 	
 	private Thread commThread;
 	private CommTask commTask;
 	
 	public Communications(String name, CommInterface readIn){
 		instances++;
-		this.name = name;
 		this.commInterface = readIn;
 		this.logName = name+"-Comm";
 		
-		initializeConcurrency();
+		initializeConcurrency(name);
 		FlashUtil.getLog().log("Initialized", logName);
 		
 		sendables = new Vector<Sendable>();
@@ -81,7 +80,7 @@ public class Communications {
 		this(""+instances, readIn);
 	}
 	
-	private void initializeConcurrency(){
+	private void initializeConcurrency(String name){
 		commTask = new CommTask(this);
 		commThread = new Thread(commTask, name+"-Communications");
 	}
@@ -232,9 +231,6 @@ public class Communications {
 				return sen;
 		}
 		return null;
-	}
-	public String getName(){
-		return name;
 	}
 	public CommInterface getCommInterface(){
 		return commInterface;

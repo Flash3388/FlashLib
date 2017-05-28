@@ -48,9 +48,6 @@ public class RangeApproach extends Action implements VoltageScalable{
 			minSpeed = VisionAction.DEFAULT_MIN_SPEED;
 		if(maxSpeed > 1 || maxSpeed <= 0)
 			maxSpeed = VisionAction.DEFAULT_MAX_SPEED;
-		
-		if(modable != null)
-			modable.enableBrakeMode(true);
 	}
 	@Override
 	protected void execute() {
@@ -78,8 +75,6 @@ public class RangeApproach extends Action implements VoltageScalable{
 	@Override
 	protected void end() {
 		driveTrain.stop();
-		if(modable != null)
-			modable.enableBrakeMode(false);
 	}
 	
 	public void setMotorModeSource(ModableMotor modable){

@@ -37,11 +37,7 @@ public class Rotate extends Action{
 	}
 	@Override
 	protected void end() {
-		if(modable != null && !modable.inBrakeMode())
-			modable.enableBrakeMode(true);
 		drive.stop();
-		if(modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	
 	public void setSpeed(double speed){

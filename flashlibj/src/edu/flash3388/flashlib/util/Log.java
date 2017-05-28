@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,7 +31,7 @@ import edu.flash3388.flashlib.io.FileStream;
  * There are several types of logging which can be used simultaneously:
  * <ul>
  * 		<li>File writing: MODE_WRITE</li>
- * 		<li>PrintStream writing: MODE_PRINT (System.out.println)</li>
+ * 		<li>PrintStream writing: MODE_PRINT (out.println)</li>
  * 		<li>External logging interfaces: MODE_INTERFACES ({@link edu.flash3388.flashlib.util.LoggingInterface LoggingInterface})</li>
  * </ul>
  * @author Tom Tzook.
@@ -70,11 +71,12 @@ public class Log{
 	
 	private Vector<LoggingInterface> loggingInterfaces = new Vector<LoggingInterface>(2);
 	
-	private String name;
+	private String name = null;
 	
-	private FileWriter writerLog, writerErrorLog;
-	private String[] logLines, errorLines;
-	private String absPath, absPathError;
+	private PrintStream out = System.out;
+	private FileWriter writerLog = null, writerErrorLog = null;
+	private String[] logLines = null, errorLines = null;
+	private String absPath = null, absPathError = null;
 	private boolean closed = true;
 	private byte logMode, indexLog, indexErrorLog;
 	private LoggingType type;
@@ -97,7 +99,7 @@ public class Log{
 		
 		try {
 			if((logMode & MODE_PRINT) != 0)
-				System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
+				out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
@@ -149,6 +151,10 @@ public class Log{
 		if(indexErrorLog == 0) return;
 		FileStream.appendLines(absPathError, errorLines);
 		indexErrorLog = 0;
+	}
+	
+	public void setPrintStream(PrintStream out){
+		this.out = out;
 	}
 	
 	public synchronized void write(String mess){
@@ -225,7 +231,7 @@ public class Log{
 		
 		closed = false;
 		if((logMode & MODE_PRINT) != 0)
-			System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
+			out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	
 	public LoggingType getLoggingType(){
@@ -294,7 +300,7 @@ public class Log{
 		if((logMode & MODE_WRITE) != 0)
 			write(msg);
 		if((logMode & MODE_PRINT) != 0)
-			System.out.println(name + "> " + msg);
+			out.println(name + "> " + msg);
 		if((logMode & MODE_INTERFACES) != 0){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().log(msg);
@@ -309,7 +315,7 @@ public class Log{
 		if((logMode & MODE_WRITE) != 0)
 			write(msg);
 		if((logMode & MODE_PRINT) != 0)
-			System.out.println(name + "> " + msg);
+			out.println(name + "> " + msg);
 		if((logMode & MODE_INTERFACES) != 0){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().log(msg);

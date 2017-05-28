@@ -35,6 +35,9 @@ public class SbcPwm{
 	private double getMinNegative(){
 		return min;
 	}
+	private double getFullScaleFactor(){
+		return getMaxPositive() - getMinNegative();
+	}
 	
 	protected void setBounds(double max, double deadbandMax, double center, double deadbandMin, double min){
 		double looptime = 1 / port.getFrequency();
@@ -46,6 +49,9 @@ public class SbcPwm{
 	}
 	protected void setFrequency(double freq){
 		port.setFrequency(freq);
+	}
+	protected double getFrequency(){
+		return port.getFrequency();
 	}
 	protected void setDeadbandEnabled(boolean enable) {
 		enableDeadband = enable;
@@ -73,6 +79,12 @@ public class SbcPwm{
 		else
 			setDutyCycle(getMaxNegative() + speed * getNegativeScaleFactor());
 	}
+	public void setPosition(double pos){
+		pos = Mathd.limit(pos, 0, 1);
+		
+		setDutyCycle(getMinNegative() + pos * getFullScaleFactor());
+	}
+	
 	public double getSpeed() {
 		double duty = getDutyCycle();
 		
@@ -87,5 +99,15 @@ public class SbcPwm{
 		if(duty < getMaxNegative())
 			return (duty - getMaxNegative()) / getNegativeScaleFactor();
 		return 0;
+	}
+	public double getPosition(){
+		double duty = getDutyCycle();
+		
+		if(duty > getMaxPositive())
+			return 1;
+		if(duty < getMinNegative())
+			return -1;
+		
+		return (duty - getMinNegative()) / getFullScaleFactor();
 	}
 }

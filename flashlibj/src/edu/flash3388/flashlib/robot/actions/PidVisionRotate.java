@@ -14,7 +14,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 
-public class PidVisionRotate extends Action implements VisionAction, VoltageScalable{
+public class PidVisionRotate extends Action implements VisionAction{
 
 	private static class DoublePidSource implements PidSource{
 		private double d;
@@ -37,7 +37,7 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 	private Vision vision;
 	private DoublePidSource source;
 	private PidController pidcontroller;
-	private boolean horizontal, targetFound, centered, scaleVoltage = false, lastDir;
+	private boolean horizontal, targetFound, centered, lastDir;
 	private byte margin = 0;
 	private double minSpeed, maxSpeed, lastSpeed;
 	private int timeout, timeLost, centeredTimeout, timeCentered;
@@ -83,8 +83,6 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 		
 		if(!vision.isRunning())
 			vision.start();
-		if(modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	@Override
 	protected void execute() {
@@ -122,8 +120,7 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 			rotateSpeed = lastSpeed > 0? minSpeed : 0;
 			dir = lastDir;
 		}
-		if(scaleVoltage && rotateSpeed != 0)
-			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
+		
 		driveTrain.rotate(rotateSpeed, dir);
 	}
 	@Override
@@ -135,8 +132,6 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 	@Override
 	protected void end() {
 		driveTrain.stop();
-		if (modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	
 	@Override
@@ -207,13 +202,5 @@ public class PidVisionRotate extends Action implements VisionAction, VoltageScal
 	}
 	public void setHorizontalRotate(boolean s){
 		horizontal = s;
-	}
-	@Override
-	public void enableVoltageScaling(boolean en) {
-		scaleVoltage = en;
-	}
-	@Override
-	public boolean isVoltageScaling() {
-		return scaleVoltage;
 	}
 }

@@ -99,10 +99,7 @@ public class VisionApproach extends Action implements VisionAction{
 	}
 	@Override
 	protected void end() {
-		if(modable != null)
-			modable.enableBrakeMode(true);
 		driveTrain.stop();
-		modable.enableBrakeMode(false);
 	}
 	
 	@Override

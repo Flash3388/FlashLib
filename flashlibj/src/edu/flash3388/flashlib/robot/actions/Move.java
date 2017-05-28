@@ -67,11 +67,7 @@ public class Move extends Action{
 	}
 	@Override
 	protected void end() {
-		if(modable != null && !modable.inBrakeMode())
-			modable.enableBrakeMode(true);
 		stop();
-		if(modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	
 	public void setSpeed(double speed){

@@ -1,26 +1,26 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.systems.ModableMotor;
+import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
-import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.System;
-import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
-import edu.flash3388.flashlib.robot.systems.ModableMotor;
 
-public class HolonomicVision extends Action implements VisionAction{
+public class TankVision extends Action implements VisionAction{
 	
-	private HolonomicDriveSystem driveTrain;
+	private TankDriveSystem driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontalD, rotate, sideways = false;
+	private boolean targetFound, centered, horizontalD;
 	private byte margin;
 	private double speed, lastY, lastX, currentDistance, distanceThreshold, minSpeed, distanceMargin, maxSpeed;
 	private int timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
 	
-	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
-			boolean rotate, boolean horizontalD,
+	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed, 
+			boolean horizontalD,
 			byte margin, double distanceThreshold, int timeout, int passedTimeout, int centeredtimout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
@@ -32,19 +32,18 @@ public class HolonomicVision extends Action implements VisionAction{
 		this.centeredTimeout = centeredtimout;
 		this.passedTimeout = passedTimeout;
 		this.horizontalD = horizontalD;
-		this.rotate = rotate;
 		
 		System s = null;
 		if((s = driveTrain.getSystem()) != null)
 			requires(s);
 		modable = driveTrain;
 	}
-	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
+	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed, 
 			boolean rotate, boolean horizontalD){
-		this(driveTrain, vision, speed, rotate, horizontalD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
+		this(driveTrain, vision, speed, horizontalD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
 				ACTION_VALIDATION_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
-	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed){
+	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed){
 		this(driveTrain, vision, speed, false, false);
 	}
 	
@@ -119,9 +118,7 @@ public class HolonomicVision extends Action implements VisionAction{
 			speedX = 0;
 		}
 		
-		if(sideways) driveTrain.holonomicCartesian(-speedY * 2, speedX, 0);
-		else if(!rotate) driveTrain.holonomicCartesian(speedX, speedY, 0);
-		else driveTrain.holonomicCartesian(0, speedY, -speedX);
+		driveTrain.arcadeDrive(speedY, speedX);
 		
 		lastX = speedX;
 		lastY = speedY;
@@ -244,17 +241,5 @@ public class HolonomicVision extends Action implements VisionAction{
 	}
 	public void setHorizontalDistance(boolean en){
 		horizontalD = en;
-	}
-	public boolean isSetToRotate(){
-		return rotate;
-	}
-	public void setToRotate(boolean rotate){
-		this.rotate = rotate;
-	}
-	public void setSideways(boolean side){
-		sideways = side;
-	}
-	public boolean isSideways(){
-		return sideways;
 	}
 }

@@ -4,8 +4,8 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.hid.HID;
 import edu.flash3388.flashlib.robot.hid.Stick;
-import edu.wpi.first.wpilibj.Joystick;
 
 /**
  * This class offers a wide range of both joystick-based driving solutions and autonomous drives.
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Joystick;
  * 
  * @author Tom Tzook
  */
-public class FlashDrive extends System implements TankDriveSystem{
+public class FlashDrive extends System implements TankDriveSystem, HolonomicDriveSystem{
 	
 	public static class InterfaceAction extends Action{
 		private DriveControlInterface driveInterface;
@@ -235,13 +235,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param left The speed value of the left side of motors 1 to -1.
 	 */
 	public void tankDrive(double right, double left){
-		right = limit(right);
-		left = limit(left);
-		
-		if(right_controllers != null) 
-			right_controllers.set(right);
-		if(left_controllers != null) 
-			left_controllers.set(left);
+		setMotors(0, right, left, 0);
 	}
 	
 	/**
@@ -266,7 +260,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param stick_left The joystick for moving the left side.
 	 */
 	public void tankDrive(Stick stick_right, Stick stick_left){
-		tankDrive(-stick_right.getY(), -stick_left.getY());
+		tankDrive(-stick_right.getY(), stick_left.getY());
 	}
 	
 	/**
@@ -279,7 +273,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void tankDrive(Stick stick_right, Stick stick_left, boolean squared){
-		tankDrive(-stick_right.getY(), -stick_left.getY(), squared);
+		tankDrive(-stick_right.getY(), stick_left.getY(), squared);
 	}
 	
 	/**
@@ -291,8 +285,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param stick_left The joystick for moving the left side.
 	 * @param left_axis The axis on the left side joystick.
 	 */
-	public void tankDrive(Joystick stick_right, int right_axis, Joystick stick_left, int left_axis){
-		tankDrive(-stick_right.getRawAxis(right_axis), -stick_left.getRawAxis(left_axis));
+	public void tankDrive(HID stick_right, int right_axis, HID stick_left, int left_axis){
+		tankDrive(-stick_right.getRawAxis(right_axis), stick_left.getRawAxis(left_axis));
 	}
 	
 	/**
@@ -306,19 +300,19 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param left_axis The axis on the left side joystick.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void tankDrive(Joystick stick_right, int right_axis, Joystick stick_left, int left_axis, boolean squared){
+	public void tankDrive(HID stick_right, int right_axis, HID stick_left, int left_axis, boolean squared){
 		tankDrive(-stick_right.getRawAxis(right_axis), -stick_left.getRawAxis(left_axis), squared);
 	}
 	
 	/**
 	 * Arcade drive implements a single joystick drive. Given move and rotate speed values, the code sets the values 
 	 * to move the robot. The move value is responsible for moving the robot forward and backward while the 
-	 * rotate value is responsible for the robot rotation. When both values are not zero then the value taken is the
-	 * absolute bigger.
+	 * rotate value is responsible for the robot rotation. 
 	 * 
 	 * @param moveValue The value to move forward or backward 1 to -1.
 	 * @param rotateValue The value to rotate right or left 1 to -1.
 	 */
+	@Override
 	public void arcadeDrive(double moveValue, double rotateValue){
 		double rSpeed = 0, lSpeed = 0;
 		
@@ -340,13 +334,7 @@ public class FlashDrive extends System implements TankDriveSystem{
   	      }
   	    }
 		
-		rSpeed = limit(rSpeed);
-		lSpeed = limit(lSpeed);
-		
-		if(right_controllers != null)
-			right_controllers.set(rSpeed);
-		if(left_controllers != null)
-			left_controllers.set(lSpeed);
+		setMotors(0, rSpeed, lSpeed, 0);
 	}
 	
 	/**
@@ -376,7 +364,10 @@ public class FlashDrive extends System implements TankDriveSystem{
      *        be selected for rotation rate.
 	 */
 	public void arcadeDrive(Stick stick){
-		arcadeDrive(-stick.getY(), -stick.getX());
+		arcadeDrive(-stick.getY(), stick.getX());
+	}
+	public void arcadeDrive(Stick mstick, Stick rstick){
+		arcadeDrive(-mstick.getY(), rstick.getX());
 	}
 	
 	/**
@@ -392,7 +383,10 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void arcadeDrive(Stick stick, boolean squared){
-		arcadeDrive(-stick.getY(), -stick.getX(), squared);
+		arcadeDrive(-stick.getY(), stick.getX(), squared);
+	}
+	public void arcadeDrive(Stick mstick, Stick rstick, boolean squared){
+		arcadeDrive(-mstick.getY(), rstick.getX(), squared);
 	}
 	
 	/**
@@ -407,8 +401,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param move_axis The axis number on the joystick to be selected for forwards and backwards.
 	 * @param rotate_axis The axis number on the joystick to be selected for rotation rate.
 	 */
-	public void arcadeDrive(Joystick stick, int move_axis, int rotate_axis){
-		arcadeDrive(-stick.getRawAxis(move_axis), -stick.getRawAxis(rotate_axis));
+	public void arcadeDrive(HID stick, int move_axis, int rotate_axis){
+		arcadeDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(rotate_axis));
 	}
 	
 	/**
@@ -425,8 +419,25 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param rotate_axis The axis number on the joystick to be selected for rotation rate.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void arcadeDrive(Joystick stick, int move_axis, int rotate_axis, boolean squared){
-		arcadeDrive(-stick.getRawAxis(move_axis), -stick.getRawAxis(rotate_axis), squared);
+	public void arcadeDrive(HID stick, int move_axis, int rotate_axis, boolean squared){
+		arcadeDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(rotate_axis), squared);
+	}
+	
+	public void vectoredTankDrive(double moveValue, double rotateValue){
+		double right = moveValue, left = moveValue;
+		
+		if(rotateValue > 0){
+			rotateValue = Math.abs(rotateValue);
+			right -= rotateValue;
+			left += rotateValue;
+		}
+		else if(rotateValue < 0){
+			rotateValue = Math.abs(rotateValue);
+			right += rotateValue;
+			left -= rotateValue;
+		}
+		
+		setMotors(0, right, left, 0);
 	}
 	
 	/**
@@ -439,17 +450,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param x The speed to move the motors on the front and back of the robot.
 	 */
 	public void omniDrive(double y, double x){
-		y = limit(y);
-		x = limit(x);
-		
-		if(right_controllers != null) 
-			right_controllers.set(y);
-		if(left_controllers != null) 
-			left_controllers.set(y);
-		if(front_controllers != null) 
-			front_controllers.set(x);
-		if(rear_controllers != null) 
-			rear_controllers.set(x);
+		setMotors(x, y, y, x);
 	}
 	
 	/**
@@ -479,7 +480,7 @@ public class FlashDrive extends System implements TankDriveSystem{
      *        be selected for right and left.
 	 */
 	public void omniDrive(Stick stick){
-		omniDrive(-stick.getY(), -stick.getX());
+		omniDrive(-stick.getY(), stick.getX());
 	}
 	
 	/**
@@ -495,7 +496,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void omniDrive(Stick stick, boolean squared){
-		omniDrive(-stick.getY(), -stick.getX(), squared);
+		omniDrive(-stick.getY(), stick.getX(), squared);
 	}
 	
 	/**
@@ -510,8 +511,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param move_axis The move axis will be selected for forwards and backward.
 	 * @param side_axis The side axis will be selected for right and left.
 	 */
-	public void omniDrive(Joystick stick, int move_axis, int side_axis){
-		omniDrive(-stick.getRawAxis(move_axis), -stick.getRawAxis(side_axis));
+	public void omniDrive(HID stick, int move_axis, int side_axis){
+		omniDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(side_axis));
 	}
 	
 	/**
@@ -528,8 +529,51 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @param side_axis The side axis will be selected for right and left.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void omniDrive(Joystick stick, int move_axis, int side_axis, boolean squared){
-		omniDrive(-stick.getRawAxis(move_axis), -stick.getRawAxis(side_axis), squared);
+	public void omniDrive(HID stick, int move_axis, int side_axis, boolean squared){
+		omniDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(side_axis), squared);
+	}
+	
+	public void vectoredOmniDrive_Cartesian(double y, double x, double rotate){
+		double right = 0, left = 0, front = 0, rear = 0;
+		
+		if (y > 0.0) {
+  	      	if (rotate > 0.0) {
+  	    	  left = y - rotate;
+  	    	  right = Math.max(y, rotate);
+  	      	} else {
+  	    	  left = Math.max(y, -rotate);
+  	    	  right = y + rotate;
+  	      	}
+  	    } else {
+  	    	if (rotate > 0.0) {
+  	    	    left = -Math.max(-y, rotate);
+  	    	    right = y + rotate;
+  	    	} else {
+  	    		left = y - rotate;
+  	    		right = -Math.max(-y, -rotate);
+  	    	}
+  	    }
+			
+		
+		if (x > 0.0) {
+			if (rotate > 0.0) {
+  	    	  rear = x - rotate;
+  	    	  front = Math.max(x, rotate);
+  	      	} else {
+  	    	  rear = Math.max(x, -rotate);
+  	    	  front = x + rotate;
+  	      	}
+  	    }else{
+	    	if (rotate > 0.0) {
+	    		rear = -Math.max(-x, rotate);
+  	    	    front = x + rotate;
+  	    	} else {
+  	    		rear = x - rotate;
+  	    		front = -Math.max(-x, -rotate);
+  	    	}
+  	    }
+		
+		setMotors(front, right, left, rear);
 	}
 	
 	@Override
@@ -538,15 +582,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		else backward(speed);
 	}
 	
-	@Override
 	public void forward(double r, double l){
-		l= limit(l);
-		r = limit(r);
-				
-		if(right_controllers != null) 
-			right_controllers.set(r);
-		if(left_controllers != null) 
-			left_controllers.set(l);
+		setMotors(0, r, l, 0);
 	}
 	@Override 
 	public void forward(double speed){
@@ -556,15 +593,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		forward(default_speed);
 	}
 	
-	@Override
 	public void backward(double r, double l){
-		l= limit(l);
-		r = limit(r);
-		
-		if(right_controllers != null) 
-			right_controllers.set(-r);
-		if(left_controllers != null) 
-			left_controllers.set(-l);
+		setMotors(0, -r, -l, 0);
 	}
 	@Override 
 	public void backward(double speed){
@@ -581,13 +611,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	}
 	
 	public void right(double f, double r){
-		f = limit(f);
-		r = limit(r);
-		
-		if(front_controllers != null) 
-			front_controllers.set(f);
-		if(rear_controllers != null) 
-			rear_controllers.set(r);
+		setMotors(f, 0, 0, r);
 	}
 	@Override 
 	public void right(double speed){
@@ -598,13 +622,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	}
 	
 	public void left(double f, double r){
-		f = limit(f);
-		r = limit(r);
-		
-		if(front_controllers != null) 
-			front_controllers.set(-f);
-		if(rear_controllers != null) 
-			rear_controllers.set(-r);
+		setMotors(-f, 0, 0, -r);
 	}
 	@Override 
 	public void left(double speed){
@@ -622,19 +640,10 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 */
 	@Override 
 	public void rotate(double speed, boolean direction){
-		speed = limit(speed);
 		if(!direction) 
 			speed = -speed;
 		
-		if(right_controllers != null) 
-			right_controllers.set(-speed);
-		if(left_controllers != null) 
-			left_controllers.set(speed);
-		
-		if(front_controllers != null) 
-			front_controllers.set(-speed); 
-		if(rear_controllers != null) 
-			rear_controllers.set(speed); 
+		setMotors(-speed, -speed, speed, speed);
 	}
 	
 	/*public void rotate(int angle){
@@ -678,6 +687,32 @@ public class FlashDrive extends System implements TankDriveSystem{
 	public void rotateLeft(){
 		rotateLeft(default_speed);
 	}
+	
+	@Override
+	public void holonomicCartesian(double x, double y, double rotation) {
+		//implement for omni drive
+	}
+	@Override
+	public void holonomicPolar(double magnitude, double direction, double rotation) {
+		//implement for omni drive
+	}
+	
+	
+	public void setMotors(double f, double r, double l, double b){
+		f = limit(f);
+		r = limit(r);
+		l = limit(l);
+		b = limit(b);
+		
+		if(right_controllers != null) 
+			right_controllers.set(r);
+		if(left_controllers != null) 
+			left_controllers.set(l);
+		if(front_controllers != null) 
+			front_controllers.set(f); 
+		if(rear_controllers != null) 
+			rear_controllers.set(b); 
+	}
 	/**
 	 * Sets all the motors to speed 0, thus stopping the motors.
 	 */
@@ -692,8 +727,6 @@ public class FlashDrive extends System implements TankDriveSystem{
 		if(rear_controllers != null) 
 			rear_controllers.stop(); 
 	}
-	
-	
 
 	public void setDefaultAction(Action action){
 		super.setDefaultAction(action);

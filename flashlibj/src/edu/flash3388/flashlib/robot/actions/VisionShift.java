@@ -57,8 +57,6 @@ public class VisionShift extends Action implements VisionAction{
 		
 		if(!vision.isRunning())
 			vision.start();
-		if(modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	@Override
 	protected void execute() {
@@ -105,8 +103,6 @@ public class VisionShift extends Action implements VisionAction{
 	@Override
 	protected void end() {
 		driveTrain.stop();
-		if (modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	
 	@Override

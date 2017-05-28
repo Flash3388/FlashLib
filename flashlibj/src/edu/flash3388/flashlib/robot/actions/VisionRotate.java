@@ -63,8 +63,6 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 		
 		if(!vision.isRunning())
 			vision.start();
-		if(modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	@Override
 	protected void execute() {
@@ -132,8 +130,6 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 	@Override
 	protected void end() {
 		driveTrain.stop();
-		if (modable != null && modable.inBrakeMode())
-			modable.enableBrakeMode(false);
 	}
 	
 	@Override
