@@ -7,6 +7,14 @@ public class ClosestToLeftFilter extends ProcessingFilter{
 	public ClosestToLeftFilter(int amount){
 		this.amount = (byte) amount;
 	}
+	
+	public int getAmount(){
+		return amount;
+	}
+	public void setAmount(int amount){
+		this.amount = (byte) amount;
+	}
+	
 	@Override
 	public void process(VisionSource source) {
 		if(amount <= 0)

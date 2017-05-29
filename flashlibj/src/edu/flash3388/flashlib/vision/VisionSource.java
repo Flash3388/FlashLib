@@ -24,7 +24,6 @@ public interface VisionSource {
 	void closestToLeft(int amount);
 	void closestToRight(int amount);
 	
-	void closestToCoordinate(double x, double y);
-	void closestToCenterY();
-	void closestToCenterX();
+	void closestToCoordinate(double x, double y, int amount);
+	void closestToCenterFrame(int amount);
 }

@@ -16,9 +16,8 @@ public class DefaultFilterCreator implements FilterCreator{
 			case 7: return new RatioFilter();
 			case 8: return new ClosestToLeftFilter();
 			case 9: return new ClosestToRightFilter();
-			case 10: return new ClosestToCenterXFilter();
-			case 11: return new ClosestToCenterXFilter();
-			case 12: return new CoordinateFilter();
+			case 10: return new ClosestToCenterFilter();
+			case 11: return new CoordinateFilter();
 		}
 		return null;
 	}
@@ -43,12 +42,10 @@ public class DefaultFilterCreator implements FilterCreator{
 			return 8;
 		if(FlashUtil.instanceOf(filter, ClosestToRightFilter.class))
 			return 9;
-		if(FlashUtil.instanceOf(filter, ClosestToCenterXFilter.class))
+		if(FlashUtil.instanceOf(filter, ClosestToCenterFilter.class))
 			return 10;
-		if(FlashUtil.instanceOf(filter, ClosestToCenterYFilter.class))
-			return 11;
 		if(FlashUtil.instanceOf(filter, CoordinateFilter.class))
-			return 12;
+			return 11;
 		return 0;
 	}
 
