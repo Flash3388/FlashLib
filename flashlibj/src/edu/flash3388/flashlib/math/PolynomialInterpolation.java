@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.math;
 
-import edu.flash3388.flashlib.util.Algorithms;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class PolynomialInterpolation extends Interpolation{
 	
@@ -21,7 +21,7 @@ public class PolynomialInterpolation extends Interpolation{
 		if(valuesUpdated()){
 			values = getMap().values().toArray(new Double[0]);
 			keys = getMap().keySet().toArray(new Double[0]);
-			Algorithms.sort(keys, values);
+			FlashUtil.sort(keys, values);
 			valueUpdated = true;
 		}
 	}

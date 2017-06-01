@@ -6,8 +6,8 @@ public interface Vision {
 	boolean isRunning();
 	void start();
 	void stop();
-	void setParameters(ProcessingParam param);
-	ProcessingParam getParameters();
+	void setProcessing(VisionProcessing proc);
+	VisionProcessing getProcessing();
 	
 	void setCameraOffsetAngle(double angle);
 	double getCameraOffsetAngle();

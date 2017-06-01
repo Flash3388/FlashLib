@@ -153,7 +153,7 @@ public class TcpTest implements CodeTest{
 			out.println("Failed - Echos: "+(i-1)+"/"+echos+" Time: "+tTime+" ms");
 		}
 		
-		long bandwidth = ((BandwidthTracker)server.getCommInterface()).getBandwidthUsage();
+		double bandwidth = ((BandwidthTracker)server.getCommInterface()).getBandwidthUsage();
 		out.println("Bandwidth: "+bandwidth+" mbps");
 		
 		close();

@@ -161,13 +161,15 @@ public class VisionProcessing {
 		ProcessingFilter[] filters = getFilters();
 		ArrayList<String> lines = new ArrayList<String>();
 		
+		lines.add("<vision>");
 		for (ProcessingFilter filter : filters) {
-			lines.add("<filter id=\""+ProcessingFilter.getSaveId(filter)+"\">");
+			lines.add("\t<filter id=\""+ProcessingFilter.getSaveId(filter)+"\">");
 			double[] params = filter.getParameters();
 			for (double d : params) 
-				lines.add("\t<param>"+d+"</param>");
-			lines.add("</filter>");
+				lines.add("\t\t<param>"+d+"</param>");
+			lines.add("\t</filter>");
 		}
+		lines.add("</vision>");
 		FileStream.writeLines(file, lines.toArray(new String[0]));
 	}
 	

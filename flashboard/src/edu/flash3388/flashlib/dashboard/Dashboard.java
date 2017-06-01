@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.dashboard;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Enumeration;
@@ -11,6 +10,7 @@ import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.CommInterface;
@@ -21,7 +21,9 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Properties;
 import edu.flash3388.flashlib.vision.CvProcessing;
 import edu.flash3388.flashlib.vision.CvRunner;
-import edu.flash3388.flashlib.vision.ProcessingParam;
+import edu.flash3388.flashlib.vision.DefaultFilterCreator;
+import edu.flash3388.flashlib.vision.ProcessingFilter;
+import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -34,8 +36,10 @@ public class Dashboard extends Application {
 	private static class UpdateTask implements Runnable{
 		Vector<UpdateWrapper> updatables = new Vector<UpdateWrapper>();
 		boolean stop = false;
+		boolean fxReady = false;
 		@Override
 		public void run() {
+			while(!fxReady) FlashUtil.delay(50);
 			while (!stop) {
 				for(Enumeration<UpdateWrapper> upenum = updatables.elements(); upenum.hasMoreElements();){
 					UpdateWrapper up = upenum.nextElement();
@@ -59,7 +63,6 @@ public class Dashboard extends Application {
 	public static final String PROP_CAM_PORT_LOCAL = "cam.port.local";
 	public static final String PROP_CAM_PORT_REMOTE = "cam.port.remote";
 	
-	public static final String EXT_VISION_PARAM = "imgproc";
 	public static final String PROP_VISION_DEFAULT_PARAM = "vision.default";
 	
 	public static final String FOLDER_SAVES = "data/saves/";
@@ -81,7 +84,7 @@ public class Dashboard extends Application {
 	private static CameraViewer camViewer;
 	private static CvRunner vision;
 	
-	private static BufferedImage[] visionImageNext = new BufferedImage[2];
+	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
 	private static boolean visionParamLoadFailed = false;
 	
@@ -105,18 +108,12 @@ public class Dashboard extends Application {
 		FlashUtil.getLog().log("Done", "Dashboard");
 		
 		FlashUtil.getLog().save();
-		boolean TESTING = false;
-		if (!TESTING) {
-		   initStart();
-		   FlashUtil.getLog().log("Launching FX...", "Dashboard");
-		   launch();
-		}
-		else test();
-	}
-	private static void test(){
-		
+		initStart();
+	    FlashUtil.getLog().log("Launching FX...", "Dashboard");
+	    launch();
 	}
 	private static void initStart(){
+		ProcessingFilter.setFilterCreator(new DefaultFilterCreator());
 		updateTask = new UpdateTask();
 		updateThread = new Thread(updateTask);
 	    updateThread.start();
@@ -134,7 +131,7 @@ public class Dashboard extends Application {
 					if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
 							(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 						if(!commSettingError){
-							FlashUtil.getLog().reportError("Failed to initialize communications: validate values of "+
+							userError("Failed to initialize communications: validate values of "+
 									PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
 							commSettingError = true;
 						}
@@ -143,7 +140,7 @@ public class Dashboard extends Application {
 					}
 					if(localport < 100 || remoteport < 100 || localcamport < 100 || remotecamport < 100){
 						if(!commSettingError){
-							FlashUtil.getLog().reportError("Failed to initialize communications: validate values of "+
+							userError("Failed to initialize communications: validate values of "+
 									PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE + ", " + PROP_CAM_PORT_LOCAL +
 									" and " + PROP_CAM_PORT_REMOTE);
 							commSettingError = true;
@@ -172,12 +169,12 @@ public class Dashboard extends Application {
 			   }
 		 });
 		addRunnableForUpdate(()->{
-			BufferedImage img = visionImageNext[visionImageIndex];
+			byte[] img = visionImageNext[visionImageIndex];
 			visionImageNext[visionImageIndex] = null;
 			visionImageIndex ^= 1;
 			if(vision != null && img != null){
-				Mat m = CvProcessing.bufferedImage2Mat(img);
-				vision.newImage(m, 0);
+				Mat m = CvProcessing.byteArray2Mat(img);
+				vision.newImage(m, (byte)0);
 			}
 		});
 	}
@@ -243,26 +240,19 @@ public class Dashboard extends Application {
 		String filename = getProperty(PROP_VISION_DEFAULT_PARAM);
 		if(filename != null){
 			FlashUtil.getLog().log("Loading default parameters: "+filename, "Dashboard");
-			ProcessingParam param = ProcessingParam.loadFromFile(filename);
-			if(param != null){
-				vision.setParameters(param);
-				FlashUtil.getLog().log("Done", "Dashboard");
-			}else {
-				visionParamLoadFailed = true;
-				FlashUtil.getLog().log("Loading failed", "Dashboard");
-			}
+			visionParamLoadFailed = !instance.controller.loadParam(FOLDER_SAVES+filename);
 		}
 	}
 	public static boolean visionInitialized(){
 		return vision != null;
 	}
-	public static void setForVision(BufferedImage image){
+	public static void setForVision(byte[] image){
 		if(vision != null)
 			visionImageNext[1-visionImageIndex] = image;
 	}
 	protected static void setVision(CvRunner vision){
 		Dashboard.vision = vision;
-		CvProcessing.pipeline = camViewer;
+		vision.setPipeline(camViewer);
 	}
 	private static boolean emptyProperty(String prop){
 		String propv = getProperty(prop);
@@ -309,7 +299,16 @@ public class Dashboard extends Application {
 		properties.saveToFile(SETTINGS_FILE);
 		Remote.saveHosts(REMOTE_HOSTS_FILE);
 	}
+	private static void fxReady(){
+		updateTask.fxReady = true;
+	}
 	
+	public static void userError(String error){
+		FlashUtil.getLog().reportError(error);
+		FlashFxUtils.onFxThread(()->{
+			Dialog.show(primaryStage, "Error", error);
+		});
+	}
 	
 	private MainController controller;
 	@Override
@@ -338,6 +337,7 @@ public class Dashboard extends Application {
 		});
 		primaryStage.setTitle("FLASHboard");
 		
+		fxReady();
 		primaryStage.show();
 	}
 	public static void close(){

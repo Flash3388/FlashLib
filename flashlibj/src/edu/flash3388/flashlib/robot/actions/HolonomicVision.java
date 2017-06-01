@@ -104,7 +104,7 @@ public class HolonomicVision extends Action implements VisionAction{
 			}else{
 				double offsetD = distanceThreshold - currentDistance;
 				speedY = speed * Math.abs(offsetD) / 100.0;
-				speedX = Mathd.limit(speedY, minSpeed, maxSpeed);
+				speedY = Mathd.limit(speedY, minSpeed, maxSpeed);
 				speedY *= offsetD < 0? 1 : -1;
 			}
 		}else{

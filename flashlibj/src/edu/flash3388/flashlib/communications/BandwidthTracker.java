@@ -86,10 +86,10 @@ public class BandwidthTracker implements CommInterface{
 		commInterface.update(millis);
 	}
 	
-	public long getBandwidthUsage(){
+	public double getBandwidthUsage(){
 		if(infoStart < 0)
 			return 0;
-		return (long) ((double)(bytes * 0.000008) / ((double)(FlashUtil.millis() - infoStart) * 0.001));
+		return ((double)(bytes * 0.000008) / ((double)(FlashUtil.millis() - infoStart) * 0.001));
 	}
 	public void reset(){
 		infoStart = -1;

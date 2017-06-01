@@ -7,8 +7,6 @@ public class DefaultFilterCreator implements FilterCreator{
 	@Override
 	public ProcessingFilter create(int id) {
 		switch (id) {
-			case 1: return new HsvFilter();
-			case 2: return new RgbFilter();
 			case 3: return new HighestFilter();
 			case 4: return new LowestFilter();
 			case 5: return new LargestFilter();
@@ -18,16 +16,13 @@ public class DefaultFilterCreator implements FilterCreator{
 			case 9: return new ClosestToRightFilter();
 			case 10: return new ClosestToCenterFilter();
 			case 11: return new CoordinateFilter();
+			case 12: return new ColorFilter();
 		}
 		return null;
 	}
 
 	@Override
 	public byte getSaveId(ProcessingFilter filter) {
-		if(FlashUtil.instanceOf(filter, HsvFilter.class))
-			return 1;
-		if(FlashUtil.instanceOf(filter, RgbFilter.class))
-			return 2;
 		if(FlashUtil.instanceOf(filter, HighestFilter.class))
 			return 3;
 		if(FlashUtil.instanceOf(filter, LowestFilter.class))
@@ -46,6 +41,8 @@ public class DefaultFilterCreator implements FilterCreator{
 			return 10;
 		if(FlashUtil.instanceOf(filter, CoordinateFilter.class))
 			return 11;
+		if(FlashUtil.instanceOf(filter, ColorFilter.class))
+			return 12;
 		return 0;
 	}
 

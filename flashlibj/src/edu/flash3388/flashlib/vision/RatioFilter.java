@@ -99,7 +99,7 @@ public class RatioFilter extends ProcessingFilter{
 		maxScore = parameters[4];
 		minScore = parameters[5];
 		maxHeight = parameters[6];
-		maxHeight = parameters[7];
+		minHeight = parameters[7];
 		maxWidth = parameters[8];
 		minWidth = parameters[9];
 	}

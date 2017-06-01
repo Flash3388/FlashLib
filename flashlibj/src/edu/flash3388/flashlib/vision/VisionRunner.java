@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Arrays;
+
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -17,13 +19,12 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		@Override
 		public void run() {
 			while(!stop){
-				if(!runner.isRunning() || runner.getParameters() == null){
+				if(!runner.isRunning() || runner.getProcessing() == null){
 					FlashUtil.delay(5);
 					continue;
 				}
 				
 				runner.lastAnalysis[1-runner.analysisIndex] = runner.analyse();
-				runner.analysisIndex ^= 1;
 				FlashUtil.delay(5);
 			}
 		}
@@ -33,7 +34,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	}
 	
 	private Analysis[] lastAnalysis = new Analysis[2];
-	private ProcessingParam parameters;
+	private VisionProcessing processing;
 	private int analysisIndex = 0;
 	private boolean running = false, remoteParam = true;
 	
@@ -61,6 +62,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	public Analysis getAnalysis() {
 		Analysis last = lastAnalysis[analysisIndex];
 		lastAnalysis[analysisIndex] = null;
+		analysisIndex ^= 1;
 		return last;
 	}
 	@Override
@@ -87,13 +89,12 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	}
 	
 	@Override
-	public void setParameters(ProcessingParam param) {
-		parameters = param;
-		FlashUtil.getLog().log("Parameters set");
+	public void setProcessing(VisionProcessing proc) {
+		processing = proc;
 	}
 	@Override
-	public ProcessingParam getParameters() {
-		return parameters;
+	public VisionProcessing getProcessing() {
+		return processing;
 	}
 
 	@Override
@@ -132,9 +133,9 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				else stop();
 			}
 		}else if(remoteParam){
-			ProcessingParam param = ProcessingParam.fromBytes(data, 2, data.length);
-			if(param != null)
-				setParameters(param);
+			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 2, data.length));
+			if(proc != null)
+				setProcessing(proc);
 		}
 	}
 	@Override

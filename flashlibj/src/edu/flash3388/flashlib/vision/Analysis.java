@@ -12,7 +12,7 @@ public class Analysis {
 	
 	public void print(){
 		String all = "H_dis: "+horizontalDistance+" V_dis: "+verticalDistance+" Dis: "+targetDistance+" Angle:"+offsetAngle;
-		FlashUtil.getLog().log(all);
+		System.out.println(all);
 	}
 	public byte[] transmit(){
 		byte[] bytes = new byte[8 * 4], x = FlashUtil.toByteArray((int)centerPointX), 

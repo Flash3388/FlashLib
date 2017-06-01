@@ -10,6 +10,7 @@ import edu.flash3388.flashlib.robot.rio.RioDpad;
 import edu.flash3388.flashlib.robot.rio.RioDpadButton;
 import edu.flash3388.flashlib.robot.rio.RioStick;
 import edu.flash3388.flashlib.robot.rio.RioTrigger;
+import edu.flash3388.flashlib.robot.sbc.IterativeFrcBot;
 import edu.flash3388.flashlib.robot.sbc.SbcBot;
 import edu.flash3388.flashlib.robot.sbc.SbcButton;
 import edu.flash3388.flashlib.robot.sbc.SbcDpad;
@@ -32,7 +33,7 @@ public class RobotFactory {
 	protected static void setImplementationType(ImplType type){
 		RobotFactory.type = type;
 		
-		if(type.equals(ImplType.RIO)){
+		if(type == ImplType.RIO){
 			FlashUtil.getLog().addLoggingInterface(new LoggingInterface(){
 				@Override
 				public void reportError(String err) {
@@ -57,9 +58,40 @@ public class RobotFactory {
 				
 			});
 		}
+		else if(type == ImplType.SBC){
+			RobotState.setImplementation(new RobotState(){
+				@Override
+				public boolean isDisabled() {
+					return SbcBot.isDisabled();
+				}
+				@Override
+				public boolean isTeleop() {
+					return SbcBot.getCurrentState() == IterativeFrcBot.STATE_TELEOP;
+				}
+				
+			});
+		}
+	}
+	
+	public static boolean isAxisConnected(int stick, int axis){
+		switch(type){
+			case RIO: return axis < DriverStation.getInstance().getStickAxisCount(axis);
+			case SBC: return true;
+			default: return false;
+		}
+	}
+	public static boolean isButtonConnected(int stick, byte button){
+		switch(type){
+			case RIO: return button <= DriverStation.getInstance().getStickButtonCount(stick);
+			case SBC: return button <= SbcBot.getControlStation().getButtonsCount(stick);
+			default: return false;
+		}
 	}
 	
 	public static double getStickAxis(int stick, int axis){
+		if(!isAxisConnected(stick, axis))
+			return 0;
+		
 		switch(type){
 			case RIO: return DriverStation.getInstance().getStickAxis(stick, axis);
 			case SBC: return SbcBot.getControlStation().getStickAxis(stick, axis);
@@ -67,6 +99,9 @@ public class RobotFactory {
 		}
 	}
 	public static boolean getStickButton(int stick, byte button){
+		if(!isButtonConnected(stick, button))
+			return false;
+		
 		switch(type){
 			case RIO: return DriverStation.getInstance().getStickButton(stick, button);
 			case SBC: return SbcBot.getControlStation().getStickButton(stick, button);

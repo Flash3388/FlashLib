@@ -8,9 +8,9 @@ public class RemoteVision extends Sendable implements Vision{
 
 	private boolean stopRemote = false, startRemote = false, localParam = true, updateForFileParam = false,
 			updateForRemoteParam = false;
-	private ProcessingParam param, copy;
+	private VisionProcessing processing;
 	private Analysis analysis;
-	private boolean send = false, newAnalysis = false, stopping = false;
+	private boolean send = false, newAnalysis = false, stopping = false, updateProcessing = false;
 	private double camOffset, targetHeight, targetWidth;
 	private long lastRec;
 	
@@ -46,7 +46,7 @@ public class RemoteVision extends Sendable implements Vision{
 	
 	@Override
 	public void start(){
-		if(param == null && isLocalParam())
+		if(processing == null && isLocalParam())
 			enableRemoteParameters(true);
 		startRemote();
 		send = true;
@@ -67,14 +67,14 @@ public class RemoteVision extends Sendable implements Vision{
 			setRobotParam();
 	}
 	@Override
-	public void setParameters(ProcessingParam param){
+	public void setProcessing(VisionProcessing proc) {
 		enableRemoteParameters(false);
-		this.param = param;
+		processing = proc;
 		FlashUtil.getLog().log("Vision Prameters are set!!");
 	}
 	@Override
-	public ProcessingParam getParameters(){
-		return param;
+	public VisionProcessing getProcessing() {
+		return processing;
 	}
 	@Override
 	public Analysis getAnalysis(){
@@ -134,17 +134,17 @@ public class RemoteVision extends Sendable implements Vision{
 		
 		if(localParam) return null;
 		FlashUtil.getLog().log("Sending Vision parameters");
-		copy = param.copy();
-		return param.toBytes();
+		updateProcessing = false;
+		return processing.toBytes();
 	}
 	@Override
 	public boolean hasChanged() {
-		return send && ((param != null && !param.equals(copy)) || stopRemote || startRemote || 
+		return send && ((updateProcessing && processing != null) || stopRemote || startRemote || 
 				updateForFileParam || updateForRemoteParam);
 	}
 	@Override
 	public void onConnection() {
-		copy = null;
+		updateProcessing = true;
 		if(!localParam && !updateForFileParam) {
 			updateForFileParam = true;
 			System.out.println("File param");

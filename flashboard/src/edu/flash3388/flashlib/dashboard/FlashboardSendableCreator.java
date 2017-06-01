@@ -19,7 +19,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.TESTER: Tester.init(id); return Tester.getInstance();
 			case FlashboardSendableType.MOTOR: if(Tester.getInstance() != null) return Tester.getInstance().addMotor(id);
 							else return null;
-			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(id);
+			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name, id);
 			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new CvRunner(name, id);
 			case FlashboardSendableType.PDP: return new PDP(name, id);
 		}

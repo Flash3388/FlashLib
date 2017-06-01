@@ -98,6 +98,9 @@ public abstract class Action {
 	public Enumeration<System> getRequirements(){
 		return requirements.elements();
 	}
+	public long getTimeOut(){
+		return timeout;
+	}
 	
 	protected void requires(System... subsystems){
 		for(System s : subsystems)
@@ -111,9 +114,6 @@ public abstract class Action {
 	}
 	protected void setTimeOut(long milliseconds){
 		timeout = milliseconds;
-	}
-	protected long getTimeOut(){
-		return timeout;
 	}
 	protected boolean removeOnDisabled(){
 		return true;

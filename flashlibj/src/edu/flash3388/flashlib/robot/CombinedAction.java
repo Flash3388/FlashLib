@@ -8,7 +8,7 @@ public abstract class CombinedAction extends Action{
 
 	public static abstract class ActionPart{
 		protected abstract void initialize();
-		protected abstract double getExecute();
+		public abstract double getExecute();
 		protected abstract boolean isFinished();
 		protected abstract void end();
 	}

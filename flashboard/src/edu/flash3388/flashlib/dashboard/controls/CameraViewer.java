@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -12,22 +11,19 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.vision.ImagePipeline;
+import edu.flash3388.flashlib.vision.CvPipeline;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 
-public class CameraViewer extends Displayble implements DataListener, ImagePipeline{
+public class CameraViewer extends Displayble implements DataListener, CvPipeline{
 	
 	public static enum DisplayMode{
 		Normal, PostProcess, Threshold
@@ -75,6 +71,8 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	}
 	@Override
 	public void newData(byte[] bytes) {
+		Dashboard.setForVision(bytes);
+		
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
  
@@ -86,7 +84,6 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 		    reader.setInput(iis, true);
 		    ImageReadParam param = reader.getDefaultReadParam();
 		    BufferedImage image = reader.read(0, param); 
-		    Dashboard.setForVision(image);
 		    setImage(image);
 		} catch (IOException e) {
 		}
@@ -116,9 +113,9 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 		mode = m;
 	}
 	@Override
-	public void newImage(Mat mat, int type) {
-		if((mode == DisplayMode.Threshold && type == ImagePipeline.TYPE_THRESHOLD) ||
-				(mode == DisplayMode.PostProcess && type == ImagePipeline.TYPE_POST_PROCESS))
+	public void newImage(Mat mat, byte type) {
+		if((mode == DisplayMode.Threshold && type == CvPipeline.TYPE_THRESHOLD) ||
+				(mode == DisplayMode.PostProcess && type == CvPipeline.TYPE_POST_PROCESS))
 			setMatImage(mat);
 	}
 }

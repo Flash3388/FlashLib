@@ -11,12 +11,15 @@ public class FileStream {
 	
 	public static String[] filesInFolder(String path, String extension){
 		File[] files = new File(path).listFiles();
+		if(files == null)
+			return null;
+		
 		List<String> names = new ArrayList<String>();
 		for(File f : files){
 			if(f.isFile()){
 				String[] splits = f.getPath().split("\\.");
 				if((extension.equals("")) || 
-						(splits.length > 1 && splits[1].equals(extension)))	
+						(splits.length > 1 && splits[splits.length-1].equals(extension)))	
 					names.add(f.getName());
 			}
 		}

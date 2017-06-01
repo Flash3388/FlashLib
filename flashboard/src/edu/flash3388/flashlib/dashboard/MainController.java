@@ -17,10 +17,10 @@ import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
 import edu.flash3388.flashlib.dashboard.Remote.RemoteHost;
 import edu.flash3388.flashlib.dashboard.Remote.User;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
-import edu.flash3388.flashlib.vision.ProcessingParam;
-import edu.flash3388.flashlib.vision.ProcessingParam.DetectingMode;
-import edu.flash3388.flashlib.vision.Range;
+import edu.flash3388.flashlib.vision.ProcessingFilter;
+import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -52,7 +52,7 @@ public class MainController implements Initializable{
 				controller.update(); 
 			CvRunner vision = Dashboard.getVision();
 			if(vision != null){
-				if(vision.isLocalParameters() && vision.getParameters() == null)
+				if(vision.isLocalParameters() && vision.getProcessing() == null)
 					Dashboard.loadDefaultParameters();
 				else 
 					controller.updateParam();
@@ -96,7 +96,7 @@ public class MainController implements Initializable{
 	@FXML TextField s_max_text;
 	@FXML TextField v_min_text;
 	@FXML TextField v_max_text;
-	@FXML CheckBox hsv_check, morph_check, vision_check, boiler_check;
+	@FXML CheckBox hsv_check, vision_check;
 	@FXML ComboBox<String> mode_box;
 	@FXML Rectangle camserverRect, connectionRect;
 	@FXML VBox controller_node, sensor_node, camera_node;
@@ -109,7 +109,7 @@ public class MainController implements Initializable{
 	private UpdateTask threadTask;
 	private boolean local = false;
 	private boolean hsvSet = false;
-	private DetectingMode[] modesV = DetectingMode.values();
+	private ColorFilter colorFilter;
 	
 	public HBox getManualControlsNode(){
 		return manual_controls;
@@ -130,9 +130,6 @@ public class MainController implements Initializable{
 		threadTask.controller = this;
 		Dashboard.addRunnableForUpdate(threadTask);
 		
-		for(DetectingMode m : modesV)
-			mode_box.getItems().add(m.toString());
-		mode_box.getSelectionModel().select(0);
 		
 		sbc_ssh.setOnAction((e)->{
 			RemoteHost host = Remote.getRemoteHost("beaglebone-3388.local");
@@ -144,35 +141,10 @@ public class MainController implements Initializable{
 			//File folder = FileDialog.showDirectoryChooser(Dashboard.getPrimary());
 		});
 		load_params.setOnAction((e)->{
-			if(Dashboard.getVision() == null){
-				Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
-				return;
-			}
-			File file = FileDialog.showLoadDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, 
-					Dashboard.EXT_VISION_PARAM);
-			if(file == null) return;
-			String path = file.getAbsolutePath();
-			FlashUtil.getLog().log("Loading file: "+path);
-			ProcessingParam p = ProcessingParam.loadFromFile(path);
-			if(Dashboard.getVision().isLocalParameters() && p != null){
-				FlashUtil.getLog().log("Parameters loaded");
-				Dashboard.getVision().setParameters(p);
-				updateParam();
-			}else FlashUtil.getLog().log("Loading failed");
+			loadParams();
 		});
 		save_params.setOnAction((e)->{
-			if(Dashboard.getVision() == null){
-				Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
-				return;
-			}
-			if(Dashboard.getVision().getParameters() != null){
-				File file = FileDialog.showSaveDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, "param",
-						Dashboard.EXT_VISION_PARAM);
-				if(file == null) return;
-				String path = file.getAbsolutePath();
-				FlashUtil.getLog().log("Saving parameters: "+path);
-				Dashboard.getVision().getParameters().saveFile(path);
-			}
+			saveParams();
 		});
 		motorTester.setOnAction((e)->showTester());
 		show_log.setOnAction((e)->showLog());
@@ -185,16 +157,10 @@ public class MainController implements Initializable{
 			int index = displayBoxType.getSelectionModel().getSelectedIndex();
 			Dashboard.getCamViewer().setDisplayMode(DisplayMode.values()[index]);
 		});
-		mode_box.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
-			if(!checkVision()) return;
-			
-			int newval = newValue.intValue();
-			Dashboard.getVision().getParameters().mode = modesV[newval];
-		});
-		morph_check.setOnAction((e)->{
-			if(!checkVision()) return;
-			
-			Dashboard.getVision().getParameters().morphOps = morph_check.isSelected();
+		mode_box.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
+			if(oldValue.equals(newValue))
+				return;
+			loadParam(Dashboard.FOLDER_SAVES+newValue);
 		});
 		vision_check.setOnAction((e)->{
 			if(!checkVision()) return;
@@ -207,13 +173,8 @@ public class MainController implements Initializable{
 		hsv_check.setOnAction((e)->{
 			if(!checkVision()) return;
 			
-			Dashboard.getVision().getParameters().hsv = hsv_check.isSelected();
+			colorFilter.setHsv(hsv_check.isSelected());
 			setForHSV(hsv_check.isSelected());
-		});
-		boiler_check.setOnAction((e)->{
-			if(!checkVision()) return;
-			
-			Dashboard.getVision().getParameters().targetBoiler = boiler_check.isSelected();
 		});
 		h_min.setMin(0);
 		h_min.setMax(255);
@@ -225,7 +186,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val) {
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().hue_red.start = new_val.intValue();
+				colorFilter.setMin1(new_val.intValue());
 				h_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -257,7 +218,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().hue_red.end = new_val.intValue();
+				colorFilter.setMax1(new_val.intValue());
 				h_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -289,7 +250,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().sat_green.start = new_val.intValue();
+				colorFilter.setMin2(new_val.intValue());
 				s_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -321,7 +282,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().sat_green.end = new_val.intValue();
+				colorFilter.setMax2(new_val.intValue());
 				s_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -353,7 +314,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().val_blue.start = new_val.intValue();
+				colorFilter.setMin3(new_val.intValue());
 				v_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -385,7 +346,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				Dashboard.getVision().getParameters().val_blue.end = new_val.intValue();
+				colorFilter.setMax3(new_val.intValue());
 				v_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -408,18 +369,68 @@ public class MainController implements Initializable{
 		});
 	}
 	
+	private void saveParams(){
+		if(Dashboard.getVision() == null){
+			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
+			return;
+		}
+		if(Dashboard.getVision().getProcessing() != null){
+			File file = FileDialog.showSaveDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, "param",
+					"xml");
+			if(file == null) return;
+			String path = file.getAbsolutePath();
+			FlashUtil.getLog().log("Saving parameters: "+path);
+			Dashboard.getVision().getProcessing().saveToFile(path);
+		}
+	}
+	private void loadParams(){
+		if(Dashboard.getVision() == null){
+			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
+			return;
+		}
+		File file = FileDialog.showLoadDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, 
+				"xml");
+		if(file == null) return;
+		String path = file.getAbsolutePath();
+		loadParam(path);
+	}
+	public boolean loadParam(String path){
+		FlashUtil.getLog().log("Loading file: "+path);
+		VisionProcessing proc = VisionProcessing.createFromXml(path);
+		if(Dashboard.getVision().isLocalParameters() && proc != null){
+			FlashUtil.getLog().log("Parameters loaded");
+			Dashboard.getVision().setProcessing(proc);
+			updateParam();
+			addParamToBox(path.substring(path.lastIndexOf("/")+1, path.lastIndexOf(".")));
+			return true;
+		}else {
+			FlashUtil.getLog().log("Loading failed");
+			return false;
+		}
+	}
+	private void addParamToBox(String name){
+		for (String str : mode_box.getItems()) {
+			if(name.equals(str)){
+				return;
+			}
+		}
+		mode_box.getItems().add(name);
+		FlashFxUtils.onFxThread(()->mode_box.getSelectionModel().select(name));
+	}
 	private boolean checkVision(){
 		if(local) 
 			return false;
 		CvRunner vision = Dashboard.getVision();
 		if(vision == null) 
 			return false;
-		if(vision.getParameters() == null && vision.isLocalParameters())
+		if(vision.getProcessing() == null && vision.isLocalParameters())
 			setParam();
 		if(!vision.isLocalParameters()){
 			updateParam();
 			return false;
 		}
+		if(colorFilter == null)
+			return false;
 		return true;
 	}
 	private boolean isANumber(String s){
@@ -449,41 +460,40 @@ public class MainController implements Initializable{
 	}
 	public void updateParam(){
 		if(Dashboard.getVision() == null) return;
-		ProcessingParam p = Dashboard.getVision().getParameters();
-		if(p == null) return;
-		local = true;
-		h_max.setValue(p.hue_red.end);    h_max_val.setText(String.valueOf(p.hue_red.end));
-		h_min.setValue(p.hue_red.start);  h_min_val.setText(String.valueOf(p.hue_red.start));
-		s_max.setValue(p.sat_green.end);  s_max_val.setText(String.valueOf(p.sat_green.end));
-		s_min.setValue(p.sat_green.start);s_min_val.setText(String.valueOf(p.sat_green.start));
-		v_max.setValue(p.val_blue.end);   v_max_val.setText(String.valueOf(p.val_blue.end));
-		v_min.setValue(p.val_blue.start); v_min_val.setText(String.valueOf(p.val_blue.start));
-		if(hsv_check.isSelected() != p.hsv){
-			hsv_check.setSelected(p.hsv);
-			setForHSV(p.hsv);
+		ProcessingFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
+		for (ProcessingFilter filter : filters) {
+			if(FlashUtil.instanceOf(filter, ColorFilter.class)){
+				colorFilter = (ColorFilter) filter;
+				break;
+			}
 		}
-		if(morph_check.isSelected() != p.morphOps)
-			morph_check.setSelected(p.morphOps);
-		if(mode_box.getSelectionModel().getSelectedIndex() != p.mode.value)
-			mode_box.getSelectionModel().select(p.mode.value);
+		if(colorFilter == null) return;
+		local = true;
+		h_max.setValue(colorFilter.getMax1());  h_max_val.setText(String.valueOf(colorFilter.getMax1()));
+		h_min.setValue(colorFilter.getMin1());  h_min_val.setText(String.valueOf(colorFilter.getMin1()));
+		s_max.setValue(colorFilter.getMax2());  s_max_val.setText(String.valueOf(colorFilter.getMax2()));
+		s_min.setValue(colorFilter.getMin2());  s_min_val.setText(String.valueOf(colorFilter.getMin2()));
+		v_max.setValue(colorFilter.getMax3());  v_max_val.setText(String.valueOf(colorFilter.getMax3()));
+		v_min.setValue(colorFilter.getMin3());  v_min_val.setText(String.valueOf(colorFilter.getMin3()));
+		if(hsv_check.isSelected() != colorFilter.isHsv()){
+			hsv_check.setSelected(colorFilter.isHsv());
+			setForHSV(colorFilter.isHsv());
+		}
+		
 		if(vision_check.isSelected() != Dashboard.getVision().isRunning())
 			vision_check.setSelected(Dashboard.getVision().isRunning());
-		if(boiler_check.isSelected() != p.targetBoiler)
-			boiler_check.setSelected(p.targetBoiler);
 		local = false;
 	}
 	public void setParam(){
 		if(Dashboard.getVision() == null) return;
-		ProcessingParam p = new ProcessingParam();
-		p.hsv = hsv_check.isSelected();
-		p.mode = modesV[mode_box.getSelectionModel().getSelectedIndex()];
-		p.blur = 7;
-		p.targetBoiler = true;
-		p.morphOps = morph_check.isSelected();
-		p.hue_red = new Range((int) h_min.getValue(), (int)h_max.getValue());
-		p.sat_green = new Range((int) s_min.getValue(), (int)s_max.getValue());
-		p.val_blue = new Range((int) v_min.getValue(), (int)v_max.getValue());
-		Dashboard.getVision().setParameters(p);
+		colorFilter = new ColorFilter();
+		colorFilter.setHsv(hsv_check.isSelected());
+		colorFilter.set((int) h_min.getValue(), (int)h_max.getValue(), 
+				(int) s_min.getValue(), (int)s_max.getValue(), 
+				(int) v_min.getValue(), (int)v_max.getValue());
+		VisionProcessing proc = new VisionProcessing();
+		proc.addFilter(colorFilter);
+		Dashboard.getVision().setProcessing(proc);
 	}
 	public void updateVisionRun(){
 		local = true;

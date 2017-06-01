@@ -72,6 +72,27 @@ public class FlashUtil {
 		return mainLog;
 	}
 
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void sort(Object[]...as){
+		if(as == null)
+			throw new NullPointerException("Array is null");
+		if(as.length < 1) 
+			throw new IllegalArgumentException("Less than 1 array was passed");
+		
+		Object[] main = as[0];
+		for (int i = 0; i < main.length; i++) {
+			for (int j = 0; j < main.length-1; j++) {
+				if(((Comparable)main[j]).compareTo(main[j+1]) > 0){
+					for (int j2 = 0; j2 < as.length; j2++) {
+						Object t = as[j2][j];
+						as[j2][j] = as[j2][j+1];
+						as[j2][j+1] = t;
+					}
+				}
+			}
+		}
+	}
 	//--------------------------------------------------------------------
 	//-----------------------Executor-------------------------------------
 	//--------------------------------------------------------------------

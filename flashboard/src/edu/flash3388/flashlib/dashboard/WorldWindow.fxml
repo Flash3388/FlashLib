@@ -182,8 +182,6 @@
             </HBox>
    					<Slider fx:id="v_max" />
             <CheckBox fx:id="hsv_check" mnemonicParsing="false" text="HSV" />
-            <CheckBox fx:id="morph_check" mnemonicParsing="false" text="Morph Ops" />
-            <CheckBox fx:id="boiler_check" mnemonicParsing="false" text="Boiler" />
             <CheckBox fx:id="vision_check" mnemonicParsing="false" text="Vision" />
             <HBox alignment="CENTER_LEFT">
       <children>

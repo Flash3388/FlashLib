@@ -1,0 +1,26 @@
+<vision>
+	<filter id="12">
+		<param>1.0</param>
+		<param>0.0</param>
+		<param>180.0</param>
+		<param>0.0</param>
+		<param>255.0</param>
+		<param>230.0</param>
+		<param>255.0</param>
+	</filter>
+	<filter id="5">
+		<param>10.0</param>
+	</filter>
+	<filter id="7">
+		<param>2.0</param>
+		<param>1.0</param>
+		<param>2.5</param>
+		<param>1.0</param>
+		<param>0.5</param>
+		<param>0.1</param>
+		<param>1000.0</param>
+		<param>5.0</param>
+		<param>1000.0</param>
+		<param>5.0</param>
+	</filter>
+</vision>
