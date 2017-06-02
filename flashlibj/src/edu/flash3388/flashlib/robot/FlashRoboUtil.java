@@ -64,7 +64,7 @@ public class FlashRoboUtil {
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
 			Flashboard.init();
-			Flashboard.attach(new SendableLog());
+			Flashboard.attach(new SendableLog(FlashUtil.getLog()));
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
 			Scheduler.init();

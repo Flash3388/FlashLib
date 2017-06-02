@@ -3,19 +3,20 @@ package edu.flash3388.flashlib.flashboard;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.LoggingInterface;
 
 public class SendableLog extends Sendable{
 	
 	private Vector<String> logs = new Vector<String>();
 	private Vector<String> sentLogs = new Vector<String>();
-	private boolean justConnected = false;
-	private int sentIndex = 0;
 	
-	public SendableLog() {
-		super(FlashboardSendableType.LOG);
-		FlashUtil.getLog().addLoggingInterface(new LoggingInterface(){
+	public SendableLog(Log log) {
+		super(log.getName(), FlashboardSendableType.LOG);
+		byte mode = log.getLoggingMode();
+		if((mode & Log.MODE_INTERFACES) == 0)
+			log.setLoggingMode((byte) (mode | Log.MODE_INTERFACES));
+		log.addLoggingInterface(new LoggingInterface(){
 			@Override
 			public void log(String log) {
 				feed(log);
@@ -36,32 +37,27 @@ public class SendableLog extends Sendable{
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		String str = "";
-		
-		if(sentIndex >= sentLogs.size() || sentLogs.isEmpty()) justConnected = false;
-		if(justConnected)
-			str = sentLogs.elementAt(sentIndex++);
-		else if(!logs.isEmpty()){
-			String log = logs.elementAt(0);
-			logs.removeElementAt(0);
-			sentLogs.addElement(log);
-			str = log;
-		}
-		
+		String str = logs.elementAt(0);
+		logs.remove(0);
+		sentLogs.addElement(str);
 		return str.getBytes();
 	}
 	@Override
 	public boolean hasChanged() {
-		return !logs.isEmpty() || (justConnected && !sentLogs.isEmpty());
+		return !logs.isEmpty();
 	}
 	@Override
 	public void onConnection() {
-		justConnected = true;
-		sentIndex = 0;
+		int logsize = logs.size();
+		for (int i = 0; i < sentLogs.size(); i++){
+			if(i < logsize)
+				logs.setElementAt(sentLogs.get(i), i);
+			else logs.addElement(sentLogs.get(i));
+		}
+		sentLogs.clear();
 	}
 	@Override
 	public void onConnectionLost() {
-		justConnected = false;
 	}
 
 }

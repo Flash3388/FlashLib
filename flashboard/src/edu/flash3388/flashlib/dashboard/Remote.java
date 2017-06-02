@@ -117,6 +117,7 @@ public class Remote {
 	}
 	
 	public static final String CHANNEL_SHELL = "shell";
+	public static final String CHANNEL_SFTP = "sftp";
 	public static final String CHANNEL_EXECUTOR = "exec";
 	
 	private static JSch jsch;

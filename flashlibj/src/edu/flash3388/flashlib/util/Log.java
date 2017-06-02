@@ -234,6 +234,9 @@ public class Log{
 			out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	
+	public String getName(){
+		return name;
+	}
 	public LoggingType getLoggingType(){
 		return type;
 	}

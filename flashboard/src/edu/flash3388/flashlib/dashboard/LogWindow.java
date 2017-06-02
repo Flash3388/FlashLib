@@ -76,7 +76,9 @@ public class LogWindow extends Stage{
 	}
 	
 	private void updateTabs(RemoteLog log){
-		tabs.getTabs().add(new Tab(log.getName()));
+		Tab tab = new Tab(log.getName());
+		tab.setClosable(false);
+		tabs.getTabs().add(tab);
 	}
 	private void addLine(String line){
 		textArea.appendText(line+"\n");
@@ -109,10 +111,13 @@ public class LogWindow extends Stage{
 		tabs = new TabPane();
 		for (RemoteLog remoteLog : logs) {
 			Tab tab = new Tab(remoteLog.getName());
+			tab.setClosable(false);
 			tabs.getTabs().add(tab);
 		}
-		if(tabs.getTabs().size() > 0)
+		if(tabs.getTabs().size() > 0){
 			tabs.getSelectionModel().select(0);
+			selectLog(0);
+		}
 		tabs.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {

@@ -17,9 +17,11 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import sun.rmi.transport.proxy.CGIHandler;
 
 public class ShellWindow extends Stage{
 
@@ -42,14 +44,10 @@ public class ShellWindow extends Stage{
 	}
 	private void enterText(){
 		inStream.setInput(enteredVal.toString());
-		enteredVal.delete(0, enteredVal.length()-1);
+		enteredVal.delete(0, enteredVal.length());
 	}
-	private void validateDelete(){
-		if(enteredVal.length() < 1 || textArea.getCaretPosition() < textArea.getLength() - enteredVal.length()){
-			textArea.deletePreviousChar();
-			return;
-		}
-		enteredVal.deleteCharAt(enteredVal.length()-1);
+	private boolean validateDelete(){
+		return enteredVal.length() > 0 && textArea.getCaretPosition() > textArea.getLength() - enteredVal.length();
 	}
 	private void createScene(){
 		textArea = new TextArea();
@@ -57,20 +55,20 @@ public class ShellWindow extends Stage{
 		textArea.setStyle("-fx-control-inner-background:#000000;");
 		//textArea.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 		textArea.setFont(Font.font(10));
-		textArea.setOnKeyTyped((e)->{
-			if(e.getCharacter().equals("\r")){
+		textArea.addEventFilter(KeyEvent.KEY_PRESSED, (e)->{
+			if(e.getCode() == KeyCode.ENTER){
+				enteredVal.append("\r");
 				enterText();
-				return;
 			}
-			if(e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE){
-				validateDelete();
-				return;
+			else if(e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.DELETE){
+				if(!validateDelete())
+					e.consume();
+				else {
+					int pos = textArea.getLength() - textArea.getCaretPosition();
+					enteredVal.delete(pos, pos+1);
+				}
 			}
-			if(textArea.getCaretPosition() < textArea.getLength() - enteredVal.length()){
-				textArea.deletePreviousChar();
-				return;
-			}
-			enteredVal.append(e.getCharacter());
+			else enteredVal.append(e.getText());
 		});
 		
 		outStream = new OutputStream(){
@@ -120,12 +118,17 @@ public class ShellWindow extends Stage{
 			case SSH: return Remote.CHANNEL_SHELL;
 			case SCP:
 				break;
-			case SFTP:
-				break;
+			case SFTP: return Remote.CHANNEL_SFTP;
 		}
 		return null;
 	}
-	public static void showShellWindow(Stage owner, ChannelType t, RemoteHost host, User user){
+	public static void showShellWindow(Stage owner, ChannelType t){
+		Object[] obj = ChannelInputWindow.showInput();
+		if(obj == null)
+			return;
+		
+		RemoteHost host = (RemoteHost) obj[0];
+		User user = (User) obj[1];
 		String chN = channelFromType(t);
 		ShellWindow shell = new ShellWindow(owner, chN, host, user);
 		shell.show();
@@ -139,7 +142,7 @@ public class ShellWindow extends Stage{
 		
 		@Override
 		public int read() throws IOException {
-			if(index >= input.length) return 0;
+			if(index >= input.length) return -1;
 			return input[index++];
 		}
 		@Override

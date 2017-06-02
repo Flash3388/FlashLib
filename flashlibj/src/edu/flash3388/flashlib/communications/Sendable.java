@@ -19,6 +19,9 @@ public abstract class Sendable {
 		this.name = name;
 	}
 	
+	void setId(int id){
+		this.id = id;
+	}
 	boolean remoteInit(){
 		return init;
 	}

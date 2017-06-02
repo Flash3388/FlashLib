@@ -132,9 +132,10 @@ public class MainController implements Initializable{
 		
 		
 		sbc_ssh.setOnAction((e)->{
-			RemoteHost host = Remote.getRemoteHost("beaglebone-3388.local");
-			User user = host.getUser("root");
-			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH, host, user);
+			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
+		});
+		sbc_sftp.setOnAction((e)->{
+			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
 		});
 		sbc_update.setOnAction((e)->{
 			//TODO: IMPLEMENT
@@ -158,7 +159,7 @@ public class MainController implements Initializable{
 			Dashboard.getCamViewer().setDisplayMode(DisplayMode.values()[index]);
 		});
 		mode_box.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
-			if(oldValue.equals(newValue))
+			if(oldValue == null || oldValue.equals(newValue))
 				return;
 			loadParam(Dashboard.FOLDER_SAVES+newValue);
 		});

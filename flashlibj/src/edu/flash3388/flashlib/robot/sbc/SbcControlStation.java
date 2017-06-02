@@ -40,7 +40,7 @@ public final class SbcControlStation extends Sendable{
 	
 	public static final byte MAX_CONTROLLERS = 3;
 	public static final byte CONTROLLER_AXES = 6;
-	private static final byte CONTROLLER_DATA_SIZE = (5 + CONTROLLER_AXES) * MAX_CONTROLLERS + 2;
+	static final byte CONTROLLER_DATA_SIZE = (5 + CONTROLLER_AXES) * MAX_CONTROLLERS + 2;
 	
 	private byte[][] controllerAxes = new byte[MAX_CONTROLLERS][CONTROLLER_AXES];
 	private short[] controllerPovs = new short[MAX_CONTROLLERS];
@@ -49,6 +49,7 @@ public final class SbcControlStation extends Sendable{
 	private byte[] controllersData = new byte[CONTROLLER_DATA_SIZE];
 	private byte connectedControllers = 0;
 	private byte stateByte = 0;
+	private boolean confirm = false;
 	private boolean updateData = true;
 	private boolean stop = false;
     private boolean attached = false;
@@ -59,7 +60,7 @@ public final class SbcControlStation extends Sendable{
 	private Thread csThread;
 	
 	SbcControlStation() {
-		super("CS-"+SbcBot.getBoardName(), SbcSendableType.CONSTROL_STATION);
+		super("CS-"+SbcBot.getBoardName(), -1, SbcSendableType.CONSTROL_STATION);
 		
 		for (int i = 0; i < controllerButtons.length; i++)
 			controllerButtons[i] = new ControllerButtons();
@@ -93,7 +94,12 @@ public final class SbcControlStation extends Sendable{
 		updateData = false;
 		int pos = 0;
 		
-		stateByte = controllersData[pos++];
+		byte b = controllersData[pos++];
+		if(stateByte != b){
+			stateByte = b;
+			confirm = true;
+		}
+		
 		connectedControllers = controllersData[pos++];
 		int j = 0;
 		for(int i = 0; i < MAX_CONTROLLERS; i++){
@@ -105,10 +111,10 @@ public final class SbcControlStation extends Sendable{
 			controllerButtons[i].count = controllersData[pos++];
 			controllerButtons[i].buttons = 0;
 			controllerButtons[i].buttons = ((short) controllersData[pos++]);
-			controllerButtons[i].buttons |= (controllersData[pos++] << (controllerButtons[i].count >> 2));
+			controllerButtons[i].buttons |= (controllersData[pos++] << 8);
 			
 			controllerPovs[i] = ((short) controllersData[pos++]);
-			controllerPovs[i] |= (controllersData[pos++] << 4);
+			controllerPovs[i] |= (controllersData[pos++] << 8);
 		}
 		
 		updateData = true;
@@ -128,11 +134,11 @@ public final class SbcControlStation extends Sendable{
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		return null;
+		return new byte[]{stateByte};
 	}
 	@Override
 	public boolean hasChanged() {
-		return false;
+		return confirm;
 	}
 
 	@Override
