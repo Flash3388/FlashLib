@@ -3,17 +3,18 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.CombinedAction;
+import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 
 public class TankOrientationCombinedAction extends CombinedAction{
 
 	private TankDriveSystem driveTrain;
-	private ActionPart positioning;
-	private ActionPart rotation;
+	private SourceAction positioning;
+	private SourceAction rotation;
 	private double minSpeed, maxSpeed;
 	
 	public TankOrientationCombinedAction(TankDriveSystem driveTrain, 
-			ActionPart positioning, ActionPart rotation, 
+			SourceAction positioning, SourceAction rotation, 
 			double minSpeed, double maxSpeed){
 		this.driveTrain = driveTrain;
 		this.positioning = positioning;
@@ -21,12 +22,15 @@ public class TankOrientationCombinedAction extends CombinedAction{
 		this.minSpeed = minSpeed;
 		this.maxSpeed = maxSpeed;
 		
+		add(rotation);
+		add(positioning);
+		
 		System s = driveTrain.getSystem();
 		if(s != null)
 			requires(s);
 	}
 	public TankOrientationCombinedAction(TankDriveSystem driveTrain, 
-			ActionPart positioning, ActionPart rotation){
+			SourceAction positioning, SourceAction rotation){
 		this(driveTrain, positioning, rotation, 0.1, 0.7);
 	}
 	
@@ -36,8 +40,10 @@ public class TankOrientationCombinedAction extends CombinedAction{
 	}
 	@Override
 	protected void execute() {
-		double speedY = Mathd.limit(positioning.getExecute(), minSpeed, maxSpeed);
-		double speedX = Mathd.limit(rotation.getExecute(), minSpeed, maxSpeed);
+		double speedY = positioning != null? 
+				Mathd.limit(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+		double speedX = rotation != null? 
+				Mathd.limit(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
 		
 		driveTrain.arcadeDrive(speedY, speedX);
 	}
@@ -47,16 +53,20 @@ public class TankOrientationCombinedAction extends CombinedAction{
 		driveTrain.stop();
 	}
 
-	public void setPositioningActionPart(ActionPart pos){
+	public void setPositioningActionPart(SourceAction pos){
+		remove(positioning);
 		this.positioning = pos;
+		add(positioning);
 	}
-	public ActionPart getPositioningActionPart(){
+	public SourceAction getPositioningActionPart(){
 		return positioning;
 	}
-	public void setRotationActionPart(ActionPart rot){
+	public void setRotationActionPart(SourceAction rot){
+		remove(rotation);
 		this.rotation = rot;
+		add(rotation);
 	}
-	public ActionPart getRotationActionPart(){
+	public SourceAction getRotationActionPart(){
 		return rotation;
 	}
 	

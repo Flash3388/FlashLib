@@ -14,13 +14,13 @@ public class HolonomicVision extends Action implements VisionAction{
 	private HolonomicDriveSystem driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontalD, rotate, sideways = false;
+	private boolean targetFound, centered, rotate, sideways = false;
 	private byte margin;
 	private double speed, lastY, lastX, currentDistance, distanceThreshold, minSpeed, distanceMargin, maxSpeed;
 	private int timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
 	
 	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
-			boolean rotate, boolean horizontalD,
+			boolean rotate,
 			byte margin, double distanceThreshold, int timeout, int passedTimeout, int centeredtimout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
@@ -31,7 +31,6 @@ public class HolonomicVision extends Action implements VisionAction{
 		this.distanceThreshold = distanceThreshold;
 		this.centeredTimeout = centeredtimout;
 		this.passedTimeout = passedTimeout;
-		this.horizontalD = horizontalD;
 		this.rotate = rotate;
 		
 		System s = null;
@@ -40,12 +39,12 @@ public class HolonomicVision extends Action implements VisionAction{
 		modable = driveTrain;
 	}
 	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed, 
-			boolean rotate, boolean horizontalD){
-		this(driveTrain, vision, speed, rotate, horizontalD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
+			boolean rotateD){
+		this(driveTrain, vision, speed, rotateD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
 				ACTION_VALIDATION_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
 	public HolonomicVision(HolonomicDriveSystem driveTrain, Vision vision, double speed){
-		this(driveTrain, vision, speed, false, false);
+		this(driveTrain, vision, speed, false);
 	}
 	
 	@Override
@@ -78,8 +77,7 @@ public class HolonomicVision extends Action implements VisionAction{
 			Analysis an = vision.getAnalysis();
 			an.print();
 			int offset = an.horizontalDistance;
-			currentDistance = horizontalD? calculateHorizontalDistance(an.targetDistance) :
-												  an.targetDistance;
+			currentDistance = an.targetDistance;
 			
 			if(offset > -margin && offset < margin){
 				if(!centered){
@@ -141,10 +139,6 @@ public class HolonomicVision extends Action implements VisionAction{
 	@Override
 	public void setMotorModeSource(ModableMotor modable){
 		this.modable = modable;
-	}
-	
-	private double calculateHorizontalDistance(double distance){
-		return Math.sqrt((distance * distance) - (0.0 * 0.0));
 	}
 	
 	@Override
@@ -237,12 +231,6 @@ public class HolonomicVision extends Action implements VisionAction{
 	}
 	public void setDistanceThreshold(double cm){
 		distanceThreshold = cm;
-	}
-	public boolean isHorizontalDistance(){
-		return horizontalD;
-	}
-	public void setHorizontalDistance(boolean en){
-		horizontalD = en;
 	}
 	public boolean isSetToRotate(){
 		return rotate;

@@ -1,10 +1,8 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
+import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -19,6 +17,7 @@ public class DoubleProperty extends Displayble{
 	private Label label;
 	private VBox node;
 	private Runnable updater;
+	private boolean changed = true;
 	
 	public DoubleProperty(String name, int id) {
 		super(name, id, FlashboardSendableType.DOUBLE);
@@ -30,6 +29,7 @@ public class DoubleProperty extends Displayble{
 		updater = new Runnable(){
 			@Override
 			public void run() {
+				changed = false;
 				label.setText(name + ": " + value);
 			}
 		};
@@ -38,9 +38,9 @@ public class DoubleProperty extends Displayble{
 	@Override
 	public void newData(byte[] bytes) {
 		if(bytes.length < 8) return;
-		if(bytes.length > 8) bytes = Arrays.copyOfRange(bytes, 0, 8);
 		synchronized(this){
-			value = ByteBuffer.wrap(bytes).getDouble();
+			value = FlashUtil.toDouble(bytes);
+			changed = true;
 		}
 	}
 	@Override
@@ -59,6 +59,7 @@ public class DoubleProperty extends Displayble{
 	protected Node getNode(){return node;}
 	@Override
 	public Runnable updateDisplay() {
+		if(!changed) return null;
 		return updater;
 	}
 }

@@ -14,12 +14,12 @@ public class VisionApproach extends Action implements VisionAction{
 	private YAxisMovable driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, horizontalDistance;
+	private boolean targetFound;
 	private double speed, lastSpeed, distanceThreshold, currentDistance, distanceMargin, minSpeed = -1, maxSpeed = 1;
 	private int timeout, timeLost, pastTimeout, timePassed;
 	private boolean lastDir;
 	
-	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed, boolean horizontal, 
+	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed, 
 			double distanceThreshold, double margin,  int timeout, int pastTimeout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
@@ -27,7 +27,6 @@ public class VisionApproach extends Action implements VisionAction{
 		this.distanceThreshold = distanceThreshold;
 		this.timeout = timeout;
 		this.pastTimeout = pastTimeout;
-		this.horizontalDistance = horizontal;
 		this.distanceMargin = margin;
 		
 		System s = null;
@@ -36,11 +35,8 @@ public class VisionApproach extends Action implements VisionAction{
 		if(driveTrain instanceof ModableMotor)
 			modable = (ModableMotor)driveTrain;
 	}
-	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed, boolean horizontal){
-		this(driveTrain, vision, speed, horizontal, ACCURACY_MARGIN * 2, ACCURACY_MARGIN, LOSS_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
-	}
 	public VisionApproach(YAxisMovable driveTrain, Vision vision, double speed){
-		this(driveTrain, vision, speed, false);
+		this(driveTrain, vision, speed, ACCURACY_MARGIN * 2, ACCURACY_MARGIN, LOSS_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
 	
 	@Override
@@ -66,8 +62,7 @@ public class VisionApproach extends Action implements VisionAction{
 		boolean dir = true;
 		if(vision.hasNewAnalysis()){
 			Analysis an = vision.getAnalysis();
-			currentDistance = horizontalDistance? calculateHorizontalDistance(an.targetDistance) :
-												  an.targetDistance;
+			currentDistance = an.targetDistance;
 			targetFound = true;
 			if(inDistanceThreshold()){
 				if(timePassed == -1)
@@ -105,10 +100,6 @@ public class VisionApproach extends Action implements VisionAction{
 	@Override
 	public void setMotorModeSource(ModableMotor modable){
 		this.modable = modable;
-	}
-	private double calculateHorizontalDistance(double distance){
-		//double horizontal = vision.getTargetHeight();
-		return Math.sqrt((distance * distance) - (0.0 * 0.0));
 	}
 	
 	@Override
@@ -176,11 +167,5 @@ public class VisionApproach extends Action implements VisionAction{
 	}
 	public void setDistanceThreshold(double cm){
 		distanceThreshold = cm;
-	}
-	public boolean isHorizontalDistance(){
-		return horizontalDistance;
-	}
-	public void setHorizontalDistance(boolean en){
-		horizontalDistance = en;
 	}
 }

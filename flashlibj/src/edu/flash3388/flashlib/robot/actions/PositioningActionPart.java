@@ -1,10 +1,10 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.CombinedAction.ActionPart;
+import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class PositioningActionPart extends ActionPart{
+public class PositioningActionPart extends SourceAction{
 
 	private DoubleDataSource source;
 	private double speed, distanceThreshold, distanceMargin, currentDistance;
@@ -29,9 +29,10 @@ public class PositioningActionPart extends ActionPart{
 	protected void initialize() {
 		timepassed = -1;
 		currentDistance = -1;
+		dataSource.set(0);
 	}
 	@Override
-	public double getExecute() {
+	public void execute() {
 		double speedY = 0;
 		int millis = FlashUtil.millisInt();
 		
@@ -48,7 +49,7 @@ public class PositioningActionPart extends ActionPart{
 			speedY *= offsetD < 0? 1 : -1;
 		}
 		
-		return speedY;
+		dataSource.set(speedY);
 	}
 	@Override
 	protected boolean isFinished() {

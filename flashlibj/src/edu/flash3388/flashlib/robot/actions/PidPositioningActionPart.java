@@ -1,11 +1,11 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.CombinedAction.ActionPart;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class PidPositioningActionPart extends ActionPart{
+public class PidPositioningActionPart extends SourceAction{
 
 	private PidController pidcontroller;
 	private double distanceMargin;
@@ -31,17 +31,17 @@ public class PidPositioningActionPart extends ActionPart{
 	@Override
 	protected void initialize() {
 		timepassed = -1;
+		dataSource.set(0);
 	}
 	@Override
-	public double getExecute() {
+	public void execute() {
 		if(inDistanceThreshold()){
 			int millis = FlashUtil.millisInt();
 			if(timepassed == -1)
 				timepassed = millis;
 			else if(millis - timepassed >= passedTimeout / 2)
-				return 0;
-		}
-		return pidcontroller.calculate();
+				dataSource.set(0);
+		}else dataSource.set(pidcontroller.calculate());
 	}
 	@Override
 	protected boolean isFinished() {

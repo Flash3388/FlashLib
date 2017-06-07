@@ -7,17 +7,15 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public class DoubleProperty extends Sendable{
 	
 	private static final double CHAGNE_DIFFERENCE = 0.1;
-	double lastValue = 0.0, value = 0.0;
-	boolean changed = false;
-	DoubleDataSource src;
-	byte[] bytes = new byte[8];
+	
+	private double lastValue = 0.0, value = 0.0;
+	private boolean changed = false;
+	private DoubleDataSource src;
+	private byte[] bytes = new byte[8];
 	
 	public DoubleProperty(String name, DoubleDataSource data) {
 		super(name, FlashboardSendableType.DOUBLE);
 		src = data;
-	}
-	public DoubleProperty(String name){
-		this(name, new DoubleDataSource.VarDataSource());
 	}
 
 	public void set(DoubleDataSource src){

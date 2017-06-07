@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot.devices;
 @FunctionalInterface
 public interface DoubleDataSource {
 	public static class VarDataSource implements DoubleDataSource{
+		
 		private double var;
 		
 		public VarDataSource(double initialVal){

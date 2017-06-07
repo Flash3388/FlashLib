@@ -5,24 +5,21 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public abstract class CombinedAction extends Action{
-
-	public static abstract class ActionPart{
-		protected abstract void initialize();
-		public abstract double getExecute();
-		protected abstract boolean isFinished();
-		protected abstract void end();
-	}
 	
-	private Vector<ActionPart> actions = new Vector<ActionPart>();
-	private ArrayList<ActionPart> currentActions = new ArrayList<ActionPart>();
+	private Vector<Action> actions = new Vector<Action>();
+	private ArrayList<Action> currentActions = new ArrayList<Action>();
 	
-	public void add(ActionPart part){
+	public void add(Action part){
+		if(part == null)
+			 return;
 		actions.add(part);
 	}
-	public ActionPart get(int index){
+	public Action get(int index){
 		return actions.get(index);
 	}
-	public void remove(ActionPart part){
+	public void remove(Action part){
+		if(part == null)
+			 return;
 		actions.remove(part);
 	}
 	public void remove(int index){
@@ -30,8 +27,8 @@ public abstract class CombinedAction extends Action{
 	}
 	
 	protected void initialize(){ 
-		for (Enumeration<ActionPart> parts = actions.elements(); parts.hasMoreElements();) {
-			ActionPart part = parts.nextElement();
+		for (Enumeration<Action> parts = actions.elements(); parts.hasMoreElements();) {
+			Action part = parts.nextElement();
 			part.initialize();
 			currentActions.add(part);
 		}
@@ -40,7 +37,7 @@ public abstract class CombinedAction extends Action{
 	protected boolean isFinished(){ 
 		boolean is = true;
 		for (int i = currentActions.size() - 1; i >= 0; i--) {
-			ActionPart part = currentActions.get(i);
+			Action part = currentActions.get(i);
 			if(part.isFinished())
 				currentActions.remove(i);
 			else if(is) 

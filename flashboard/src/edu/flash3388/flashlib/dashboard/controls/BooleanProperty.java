@@ -13,7 +13,7 @@ public class BooleanProperty extends Displayble{
 	private static final int LABEL_HEIGHT = 10;
 	
 	private boolean value = false;
-	private boolean changed = false;
+	private boolean changed = true;
 	
 	private Label label;
 	private VBox node;
@@ -31,10 +31,8 @@ public class BooleanProperty extends Displayble{
 			@Override
 			public void run() {
 				label.setText(name + ": " + value);
-				if(changed){
-					changed = false;
-					label.setTextFill(value? Color.GREEN : Color.RED);
-				}
+				changed = false;
+				label.setTextFill(value? Color.GREEN : Color.RED);
 			}
 		};
 	}
@@ -63,6 +61,7 @@ public class BooleanProperty extends Displayble{
 	protected Node getNode(){return node;}
 	@Override
 	public Runnable updateDisplay() {
+		if(!changed) return null;
 		return updater;
 	}
 

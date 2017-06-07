@@ -13,9 +13,6 @@ public class BooleanProperty extends Sendable{
 		super(name, FlashboardSendableType.BOOLEAN);
 		src = data;
 	}
-	public BooleanProperty(String name){
-		this(name, new BooleanDataSource.VarDataSource());
-	}
 
 	public void set(BooleanDataSource src){
 		lastValue = src.get();

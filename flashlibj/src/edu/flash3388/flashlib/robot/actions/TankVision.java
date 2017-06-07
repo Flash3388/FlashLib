@@ -14,13 +14,12 @@ public class TankVision extends Action implements VisionAction{
 	private TankDriveSystem driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontalD;
+	private boolean targetFound, centered;
 	private byte margin;
 	private double speed, lastY, lastX, currentDistance, distanceThreshold, minSpeed, distanceMargin, maxSpeed;
 	private int timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
 	
-	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed, 
-			boolean horizontalD,
+	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed,
 			byte margin, double distanceThreshold, int timeout, int passedTimeout, int centeredtimout){
 		this.vision = vision;
 		this.driveTrain = driveTrain;
@@ -31,20 +30,15 @@ public class TankVision extends Action implements VisionAction{
 		this.distanceThreshold = distanceThreshold;
 		this.centeredTimeout = centeredtimout;
 		this.passedTimeout = passedTimeout;
-		this.horizontalD = horizontalD;
 		
 		System s = null;
 		if((s = driveTrain.getSystem()) != null)
 			requires(s);
 		modable = driveTrain;
 	}
-	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed, 
-			boolean rotate, boolean horizontalD){
-		this(driveTrain, vision, speed, horizontalD, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
-				ACTION_VALIDATION_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
-	}
 	public TankVision(TankDriveSystem driveTrain, Vision vision, double speed){
-		this(driveTrain, vision, speed, false, false);
+		this(driveTrain, vision, speed, ACCURACY_MARGIN, ACCURACY_MARGIN, LOSS_TIMEOUT, 
+				ACTION_VALIDATION_TIMEOUT, ACTION_VALIDATION_TIMEOUT);
 	}
 	
 	@Override
@@ -77,8 +71,7 @@ public class TankVision extends Action implements VisionAction{
 			Analysis an = vision.getAnalysis();
 			an.print();
 			int offset = an.horizontalDistance;
-			currentDistance = horizontalD? calculateHorizontalDistance(an.targetDistance) :
-												  an.targetDistance;
+			currentDistance = an.targetDistance;
 			
 			if(offset > -margin && offset < margin){
 				if(!centered){
@@ -138,11 +131,6 @@ public class TankVision extends Action implements VisionAction{
 	@Override
 	public void setMotorModeSource(ModableMotor modable){
 		this.modable = modable;
-	}
-	
-	private double calculateHorizontalDistance(double distance){
-		//double horizontal = vision.getTargetHeight();
-		return Math.sqrt((distance * distance) - (0.0 * 0.0));
 	}
 	
 	@Override
@@ -235,11 +223,5 @@ public class TankVision extends Action implements VisionAction{
 	}
 	public void setDistanceThreshold(double cm){
 		distanceThreshold = cm;
-	}
-	public boolean isHorizontalDistance(){
-		return horizontalD;
-	}
-	public void setHorizontalDistance(boolean en){
-		horizontalD = en;
 	}
 }

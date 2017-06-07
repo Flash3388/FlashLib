@@ -1,10 +1,10 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.CombinedAction.ActionPart;
+import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class RotationActionPart extends ActionPart{
+public class RotationActionPart extends SourceAction{
 
 	private DoubleDataSource source;
 	private double speed, rotationThreshold, rotationMargin, currentRotation;
@@ -29,9 +29,10 @@ public class RotationActionPart extends ActionPart{
 	protected void initialize() {
 		timepassed = -1;
 		currentRotation = -1;
+		dataSource.set(0);
 	}
 	@Override
-	public double getExecute() {
+	public void execute() {
 		double speedY = 0;
 		int millis = FlashUtil.millisInt();
 		
@@ -48,7 +49,7 @@ public class RotationActionPart extends ActionPart{
 			speedY *= offsetD < 0? 1 : -1;
 		}
 		
-		return speedY;
+		dataSource.set(speedY);
 	}
 	@Override
 	protected boolean isFinished() {

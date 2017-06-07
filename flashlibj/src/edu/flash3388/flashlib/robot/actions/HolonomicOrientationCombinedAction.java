@@ -2,19 +2,20 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.CombinedAction;
+import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
 
 public class HolonomicOrientationCombinedAction extends CombinedAction{
 
 	private HolonomicDriveSystem driveTrain;
-	private ActionPart positioning;
-	private ActionPart rotation;
+	private SourceAction positioning;
+	private SourceAction rotation;
 	private double minSpeed, maxSpeed;
 	private boolean rotate = true;
 	
 	public HolonomicOrientationCombinedAction(HolonomicDriveSystem driveTrain, 
-			ActionPart positioning, ActionPart rotation, 
+			SourceAction positioning, SourceAction rotation, 
 			double minSpeed, double maxSpeed, boolean rotate){
 		this.driveTrain = driveTrain;
 		this.positioning = positioning;
@@ -23,12 +24,15 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 		this.maxSpeed = maxSpeed;
 		this.rotate = rotate;
 		
+		add(rotation);
+		add(positioning);
+		
 		System s = driveTrain.getSystem();
 		if(s != null)
 			requires(s);
 	}
 	public HolonomicOrientationCombinedAction(HolonomicDriveSystem driveTrain, 
-			ActionPart positioning, ActionPart rotation, boolean rotate){
+			SourceAction positioning, SourceAction rotation, boolean rotate){
 		this(driveTrain, positioning, rotation, 0.1, 0.7, rotate);
 	}
 	
@@ -38,8 +42,10 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 	}
 	@Override
 	protected void execute() {
-		double speedY = Mathd.limit(positioning.getExecute(), minSpeed, maxSpeed);
-		double speedX = Mathd.limit(rotation.getExecute(), minSpeed, maxSpeed);
+		double speedY = positioning != null? 
+				Mathd.limit(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+		double speedX = rotation != null? 
+				Mathd.limit(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
 		
 		if(rotate)
 			driveTrain.holonomicCartesian(0, speedY, speedX);
@@ -51,16 +57,20 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 		driveTrain.stop();
 	}
 
-	public void setPositioningActionPart(ActionPart pos){
+	public void setPositioningActionPart(SourceAction pos){
+		remove(positioning);
 		this.positioning = pos;
+		add(positioning);
 	}
-	public ActionPart getPositioningActionPart(){
+	public SourceAction getPositioningActionPart(){
 		return positioning;
 	}
-	public void setRotationActionPart(ActionPart rot){
+	public void setRotationActionPart(SourceAction rot){
+		remove(rotation);
 		this.rotation = rot;
+		add(rotation);
 	}
-	public ActionPart getRotationActionPart(){
+	public SourceAction getRotationActionPart(){
 		return rotation;
 	}
 	
