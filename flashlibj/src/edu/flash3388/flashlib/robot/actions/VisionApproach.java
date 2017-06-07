@@ -107,8 +107,8 @@ public class VisionApproach extends Action implements VisionAction{
 		this.modable = modable;
 	}
 	private double calculateHorizontalDistance(double distance){
-		double horizontal = vision.getTargetHeight();
-		return Math.sqrt((distance * distance) - (horizontal * horizontal));
+		//double horizontal = vision.getTargetHeight();
+		return Math.sqrt((distance * distance) - (0.0 * 0.0));
 	}
 	
 	@Override

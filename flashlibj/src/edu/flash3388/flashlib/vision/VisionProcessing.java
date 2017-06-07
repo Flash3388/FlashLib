@@ -19,14 +19,23 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.io.FileStream;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 public class VisionProcessing {
 	
 	private List<ProcessingFilter> filters;
+	private String name;
+	private static byte instances = 0;
 	
-	public VisionProcessing(){
+	public VisionProcessing(String name){
+		this.name = name;
 		filters = new ArrayList<ProcessingFilter>();
+	}
+	public VisionProcessing(){
+		this("processing"+(++instances));
+	}
+	
+	public String getName(){
+		return name;
 	}
 	
 	public void addFilter(ProcessingFilter filter){
@@ -62,19 +71,20 @@ public class VisionProcessing {
 		return source.getResults();
 	}
 	
-	public void loadFilters(byte[] bytes){
+	private void loadFilters(byte[] bytes){
 		String filterstr = new String(bytes);
 		String[] filters = filterstr.split("\\|");
 		loadFilters(filters);
 	}
-	public void loadFilters(String[] filters){
+	private void loadFilters(String[] filters){
 		if(!ProcessingFilter.hasFilterCreator())
 			throw new IllegalStateException("Missing filter creator");
 		
-		for (int i = 0; i < filters.length; i++) {
+		name = filters[0];
+		for (int i = 1; i < filters.length; i++) {
 			String[] splits = filters[i].split(":");
 			if(splits.length < 1) continue;
-			int id = FlashUtil.toInt(splits[0]);
+			String namestr = splits[0];
 			
 			Map<String, FilterParam> params = new HashMap<String, FilterParam>();
 			
@@ -92,10 +102,10 @@ public class VisionProcessing {
 				}
 			}
 			
-			addFilter(ProcessingFilter.createFilter(id, params));
+			addFilter(ProcessingFilter.createFilter(namestr, params));
 		}
 	}
-	public void parseXml(String file) throws SAXException, IOException, ParserConfigurationException, XMLParseException{
+	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException, XMLParseException{
 		if(!ProcessingFilter.hasFilterCreator())
 			throw new IllegalStateException("Missing filter creator");
 		
@@ -104,21 +114,21 @@ public class VisionProcessing {
 				.parse(infile);
 		
 		doc.getDocumentElement().normalize();
+		
+		NodeList base = doc.getElementsByTagName("vision");
+		if(base.getLength() != 1)
+			throw new XMLParseException("Missing base tag: vision");
+		name = ((Element)base.item(0)).getAttribute("name");
+		if(name == null)
+			name = FileStream.fileName(file);
+		
 		NodeList filterList = doc.getElementsByTagName("filter");
 		for (int i = 0; i < filterList.getLength(); i++) {
 			Node node = filterList.item(i);
 			if(node.getNodeType() == Node.ELEMENT_NODE){
 				Element element = (Element) node;
 				
-				String idstr = element.getAttribute("id");
-				int id = -1;
-				try{
-					id = Integer.parseInt(idstr);
-				}catch(NumberFormatException e){
-					throw new XMLParseException("Cannot parse id attribute for filter: FormatException");
-				}
-				if(id < 0)
-					throw new XMLParseException("Id attribute for filter has illegal value: "+id);
+				String namestr = element.getAttribute("name");
 				
 				NodeList paramsNodeList = element.getElementsByTagName("param");
 				Map<String, FilterParam> params = new HashMap<String, FilterParam>();
@@ -147,7 +157,7 @@ public class VisionProcessing {
 					}
 				}
 				
-				addFilter(ProcessingFilter.createFilter(id, params));
+				addFilter(ProcessingFilter.createFilter(namestr, params));
 			}
 		}
 	}
@@ -157,10 +167,10 @@ public class VisionProcessing {
 			throw new IllegalStateException("Missing filter creator");
 		
 		ProcessingFilter[] filters = getFilters();
-		String filterstr = "";
+		String filterstr = name+"|";
 		for (int i = 0; i < filters.length; i++) {
-			int id = ProcessingFilter.getSaveId(filters[i]);
-			filterstr += id + ":";
+			String name = ProcessingFilter.getSaveName(filters[i]);
+			filterstr += name + ":";
 					
 			FilterParam[] params = filters[i].getParameters();
 			for (int j = 0; j < params.length; j++) 
@@ -177,9 +187,9 @@ public class VisionProcessing {
 		ProcessingFilter[] filters = getFilters();
 		ArrayList<String> lines = new ArrayList<String>();
 		
-		lines.add("<vision>");
+		lines.add("<vision name=\""+name+"\">");
 		for (ProcessingFilter filter : filters) {
-			lines.add("\t<filter id=\""+ProcessingFilter.getSaveId(filter)+"\">");
+			lines.add("\t<filter name=\""+ProcessingFilter.getSaveName(filter)+"\">");
 			FilterParam[] params = filter.getParameters();
 			for (FilterParam d : params) 
 				lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+d.getValue()+"</param>");
@@ -196,6 +206,8 @@ public class VisionProcessing {
 		return proc;
 	}
 	public static VisionProcessing createFromXml(String file){
+		if(!new File(file).isFile())
+			return null;
 		VisionProcessing proc = new VisionProcessing();
 		try {
 			proc.parseXml(file);

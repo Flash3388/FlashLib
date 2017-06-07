@@ -5,45 +5,45 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public class DefaultFilterCreator implements FilterCreator{
 
 	@Override
-	public ProcessingFilter create(int id) {
-		switch (id) {
-			case 3: return new HighestFilter();
-			case 4: return new LowestFilter();
-			case 5: return new LargestFilter();
-			case 6: return new ShapeFilter();
-			case 7: return new RatioFilter();
-			case 8: return new ClosestToLeftFilter();
-			case 9: return new ClosestToRightFilter();
-			case 10: return new ClosestToCenterFilter();
-			case 11: return new CoordinateFilter();
-			case 12: return new ColorFilter();
+	public ProcessingFilter create(String name) {
+		switch (name) {
+			case "highest": return new HighestFilter();
+			case "lowest": return new LowestFilter();
+			case "largest": return new LargestFilter();
+			case "shape": return new ShapeFilter();
+			case "ratio": return new RatioFilter();
+			case "closest-left": return new ClosestToLeftFilter();
+			case "closest-right": return new ClosestToRightFilter();
+			case "closest-center": return new ClosestToCenterFilter();
+			case "coordinate": return new CoordinateFilter();
+			case "color": return new ColorFilter();
 		}
 		return null;
 	}
 
 	@Override
-	public byte getSaveId(ProcessingFilter filter) {
+	public String getSaveName(ProcessingFilter filter) {
 		if(FlashUtil.instanceOf(filter, HighestFilter.class))
-			return 3;
+			return "highest";
 		if(FlashUtil.instanceOf(filter, LowestFilter.class))
-			return 4;
+			return "lowest";
 		if(FlashUtil.instanceOf(filter, LargestFilter.class))
-			return 5;
+			return "largest";
 		if(FlashUtil.instanceOf(filter, ShapeFilter.class))
-			return 6;
+			return "shape";
 		if(FlashUtil.instanceOf(filter, RatioFilter.class))
-			return 7;
+			return "ratio";
 		if(FlashUtil.instanceOf(filter, ClosestToLeftFilter.class))
-			return 8;
+			return "closest-left";
 		if(FlashUtil.instanceOf(filter, ClosestToRightFilter.class))
-			return 9;
+			return "closest-right";
 		if(FlashUtil.instanceOf(filter, ClosestToCenterFilter.class))
-			return 10;
+			return "closest-center";
 		if(FlashUtil.instanceOf(filter, CoordinateFilter.class))
-			return 11;
+			return "coordinate";
 		if(FlashUtil.instanceOf(filter, ColorFilter.class))
-			return 12;
-		return 0;
+			return "color";
+		return null;
 	}
 
 }

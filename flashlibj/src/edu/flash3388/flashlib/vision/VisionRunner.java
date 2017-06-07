@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -33,10 +33,12 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		}
 	}
 	
+	private boolean newSelection = false;
 	private Analysis[] lastAnalysis = new Analysis[2];
-	private VisionProcessing processing;
+	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
+	private int currentProcessing = -1;
 	private int analysisIndex = 0;
-	private boolean running = false, remoteParam = true;
+	private boolean running = false;
 	
 	private Thread visionThread;
 	private VisionRunnerTask runTask;
@@ -70,9 +72,6 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	public boolean isRunning() {
 		return running;
 	}
-	public boolean isLocalParameters(){
-		return remoteParam;
-	}
 	
 	@Override
 	public void start() {
@@ -90,62 +89,62 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	}
 	
 	@Override
-	public void setProcessing(VisionProcessing proc) {
-		processing = proc;
+	public void addProcessing(VisionProcessing proc) {
+		processing.add(proc);
+		if(currentProcessing < 0)
+			selectProcessing(0);
+	}
+	@Override
+	public void selectProcessing(int index) {
+		if(index < 0 || index >= processing.size())
+			return;
+		currentProcessing = index;
+		newSelection = true;
+	}
+	@Override
+	public VisionProcessing getProcessing(int index) {
+		if(index < 0 || index >= processing.size())
+			return null;
+		return processing.get(index);
 	}
 	@Override
 	public VisionProcessing getProcessing() {
-		return processing;
-	}
-
-	@Override
-	public void setCameraOffsetAngle(double angle) {
+		return getProcessing(currentProcessing);
 	}
 	@Override
-	public double getCameraOffsetAngle() {
-		return 0;
-	}
-	@Override
-	public void setTargetHeight(double h) {
-	}
-	@Override
-	public double getTargetHeight() {
-		return 0;
-	}
-	@Override
-	public void setTargetWidth(double w) {
-	}
-	@Override
-	public double getTargetWidth() {
-		return 0;
+	public int getProcessingCount() {
+		return processing.size();
 	}
 
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 2) return;
 		if(data.length == 2){
-			boolean t = data[0] == 1, r = data[1] == 1;
-			if(!t){
-				FlashUtil.getLog().log("Remote Parameters: "+r);
-				remoteParam = r;
-			}else{
-				FlashUtil.getLog().log("Starting: "+r);
-				if(r) start();
+			if(data[0] == 1){
+				FlashUtil.getLog().log("Starting: "+(data[1] == 1));
+				if(data[1] == 1) start();
 				else stop();
+			}else if(data[0] == 2){
+				currentProcessing = data[1];
 			}
-		}else if(remoteParam){
-			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 2, data.length));
-			if(proc != null)
-				setProcessing(proc);
+			
+			return;
 		}
+		VisionProcessing proc = VisionProcessing.createFromBytes(data);
+		if(proc != null)
+			addProcessing(proc);
 	}
 	@Override
 	public byte[] dataForTransmition() {
+		if(newSelection){
+			newSelection = false;
+			return new byte[]{2, (byte) currentProcessing};
+		}
 		return getAnalysis().transmit();
 	}
 	@Override
 	public boolean hasChanged() {
-		return hasNewAnalysis();
+		return hasNewAnalysis() || newSelection;
 	}
 	@Override
 	public void onConnection() {

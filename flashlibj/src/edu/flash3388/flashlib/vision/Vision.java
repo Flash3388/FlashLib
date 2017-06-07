@@ -6,13 +6,9 @@ public interface Vision {
 	boolean isRunning();
 	void start();
 	void stop();
-	void setProcessing(VisionProcessing proc);
+	void addProcessing(VisionProcessing proc);
+	void selectProcessing(int index);
+	int getProcessingCount();
+	VisionProcessing getProcessing(int index);
 	VisionProcessing getProcessing();
-	
-	void setCameraOffsetAngle(double angle);
-	double getCameraOffsetAngle();
-	void setTargetHeight(double h);
-	double getTargetHeight();
-	void setTargetWidth(double w);
-	double getTargetWidth();
 }

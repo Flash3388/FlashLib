@@ -14,8 +14,6 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.gui.ShellWindow;
 import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
-import edu.flash3388.flashlib.dashboard.Remote.RemoteHost;
-import edu.flash3388.flashlib.dashboard.Remote.User;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
@@ -47,12 +45,18 @@ public class MainController implements Initializable{
 	private static class UpdateTask implements Runnable{
 		MainController controller;
 		boolean lastconnectionC = false, lastconnectionS = false;
+		int lastProcCount = 0;
 		Runnable dxUpdate = ()->{
 			if(Dashboard.communicationsConnected())
 				controller.update(); 
 			CvRunner vision = Dashboard.getVision();
 			if(vision != null){
-				if(vision.isLocalParameters() && vision.getProcessing() == null)
+				if(vision.getProcessingCount() != lastProcCount){
+					for (int i = lastProcCount; i < vision.getProcessingCount(); i++)
+						controller.addParamToBox(vision.getProcessing(i).getName());
+					lastProcCount = vision.getProcessingCount();
+				}
+				if(vision.getProcessing() == null)
 					Dashboard.loadDefaultParameters();
 				else 
 					controller.updateParam();
@@ -158,10 +162,10 @@ public class MainController implements Initializable{
 			int index = displayBoxType.getSelectionModel().getSelectedIndex();
 			Dashboard.getCamViewer().setDisplayMode(DisplayMode.values()[index]);
 		});
-		mode_box.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
-			if(oldValue == null || oldValue.equals(newValue))
+		mode_box.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
+			if(oldValue == null || oldValue.intValue() == newValue.intValue())
 				return;
-			loadParam(Dashboard.FOLDER_SAVES+newValue);
+			Dashboard.getVision().selectProcessing(newValue.intValue());
 		});
 		vision_check.setOnAction((e)->{
 			if(!checkVision()) return;
@@ -381,7 +385,7 @@ public class MainController implements Initializable{
 			if(file == null) return;
 			String path = file.getAbsolutePath();
 			FlashUtil.getLog().log("Saving parameters: "+path);
-			Dashboard.getVision().getProcessing().saveToFile(path);
+			Dashboard.getVision().getProcessing().saveXml(path);
 		}
 	}
 	private void loadParams(){
@@ -398,11 +402,11 @@ public class MainController implements Initializable{
 	public boolean loadParam(String path){
 		FlashUtil.getLog().log("Loading file: "+path);
 		VisionProcessing proc = VisionProcessing.createFromXml(path);
-		if(Dashboard.getVision().isLocalParameters() && proc != null){
+		if(proc != null){
 			FlashUtil.getLog().log("Parameters loaded");
-			Dashboard.getVision().setProcessing(proc);
+			Dashboard.getVision().addProcessing(proc);
 			updateParam();
-			addParamToBox(path.substring(path.lastIndexOf("/")+1, path.lastIndexOf(".")));
+			addParamToBox(proc.getName());
 			return true;
 		}else {
 			FlashUtil.getLog().log("Loading failed");
@@ -424,12 +428,8 @@ public class MainController implements Initializable{
 		CvRunner vision = Dashboard.getVision();
 		if(vision == null) 
 			return false;
-		if(vision.getProcessing() == null && vision.isLocalParameters())
+		if(vision.getProcessing() == null)
 			setParam();
-		if(!vision.isLocalParameters()){
-			updateParam();
-			return false;
-		}
 		if(colorFilter == null)
 			return false;
 		return true;
@@ -494,7 +494,7 @@ public class MainController implements Initializable{
 				(int) v_min.getValue(), (int)v_max.getValue());
 		VisionProcessing proc = new VisionProcessing();
 		proc.addFilter(colorFilter);
-		Dashboard.getVision().setProcessing(proc);
+		Dashboard.getVision().addProcessing(proc);
 	}
 	public void updateVisionRun(){
 		local = true;

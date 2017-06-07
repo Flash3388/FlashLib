@@ -30,6 +30,10 @@ public class FileStream {
 		return filesInFolder(directory, "");
 	}
 	
+	public static String fileName(String file){
+		return new File(file).getName();
+	}
+	
 	public static FileWriter openWriter(String file){
 		return new FileWriter(file);
 	}
