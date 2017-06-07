@@ -1,10 +1,12 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public abstract class ProcessingFilter {
 
 	public abstract void process(VisionSource source);
-	public abstract void parseParameters(double[] parameters);
-	public abstract double[] getParameters();
+	public abstract void parseParameters(Map<String, FilterParam> parameters);
+	public abstract FilterParam[] getParameters();
 	
 	private static FilterCreator creator;
 	
@@ -15,11 +17,14 @@ public abstract class ProcessingFilter {
 		return creator != null;
 	}
 	
-	public static ProcessingFilter createFilter(int id, double[] parameters){
+	public static ProcessingFilter createFilter(int id, Map<String, FilterParam> parameters){
 		if(creator == null)
 			throw new IllegalStateException("Filter creator was now defined");
 		
 		ProcessingFilter filter = creator.create(id);
+		if(filter == null)
+			return null;
+		
 		filter.parseParameters(parameters);
 		return filter;
 	}

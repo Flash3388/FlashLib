@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public class ColorFilter extends ProcessingFilter{
 
 	private short min1, max1, min2, max2, min3, max3;
@@ -79,20 +81,25 @@ public class ColorFilter extends ProcessingFilter{
 			source.filterRgb(min1, min2, min3, max1, max2, max3);
 	}
 	@Override
-	public void parseParameters(double[] parameters) {
-		if(parameters.length != 7)
-			throw new IllegalArgumentException("Arguments invalid! Require 7");
-		
-		hsv = parameters[0] == 1;
-		min1 = (short) parameters[1];
-		max1 = (short) parameters[2];
-		min2 = (short) parameters[3];
-		max2 = (short) parameters[4];
-		min3 = (short) parameters[5];
-		max3 = (short) parameters[6];
+	public void parseParameters(Map<String, FilterParam> parameters) {
+		hsv = FilterParam.getBooleanValue(parameters.get("hsv"));
+		min1 = (short) FilterParam.getIntValue(parameters.get("min1"));
+		min2 = (short) FilterParam.getIntValue(parameters.get("min2"));
+		min3 = (short) FilterParam.getIntValue(parameters.get("min3"));
+		max1 = (short) FilterParam.getIntValue(parameters.get("max1"));
+		max2 = (short) FilterParam.getIntValue(parameters.get("max2"));
+		max3 = (short) FilterParam.getIntValue(parameters.get("max3"));
 	}
 	@Override
-	public double[] getParameters() {
-		return new double[] {hsv? 1:0, min1, max1, min2, max2, min3, max3};
+	public FilterParam[] getParameters() {
+		return new FilterParam[]{
+				new FilterParam.BooleanParam("hsv", hsv),
+				new FilterParam.IntParam("min1", min1),
+				new FilterParam.IntParam("max1", max1),
+				new FilterParam.IntParam("min2", min2),
+				new FilterParam.IntParam("max2", max2),
+				new FilterParam.IntParam("min3", min3),
+				new FilterParam.IntParam("max3", max3)
+		};
 	}
 }

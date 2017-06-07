@@ -5,6 +5,7 @@ import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.VoltageScalable;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.devices.MultiSpeedController;
 import edu.flash3388.flashlib.robot.System;
 
 public class SingleMotorSystem extends System implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable{
@@ -36,6 +37,12 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	private double default_speed_forward = 0.5, default_speed_backward = 0.5;
 	private boolean scaleVoltage = false;
 	
+	public SingleMotorSystem(FlashSpeedController... controllers){
+		this(null, controllers);
+	}
+	public SingleMotorSystem(Action defaultAction, FlashSpeedController... controllers){
+		this(new MultiSpeedController(controllers), defaultAction);
+	}
 	public SingleMotorSystem(FlashSpeedController controller){
 		this(controller, null);
 	}

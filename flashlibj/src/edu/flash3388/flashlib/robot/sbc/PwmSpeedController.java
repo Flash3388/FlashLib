@@ -14,7 +14,6 @@ public class PwmSpeedController extends SafePwm implements FlashSpeedController{
 	@Override
 	public void set(double speed) {
 		setSpeed(inverted? -speed : speed);
-		feed();
 	}
 	@Override
 	public void set(double speed, int direction) {
@@ -37,6 +36,11 @@ public class PwmSpeedController extends SafePwm implements FlashSpeedController{
 	@Override
 	public void setInverted(boolean inverted) {
 		this.inverted = inverted;
+	}
+
+	@Override
+	public void stop() {
+		set(0);
 	}
 
 }

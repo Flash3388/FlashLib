@@ -433,29 +433,29 @@ public class Mathd {
 	public static double planeIntersection(Vector3 origin, Vector3 direction, Vector3 n, double d){
 		return -(n.dot(origin) + d) / (n.dot(direction));
 	}
-	public static double getInclination(double z, double magnitude){
+	public static double VecInclination(double z, double magnitude){
 		double angle = Math.toDegrees(Math.acos(z / magnitude)); 
 		return (z < 0)? -angle : angle;
 	}
-	public static double getAzimuth(double y, double x){
+	public static double vecAzimuth(double y, double x){
 		return Math.toDegrees(Math.atan2(y, x));
 	}
-	public static double getMagnitude(double x, double y, double z){
+	public static double vecMagnitude(double x, double y, double z){
 		return pythagorasTheorem(x, y, z);
 	}
-	public static double getX(double magnitude, double azimuth, double inclination){
+	public static double vecX(double magnitude, double azimuth, double inclination){
 		return (magnitude * Math.sin(Math.toRadians(inclination)) * Math.cos(Math.toRadians(azimuth)));
 	}
-	public static double getX(double magnitude, double azimuth){
+	public static double vecX(double magnitude, double azimuth){
 		return (magnitude * Math.cos(Math.toRadians(azimuth)));
 	}
-	public static double getY(double magnitude, double azimuth, double inclination){
+	public static double vecY(double magnitude, double azimuth, double inclination){
 		return (magnitude * Math.sin(Math.toRadians(inclination)) * Math.sin(Math.toRadians(azimuth)));
 	}
-	public static double getY(double magnitude, double azimuth){
+	public static double vecY(double magnitude, double azimuth){
 		return (magnitude * Math.sin(Math.toRadians(azimuth)));
 	}
-	public static double getZ(double magnitude, double inclination){
+	public static double vecZ(double magnitude, double inclination){
 		return (magnitude * Math.cos(Math.toRadians(inclination)));
 	}
 }

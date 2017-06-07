@@ -29,6 +29,8 @@ import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 public abstract class SbcBot {
 	
 	public static final byte STATE_DISABLED = 0x00;
+	public static final byte STATE_AUTONOMOUS = 0x01;
+	public static final byte STATE_TELEOP = 0x02;
 	
 	public static final String PROP_USER_CLASS = "user.class";
 	public static final String PROP_BOARD_SHUTDOWN = "board.shutdown";

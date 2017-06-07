@@ -122,8 +122,8 @@ public class Vector2 {
 		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
 	}
 	public static Vector2 polar(double magnitude, double azimuth){
-		double x = Mathd.getX(magnitude, azimuth);
-		double y = Mathd.getY(magnitude, azimuth);
+		double x = Mathd.vecX(magnitude, azimuth);
+		double y = Mathd.vecY(magnitude, azimuth);
 		return new Vector2(x, y);
 	}
 }

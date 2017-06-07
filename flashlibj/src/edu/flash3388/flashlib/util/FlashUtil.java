@@ -68,6 +68,12 @@ public class FlashUtil {
 	public static void setStart(){
 		setStart(Log.LoggingType.Stream, false);
 	}
+	public static void validateInit(){
+		if(startTime == 0)
+			setStartTime(System.currentTimeMillis());
+		if(mainLog == null)
+			mainLog = new Log("flashlib", Log.LoggingType.Stream, false);
+	}
 	public static Log getLog(){
 		return mainLog;
 	}

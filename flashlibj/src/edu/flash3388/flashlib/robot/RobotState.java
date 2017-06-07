@@ -19,4 +19,7 @@ public abstract class RobotState {
 	public static boolean isRobotTeleop(){
 		return impl != null && impl.isTeleop();
 	}
+	public static boolean inEmergencyStop(){
+		return FlashRoboUtil.inEmergencyStop();
+	}
 }

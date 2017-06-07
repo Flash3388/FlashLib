@@ -45,14 +45,14 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 		super(name);
 		this.channel = channel;
 		
-		LeftStick = RobotFactory.createStick(channel, 0, 1);
-		RightStick = RobotFactory.createStick(channel, 4, 5);
+		LeftStick = new Stick(channel, 0, 1);
+		RightStick = new Stick(channel, 4, 5);
 		
-		DPad = RobotFactory.createDpad(channel);
+		DPad = new DPad(channel);
 		Triggers = new Triggers(channel, 2, 3);
 		
 		for(int i = 0; i < buttons.length; i++)
-    		buttons[i] = RobotFactory.createButton(buttonNames[i], channel, i+1);
+    		buttons[i] = new Button(buttonNames[i], channel, i+1);
 		
 		A = buttons[0];
 	    B = buttons[1];

@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
 
 public class Triggers{
 	
-	public static abstract class Trigger extends Button{
+	public static class Trigger extends Button{
 
 		private double val = 0, sensitivity = 1;
 		
@@ -29,24 +29,28 @@ public class Triggers{
 		protected void setValue(double val){
 			this.val = val;
 		}
+		
+		@Override
+		public void refresh(){
+			setValue(RobotFactory.getStickAxis(getJoystick(), getNumber()));
+			set(getValue() >= getSensitivity());
+		}
 	}
 	
-	private double combined = 0;
-	public Trigger Right, Left;
+	public final Trigger Right, Left;
 	
 	public Triggers(int stick, int numberL, int numberR){ 
-		Right = RobotFactory.createTrigger(stick, numberR);
-		Left = RobotFactory.createTrigger(stick, numberL);
-		combine();
+		Right = new Trigger(stick, numberR);
+		Left =  new Trigger(stick, numberL);
 	}
-	
-	public void combine(){ combined = Right.getValue() - Left.getValue(); }
 	
 	/**
 	 * Gets the value of both triggers
 	 * @return Combined value of both triggers
 	 */
-	public double getCombined() { return combined; }
+	public double getCombined() { 
+		return Right.getValue() - Left.getValue();
+	}
 	
 	public void refresh() {
 		Left.refresh();

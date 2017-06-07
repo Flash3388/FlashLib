@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public class LargestFilter extends ProcessingFilter{
 	private byte amount;
 
@@ -22,14 +24,13 @@ public class LargestFilter extends ProcessingFilter{
 		source.largestContours(amount);
 	}
 	@Override
-	public void parseParameters(double[] parameters) {
-		if(parameters.length != 1)
-			throw new IllegalArgumentException("Arguments invalid! Require 1");
-		
-		amount = (byte) parameters[0];
+	public void parseParameters(Map<String, FilterParam> parameters) {
+		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
 	}
 	@Override
-	public double[] getParameters() {
-		return new double[] {amount};
+	public FilterParam[] getParameters() {
+		return new FilterParam[]{
+				new FilterParam.IntParam("amount", amount)
+		};
 	}
 }

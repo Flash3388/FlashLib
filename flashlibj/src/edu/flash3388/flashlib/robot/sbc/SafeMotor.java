@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.sbc;
 public interface SafeMotor {
 	public static final int DEFAULT_EXPIRATION = 100;
 	
-	public void stop();
+	public void disable();
 	
 	void setExpiration(int timeout);
     int getExpiration();

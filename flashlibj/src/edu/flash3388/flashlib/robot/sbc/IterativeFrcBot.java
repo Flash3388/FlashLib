@@ -1,9 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
 public abstract class IterativeFrcBot extends IterativeSbc{
-
-	public static final byte STATE_AUTONOMOUS = 0x01;
-	public static final byte STATE_TELEOP = 0x02;
 	
 	@Override
 	protected void stateInit(byte state) {

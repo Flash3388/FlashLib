@@ -8,6 +8,8 @@ public class Mathf {
 		float f(float x);
 	}
 	
+	public static final float ROOT_DIFFERENCE = 1e-8f;
+	
 	//--------------------------------------------------------------------
 	//--------------------------General-----------------------------------
 	//--------------------------------------------------------------------
@@ -138,8 +140,6 @@ public class Mathf {
         if(result == 0) 
             return 0;
         
-        final float ROOT_DIFFERENCE = 1e-8f;
-        
         float x1 = result;
         float x2 = result / exponent;  
         while (Math.abs(x1 - x2) > ROOT_DIFFERENCE){
@@ -174,6 +174,105 @@ public class Mathf {
 		for (int i = 2; i <= n; i++) 
 			result *= n;
 		return result;
+	}
+	
+	//--------------------------------------------------------------------
+	//--------------------------Matrices----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static float[][] multiplyMat(float[][] mat1, float[][] mat2){
+		if(mat1[0].length != mat2.length) 
+			throw new IllegalArgumentException("Cannot multiply matricies");
+		float[][] result = new float[mat2.length][mat2[0].length];
+		for(int i = 0; i < result[0].length; i++){
+			for(int j = 0; j < result.length; j++){
+				float value = 0;
+				for(int k = 0; k < result.length; k++)
+					value += mat1[j][k] * mat2[k][i];
+				result[j][i] = value;
+			}
+		}
+		return result;
+	}
+	public static float[][] multiplyMat(float[][]...mats){
+		if(mats == null || mats.length < 2)
+			throw new IllegalArgumentException("Insufficent matrices to multiply");
+		
+		float[][] mat = mats[0];
+		for(int i = 1; i < mats.length; i++)
+			mat = multiplyMat(mat, mats[i]);
+		return mat;
+	}
+	public static float[][] rotationMatrix3d(float x, float y, float z){
+		return multiplyMat(rotationMatrix3dX(x), rotationMatrix3dY(y), rotationMatrix3dZ(z));
+	}
+	public static float[][] rotationMatrix3dX(float angle){
+		angle = (float) Math.toRadians(angle);
+		return new float[][]{
+			{1, 0, 0, 0},
+			{0, (float) Math.cos(angle), (float) -Math.sin(angle), 0},
+			{0, (float) Math.sin(angle), (float) Math.cos(angle), 0},
+			{0,0,0,1}
+		};
+	}
+	public static float[][] rotationMatrix3dY(float angle){
+		angle = (float) Math.toRadians(angle);
+		return new float[][]{
+			{(float) Math.cos(angle), 0, (float) Math.sin(angle),0},
+			{0, 1, 0,0},
+			{(float) -Math.sin(angle), 0, (float) Math.cos(angle),0},
+			{0,0,0,1}
+		};
+	}
+	public static float[][] rotationMatrix3dZ(float angle){
+		angle = (float) Math.toRadians(angle);
+		return new float[][]{
+			{(float) Math.cos(angle), (float) -Math.sin(angle), 0,0},
+			{(float) Math.sin(angle), (float) Math.cos(angle), 0,0},
+			{0,0,1,0},
+			{0,0,0,1}
+		};
+	}
+	public static float[][] translationMatrix3d(float x, float y, float z){
+		return new float[][]{
+			{1,0,0,x},
+			{0,1,0,y},
+			{0,0,1,z},
+			{0,0,0,1}
+		};
+	}
+	public static float[][] rotationMatrix2d(float angle){
+		angle = (float) Math.toRadians(angle);
+		return new float[][]{
+			{(float) Math.cos(angle), (float) -Math.sin(angle), 0},
+			{(float) Math.sin(angle), (float) Math.cos(angle), 0},
+			{0, 0, 1},
+		};
+	}
+	public static float[][] translationMatrix2d(float x, float y){
+		return new float[][]{
+			{1,0,x},
+			{0,1,y},
+			{0,0,1}
+		};
+	}
+	public static void reverseMatrixValues(float[][] mat){
+		for(int i = 0; i < mat.length; i++){
+			for(int j = 0; j < mat[0].length; j++)
+				mat[i][j] *= -1;
+		}
+	}
+	public static float[][] reversedMatrix(float[][] mat){
+		float[][] mat2 = new float[mat.length][mat[0].length];
+		for(int i = 0; i < mat.length; i++){
+			for(int j = 0; j < mat[0].length; j++)
+				mat2[i][j] = -1 * mat[i][j];
+		}
+		return mat2;
+	}
+	public static float[][] rotatePoint(float[][] pointAsMat, float[][] rotationMat, float[][] translationMat){
+		float[][] res = multiplyMat(rotationMat, translationMat, pointAsMat);
+		return multiplyMat(res, reversedMatrix(translationMat), pointAsMat);
 	}
 	
 	//--------------------------------------------------------------------
@@ -241,6 +340,45 @@ public class Mathf {
 			if(i < slices / 2) s2 += func.f(min + 2 * i * h);
 		}
 		return (1 / 3.0f) * h * (s + 4 * s1 + 2 * s2);
+	}
+	
+	//--------------------------------------------------------------------
+	//--------------------------Vectors-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static double planeIntersection(Vector3 origin, Vector3 direction, 
+			Vector3 surfaceVec1, Vector3 surfaceVec2, Vector3 pointOnSurface){
+		Vector3 n = surfaceVec1.cross(surfaceVec2);
+		double d = -pointOnSurface.dot(n);
+		return planeIntersection(origin, direction, n, d);
+	}
+	public static double planeIntersection(Vector3 origin, Vector3 direction, Vector3 n, double d){
+		return -(n.dot(origin) + d) / (n.dot(direction));
+	}
+	public static float VecInclination(float z, float magnitude){
+		float angle = (float) Math.toDegrees(Math.acos(z / magnitude)); 
+		return (z < 0)? -angle : angle;
+	}
+	public static float vecAzimuth(float y, float x){
+		return (float) Math.toDegrees(Math.atan2(y, x));
+	}
+	public static float vecMagnitude(float x, float y, float z){
+		return pythagorasTheorem(x, y, z);
+	}
+	public static float vecX(float magnitude, float azimuth, float inclination){
+		return (float) (magnitude * Math.sin(Math.toRadians(inclination)) * Math.cos(Math.toRadians(azimuth)));
+	}
+	public static float vecX(float magnitude, float azimuth){
+		return (float) (magnitude * Math.cos(Math.toRadians(azimuth)));
+	}
+	public static float vecY(float magnitude, float azimuth, float inclination){
+		return (float) (magnitude * Math.sin(Math.toRadians(inclination)) * Math.sin(Math.toRadians(azimuth)));
+	}
+	public static float vecY(float magnitude, float azimuth){
+		return (float) (magnitude * Math.sin(Math.toRadians(azimuth)));
+	}
+	public static float vecZ(float magnitude, float inclination){
+		return (float) (magnitude * Math.cos(Math.toRadians(inclination)));
 	}
 }
 /*

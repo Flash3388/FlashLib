@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public class RatioFilter extends ProcessingFilter{
 	private double heightRatio, widthRatio, dy, dx, maxScore, minScore, 
 			maxHeight, minHeight, maxWidth, minWidth;
@@ -88,24 +90,31 @@ public class RatioFilter extends ProcessingFilter{
 				maxHeight, minHeight, maxWidth, minWidth);
 	}
 	@Override
-	public void parseParameters(double[] parameters) {
-		if(parameters.length != 10)
-			throw new IllegalArgumentException("Arguments invalid! Require 10");
-		
-		heightRatio = parameters[0];
-		widthRatio = parameters[1];
-		dy = parameters[2];
-		dx = parameters[3];
-		maxScore = parameters[4];
-		minScore = parameters[5];
-		maxHeight = parameters[6];
-		minHeight = parameters[7];
-		maxWidth = parameters[8];
-		minWidth = parameters[9];
+	public void parseParameters(Map<String, FilterParam> parameters) {
+		heightRatio = FilterParam.getDoubleValue(parameters.get("heightRatio"));
+		widthRatio = FilterParam.getDoubleValue(parameters.get("widthRatio"));
+		dx = FilterParam.getDoubleValue(parameters.get("dx"));
+		dy = FilterParam.getDoubleValue(parameters.get("dy"));
+		minScore = FilterParam.getDoubleValue(parameters.get("minScore"));
+		maxScore = FilterParam.getDoubleValue(parameters.get("maxScore"));
+		minHeight = FilterParam.getDoubleValue(parameters.get("minHeight"));
+		maxHeight = FilterParam.getDoubleValue(parameters.get("maxHeight"));
+		minWidth = FilterParam.getDoubleValue(parameters.get("minWidth"));
+		maxWidth = FilterParam.getDoubleValue(parameters.get("maxWidth"));
 	}
 	@Override
-	public double[] getParameters() {
-		return new double[] {heightRatio, widthRatio, dy, dx, maxScore, minScore, maxHeight, minHeight,
-				maxWidth, minWidth};
+	public FilterParam[] getParameters() {
+		return new FilterParam[]{
+				new FilterParam.DoubleParam("heightRatio", heightRatio),
+				new FilterParam.DoubleParam("widthRatio", widthRatio),
+				new FilterParam.DoubleParam("dx", dx),
+				new FilterParam.DoubleParam("dy", dy),
+				new FilterParam.DoubleParam("minScore", minScore),
+				new FilterParam.DoubleParam("maxScore", maxScore),
+				new FilterParam.DoubleParam("minHeight", minHeight),
+				new FilterParam.DoubleParam("maxHeight", maxHeight),
+				new FilterParam.DoubleParam("minWidth", minWidth),
+				new FilterParam.DoubleParam("maxWidth", maxWidth)
+		};
 	}
 }

@@ -49,10 +49,11 @@ public abstract class Action {
 	}
 	
 	public void start(){
-		initialized = false;
-		canceled = false;
-		running = true;
-		Scheduler.getInstance().add(this);
+		if(Scheduler.getInstance().add(this)){
+			initialized = false;
+			canceled = false;
+			running = true;
+		}
 	}
 	public void cancel(){
 		if(running)

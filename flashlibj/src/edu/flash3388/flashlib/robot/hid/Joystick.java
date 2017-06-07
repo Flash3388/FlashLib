@@ -20,11 +20,11 @@ public class Joystick extends HIDSendable implements HID, ScheduledTask{
 		super(name);
 		stick_num = stick;
 		
-		this.stick = RobotFactory.createStick(stick, X, Y);
+		this.stick = new Stick(stick, X, Y);
 		buttons = new Button[buttonCount];
 		for(int i = 0; i < buttons.length; i++)
-			buttons[i] = RobotFactory.createButton(stick, i+1);
-		pov = RobotFactory.createDpad(stick);
+			buttons[i] = new Button(stick, i+1);
+		pov = new DPad(stick);
 		
 		next = head;
 		head = this;

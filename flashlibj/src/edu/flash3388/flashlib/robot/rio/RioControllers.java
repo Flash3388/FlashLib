@@ -61,13 +61,8 @@ public class RioControllers implements FlashSpeedController, ModableMotor{
 		
 		return motor_controllers[index];
 	}
-	
 	public int getControllerCount(){
 		return motor_controllers.length;
-	}
-	
-	public SpeedController[] getControllers(){
-		return motor_controllers;
 	}
 	
 	@Override

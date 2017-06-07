@@ -22,6 +22,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name, id);
 			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new CvRunner(name, id);
 			case FlashboardSendableType.PDP: return new PDP(name, id);
+			case FlashboardSendableType.ESTOP: return new EmergencyStopControl(id);
 		}
 		return null;
 	}

@@ -12,8 +12,18 @@ public class SafePwm extends SbcPwm implements SafeMotor{
 	}
 
 	@Override
-	public void stop() {
-		disable();
+	public void setSpeed(double speed){
+		if(helper.isMotorEnabled()){
+			super.setSpeed(speed);
+			helper.feed();
+		}
+	}
+	@Override
+	public void setPosition(double pos){
+		if(helper.isMotorEnabled()){
+			super.setPosition(pos);
+			helper.feed();
+		}
 	}
 	
 	@Override

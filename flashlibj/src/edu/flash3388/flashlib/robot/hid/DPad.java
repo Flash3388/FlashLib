@@ -1,11 +1,13 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.robot.RobotFactory;
+
 /**
  * This represents a D-Pad from and XBox controller.
  * 
  * @author Tom Tzook
  */
-public abstract class DPad {
+public class DPad {
 	/**
 	 * The Up button on the D-Pad
 	 */
@@ -25,12 +27,16 @@ public abstract class DPad {
 	
 	public final POVButton POV;
 	
+	private int stick;
+	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
 	 * 
 	 * @param stick The Joystick the D-Pad is on.
 	 */
 	public DPad(int stick){
+		this.stick = stick;
+		
 		POV = new POVButton("POV", stick, POVButton.Type.ALL);
 		Up = new POVButton("POV Up", stick, POVButton.Type.UP);
 		Down = new POVButton("POV Down", stick, POVButton.Type.DOWN);
@@ -38,13 +44,16 @@ public abstract class DPad {
 		Left = new POVButton("POV Left", stick, POVButton.Type.LEFT);
 	}
 	
-	public abstract int get();
+	public int get(){
+		return RobotFactory.getStickPov(stick);
+	}
 	
-	public void refresh() {
-		POV.refresh();
-		Up.refresh();
-		Down.refresh();
-		Right.refresh();
-		Left.refresh();
+	public void refresh(){
+		int degrees = get();
+		Up.set(degrees);
+		Down.set(degrees);
+		Left.set(degrees);
+		Right.set(degrees);
+		POV.set(degrees);
 	}
 }

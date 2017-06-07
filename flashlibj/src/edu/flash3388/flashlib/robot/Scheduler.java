@@ -61,7 +61,7 @@ public class Scheduler {
 		}
 	}
 	
-	private static final int DELAY_MILLISECONDS = 25;
+	private static final byte DELAY_MILLISECONDS = 25;
 	
 	private static Scheduler instance;
 	
@@ -118,7 +118,9 @@ public class Scheduler {
 	public void registerSystem(System system){
 		systems.add(system);
 	}
-	public void add(Action action){
+	public boolean add(Action action){
+		if(disabled) return false;
+		
 		Enumeration<System> requirements = action.getRequirements();
 		while(requirements.hasMoreElements()){
 			System system = requirements.nextElement();
@@ -127,6 +129,8 @@ public class Scheduler {
 			system.setCurrentAction(action);
 		}
 		actions.addElement(action);
+		
+		return true;
 	}
 	public void remove(Action action){
 		actions.removeElement(action);
@@ -136,6 +140,11 @@ public class Scheduler {
 			requirements.nextElement().setCurrentAction(null);
 		
 		action.removed();
+	}
+	public void removeAllActions(){
+		Enumeration<Action> actionEnum = actions.elements();
+		for (;actionEnum.hasMoreElements();)
+			remove(actionEnum.nextElement());
 	}
 	
 	public void disable(boolean disable){

@@ -27,6 +27,10 @@ public class Servo extends SbcPwm{
 		return getPosition();
 	}
 	
+	public void stop(){
+		set(0);
+	}
+	
 	public void setAngle(double angle){
 		angle = Mathd.limit(angle, 0, 180);
 		

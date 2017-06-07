@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 
 /**
@@ -7,20 +8,23 @@ import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
  * 
  * @author Tom Tzook
  */
-public abstract class Stick implements DoubleDataSource{
+public class Stick implements DoubleDataSource{
 
 	private boolean xreturn = false;	
+	private int stick, axisX, axisY;
 	
-	/**
-	 * Gets the value of the X axis of the stick
-	 * @return Value of X axis
-	 */
-	public abstract double getX();
-	/**
-	 * Gets the value of the Y axis of the stick
-	 * @return Value of Y axis
-	 */
-	public abstract double getY();
+	public Stick(int stick, int axisX, int axisY){
+		this.axisX = axisX;
+		this.stick = stick;
+		this.axisY = axisY;
+	}
+	
+	public double getX() {
+		return RobotFactory.getStickAxis(stick, axisX);
+	}
+	public double getY() {
+		return RobotFactory.getStickAxis(stick, axisY);
+	}
 	
 	public double getMagnitude(){
 		double x = getX(), y = getY();

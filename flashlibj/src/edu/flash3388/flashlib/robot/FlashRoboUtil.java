@@ -1,24 +1,60 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
+import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class FlashRoboUtil {
 	private FlashRoboUtil(){}
 	
-	public static final int UTIL_INIT = 0x0;
-	public static final int FLASHBOARD_INIT = 0x1 << 1;
-	public static final int SCHEDULER_INIT = 0x1 << 2;
-	public static final double DEFAULT_EXPECTED_VOLTAGE = 13.3;
+	public static final byte UTIL_INIT = 0x0;
+	public static final byte FLASHBOARD_INIT = 0x1 << 1;
+	public static final byte SCHEDULER_INIT = 0x1 << 2;
 	
 	private static boolean init = false;
-	private static int initCode = 0;
+	private static boolean emergencyStop = false;
+	private static byte initCode = 0;
 	private static DoubleDataSource voltageSource;
-	private static double expectedVoltage = DEFAULT_EXPECTED_VOLTAGE;
+	private static EmergencyStopControl estopControl;
+	private static double expectedVoltage = 13.3;
+	
+	public static boolean inEmergencyStop(){
+		return emergencyStop;
+	}
+	public static void enterEmergencyStop(){
+		if(emergencyStop) return;
+		
+		FlashUtil.getLog().logTime("!EMERGENCY STOP!");
+		
+		if(Scheduler.schedulerHasInstance()){
+			Scheduler.disableScheduler(true);
+			Scheduler.getInstance().removeAllActions();
+		}
+		if(RobotFactory.isSbcImpl())
+			MotorSafetyHelper.disableAll();
+		
+		estopControl.inEmergencyStop(true);
+		emergencyStop = true;
+	}
+	public static void exitEmergencyStop(){
+		if(!emergencyStop) return;
+		
+		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED");
+		
+		if(Scheduler.schedulerHasInstance()){
+			Scheduler.disableScheduler(false);
+		}
+		if(RobotFactory.isSbcImpl())
+			MotorSafetyHelper.enableAll();
+		
+		estopControl.inEmergencyStop(false);
+		emergencyStop = false;
+	}
 	
 	public static void updateHID(){
 		Joystick.refreshAll();
@@ -59,21 +95,23 @@ public class FlashRoboUtil {
 		
 		FlashUtil.setStart();
 		RobotFactory.setImplementationType(implType);
+		estopControl = new EmergencyStopControl();
 		
 		FlashUtil.getLog().logTime("INITIALIZING...");
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
 			Flashboard.init();
-			Flashboard.attach(new SendableLog(FlashUtil.getLog()));
+			Flashboard.attach(estopControl,
+						      new SendableLog(FlashUtil.getLog()));
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
 			Scheduler.init();
 		}
 		
-		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - 0x" +
-								Integer.toHexString(mode) + " - "+implType);
+		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - " +
+								Integer.toBinaryString(mode) + " - "+implType);
 		
-		initCode = mode;
+		initCode = (byte)mode;
 		init = true;
 	}
 	public static void startFlashboard(){

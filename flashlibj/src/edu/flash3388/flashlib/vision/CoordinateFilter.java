@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public class CoordinateFilter extends ProcessingFilter{
 	private double x, y;
 	private byte amount = 0;
@@ -35,16 +37,17 @@ public class CoordinateFilter extends ProcessingFilter{
 		source.closestToCoordinate(x, y, amount);
 	}
 	@Override
-	public void parseParameters(double[] parameters) {
-		if(parameters.length != 3)
-			throw new IllegalArgumentException("Arguments invalid! Require 3");
-		
-		x = parameters[0];
-		y = parameters[1];
-		amount = (byte) parameters[2];
+	public void parseParameters(Map<String, FilterParam> parameters) {
+		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
+		x = FilterParam.getDoubleValue(parameters.get("x"));
+		y = FilterParam.getDoubleValue(parameters.get("y"));
 	}
 	@Override
-	public double[] getParameters() {
-		return new double[] {x, y, amount};
+	public FilterParam[] getParameters() {
+		return new FilterParam[]{
+				new FilterParam.IntParam("amount", amount),
+				new FilterParam.DoubleParam("x", x),
+				new FilterParam.DoubleParam("y", y)
+		};
 	}
 }

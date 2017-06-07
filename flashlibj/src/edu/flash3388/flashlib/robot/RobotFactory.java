@@ -1,22 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.hid.Button;
-import edu.flash3388.flashlib.robot.hid.DPad;
-import edu.flash3388.flashlib.robot.hid.POVButton;
-import edu.flash3388.flashlib.robot.hid.Stick;
-import edu.flash3388.flashlib.robot.hid.Triggers.Trigger;
-import edu.flash3388.flashlib.robot.rio.RioButton;
-import edu.flash3388.flashlib.robot.rio.RioDpad;
-import edu.flash3388.flashlib.robot.rio.RioDpadButton;
-import edu.flash3388.flashlib.robot.rio.RioStick;
-import edu.flash3388.flashlib.robot.rio.RioTrigger;
-import edu.flash3388.flashlib.robot.sbc.IterativeFrcBot;
 import edu.flash3388.flashlib.robot.sbc.SbcBot;
-import edu.flash3388.flashlib.robot.sbc.SbcButton;
-import edu.flash3388.flashlib.robot.sbc.SbcDpad;
-import edu.flash3388.flashlib.robot.sbc.SbcDpadButton;
-import edu.flash3388.flashlib.robot.sbc.SbcStick;
-import edu.flash3388.flashlib.robot.sbc.SbcTrigger;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.LoggingInterface;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -66,21 +50,42 @@ public class RobotFactory {
 				}
 				@Override
 				public boolean isTeleop() {
-					return SbcBot.getCurrentState() == IterativeFrcBot.STATE_TELEOP;
+					return SbcBot.getCurrentState() == SbcBot.STATE_TELEOP;
 				}
 				
 			});
 		}
 	}
 	
-	public static boolean isAxisConnected(int stick, int axis){
+	public static boolean isSbcImpl(){
+		return type == ImplType.SBC;
+	}
+	public static boolean isRioImpl(){
+		return type == ImplType.RIO;
+	}
+	
+	public static boolean isControllerConnected(int controller){
 		switch(type){
-			case RIO: return axis < DriverStation.getInstance().getStickAxisCount(axis);
-			case SBC: return true;
+			case RIO: return true;
+			case SBC: return SbcBot.getControlStation().isStickConnected(controller);
 			default: return false;
 		}
 	}
-	public static boolean isButtonConnected(int stick, byte button){
+	public static boolean isAxisConnected(int stick, int axis){
+		switch(type){
+			case RIO: return axis < DriverStation.getInstance().getStickAxisCount(stick);
+			case SBC: return SbcBot.getControlStation().isStickConnected(stick);
+			default: return false;
+		}
+	}
+	public static boolean isPovConnected(int stick){
+		switch(type){
+			case RIO: return 1 <= DriverStation.getInstance().getStickAxisCount(stick);
+			case SBC: return isControllerConnected(stick);
+			default: return false;
+		}
+	}
+	public static boolean isButtonConnected(int stick, int button){
 		switch(type){
 			case RIO: return button <= DriverStation.getInstance().getStickButtonCount(stick);
 			case SBC: return button <= SbcBot.getControlStation().getButtonsCount(stick);
@@ -89,7 +94,7 @@ public class RobotFactory {
 	}
 	
 	public static double getStickAxis(int stick, int axis){
-		if(!isAxisConnected(stick, axis))
+		if(FlashRoboUtil.inEmergencyStop() || !isAxisConnected(stick, axis))
 			return 0;
 		
 		switch(type){
@@ -98,57 +103,24 @@ public class RobotFactory {
 			default: return 0;
 		}
 	}
+	public static int getStickPov(int stick){
+		if(FlashRoboUtil.inEmergencyStop() || !isPovConnected(stick))
+			return -1;
+		
+		switch(type){
+			case RIO: return DriverStation.getInstance().getStickPOV(stick, 0);
+			case SBC: return SbcBot.getControlStation().getStickPOV(stick);
+			default: return -1;
+		}
+	}
 	public static boolean getStickButton(int stick, byte button){
-		if(!isButtonConnected(stick, button))
+		if(FlashRoboUtil.inEmergencyStop() || !isButtonConnected(stick, button))
 			return false;
 		
 		switch(type){
 			case RIO: return DriverStation.getInstance().getStickButton(stick, button);
 			case SBC: return SbcBot.getControlStation().getStickButton(stick, button);
 			default: return false;
-		}
-	}
-	
-	public static Stick createStick(int stick, int axisX, int axisY){
-		switch(type){
-			case RIO: return new RioStick(stick, axisX, axisY);
-			case SBC: return new SbcStick(stick, axisX, axisY);
-			default: return null;
-		}
-	}
-	public static Button createButton(int stick, int button){
-		switch(type){
-			case RIO: return new RioButton(stick, button);
-			case SBC: return new SbcButton(stick, button);
-			default: return null;
-		}
-	}
-	public static Button createButton(String name, int stick, int button){
-		switch(type){
-			case RIO: return new RioButton(name, stick, button);
-			case SBC: return new SbcButton(name, stick, button);
-			default: return null;
-		}
-	}
-	public static DPad createDpad(int stick){
-		switch(type){
-			case RIO: return new RioDpad(stick);
-			case SBC: return new SbcDpad(stick);
-			default: return null;
-		}
-	}
-	public static POVButton createDpadButton(int stick, POVButton.Type t){
-		switch(type){
-			case RIO: return new RioDpadButton(stick, t);
-			case SBC: return new SbcDpadButton(stick, t);
-			default: return null;
-		}
-	}
-	public static Trigger createTrigger(int stick, int trig){
-		switch(type){
-			case RIO: return new RioTrigger(stick, trig);
-			case SBC: return new SbcTrigger(stick, trig);
-			default: return null;
 		}
 	}
 }

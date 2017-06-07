@@ -9,7 +9,7 @@ public class MotorSafetyHelper {
 	
 	private int expiration;
 	private int stopTime;
-	private boolean enabled;
+	private boolean enabled, motorEnabled;
 	private final SafeMotor safeMotor;
 	private final MotorSafetyHelper nextMotor;
 	
@@ -49,12 +49,31 @@ public class MotorSafetyHelper {
 		if(!enabled || RobotState.isRobotDisabled())
 			return;
 		if (stopTime <= FlashUtil.millisInt()) {
-			safeMotor.stop();
+			safeMotor.disable();
 		}
+	}
+	
+	public boolean isMotorEnabled(){
+		return motorEnabled;
+	}
+	public void disableMotor(){
+		safeMotor.disable();
+		motorEnabled = false;
+	}
+	public void enableMotor(){
+		motorEnabled = true;
 	}
 	
 	public static void checkAll(){
 		for(MotorSafetyHelper helper = headMotor; helper != null; helper = helper.nextMotor)
 			helper.check();
+	}
+	public static void disableAll(){
+		for(MotorSafetyHelper helper = headMotor; helper != null; helper = helper.nextMotor)
+			helper.disableMotor();
+	}
+	public static void enableAll(){
+		for(MotorSafetyHelper helper = headMotor; helper != null; helper = helper.nextMotor)
+			helper.enableMotor();
 	}
 }

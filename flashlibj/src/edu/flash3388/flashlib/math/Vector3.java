@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.math;
 
 public class Vector3 {
+	
 	private double x;
 	private double y;
 	private double z;
@@ -138,9 +139,9 @@ public class Vector3 {
 		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
 	}
 	public static Vector3 polar(double magnitude, double azimuth, double inclination){
-		double x = Mathd.getX(magnitude, azimuth, inclination);
-		double y = Mathd.getY(magnitude, azimuth, inclination);
-		double z = Mathd.getZ(magnitude, inclination);
+		double x = Mathd.vecX(magnitude, azimuth, inclination);
+		double y = Mathd.vecY(magnitude, azimuth, inclination);
+		double z = Mathd.vecZ(magnitude, inclination);
 		return new Vector3(x, y, z);
 	}
 }

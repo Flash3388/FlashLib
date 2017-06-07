@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Map;
+
 public class ShapeFilter extends ProcessingFilter{
 	private byte amount, vertecies;
 	private double accuracy;
@@ -38,16 +40,17 @@ public class ShapeFilter extends ProcessingFilter{
 			source.detectShapes(amount, vertecies, accuracy);
 	}
 	@Override
-	public void parseParameters(double[] parameters) {
-		if(parameters.length != 3)
-			throw new IllegalArgumentException("Arguments invalid! Require 3");
-		
-		amount = (byte) parameters[0];
-		vertecies = (byte) parameters[1];
-		accuracy = parameters[2];
+	public void parseParameters(Map<String, FilterParam> parameters) {
+		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
+		vertecies = (byte) FilterParam.getIntValue(parameters.get("vertecies"));
+		accuracy = FilterParam.getDoubleValue(parameters.get("accuracy"));
 	}
 	@Override
-	public double[] getParameters() {
-		return new double[] {amount, vertecies, accuracy};
+	public FilterParam[] getParameters() {
+		return new FilterParam[]{
+				new FilterParam.IntParam("amount", amount),
+				new FilterParam.IntParam("vertecies", vertecies),
+				new FilterParam.DoubleParam("accuracy", accuracy)
+		};
 	}
 }

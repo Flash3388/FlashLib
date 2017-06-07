@@ -4,8 +4,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RobotState;
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
+import edu.flash3388.flashlib.robot.sbc.SbcBot;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -14,7 +16,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * 
  * @author Tom Tzook
  */
-public abstract class Button implements ButtonListener, BooleanDataSource{
+public class Button implements ButtonListener, BooleanDataSource{
 	
 	protected static class ButtonCommand{
 		public final ActivateType type;
@@ -239,5 +241,8 @@ public abstract class Button implements ButtonListener, BooleanDataSource{
 				ex.cancel();
 		}
 	}
-	public void refresh(){}
+	
+	public void refresh(){
+		set(RobotFactory.getStickButton(getJoystick(), (byte)getNumber()));
+	}
 }

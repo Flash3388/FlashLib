@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.robot.Scheduler.*;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
+import static edu.flash3388.flashlib.robot.FlashRoboUtil.inEmergencyStop;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -15,7 +16,7 @@ public abstract class FlashRio extends SampleRobot {
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final long ITERATION_DELAY = 20;
+	private static final byte ITERATION_DELAY = 20;
 	
 	private Log log;
 	private Log powerLog;
@@ -39,6 +40,21 @@ public abstract class FlashRio extends SampleRobot {
 		LiveWindow.setEnabled(false);
 		powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), powerLogTime());
 		while(true){
+			if(inEmergencyStop()){
+				log.logTime("NEW STATE - EMERGENCY STOP");
+				powerLog.logTime("New State: EMERGENCY STOP >> Voltage: "+m_ds.getBatteryVoltage(),
+						powerLogTime());
+				disabledInit();
+				
+				while (inEmergencyStop()) {
+					disabledPeriodic();
+					delay(50);
+				}
+				
+				log.logTime("EMERGENCY STOP - DONE");
+				powerLog.logTime("Done State: EMERGENCY STOP >> Voltage: "+m_ds.getBatteryVoltage() + 
+						" >> SCurrent: "+powerDrawState, powerLogTime());
+			}
 			if(isDisabled()){
 				log.logTime("NEW STATE - DISABLED");
 				powerLog.logTime("New State: Disabled >> Voltage: "+m_ds.getBatteryVoltage(),
@@ -50,7 +66,7 @@ public abstract class FlashRio extends SampleRobot {
 				m_ds.InDisabled(true);
 				disabledInit();
 				
-				while(isDisabled()){
+				while(isDisabled() && !inEmergencyStop()){
 					disabledPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -70,7 +86,7 @@ public abstract class FlashRio extends SampleRobot {
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
-				while(isEnabled() && isAutonomous()){
+				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
 					runScheduler();
 					autonomousPeriodic();
 					logLowVoltage();
@@ -91,7 +107,7 @@ public abstract class FlashRio extends SampleRobot {
 				m_ds.InTest(true);
 				testInit();
 				
-				while(isEnabled() && isTest()){
+				while(isEnabled() && isTest() && !inEmergencyStop()){
 					runScheduler();
 					testPeriodic();
 					logLowVoltage();
@@ -112,7 +128,7 @@ public abstract class FlashRio extends SampleRobot {
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				
-				while(isEnabled() && isOperatorControl()){
+				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
 					runScheduler();
 					teleopPeriodic();
 					logLowVoltage();
