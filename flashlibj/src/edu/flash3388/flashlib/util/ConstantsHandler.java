@@ -30,6 +30,9 @@ public class ConstantsHandler {
 	private static Map<String, BooleanDataSource.VarDataSource> booleanMap = 
 			new HashMap<String, BooleanDataSource.VarDataSource>();
 	
+	//--------------------------------------------------------------------
+	//-----------------------General--------------------------------------
+	//--------------------------------------------------------------------
 	
 	public static void clear(){
 		doubleMap.clear();
@@ -40,11 +43,18 @@ public class ConstantsHandler {
 		return getBooleanMapCount() + getNumberMapCount() + getStringMapCount();
 	}
 	
+	//--------------------------------------------------------------------
+	//-----------------------Numbers--------------------------------------
+	//--------------------------------------------------------------------
+	
 	public static int getNumberMapCount(){
 		return doubleMap.size();
 	}
 	public static String[] getNumberMapNames(){
 		return doubleMap.keySet().toArray(new String[0]);
+	}
+	public static DoubleDataSource removeNumber(String name){
+		return doubleMap.remove(name);
 	}
 	public static DoubleDataSource putNumber(String name, double iniVal){
 		DoubleDataSource.VarDataSource source = doubleMap.get(name);
@@ -88,12 +98,18 @@ public class ConstantsHandler {
 		return (int) source.get();
 	}
 	
+	//--------------------------------------------------------------------
+	//-----------------------Strings--------------------------------------
+	//--------------------------------------------------------------------
 	
 	public static int getStringMapCount(){
 		return stringMap.size();
 	}
 	public static String[] getStringMapNames(){
 		return stringMap.keySet().toArray(new String[0]);
+	}
+	public static StringDataSource removeString(String name){
+		return stringMap.remove(name);
 	}
 	public static StringDataSource putString(String name, String iniVal){
 		StringDataSource.VarDataSource source = stringMap.get(name);
@@ -128,12 +144,18 @@ public class ConstantsHandler {
 		return source.get();
 	}
 	
+	//--------------------------------------------------------------------
+	//-----------------------Boolean--------------------------------------
+	//--------------------------------------------------------------------
 	
 	public static int getBooleanMapCount(){
 		return booleanMap.size();
 	}
 	public static String[] getBooleanMapNames(){
 		return booleanMap.keySet().toArray(new String[0]);
+	}
+	public static BooleanDataSource removeBoolean(String name){
+		return booleanMap.remove(name);
 	}
 	public static BooleanDataSource putBoolean(String name, boolean iniVal){
 		BooleanDataSource.VarDataSource source = booleanMap.get(name);
@@ -168,6 +190,9 @@ public class ConstantsHandler {
 		return source.get();
 	}
 	
+	//--------------------------------------------------------------------
+	//---------------------------IOs--------------------------------------
+	//--------------------------------------------------------------------
 	
 	private static void parseXml(File file) throws SAXException, IOException, ParserConfigurationException{
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()

@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.gui;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import javafx.geometry.Insets;
@@ -46,18 +45,30 @@ public class PropertyViewer extends Stage{
 			}
 		}
 		
+		public void remove(){
+			switch(type){
+				case Boolean: ConstantsHandler.removeBoolean(name);
+					break;
+				case Number: ConstantsHandler.removeNumber(name);
+					break;
+				case String: ConstantsHandler.removeString(name);
+					break;
+			}
+		}
 		public boolean setValue(String value){
 			if(type == Type.Boolean){
 				try {
-					ConstantsHandler.putBoolean(name, Boolean.parseBoolean(value));
+					boolean b = Boolean.parseBoolean(value);
+					ConstantsHandler.putBoolean(name, b);
 					return true;
-				} catch (Exception e) { return false;}
+				} catch (NumberFormatException e) { return false;}
 			}
 			if(type == Type.Number){
 				try {
-					ConstantsHandler.putNumber(name, Double.parseDouble(value));
+					double d = Double.parseDouble(value);
+					ConstantsHandler.putNumber(name, d);
 					return true;
-				} catch (Exception e) { return false;}
+				} catch (NumberFormatException e) { return false;}
 			}
 			if(type == Type.String){
 				ConstantsHandler.putString(name, value);
@@ -79,9 +90,9 @@ public class PropertyViewer extends Stage{
 		setResizable(false);
 	}
 	
-	private void newProp(Property prop, String value){
-		if(!prop.setValue(value))
-			Dialog.show(this, "Error", "Value is incompatible with property type");
+	private boolean newProp(Property prop, String value){
+		return prop.setValue(value);
+			
 	}
 	private String[] getKeys(){
 		props = new ArrayList<Property>();
@@ -90,18 +101,18 @@ public class PropertyViewer extends Stage{
 		String[] pKeys = ConstantsHandler.getStringMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
-			props.add(new Property(ConstantsHandler.getStringNative(pKeys[i]), Property.Type.String));
+			props.add(new Property(pKeys[i], Property.Type.String));
 		}
 		pKeys = ConstantsHandler.getNumberMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
-			props.add(new Property(String.valueOf(ConstantsHandler.getNumberNative(pKeys[i])), 
+			props.add(new Property(String.valueOf(pKeys[i]), 
 					Property.Type.Number));
 		}
 		pKeys = ConstantsHandler.getBooleanMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
-			props.add(new Property(String.valueOf(ConstantsHandler.getBooleanNative(pKeys[i]))
+			props.add(new Property(String.valueOf(pKeys[i])
 					, Property.Type.Boolean));
 		}
 		return keys.toArray(new String[0]);
@@ -112,8 +123,10 @@ public class PropertyViewer extends Stage{
 		keysBox.setPrefWidth(150);
 		valField = new TextField();
 		valField.setPrefWidth(150);
-		final Button save = new Button("Save"), newProp = new Button("New");
+		final Button save = new Button("Save"), newProp = new Button("New"), 
+				delete = new Button("Delete");
 		save.setDisable(true);
+		delete.setDisable(true);
 		
 		keysBox.getItems().add("");
 		String[] keys = getKeys();
@@ -121,9 +134,13 @@ public class PropertyViewer extends Stage{
 		keysBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			local = true;
 			if(newValue.intValue() != 0){
-				cProp = props.get(newValue.intValue());
+				cProp = props.get(newValue.intValue() - 1);
 				valField.setText(cProp.getValue());
-			}else valField.setText("");
+				delete.setDisable(false);
+			}else {
+				valField.setText("");
+				delete.setDisable(true);
+			}
 			local = false;
 			save.setDisable(true);
 		});
@@ -132,9 +149,19 @@ public class PropertyViewer extends Stage{
 				save.setDisable(false);
 		});
 		
+		delete.setOnAction((e)->{
+			int i = keysBox.getSelectionModel().getSelectedIndex();
+			if(i != 0){
+				keysBox.getItems().remove(i);
+				props.get(i - 1).remove();
+				props.remove(i - 1);
+			}
+			keysBox.getSelectionModel().select(i - 1);
+		});
 		save.setOnAction((e)->{
 			String newVal = valField.getText();
-			newProp(cProp, newVal);
+			if(!newProp(cProp, newVal))
+				Dialog.show(this, "Error", "Value is incompatible with property type");
 			save.setDisable(true);
 		});
 		newProp.setOnAction((e)->{
@@ -150,7 +177,7 @@ public class PropertyViewer extends Stage{
 		viewerNode.setAlignment(Pos.CENTER);
 		viewerNode.setPadding(new Insets(10, 10, 10, 10));
 		HBox buttonNode = new HBox();
-		buttonNode.getChildren().addAll(save, newProp);
+		buttonNode.getChildren().addAll(save, newProp, delete);
 		buttonNode.setSpacing(10);
 		buttonNode.setAlignment(Pos.CENTER_RIGHT);
 		buttonNode.setPadding(new Insets(0, 5, 5, 0));
@@ -185,10 +212,13 @@ public class PropertyViewer extends Stage{
 			String newVal = valField.getText();
 			String keyName = nameField.getText();
 			Property.Type t = typeBox.getValue();
+			System.out.println(t);
+			System.out.println(newVal);
 			
 			cProp = new Property(keyName, t);
-			newProp(cProp, newVal);
-			close();
+			if(!newProp(cProp, newVal))
+				Dialog.show(this, "Error", "Value is incompatible with property type");
+			else close();
 		});
 		cancel.setOnAction((e)->{
 			cProp = null;
@@ -196,7 +226,7 @@ public class PropertyViewer extends Stage{
 		});
 		
 		VBox viewerNode = new VBox();
-		viewerNode.getChildren().addAll(nameField, valField);
+		viewerNode.getChildren().addAll(nameField, valField, typeBox);
 		viewerNode.setSpacing(10);
 		viewerNode.setAlignment(Pos.CENTER);
 		viewerNode.setPadding(new Insets(10, 10, 10, 10));
