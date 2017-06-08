@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
+import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -34,7 +35,7 @@ public class EmergencyStopControl extends Displayble{
 		button.setPrefWidth(160);
 		button.setPrefHeight(40);
 		button.setOnAction((e)->{
-			change(!emergency);
+			change();
 		});
 		
 		root = new VBox();
@@ -49,14 +50,19 @@ public class EmergencyStopControl extends Displayble{
 				if(emergency){
 					button.setText("Normal");
 					statusRect.setFill(Color.RED);
+					FlashUtil.getLog().log("!!!EMERGENCY STOP!!!", "EStop Control");
 				}else{
 					button.setText("Emergency Stop");
 					statusRect.setFill(Color.GREEN);
+					FlashUtil.getLog().log("Normal Operations", "EStop Control");
 				}
 			}
 		};
 	}
 
+	public void change(){
+		change(!emergency);
+	}
 	public void change(boolean e){
 		emergency = e;
 		changed = true;

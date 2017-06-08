@@ -9,6 +9,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
+import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
@@ -28,6 +29,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -82,6 +84,7 @@ public class Dashboard extends Application {
 	private static CameraClient camClient;
 	private static CameraViewer camViewer;
 	private static CvRunner vision;
+	private static EmergencyStopControl emergencyStop;
 	private static Log log;
 	
 	private static byte[][] visionImageNext = new byte[2][2];
@@ -246,6 +249,9 @@ public class Dashboard extends Application {
 		Dashboard.vision = vision;
 		vision.setPipeline(camViewer);
 	}
+	protected static void setEmergencyStopControl(EmergencyStopControl estop){
+		Dashboard.emergencyStop = estop;
+	}
 	private static boolean emptyProperty(String prop){
 		String propv = ConstantsHandler.getStringNative(prop);
 		return propv == null || propv.equals("");
@@ -319,6 +325,13 @@ public class Dashboard extends Application {
 		}
 		
 		Scene scene = new Scene(root, 1300, 680);
+		scene.setOnKeyPressed((e)->{
+			if(e.getCode() == KeyCode.SPACE && Dashboard.emergencyStop != null){
+				System.out.println("SPACE! THE FINAL FRONTIER!");
+				Dashboard.emergencyStop.change();
+			}
+		});
+		
 		primaryStage.setScene(scene);
 		primaryStage.setResizable(true);
 		primaryStage.setOnCloseRequest((e)->{

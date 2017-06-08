@@ -727,10 +727,6 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		if(rear_controllers != null) 
 			rear_controllers.stop(); 
 	}
-
-	public void setDefaultAction(Action action){
-		super.setDefaultAction(action);
-	}
 	
 	private double limit(double speed){
 		speed *= speed_limit;
@@ -758,9 +754,6 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		setControlInterface(controlInterface);
 		setDefaultAction(interface_action);
 	}
-	
-	@Override
-	protected void initDefaultAction() {}
 
 	@Override
 	public System getSystem() {

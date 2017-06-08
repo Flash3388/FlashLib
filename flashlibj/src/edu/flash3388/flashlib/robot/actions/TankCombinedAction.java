@@ -5,6 +5,7 @@ import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.CombinedAction;
 import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class TankCombinedAction extends CombinedAction{
 
@@ -43,9 +44,9 @@ public class TankCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathd.limit(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathd.limit2(positioning.getSource().get(), minSpeed, maxSpeed) : 0.0;
 		double speedX = rotation != null? 
-				Mathd.limit(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathd.limit2(rotation.getSource().get(), minSpeed, maxSpeed) : 0.0;
 		
 		driveTrain.arcadeDrive(speedY, speedX);
 	}
@@ -82,6 +83,6 @@ public class TankCombinedAction extends CombinedAction{
 		return maxSpeed;
 	}
 	public void setMaxSpeed(double max){
-		minSpeed = max;
+		maxSpeed = max;
 	}
 }

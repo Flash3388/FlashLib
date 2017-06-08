@@ -36,11 +36,7 @@ public abstract class System{
 		if(default_action != null) 
 			default_action.start();
 	}
-	protected void setDefaultAction(Action action){
+	public void setDefaultAction(Action action){
 		default_action = action;
 	}
-	
-	
-	protected abstract void initDefaultAction();
-
 }

@@ -45,9 +45,9 @@ public class HolonomicCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathd.limit(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathd.limit2(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
 		double speedX = rotation != null? 
-				Mathd.limit(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathd.limit2(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
 		
 		if(rotate)
 			driveTrain.holonomicCartesian(0, speedY, speedX);
@@ -92,6 +92,6 @@ public class HolonomicCombinedAction extends CombinedAction{
 		return maxSpeed;
 	}
 	public void setMaxSpeed(double max){
-		minSpeed = max;
+		maxSpeed = max;
 	}
 }

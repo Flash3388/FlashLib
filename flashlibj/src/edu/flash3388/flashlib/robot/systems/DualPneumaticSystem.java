@@ -110,8 +110,5 @@ public class DualPneumaticSystem extends System {
 	public State getState(){
 		return state;
 	}
-	
-	@Override
-	protected void initDefaultAction() {}
 
 }

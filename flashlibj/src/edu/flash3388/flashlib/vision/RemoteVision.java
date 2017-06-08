@@ -12,9 +12,9 @@ public class RemoteVision extends Sendable implements Vision{
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
 	private int currentProcessing = -1;
 	private Analysis analysis;
-	private boolean send = false, newAnalysis = false, stopping = false, updateProcessing = false,
+	private boolean send = false, stopping = false, updateProcessing = false,
 			sendProps = false;
-	private long lastRec;
+	private int lastRec, recTimeout = 1000;
 	
 	public RemoteVision() {
 		super(FlashboardSendableType.VISION);
@@ -31,7 +31,7 @@ public class RemoteVision extends Sendable implements Vision{
 	public void start(){
 		startRemote();
 		send = true;
-		lastRec = FlashUtil.millis();
+		lastRec = FlashUtil.millisInt();
 	}
 	@Override
 	public void stop(){
@@ -72,12 +72,11 @@ public class RemoteVision extends Sendable implements Vision{
 	
 	@Override
 	public Analysis getAnalysis(){
-		newAnalysis = false;
 		return analysis;
 	}
 	@Override
 	public boolean hasNewAnalysis(){
-		return newAnalysis;
+		return analysis != null && FlashUtil.millisInt() - lastRec < recTimeout;
 	}
 	
 	@Override
@@ -97,12 +96,8 @@ public class RemoteVision extends Sendable implements Vision{
 		Analysis an = Analysis.fromBytes(data);
 		
 		if(an != null) {
-			long t = FlashUtil.millis() - lastRec;
-			if(t > 1000)
-				FlashUtil.getLog().log("New analysis: "+t);
-			lastRec = FlashUtil.millis();
+			lastRec = FlashUtil.millisInt();
 			analysis = an;
-			newAnalysis = true;
 		}
 	}
 	@Override
@@ -141,5 +136,14 @@ public class RemoteVision extends Sendable implements Vision{
 	}
 	@Override
 	public void onConnectionLost() {
+	}
+
+	@Override
+	public void setNewAnalysisTimeout(int timeout) {
+		recTimeout = timeout;
+	}
+	@Override
+	public int getNewAnalysisTimeout() {
+		return recTimeout;
 	}
 }

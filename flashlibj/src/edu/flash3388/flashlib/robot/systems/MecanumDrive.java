@@ -379,9 +379,6 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 	}
 
 	@Override
-	protected void initDefaultAction() {
-	}
-	@Override
 	public void enableBrakeMode(boolean mode) {
 		if(front_left instanceof ModableMotor)
 			((ModableMotor)front_left).enableBrakeMode(mode);

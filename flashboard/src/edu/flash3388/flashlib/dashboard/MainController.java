@@ -135,7 +135,6 @@ public class MainController implements Initializable{
 		threadTask.controller = this;
 		Dashboard.addRunnableForUpdate(threadTask);
 		
-		
 		sbc_ssh.setOnAction((e)->{
 			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
 		});

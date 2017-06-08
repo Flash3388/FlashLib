@@ -3,57 +3,43 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
 import edu.flash3388.flashlib.robot.SourceAction;
-import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 
-public class PidRotationActionPart extends SourceAction{
+public class PidRotationActionPart extends SourceAction implements PidAction{
 
 	private PidController pidcontroller;
 	private double rotationMargin;
-	private int passedTimeout, timepassed;
 	
-	public PidRotationActionPart(PidSource source, double kp, double ki, double kd, double rotationThreshold, 
-			double rotationMargin, int passedTimeout){
+	public PidRotationActionPart(PidSource source, double kp, double ki, double kd, DoubleDataSource rotationThreshold, 
+			double rotationMargin){
 		this.rotationMargin = rotationMargin;
-		this.passedTimeout = passedTimeout;
 		
 		pidcontroller = new PidController(kp, ki, kd);
 		pidcontroller.setPIDSource(source);
-		pidcontroller.setInputLimit(1000);
 		pidcontroller.setSetPoint(rotationThreshold);
 	}
-	public PidRotationActionPart(PidSource source, double kp, double ki, double kd, double rotationThreshold){
-		this(source, kp, ki, kd, rotationThreshold, 15.0, 100);
-	}
 	public PidRotationActionPart(PidSource source, double kp, double ki, double kd){
-		this(source, kp, ki, kd, 100.0);
+		this(source, kp, ki, kd, ()->100.0, 15.0);
 	}
 	
 	@Override
 	protected void initialize() {
-		timepassed = -1;
 		dataSource.set(0);
 	}
 	@Override
 	public void execute() {
-		if(inRotationThreshold()){
-			int millis = FlashUtil.millisInt();
-			if(timepassed == -1)
-				timepassed = millis;
-			else if(millis - timepassed >= passedTimeout / 2)
-				dataSource.set(0);
-		}else dataSource.set(pidcontroller.calculate());
+		if(inRotationThreshold())
+			dataSource.set(0);
+		else dataSource.set(pidcontroller.calculate());
 	}
 	@Override
 	protected boolean isFinished() {
-		return finiteApproachTimeout() && inRotationThreshold() && FlashUtil.millisInt() - timepassed >= passedTimeout;
+		return inRotationThreshold();
 	}
 	@Override
 	protected void end() {
 	}
 	
-	public boolean finiteApproachTimeout(){
-		return passedTimeout > 0;
-	}
 	public boolean inRotationThreshold(){
 		double current = pidcontroller.getSource().pidGet();
 		return current > 0 && 
@@ -66,16 +52,12 @@ public class PidRotationActionPart extends SourceAction{
 	public void setRotationMargin(double margin){
 		rotationMargin = margin;
 	}
-	public int getPastTimeout(){
-		return passedTimeout;
-	}
-	public void setPastTimeout(int millis){
-		passedTimeout = millis;
-	}
 	public double getRotationThreshold(){
-		return pidcontroller.getSetPoint();
+		return pidcontroller.getSetPoint().get();
 	}
-	public void setRotationThreshold(double cm){
-		pidcontroller.setSetPoint(cm);
+	
+	@Override
+	public PidController getPidController(){
+		return pidcontroller;
 	}
 }

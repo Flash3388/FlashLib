@@ -57,6 +57,12 @@ public class Mathd {
 		else if(value < min) value = min;
 		return value;
 	}
+	public static double limit2(double value, double min, double max){
+		double mag = Math.abs(value);
+		if(mag > max) mag = max;
+		else if(mag < min) mag = min;
+		return value >= 0? mag : -mag;
+	}
 	public static boolean limited(double value, double min, double max){
 		return value >= min && value <= max;
 	}

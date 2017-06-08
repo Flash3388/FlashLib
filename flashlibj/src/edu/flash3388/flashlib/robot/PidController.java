@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.vision.Vision;
 
@@ -33,15 +34,16 @@ public class PidController {
 		private PidType type;
 		private Vision vision;
 		private double previous = 0.0;
-		private boolean horizontal;
+		private boolean horizontal, distance;
 		
-		public VisionPidSource(Vision vision, PidType t, boolean horizontal){
+		public VisionPidSource(Vision vision, PidType t, boolean horizontal, boolean distance){
 			this.vision = vision;
 			this.horizontal = horizontal;
+			this.distance = distance;
 			this.type = t;
 		}
-		public VisionPidSource(Vision vision, boolean horizontal){
-			this(vision, PidType.Displacement, horizontal);
+		public VisionPidSource(Vision vision, boolean horizontal, boolean distance){
+			this(vision, PidType.Displacement, horizontal, distance);
 		}
 		
 		public void setVision(Vision vision){
@@ -50,19 +52,29 @@ public class PidController {
 		public Vision getVision(){
 			return vision;
 		}
-		public void setHorizontal(boolean horizontal){
+		
+		public void setDistanceMode(boolean distance){
+			this.distance = distance;
+		}
+		public boolean getDistanceMode(){
+			return distance;
+		}
+		public void setHorizontalMode(boolean horizontal){
 			this.horizontal = horizontal;
 		}
-		public boolean getHorizontal(){
+		public boolean getHorizontalMode(){
 			return horizontal;
 		}
 		
 		@Override
 		public double pidGet() {
 			if(!vision.hasNewAnalysis()) return previous;
-			previous = horizontal? 
-					vision.getAnalysis().horizontalDistance : 
-					vision.getAnalysis().verticalDistance;
+			if(distance)
+				previous = vision.getAnalysis().targetDistance;
+			else
+				previous = horizontal? 
+							vision.getAnalysis().horizontalDistance : 
+							vision.getAnalysis().verticalDistance;
 			return previous;
 		}
 		@Override
@@ -94,43 +106,67 @@ public class PidController {
 			return type;
 		}
 	}
+	public static class PidDoubleDataSource implements PidSource{
+
+		private PidType type;
+		private DoubleDataSource source;
+		
+		public PidDoubleDataSource(DoubleDataSource source, PidType t){
+			this.source = source;
+			this.type = t;
+		}
+		public PidDoubleDataSource(DoubleDataSource source){
+			this(source, PidType.Displacement);
+		}
+		
+		@Override
+		public double pidGet() {
+			return source.get();
+		}
+		@Override
+		public PidType getType() {
+			return type;
+		}
+		
+	}
 	
 	private PidSource source;
-	private double setPoint;
-	private double minimumInput = -1, maximumInput = 1;
+	private DoubleDataSource setPoint;
 	private double minimumOutput = -1, maximumOutput = 1;
 	private double kp, ki, kd;
 	private double totalError, error, preError;
 	private boolean enabled = true;
 	
-	public PidController(double kp, double ki, double kd, double setPoint, PidSource source){
+	public PidController(double kp, double ki, double kd, DoubleDataSource setPoint, PidSource source){
 		this.kp = kp;
 		this.ki = ki;
 		this.kd = kd;
 		this.setPoint = setPoint;
 		this.source = source;
 	}
-	public PidController(double kp, double ki, double kd, double setPoint){
+	public PidController(double kp, double ki, double kd, DoubleDataSource setPoint){
 		this(kp, ki, kd, setPoint, null);
 	}
 	public PidController(double kp, double ki, double kd){
-		this(kp, ki, kd, 0);
+		this(kp, ki, kd, null);
 	}
 	public PidController(double kp, double kd){
-		this(kp, 0, kd, 0);
+		this(kp, 0, kd);
 	}
 	public PidController(double kp){
-		this(kp, 0, 0, 0);
+		this(kp, 0);
 	}
 	
 	public double calculate(){
 		if(!enabled) return 0;
 		if(source == null)
 			throw new IllegalStateException("PID Source is missing!");
+		if(setPoint == null)
+			throw new IllegalStateException("PID SetPoint is missing!");
 		
 		double currentVal = source.pidGet();
 		double result = 0;
-		error = setPoint - currentVal;
+		error = setPoint.get() - currentVal;
 		
 		if(source.getType() == PidType.Rate){
 			double pGain = (totalError + error) * kp;
@@ -159,12 +195,6 @@ public class PidController {
 		return result;
 	}
 	
-	public double getMaximumInput(){
-		return maximumInput;
-	}
-	public double getMinimumInput(){
-		return minimumInput;
-	}
 	public double getMaximumOutput(){
 		return maximumOutput;
 	}
@@ -186,35 +216,22 @@ public class PidController {
 	public double getDerivativeTime(){
 		return kd / kp;
 	}
-	public double getSetPoint(){
+	public DoubleDataSource getSetPoint(){
 		return setPoint;
 	}
 	public PidSource getSource(){
 		return source;
 	}
 	
-	public void setMaximumInput(double m){
-		this.maximumInput = m;
-	}
-	public void setMinimumInput(double m){
-		this.minimumInput = m;
-	}
-	public void setInputLimit(double l){
-		this.maximumInput = l;
-		this.minimumInput = -l;
-	}
 	public void setMaximumOutput(double m){
 		this.maximumOutput = m;
-		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setMinimumOutput(double m){
 		this.minimumOutput = m;
-		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setOutputLimit(double l){
 		this.maximumOutput = l;
 		this.minimumOutput = -l;
-		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setP(double p){
 		this.kp = p;
@@ -236,8 +253,8 @@ public class PidController {
 		this.ki = i;
 		this.kd = d;
 	}
-	public void setSetPoint(double setpoint){
-		this.setPoint = Mathd.limit(setpoint, minimumOutput, maximumOutput);
+	public void setSetPoint(DoubleDataSource setpoint){
+		this.setPoint = setpoint;
 	}
 	public void setPIDSource(PidSource source){
 		this.source = source;

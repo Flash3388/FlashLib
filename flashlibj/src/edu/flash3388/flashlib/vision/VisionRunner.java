@@ -24,7 +24,11 @@ public abstract class VisionRunner extends Sendable implements Vision{
 					continue;
 				}
 				
-				runner.lastAnalysis[1-runner.analysisIndex] = runner.analyse();
+				Analysis an = runner.analyse();
+				runner.lastAnalysis[1-runner.analysisIndex] = an;
+				if(an != null)
+					runner.lastRec = FlashUtil.millisInt();
+				
 				FlashUtil.delay(5);
 			}
 		}
@@ -38,6 +42,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
 	private int currentProcessing = -1;
 	private int analysisIndex = 0;
+	private int recTimeout = 1000, lastRec;
 	private boolean running = false;
 	
 	private Thread visionThread;
@@ -58,7 +63,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 
 	@Override
 	public boolean hasNewAnalysis() {
-		return lastAnalysis[analysisIndex] != null;
+		return lastAnalysis[analysisIndex] != null && FlashUtil.millisInt() - lastRec < recTimeout;
 	}
 	@Override
 	public Analysis getAnalysis() {
@@ -77,6 +82,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		if(!visionThread.isAlive())
 			visionThread.start();
 		running = true;
+		lastRec = FlashUtil.millisInt();
 	}
 	@Override
 	public void stop() {
@@ -152,5 +158,14 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	public void onConnectionLost() {
 	}
 
+	@Override
+	public void setNewAnalysisTimeout(int timeout) {
+		recTimeout = timeout;
+	}
+	@Override
+	public int getNewAnalysisTimeout() {
+		return recTimeout;
+	}
+	
 	protected abstract Analysis analyse();
 }

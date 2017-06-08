@@ -1,79 +1,73 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
-import edu.flash3388.flashlib.robot.devices.StringDataSource;
-import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.ConstantsHandler;
 
 public class DashboardInput extends Sendable{
 	
-	private StringDataSource.VarDataSource value;
+	private InputType type;
+	private boolean updateType = false;
+	private String lastValue, value;
 	
-	public DashboardInput(String name) {
+	public DashboardInput(String name, InputType type) {
 		super(name, FlashboardSendableType.INPUT);
-		value = new StringDataSource.VarDataSource();
-	}
-
-	public boolean empty(){
-		return value == null || value.get().equals("");
-	}
-	public int intValue(){
-		return intValue(0);
-	}
-	public int intValue(int defaultVal){
-		if(empty()) return defaultVal;
-		return FlashUtil.toInt(value.get());
+		this.type = type;
 	}
 	
-	public double doubleValue(){
-		return doubleValue(0);
+	private String getValueAsString(){
+		switch(type){
+			case Boolean:return String.valueOf(ConstantsHandler.getBooleanNative(getName()));
+			case Double: return String.valueOf(ConstantsHandler.getNumberNative(getName()));
+			case String: return ConstantsHandler.getStringNative(getName());
+		}
+		return null;
 	}
-	public double doubleValue(double defaultVal){
-		if(empty()) return defaultVal;
-		return FlashUtil.toDouble(value.get());
-	}
-	public DoubleDataSource getDoubleSource(){
-		return new DoubleDataSource() {
-			@Override
-			public double get() {
-				return doubleValue();
-			}
-		};
-	}
-	
-	public String stringValue(){
-		return stringValue("");
-	}
-	public String stringValue(String defaultVal){
-		if(empty()) return defaultVal;
-		return value.get();
-	}
-	public StringDataSource getStringSource(){
-		return new StringDataSource() {
-			@Override
-			public String get() {
-				return stringValue();
-			}
-		};
+	private void setNewValue(String value){
+		if(type == InputType.Boolean){
+			try {
+				boolean b = Boolean.parseBoolean(value);
+				ConstantsHandler.putBoolean(getName(), b);
+			} catch (NumberFormatException e) { }
+		}
+		if(type == InputType.Double){
+			try {
+				double d = Double.parseDouble(value);
+				ConstantsHandler.putNumber(getName(), d);
+			} catch (NumberFormatException e) { }
+		}
+		if(type == InputType.String){
+			ConstantsHandler.putString(getName(), value);
+		}
 	}
 	
 	@Override
 	public void newData(byte[] data) {
-		String newV = new String(data);
-		synchronized (value) {
-			value.set(newV);
-		}
+		String str = new String(data);
+		setNewValue(str);
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		return null;
+		if(updateType){
+			updateType = false;
+			return new byte[] {1, type.value};
+		}
+		lastValue = value;
+		byte[] data = new byte[lastValue.length()+1];
+		data[0] = 0;
+		System.arraycopy(lastValue.getBytes(), 0, data, 1, lastValue.length());
+		return data;
 	}
 	@Override
 	public boolean hasChanged() {
-		return false;
+		if(updateType) return true;
+		value = getValueAsString();
+		return !value.equals(lastValue);
 	}
 	@Override
-	public void onConnection() {}
+	public void onConnection() {
+		updateType = true;
+		lastValue = null;
+	}
 	@Override
 	public void onConnectionLost() {}
 }

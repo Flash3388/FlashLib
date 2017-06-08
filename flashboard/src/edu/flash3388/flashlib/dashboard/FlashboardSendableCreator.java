@@ -34,6 +34,8 @@ public class FlashboardSendableCreator implements SendableCreator{
 			Dashboard.setVision((CvRunner)s);
 		if(s != null && s instanceof Displayble)
 			Dashboard.addDisplayable((Displayble)s);
+		if(s != null && s instanceof EmergencyStopControl)
+			Dashboard.setEmergencyStopControl((EmergencyStopControl)s);
 		return s;
 	}
 }

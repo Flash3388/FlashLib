@@ -36,7 +36,7 @@ public abstract class CombinedAction extends Action{
 	}
 	@Override
 	protected void execute(){
-		for (int i = 0; i < currentActions.size(); i--)
+		for (int i = 0; i < currentActions.size(); i++)
 			currentActions.get(i).execute();
 	}
 	@Override

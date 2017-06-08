@@ -61,6 +61,9 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	public FlashSpeedController getMotorController(){
 		return controller;
 	}
+	public double get(){
+		return controller.get();
+	}
 	
 	public void setDefaultSpeed(double speed){
 		setDefaultSpeed(speed, speed);
@@ -73,9 +76,11 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 		default_speed_backward = backward;
 	}
 	
-	private void set(double speed){
-		double scaled = FlashRoboUtil.scaleVoltageBus(speed);
-		controller.set(scaleVoltage? scaled : speed);
+	public void set(double speed){
+		if(scaleVoltage)
+			speed = FlashRoboUtil.scaleVoltageBus(speed);
+		
+		controller.set(speed);
 	}
 	
 	@Override
@@ -98,9 +103,6 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	public void stop(){
 		controller.set(0);
 	}
-	
-	@Override
-	protected void initDefaultAction() {}
 	
 	@Override
 	public void rotate(double speed, boolean direction) {
