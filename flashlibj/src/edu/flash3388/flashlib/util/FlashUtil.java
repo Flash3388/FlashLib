@@ -30,7 +30,9 @@ public class FlashUtil {
 	private static Log mainLog;
 	private static ExecutorService executor;
 	
-
+	static{
+		setStartTime(System.currentTimeMillis());
+	}
 	
 	//--------------------------------------------------------------------
 	//-----------------------General--------------------------------------
@@ -46,13 +48,16 @@ public class FlashUtil {
 		delay((long)(secs * 1000));
 	}
 	public static long millis(){
-		return startTime != 0? System.currentTimeMillis() - startTime : -1;
+		return startTime != 0? System.currentTimeMillis() - startTime : -1L;
 	}
 	public static int millisInt(){
-		return (int) (startTime != 0? System.currentTimeMillis() - startTime : -1);
+		return (int) millis();
 	}
 	public static double secs(){
-		return startTime != 0? millis() / 1000.0 : -1;
+		return startTime != 0? millis() / 1000.0 : -1.0;
+	}
+	public static double clockSecs(){
+		return System.nanoTime() / 1e6;
 	}
 
 	
@@ -61,20 +66,15 @@ public class FlashUtil {
 			startTime = time;
 	}
 	public static void setStart(Log.LoggingType logType, boolean overrideLog){
-		setStartTime(System.currentTimeMillis());
 		if(mainLog == null)
 			mainLog = new Log("flashlib", logType, overrideLog);
 	}
 	public static void setStart(){
 		setStart(Log.LoggingType.Stream, false);
 	}
-	public static void validateInit(){
-		if(startTime == 0)
-			setStartTime(System.currentTimeMillis());
-		if(mainLog == null)
-			mainLog = new Log("flashlib", Log.LoggingType.Stream, false);
-	}
 	public static Log getLog(){
+		if(mainLog == null)
+			setStart();
 		return mainLog;
 	}
 
@@ -550,6 +550,15 @@ public class FlashUtil {
 	public static float toFloat(String s, float defaultVal){
 		try{
 			return Float.parseFloat(s);
+		}catch(NumberFormatException e){}
+		return defaultVal;
+	}
+	public static boolean toBoolean(String s){
+		return toBoolean(s, false);
+	}
+	public static boolean toBoolean(String s, boolean defaultVal){
+		try{
+			return Boolean.parseBoolean(s);
 		}catch(NumberFormatException e){}
 		return defaultVal;
 	}

@@ -13,9 +13,9 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.util.Properties;
 import io.silverspoon.bulldog.core.io.IOPort;
 import io.silverspoon.bulldog.core.io.bus.i2c.I2cBus;
 import io.silverspoon.bulldog.core.io.bus.spi.SpiBus;
@@ -36,6 +36,7 @@ public abstract class SbcBot {
 	public static final String PROP_BOARD_SHUTDOWN = "board.shutdown";
 	public static final String PROP_COMM_PORT = "comm.port";
 	public static final String PROP_COMM_INTERFACE = "comm.interface";
+	public static final String PROP_COMM_SERIAL_PORT = "comm.serial.port";
 	public static final String PROP_FLASHBOARD_INIT = "flashboard.init";
 	
 	private static final String NATIVE_LIBRARY_NAME = "";
@@ -48,7 +49,6 @@ public abstract class SbcBot {
 	private static byte currentState;
 	private static StateSelector stateSelector;
 	private static SbcBot userImplement;
-	private static Properties properties = new Properties();
 	private static Log log;
 
 	public static void main(String[] args){
@@ -72,20 +72,19 @@ public abstract class SbcBot {
 		log.log("Loading settings...");
 		File file = new File(PROPERTIES_FILE);
 		if(file.exists())
-			properties.loadFromFile(PROPERTIES_FILE);
+			ConstantsHandler.loadConstantsFromXml(PROPERTIES_FILE);
 		else{
 			try {
 				file.createNewFile();
 			} catch (IOException e) {}
 		}
 		loadDefaultSettings();
-		loadSettings(args);
-		properties.saveToFile(PROPERTIES_FILE);
-		printSettings();
+		ConstantsHandler.saveConstantsToXml(PROPERTIES_FILE);
+		ConstantsHandler.printAll(log);
 		
 		log.log("Initializing FlashLib...");
 		int initcode = SCHEDULER_INIT | 
-				(getProperties().getBooleanProperty(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
+				(ConstantsHandler.getBooleanNative(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
 		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
 		log.log("Initializing Communications...");
@@ -111,7 +110,7 @@ public abstract class SbcBot {
 		SbcBot userClass = null;
 		String userClassName = "";
 		try {
-			userClassName = properties.getProperty(PROP_USER_CLASS);
+			userClassName = ConstantsHandler.getStringNative(PROP_USER_CLASS);
 			if(userClassName == null || userClassName.equals(""))
 				throw new ClassNotFoundException("User class missing! Must be set to "+PROP_USER_CLASS+" property");
 			userClass = (SbcBot) Class.forName(userClassName).newInstance();
@@ -131,40 +130,43 @@ public abstract class SbcBot {
 		userClass.startRobot();
 	}
 	private static CommInterface setupCommInterface() throws IOException{
-		int port = properties.getIntegerProperty(PROP_COMM_PORT);
+		int port = ConstantsHandler.getIntegerNative(PROP_COMM_PORT);
 		if(port <= 0) return null;
-		String interfaceType = properties.getProperty(PROP_COMM_INTERFACE);
+		String interfaceType = ConstantsHandler.getStringNative(PROP_COMM_INTERFACE, "");
 		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UdpCommInterface(port);
         else if(interfaceType.equalsIgnoreCase("tcp"))
 			return new TcpCommInterface(port);
-        else if(interfaceType.startsWith("serial")){
-        	String data = FlashUtil.splitAndGet(interfaceType, "=", 1);
-        	SerialPort sport = getSerialPort(data);
-        	if(sport == null)
+        else if(interfaceType.equalsIgnoreCase("serial")){
+        	String data = ConstantsHandler.getStringNative(PROP_COMM_SERIAL_PORT);
+        	if(data == null){
+        		log.reportError("To initialize serial port comm, a serial port has to be defined under "+
+        				PROP_COMM_SERIAL_PORT+" property");
         		return null;
+        	}
+        	
+        	SerialPort sport = getSerialPort(data);
+        	if(sport == null){
+        		log.reportError("property "+ PROP_COMM_SERIAL_PORT+" contains an invalid serial port name: "+
+        					data);
+        		return null;
+        	}
+        	
         	return new SbcSerialCommInterface(sport, true);
         }
 		return null;
 	}
-	private static void loadSettings(String[] args){
-		for (int i = 0; i < args.length; i++) {
-			String[] splits = args[i].split(":");
-			if(splits.length == 2)
-				properties.putProperty(splits[0], splits[1]);
-		}
-	}
 	private static void loadDefaultSettings(){
-		if(properties.getProperty(PROP_BOARD_SHUTDOWN) == null)
-			properties.putBooleanProperty(PROP_BOARD_SHUTDOWN, false);
-		if(properties.getProperty(PROP_COMM_PORT) == null){
-			properties.putIntegerProperty(PROP_COMM_PORT, 0);
+		if(!ConstantsHandler.hasBoolean(PROP_BOARD_SHUTDOWN))
+			ConstantsHandler.putBoolean(PROP_BOARD_SHUTDOWN, false);
+		if(!ConstantsHandler.hasNumber(PROP_COMM_PORT)){
+			ConstantsHandler.putNumber(PROP_COMM_PORT, 0);
 			FlashUtil.getLog().reportError("Missing Property: "+PROP_COMM_PORT);
 		}
-		if(properties.getProperty(PROP_COMM_INTERFACE) == null)
-			properties.putProperty(PROP_COMM_INTERFACE, "udp");
-		if(properties.getProperty(PROP_FLASHBOARD_INIT) == null)
-			properties.putBooleanProperty(PROP_FLASHBOARD_INIT, true);
+		if(!ConstantsHandler.hasString(PROP_COMM_INTERFACE))
+			ConstantsHandler.putString(PROP_COMM_INTERFACE, "tcp");
+		if(!ConstantsHandler.hasBoolean(PROP_FLASHBOARD_INIT))
+			ConstantsHandler.putBoolean(PROP_FLASHBOARD_INIT, true);
 	}
 	private static void onShutdown(){
 		log.logTime("Shuting down...");
@@ -184,11 +186,11 @@ public abstract class SbcBot {
 			board.shutdown();
 			log.log("Done");
 		}
-		properties.saveToFile(PROPERTIES_FILE);
+		ConstantsHandler.saveConstantsToXml(PROPERTIES_FILE);
 		log.log("Settings saved");
 		
 		log.logTime("Shutdown successful");
-		boolean shutdown = properties.getBooleanProperty(PROPERTIES_FILE);
+		boolean shutdown = ConstantsHandler.getBooleanNative(PROP_BOARD_SHUTDOWN);
 		log.log("Board shutdown="+shutdown);
 		log.save();
 		log.close();
@@ -204,23 +206,6 @@ public abstract class SbcBot {
 	}
 	public static void shutdown(){
 		shutdown(0);
-	}
-	public static void printSettings(){
-		String[] keys = properties.keys(),
-				 values = properties.values();
-		String print = "Settings:\n";
-		for (int i = 0; i < values.length; i++) 
-			print += "\t"+keys[i]+"="+values[i]+"\n";
-		log.log(print);
-	}
-	public static void setProperty(String property, String value){
-		properties.putProperty(property, value);
-	}
-	public static String getProperty(String property){
-		return properties.getProperty(property);
-	}
-	public static Properties getProperties(){
-		return properties;
 	}
 	
 	public static byte getCurrentState(){

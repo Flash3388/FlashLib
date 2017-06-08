@@ -14,6 +14,7 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.gui.ShellWindow;
 import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
+import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
@@ -442,7 +443,7 @@ public class MainController implements Initializable{
 		return true;
 	}
 	private void showPropViewer(){
-		PropertyViewer.showPropertyViewer(Dashboard.getPrimary(), Dashboard.getProperties().getMap());
+		PropertyViewer.showPropertyViewer(Dashboard.getPrimary());
 	}
 	private void showPDP(){
 		PDPWindow.showPDP();

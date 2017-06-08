@@ -42,9 +42,17 @@ public class FileStream {
 	}
 	public static File wrap(String filename){
         File file = new File(filename);
+        
         File parent = file.getAbsoluteFile().getParentFile();
         if (!parent.exists()) 
             parent.mkdirs();
+        
+        if(!file.exists()){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+        }
+        
         return file;
 	}
 	

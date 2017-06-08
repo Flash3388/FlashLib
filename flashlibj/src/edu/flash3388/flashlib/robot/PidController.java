@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.vision.Vision;
 
 public class PidController {
 	
@@ -21,6 +22,72 @@ public class PidController {
 		@Override
 		public double pidGet() {
 			return gyro.getAngle();
+		}
+		@Override
+		public PidType getType() {
+			return type;
+		}
+	}
+	public static class VisionPidSource implements PidSource{
+
+		private PidType type;
+		private Vision vision;
+		private double previous = 0.0;
+		private boolean horizontal;
+		
+		public VisionPidSource(Vision vision, PidType t, boolean horizontal){
+			this.vision = vision;
+			this.horizontal = horizontal;
+			this.type = t;
+		}
+		public VisionPidSource(Vision vision, boolean horizontal){
+			this(vision, PidType.Displacement, horizontal);
+		}
+		
+		public void setVision(Vision vision){
+			this.vision = vision;
+		}
+		public Vision getVision(){
+			return vision;
+		}
+		public void setHorizontal(boolean horizontal){
+			this.horizontal = horizontal;
+		}
+		public boolean getHorizontal(){
+			return horizontal;
+		}
+		
+		@Override
+		public double pidGet() {
+			if(!vision.hasNewAnalysis()) return previous;
+			previous = horizontal? 
+					vision.getAnalysis().horizontalDistance : 
+					vision.getAnalysis().verticalDistance;
+			return previous;
+		}
+		@Override
+		public PidType getType() {
+			return type;
+		}
+	}
+	public static class DoublePidSource implements PidSource{
+
+		private PidType type;
+		private double value;
+		
+		public DoublePidSource(PidType t){
+			this.type = t;
+		}
+		public DoublePidSource(){
+			this(PidType.Displacement);
+		}
+		
+		public void setValue(double val){
+			this.value = val;
+		}
+		@Override
+		public double pidGet() {
+			return value;
 		}
 		@Override
 		public PidType getType() {

@@ -9,23 +9,24 @@ public abstract class CombinedAction extends Action{
 	private Vector<Action> actions = new Vector<Action>();
 	private ArrayList<Action> currentActions = new ArrayList<Action>();
 	
-	public void add(Action part){
+	protected void add(Action part){
 		if(part == null)
 			 return;
 		actions.add(part);
 	}
-	public Action get(int index){
+	protected Action get(int index){
 		return actions.get(index);
 	}
-	public void remove(Action part){
+	protected void remove(Action part){
 		if(part == null)
 			 return;
 		actions.remove(part);
 	}
-	public void remove(int index){
+	protected void remove(int index){
 		actions.remove(index);
 	}
 	
+	@Override
 	protected void initialize(){ 
 		for (Enumeration<Action> parts = actions.elements(); parts.hasMoreElements();) {
 			Action part = parts.nextElement();
@@ -33,7 +34,12 @@ public abstract class CombinedAction extends Action{
 			currentActions.add(part);
 		}
 	}
-	
+	@Override
+	protected void execute(){
+		for (int i = 0; i < currentActions.size(); i--)
+			currentActions.get(i).execute();
+	}
+	@Override
 	protected boolean isFinished(){ 
 		boolean is = true;
 		for (int i = currentActions.size() - 1; i >= 0; i--) {

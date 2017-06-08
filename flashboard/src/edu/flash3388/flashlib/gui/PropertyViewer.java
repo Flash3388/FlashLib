@@ -1,7 +1,9 @@
 package edu.flash3388.flashlib.gui;
 
+import java.util.ArrayList;
 import java.util.Map;
 
+import edu.flash3388.flashlib.util.ConstantsHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,25 +18,93 @@ import javafx.stage.Stage;
 
 public class PropertyViewer extends Stage{
 
-	private Map<String, String> properties;
+	private static class Property{
+		private static enum Type{
+			String, Boolean, Number
+		}
+		
+		private String name;
+		private Type type;
+		
+		public Property(String name, Type type){
+			this.name = name;
+			this.type = type;
+		}
+		
+		public String getName(){
+			return name;
+		}
+		public String getValue(){
+			switch(type){
+				case Boolean: 
+					return String.valueOf(ConstantsHandler.getBooleanNative(name));
+				case Number: 
+					return String.valueOf(ConstantsHandler.getNumberNative(name));
+				case String: 
+					return ConstantsHandler.getStringNative(name);
+				default: return "";
+			}
+		}
+		
+		public boolean setValue(String value){
+			if(type == Type.Boolean){
+				try {
+					ConstantsHandler.putBoolean(name, Boolean.parseBoolean(value));
+					return true;
+				} catch (Exception e) { return false;}
+			}
+			if(type == Type.Number){
+				try {
+					ConstantsHandler.putNumber(name, Double.parseDouble(value));
+					return true;
+				} catch (Exception e) { return false;}
+			}
+			if(type == Type.String){
+				ConstantsHandler.putString(name, value);
+				return true;
+			}
+			return true;
+		}
+	}
+	
+	private ArrayList<Property> props;
 	private TextField valField, nameField;
 	private ComboBox<String> keysBox;
-	private String keyName;
+	private Property cProp;
 	private boolean local = false;
-	private String retVal = null;
 	
-	private PropertyViewer(Stage owner, Map<String, String> props){
+	private PropertyViewer(Stage owner){
 		initOwner(owner);
 		initModality(Modality.WINDOW_MODAL);
 		setResizable(false);
-		properties = props;
 	}
 	
-	private void newProp(String prop, String value){
-		properties.put(prop, value);
+	private void newProp(Property prop, String value){
+		if(!prop.setValue(value))
+			Dialog.show(this, "Error", "Value is incompatible with property type");
 	}
 	private String[] getKeys(){
-		return properties.keySet().toArray(new String[0]);
+		props = new ArrayList<Property>();
+		ArrayList<String> keys = new ArrayList<String>();
+		
+		String[] pKeys = ConstantsHandler.getStringMapNames();
+		for (int i = 0; i < pKeys.length; i++){
+			keys.add(pKeys[i]);
+			props.add(new Property(ConstantsHandler.getStringNative(pKeys[i]), Property.Type.String));
+		}
+		pKeys = ConstantsHandler.getNumberMapNames();
+		for (int i = 0; i < pKeys.length; i++){
+			keys.add(pKeys[i]);
+			props.add(new Property(String.valueOf(ConstantsHandler.getNumberNative(pKeys[i])), 
+					Property.Type.Number));
+		}
+		pKeys = ConstantsHandler.getBooleanMapNames();
+		for (int i = 0; i < pKeys.length; i++){
+			keys.add(pKeys[i]);
+			props.add(new Property(String.valueOf(ConstantsHandler.getBooleanNative(pKeys[i]))
+					, Property.Type.Boolean));
+		}
+		return keys.toArray(new String[0]);
 	}
 	
 	private void loadPropertyViewer(){
@@ -48,11 +118,11 @@ public class PropertyViewer extends Stage{
 		keysBox.getItems().add("");
 		String[] keys = getKeys();
 		keysBox.getItems().addAll(keys);
-		keysBox.valueProperty().addListener((observable, oldValue, newValue)->{
+		keysBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			local = true;
-			if(!newValue.equals("")){
-				keyName = newValue;
-				valField.setText(properties.get(newValue));
+			if(newValue.intValue() != 0){
+				cProp = props.get(newValue.intValue());
+				valField.setText(cProp.getValue());
 			}else valField.setText("");
 			local = false;
 			save.setDisable(true);
@@ -64,13 +134,15 @@ public class PropertyViewer extends Stage{
 		
 		save.setOnAction((e)->{
 			String newVal = valField.getText();
-			newProp(keyName, newVal);
+			newProp(cProp, newVal);
 			save.setDisable(true);
 		});
 		newProp.setOnAction((e)->{
-			String prop = PropertyViewer.showPropertyCreator(this, this.properties);
-			if(prop != null)
-				keysBox.getItems().add(prop);
+			Property prop = PropertyViewer.showPropertyCreator(this);
+			if(prop != null){
+				props.add(prop);
+				keysBox.getItems().add(prop.getName());
+			}
 		});
 		VBox viewerNode = new VBox();
 		viewerNode.getChildren().addAll(keysBox, valField);
@@ -93,6 +165,9 @@ public class PropertyViewer extends Stage{
 		valField = new TextField();
 		valField.setPrefWidth(150);
 		valField.setDisable(true);
+		final ComboBox<Property.Type> typeBox = new ComboBox<Property.Type>();
+		typeBox.setPrefWidth(150);
+		typeBox.getItems().addAll(Property.Type.values());
 		final Button save = new Button("Save"), cancel = new Button("Cancel");
 		save.setDisable(true);
 		
@@ -109,12 +184,14 @@ public class PropertyViewer extends Stage{
 		save.setOnAction((e)->{
 			String newVal = valField.getText();
 			String keyName = nameField.getText();
-			newProp(keyName, newVal);
-			retVal = keyName;
+			Property.Type t = typeBox.getValue();
+			
+			cProp = new Property(keyName, t);
+			newProp(cProp, newVal);
 			close();
 		});
 		cancel.setOnAction((e)->{
-			retVal = null;
+			cProp = null;
 			close();
 		});
 		
@@ -134,17 +211,17 @@ public class PropertyViewer extends Stage{
 		setScene(new Scene(pane, 200, 200));
 	}
 	
-	public static void showPropertyViewer(Stage owner, Map<String, String> prop){
-		PropertyViewer v = new PropertyViewer(owner, prop);
+	public static void showPropertyViewer(Stage owner){
+		PropertyViewer v = new PropertyViewer(owner);
 		v.setTitle("Properties Viewer");
 		v.loadPropertyViewer();
 		v.showAndWait();
 	}
-	public static String showPropertyCreator(Stage owner, Map<String, String> prop){
-		PropertyViewer v = new PropertyViewer(owner, prop);
+	private static Property showPropertyCreator(Stage owner){
+		PropertyViewer v = new PropertyViewer(owner);
 		v.setTitle("Property Creator");
 		v.loadPropertyCreator();
 		v.showAndWait();
-		return v.retVal;
+		return v.cProp;
 	}
 }

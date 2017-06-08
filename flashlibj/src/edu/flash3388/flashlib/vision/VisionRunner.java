@@ -45,7 +45,6 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	
 	public VisionRunner(String name, int id) {
 		super(name, id, FlashboardSendableType.VISION);
-		FlashUtil.validateInit();
 		
 		runTask = new VisionRunnerTask(this);
 		visionThread = new Thread(runTask, name);

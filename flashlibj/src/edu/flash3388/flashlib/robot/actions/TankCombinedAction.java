@@ -1,28 +1,26 @@
 package edu.flash3388.flashlib.robot.actions;
 
+import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.CombinedAction;
 import edu.flash3388.flashlib.robot.SourceAction;
-import edu.flash3388.flashlib.robot.System;
-import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
+import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 
-public class HolonomicOrientationCombinedAction extends CombinedAction{
+public class TankCombinedAction extends CombinedAction{
 
-	private HolonomicDriveSystem driveTrain;
+	private TankDriveSystem driveTrain;
 	private SourceAction positioning;
 	private SourceAction rotation;
 	private double minSpeed, maxSpeed;
-	private boolean rotate = true;
 	
-	public HolonomicOrientationCombinedAction(HolonomicDriveSystem driveTrain, 
+	public TankCombinedAction(TankDriveSystem driveTrain, 
 			SourceAction positioning, SourceAction rotation, 
-			double minSpeed, double maxSpeed, boolean rotate){
+			double minSpeed, double maxSpeed){
 		this.driveTrain = driveTrain;
 		this.positioning = positioning;
 		this.rotation = rotation;
 		this.minSpeed = minSpeed;
 		this.maxSpeed = maxSpeed;
-		this.rotate = rotate;
 		
 		add(rotation);
 		add(positioning);
@@ -31,9 +29,9 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 		if(s != null)
 			requires(s);
 	}
-	public HolonomicOrientationCombinedAction(HolonomicDriveSystem driveTrain, 
-			SourceAction positioning, SourceAction rotation, boolean rotate){
-		this(driveTrain, positioning, rotation, 0.1, 0.7, rotate);
+	public TankCombinedAction(TankDriveSystem driveTrain, 
+			SourceAction positioning, SourceAction rotation){
+		this(driveTrain, positioning, rotation, 0.1, 0.7);
 	}
 	
 	@Override 
@@ -42,14 +40,14 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 	}
 	@Override
 	protected void execute() {
+		super.execute();
+		
 		double speedY = positioning != null? 
 				Mathd.limit(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
 		double speedX = rotation != null? 
 				Mathd.limit(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
 		
-		if(rotate)
-			driveTrain.holonomicCartesian(0, speedY, speedX);
-		else driveTrain.holonomicCartesian(speedX, speedY, 0);
+		driveTrain.arcadeDrive(speedY, speedX);
 	}
 	@Override
 	protected void end() {
@@ -74,12 +72,6 @@ public class HolonomicOrientationCombinedAction extends CombinedAction{
 		return rotation;
 	}
 	
-	public boolean isSetToRotate(){
-		return rotate;
-	}
-	public void setRotate(boolean rotate){
-		this.rotate = rotate;
-	}
 	public double getMinSpeed(){
 		return minSpeed;
 	}

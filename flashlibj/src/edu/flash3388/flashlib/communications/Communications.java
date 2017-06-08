@@ -64,8 +64,6 @@ public class Communications {
 	private CommTask commTask;
 	
 	public Communications(String name, CommInterface readIn){
-		FlashUtil.validateInit();
-		
 		instances++;
 		this.commInterface = readIn;
 		this.logName = name+"-Comm";
