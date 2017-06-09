@@ -3,7 +3,10 @@ package edu.flash3388.flashlib.communications;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -51,7 +54,8 @@ public class Communications {
 	
 	private static byte instances = 0;
 	
-	private Vector<Sendable> sendables, attachedSendables;
+	private Vector<Sendable> attachedSendables;
+	private Map<Integer, Sendable> sendables;
 	
 	private long currentMillis = -1, readStart = -1;
 	private int readTimeout;
@@ -64,20 +68,19 @@ public class Communications {
 	private CommTask commTask;
 	
 	public Communications(String name, CommInterface readIn){
-		instances++;
 		this.commInterface = readIn;
 		this.logName = name+"-Comm";
 		
 		initializeConcurrency(name);
 		FlashUtil.getLog().log("Initialized", logName);
 		
-		sendables = new Vector<Sendable>();
+		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
 		setBufferSize(MAX_REC_LENGTH);
 		commInterface.open();
 	}
 	public Communications(CommInterface readIn){
-		this(""+instances, readIn);
+		this(""+(++instances), readIn);
 	}
 	
 	private void initializeConcurrency(String name){
@@ -101,14 +104,14 @@ public class Communications {
 				continue;
 			
 			int id = FlashUtil.toInt(packet.data);
-			Sendable sen = getByID(id);
+			Sendable sen = getFromAllAttachedByID(id);
 			if(sen != null)
 				sen.newData(Arrays.copyOfRange(packet.data, 5, packet.length));
 			else if(sendableCreator != null){
 				String str = new String(packet.data, 5, packet.length - 5);
 				sen = sendableCreator.create(str, id, packet.data[4]);
 				if(sen != null){
-					sendables.add(sen);
+					sendables.put(sen.getID(), sen);
 					sen.setAttached(true);
 				}
 			}
@@ -119,7 +122,7 @@ public class Communications {
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements()) {
 			Sendable sendable = sendablesEnum.nextElement();
-			sendables.addElement(sendable);
+			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
 	} 
@@ -128,17 +131,17 @@ public class Communications {
 		sen.onConnection();
 	}
 	private void onDisconnect(){
-		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements())
-			handleDisconnection(sendablesEnum.nextElement());
+		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
+		while(sendablesEnum.hasNext())
+			handleDisconnection(sendablesEnum.next());
 	} 
 	private void handleDisconnection(Sendable sen){
 		sen.onConnectionLost();
 	}
 	private void sendAll(){
-		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements())
-			sendFromSendable(sendablesEnum.nextElement());
+		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
+		while(sendablesEnum.hasNext())
+			sendFromSendable(sendablesEnum.next());
 	}
 	private void sendFromSendable(Sendable sen){
 		if(!sen.remoteInit()){
@@ -178,59 +181,53 @@ public class Communications {
 			attach(sendable);
 	}
 	public void attach(Sendable sendable){
-		if(getByID(sendable.getID()) == null){
-			attachedSendables.add(sendable);
-			sendable.setAttached(true);
-			if(isConnected()){
-				sendables.addElement(sendable);
-				resetSendable(sendable);
-			}
+		if(getFromAllAttachedByID(sendable.getID()) != null)
+			throw new RuntimeException("Id taken");
+			
+		attachedSendables.add(sendable);
+		sendable.setAttached(true);
+		if(isConnected()){
+			sendables.put(sendable.getID(), sendable);
+			resetSendable(sendable);
 		}
 	}
 	public boolean detach(Sendable sendable){
-		if(sendables.remove(sendable)){
-			attachedSendables.remove(sendable);
+		if(attachedSendables.remove(sendable)){
+			sendables.remove(sendable.getID());
 			sendable.setAttached(false);
 			if(isConnected())
 				handleDisconnection(sendable);
 		}
 		return !sendable.attached();
 	}
-	public boolean detach(int index){
-		Sendable sen = sendables.get(index);
+	public boolean detach(int id){
+		Sendable sen = getLocalyAttachedByID(id);
 		if(sen != null) {
 			attachedSendables.remove(sen);
-			sendables.remove(index);
 			sen.setAttached(false);
-			if(isConnected())
+			if(isConnected()){
+				sendables.remove(sen.getID());
 				handleDisconnection(sen);
-		}
-		return sen != null && !sen.attached();
-	}
-	public boolean detachByID(int id){
-		Sendable sen = getByID(id);
-		if(sen != null) {
-			attachedSendables.remove(sen);
-			sendables.remove(sen);
-			sen.setAttached(false);
-			if(isConnected())
-				handleDisconnection(sen);
+			}
 		}
 		return sen != null && !sen.attached();
 	}
 	public void detachAll(){
-		Enumeration<Sendable> sendablesEnum = sendables.elements();
+		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements())
 			detach(sendablesEnum.nextElement());
 	}
-	public Sendable getByID(int id){
-		Enumeration<Sendable> sendablesEnum = sendables.elements();
+	public Sendable getLocalyAttachedByID(int id){
+		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while(sendablesEnum.hasMoreElements()){
 			Sendable sen = sendablesEnum.nextElement();
 			if(sen.getID() == id)
 				return sen;
 		}
 		return null;
+	}
+	public Sendable getFromAllAttachedByID(int id){
+		return sendables.get(id);
 	}
 	public CommInterface getCommInterface(){
 		return commInterface;
@@ -280,8 +277,8 @@ public class Communications {
 		detachAll();
 	}
 	public void sendDataForSendable(Sendable sendable, byte[] data){
-		if(getByID(sendable.getID()) == null)
-			return;
+		if(getFromAllAttachedByID(sendable.getID()) == null)
+			throw new RuntimeException("No such id attached");
 		send(data, sendable);
 	}
 	

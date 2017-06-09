@@ -56,6 +56,14 @@ public class ConstantsHandler {
 	public static DoubleDataSource removeNumber(String name){
 		return doubleMap.remove(name);
 	}
+	public static DoubleDataSource addNumber(String name, double iniVal){
+		DoubleDataSource.VarDataSource source = doubleMap.get(name);
+		if(source == null){
+			source = new DoubleDataSource.VarDataSource(iniVal);
+			doubleMap.put(name, source);
+		}
+		return source;
+	}
 	public static DoubleDataSource putNumber(String name, double iniVal){
 		DoubleDataSource.VarDataSource source = doubleMap.get(name);
 		if(source == null){
@@ -111,6 +119,14 @@ public class ConstantsHandler {
 	public static StringDataSource removeString(String name){
 		return stringMap.remove(name);
 	}
+	public static StringDataSource addString(String name, String iniVal){
+		StringDataSource.VarDataSource source = stringMap.get(name);
+		if(source == null){
+			source = new StringDataSource.VarDataSource(iniVal);
+			stringMap.put(name, source);
+		}
+		return source;
+	}
 	public static StringDataSource putString(String name, String iniVal){
 		StringDataSource.VarDataSource source = stringMap.get(name);
 		if(source == null){
@@ -156,6 +172,14 @@ public class ConstantsHandler {
 	}
 	public static BooleanDataSource removeBoolean(String name){
 		return booleanMap.remove(name);
+	}
+	public static BooleanDataSource addString(String name, boolean iniVal){
+		BooleanDataSource.VarDataSource source = booleanMap.get(name);
+		if(source == null){
+			source = new BooleanDataSource.VarDataSource(iniVal);
+			booleanMap.put(name, source);
+		}
+		return source;
 	}
 	public static BooleanDataSource putBoolean(String name, boolean iniVal){
 		BooleanDataSource.VarDataSource source = booleanMap.get(name);

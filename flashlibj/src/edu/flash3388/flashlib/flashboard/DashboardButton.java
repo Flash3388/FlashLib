@@ -1,55 +1,53 @@
 package edu.flash3388.flashlib.flashboard;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.robot.hid.Button;
 
 public class DashboardButton extends Sendable{
 	
-	private Vector<Action> actions = new Vector<Action>(2);
-	private boolean activated = false;
-	private byte[] done = {1};
+	public static final byte DOWN = 0xe;
+	public static final byte UP = 0x5;
+	
+	private Button button;
+	private boolean running = false;
 	
 	public DashboardButton(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
+		
+		button = new Button(name, -1, -1);
 	}
 
 	public void whenPressed(Action action){
-		actions.add(action);
+		button.whenPressed(action);
 	}
 	
 	@Override
 	public void newData(byte[] data) {
-		if(data[0] == 1){
-			FlashUtil.getLog().log("Start");
-			for(Enumeration<Action> eA = actions.elements(); eA.hasMoreElements();){
-				Action a = eA.nextElement();
-				if(!a.isRunning())
-					a.start();
-			}
-			activated = true;
+		if(data[0] == DOWN && !running){
+			running = true;
+			button.setPressed(true);
+		}else if(data[0] == UP){
+			running = false;
+			button.setPressed(false);
+			button.stopAll();
 		}
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		for(Enumeration<Action> eA = actions.elements(); eA.hasMoreElements();){
-			if(eA.nextElement().isRunning())
-				return null;
-		}
-		activated = false;
-		return done;
+		return new byte[] {UP};
 	}
 	@Override
 	public boolean hasChanged() {
-		return activated;
+		return running && button.actionsStilRunning();
 	}
 	@Override
 	public void onConnection() {
+		running = false;
+		button.setPressed(false);
 	}
 	@Override
 	public void onConnectionLost() {
+		button.stopAll();
 	}
 }

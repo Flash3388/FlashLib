@@ -1,7 +1,9 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.flashboard.DashboardButton;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -15,9 +17,8 @@ public class Button extends Displayble{
 	
 	private javafx.scene.control.Button button;
 	private HBox node;
-	private byte[] bytes = new byte[1], press = {1};
-	private boolean disabled = false;
-	private Runnable updater;
+	private byte[] press = {DashboardButton.DOWN};
+	private boolean changed = false;
 	
 	public Button(String name, int id) {
 		super(name, id, FlashboardSendableType.ACTIVATABLE);
@@ -30,43 +31,32 @@ public class Button extends Displayble{
 			@Override
 			public void handle(ActionEvent event) {
 				press();
+				button.setDisable(true);
 			}
 		});
 		node.getChildren().add(button);
-		button.setAlignment(Pos.TOP_CENTER);
-		
-		updater = new Runnable(){
-			@Override
-			public void run() {
-				if(disabled && !button.isDisabled())
-					button.setDisable(true);
-				else if(!disabled && button.isDisabled())
-					button.setDisable(false);
-			}
-		};
+		button.setAlignment(Pos.CENTER);
 	}
 
 	private void press(){
-		bytes[0] = 1;
-		disabled = true;
+		changed = true;
 	}
 	@Override
 	public void newData(byte[] bytes) {
-		if(bytes[0] == 1){
-			disabled = false;
+		if(bytes[0] == DashboardButton.UP){
+			FlashFxUtils.onFxThread(()->{
+				button.setDisable(false);
+			});
 		}
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		if(bytes[0] == 1){
-			bytes[0] = 0;
-			return press;
-		}
-		return null;
+		changed = false;
+		return press;
 	}
 	@Override
 	public boolean hasChanged() {
-		return bytes[0] == 1;
+		return changed;
 	}
 	@Override
 	public void onConnection() {}
@@ -75,10 +65,6 @@ public class Button extends Displayble{
 	
 	@Override
 	protected Node getNode(){return node;}
-	@Override
-	public Runnable updateDisplay() {
-		return updater;
-	}
 	@Override
 	public DisplayType getDisplayType(){
 		return DisplayType.Manual;

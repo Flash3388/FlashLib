@@ -52,17 +52,13 @@ public class Flashboard {
 		if(!instance) return false;
 		return communications.detach(sendable);
 	}
-	public static boolean detach(int index){
+	public static boolean detach(int id){
 		if(!instance) return false;
-		return communications.detach(index);
+		return communications.detach(id);
 	}
-	public static boolean detachByID(int id){
-		if(!instance) return false;
-		return communications.detachByID(id);
-	}
-	public static Sendable getByID(int id){
+	public static Sendable getLocalByID(int id){
 		if(!instance) return null;
-		return communications.getByID(id);
+		return communications.getLocalyAttachedByID(id);
 	}
 	
 	public static boolean connect() throws IOException{

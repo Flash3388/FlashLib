@@ -7,7 +7,6 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RobotState;
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
-import edu.flash3388.flashlib.robot.sbc.SbcBot;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -46,7 +45,7 @@ public class Button implements ButtonListener, BooleanDataSource{
 	private int number;
 	private int stick; 
 	protected ButtonEvent event;
-	private long holdStart = -1;
+	private int holdStart = -1;
 	
 	private Vector<ButtonListener> listeners = new Vector<ButtonListener>();
 	private Vector<ButtonCommand> commands = new Vector<ButtonCommand>();
@@ -181,6 +180,27 @@ public class Button implements ButtonListener, BooleanDataSource{
 			commands.add(new ButtonCommand(a, ActivateType.Release));
 	}
 	
+	public synchronized void stopAll(){
+		Enumeration<ButtonCommand> commEnum = commands.elements();
+		while(commEnum.hasMoreElements()){
+			ButtonCommand com = commEnum.nextElement();
+			if(com.isRunning())
+				com.cancel();
+		}
+	}
+	public boolean actionsStilRunning(){
+		boolean run = false;
+		Enumeration<ButtonCommand> commEnum = commands.elements();
+		while(commEnum.hasMoreElements()){
+			ButtonCommand com = commEnum.nextElement();
+			if(com.isRunning()){
+				run = true;
+				break;
+			}
+		}
+		return run;
+	}
+	
 	public synchronized void set(boolean down){
 		last = current;
 		current = down;
@@ -188,9 +208,17 @@ public class Button implements ButtonListener, BooleanDataSource{
     	changedUp = last && !current;
     	
     	if(changedDown)
-    		holdStart = FlashUtil.millis();
+    		holdStart = FlashUtil.millisInt();
     	
-    	setCommands(changedUp && (holdStart > 0 && FlashUtil.millis() - holdStart < 500));
+    	setCommands(changedUp && (holdStart > 0 && FlashUtil.millisInt() - holdStart < 500));
+	}
+	public synchronized void setPressed(boolean press){
+		changedUp = true;
+		last = true;
+		current = false;
+		changedDown = false;
+		
+		setCommands(true);
 	}
 	protected void setCommands(boolean press){
 		if(!RobotState.isRobotTeleop()) return;

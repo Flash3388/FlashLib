@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.System;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -16,49 +17,25 @@ public class DualPneumaticSystem extends System {
 		Forward, Backward, Off
 	}
 	
-	public final Action FORWARD_ACTION = new SystemAction(this, new Action(){
+	public final Action FORWARD_ACTION = new SystemAction(this, new InstantAction(){
 		@Override
-		protected void initialize(){ forward();}
-		@Override
-		protected boolean isFinished(){ return true;}
-		@Override
-		protected void execute() {}
-		@Override
-		protected void end() {}
+		protected void execute() {forward();}
 	});
-	public final Action BACKWARD_ACTION = new SystemAction(this, new Action(){
+	public final Action BACKWARD_ACTION = new SystemAction(this, new InstantAction(){
 		@Override
-		protected void initialize(){ backward();}
-		@Override
-		protected boolean isFinished(){ return true;}
-		@Override
-		public void execute() {}
-		@Override
-		public void end() {}
+		public void execute() {backward();}
 	});
-	public final Action OFF_ACTION = new SystemAction(this, new Action(){
+	public final Action OFF_ACTION = new SystemAction(this, new InstantAction(){
 		@Override
-		protected void initialize(){ off();}
-		@Override
-		protected boolean isFinished(){ return true;}
-		@Override
-		public void execute() {}
-		@Override
-		public void end() {}
+		public void execute() {off();}
 	});
-	public final Action SWITCH_ACTION = new SystemAction(this, new Action(){
+	public final Action SWITCH_ACTION = new SystemAction(this, new InstantAction(){
 		@Override
-		protected void initialize(){ 
+		public void execute() {
 			if(open)
 				backward();
 			else forward();
 		}
-		@Override
-		protected boolean isFinished(){ return true;}
-		@Override
-		public void execute() {}
-		@Override
-		public void end() {}
 	});
 	
 	private DoubleSolenoid solenoid_1, solenoid_2;
