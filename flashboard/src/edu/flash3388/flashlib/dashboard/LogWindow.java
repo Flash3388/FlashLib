@@ -93,7 +93,8 @@ public class LogWindow extends Stage{
 			currentLog = logs.get(index);
 			textArea.clear();
 			
-			String[] lines = currentLog.logs.toArray(new String[0]);
+			String[] lines = new String[currentLog.logs.size()];
+			currentLog.logs.toArray(lines);
 			for (String line : lines)
 				textArea.appendText(line+"\n");
 			currentLog.window = this;

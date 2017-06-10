@@ -32,8 +32,11 @@ public class RemoteControlStation extends Sendable{
 				else buttons.add(component);
 			}
 			
-			this.axes = axes.toArray(new Component[0]);
-			this.buttons = buttons.toArray(new Component[0]);
+			this.axes = new Component[axes.size()];
+			axes.toArray(this.axes);
+			
+			this.buttons = new Component[buttons.size()];
+			buttons.toArray(this.buttons);
 		}
 		
 		void update(){

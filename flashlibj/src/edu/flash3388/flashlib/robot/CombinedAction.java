@@ -44,10 +44,10 @@ public abstract class CombinedAction extends Action{
 		boolean is = true;
 		for (int i = currentActions.size() - 1; i >= 0; i--) {
 			Action part = currentActions.get(i);
-			if(part.isFinished())
-				currentActions.remove(i);
-			else if(is) 
+			if(!part.isFinished()){
 				is = false;
+				break;
+			}
 		}
 		return is;
 	}

@@ -51,7 +51,8 @@ public class ConstantsHandler {
 		return doubleMap.size();
 	}
 	public static String[] getNumberMapNames(){
-		return doubleMap.keySet().toArray(new String[0]);
+		String[] keys = new String[doubleMap.size()];
+		return doubleMap.keySet().toArray(keys);
 	}
 	public static DoubleDataSource removeNumber(String name){
 		return doubleMap.remove(name);
@@ -114,7 +115,8 @@ public class ConstantsHandler {
 		return stringMap.size();
 	}
 	public static String[] getStringMapNames(){
-		return stringMap.keySet().toArray(new String[0]);
+		String[] keys = new String[stringMap.size()];
+		return stringMap.keySet().toArray(keys);
 	}
 	public static StringDataSource removeString(String name){
 		return stringMap.remove(name);
@@ -168,7 +170,8 @@ public class ConstantsHandler {
 		return booleanMap.size();
 	}
 	public static String[] getBooleanMapNames(){
-		return booleanMap.keySet().toArray(new String[0]);
+		String[] keys = new String[booleanMap.size()];
+		return booleanMap.keySet().toArray(keys);
 	}
 	public static BooleanDataSource removeBoolean(String name){
 		return booleanMap.remove(name);
@@ -261,7 +264,8 @@ public class ConstantsHandler {
 		fillXmlString(lines);
 		lines.add("</constants-handler>");
 		
-		FileStream.writeLines(file.getAbsolutePath(), lines.toArray(new String[0]));
+		String[] linesArr = new String[lines.size()];
+		FileStream.writeLines(file.getAbsolutePath(), lines.toArray(linesArr));
 	}
 	private static void fillXmlString(ArrayList<String> lines){
 		String[] names = getStringMapNames();

@@ -1,0 +1,14 @@
+<vision name="2processing">
+	<filter name="color">
+		<param name="hsv" type="Boolean">false</param>
+		<param name="min1" type="Int">0</param>
+		<param name="max1" type="Int">255</param>
+		<param name="min2" type="Int">50</param>
+		<param name="max2" type="Int">255</param>
+		<param name="min3" type="Int">100</param>
+		<param name="max3" type="Int">255</param>
+	</filter>
+	<filter name="largest">
+		<param name="amount" type="Int">10</param>
+	</filter>
+</vision>

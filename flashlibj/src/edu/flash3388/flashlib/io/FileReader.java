@@ -91,7 +91,7 @@ public class FileReader {
 	public String[] readAll() throws IOException{
 		while(!endOfStream)
 			readLine();
-		return lines.toArray(new String[0]);
+		return lines.toArray(new String[lines.size()]);
 	}
 	/**
 	 * Reads a line from the file, until '\n'.

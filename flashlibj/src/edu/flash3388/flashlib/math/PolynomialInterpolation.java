@@ -9,6 +9,8 @@ public class PolynomialInterpolation extends Interpolation{
 	
 	public PolynomialInterpolation(double keyMargin){
 		super(keyMargin);
+		values = new Double[0];
+		keys = new Double[0];
 	}
 	
 	@Override
@@ -19,8 +21,13 @@ public class PolynomialInterpolation extends Interpolation{
 	
 	public void updateValues(){
 		if(valuesUpdated()){
-			values = getMap().values().toArray(new Double[0]);
-			keys = getMap().keySet().toArray(new Double[0]);
+			if(values.length != getMap().size()){
+				values = new Double[getMap().size()];
+				keys = new Double[getMap().size()];
+			}
+			getMap().values().toArray(values);
+			getMap().keySet().toArray(keys);
+			
 			FlashUtil.sort(keys, values);
 			valueUpdated = true;
 		}

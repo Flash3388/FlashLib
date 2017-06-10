@@ -14,7 +14,6 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.gui.ShellWindow;
 import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
@@ -46,7 +45,7 @@ public class MainController implements Initializable{
 	private static class UpdateTask implements Runnable{
 		MainController controller;
 		boolean lastconnectionC = false, lastconnectionS = false;
-		int lastProcCount = 0;
+		int lastProcCount = 0, lastProc = -1;
 		Runnable dxUpdate = ()->{
 			if(Dashboard.communicationsConnected())
 				controller.update(); 
@@ -61,6 +60,11 @@ public class MainController implements Initializable{
 					Dashboard.loadDefaultParameters();
 				else 
 					controller.updateParam();
+				if(lastProc != Dashboard.getVision().getSelectedProcessingIndex()){
+					lastProc = Dashboard.getVision().getSelectedProcessingIndex();
+					controller.updateParamBoxSelection();
+					System.out.println("Selection changed");
+				}
 				controller.updateVisionRun();
 			}
 			if(Dashboard.communicationsConnected() != lastconnectionC){
@@ -420,7 +424,12 @@ public class MainController implements Initializable{
 			}
 		}
 		mode_box.getItems().add(name);
-		FlashFxUtils.onFxThread(()->mode_box.getSelectionModel().select(name));
+		mode_box.getSelectionModel().select(name);
+	}
+	private void updateParamBoxSelection(){
+		local = true;
+		mode_box.getSelectionModel().select(Dashboard.getVision().getSelectedProcessingIndex());
+		local = false;
 	}
 	private boolean checkVision(){
 		if(local) 
@@ -460,7 +469,7 @@ public class MainController implements Initializable{
 		
 	}
 	public void updateParam(){
-		if(Dashboard.getVision() == null) return;
+		if(Dashboard.getVision() == null || Dashboard.getVision().getProcessing() == null) return;
 		ProcessingFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
 		for (ProcessingFilter filter : filters) {
 			if(FlashUtil.instanceOf(filter, ColorFilter.class)){
@@ -480,9 +489,6 @@ public class MainController implements Initializable{
 			hsv_check.setSelected(colorFilter.isHsv());
 			setForHSV(colorFilter.isHsv());
 		}
-		
-		if(vision_check.isSelected() != Dashboard.getVision().isRunning())
-			vision_check.setSelected(Dashboard.getVision().isRunning());
 		local = false;
 	}
 	public void setParam(){

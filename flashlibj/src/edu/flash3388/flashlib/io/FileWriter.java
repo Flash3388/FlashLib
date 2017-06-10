@@ -59,8 +59,8 @@ public class FileWriter {
 		}
 	}
 	public void write(String...lines){
-		for (String line : lines)
-			write(line);
+		for (int i = 0; i < lines.length; i++)
+			write(lines[i]);
 	}
 	
 	public void writeConstant(String constant, String value, String seperator){

@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -8,11 +9,19 @@ import edu.flash3388.flashlib.util.FlashUtil;
 
 public class RemoteVision extends Sendable implements Vision{
 
-	private boolean stopRemote = false, startRemote = false;
+	public static final byte REMOTE_STOP = 0xe;
+	public static final byte REMOTE_START = 0x5;
+	
+	public static final byte REMOTE_RUN_MODE = 0x10;
+	public static final byte REMOTE_SELECT_MODE = 0x1;
+	public static final byte REMOTE_ANALYSIS_MODE = 0xf;
+	public static final byte REMOTE_PROC_MODE = 0x5;
+	
+	private boolean stopRemote = false, startRemote = false, connected = false;
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
-	private int currentProcessing = -1;
+	private int currentProcessing = -1, sendProc = 0, procCount = 0;
 	private Analysis analysis;
-	private boolean send = false, stopping = false, updateProcessing = false,
+	private boolean running = false, updateProcessing = false,
 			sendProps = false;
 	private int lastRec, recTimeout = 1000;
 	
@@ -30,27 +39,26 @@ public class RemoteVision extends Sendable implements Vision{
 	@Override
 	public void start(){
 		startRemote();
-		send = true;
+		running = true;
 		lastRec = FlashUtil.millisInt();
 	}
 	@Override
 	public void stop(){
 		stopRemote();
-		stopping = true;
 	}
 	public boolean isRunning(){
-		return send;
+		return running;
 	}
 	@Override
 	public void addProcessing(VisionProcessing proc) {
 		processing.add(proc);
-		
+		sendProps = true;
 		if(currentProcessing < 0)
 			selectProcessing(0);
 	}
 	@Override
 	public void selectProcessing(int index) {
-		if(index < 0 || index >= processing.size())
+		if(index < 0 || index >= procCount)
 			return;
 		currentProcessing = index;
 		updateProcessing = true;
@@ -62,12 +70,16 @@ public class RemoteVision extends Sendable implements Vision{
 		return processing.get(index);
 	}
 	@Override
+	public int getSelectedProcessingIndex() {
+		return currentProcessing;
+	}
+	@Override
 	public VisionProcessing getProcessing() {
-		return getProcessing(currentProcessing);
+		return null;//getProcessing(currentProcessing);
 	}
 	@Override
 	public int getProcessingCount() {
-		return processing.size();
+		return procCount;
 	}
 	
 	@Override
@@ -81,61 +93,78 @@ public class RemoteVision extends Sendable implements Vision{
 	
 	@Override
 	public void newData(byte[] data) {
-		if(!send) return;
-		if(stopping){
-			stopping = false;
-			send = false;
-			return;
-		}
-		if(data.length == 2){
-			if (data[0] == 2)
-				currentProcessing = data[1];
-			return;
-		}
+		System.out.println("data: "+data.length);
+		if(data.length < 2) return;
 		
-		Analysis an = Analysis.fromBytes(data);
-		
-		if(an != null) {
-			lastRec = FlashUtil.millisInt();
-			analysis = an;
+		if(data[0] == REMOTE_RUN_MODE){
+			if(data[1] == REMOTE_START){
+				running = true;
+			}else if(data[1] == REMOTE_STOP){
+				running = false;
+			}
+		}
+		else if(data[0] == REMOTE_SELECT_MODE){
+			currentProcessing = data[1];
+			System.out.println("New Selection");
+		}
+		else if(data[0] == REMOTE_PROC_MODE){
+			System.out.println("New Proc");
+			procCount = data[1];
+		}
+		else if(data[0] == REMOTE_ANALYSIS_MODE){
+			Analysis an = Analysis.fromBytes(Arrays.copyOfRange(data, 1, data.length));
+			
+			if(an != null) {
+				lastRec = FlashUtil.millisInt();
+				analysis = an;
+			}
 		}
 	}
 	@Override
 	public byte[] dataForTransmition() {
 		if(sendProps){
-			VisionProcessing props = processing.get(processing.size()-1);
-			sendProps = false;
-			return props.toBytes();
+			byte[] data = processing.get(sendProc).toBytes();
+			byte[] send = Arrays.copyOf(data, data.length+1);
+			send[0] = REMOTE_PROC_MODE;
+			
+			if((++sendProc) >= processing.size())
+				sendProps = false;
+			return send;
 		}
 		if(stopRemote){
 			stopRemote = false;
 			System.out.println("Vision: Stop");
-			return new byte[]{1,0};
+			return new byte[]{REMOTE_RUN_MODE,REMOTE_STOP};
 		}
 		if(startRemote){
 			startRemote = false;
 			System.out.println("Vision: Start");
-			return new byte[]{1,1};
+			return new byte[]{REMOTE_RUN_MODE,REMOTE_START};
 		}
 		
 		if(!updateProcessing) return null;
 		FlashUtil.getLog().log("Sending Vision parameters");
 		updateProcessing = false;
-		return new byte[]{2, (byte) currentProcessing};
+		System.out.println("Sending new current");
+		return new byte[]{REMOTE_SELECT_MODE, (byte) currentProcessing};
 	}
 	@Override
 	public boolean hasChanged() {
-		return send && ((updateProcessing && processing != null) || stopRemote || startRemote || 
-				sendProps);
+		return updateProcessing || stopRemote || startRemote || 
+				sendProps;
 	}
 	@Override
 	public void onConnection() {
 		updateProcessing = true;
 		if(isRunning()) startRemote = true;
 		else stopRemote = true;
+		connected = true;
+		sendProc = 0;
 	}
 	@Override
 	public void onConnectionLost() {
+		connected = false;
+		procCount = 0;
 	}
 
 	@Override

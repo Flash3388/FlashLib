@@ -147,6 +147,7 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	private InterfaceAction interface_action;
 	
 	private double speed_limit = 1;
+	private double minSpeed = 0.0;
 	private double default_speed = 0.5;
 	
 	/**
@@ -225,6 +226,13 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	}
 	public double getSpeedLimit(){
 		return speed_limit;
+	}
+	
+	public void setMinSpeed(double limit){
+		minSpeed = Math.abs(limit);
+	}
+	public double getMinSpeed(){
+		return minSpeed;
 	}
 	
 	/**
@@ -729,6 +737,9 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	}
 	
 	private double limit(double speed){
+		if(Math.abs(speed) < minSpeed)
+			return 0.0;
+		
 		speed *= speed_limit;
 		if(speed > speed_limit) speed = speed_limit;
 		else if(speed < -speed_limit) speed = -speed_limit;

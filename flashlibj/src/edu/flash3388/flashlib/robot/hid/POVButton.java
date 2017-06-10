@@ -13,7 +13,7 @@ public class POVButton extends Button {
 	 * @author Tom Tzook
 	 */
 	public static class Type{
-		public final int value;
+		public final byte value;
 		/**
 		 * The minimum degree to be considered as the button being pressed.
 		 */
@@ -24,13 +24,14 @@ public class POVButton extends Button {
 		public final int maxDegree;
 		
 		private Type(int val, int min, int max){ 
-			value = val;
+			value = (byte) val;
 			minDegree = min;
 			maxDegree = max;
 		}
 		
 		public boolean get(int degrees){
-			if(value == UP.value) return (degrees >= minDegree || degrees <= maxDegree) && degrees >= 0 && degrees <= 360;
+			if(value == UP.value) 
+				return (degrees >= minDegree || degrees <= maxDegree) && degrees >= 0 && degrees <= 360;
 			return degrees >= minDegree && degrees <= maxDegree && degrees >= 0 && degrees <= 360;
 		}
 		

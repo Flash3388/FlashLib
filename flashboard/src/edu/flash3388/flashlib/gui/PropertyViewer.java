@@ -115,7 +115,7 @@ public class PropertyViewer extends Stage{
 			props.add(new Property(String.valueOf(pKeys[i])
 					, Property.Type.Boolean));
 		}
-		return keys.toArray(new String[0]);
+		return keys.toArray(new String[keys.size()]);
 	}
 	
 	private void loadPropertyViewer(){

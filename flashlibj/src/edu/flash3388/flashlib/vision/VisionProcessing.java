@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.modelmbean.XMLParseException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -55,7 +54,7 @@ public class VisionProcessing {
 		return filters.get(index);
 	}
 	public ProcessingFilter[] getFilters(){
-		return filters.toArray(new ProcessingFilter[0]);
+		return filters.toArray(new ProcessingFilter[filters.size()]);
 	}
 	
 	public void process(VisionSource source){
@@ -105,7 +104,7 @@ public class VisionProcessing {
 			addFilter(ProcessingFilter.createFilter(namestr, params));
 		}
 	}
-	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException, XMLParseException{
+	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException{
 		if(!ProcessingFilter.hasFilterCreator())
 			throw new IllegalStateException("Missing filter creator");
 		
@@ -117,7 +116,7 @@ public class VisionProcessing {
 		
 		NodeList base = doc.getElementsByTagName("vision");
 		if(base.getLength() != 1)
-			throw new XMLParseException("Missing base tag: vision");
+			throw new RuntimeException("Missing base tag: vision");
 		name = ((Element)base.item(0)).getAttribute("name");
 		if(name == null)
 			name = FileStream.fileName(file);
@@ -139,21 +138,21 @@ public class VisionProcessing {
 					
 					Node n = attrs.getNamedItem("type");
 					if(n == null)
-						throw new XMLParseException("Type attribute is missing value");
+						throw new RuntimeException("Type attribute is missing value");
 					String type = n.getTextContent();
 					
 					n = attrs.getNamedItem("name");
 					if(n == null)
-						throw new XMLParseException("Name attribute is missing value");
+						throw new RuntimeException("Name attribute is missing value");
 					String name = n.getTextContent();
 					
 					try {
 						FilterParam p = FilterParam.createParam(name, type, val);
 						if(p == null)
-							throw new XMLParseException("Invalid type attribute for param "+name+": "+type);
+							throw new RuntimeException("Invalid type attribute for param "+name+": "+type);
 						params.put(name, p);
 					} catch (RuntimeException e) {
-						throw new XMLParseException(e.getMessage());
+						throw new RuntimeException(e.getMessage());
 					}
 				}
 				
@@ -196,7 +195,7 @@ public class VisionProcessing {
 			lines.add("\t</filter>");
 		}
 		lines.add("</vision>");
-		FileStream.writeLines(file, lines.toArray(new String[0]));
+		FileStream.writeLines(file, lines.toArray(new String[lines.size()]));
 	}
 	
 
@@ -211,7 +210,7 @@ public class VisionProcessing {
 		VisionProcessing proc = new VisionProcessing();
 		try {
 			proc.parseXml(file);
-		} catch (SAXException | IOException | ParserConfigurationException | XMLParseException e) {
+		} catch (SAXException | IOException | ParserConfigurationException | RuntimeException e) {
 			return null;
 		}
 		return proc;

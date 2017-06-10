@@ -47,7 +47,8 @@ public class Remote {
 			return users.size();
 		}
 		public User[] getUsers(){
-			return users.toArray(new User[0]);
+			User[] usersArr = new User[users.size()];
+			return users.toArray(usersArr);
 		}
 		public User getUser(int index){
 			return users.get(index);
@@ -176,7 +177,8 @@ public class Remote {
 		return hosts.size();
 	}
 	public static RemoteHost[] getHosts(){
-		return hosts.toArray(new RemoteHost[0]);
+		RemoteHost[] hostsArr = new RemoteHost[hosts.size()];
+		return hosts.toArray(hostsArr);
 	}
 	public static RemoteHost getRemoteHost(int index){
 		return hosts.get(index);

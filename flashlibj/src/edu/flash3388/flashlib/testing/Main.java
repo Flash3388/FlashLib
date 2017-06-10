@@ -17,14 +17,6 @@ public class Main {
 		Log.setParentDirectory("/home/tomtzook/frc");
 		FlashUtil.setStart();
 		
-		ConstantsHandler.putString("Str", "try");
-		ConstantsHandler.putBoolean("Bool", true);
-		ConstantsHandler.putNumber("Num", 5.2);
 		
-		ConstantsHandler.saveConstantsToXml("constants.xml");
-		ConstantsHandler.clear();
-		ConstantsHandler.loadConstantsFromXml("constants.xml");
-		
-		ConstantsHandler.printAll(FlashUtil.getLog());
 	}
 }

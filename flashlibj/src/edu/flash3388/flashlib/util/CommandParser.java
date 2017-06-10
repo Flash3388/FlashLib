@@ -91,7 +91,8 @@ public class CommandParser{
 		return commands.get(name);
 	}
 	public Command[] getCommands(){
-		return commands.values().toArray(new Command[0]);
+		Command[] commandsArr = new Command[commands.size()];
+		return commands.values().toArray(commandsArr);
 	}
 	
 	public Scanner getInputScanner(){

@@ -13,6 +13,7 @@ public interface Vision {
 	void addProcessing(VisionProcessing proc);
 	void selectProcessing(int index);
 	int getProcessingCount();
+	int getSelectedProcessingIndex();
 	VisionProcessing getProcessing(int index);
 	VisionProcessing getProcessing();
 }
