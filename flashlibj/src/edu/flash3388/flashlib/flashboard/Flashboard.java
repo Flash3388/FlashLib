@@ -98,14 +98,15 @@ public class Flashboard {
 		if(!instance){
 			Flashboard.tcp = tcp;
 			try {
+				vision = new RemoteVision();
+				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+				
 				CommInterface readi;
 				if(tcp)
 					readi = new TcpCommInterface(port);
 				else readi = new UdpCommInterface(port);
 				
 				communications = new Communications("Flashboard", readi);
-				vision = new RemoteVision();
-				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
 				camServer = new CameraServer("Flashboard", camport, camViewer);
 				communications.attach(vision);
 				

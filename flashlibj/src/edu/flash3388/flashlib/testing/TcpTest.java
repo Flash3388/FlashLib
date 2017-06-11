@@ -69,7 +69,7 @@ public class TcpTest implements CodeTest{
 	public void run(String[] args, Scanner in, PrintStream out) {
 		//FlashUtil.getLog().setLoggingMode(Log.MODE_WRITE);
 		
-		Map<String, String> map = FlashUtil.parseValueParameters(args);
+		Map<String, String> map = FlashUtil.parseValueParameters(args, "=");
 		int echos = FlashUtil.toInt(map.get("echo"));
 		long ms = FlashUtil.toLong(map.get("ms"));
 		long wait = FlashUtil.toLong(map.get("wait"));

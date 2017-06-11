@@ -21,8 +21,30 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class FlashUtil {
+import edu.flash3388.flashlib.util.Log.LoggingType;
+
+/**
+ * FlashUtil contains utility functions used throughout flashLib.
+ * <p>
+ * The utilities are divided into types:
+ * <ul>
+ * 		<li> Time utilities: Provides time stamp data and delay</li>
+ * 		<li> Executor utilities: Provides {@link ExecutorService} utils for time based execution</li>
+ * 		<li> Array utilities: Array shifting, copying, enlarging, printing, etc</li>
+ * 		<li> Type conversion utilities: Converting between bytes, Strings and other data types </li>
+ * 		<li> Parsing utilities: Parsing lines of String for data </li>
+ * 		<li> Reflection utilities: Java reflection assistance </li>
+ * 		<li> Network utilities: Getting network addresses and interfaces </li>
+ * </ul>
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
+public final class FlashUtil {
 	
+	/**
+	 * The current version of FlashLib.
+	 */
 	public static final String VERSION = "1.0.0";
 	
 	private FlashUtil(){}
@@ -38,40 +60,92 @@ public class FlashUtil {
 	//-----------------------General--------------------------------------
 	//--------------------------------------------------------------------
 	
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
+	 * milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
+	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long)}.
+	 * 
+	 * @param ms the length of time to sleep in milliseconds.
+	 */
 	public static void delay(long ms){
 		if(ms <= 0) return;
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {}
 	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
+	 * milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
+	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long)}.
+	 * 
+	 * @param secs the length of time to sleep in seconds.
+	 */
 	public static void delay(double secs){
 		delay((long)(secs * 1000));
 	}
+	
+	/**
+	 * Returns the time since the program was started in milliseconds.
+	 * 
+	 * @return the difference, measured in milliseconds, between the current time and the time when the program was started.
+	 */
 	public static long millis(){
-		return startTime != 0? System.currentTimeMillis() - startTime : -1L;
+		return System.currentTimeMillis() - startTime;
 	}
+	/**
+	 * Returns the time since the program was started in milliseconds. The data is returned as an integer and not a long.
+	 * 
+	 * @return the difference, measured in milliseconds, between the current time and the time when the program was started.
+	 */
 	public static int millisInt(){
 		return (int) millis();
 	}
+	/**
+	 * Returns the time since the program was started in seconds.
+	 * 
+	 * @return the difference, measured in seconds, between the current time and the time when the program was started.
+	 */
 	public static double secs(){
-		return startTime != 0? millis() / 1000.0 : -1.0;
+		return millis() / 1000.0;
 	}
+	/**
+	 * Returns the current value of the running Java Virtual Machine's high-resolution time source, in seconds. 
+	 * @return the current value of the running Java Virtual Machine's high-resolution time source, in seconds
+	 */
 	public static double clockSecs(){
 		return System.nanoTime() / 1e6;
 	}
 
 	
-	protected static void setStartTime(long time){
+	private static void setStartTime(long time){
 		if(startTime == 0)
 			startTime = time;
 	}
+	
+	/**
+	 * Initialized the main log of flashlib. Many features throughout the library log data to this log.
+	 * 
+	 * @param logType The {@link LoggingType} of the created log
+	 * @param overrideLog If true and previous files of the main log exist, they will be deleted.
+	 */
 	public static void setStart(Log.LoggingType logType, boolean overrideLog){
 		if(mainLog == null)
 			mainLog = new Log("flashlib", logType, overrideLog);
 	}
+	/**
+	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
+	 * The main log uses {@link LoggingType#Stream} as the logs {@link LoggingType}, and does not override any 
+	 * existing files.
+	 */
 	public static void setStart(){
 		setStart(Log.LoggingType.Stream, false);
 	}
+	/**
+	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized by calling
+	 * {@link #setStart()}.
+	 * 
+	 * @return the main {@link Log} used throughout flashlib.
+	 */
 	public static Log getLog(){
 		if(mainLog == null)
 			setStart();
@@ -79,6 +153,12 @@ public class FlashUtil {
 	}
 
 	
+	/**
+	 * Sorts a given array using bubble sort. The rest of the given arrays are
+	 * sorted by the change of indexes in the first array. Used to make sure data stays the same.
+	 * 
+	 * @param as the arrays to sort.
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void sort(Object[]...as){
 		if(as == null)
@@ -112,11 +192,11 @@ public class FlashUtil {
 	}
 	
 	public static void awaitExecutorTermination(){
-		if(isExecutorInit()) return;
+		if(!isExecutorInit()) return;
 		executor.shutdown();
 	}
 	public static void terminateExecutor(){
-		if(isExecutorInit()) return;
+		if(!isExecutorInit()) return;
 		executor.shutdownNow();
 	}
 	public static boolean isExecutorShutdown(){
@@ -127,6 +207,15 @@ public class FlashUtil {
 		initExecutor();
 		executor.execute(r);
 	}
+	/**
+	 * Executes a {@link java.util.concurrent.Callable} object for a given time in milliseconds. Uses a cached thread pool executor.
+	 * 
+	 * @param callable object to execute
+	 * @param ms time in milliseconds to execute the {@link java.util.concurrent.Callable} object
+	 * @param <T> the result type of method call
+	 * @return the result of the {@link java.util.concurrent.Callable} object after execution, 
+	 * or null if the execution was interrupted or has timedout
+	 */
 	public static <T> T executeForTime(Callable<T> callable, long ms){
 		initExecutor();
 		
@@ -142,72 +231,205 @@ public class FlashUtil {
 	//--------------------------Arrays------------------------------------
 	//--------------------------------------------------------------------
 	
-    public static boolean isEmpty(String s) {
-        return s == null || s.length() == 0;
-    }
-	
     //------------is empty---------------
     
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(byte[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(short[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(int[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(long[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(float[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param arr the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(double[] arr) {
         return arr == null || arr.length == 0; 
     }
+	/**
+	 * Returns whether or not a given array is empty
+	 * 
+	 * @param objects the array to check
+	 * 
+	 * @return True if the array is null or empty
+	 */
     public static boolean isEmpty(Object[] objects) {
         return objects == null || objects.length == 0; 
     }
     
     //------------index of---------------
+    private static void checkIndexes(int length, int start, int end){
+    	if(start < 0 || end < 0)
+    		throw new IllegalArgumentException("Indexes must be non-negative");
+    	if(start > end)
+    		throw new IllegalArgumentException("Start index cannot be bigger than end index");
+    	if(start >= length || end >= length)
+    		throw new ArrayIndexOutOfBoundsException("Indexes must not exceede the array length");
+    }
     
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(byte[] data, int start, int end, byte ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(short[] data, int start, int end, short ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(int[] data, int start, int end, int ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(long[] data, int start, int end, long ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(double[] data, int start, int end, double ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(float[] data, int start, int end, float ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(char[] data, int start, int end, char ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
 		return -1;
 	}
+    /**
+     * Gets the index of a value in an array between two indexes. 
+     * 
+     * @param data the array
+     * @param start the start index of the search
+     * @param end the end index of the search
+     * @param ch the value to search
+     * @return the index of the value, or -1 if the value was not found
+     */
 	public static int indexOf(Object[] data, int start, int end, Object ch){
+		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i].equals(ch)) return i;
 		return -1;
@@ -215,153 +437,367 @@ public class FlashUtil {
 	
 	//------------contains---------------
 	
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(byte[] data, int start, int end, byte ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(short[] data, int start, int end, short ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(int[] data, int start, int end, int ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(long[] data, int start, int end, long ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(float[] data, int start, int end, float ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(double[] data, int start, int end, double ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(char[] data, int start, int end, char ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
+	/**
+	 * Gets whether an array contains a value between two given indexes.
+	 * 
+	 * @param data the array
+	 * @param start the start index of the search
+	 * @param end the end index of the search
+	 * @param ch the value to search
+	 * @return true if the value is contained in the search area of the array, false otherwise
+	 */
 	public static boolean arrayContains(Object[] data, int start, int end, Object ch){
 		return indexOf(data, start, end, ch) >= 0;
 	}
 	
 	//------------print---------------
 	
-	public static void printBytes(byte[] s){
-		for(byte i : s)
-			System.out.print((char)i + " ");
-	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(byte[] s){
-		for(byte i : s)
-			System.out.println((int)i);
+		for(int i = 0; i < s.length; i++)
+			System.out.println((int)s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(short[] s){
-		for(short sh : s)
-			System.out.println(sh);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(int[] s){
-		for(int i : s)
-			System.out.println(i);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(long[] s){
-		for(float l : s)
-			System.out.println(l);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(double[] s){
-		for(double d : s)
-			System.out.println(d);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(float[] s){
-		for(float f : s)
-			System.out.println(f);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(char[] s){
-		for(char c : s)
-			System.out.println(c);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
+	/**
+	 * Prints the array values.
+	 * 
+	 * @param s the array to print
+	 */
 	public static void printArray(Object[] s){
-		for(Object str : s)
-			System.out.println(str);
+		for(int i = 0; i < s.length; i++)
+			System.out.println(s[i]);
 	}
 	
 	//------------shift left---------------
 	
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(byte[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(short[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(int[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(long[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(double[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(float[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(char[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	/**
+	 * Shifts all array value between the given indexes to the left
+	 * 
+	 * @param arr the array to shift.
+	 * @param start the index where the shift starts
+	 * @param end the index where the shift ends
+	 */
 	public static void shiftArrayL(Object[] arr, int start, int end){
-		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
-			throw new IllegalArgumentException("Illegal shift arguments");
+		checkIndexes(arr.length, start, end);
 		for (int i = start; i < end; i++) 
 			arr[i] = arr[i+1];
 	}
+	
 	
 	//------------resize---------------
 	
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static byte[] resize(byte[] arr, int newSize){
 		byte[] nArr = new byte[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr;
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static short[] resize(short[] arr, int newSize){
 		short[] nArr = new short[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr;
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static int[] resize(int[] arr, int newSize){
 		int[] nArr = new int[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr;
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static long[] resize(long[] arr, int newSize){
 		long[] nArr = new long[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr; 
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static float[] resize(float[] arr, int newSize){
 		float[] nArr = new float[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr;
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	public static double[] resize(double[] arr, int newSize){
 		double[] nArr = new double[newSize];
 		System.arraycopy(arr, 0, nArr, 0, Math.min(newSize, arr.length));
 		return nArr; 
 	}
+	/**
+	 * Creates a copy of an array with a new size. Values from the previous array are saved up to the end of the previous
+	 * array or the end of the new array. 
+	 * 
+	 * @param arr the original array
+	 * @param newSize the size of the new array
+	 * @param <T> the type of the array
+	 * @return a copy of the given array with the same values and a new size
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] resize(T[] arr, int newSize){
 		Class<?> type = arr.getClass().getComponentType();
@@ -372,36 +808,79 @@ public class FlashUtil {
 	
 	//------------copy---------------
 	
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static byte[] copy(byte[] arr){
 		byte[] nArr = new byte[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static short[] copy(short[] arr){
 		short[] nArr = new short[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static int[] copy(int[] arr){
 		int[] nArr = new int[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static long[] copy(long[] arr){
 		long[] nArr = new long[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr; 
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static float[] copy(float[] arr){
 		float[] nArr = new float[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @return a copy of the given array
+	 */
 	public static double[] copy(double[] arr){
 		double[] nArr = new double[arr.length];
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr; 
 	}
+	/**
+	 * Creates a copy of a given array with the same values and size as the previous array
+	 * 
+	 * @param arr the array to copy
+	 * @param <T> the type of the array
+	 * @return a copy of the given array
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] copy(T[] arr){
 		Class<?> type = arr.getClass().getComponentType();
@@ -410,13 +889,25 @@ public class FlashUtil {
 		return nArr;
 	}
 	
-	
+	/**
+	 * Converts the given String array into a double array. All values are converted from String to double. If a String value
+	 * cannot be converted, 0.0 is placed instead.
+	 * 
+	 * @param str the string array to convert
+	 * @return a double array converted from the given string array
+	 */
 	public static double[] toDoubleArray(String[] str){
 		double[] d = new double[str.length];
 		for (int i = 0; i < d.length; i++) 
 			d[i] = FlashUtil.toDouble(str[i]);
 		return d;
 	}
+	/**
+	 * Converts the given double array into a string array. All values are converted from double to string.
+	 * 
+	 * @param d the double array to convert
+	 * @return a string array converted from the given double array
+	 */
 	public static String[] toStringArray(double[] d){
 		String[] str = new String[d.length];
 		for (int i = 0; i < d.length; i++) 
@@ -428,53 +919,119 @@ public class FlashUtil {
 	//--------------------------Conversion--------------------------------
 	//--------------------------------------------------------------------
 	
-	public static byte[] fillByteArray(double value, byte[] bytes){
-		return fillByteArray(value, 0, bytes);
+	/**
+	 * Converts a double to bytes and fills a given array with those values from the first index of the array. Requires 8 bytes
+	 * to place the double in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param bytes the byte array to place the double in
+	 */
+	public static void fillByteArray(double value, byte[] bytes){
+		fillByteArray(value, 0, bytes);
 	}
-	public static byte[] fillByteArray(double value, int start, byte[] bytes){
-		if(bytes.length < 8) throw new IllegalArgumentException("Bytes array must be 8 bytes long");
+	/**
+	 * Converts a double to bytes and fills a given array with those values from a start index. Requires 8 bytes
+	 * to place the double in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param start the start index of placement
+	 * @param bytes the byte array to place the double in
+	 */
+	public static void fillByteArray(double value, int start, byte[] bytes){
+		if(bytes.length  - start < 8) 
+			throw new IllegalArgumentException("double requires 8 bytes to be placed in the array");
 		
 		long lng = Double.doubleToLongBits(value);
 		for(int i = 0; i < 8; i++) 
 			bytes[start + i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);
-		return bytes;
 	}
-	public static byte[] fillByteArray(int value, byte[] bytes){
-		return fillByteArray(value, 0, bytes);
+
+	/**
+	 * Converts an int to bytes and fills a given array with those values from a start index. Requires 4 bytes
+	 * to place the int in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param bytes the byte array to place the int in
+	 */
+	public static void fillByteArray(int value, byte[] bytes){
+		fillByteArray(value, 0, bytes);
 	}
-	public static byte[] fillByteArray(int value, int start, byte[] bytes){
-		if(bytes.length < 4) throw new IllegalArgumentException("Bytes array must be 4 bytes long");
+	/**
+	 * Converts a int to bytes and fills a given array with those values from the first index of the array. Requires 4 bytes
+	 * to place the int in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param start the start index of placement
+	 * @param bytes the byte array to place the int in
+	 */
+	public static void fillByteArray(int value, int start, byte[] bytes){
+		if(bytes.length  - start < 4) 
+			throw new IllegalArgumentException("int requires 4 bytes to be placed in the array");
 		
 		bytes[start + 3] = (byte) (value & 0xff);   
 		bytes[start + 2] = (byte) ((value >> 8) & 0xff);   
 		bytes[start + 1] = (byte) ((value >> 16) & 0xff);   
 		bytes[start] = (byte) ((value >> 24) & 0xff);
-		return bytes;
 	}
+	
+	/**
+	 * Converts a long to bytes and fills a given array with those values from the first index of the array. Requires 8 bytes
+	 * to place the long in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param bytes the byte array to place the long in
+	 */
 	public static void fillByteArray(long value, byte[] bytes){
 		fillByteArray(value, 0, bytes);
 	}
+	/**
+	 * Converts a long to bytes and fills a given array with those values from a start index. Requires 8 bytes
+	 * to place the long in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param start the start index of placement
+	 * @param bytes the byte array to place the long in
+	 */
 	public static void fillByteArray(long value, int start, byte[] bytes) {
+		if(bytes.length  - start < 8) 
+			throw new IllegalArgumentException("long requires 8 bytes to be placed in the array");
+		
 	    for (int i = start + 7; i >= start; i--) {
 	    	bytes[i] = (byte)(value & 0xFF);
 	        value >>= 8;
 	    }
 	}
 	
+	/**
+	 * Converts a long to a byte array 
+	 * 
+	 * @param value value to convert
+	 * @return a byte array containing the long value as bytes
+	 */
 	public static byte[] toByteArray(long value){
 	    byte[] bytes = new byte[8];
 	    fillByteArray(value, bytes);
 	    return bytes;
 	}
+	/**
+	 * Converts the bytes of a byte array to a long. Requires 8 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @return a long
+	 */
 	public static long toLong(byte[] b) {
-	    long result = 0;
-	    for (int i = 0; i < 8; i++) {
-	        result <<= 8;
-	        result |= (b[i] & 0xFF);
-	    }
-	    return result;
+		return toLong(b, 0);
 	}
+	/**
+	 * Converts the bytes from an index of a byte array to a long. Requires 8 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @param s the start index of the long value
+	 * @return a long
+	 */
 	public static long toLong(byte[] b, int s) {
+		if(b.length - s < 8) 
+			throw new IllegalArgumentException("long requires 8 bytes");
 	    long result = 0;
 	    int e = s+8;
 	    for (int i = s; i < e; i++) {
@@ -483,31 +1040,81 @@ public class FlashUtil {
 	    }
 	    return result;
 	}
+	
+	/**
+	 * Converts an int to a byte array 
+	 * 
+	 * @param value value to convert
+	 * @return a byte array containing the int value as bytes
+	 */
 	public static byte[] toByteArray(int value){
 	    byte[] bytes = new byte[4];
 	    fillByteArray(value, bytes);
 	    return bytes;
 	}
+	/**
+	 * Converts the bytes from a byte array to an int. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @return an int
+	 */
 	public static int toInt(byte[] b){
-	    return   b[3] & 0xff |
-	            (b[2] & 0xff) << 8 |
-	            (b[1] & 0xff) << 16 |
-	            (b[0] & 0xff) << 24;
+		return toInt(b, 0);
 	}
+	/**
+	 * Converts the bytes from an index of a byte array to an int. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @param s the start index of the int value
+	 * @return an int
+	 */
 	public static int toInt(byte[] b, int s){
-	    return toInt(Arrays.copyOfRange(b, s, s + 4));
+		if(b.length - s < 4) 
+			throw new IllegalArgumentException("int requires 4 bytes");
+	    return   b[s + 3] & 0xff |
+	            (b[s + 2] & 0xff) << 8 |
+	            (b[s + 1] & 0xff) << 16 |
+	            (b[s + 0] & 0xff) << 24;
 	}
+	
+	/**
+	 * Converts a double to a byte array 
+	 * 
+	 * @param value value to convert
+	 * @return a byte array containing the double value as bytes
+	 */
 	public static byte[] toByteArray(double value) {
 	    byte[] bytes = new byte[8];
 	    fillByteArray(value, bytes);
 	    return bytes;
 	}
-	public static double toDouble(byte[] bytes) {
-	    return ByteBuffer.wrap(bytes).getDouble();
+	/**
+	 * Converts the bytes from a byte array to a double. Requires 8 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @return a double
+	 */
+	public static double toDouble(byte[] b) {
+	    return ByteBuffer.wrap(b).getDouble();
 	}
+	/**
+	 * Converts the bytes from an index of a byte array to a double. Requires 8 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @param s the start index of the double value
+	 * @return a double
+	 */
 	public static double toDouble(byte[] b, int s) {
 	    return toDouble(Arrays.copyOfRange(b, s, s + 8));
 	}
+	
+	/**
+	 * Checks whether 2 byte array are equal in size and value.
+	 * 
+	 * @param b1 the first array
+	 * @param b2 the seconds array
+	 * @return true if both arrays are the same size and contain the same values
+	 */
 	public static boolean equals(byte[] b1, byte[] b2){
 		if(b1.length != b2.length) return false;
 		for(int i = 0; i < b1.length; i++){
@@ -517,45 +1124,91 @@ public class FlashUtil {
 		return true;
 	}
 	
+	/**
+	 * Converts a string to an int. If the string cannot be converted, 0 is returned.
+	 * 
+	 * @param s the string to convert
+	 * @return an int converted from the given string, or 0 if the string cannot be converted
+	 */
 	public static int toInt(String s){
 		return toInt(s, 0);
 	}
+	/**
+	 * Converts a string to an int. If the string cannot be converted, a default value is returned.
+	 * 
+	 * @param s the string to convert
+	 * @param defaultVal the value to return if the string cannot be converted
+	 * @return an int converted from the given string, or a default value if the string cannot be converted
+	 */
 	public static int toInt(String s, int defaultVal){
 		try{
 			return Integer.parseInt(s);
 		}catch(NumberFormatException e){}
 		return defaultVal;
 	}
+	
+	/**
+	 * Converts a string to a long. If the string cannot be converted, 0 is returned.
+	 * 
+	 * @param s the string to convert
+	 * @return a long converted from the given string, or 0 if the string cannot be converted
+	 */
 	public static long toLong(String s){
 		return toLong(s, 0);
 	}
+	/**
+	 * Converts a string to a long. If the string cannot be converted, a default value is returned.
+	 * 
+	 * @param s the string to convert
+	 * @param defaultVal the value to return if the string cannot be converted
+	 * @return a long converted from the given string, or a default value if the string cannot be converted
+	 */
 	public static long toLong(String s, long defaultVal){
 		try{
 			return Long.parseLong(s);
 		}catch(NumberFormatException e){}
 		return defaultVal;
 	}
+	
+	/**
+	 * Converts a string to a double. If the string cannot be converted, 0 is returned.
+	 * 
+	 * @param s the string to convert
+	 * @return a double converted from the given string, or 0 if the string cannot be converted
+	 */
 	public static double toDouble(String s){
 		return toDouble(s, 0);
 	}
+	/**
+	 * Converts a string to a double. If the string cannot be converted, a default value is returned.
+	 * 
+	 * @param s the string to convert
+	 * @param defaultVal the value to return if the string cannot be converted
+	 * @return a double converted from the given string, or a default value if the string cannot be converted
+	 */
 	public static double toDouble(String s, double defaultVal){
 		try{
 			return Double.parseDouble(s);
 		}catch(NumberFormatException e){}
 		return defaultVal;
 	}
-	public static float toFloat(String s){
-		return toFloat(s, 0);
-	}
-	public static float toFloat(String s, float defaultVal){
-		try{
-			return Float.parseFloat(s);
-		}catch(NumberFormatException e){}
-		return defaultVal;
-	}
+	
+	/**
+	 * Converts a string to a boolean. If the string cannot be converted, false is returned.
+	 * 
+	 * @param s the string to convert
+	 * @return a boolean converted from the given string, or false if the string cannot be converted
+	 */
 	public static boolean toBoolean(String s){
 		return toBoolean(s, false);
 	}
+	/**
+	 * Converts a string to a boolean. If the string cannot be converted, a default value is returned.
+	 * 
+	 * @param s the string to convert
+	 * @param defaultVal the value to return if the string cannot be converted
+	 * @return a boolean converted from the given string, or a default value if the string cannot be converted
+	 */
 	public static boolean toBoolean(String s, boolean defaultVal){
 		try{
 			return Boolean.parseBoolean(s);
@@ -567,12 +1220,28 @@ public class FlashUtil {
 	//--------------------------Parsing-----------------------------------
 	//--------------------------------------------------------------------
 	
+	/**
+	 * Merges array values to a single string of values separated by a given separator.
+	 * 
+	 * @param str the string array 
+	 * @param sep the separator
+	 * @return a line of merged string values
+	 */
 	public static String toDataString(String[] str, String sep){
 		String s = "";
 		for (int i = 0; i < str.length; i++) 
 			s += str[i] + sep;
 		return s.substring(0, s.length());
 	}
+	
+	/**
+	 * Splits a string around a separator and returns the value at a given index
+	 * 
+	 * @param str the string to split
+	 * @param seperator the separator to split the string around
+	 * @param index the index of the value to return
+	 * @return a value from the split array at the given index
+	 */
 	public static String splitAndGet(String str, String seperator, int index){
 		if(index < 0)
 			throw new IllegalArgumentException("Index must be non-negative");
@@ -581,22 +1250,48 @@ public class FlashUtil {
 			throw new ArrayIndexOutOfBoundsException("Index is out of splited array bounds");
 		return splits[index];
 	}
-	public static Map<String, String> parseValueParameters(String line){
+	
+	/**
+	 * Splits a line around spaces and converts the array of values to a map. Each string in the array is split around a separator and
+	 * the 2 values from the split are inserted as key and value into the map.
+	 * 
+	 * @param line the line to parse
+	 * @param separator the separator to split the values around
+	 * @return a map of the values in the array.
+	 */
+	public static Map<String, String> parseValueParameters(String line, String separator){
 		String[] split = line.split(" ");
-		return parseValueParameters(split);
+		return parseValueParameters(split, separator);
 	}
-	public static Map<String, String> parseValueParameters(String[] args){
+	
+	/**
+	 * Converts an array of values to a map. Each string in the array is split around a separator and
+	 * the 2 values from the split are inserted as key and value into the map.
+	 * 
+	 * @param args the array of value to insert into the map
+	 * @param separator the separator to split the values around
+	 * @return a map of the values in the array.
+	 */
+	public static Map<String, String> parseValueParameters(String[] args, String separator){
 		Map<String, String> map = new HashMap<String, String>();
 		for (String param : args) {
-			String[] vals = param.split("=");
+			String[] vals = param.split(separator);
 			if(vals.length != 2)
 				continue;
 			map.put(vals[0].trim(), vals[1].trim());
 		}
 		return map;
 	}
-	public static String[] parseParameters(String line){
-		String[] split = line.trim().split("-");
+	
+	/**
+	 * Splits a line around a separator, trims the values and returns them in an array.
+	 * 
+	 * @param line the line to split
+	 * @param separator the separator to split the array around
+	 * @return an array of the split value from the line
+	 */
+	public static String[] parseParameters(String line, String separator){
+		String[] split = line.trim().split(separator);
 		for (int i = 0; i < split.length; i++) {
 			split[i] = split[i].trim();
 		}
@@ -607,10 +1302,23 @@ public class FlashUtil {
 	//--------------------------Reflection--------------------------------
 	//--------------------------------------------------------------------
 	
+	/**
+	 * Gets whether a class inherits from another.
+	 * 
+	 * @param cl the sub class
+	 * @param suCl the super class
+	 * @return true if the subclass inherits from the superclass
+	 */
 	public static boolean isAssignable(Class<?> cl, Class<?> suCl){
 		return suCl.isAssignableFrom(cl);
 	}
 	
+	/**
+	 * Gets the super class and interfaces inherited and implemented by a type.
+	 * 
+	 * @param type the {@link java.lang.Class}
+	 * @return a {@link java.util.Set} of interfaces and super class extended and inplemented by a type
+	 */
     public static Set<Class<?>> getSuperTypes(Class<?> type) {
         Set<Class<?>> supers = new LinkedHashSet<>();
         Class<?> superclass = type.getSuperclass();
@@ -622,6 +1330,14 @@ public class FlashUtil {
         	supers.addAll(Arrays.asList(interfaces));
         return supers;
     }
+    
+    /**
+     * Gets whether an object related to a class type.
+     * 
+     * @param obj the object
+     * @param cl a {@link java.lang.Class} object of the class
+     * @return true if the object is an instance of the given type, or inherits from it.
+     */
     public static boolean instanceOf(Object obj, Class<?> cl){
     	return obj.getClass() == cl || isAssignable(obj.getClass(), cl);
     }
@@ -630,6 +1346,13 @@ public class FlashUtil {
 	//----------------------Communications--------------------------------
 	//--------------------------------------------------------------------
 	
+    /**
+     * Gets the local {@link java.net.InetAddress} of the network interface connected to a give remote address.
+     * 
+     * @param remote the remote address
+     * @return the local {@link java.net.InetAddress} of the network interface
+     * @throws SocketException if an I/O error occurs.
+     */
 	public static InetAddress getLocalAddress(InetAddress remote) throws SocketException{
 		byte[] remoteAddrByte = remote.getAddress();
 		Enumeration<NetworkInterface> interEnum = NetworkInterface.getNetworkInterfaces();

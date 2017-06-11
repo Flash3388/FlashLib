@@ -105,8 +105,9 @@ public class Communications {
 			
 			int id = FlashUtil.toInt(packet.data);
 			Sendable sen = getFromAllAttachedByID(id);
-			if(sen != null)
+			if(sen != null && packet.length - 5 > 0){
 				sen.newData(Arrays.copyOfRange(packet.data, 5, packet.length));
+			}
 			else if(sendableCreator != null){
 				String str = new String(packet.data, 5, packet.length - 5);
 				sen = sendableCreator.create(str, id, packet.data[4]);

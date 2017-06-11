@@ -17,9 +17,8 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.INPUT: return new InputField(name, id);
 			case FlashboardSendableType.JOYSTICK: return new Controller(name, id);
 			case FlashboardSendableType.CHOOSER: return new Chooser(name, id);
-			case FlashboardSendableType.TESTER: Tester.init(id); return Tester.getInstance();
-			case FlashboardSendableType.MOTOR: if(Tester.getInstance() != null) return Tester.getInstance().addMotor(id);
-							else return null;
+			case FlashboardSendableType.TESTER: return new FlashboardTester(name, id);
+			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name, id);
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name, id);
 			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new CvRunner(name, id);
 			case FlashboardSendableType.PDP: return new PDP(name, id);

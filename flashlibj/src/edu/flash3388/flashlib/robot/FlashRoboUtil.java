@@ -13,8 +13,8 @@ public class FlashRoboUtil {
 	private FlashRoboUtil(){}
 	
 	public static final byte UTIL_INIT = 0x0;
-	public static final byte FLASHBOARD_INIT = 0x1 << 1;
-	public static final byte SCHEDULER_INIT = 0x1 << 2;
+	public static final byte FLASHBOARD_INIT = 0x1;
+	public static final byte SCHEDULER_INIT = 0x1 << 1;
 	
 	private static boolean init = false;
 	private static boolean emergencyStop = false;

@@ -18,7 +18,7 @@
                   <Label fx:id="tCurrent" text="Total Current:" />
                </children>
             </HBox>
-            <HBox prefHeight="242.0" prefWidth="349.0">
+            <HBox prefHeight="242.0" prefWidth="356.0">
                <children>
                   <VBox fx:id="channelsLeft" alignment="CENTER_RIGHT" prefHeight="212.0" prefWidth="101.0" spacing="5.0">
                      <HBox.margin>

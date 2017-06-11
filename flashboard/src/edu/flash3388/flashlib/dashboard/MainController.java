@@ -7,7 +7,6 @@ import java.util.ResourceBundle;
 
 import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
-import edu.flash3388.flashlib.dashboard.controls.Tester;
 import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FileDialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
@@ -167,7 +166,7 @@ public class MainController implements Initializable{
 			Dashboard.getCamViewer().setDisplayMode(DisplayMode.values()[index]);
 		});
 		mode_box.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
-			if(oldValue == null || oldValue.intValue() == newValue.intValue())
+			if(local || oldValue == null || oldValue.intValue() == newValue.intValue())
 				return;
 			Dashboard.getVision().selectProcessing(newValue.intValue());
 		});
@@ -460,10 +459,7 @@ public class MainController implements Initializable{
 		LogWindow.showLog();
 	}
 	private void showTester(){
-		if(Tester.getInstance() == null){
-			
-		}
-		else TesterWindow.showTester();
+		TesterWindow.showTester();
 	}
 	public void stop(){
 		

@@ -17,7 +17,7 @@ public class RemoteVision extends Sendable implements Vision{
 	public static final byte REMOTE_ANALYSIS_MODE = 0xf;
 	public static final byte REMOTE_PROC_MODE = 0x5;
 	
-	private boolean stopRemote = false, startRemote = false, connected = false;
+	private boolean stopRemote = false, startRemote = false;
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
 	private int currentProcessing = -1, sendProc = 0, procCount = 0;
 	private Analysis analysis;
@@ -93,7 +93,6 @@ public class RemoteVision extends Sendable implements Vision{
 	
 	@Override
 	public void newData(byte[] data) {
-		System.out.println("data: "+data.length);
 		if(data.length < 2) return;
 		
 		if(data[0] == REMOTE_RUN_MODE){
@@ -105,10 +104,8 @@ public class RemoteVision extends Sendable implements Vision{
 		}
 		else if(data[0] == REMOTE_SELECT_MODE){
 			currentProcessing = data[1];
-			System.out.println("New Selection");
 		}
 		else if(data[0] == REMOTE_PROC_MODE){
-			System.out.println("New Proc");
 			procCount = data[1];
 		}
 		else if(data[0] == REMOTE_ANALYSIS_MODE){
@@ -124,28 +121,26 @@ public class RemoteVision extends Sendable implements Vision{
 	public byte[] dataForTransmition() {
 		if(sendProps){
 			byte[] data = processing.get(sendProc).toBytes();
-			byte[] send = Arrays.copyOf(data, data.length+1);
+			byte[] send = new byte[data.length+1];
 			send[0] = REMOTE_PROC_MODE;
-			
+			System.arraycopy(data, 0, send, 1, data.length);
 			if((++sendProc) >= processing.size())
 				sendProps = false;
 			return send;
 		}
 		if(stopRemote){
 			stopRemote = false;
-			System.out.println("Vision: Stop");
+			FlashUtil.getLog().log("Vision: Stop");
 			return new byte[]{REMOTE_RUN_MODE,REMOTE_STOP};
 		}
 		if(startRemote){
 			startRemote = false;
-			System.out.println("Vision: Start");
+			FlashUtil.getLog().log("Vision: Start");
 			return new byte[]{REMOTE_RUN_MODE,REMOTE_START};
 		}
 		
 		if(!updateProcessing) return null;
-		FlashUtil.getLog().log("Sending Vision parameters");
 		updateProcessing = false;
-		System.out.println("Sending new current");
 		return new byte[]{REMOTE_SELECT_MODE, (byte) currentProcessing};
 	}
 	@Override
@@ -158,12 +153,10 @@ public class RemoteVision extends Sendable implements Vision{
 		updateProcessing = true;
 		if(isRunning()) startRemote = true;
 		else stopRemote = true;
-		connected = true;
 		sendProc = 0;
 	}
 	@Override
 	public void onConnectionLost() {
-		connected = false;
 		procCount = 0;
 	}
 

@@ -10,8 +10,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
 public class TcpCommInterface extends StreamCommInterface{
 	
 	private ServerSocket serverSocket;

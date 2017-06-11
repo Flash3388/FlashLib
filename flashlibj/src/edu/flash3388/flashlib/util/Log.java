@@ -30,13 +30,16 @@ import edu.flash3388.flashlib.io.FileStream;
  * <p>
  * There are several types of logging which can be used simultaneously:
  * <ul>
- * 		<li>File writing: MODE_WRITE</li>
- * 		<li>PrintStream writing: MODE_PRINT (out.println)</li>
- * 		<li>External logging interfaces: MODE_INTERFACES ({@link edu.flash3388.flashlib.util.LoggingInterface LoggingInterface})</li>
+ * 		<li>File writing: {@link #MODE_WRITE}</li>
+ * 		<li>PrintStream writing: {@link #MODE_PRINT}</li>
+ * 		<li>External logging interfaces: {@link #MODE_INTERFACES} 
+ * ({@link LoggingInterface LoggingInterface})</li>
  * </ul>
- * @author Tom Tzook.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
-public class Log{
+public final class Log{
 	
 	/**
 	 * <p>
@@ -58,10 +61,34 @@ public class Log{
 		Stream, Buffered
 	}
 	
+	
+	/**
+	 * Disabled writing mode.
+	 * When this mode is set, a call to one of the logging methods will do nothing.
+	 */
 	public static final byte MODE_DISABLED = 0x00;
-	public static final byte MODE_WRITE = 0x01 << 2;
-	public static final byte MODE_PRINT = 0x01 << 3;
-	public static final byte MODE_INTERFACES = 0x01 << 4;
+	/**
+	 * File writing mode.
+	 * When this mode is set, a call to one of the logging methods will write data to the logging file or logging 
+	 * buffer, depending on the {@link LoggingType}.
+	 */
+	public static final byte MODE_WRITE = 0x01 << 1;
+	/**
+	 * Print writing mode.
+	 * When this mode is set, a call to one of the logging methods will print data using the
+	 * {@link java.io.PrintStream#println()} method in the saved {@link java.io.PrintStream} which can be set using
+	 * {@link #setPrintStream(PrintStream)}. The default output is to {@link java.lang.System#out}.
+	 */
+	public static final byte MODE_PRINT = 0x01 << 2;
+	/**
+	 * Interfaces writing mode.
+	 * When this mode is set, a call to one of the logging methods will pass data to attached {@link LoggingInterface logging interfaces}.
+	 */
+	public static final byte MODE_INTERFACES = 0x01 << 3;
+	/**
+	 * Full writing mode.
+	 * When this mode is set, a call to one of the logging methods will perform all possible logging functions.
+	 */
 	public static final byte MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
 	
 	private static final byte BUFFER_SIZE = 50;
@@ -81,6 +108,30 @@ public class Log{
 	private byte logMode, indexLog, indexErrorLog;
 	private LoggingType type;
 	
+	
+	/**
+	 * Creates a new log using a given {@link LoggingType} and logging mode. 
+	 * <p>
+	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
+	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
+	 * </p>
+	 * <p>
+	 * The log files are created in the given directory and the file name is the log name. If the directory or any of its 
+	 * parent directories do not exist, they will be created. If override is true, any existing log files with the same name 
+	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
+	 * is a new file of the same name. 
+	 * </p>
+	 * <p>
+	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
+	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
+	 * </p>
+	 * 
+	 * @param directory The directory in which to save the log
+	 * @param name The name of the log
+	 * @param type The {@link LoggingType} of the created log
+	 * @param override If true, any existing log files with the same name will be deleted
+	 * @param logMode The logging output types
+	 */
 	public Log(String directory, String name, LoggingType type, boolean override, byte logMode){
 		this.name = name;
 		this.logMode = logMode;
@@ -132,12 +183,74 @@ public class Log{
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Creates a new log using a given {@link LoggingType} and logging mode. 
+	 * <p>
+	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
+	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
+	 * </p>
+	 * <p>
+	 * The log files are created in the currently set parentDirectory, which can be set using {@link #setParentDirectory(String)}, 
+	 * and the file name is the log name. If the directory or any of its 
+	 * parent directories do not exist, they will be created. If override is true, any existing log files with the same name 
+	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
+	 * is a new file of the same name. 
+	 * </p>
+	 * <p>
+	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
+	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
+	 * </p>
+	 * 
+	 * @param name The name of the log
+	 * @param type The {@link LoggingType} of the created log
+	 * @param override If true, any existing log files with the same name will be deleted
+	 * @param logMode The logging output types
+	 */
 	public Log(String name, LoggingType type, boolean override, byte logMode){
 		this(parentDirectory+"logs/", name, type, override, logMode);
 	}
+	/**
+	 * Creates a new log using a given {@link LoggingType} with a {@link #MODE_FULL full log output mode}. 
+	 * <p>
+	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
+	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
+	 * </p>
+	 * <p>
+	 * The log files are created in the given directory and the file name is the log name. If the directory or any of its 
+	 * parent directories do not exist, they will be created. If override is true, any existing log files with the same name 
+	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
+	 * is a new file of the same name. 
+	 * </p>
+	 * <p>
+	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
+	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
+	 * </p>
+	 * 
+	 * @param name The name of the log
+	 * @param type The {@link LoggingType} of the created log
+	 * @param override If true, any existing log files with the same name will be deleted
+	 */
 	public Log(String name, LoggingType type, boolean override){
 		this(parentDirectory+"logs/", name, type, override, MODE_FULL);
 	}
+	/**
+	 * Creates a new {@link LoggingType#Stream} log with a {@link #MODE_FULL full log output mode}. 
+	 * <p>
+	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
+	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
+	 * </p>
+	 * <p>
+	 * The log files are created in the given directory and the file name is the log name. If the directory or any of its 
+	 * parent directories do not exist, they will be created. If a log file with same name is present, an integer will be added to the name specifying it
+	 * is a new file of the same name. 
+	 * </p>
+	 * <p>
+	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
+	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
+	 * </p>
+	 * 
+	 * @param name The name of the log
+	 */
 	public Log(String name){
 		this(name, LoggingType.Stream, false);
 	}
@@ -153,10 +266,22 @@ public class Log{
 		indexErrorLog = 0;
 	}
 	
+	/**
+	 * Sets the {@link java.io.PrintStream} to which log data is printed if the output mode include {@link #MODE_PRINT}.
+	 * The default stream is {@link java.lang.System#out}.
+	 * 
+	 * @param out The {@link java.io.PrintStream} to which log data is printed.
+	 */
 	public void setPrintStream(PrintStream out){
 		this.out = out;
 	}
 	
+	/**
+	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
+	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
+	 * 
+	 * @param mess A line to log to the standard log file or buffer
+	 */
 	public synchronized void write(String mess){
 		if(isClosed()) return;
 		if(type == LoggingType.Buffered){
@@ -171,6 +296,13 @@ public class Log{
 			}
 		}
 	}
+	
+	/**
+	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
+	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
+	 * 
+	 * @param mess A line to log to the error log file or buffer
+	 */
 	public synchronized void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
@@ -186,6 +318,13 @@ public class Log{
 			}
 		}
 	}
+	/**
+	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
+	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
+	 * 
+	 * @param mess A line to log to the error log file or buffer
+	 * @param stacktrace A stack trace of the error
+	 */
 	public synchronized void writeError(String mess, String stacktrace){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
@@ -203,17 +342,31 @@ public class Log{
 			}
 		}
 	}
+	
+	/**
+	 * Closes the log and saves it. Closing the log will disable file writing.
+	 */
 	public synchronized void close(){
 		if(isClosed()) return;
 		save();
 		closed = true;
 	}
+	
+	/**
+	 * Deletes the log file and closes file writing features. Doing so will disable file writing.
+	 */
 	public synchronized void delete(){
 		if(!isClosed())
 			close();
 		new File(absPath).delete();
 		new File(absPathError).delete();
 	}
+	
+	/**
+	 * Saves data into the log files. If the {@link LoggingType} is {@link LoggingType#Buffered} than the data buffers
+	 * are flushed to the log files, otherwise the {@link FileWriter file writer streams} are flushed using {@link FileWriter#flush()}.
+	 * If the log is closed or if the logging mode is set to {@link #MODE_DISABLED} than nothing will happen.
+	 */
 	public synchronized void save(){
 		if(isClosed() || isDisabled()) return;
 		
@@ -234,32 +387,115 @@ public class Log{
 			out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	
+	/**
+	 * Gets the name of the log.
+	 * 
+	 * @return The name of this log.
+	 */
 	public String getName(){
 		return name;
 	}
+	
+	/**
+	 * Gets the {@link LoggingType} set for use in this log.
+	 * 
+	 * @return The {@link LoggingType} used for this log.
+	 */
 	public LoggingType getLoggingType(){
 		return type;
 	}
+	
+	/**
+	 * Gets whether or not the log is closed. If the log is closed than writing to the log files is not possible.
+	 * 
+	 * @return True if the log is closed.
+	 */
 	public boolean isClosed(){
 		return closed || (type == LoggingType.Stream && (writerLog == null || writerErrorLog == null));
 	}
+	
+	/**
+	 * Sets the logging mode to {@link #MODE_DISABLED} effectively disabling functionality of this log.
+	 */
 	public void disable(){
 		setLoggingMode(MODE_DISABLED);
 	}
+	
+	/**
+	 * Gets whether or not the logging mode is set to {@link #MODE_DISABLED}.
+	 * 
+	 * @return True if the current logging mode is {@link #MODE_DISABLED}.
+	 */
 	public boolean isDisabled(){
 		return logMode == MODE_DISABLED;
 	}
+	
+	/**
+	 * Sets the logging mode of this log. Logging mode determines the outputs used by this log when a logging is occurred.
+	 * There are several types of logging which can be used simultaneously:
+	 * <ul>
+ 	 * 		<li>File writing: {@link #MODE_WRITE}</li>
+ 	 * 		<li>PrintStream writing: {@link #MODE_PRINT}</li>
+ 	 * 		<li>External logging interfaces: {@link #MODE_INTERFACES}</li>
+ 	 * </ul>
+ 	 * 
+ 	 * <p>
+ 	 * To use several logging modes at the same time, use bitwise OR:<br><br>
+ 	 * {@code
+ 	 * 		setLoggingMode(MODE_PRINT | MODE_WRITE);
+ 	 * }<br><br>
+ 	 * This will set the logging mode to use {@link #MODE_PRINT} and {@link #MODE_WRITE}.
+ 	 * </p>
+ 	 * 
+	 * @param mode The logging mode to set for use in this log
+	 */
 	public void setLoggingMode(byte mode){
 		this.logMode = mode;
 	}
+	
+	/**
+	 * Gets the logging mode used by this log. Logging mode determines the outputs used by this log when a logging is occurred.
+	 * There are several types of logging which can be used simultaneously:
+	 * <ul>
+ 	 * 		<li>File writing: {@link #MODE_WRITE}</li>
+ 	 * 		<li>PrintStream writing: {@link #MODE_PRINT}</li>
+ 	 * 		<li>External logging interfaces: {@link #MODE_INTERFACES}</li>
+ 	 * </ul> 
+	 * <p>
+	 * To determine what logging modes are set, use bitwise AND and compare the returned byte with the desired mode:
+	 * <br><br>
+	 * {@code
+	 * 		(getLoggingMode() & MODE_WRITE) != 0
+	 * }
+	 * <br> <br>
+	 * The result of this operation is true when the logging mode include {@link #MODE_WRITE}
+	 * </p>
+	 * 
+	 * @return The logging mode use by this log
+	 */
 	public byte getLoggingMode(){
 		return logMode;
 	}
 	
+	/**
+	 * Adds a {@link LoggingInterface} to this log. {@link LoggingInterface}s allow for log data to pass to external sources.
+	 * If the current logging mode does not include {@link #MODE_INTERFACES} data will not be transfered to the attached interfaces.
+	 * 
+	 * @param in {@link LoggingInterface} to add.
+	 */ 
 	public void addLoggingInterface(LoggingInterface in){
 		loggingInterfaces.addElement(in);
 	}
 	
+	/**
+	 * Reports an error. The data output depends on the logging mode currently set:
+	 * <ul>
+	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to both the standard and error files or buffers. A stack trace of the error is added as well. </li>
+	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
+	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LoggingInterface} to {@link LoggingInterface#reportError(String)} </li>
+	 * </ul>
+	 * @param error String containing data about the error.
+	 */
 	public void reportError(String error){
 		if(isDisabled()) return;
 		String err = "ERROR\n\t" + 
@@ -276,6 +512,16 @@ public class Log{
 				lEnum.nextElement().reportError(error);
 		}
 	}
+	
+	/**
+	 * Reports a warning. The data output depends on the logging mode currently set:
+	 * <ul>
+	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to both the standard and error files or buffers.</li>
+	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
+	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LoggingInterface} to {@link LoggingInterface#reportWarning(String)} </li>
+	 * </ul>
+	 * @param warning String containing data about the warning.
+	 */
 	public void reportWarning(String warning){
 		if(isDisabled()) return;
 		String war = "WARNING\n\t" + 
@@ -291,12 +537,37 @@ public class Log{
 				lEnum.nextElement().reportWarning(warning);
 		}
 	}
+	
+	/**
+	 * Logs data with information about the sender of the log data. This method calls {@link #log(String, Class)} and
+	 * passes it the class which called it using {@link Thread#getStackTrace()}.
+	 * 
+	 * @param msg The log data.
+	 */
 	public void log(String msg){
 		log(msg, getCallerClass());
 	}
+	/**
+	 * Logs data with information about the sender of the log data. This method calls {@link #log(String, String)} and
+	 * passes it the value of {@link Class#getName()} as the caller.
+	 * 
+	 * @param msg The log data.
+	 * @param caller The calling class.
+	 */
 	public void log(String msg, Class<?> caller){
 		log(msg, caller.getName());
 	}
+	
+	/**
+	 * Logs data with information about the sender of the log data. The data output depends on the logging mode currently set:
+	 * <ul>
+	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to the standard file or buffer.</li>
+	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
+	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LoggingInterface} to {@link LoggingInterface#log(String)} </li>
+	 * </ul>
+	 * @param msg The log data.
+	 * @param caller The name of the caller to the log.
+	 */
 	public void log(String msg, String caller){
 		if(isDisabled()) return;
 		msg = caller+": "+msg;
@@ -309,9 +580,27 @@ public class Log{
 				lEnum.nextElement().log(msg);
 		}
 	}
+	
+	/**
+	 * Logs data with information about the current time. Calls {@link #logTime(String, double)} and passes it 
+	 * {@link FlashUtil#secs()} as a time stamp.
+	 * 
+	 * @param msg The log data.
+	 */
 	public void logTime(String msg){
 		logTime(msg, FlashUtil.secs());
 	}
+	
+	/**
+	 * Logs data with information about the current time. The data output depends on the logging mode currently set:
+	 * <ul>
+	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to the standard file or buffer.</li>
+	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
+	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LoggingInterface} to {@link LoggingInterface#log(String)} </li>
+	 * </ul>
+	 * @param msg The log data.
+	 * @param time The current time stamp.
+	 */
 	public void logTime(String msg, double time){
 		if(isDisabled()) return;
 		msg = time + " : ---------->" + msg;
@@ -338,6 +627,13 @@ public class Log{
 			trace += "\t"+traces[i].toString()+"\n";
 		return trace;
 	}
+	
+	/**
+	 * Sets the directory in which to save logs files whose directories were not defined. Such logs are created using
+	 * {@link #Log(String, LoggingType, boolean, byte)}.
+	 * 
+	 * @param directory The directory in which to save logs.
+	 */
 	public static void setParentDirectory(String directory){
 		parentDirectory = directory;
 		if(!parentDirectory.endsWith("/"))

@@ -131,7 +131,6 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 2) return;
-		System.out.println("data: "+data.length);
 		
 		if(data[0] == RemoteVision.REMOTE_RUN_MODE){
 			if(data[1] == RemoteVision.REMOTE_START){
@@ -144,7 +143,6 @@ public abstract class VisionRunner extends Sendable implements Vision{
 			}
 		}else if(data[0] == RemoteVision.REMOTE_SELECT_MODE){
 			currentProcessing = data[1];
-			System.out.println("Current changed");
 		}else if(data[0] == RemoteVision.REMOTE_PROC_MODE){
 			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 1, data.length));
 			if(proc != null)
@@ -154,19 +152,18 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	@Override
 	public byte[] dataForTransmition() {
 		if(newProcessing){
-			System.out.println("Sending new proc data");
 			newProcessing = false;
 			return new byte[]{RemoteVision.REMOTE_PROC_MODE, (byte) (processing.size())};
 		}
 		if(newSelection){
 			newSelection = false;
-			System.out.println("Updating selection");
 			return new byte[]{RemoteVision.REMOTE_SELECT_MODE, (byte) currentProcessing};
 		}
 		
 		byte[] data = getAnalysis().transmit();
-		byte[] send = Arrays.copyOf(data, data.length+1);
+		byte[] send = new byte[data.length+1];
 		send[0] = RemoteVision.REMOTE_ANALYSIS_MODE;
+		System.arraycopy(data, 0, send, 1, data.length);
 		return send;
 	}
 	@Override
