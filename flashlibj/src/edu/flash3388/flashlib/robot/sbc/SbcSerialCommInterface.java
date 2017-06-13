@@ -10,7 +10,7 @@ public class SbcSerialCommInterface extends PortCommInterface{
 	
 	private SerialPort port;
 	private SbcReadCallable task;
-	private long readtimeout = READ_TIMEOUT;
+	private int readtimeout = READ_TIMEOUT;
 	
 	public SbcSerialCommInterface(SerialPort port, boolean server) {
 		super(server);
@@ -41,11 +41,11 @@ public class SbcSerialCommInterface extends PortCommInterface{
 	}
 
 	@Override
-	public void setReadTimeout(long millis) {
+	public void setReadTimeout(int millis) {
 		readtimeout = millis;
 	}
 	@Override
-	public long getTimeout() {
+	public int getTimeout() {
 		return readtimeout;
 	}
 

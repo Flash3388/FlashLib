@@ -1,5 +1,12 @@
 package edu.flash3388.flashlib.communications;
 
+/**
+ * A testing sendable that acts as an echo server or client. Uses its name and sends it to its remote counter part who
+ * returns it back.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class EchoSendable extends Sendable{
 	
 	private byte[] origindata;

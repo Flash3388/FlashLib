@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.communications;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -10,6 +9,30 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * Provides a communications management system between to sides. The communications is split into mini communication part
+ * between to {@link Sendable} objects, each pair having its own conversion without caring about other sendables. This method
+ * allows for managing of multiple information types through a single communications port, resulting in a concurrent data 
+ * communication system. To allow for flexible communications system, this classes uses a {@link CommInterface} object for 
+ * reading and sending data.
+ *
+ * <p>
+ * When attached using {@link #attach(Sendable)}, a sendable is added to a collection of locally attached sendables. Upon
+ * connection with another {@link Communications} object, the sendables are transfered to a map. Data about the sendables 
+ * is than sent to the remote side, where if a sendable with a matching ID exists than they begin conversion, otherwise
+ * a matching sendable is created using a {@link SendableCreator} object, if one exists ({@link #setSendableCreator(SendableCreator)}),
+ * and added to the sendable map. Upon disconnection, the map is purged of sendables, but the collection of locally attached sendables
+ * remains intact.
+ * </p>
+ * 
+ * <p>
+ * Communication is managed in a thread, which starts when {@link #start()} is called, and terminated when {@link #close()} is
+ * called. The thread will handle continuos connection to the remote system.
+ * </p>
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class Communications {
 	private static class CommTask implements Runnable{
 		boolean stop = false;
@@ -21,36 +44,29 @@ public class Communications {
 		
 		@Override
 		public void run() {
-			try{
-				while(!stop){
-					FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-					while(!comm.connect() && !stop);
-					if(stop) break;
+			while(!stop){
+				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
+				while(!comm.connect() && !stop);
+				if(stop) break;
+				
+				FlashUtil.getLog().log("Connected", comm.logName);
+				comm.resetAll();
+				
+				while(comm.isConnected()){
+					comm.sendAll();
+					comm.read();
 					
-					FlashUtil.getLog().log("Connected", comm.logName);
-					comm.resetAll();
-					
-					while(comm.isConnected()){
-						comm.sendAll();
-						comm.read();
-						
-						comm.commInterface.update(FlashUtil.millis());
-						FlashUtil.delay(10);
-					}
-					comm.onDisconnect();
-					FlashUtil.getLog().log("Disconnected", comm.logName);
+					comm.commInterface.update(FlashUtil.millisInt());
+					FlashUtil.delay(10);
 				}
-			}catch(IOException e){
-				FlashUtil.getLog().reportError(e.getMessage());
-				comm.disconnect();
+				comm.onDisconnect();
+				FlashUtil.getLog().log("Disconnected", comm.logName);
 			}
 		}
 		public void stop(){
 			stop = true;
 		}
 	}
-	
-	public static final short MAX_REC_LENGTH = 100;
 	
 	private static byte instances = 0;
 	
@@ -67,6 +83,13 @@ public class Communications {
 	private Thread commThread;
 	private CommTask commTask;
 	
+	/**
+	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
+	 * To start the communications thread, it is necessary to call {@link #start()}.
+	 * 
+	 * @param name logging name
+	 * @param readIn communications interface
+	 */
 	public Communications(String name, CommInterface readIn){
 		this.commInterface = readIn;
 		this.logName = name+"-Comm";
@@ -76,9 +99,14 @@ public class Communications {
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
-		setBufferSize(MAX_REC_LENGTH);
 		commInterface.open();
-	}
+	}	
+	/**
+	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
+	 * To start the communications thread, it is necessary to call {@link #start()}. Uses a generated name for logging data.
+	 * 
+	 * @param readIn communications interface
+	 */
 	public Communications(CommInterface readIn){
 		this(""+(++instances), readIn);
 	}
@@ -108,14 +136,21 @@ public class Communications {
 			if(sen != null && packet.length - 5 > 0){
 				sen.newData(Arrays.copyOfRange(packet.data, 5, packet.length));
 			}
-			else if(sendableCreator != null){
+			else{
 				String str = new String(packet.data, 5, packet.length - 5);
-				sen = sendableCreator.create(str, id, packet.data[4]);
-				if(sen != null){
-					sendables.put(sen.getID(), sen);
-					sen.setAttached(true);
-				}
+				createSendable(str, id, packet.data[4]);
 			}
+		}
+	}
+	
+	private void createSendable(String name, int id, byte type){
+		if(sendableCreator == null) return;
+		
+		Sendable s = sendableCreator.create(name, id, type);
+		if(s != null){
+			s.setAttached(true);
+			s.setRemoteInit(true);
+			sendables.put(s.getID(), s);
 		}
 	}
 	private void resetAll(){
@@ -177,10 +212,50 @@ public class Communications {
 		write(bytes);
 	}
 	
-	public void attach(Sendable... sendables){
-		for (Sendable sendable : sendables) 
-			attach(sendable);
+	/**
+	 * Sends data from a sendable to its remote counter part. If no connection was established, nothing will occur.
+	 * If the sendable is not attached to this system, a runtime exception will be thrown. If the sendable was
+	 * not initialized, a runtime exception will be thrown.
+	 * 
+	 * @param sendable the sendable 
+	 * @param data byte array of data
+	 * 
+	 * @throws RuntimeException the sendable is not attached or initialized for remote communications
+	 */
+	public void sendDataForSendable(Sendable sendable, byte[] data){
+		if(!isConnected())
+			return;
+		if(getFromAllAttachedByID(sendable.getID()) == null)
+			throw new RuntimeException("No such id attached");
+		if(!sendable.remoteInit())
+			throw new RuntimeException("Sendable was not initialized for remote connection");
+		
+		send(data, sendable);
 	}
+	
+	/**
+	 * Attaches an array of sendables. Passes them one by one to {@link #attach(Sendable)}.
+	 * @param sendables array of sendables to attach
+	 */
+	public void attach(Sendable... sendables){
+		for (int i = 0; i < sendables.length; i++) 
+			attach(sendables[i]);
+	}
+	/**
+	 * Attaches a new sendable to the system. If a connection was already established, than the sendable is
+	 * Immediately added to the sendables map for use.
+	 * 
+	 * <p>
+	 * If the sendable is already attached to a communications system, an 
+	 * {@link IllegalStateException} is thrown. If a sendable with the same ID is already attached, a 
+	 * {@link RuntimeException}.
+	 * </p>
+	 * 
+	 * @param sendable sendable to attach
+	 * 
+	 * @throws IllegalStateException if the sendable is already attached
+	 * @throws RuntimeException if a sendable with the same id is attached
+	 */
 	public void attach(Sendable sendable){
 		if(sendable.attached())
 			throw new IllegalStateException("Sendable is already attached to communications");
@@ -194,6 +269,14 @@ public class Communications {
 			resetSendable(sendable);
 		}
 	}
+	/**
+	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
+	 * the sendable is removed from the map.
+	 * 
+	 * 
+	 * @param sendable sendable to remove
+	 * @return true if the sendable was removed, false otherwise
+	 */
 	public boolean detach(Sendable sendable){
 		if(attachedSendables.remove(sendable)){
 			sendables.remove(sendable.getID());
@@ -203,6 +286,14 @@ public class Communications {
 		}
 		return !sendable.attached();
 	}
+	/**
+	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
+	 * the sendable is removed from the map.
+	 * 
+	 * 
+	 * @param id id of the sendable to remove
+	 * @return true if the sendable was removed, false otherwise
+	 */
 	public boolean detach(int id){
 		Sendable sen = getLocalyAttachedByID(id);
 		if(sen != null) {
@@ -215,11 +306,20 @@ public class Communications {
 		}
 		return sen != null && !sen.attached();
 	}
+	/**
+	 * Removes all the locally attached sendables.
+	 */
 	public void detachAll(){
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements())
 			detach(sendablesEnum.nextElement());
 	}
+	/**
+	 * Gets a locally attached sendable by its id, if such exists.
+	 * 
+	 * @param id id of the sendable to return
+	 * @return a sendable with a matching id, if one exists
+	 */
 	public Sendable getLocalyAttachedByID(int id){
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while(sendablesEnum.hasMoreElements()){
@@ -229,13 +329,31 @@ public class Communications {
 		}
 		return null;
 	}
+	/**
+	 * Gets an attached sendable by its id, if such exists. This includes remotely attached sendable as well.
+	 * 
+	 * @param id id of the sendable to return
+	 * @return a sendable with a matching id, if one exists
+	 */
 	public Sendable getFromAllAttachedByID(int id){
 		return sendables.get(id);
 	}
+	
+	/**
+	 * Gets the {@link CommInterface} used by this system for communications.
+	 * 
+	 * @return communications interface used for communications
+	 */
 	public CommInterface getCommInterface(){
 		return commInterface;
 	}
-	public boolean connect() throws IOException{
+	
+	/**
+	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect(Packet)}.
+	 * 
+	 * @return true if connection was established, false otherwise
+	 */
+	public boolean connect(){
 		if(isConnected()) return true;
 		updateClock();
 		commInterface.connect(packet);
@@ -245,35 +363,91 @@ public class Communications {
 		}
 		return false;
 	}
+	/**
+	 * If connected, attempts disconnection from a remote communications object. Stops the communication loop and 
+	 * calls {@link CommInterface#disconnect()}
+	 * 
+	 * <p>
+	 * It is not recommended to call this method explicitly.
+	 * </p>
+	 */
 	public void disconnect(){
 		if(isConnected()){
 			commTask.stop();
 			commInterface.disconnect();
 		}
 	}
+	/**
+	 * Gets whether this port is connected to a remote communications port.
+	 * @return true if connected, false otherwise.
+	 */
 	public boolean isConnected(){
 		return commInterface.isConnected();
 	}
+	
+
+	/**
+	 * Sets timeout for the reading blocking call in milliseconds.
+	 * 
+	 * @param timeout timeout for reading call milliseconds
+	 */
 	public void setReadTimeout(int timeout){
-		readTimeout = timeout;
-		commInterface.setReadTimeout(readTimeout);
+		commInterface.setReadTimeout(timeout);
 	}
+	/**
+	 * Gets the timeout for the reading blocking call in milliseconds.
+	 * @return timeout for reading call in milliseconds.
+	 */
 	public int getReadTimeout(){
-		return readTimeout;
+		return commInterface.getTimeout();
 	}
+	
+	/**
+	 * Sets the {@link SendableCreator} object used to create sendables for a remote communications system.
+	 * 
+	 * @param creator sendable creator
+	 */
 	public void setSendableCreator(SendableCreator creator){
 		sendableCreator = creator;
 	}
-	public void setBufferSize(int size){
-		commInterface.setMaxBufferSize(size);
-	}
+	/**
+	 * Gets the sendable creator used tor create sendables for a remote communications system.
+	 * 
+	 * @return the sendable creator
+	 */
 	public SendableCreator getSendableCreator(){
 		return sendableCreator;
 	}
+	
+	/**
+	 * Sets the maximum size of the reading data buffer. This is the maximum amount of bytes that can
+	 * be read from the port.
+	 * 
+	 * @param size maximum amount of bytes in the data buffer.
+	 */
+	public void setBufferSize(int size){
+		commInterface.setMaxBufferSize(size);
+	}
+	/**
+	 * Gets the maximum size of the reading data buffer. This is the maximum amount of bytes that can
+	 * be read from the port.
+	 * @return maximum amount of bytes in the data buffer.
+	 */
+	public int getBufferSize(){
+		return commInterface.getMaxBufferSize();
+	}
+
+	/**
+	 * Starts the communications thread if it has not started.
+	 */
 	public void start(){
 		if(!commThread.isAlive())
 			commThread.start();
 	}
+	/**
+	 * Closes this communications system. Usage of this system will not be possible after closing.
+	 * Awaits termination of the communications thread.
+	 */
 	public void close() {
 		disconnect();
 		commInterface.close();
@@ -285,59 +459,5 @@ public class Communications {
 			Thread.currentThread().interrupt();
 			e.printStackTrace();
 		}
-	}
-	public void sendDataForSendable(Sendable sendable, byte[] data){
-		if(getFromAllAttachedByID(sendable.getID()) == null)
-			throw new RuntimeException("No such id attached");
-		send(data, sendable);
-	}
-	
-	
-	public static boolean handshakeServer(CommInterface commInterface, Packet packet){
-		commInterface.setReadTimeout(CommInterface.READ_TIMEOUT * 4);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
-			return false;
-		
-		commInterface.write(CommInterface.HANDSHAKE_CONNECT_SERVER);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
-			return false;
-		return true;
-	}
-	public static boolean handshakeClient(CommInterface commInterface, Packet packet){
-		commInterface.setReadTimeout(CommInterface.READ_TIMEOUT);
-		commInterface.write(CommInterface.HANDSHAKE_CONNECT_CLIENT);
-		
-		commInterface.read(packet);
-		if(!isHandshakeServer(packet.data, packet.length))
-			return false;
-		
-		commInterface.write(CommInterface.HANDSHAKE_CONNECT_CLIENT);
-		return true;
-	}
-	public static boolean isHandshake(byte[] bytes, int length){
-		if(length != CommInterface.HANDSHAKE.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != CommInterface.HANDSHAKE[i])
-				return false;
-		}
-		return true;
-	}
-	public static boolean isHandshakeServer(byte[] bytes, int length){
-		if(length != CommInterface.HANDSHAKE_CONNECT_SERVER.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != CommInterface.HANDSHAKE_CONNECT_SERVER[i])
-				return false;
-		}
-		return true;
-	}
-	public static boolean isHandshakeClient(byte[] bytes, int length){
-		if(length != CommInterface.HANDSHAKE_CONNECT_CLIENT.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != CommInterface.HANDSHAKE_CONNECT_CLIENT[i])
-				return false;
-		}
-		return true;
 	}
 }

@@ -13,7 +13,19 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
-
+/**
+ * CameraClient provides a UDP communications client for camera data. It connects with a remote {@link CameraServer},
+ * receives byte arrays holding image data and passes them on to attached {@link DataListener}s. Data reading runs in
+ * a separate thread which starts immediately and can be stopped by calling {@link #stop()}.
+ * <p>
+ * To receive image data, implement {@link DataListener} and add it using {@link #addListener(DataListener)}. Data will be
+ * passed automatically on arrival. But the data is passed as bytes, so the image will need to be created manually. This allows
+ * for different image data encrypting.
+ * </p>
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class CameraClient {
 	private static class Task implements Runnable{
 		CameraClient client;
@@ -34,7 +46,10 @@ public class CameraClient {
 		}
 	}
 	
-	public static final int DEFUALT_MAX_BYTES = (int) 1e5;
+	/**
+	 * The default max possible amount of bytes that can be read from the socket.
+	 */
+	public static final int DEFAULT_MAX_BYTES = (int) 1e5;
 	private static final byte[] HANDSHAKE = {0x01, 0x00, 0x01};
 	private static final int READ_TIMEOUT = 800;
 	
@@ -47,28 +62,52 @@ public class CameraClient {
 	private InetAddress sendAddress;
 	private int sendPort;
 	private int port;
-	private int maxBytes;
 	private String name, logName;
 	
 	private boolean stop = false, connected = false;
 	
+	/**
+	 * Creates a new CameraServer. A datagram socket is created at the local address listening to a given port. The read thread
+	 * is immediately started and data is received. In order to initiate connection with the remote {@link CameraServer} a handshake
+	 * is sent to a given port and address which belong to the remote camera server. To avoid to much data, the data buffer is
+	 * limited to a maximum amount of bytes.
+	 * 
+	 * @param name the name of client, for logging
+	 * @param localPort local port for data listening
+	 * @param remoteAdd remote server address
+	 * @param remotePort remote server port
+	 * @param maxBytes maximum buffer size
+	 */
 	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes){
 		port = localPort;
 		sendPort = remotePort;
 		sendAddress = remoteAdd;
-		this.maxBytes = maxBytes;
 		this.name = name;
 		logName = name+"-CameraClient";
 		try {
 			socket = new DatagramSocket(new InetSocketAddress(localPort));
 			socket.setSoTimeout(READ_TIMEOUT);
 		} catch (SocketException e) {
+			e.printStackTrace();
 		}
 		recBytes = new byte[maxBytes];
-		recPacket = new DatagramPacket(recBytes, maxBytes);
 		 
 		runThread = new Thread(new Task(this));
 		runThread.start();
+	}
+	/**
+	 * Creates a new CameraServer. A datagram socket is created at the local address listening to a given port. The read thread
+	 * is immediately started and data is received. In order to initiate connection with the remote {@link CameraServer} a handshake
+	 * is sent to a given port and address which belong to the remote camera server. To avoid to much data, the data buffer is
+	 * limited to a the default amount of bytes: 100000 bytes.
+	 * 
+	 * @param name the name of client, for logging
+	 * @param localPort local port for data listening
+	 * @param remoteAdd remote server address
+	 * @param remotePort remote server port
+	 */
+	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort){
+		this(name, localPort, remoteAdd, remotePort, DEFAULT_MAX_BYTES);
 	}
 	
 	private void write(byte[] bytes){
@@ -110,24 +149,64 @@ public class CameraClient {
 		}
 	}
 	
+	/**
+	 * Gets the local port being listened to for data by the datagram socket.
+	 * @return the listening port
+	 */
 	public int getLocalPort(){
 		return port;
 	}
+	/**
+	 * Gets the remote server port to which data is sent.
+	 * @return remote server port
+	 */
 	public int getRemotePort(){
 		return sendPort;
 	}
-	public int getMaxBytes(){
-		return maxBytes;
+	/**
+	 * Gets the address of the connected server as a {@link InetAddress} object.
+	 * @return the address of the server
+	 */
+	public InetAddress getRemoteAddress(){
+		return sendAddress;
 	}
+	
+	/**
+	 * Gets the maximum amount of bytes that can be read.
+	 * @return max bytes 
+	 */
+	public int getMaxBytes(){
+		return recBytes.length;
+	}
+	/**
+	 * Sets the maximum amount of bytes that can be read by the client.
+	 * @param maxbytes max bytes to be read
+	 */
+	public void setMaxBytes(int maxbytes){
+		synchronized (recBytes) {
+			recBytes = new byte[maxbytes];
+		}
+	}
+	
+	/**
+	 * Gets whether or not the client is connected to a remote camera server
+	 * @return true if connected, false otherwise
+	 */
 	public boolean isConnected(){
 		return connected;
 	}
-	public void setMaxBytes(int maxbytes){
-		maxBytes = maxbytes;
-	}
+
+	/**
+	 * Gets the name of this client used for data logging.
+	 * @return the name of this client
+	 */
 	public String getName(){
 		return name;
 	}
+	
+	/**
+	 * Stops the operation of the client. Closes the socket and waits for termination of the reading thread.
+	 */
 	public void stop(){
 		stop = true;
 		connected = false;
@@ -141,9 +220,18 @@ public class CameraClient {
 		}
 	}
 	
+	/**
+	 * Add a new {@link DataListener} to this client. When camera data is read, it will be passed to this listener.
+	 * 
+	 * @param listener data listener to add
+	 */
 	public void addListener(DataListener listener){
 		listeners.addElement(listener);
 	}
+	/**
+	 * Removes a {@link DataListener} from this client. The listener will no longer receive image data.
+	 * @param listener data listener to remove
+	 */
 	public void removeListener(DataListener listener){
 		listeners.removeElement(listener);
 	}
