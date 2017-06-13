@@ -132,6 +132,13 @@ public class CameraClient {
 		stop = true;
 		connected = false;
 		socket.close();
+		
+		try {
+			runThread.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			e.printStackTrace();
+		}
 	}
 	
 	public void addListener(DataListener listener){

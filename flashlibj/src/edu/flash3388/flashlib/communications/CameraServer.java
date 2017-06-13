@@ -136,6 +136,13 @@ public class CameraServer {
 	public void stop(){
 		stop = true;
 		socket.close();
+		
+		try {
+			runThread.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			e.printStackTrace();
+		}
 	}
 	public double getBandwidthUsage(){
 		long cMillis = FlashUtil.millis();

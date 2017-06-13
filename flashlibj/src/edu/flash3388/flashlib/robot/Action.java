@@ -15,10 +15,8 @@ public abstract class Action {
 	public static final Action EMPTY = new Action(){
 		@Override
 		protected void execute() {}
-
 		@Override
-		protected void end() {
-		}
+		protected void end() {}
 	};
 
 	private Vector<System> requirements = new Vector<System>(2);
@@ -107,6 +105,10 @@ public abstract class Action {
 		for(System s : subsystems)
 			requirements.add(s);
 	}
+	protected void copyRequirements(Action action){
+		for (Enumeration<System> sys = action.getRequirements(); sys.hasMoreElements(); )
+			requires(sys.nextElement());
+	}
 	protected void resetRequirements(){
 		requirements.clear();
 	}
@@ -134,7 +136,7 @@ public abstract class Action {
 	public static Action stopAction(Action action){
 		return new InstantAction(){
 			@Override
-			protected void execute() {
+			public void execute() {
 				if(action.isRunning())
 					action.cancel();
 			}

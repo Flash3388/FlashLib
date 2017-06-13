@@ -62,6 +62,20 @@ public final class FlashUtil {
 	
 	/**
 	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
+	 * nanoseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
+	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long, int)}.
+	 * 
+	 * @param nanos the length of time to sleep in nanoseconds.
+	 */
+	public static void delayns(int nanos){
+		if(nanos <= 0) return;
+		try {
+			Thread.sleep(0, nanos);
+		} catch (InterruptedException e) {}
+	}
+	
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
 	 * milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
 	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long)}.
 	 * 

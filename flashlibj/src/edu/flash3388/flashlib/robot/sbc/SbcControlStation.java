@@ -144,10 +144,12 @@ public final class SbcControlStation extends Sendable{
 	@Override
 	public void onConnection() {
 		attached = true;
+		stateByte = SbcBot.STATE_DISABLED;
 	}
 	@Override
 	public void onConnectionLost() {
 		attached = false;
+		stateByte = SbcBot.STATE_DISABLED;
 	}
 	
 	public void waitForData(){

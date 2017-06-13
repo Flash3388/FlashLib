@@ -67,7 +67,7 @@ public class ActionGroup extends Action{
 	}
 	
 	@Override
-	protected void initialize(){
+	public void initialize(){
 		index = 0;
 		Entry c = actions.elementAt(index);
 		FlashUtil.getLog().log("Stating action-"+c.action.getClass().getName());
@@ -75,7 +75,7 @@ public class ActionGroup extends Action{
 		current.addElement(c);
 	}
 	@Override
-	protected void execute() {
+	public void execute() {
 		Entry c = actions.elementAt(index); boolean next = false;
 		if(!c.action.isRunning()){
 			current.removeElement(c);
@@ -102,11 +102,11 @@ public class ActionGroup extends Action{
 		}
 	}
 	@Override
-	protected boolean isFinished() {
+	public boolean isFinished() {
 		return index >= actions.size();
 	}
 	@Override
-	protected void end() {
+	public void end() {
 		for(Enumeration<Entry> en = current.elements(); en.hasMoreElements();){
 			Entry entry = en.nextElement();
 			if(entry.action.isRunning())

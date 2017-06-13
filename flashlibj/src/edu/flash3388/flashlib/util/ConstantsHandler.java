@@ -366,7 +366,7 @@ public final class ConstantsHandler {
 	 * @param iniVal the initial value
 	 * @return a {@link BooleanDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
-	public static BooleanDataSource addString(String name, boolean iniVal){
+	public static BooleanDataSource addBoolean(String name, boolean iniVal){
 		BooleanDataSource.VarDataSource source = booleanMap.get(name);
 		if(source == null){
 			source = new BooleanDataSource.VarDataSource(iniVal);

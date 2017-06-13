@@ -25,10 +25,11 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 	@Override
 	protected void initialize() {
 		dataSource.set(0);
+		pidcontroller.setEnabled(true);
 	}
 	@Override
 	public void execute() {
-		if(inDistanceThreshold())
+		if(!pidcontroller.isEnabled() || inDistanceThreshold())
 			dataSource.set(0);
 		else {
 			dataSource.set(-pidcontroller.calculate());

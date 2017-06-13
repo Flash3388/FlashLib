@@ -40,7 +40,7 @@ public class SbcPwm{
 	}
 	
 	protected void setBounds(double max, double deadbandMax, double center, double deadbandMin, double min){
-		double looptime = 1 / port.getFrequency();
+		double looptime = 1.0 / port.getFrequency();
 		this.max = max / looptime;
 		this.min = min / looptime;
 		this.center = center / looptime;
@@ -67,20 +67,22 @@ public class SbcPwm{
 		return port.getDuty();
 	}
 	public void disable(){
-		setDutyCycle(0);
+		setDutyCycle(0.0);
 	}
 	
 	public void setSpeed(double speed) {
-		speed = Mathd.limit(speed, -1, 1);
-		if(speed == 0)
-			setDutyCycle(0);
-		else if(speed > 0)
+		speed = Mathd.limit(speed, -1.0, 1.0);
+		if(speed == 0.0)
+			setDutyCycle(0.0);
+		else if(speed > 0.0)
 			setDutyCycle(getMinPositive() + speed * getPositiveScaleFactor());
 		else
 			setDutyCycle(getMaxNegative() + speed * getNegativeScaleFactor());
 	}
 	public void setPosition(double pos){
-		pos = Mathd.limit(pos, 0, 1);
+		if(pos < 0.0)
+			pos = Math.abs(pos);
+		pos = Mathd.limit(pos, 0.0, 1.0);
 		
 		setDutyCycle(getMinNegative() + pos * getFullScaleFactor());
 	}
@@ -88,25 +90,25 @@ public class SbcPwm{
 	public double getSpeed() {
 		double duty = getDutyCycle();
 		
-		if(duty == 0)
-			return 0;
+		if(duty == 0.0)
+			return 0.0;
 		if(duty > getMaxPositive())
-			return 1;
+			return 1.0;
 		if(duty < getMinNegative())
-			return -1;
+			return -1.0;
 		if(duty > getMinPositive())
 			return (duty - getMinPositive()) / getPositiveScaleFactor();
 		if(duty < getMaxNegative())
 			return (duty - getMaxNegative()) / getNegativeScaleFactor();
-		return 0;
+		return 0.0;
 	}
 	public double getPosition(){
 		double duty = getDutyCycle();
 		
 		if(duty > getMaxPositive())
-			return 1;
+			return 1.0;
 		if(duty < getMinNegative())
-			return -1;
+			return -1.0;
 		
 		return (duty - getMinNegative()) / getFullScaleFactor();
 	}

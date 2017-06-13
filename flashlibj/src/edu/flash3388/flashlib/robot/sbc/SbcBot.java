@@ -13,6 +13,7 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -39,8 +40,7 @@ public abstract class SbcBot {
 	public static final String PROP_COMM_SERIAL_PORT = "comm.serial.port";
 	public static final String PROP_FLASHBOARD_INIT = "flashboard.init";
 	
-	private static final String NATIVE_LIBRARY_NAME = "";
-	private static final String PROPERTIES_FILE = "robot.ini";
+	private static final String PROPERTIES_FILE = "robot.xml";
 	
 	private static Board board;
 	private static SbcControlStation controlStation;
@@ -53,8 +53,6 @@ public abstract class SbcBot {
 
 	public static void main(String[] args){
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		if(!NATIVE_LIBRARY_NAME.equals(""))
-			System.loadLibrary(NATIVE_LIBRARY_NAME);
 		
 		setStart();
 		log = FlashUtil.getLog();
@@ -127,7 +125,13 @@ public abstract class SbcBot {
 		userImplement = userClass;
 		stateSelector = userImplement.initStateSelector();
 		communications.start();
-		userClass.startRobot();
+		
+		try{
+			userClass.startRobot();
+		}catch(Throwable t){
+			log.reportError("Exception occurred in robot thread!!\n"+t.getMessage());
+			shutdown(1);
+		}
 	}
 	private static CommInterface setupCommInterface() throws IOException{
 		int port = ConstantsHandler.getIntegerNative(PROP_COMM_PORT);
@@ -172,10 +176,17 @@ public abstract class SbcBot {
 		log.logTime("Shuting down...");
 		if(userImplement != null){
 			log.log("User shutdown...");
-			userImplement.stopRobot();
+			try {
+				userImplement.stopRobot();
+			} catch (Throwable e) {
+				log.reportError("Exception occurred during user shutdown!!\n"+e.getMessage());
+				FlashUtil.delay(5);
+			}
 		}
-		if(schedulerHasInstance())
+		if(schedulerHasInstance()){
 			disableScheduler(true);
+			Scheduler.getInstance().removeAllActions();
+		}
 		if(communications != null){
 			log.log("Closing communications...");
 			communications.close();
@@ -186,6 +197,9 @@ public abstract class SbcBot {
 			board.shutdown();
 			log.log("Done");
 		}
+		
+		FlashUtil.terminateExecutor();
+		
 		ConstantsHandler.saveConstantsToXml(PROPERTIES_FILE);
 		log.log("Settings saved");
 		

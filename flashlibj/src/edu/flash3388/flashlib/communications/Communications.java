@@ -182,6 +182,8 @@ public class Communications {
 			attach(sendable);
 	}
 	public void attach(Sendable sendable){
+		if(sendable.attached())
+			throw new IllegalStateException("Sendable is already attached to communications");
 		if(getFromAllAttachedByID(sendable.getID()) != null)
 			throw new RuntimeException("Id taken");
 			
@@ -276,6 +278,13 @@ public class Communications {
 		disconnect();
 		commInterface.close();
 		detachAll();
+		
+		try {
+			commThread.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			e.printStackTrace();
+		}
 	}
 	public void sendDataForSendable(Sendable sendable, byte[] data){
 		if(getFromAllAttachedByID(sendable.getID()) == null)

@@ -1,7 +1,8 @@
-package edu.flash3388.flashlib.robot.devices;
+package edu.flash3388.flashlib.robot.rio;
 
 import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
@@ -128,6 +129,7 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		if(manualUpdate) update();
 		return ticks;
 	}
+	@Override
 	public double getDistance(){
 		if(manualUpdate) update();
 		return (revs + (double)ticks/ticksPerRev) * distancePerRev;

@@ -1,5 +1,6 @@
-package edu.flash3388.flashlib.robot.devices;
+package edu.flash3388.flashlib.robot.rio;
 
+import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.SensorBase;

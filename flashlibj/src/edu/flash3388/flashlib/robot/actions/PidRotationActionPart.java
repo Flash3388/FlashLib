@@ -25,10 +25,11 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 	@Override
 	protected void initialize() {
 		dataSource.set(0);
+		pidcontroller.setEnabled(true);
 	}
 	@Override
 	public void execute() {
-		if(inRotationThreshold())
+		if(!pidcontroller.isEnabled() || inRotationThreshold())
 			dataSource.set(0);
 		else dataSource.set(pidcontroller.calculate());
 	}
