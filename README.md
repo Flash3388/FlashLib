@@ -57,7 +57,10 @@ Please see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for further information abou
 
 ## Contributing
 
+As an open-source project we readily welcome any one wanting to contribute. But in order to maintain organization we have a few
+rules and guidelines for contributions.
 
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) with you are interested in contributing to this project.
 
 ## Disclaimer
 
