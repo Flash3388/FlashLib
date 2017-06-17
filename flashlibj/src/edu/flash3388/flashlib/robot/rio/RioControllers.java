@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.ctre.CANTalon;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.wpi.first.wpilibj.Jaguar;
@@ -80,7 +80,7 @@ public class RioControllers implements FlashSpeedController, ModableMotor{
 
 	@Override
 	public void set(double speed) {
-		Mathd.limit(speed, -1, 1);
+		Mathf.limit(speed, -1, 1);
 		for(SpeedController c : motor_controllers)
 			c.set(speed);
 	}

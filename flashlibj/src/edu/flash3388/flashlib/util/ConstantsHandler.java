@@ -559,7 +559,7 @@ public final class ConstantsHandler {
 	 * @param file the path of the xml file
 	 */
 	public static void saveConstantsToXml(String file){
-		File wfile = FileStream.wrap(file);
+		File wfile = FileStream.getFile(file);
 		if(!wfile.isFile())
 			throw new IllegalArgumentException("Given path is not a file");
 		saveXml(wfile);

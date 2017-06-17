@@ -19,7 +19,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 
 public class CvProcessing {
 
@@ -281,8 +281,8 @@ public class CvProcessing {
 	public static void filterForClosestContoursToPoint(List<MatOfPoint> contours, double x, double y, int amount) {
 		Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
 			Point p1 = CvProcessing.contourCenter(o1), p2 = CvProcessing.contourCenter(o2);
-			double d1 = Mathd.pythagorasTheorem(p1.x - x, p1.y - y),
-				   d2 = Mathd.pythagorasTheorem(p2.x - x, p2.y - y);
+			double d1 = Mathf.pythagorasTheorem(p1.x - x, p1.y - y),
+				   d2 = Mathf.pythagorasTheorem(p2.x - x, p2.y - y);
 			if(d1 > d2) return 1;
 			else if(d2 > d1) return -1;
 			return 0;

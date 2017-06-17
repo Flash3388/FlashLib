@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.CombinedAction;
 import edu.flash3388.flashlib.robot.SourceAction;
 import edu.flash3388.flashlib.robot.System;
@@ -45,9 +45,9 @@ public class HolonomicCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathd.limit2(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathf.limit2(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
 		double speedX = rotation != null? 
-				Mathd.limit2(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathf.limit2(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
 		
 		if(rotate)
 			driveTrain.holonomicCartesian(0, speedY, speedX);

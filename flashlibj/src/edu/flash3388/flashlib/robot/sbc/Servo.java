@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import io.silverspoon.bulldog.core.pin.Pin;
 
@@ -48,7 +48,7 @@ public class Servo extends SbcPwm implements FlashSpeedController{
 		if(angle < 0.0)
 			angle = Math.abs(angle);
 		
-		angle = Mathd.limit(angle, 0.0, 180.0);
+		angle = Mathf.limit(angle, 0.0, 180.0);
 		
 		setPosition((angle - minAngle) / getAngleRange());
 	}

@@ -5,12 +5,15 @@ import java.io.IOException;
 
 
 /**
- * Allows to write info to a file on the robot.
+ * A file writer for writing file data.
  * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class FileWriter {
-	private static final String PARENT_DIRECTORY = "";//"data/";
+	
+	private static String PARENT_DIRECTORY = "";//"data/";
+	
 	private File file;
 	private java.io.FileWriter writer;
 	private String uri;
@@ -44,7 +47,7 @@ public class FileWriter {
 	}
 	
 	/**
-	 * Writes info to the log file if the log file exists and can be written to. If the writer was closed then
+	 * Writes a line to the file if the file exists and can be written to. If the writer was closed then
 	 * nothing will happen. The info cannot be null or empty.
 	 * 
 	 * @param info A string of information to write to the file. Cannot be null or empty.
@@ -58,26 +61,56 @@ public class FileWriter {
 			}
 		}
 	}
+	/**
+	 * Writes data to the file if the file exists and can be written to. If the writer was closed then
+	 * nothing will happen. The info cannot be null or empty.
+	 * 
+	 * @param info A string of information to write to the file. Cannot be null or empty.
+	 */
 	public void write(String...lines){
 		for (int i = 0; i < lines.length; i++)
 			write(lines[i]);
 	}
 	
+	/**
+	 * Writes a constant to the file. A constant is a represented in the following manner:<br>
+	 * {@code
+	 * 	constant:value
+	 * }<br>
+	 * Where : is the separator.<br>
+	 * 
+	 * @param constant the constant identifier
+	 * @param seperator the separator string between the identifier and the value
+	 * @param value the value attached to the identifier
+	 */
 	public void writeConstant(String constant, String value, String seperator){
 		write(constant+seperator+value);
 	}
+	/**
+	 * Writes a constant to the file. A constant is a represented in the following manner:<br>
+	 * {@code
+	 * 	constant:value
+	 * }<br>
+	 * Where : is the separator.<br>
+	 * 
+	 * @param constant the constant identifier
+	 * @param value the value attached to the identifier
+	 */
 	public void writeConstant(String constant, String value){
 		writeConstant(constant, value, FileReader.DEFAULT_CONSTANT_SEPERATOR);
 	}
 	
 	/**
-	 * returns if the writer is closed or not.
+	 * Returns whether the writer is closed or not.
 	 * @return True if the writer is closed, false otherwise.
 	 */
 	public boolean isClosed(){
 		return is_closed;
 	}
 	
+	/**
+	 * Closes the writer and deletes the file.
+	 */
 	public void delete(){
 		close();
 		file.delete();
@@ -95,5 +128,16 @@ public class FileWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Sets the directory in which to save files whose directories were not defined.
+	 * 
+	 * @param directory The directory in which to save for files.
+	 */
+	public static void setParentDirectory(String directory){
+		PARENT_DIRECTORY = directory;
+		if(!directory.isEmpty() && !PARENT_DIRECTORY.endsWith("/"))
+			PARENT_DIRECTORY += "/";
 	}
 }

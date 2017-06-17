@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import io.silverspoon.bulldog.core.pin.Pin;
 import io.silverspoon.bulldog.core.pwm.Pwm;
 
@@ -71,7 +71,7 @@ public class SbcPwm{
 	}
 	
 	public void setSpeed(double speed) {
-		speed = Mathd.limit(speed, -1.0, 1.0);
+		speed = Mathf.limit(speed, -1.0, 1.0);
 		if(speed == 0.0)
 			setDutyCycle(0.0);
 		else if(speed > 0.0)
@@ -82,7 +82,7 @@ public class SbcPwm{
 	public void setPosition(double pos){
 		if(pos < 0.0)
 			pos = Math.abs(pos);
-		pos = Mathd.limit(pos, 0.0, 1.0);
+		pos = Mathf.limit(pos, 0.0, 1.0);
 		
 		setDutyCycle(getMinNegative() + pos * getFullScaleFactor());
 	}

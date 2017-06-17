@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
@@ -38,7 +38,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			lastRotDir = 0;
 			changed = CHANGED_NOTHING;
 			changesCount = 0;
-			movmentAngle = Mathd.limitAngle(gyro.getAngle());
+			movmentAngle = Mathf.limitAngle(gyro.getAngle());
 			FlashUtil.getLog().log("\nStabilizer: New Feed - (" + magnitude + ", " + direction + ") - " + movmentAngle);
 		}
 
@@ -55,7 +55,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				return;
 			if (magnitude != this.magnitude || direction != this.direction)
 				feedNew(magnitude, direction);
-			double currentAngle = Mathd.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.limitAngle(gyro.getAngle());
 			// FlashUtil.getLog().log("Stabilizer: CurrentAngle: "+currentAngle);
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				// FlashUtil.getLog().log("Stabilizer: Offset minimal");
@@ -130,7 +130,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				feedNew(magnitude, direction);
 				FlashUtil.getLog().log("Feed new");
 			}
-			double currentAngle = Mathd.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.limitAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				return 0;
 			}
@@ -146,12 +146,12 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				feedNew(magnitude, direction);
 				FlashUtil.getLog().log("Feed new");
 			}
-			double currentAngle = Mathd.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.limitAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				return 0;
 			}
 			int rotationDir = -getRotationDirection(currentAngle);
-			double offset = Mathd.limitAngle(currentAngle - movmentAngle);
+			double offset = Mathf.limitAngle(currentAngle - movmentAngle);
 			FlashUtil.getLog().log("Offset! >>Mag: "+offset+" Dir: "+rotationDir);
 			return offset * rotationDir;
 		}
@@ -314,7 +314,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 	}
 
 	private double roundAngle(double angle) {
-		return Mathd.roundToMultiplier(angle, angleRound);
+		return Mathf.roundToMultiplier(angle, angleRound);
 	}
 	@Override
 	public void rotate(double speed, boolean direction) {

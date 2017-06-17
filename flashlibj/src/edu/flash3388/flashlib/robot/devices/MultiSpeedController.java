@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.devices;
 
 import java.util.List;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -44,7 +44,7 @@ public class MultiSpeedController implements FlashSpeedController, ModableMotor{
 	
 	@Override
 	public void set(double speed) {
-		Mathd.limit(speed, -1, 1);
+		Mathf.limit(speed, -1, 1);
 		for(FlashSpeedController c : motor_controllers)
 			c.set(speed);
 	}

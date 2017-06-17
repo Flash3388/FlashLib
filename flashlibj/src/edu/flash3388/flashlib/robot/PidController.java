@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.vision.Vision;
@@ -170,7 +170,7 @@ public class PidController {
 		
 		if(source.getType() == PidType.Rate){
 			double pGain = (totalError + error) * kp;
-			if(Mathd.limited(pGain, minimumOutput, maximumOutput))
+			if(Mathf.limited(pGain, minimumOutput, maximumOutput))
 				totalError += error;
 			else if(pGain < maximumOutput)
 				totalError = minimumOutput / kp;
@@ -180,7 +180,7 @@ public class PidController {
 			result = kp * totalError + kd * error;
 		}else{//DISPLACEMENT!
 			double iGain = (totalError + error) * ki;
-			if(Mathd.limited(iGain, minimumOutput, maximumOutput))
+			if(Mathf.limited(iGain, minimumOutput, maximumOutput))
 				totalError += error;
 			else if(iGain < maximumOutput)
 				totalError = minimumOutput / ki;
@@ -191,7 +191,7 @@ public class PidController {
 		}
 		
 		preError = error;
-		result = Mathd.limit(result, minimumOutput, maximumOutput);
+		result = Mathf.limit(result, minimumOutput, maximumOutput);
 		return result;
 	}
 	

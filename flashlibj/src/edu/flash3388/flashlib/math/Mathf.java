@@ -1,27 +1,56 @@
 package edu.flash3388.flashlib.math;
 
+/**
+ * Holds a ton of static methods with mathematical functionalities.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class Mathf {
 	private Mathf(){}
 	
+	/**
+	 * Represents a function
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
 	@FunctionalInterface
-	public interface Function {
-		float f(float x);
+	public static interface Function {
+		double f(double x);
 	}
 	
-	public static final float ROOT_DIFFERENCE = 1e-8f;
+	
+	private static final double ROOT_DIFFERENCE = 1e-8;
+	private static final int DEFAULT_INTEGRAL_TREPAZOIDS = 100;
+	private static final int DEFAULT_INTEGRAL_SLICES = 10;
 	
 	//--------------------------------------------------------------------
 	//--------------------------General-----------------------------------
 	//--------------------------------------------------------------------
 	
-	public static float avg(float...ds){
-		float res = 0;
+	/**
+	 * Calculates the average value of an array of double.
+	 * 
+	 * @param ds an array of double values
+	 * @return the average of the array
+	 */
+	public static double avg(double...ds){
+		double res = 0;
 		for (int i = 0; i < ds.length; i++) 
 			res += ds[i];
 		return res / ds.length;
 	}
-	public static boolean validFloat(float f){
-		return !Float.isNaN(f) && Float.isFinite(f);
+	/**
+	 * Gets whether or not a double value is valid, meaning that the value is finite and
+	 * is a number. 
+	 * @param d value to check
+	 * @return true if the value is valid
+	 * @see Double#isNaN(double)
+	 * @see Double#isFinite(double)
+	 */
+	public static boolean validDouble(double d){
+		return !Double.isNaN(d) && Double.isFinite(d);
 	}
 	/**
 	 * Limits a given degree to a range of 0 to 360. The given angle must be in degrees.
@@ -34,7 +63,7 @@ public class Mathf {
 	 * @param value An angle in degrees to limit.
 	 * @return The value of the angle after being limited.
 	 */
-	public static float limitAngle(float value){
+	public static double limitAngle(double value){
 		value %= 360;
 		if(value < 0)
 			value += 360;
@@ -51,12 +80,38 @@ public class Mathf {
 	 * @param max The maximum limit
 	 * @return The new value after making sure it is within the given limit.
 	 */
-	public static float limit(float value, float min, float max){
+	public static double limit(double value, double min, double max){
 		if(value > max) value = max;
 		else if(value < min) value = min;
 		return value;
 	}
-	public static boolean limited(float value, float min, float max){
+	/**
+	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
+	 * will be changed to meet the limit accordingly:
+	 * value bigger than max : value = max
+	 * value smaller than min : value = min
+	 * <p>
+	 * Compensates for negative values.
+	 * </p>
+	 * @param value The value to limit
+	 * @param min The minimum limit
+	 * @param max The maximum limit
+	 * @return The new value after making sure it is within the given limit.
+	 */
+	public static double limit2(double value, double min, double max){
+		double mag = Math.abs(value);
+		if(mag > max) mag = max;
+		else if(mag < min) mag = min;
+		return value >= 0? mag : -mag;
+	}
+	/**
+	 * Gets whether a value is limited between to values.
+	 * @param value value to check
+	 * @param min lower boundary
+	 * @param max upper boundary
+	 * @return true if the value is limited, false otherwise
+	 */
+	public static boolean limited(double value, double min, double max){
 		return value >= min && value <= max;
 	}
 	/**
@@ -65,24 +120,37 @@ public class Mathf {
 	 * @param x A decimal value to round
 	 * @return The rounded value
 	 */
-	public static float roundDecimal(float x){
+	public static double roundDecimal(double x){
 		return roundDecimal(x, 2);
 	}
 	/**
-	 * Rounds a decimal number to a give amount of numbers after the decimal point.
+	 * Rounds a decimal number to a given amount of numbers after the decimal point.
 	 * @param x A decimal value to round
 	 * @param decimalNums Amount of numbers after the decimal point
 	 * @return The rounded value
 	 */
-	public static float roundDecimal(float x, int decimalNums){
-		float m = (float) Math.pow(10, decimalNums);
+	public static double roundDecimal(double x, int decimalNums){
+		double m = Math.pow(10, decimalNums);
 		return  Math.round(x * m) / m;
 	}
-	public static float roundToMultiplier(float val, float multiplier){
+	/**
+	 * Rounds a number to the closest multiplier of a value.
+	 * @param val a value to round
+	 * @param multiplier multiplier to round to
+	 * @return The rounded value
+	 */
+	public static double roundToMultiplier(double val, double multiplier){
 		return multiplier * Math.round(val / multiplier);
 	}
-	public static float roundToMultiplier(float val, float multiplier, boolean up){
-		float rounded = roundToMultiplier(val, multiplier);
+	/**
+	 * Rounds a number to the closest multiplier of a value. 
+	 * @param val a value to round
+	 * @param multiplier multiplier to round to
+	 * @param up true to round the value upwards, false for downwards
+	 * @return The rounded value
+	 */
+	public static double roundToMultiplier(double val, double multiplier, boolean up){
+		double rounded = roundToMultiplier(val, multiplier);
 		if(rounded < val)
 			rounded += up? multiplier : -multiplier;
 		return rounded;
@@ -97,13 +165,13 @@ public class Mathf {
 	 * 
 	 * This method implements it in a 3d space.
 	 * 
-	 * @param a a
-	 * @param b a
-	 * @param c a
-	 * @return The result for pythagorasTheorem for given values
+	 * @param a value a
+	 * @param b value b
+	 * @param c value c
+	 * @return The result of pythagorasTheorem for given values
 	 */
-	public static float pythagorasTheorem(float a, float b, float c){
-		return (float) Math.sqrt((a * a) + (b * b) + (c * c));
+	public static double pythagorasTheorem(double a, double b, double c){
+		return Math.sqrt((a * a) + (b * b) + (c * c));
 	}
 	/**
 	 * Gets the result of Pythagorases theorem for a given set of numbers.
@@ -113,19 +181,29 @@ public class Mathf {
 	 * (the side opposite the right angle) is equal to the sum of the areas of the squares whose 
 	 * sides are the two legs (the two sides that meet at a right angle).
 	 * 
-	 * @param a a
-	 * @param b a
+	 * @param a value a
+	 * @param b value b
 	 * @return The area of the square whose side is the hypotenuse
 	 */
-	public static float pythagorasTheorem(float a, float b){
+	public static double pythagorasTheorem(double a, double b){
 		return pythagorasTheorem(a, b, 0);
 	}
-	public static float reversePythagorasTheorem(float a, float c){
-		return (float) Math.sqrt((c * c) - (a * a));
+	/**
+	 * Gets the result of a reverse Pythagorases theorem for a given set of numbers.
+	 * 
+	 * The Pythagorean theorem states that:
+	 * In any right triangle, the area of the square whose side is the hypotenuse 
+	 * (the side opposite the right angle) is equal to the sum of the areas of the squares whose 
+	 * sides are the two legs (the two sides that meet at a right angle).
+	 * 
+	 * @param a value a
+	 * @param c value c
+	 * @return 
+	 */
+	public static double reversePythagorasTheorem(double a, double c){
+		return Math.sqrt((c * c) - (a * a));
 	}
-	public static int multiply(int a, int b){
-		return (a << (b / 2)) + ((b % 2 != 0)? a : 0);
-	}
+
 	/**
 	 * Calculates the nth root of a given number.
 	 * 
@@ -134,45 +212,133 @@ public class Mathf {
 	 * @return The base who when multiplied exponent times returns the given result
 	 * @throws IllegalArgumentException if result is negative
 	 */
-	public static float root(float result, int exponent){
+	public static double root(double result, int exponent){
 		if(result < 0)
 			throw new IllegalArgumentException("Cannot calculate negative root! Use complexRoot instead");
         if(result == 0) 
             return 0;
         
-        float x1 = result;
-        float x2 = result / exponent;  
+        double x1 = result;
+        double x2 = result / exponent;  
         while (Math.abs(x1 - x2) > ROOT_DIFFERENCE){
             x1 = x2;
-            x2 = ((exponent - 1.0f) * x2 + result / (float) Math.pow(x2, exponent - 1.0f)) / exponent;
+            x2 = ((exponent - 1.0) * x2 + result / Math.pow(x2, exponent - 1.0)) / exponent;
         }
         return x2;
 	}
 	
-	public static float sineLaw(float a, float ratio){
-		return (float) Math.toDegrees(Math.asin(a / ratio));
+	//--------------------------------------------------------------------
+	//--------------------------Complex-----------------------------------
+	//--------------------------------------------------------------------
+	
+	/**
+	 * Calculates the nth root of a given number. This method considers the existence of complex numbers
+	 * and will work with a negative number.
+	 * 
+	 * @param result The result of the base in the power of exponent.
+	 * @param exponent The root exponent
+	 * @return The base, as a complex number, who when multiplied exponent times returns the given result
+	 */
+	public static Complex complexRoot(double result, int exponent){
+		if(result > 0)
+			return new Complex(root(result, exponent), 0);
+        if(result == 0) 
+            return new Complex(0, 0);
+        
+        result *= -1;
+        double x1 = result;
+        double x2 = result / exponent;  
+        while (Math.abs(x1 - x2) > ROOT_DIFFERENCE){
+            x1 = x2;
+            x2 = ((exponent - 1.0) * x2 + result / Math.pow(x2, exponent - 1.0)) / exponent;
+        }
+        return new Complex(0, x2);
 	}
-	public static float reverseSineLaw(float alpha, float ratio){
-		return ratio * (float) Math.toDegrees(Math.sin(alpha));
-	}
-	public static float cosineLaw(float a, float b, float angle){
-		return ((a * a) + (b * b) - 2 * a * b * (float) Math.toDegrees(Math.cos(angle)));
-	}
-	public static float reverseCosineLaw(float a, float b, float c){
-		return (float) Math.acos(-(c * c - a * a - b * b) / (2 * a * b));
-	}
-	public static float discriminant(float a, float b, float c){
-		return (b * b) - 4 * a * c;
-	}
-	public static float[] quadraticFormula(float a, float b, float c){
-		float root = (float) Math.sqrt(discriminant(a, b, c));
-		return new float[]{(-b + root)/(2 * a), (-b - root)/(2 * a)};
+	/**
+	 * Divides a real number by a complex number.
+	 * 
+	 * This is done by multiplying the both numbers by the conjugate of the complex number, which gives
+	 * us a real number as the divisor and a complex number as the dividend, we then use {@link Complex#divide(Complex)} 
+	 * to get the result. 
+	 * 
+	 * @param n The real number
+	 * @param z The complex number
+	 * @return The result of the division of n by z
+	 */
+	public static Complex divideByComplex(double n, Complex z){
+		final Complex I = new Complex(0, 1);
+		return new Complex(0, n).divide(z.multiply(I));
 	}
 	
-	public static float factorial(float n){
-		float result = 1;
-		for (int i = 2; i <= n; i++) 
-			result *= n;
+	/**
+	 * Performs a discrete fourier transform for an array of samples.
+	 * <p>
+	 * The Fourier transform decomposes a function of time (a signal) 
+	 * into the frequencies that make it up, in a way similar to how a 
+	 * musical chord can be expressed as the frequencies (or pitches) of its constituent notes.
+	 * </p>
+	 * <p>
+	 * In mathematics, the discrete Fourier transform (DFT) converts a finite sequence of 
+	 * equally-spaced samples of a function into an equivalent-length sequence of equally-spaced 
+	 * samples of the discrete-time Fourier transform (DTFT), which is a complex-valued function of 
+	 * frequency. 
+	 * </p>
+	 * @param samples an array of samples
+	 * @return the result of the fourier transform
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 */
+	public static Complex[] discreteFourierTransform(double... samples){
+		Function func = (x)->{return samples[(int)x];};
+		return discreteFourierTransform(func, samples.length);
+	}
+	/**
+	 * Performs a discrete fourier transform for an array of samples.
+	 * <p>
+	 * The Fourier transform decomposes a function of time (a signal) 
+	 * into the frequencies that make it up, in a way similar to how a 
+	 * musical chord can be expressed as the frequencies (or pitches) of its constituent notes.
+	 * </p>
+	 * <p>
+	 * In mathematics, the discrete Fourier transform (DFT) converts a finite sequence of 
+	 * equally-spaced samples of a function into an equivalent-length sequence of equally-spaced 
+	 * samples of the discrete-time Fourier transform (DTFT), which is a complex-valued function of 
+	 * frequency. 
+	 * </p>
+	 * @param func the function of time
+	 * @param samples the amount of samples to use
+	 * @return the result of the fourier transform
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 */
+	public static Complex[] discreteFourierTransform(Function func, int samples){
+		Complex[] results = new Complex[samples];
+		for(int i = 0; i < samples; i++)
+			results[i] = discreteFourierTransform(func, (i + 1), samples);
+		return results;
+	}
+	/**
+	 * Performs a discrete fourier transform for an array of samples.
+	 * <p>
+	 * The Fourier transform decomposes a function of time (a signal) 
+	 * into the frequencies that make it up, in a way similar to how a 
+	 * musical chord can be expressed as the frequencies (or pitches) of its constituent notes.
+	 * </p>
+	 * <p>
+	 * In mathematics, the discrete Fourier transform (DFT) converts a finite sequence of 
+	 * equally-spaced samples of a function into an equivalent-length sequence of equally-spaced 
+	 * samples of the discrete-time Fourier transform (DTFT), which is a complex-valued function of 
+	 * frequency. 
+	 * </p>
+	 * @param func the function of time
+	 * @param samples the amount of samples to use
+	 * @param k the index
+	 * @return the result of the fourier transform
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 */
+	public static Complex discreteFourierTransform(Function func, int k, int samples){
+		Complex result = new Complex();
+		double v = 2 * Math.PI * k / samples;
+		for(int i = 0; i < samples; i++)
+			result.add(Complex.euler(func.f(i), v * i));
 		return result;
 	}
 	
@@ -180,13 +346,24 @@ public class Mathf {
 	//--------------------------Matrices----------------------------------
 	//--------------------------------------------------------------------
 	
-	public static float[][] multiplyMat(float[][] mat1, float[][] mat2){
+	/**
+	 * Performs a multiplication between two matrices.
+	 * <p>
+	 * Multiplication of two matrices is defined if and only if the number of 
+	 * columns of the left matrix is the same as the number of rows of the right matrix.
+	 * </p>
+	 * @param mat1 first matrix
+	 * @param mat2 seconds matrix
+	 * @return the result of the matrix multiplication
+	 * @throws IllegalArgumentException if the matrices are not compatible for multiplication
+	 */
+	public static double[][] multiplyMat(double[][] mat1, double[][] mat2){
 		if(mat1[0].length != mat2.length) 
 			throw new IllegalArgumentException("Cannot multiply matricies");
-		float[][] result = new float[mat2.length][mat2[0].length];
+		double[][] result = new double[mat2.length][mat2[0].length];
 		for(int i = 0; i < result[0].length; i++){
 			for(int j = 0; j < result.length; j++){
-				float value = 0;
+				double value = 0;
 				for(int k = 0; k < result.length; k++)
 					value += mat1[j][k] * mat2[k][i];
 				result[j][i] = value;
@@ -194,119 +371,332 @@ public class Mathf {
 		}
 		return result;
 	}
-	public static float[][] multiplyMat(float[][]...mats){
+	/**
+	 * Performs a multiplication between a series of matrices. Every matrix is multiplied by the next.
+	 * <p>
+	 * Multiplication of two matrices is defined if and only if the number of 
+	 * columns of the left matrix is the same as the number of rows of the right matrix.
+	 * </p>
+	 * @param mats an array if matrices
+	 * @return the result of the matrix multiplication
+	 * @throws IllegalArgumentException if less than 2 matrices are in the array
+	 */
+	public static double[][] multiplyMat(double[][]...mats){
 		if(mats == null || mats.length < 2)
 			throw new IllegalArgumentException("Insufficent matrices to multiply");
 		
-		float[][] mat = mats[0];
+		double[][] mat = mats[0];
 		for(int i = 1; i < mats.length; i++)
 			mat = multiplyMat(mat, mats[i]);
 		return mat;
 	}
-	public static float[][] rotationMatrix3d(float x, float y, float z){
+	/**
+	 * Creates a 3d rotation matrix for all coordinates. 
+	 * <p>
+	 * In linear algebra, a rotation matrix is a matrix that is used to perform a rotation in Euclidean space.
+	 * </p>
+	 * @param x the x rotation value in degrees
+	 * @param y the y rotation value in degrees
+	 * @param z the z rotation value in degrees
+	 * @return the rotation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Rotation_matrix">https://en.wikipedia.org/wiki/Rotation_matrix</a>
+	 */
+	public static double[][] rotationMatrix3d(double x, double y, double z){
 		return multiplyMat(rotationMatrix3dX(x), rotationMatrix3dY(y), rotationMatrix3dZ(z));
 	}
-	public static float[][] rotationMatrix3dX(float angle){
-		angle = (float) Math.toRadians(angle);
-		return new float[][]{
+	/**
+	 * Creates a 3d rotation matrix around the x-axis. 
+	 * <p>
+	 * In linear algebra, a rotation matrix is a matrix that is used to perform a rotation in Euclidean space.
+	 * </p>
+	 * @param angle the angle of rotation in degrees
+	 * @return the rotation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Rotation_matrix">https://en.wikipedia.org/wiki/Rotation_matrix</a>
+	 */
+	public static double[][] rotationMatrix3dX(double angle){
+		angle = Math.toRadians(angle);
+		return new double[][]{
 			{1, 0, 0, 0},
-			{0, (float) Math.cos(angle), (float) -Math.sin(angle), 0},
-			{0, (float) Math.sin(angle), (float) Math.cos(angle), 0},
+			{0, Math.cos(angle), -Math.sin(angle), 0},
+			{0, Math.sin(angle), Math.cos(angle), 0},
 			{0,0,0,1}
 		};
 	}
-	public static float[][] rotationMatrix3dY(float angle){
-		angle = (float) Math.toRadians(angle);
-		return new float[][]{
-			{(float) Math.cos(angle), 0, (float) Math.sin(angle),0},
+	/**
+	 * Creates a 3d rotation matrix around the y-axis. 
+	 * <p>
+	 * In linear algebra, a rotation matrix is a matrix that is used to perform a rotation in Euclidean space.
+	 * </p>
+	 * @param angle the angle of rotation in degrees
+	 * @return the rotation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Rotation_matrix">https://en.wikipedia.org/wiki/Rotation_matrix</a>
+	 */
+	public static double[][] rotationMatrix3dY(double angle){
+		angle = Math.toRadians(angle);
+		return new double[][]{
+			{Math.cos(angle), 0, Math.sin(angle),0},
 			{0, 1, 0,0},
-			{(float) -Math.sin(angle), 0, (float) Math.cos(angle),0},
+			{-Math.sin(angle), 0, Math.cos(angle),0},
 			{0,0,0,1}
 		};
 	}
-	public static float[][] rotationMatrix3dZ(float angle){
-		angle = (float) Math.toRadians(angle);
-		return new float[][]{
-			{(float) Math.cos(angle), (float) -Math.sin(angle), 0,0},
-			{(float) Math.sin(angle), (float) Math.cos(angle), 0,0},
+	/**
+	 * Creates a 3d rotation matrix around the z-axis. 
+	 * <p>
+	 * In linear algebra, a rotation matrix is a matrix that is used to perform a rotation in Euclidean space.
+	 * </p>
+	 * @param angle the angle of rotation in degrees
+	 * @return the rotation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Rotation_matrix">https://en.wikipedia.org/wiki/Rotation_matrix</a>
+	 */
+	public static double[][] rotationMatrix3dZ(double angle){
+		angle = Math.toRadians(angle);
+		return new double[][]{
+			{Math.cos(angle), -Math.sin(angle), 0,0},
+			{Math.sin(angle), Math.cos(angle), 0,0},
 			{0,0,1,0},
 			{0,0,0,1}
 		};
 	}
-	public static float[][] translationMatrix3d(float x, float y, float z){
-		return new float[][]{
+	/**
+	 * Creates a 2d rotation matrix around the z-axis. 
+	 * <p>
+	 * In linear algebra, a rotation matrix is a matrix that is used to perform a rotation in Euclidean space.
+	 * </p>
+	 * @param angle the angle of rotation in degrees
+	 * @return the rotation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Rotation_matrix">https://en.wikipedia.org/wiki/Rotation_matrix</a>
+	 */
+	public static double[][] rotationMatrix2d(double angle){
+		angle = Math.toRadians(angle);
+		return new double[][]{
+			{Math.cos(angle), -Math.sin(angle), 0},
+			{Math.sin(angle), Math.cos(angle), 0},
+			{0, 0, 1},
+		};
+	}
+	
+	/**
+	 * Creates a 3d transformation matrix for all coordinates. 
+	 * <p>
+	 * In linear algebra, linear transformations can be represented by matrices.
+	 * </p>
+	 * @param x the x transformation value
+	 * @param y the y transformation value
+	 * @param z the z transformation value
+	 * @return the transformation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Transformation_matrix">https://en.wikipedia.org/wiki/Transformation_matrix</a>
+	 */
+	public static double[][] translationMatrix3d(double x, double y, double z){
+		return new double[][]{
 			{1,0,0,x},
 			{0,1,0,y},
 			{0,0,1,z},
 			{0,0,0,1}
 		};
 	}
-	public static float[][] rotationMatrix2d(float angle){
-		angle = (float) Math.toRadians(angle);
-		return new float[][]{
-			{(float) Math.cos(angle), (float) -Math.sin(angle), 0},
-			{(float) Math.sin(angle), (float) Math.cos(angle), 0},
-			{0, 0, 1},
-		};
-	}
-	public static float[][] translationMatrix2d(float x, float y){
-		return new float[][]{
+	/**
+	 * Creates a 2d transformation matrix for all coordinates. 
+	 * <p>
+	 * In linear algebra, linear transformations can be represented by matrices.
+	 * </p>
+	 * @param x the x transformation value
+	 * @param y the y transformation value
+	 * @return the transformation matrix
+	 * @see <a href="https://en.wikipedia.org/wiki/Transformation_matrix">https://en.wikipedia.org/wiki/Transformation_matrix</a>
+	 */
+	public static double[][] translationMatrix2d(double x, double y){
+		return new double[][]{
 			{1,0,x},
 			{0,1,y},
 			{0,0,1}
 		};
 	}
-	public static void reverseMatrixValues(float[][] mat){
+	
+	/**
+	 * Reverses the values in the matrix by multiplying it by -1.
+	 * @param mat
+	 */
+	public static void reverseMatrixValues(double[][] mat){
 		for(int i = 0; i < mat.length; i++){
 			for(int j = 0; j < mat[0].length; j++)
 				mat[i][j] *= -1;
 		}
 	}
-	public static float[][] reversedMatrix(float[][] mat){
-		float[][] mat2 = new float[mat.length][mat[0].length];
+	/**
+	 * Creates a matrix with values reversed from the given matrix.
+	 * @param mat mat to use values of
+	 * @return a new matrix with reversed values
+	 */
+	public static double[][] reversedMatrix(double[][] mat){
+		double[][] mat2 = new double[mat.length][mat[0].length];
 		for(int i = 0; i < mat.length; i++){
 			for(int j = 0; j < mat[0].length; j++)
-				mat2[i][j] = -1 * mat[i][j];
+				mat2[i][j] = -mat[i][j];
 		}
 		return mat2;
-	}
-	public static float[][] rotatePoint(float[][] pointAsMat, float[][] rotationMat, float[][] translationMat){
-		float[][] res = multiplyMat(rotationMat, translationMat, pointAsMat);
-		return multiplyMat(res, reversedMatrix(translationMat), pointAsMat);
 	}
 	
 	//--------------------------------------------------------------------
 	//--------------------------Derivatives---------------------------------
 	//--------------------------------------------------------------------
 	
-	public static float derive(Function func, float x){
+	/**
+	 * Derives a function for an x-coordinate. Uses the first method of central difference.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="https://en.wikipedia.org/wiki/Derivative">https://en.wikipedia.org/wiki/Derivative</a>
+	 * @see #centralDifference(Function, double)
+	 */
+	public static double derive(Function func, double x){
 		return centralDifference(func, x);
 	}
-	public static float derive2(Function func, float x){
+	/**
+	 * Derives a function for an x-coordinate. Uses the second method of central difference.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="https://en.wikipedia.org/wiki/Derivative">https://en.wikipedia.org/wiki/Derivative</a>
+	 * @see #centralDifference2(Function, double)
+	 */
+	public static double derive2(Function func, double x){
 		return centralDifference2(func, x);
 	}
-	public static float forwardDifference(Function func, float x){
-		return forwardDifference(func, x, 1e-8f);
+	
+	/**
+	 * Derives a function for an x-coordinate. Uses the method of forward difference. With a
+	 * difference constant of 1e-8.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/ForwardDifference.html">http://mathworld.wolfram.com/ForwardDifference.html</a>
+	 */
+	public static double forwardDifference(Function func, double x){
+		return forwardDifference(func, x, 1e-8);
 	}
-	public static float forwardDifference(Function func, float x, float changeConstant){
+	/**
+	 * Derives a function for an x-coordinate. Uses the method of forward difference. With a
+	 * given difference constant.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @param changeConstant 
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/ForwardDifference.html">http://mathworld.wolfram.com/ForwardDifference.html</a>
+	 */
+	public static double forwardDifference(Function func, double x, double changeConstant){
 		return (func.f(x + changeConstant) - func.f(x)) / changeConstant;
 	}
-	public static float backwardDifference(Function func, float x){
-		return backwardDifference(func, x, 1e-8f);
+	
+	/**
+	 * Derives a function for an x-coordinate. Uses the method of backward difference. With a
+	 * difference constant of 1e-8.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/BackwardDifference.html">http://mathworld.wolfram.com/BackwardDifference.html</a>
+	 */
+	public static double backwardDifference(Function func, double x){
+		return backwardDifference(func, x, 1e-8);
 	}
-	public static float backwardDifference(Function func, float x, float changeConstant){
+	/**
+	 * Derives a function for an x-coordinate. Uses the method of backward difference. With a
+	 * given difference constant.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @param changeConstant 
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/BackwardDifference.html">http://mathworld.wolfram.com/BackwardDifference.html</a>
+	 */
+	public static double backwardDifference(Function func, double x, double changeConstant){
 		return (func.f(x) - func.f(x - changeConstant)) / changeConstant;
 	}
-	public static float centralDifference(Function func, float x){
-		return centralDifference(func, x, 1e-8f);
+	
+	/**
+	 * Derives a function for an x-coordinate. Uses the first method of central difference. With a
+	 * difference constant of 1e-8.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
+	 */
+	public static double centralDifference(Function func, double x){
+		return centralDifference(func, x, 1e-8);
 	}
-	public static float centralDifference(Function func, float x, float changeConstant){
+	/**
+	 * Derives a function for an x-coordinate. Uses the first method of central difference. With a
+	 * given difference constant.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @param changeConstant 
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
+	 */
+	public static double centralDifference(Function func, double x, double changeConstant){
 		return (func.f(x + changeConstant) - func.f(x - changeConstant)) / (2 * changeConstant);
 	}
-	public static float centralDifference2(Function func, float x){
-		return centralDifference2(func, x, 1e-8f);
+	
+	/**
+	 * Derives a function for an x-coordinate. Uses the second method of central difference. With a
+	 * difference constant of 1e-8.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
+	 */
+	public static double centralDifference2(Function func, double x){
+		return centralDifference2(func, x, 1e-8);
 	}
-	public static float centralDifference2(Function func, float x, float changeConstant){
+	/**
+	 * Derives a function for an x-coordinate. Uses the second method of central difference. With a
+	 * given difference constant.
+	 * <p>
+	 * The derivative of a function of a real variable measures the sensitivity to 
+	 * change of the function (output) value with respect to a change in its argument (input value).
+	 * </p>
+	 * @param func the function to derive
+	 * @param x the x coordinate
+	 * @param changeConstant 
+	 * @return the result of the derivative 
+	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
+	 */
+	public static double centralDifference2(Function func, double x, double changeConstant){
 		return (func.f(x + changeConstant) - 2 * func.f(x) + func.f(x - changeConstant)) / (changeConstant * changeConstant);
 	}
 	
@@ -314,103 +704,248 @@ public class Mathf {
 	//--------------------------Integrals---------------------------------
 	//--------------------------------------------------------------------
 	
-	public static float integrate(Function func, float min, float max){
+	/**
+	 * Integrates a function between 2 x coordinates. Uses Simpson's rule for integrals.
+	 * <p>
+	 * In mathematics, an integral assigns numbers to functions in a way that can 
+	 * describe displacement, area, volume, and other concepts that arise by combining 
+	 * infinitesimal data.
+	 * </p>
+	 * @param func the function to integrate
+	 * @param min the lower boundary for integration
+	 * @param max the upper boundary for integration
+	 * @return the result of the integration
+	 * @see <a href="https://en.wikipedia.org/wiki/Integral">https://en.wikipedia.org/wiki/Integral</a>
+	 * @see #simpsonsRule(Function, double, double)
+	 */
+	public static double integrate(Function func, double min, double max){
 		return simpsonsRule(func, min, max);
 	}
-	public static float trapezoidalRule(Function func, float min, float max){
-		final int DEFAULT_INTEGRAL_TREPAZOIDS = 100;
+	
+	/**
+	 * Integrates a function between 2 x coordinates. Uses trapezoidal rule for integrals. Uses
+	 * a default count trapezoidal {@link #DEFAULT_INTEGRAL_TREPAZOIDS}.
+	 * <p>
+	 * In mathematics, an integral assigns numbers to functions in a way that can 
+	 * describe displacement, area, volume, and other concepts that arise by combining 
+	 * infinitesimal data.
+	 * </p>
+	 * @param func the function to integrate
+	 * @param min the lower boundary for integration
+	 * @param max the upper boundary for integration
+	 * @return the result of the integration
+	 * @see <a href="https://en.wikipedia.org/wiki/Integral">https://en.wikipedia.org/wiki/Integral</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Trapezoidal_rule">https://en.wikipedia.org/wiki/Trapezoidal_rule</a>
+	 */
+	public static double trapezoidalRule(Function func, double min, double max){
 		return trapezoidalRule(func, min, max, DEFAULT_INTEGRAL_TREPAZOIDS);
 	}
-	public static float trapezoidalRule(Function func, float min, float max, int trapezoids){
-		float h = (max - min) / trapezoids;
-		float s = 0.5f * (func.f(min) + func.f(max));
+	/**
+	 * Integrates a function between 2 x coordinates. Uses trapezoidal rule for integrals. Uses
+	 * a given amount of trapezoids.
+	 * <p>
+	 * In mathematics, an integral assigns numbers to functions in a way that can 
+	 * describe displacement, area, volume, and other concepts that arise by combining 
+	 * infinitesimal data.
+	 * </p>
+	 * @param func the function to integrate
+	 * @param min the lower boundary for integration
+	 * @param max the upper boundary for integration
+	 * @param trapezoids the count of trapezoids
+	 * @return the result of the integration
+	 * @see <a href="https://en.wikipedia.org/wiki/Integral">https://en.wikipedia.org/wiki/Integral</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Trapezoidal_rule">https://en.wikipedia.org/wiki/Trapezoidal_rule</a>
+	 */
+	public static double trapezoidalRule(Function func, double min, double max, int trapezoids){
+		double h = (max - min) / trapezoids;
+		double s = 0.5 * (func.f(min) + func.f(max));
 		for(int i = 1; i < trapezoids; i++)
 			s += func.f(min + i * h); 
 		return (s * h);
 	}
-	public static float simpsonsRule(Function func, float min, float max){
-		final int DEFAULT_INTEGRAL_SLICES = 10;
+	
+	/**
+	 * Integrates a function between 2 x coordinates. Uses Simpson's rule for integrals. Uses the
+	 * default amount of slices {@link #DEFAULT_INTEGRAL_SLICES}.
+	 * <p>
+	 * In mathematics, an integral assigns numbers to functions in a way that can 
+	 * describe displacement, area, volume, and other concepts that arise by combining 
+	 * infinitesimal data.
+	 * </p>
+	 * @param func the function to integrate
+	 * @param min the lower boundary for integration
+	 * @param max the upper boundary for integration
+	 * @return the result of the integration
+	 * @see <a href="https://en.wikipedia.org/wiki/Integral">https://en.wikipedia.org/wiki/Integral</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">https://en.wikipedia.org/wiki/Simpson%27s_rule</a>
+	 */
+	public static double simpsonsRule(Function func, double min, double max){
 		return simpsonsRule(func, min, max, DEFAULT_INTEGRAL_SLICES);
 	}
-	public static float simpsonsRule(Function func, float min, float max, int slices){
-		float h = (max - min) / slices;
-		float s = func.f(min) + func.f(max), s1 = 0, s2 = 0;
+	/**
+	 * Integrates a function between 2 x coordinates. Uses Simpson's rule for integrals. Uses a given
+	 * amount of slices.
+	 * <p>
+	 * In mathematics, an integral assigns numbers to functions in a way that can 
+	 * describe displacement, area, volume, and other concepts that arise by combining 
+	 * infinitesimal data.
+	 * </p>
+	 * @param func the function to integrate
+	 * @param min the lower boundary for integration
+	 * @param max the upper boundary for integration
+	 * @param slices the amount of slices
+	 * @return the result of the integration
+	 * @see <a href="https://en.wikipedia.org/wiki/Integral">https://en.wikipedia.org/wiki/Integral</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Simpson%27s_rule">https://en.wikipedia.org/wiki/Simpson%27s_rule</a>
+	 */
+	public static double simpsonsRule(Function func, double min, double max, int slices){
+		double h = (max - min) / slices;
+		double s = func.f(min) + func.f(max), s1 = 0, s2 = 0;
 		for(int i = 1; i <= slices / 2; i++){
 			s1 += func.f(min + (2 * i - 1) * h);
 			if(i < slices / 2) s2 += func.f(min + 2 * i * h);
 		}
-		return (1 / 3.0f) * h * (s + 4 * s1 + 2 * s2);
+		return (1 / 3.0) * h * (s + 4 * s1 + 2 * s2);
 	}
 	
 	//--------------------------------------------------------------------
 	//--------------------------Vectors-----------------------------------
 	//--------------------------------------------------------------------
 	
-	public static double planeIntersection(Vector3 origin, Vector3 direction, 
-			Vector3 surfaceVec1, Vector3 surfaceVec2, Vector3 pointOnSurface){
-		Vector3 n = surfaceVec1.cross(surfaceVec2);
-		double d = -pointOnSurface.dot(n);
-		return planeIntersection(origin, direction, n, d);
-	}
-	public static double planeIntersection(Vector3 origin, Vector3 direction, Vector3 n, double d){
-		return -(n.dot(origin) + d) / (n.dot(direction));
-	}
-	public static float VecInclination(float z, float magnitude){
-		float angle = (float) Math.toDegrees(Math.acos(z / magnitude)); 
+	/**
+	 * Gets the inclination of a 3d vector. Inclination is the angle between the vector and the
+	 * z-axis.
+	 * <p>
+	 * {@code
+	 * 	inclination = arc cos(z / length)
+	 * }
+	 * </p>
+	 * @param z z coordinate
+	 * @param magnitude the length of the vector.
+	 * @return the inclination of the vector
+	 */
+	public static double vecInclination(double z, double magnitude){
+		double angle = Math.toDegrees(Math.acos(z / magnitude)); 
 		return (z < 0)? -angle : angle;
 	}
-	public static float vecAzimuth(float y, float x){
-		return (float) Math.toDegrees(Math.atan2(y, x));
+	/**
+	 * Gets the azimuth of a 3d or 2d vector. Azimuth is the angle between the vector and the
+	 * x-axis.
+	 * <p>
+	 * {@code
+	 * 	azimuth = arc tan2(y, x)
+	 * }
+	 * </p>
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @return the azimuth of the vector
+	 */
+	public static double vecAzimuth(double y, double x){
+		return Math.toDegrees(Math.atan2(y, x));
 	}
-	public static float vecMagnitude(float x, float y, float z){
+	/**
+	 * Gets the magnitude, or length of a 3d vector.
+	 * <p>
+	 * {@code
+	 * 	length = sqrt(pow(x,2) + pow(y,2) + pow(z,2))
+	 * }
+	 * </p>
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param z z coordinate
+	 * @return the length of the vector
+	 */
+	public static double vecMagnitude(double x, double y, double z){
 		return pythagorasTheorem(x, y, z);
 	}
-	public static float vecX(float magnitude, float azimuth, float inclination){
-		return (float) (magnitude * Math.sin(Math.toRadians(inclination)) * Math.cos(Math.toRadians(azimuth)));
+	/**
+	 * Gets the magnitude, or length of a 2d vector.
+	 * <p>
+	 * {@code
+	 * 	length = sqrt(pow(x,2) + pow(y,2)))
+	 * }
+	 * </p>
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @return the length of the vector
+	 */
+	public static double vecMagnitude(double x, double y){
+		return pythagorasTheorem(x, y);
 	}
-	public static float vecX(float magnitude, float azimuth){
-		return (float) (magnitude * Math.cos(Math.toRadians(azimuth)));
+	
+	/**
+	 * Gets the x coordinate of a 3d vector.
+	 * <p>
+	 * {@code
+	 * 	x = magnitude * sin(inclination) * cos(azimuth)
+	 * }
+	 * </p>
+	 * @param magnitude the length of the vector
+	 * @param azimuth the azimuth of the vector
+	 * @param inclination the inclination of the vector
+	 * @return the x coordinate of the vector
+	 */
+	public static double vecX(double magnitude, double azimuth, double inclination){
+		return (magnitude * Math.sin(Math.toRadians(inclination)) * Math.cos(Math.toRadians(azimuth)));
 	}
-	public static float vecY(float magnitude, float azimuth, float inclination){
-		return (float) (magnitude * Math.sin(Math.toRadians(inclination)) * Math.sin(Math.toRadians(azimuth)));
+	/**
+	 * Gets the x coordinate of a 2d vector.
+	 * <p>
+	 * {@code
+	 * 	x = magnitude * cos(azimuth)
+	 * }
+	 * </p>
+	 * @param magnitude the length of the vector
+	 * @param azimuth the azimuth of the vector
+	 * @return the x coordinate of the vector
+	 */
+	public static double vecX(double magnitude, double azimuth){
+		return (magnitude * Math.cos(Math.toRadians(azimuth)));
 	}
-	public static float vecY(float magnitude, float azimuth){
-		return (float) (magnitude * Math.sin(Math.toRadians(azimuth)));
+	
+	/**
+	 * Gets the y coordinate of a 3d vector.
+	 * <p>
+	 * {@code
+	 * 	y = magnitude * sin(inclination) * sin(azimuth)
+	 * }
+	 * </p>
+	 * @param magnitude the length of the vector
+	 * @param azimuth the azimuth of the vector
+	 * @param inclination the inclination of the vector
+	 * @return the y coordinate of the vector
+	 */
+	public static double vecY(double magnitude, double azimuth, double inclination){
+		return (magnitude * Math.sin(Math.toRadians(inclination)) * Math.sin(Math.toRadians(azimuth)));
 	}
-	public static float vecZ(float magnitude, float inclination){
-		return (float) (magnitude * Math.cos(Math.toRadians(inclination)));
+	/**
+	 * Gets the y coordinate of a 2d vector.
+	 * <p>
+	 * {@code
+	 * 	x = magnitude * sin(azimuth)
+	 * }
+	 * </p>
+	 * @param magnitude the length of the vector
+	 * @param azimuth the azimuth of the vector
+	 * @return the x coordinate of the vector
+	 */
+	public static double vecY(double magnitude, double azimuth){
+		return (magnitude * Math.sin(Math.toRadians(azimuth)));
+	}
+	
+	/**
+	 * Gets the z coordinate of a 3d vector.
+	 * <p>
+	 * {@code
+	 * 	z = magnitude * cos(inclination)
+	 * }
+	 * </p>
+	 * @param magnitude the length of the vector
+	 * @param azimuth the azimuth of the vector
+	 * @param inclination the inclination of the vector
+	 * @return the x coordinate of the vector
+	 */
+	public static double vecZ(double magnitude, double inclination){
+		return (magnitude * Math.cos(Math.toRadians(inclination)));
 	}
 }
-/*
-	public static float derive(Functionf func, float x){
-		return centralDifference(func, x);
-	}
-	public static float derive2(Functionf func, float x){
-		return centralDifference2(func, x);
-	}
-	public static float forwardDifference(Functionf func, float x){
-		return forwardDifference(func, x, 1e-8f);
-	}
-	public static float forwardDifference(Functionf func, float x, float changeConstant){
-		return (func.f(x + changeConstant) - func.f(x)) / changeConstant;
-	}
-	public static float backwardDifference(Functionf func, float x){
-		return backwardDifference(func, x, 1e-8f);
-	}
-	public static float backwardDifference(Functionf func, float x, float changeConstant){
-		return (func.f(x) - func.f(x - changeConstant)) / changeConstant;
-	}
-	public static float centralDifference(Functionf func, float x){
-		return centralDifference(func, x, 1e-8f);
-	}
-	public static float centralDifference(Functionf func, float x, float changeConstant){
-		return (func.f(x + changeConstant) - func.f(x - changeConstant)) / (2 * changeConstant);
-	}
-	public static float centralDifference2(Functionf func, float x){
-		return centralDifference2(func, x, 1e-8f);
-	}
-	public static float centralDifference2(Functionf func, float x, float changeConstant){
-		return (func.f(x + changeConstant) - 2 * func.f(x) + func.f(x - changeConstant)) / (changeConstant * changeConstant);
-	}
-
-*/
