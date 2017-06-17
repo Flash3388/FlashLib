@@ -52,5 +52,5 @@ on actual hardware. Once all tests have passed and we are is satisfied, we will 
 
 By contributing to FlashLib, you agree that your code will be distributed with FlashLib, and licensed under the license for the FlashLib 
 project. You should not contribute code that you do not have permission to relicense in this manner. 
-Our license is the General Public License v3.0 which can be found [here](LICENSE.md)
+Our license is the BSD 3-clause which can be found [here](LICENSE.md)
 
