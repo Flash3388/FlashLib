@@ -6,7 +6,7 @@ import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.systems.ModableMotor;
+import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;

@@ -5,9 +5,10 @@ import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ScheduledTask;
 
 /**
- * Represents an Xbox 360 controller for use in FRC robot code
- * This is a wrapper class for an Xbox 360 controller
+ * Represents an Xbox 360 controller for use for robot control.
+ * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	
@@ -38,9 +39,20 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	
 	private static XboxController head;
 	
+	/**
+	 * Creates a new Xbox controller.
+	 * 
+	 * @param channel the device index
+	 */
 	public XboxController(int channel){
 		this(channel, "XBox "+ channel);
 	}
+	/**
+	 * Creates a new Xbox controller.
+	 * 
+	 * @param channel the device index
+	 * @param name the name of the controller
+	 */
 	public XboxController(int channel, String name){
 		super(name);
 		this.channel = channel;
@@ -93,22 +105,37 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	 */
 	public Triggers getTriggers() { return Triggers; }
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public double getRawAxis(int axis){
 		return RobotFactory.getStickAxis(channel, axis);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean getRawButton(int button){
 		return RobotFactory.getStickButton(channel, (byte)button);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Button getButton(int button) {
 		return buttons[button - 1];
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override 
 	public int getButtonCount(){
 		return 10;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Stick getStick(int index) {
 		switch(index){
@@ -117,30 +144,40 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 			default: return null;
 		}
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Stick getStick() {
 		return getStick(0);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public DPad getPOV() {
 		return getDPad();
 	}
 	
-	public void addListener(ButtonListener listener){
-		for(Button b : buttons)
-			b.addListener(listener);
-	}
-	
+	/**
+	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
+	 * actions attached to those wrapped. 
+	 */
 	public void refresh(){
-		for(Button b : buttons)
-			b.set(getRawButton(b.getNumber()));
+		for(int i = 0; i < buttons.length; i++)
+			buttons[i].refresh();
 		DPad.refresh();
 		Triggers.refresh();
 	}
+	
+	/**
+	 * Refreshes all created xbox controllers.
+	 */
 	public static void refreshAll(){
 		for(XboxController c = head; c != null; c = c.next)
 			c.refresh();
 	}
+	
 	@Override
 	public boolean run() {
 		refresh();

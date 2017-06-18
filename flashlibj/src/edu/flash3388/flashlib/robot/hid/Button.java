@@ -10,10 +10,11 @@ import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
- * This class represents a button on a joystick/controller. Although it is not mandatory to use this class since there
- * is an FRC one, this class holds many functionalities and when using Actions from flashLib, this class should be used.
+ * Represents a button on a Human Interface Device. Can activate actions depending on the state of 
+ * the button.
  * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class Button implements ButtonListener, BooleanDataSource{
 	

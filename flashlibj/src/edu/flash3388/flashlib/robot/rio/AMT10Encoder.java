@@ -7,23 +7,36 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 
+/**
+ * Class for interfacing with the AMT10 encoder.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see <a href="http://www.cui.com/product/components/encoders/incremental/modular/amt10-series">http://www.cui.com/product/components/encoders/incremental/modular/amt10-series</a>
+ */
 public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 	
-	public static enum CounterMode{
+	private static enum CounterMode{
 		Quadrutate, Revolution
 	}
 	
-	public static final int DEFUALT_PULSES_PER_REV = 1024;
-	public static final int DEFUALT_CHANGE_MARGIN = 20;
+	public static final int DEFAULT_PULSES_PER_REV = 1024;
+	public static final int DEFAULT_CHANGE_MARGIN = 20;
 	
 	private PIDSourceType pidtype = PIDSourceType.kRate;
 	private Counter counter;
 	private CounterMode mode;
-	private double velocity, rateSum, distancePerRev, lastV, changeMargin = DEFUALT_CHANGE_MARGIN;
+	private double velocity, rateSum, distancePerRev, lastV, changeMargin = DEFAULT_CHANGE_MARGIN;
 	private long revs;
 	private boolean manualUpdate = false, resetAvgOnChange = false;
-	private int ticks, ticksPerRev = DEFUALT_PULSES_PER_REV, updates;
+	private int ticks, ticksPerRev = DEFAULT_PULSES_PER_REV, updates;
 	
+	/**
+	 * Creates a new AMT10 object in a quadrature counting mode.
+	 * 
+	 * @param channelA the first quadrature channel
+	 * @param channelB the second quadrature channel
+	 */
 	public AMT10Encoder(int channelA, int channelB){
 		counter = new Counter();
 		counter.setUpSource(channelA);
@@ -32,6 +45,11 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		mode = CounterMode.Quadrutate;
 		reset();
 	}
+	/**
+	 * Creates a new AMT10 object in a revolution counting mode.
+	 * 
+	 * @param index the index channel
+	 */
 	public AMT10Encoder(int index){
 		counter = new Counter();
 		counter.setUpSource(index);

@@ -4,7 +4,8 @@ package edu.flash3388.flashlib.robot.hid;
 /**
  * Representing a button of a POV such as a D-Pad.
  * 
- * @author Tom Tzook 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class POVButton extends Button {
 	/**

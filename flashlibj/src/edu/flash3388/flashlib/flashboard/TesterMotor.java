@@ -4,8 +4,8 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.robot.systems.ModableMotor;
 
 /**
  * Represents a tracking wrapper for motors on the Flashboard.

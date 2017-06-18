@@ -4,6 +4,7 @@ package edu.flash3388.flashlib.robot.hid;
  * Contains information of any button events.
  * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class ButtonEvent {
 	/**

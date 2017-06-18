@@ -6,6 +6,7 @@ import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.hid.Stick;
 import edu.flash3388.flashlib.util.FlashUtil;
 

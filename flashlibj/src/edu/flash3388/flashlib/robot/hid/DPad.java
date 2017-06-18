@@ -6,6 +6,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  * This represents a D-Pad from and XBox controller.
  * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class DPad {
 	/**

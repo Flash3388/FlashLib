@@ -4,6 +4,7 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.hid.HID;
 import edu.flash3388.flashlib.robot.hid.Stick;
 
