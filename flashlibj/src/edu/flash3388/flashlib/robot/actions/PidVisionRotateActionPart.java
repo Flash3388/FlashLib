@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -10,7 +9,7 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	
 	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, boolean horizontal,
 			DoubleDataSource rotationThreshold, double rotationMargin){
-		super(new PidController.VisionPidSource(source, horizontal, false), kp, ki, kd, rotationThreshold, rotationMargin);
+		super(new PidSource.VisionPidSource(source, horizontal, false), kp, ki, kd, rotationThreshold, rotationMargin);
 	}
 	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, boolean horizontal){
 		this(source, kp, ki, kd, horizontal, ()->100.0, 15.0);
@@ -31,14 +30,14 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	@Override
 	public void setVision(Vision vision) {
 		PidSource source = getPidController().getSource();
-		if(source instanceof PidController.VisionPidSource)
-			((PidController.VisionPidSource)source).setVision(vision);
+		if(source instanceof PidSource.VisionPidSource)
+			((PidSource.VisionPidSource)source).setVision(vision);
 	}
 	@Override
 	public Vision getVision() {
 		PidSource source = getPidController().getSource();
-		if(source instanceof PidController.VisionPidSource)
-			return ((PidController.VisionPidSource)source).getVision();
+		if(source instanceof PidSource.VisionPidSource)
+			return ((PidSource.VisionPidSource)source).getVision();
 		return null;
 	}
 }

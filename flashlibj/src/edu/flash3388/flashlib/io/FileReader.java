@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.flash3388.flashlib.util.Log.LoggingType;
-
 /**
  * A file reader for reading file data.
  * 

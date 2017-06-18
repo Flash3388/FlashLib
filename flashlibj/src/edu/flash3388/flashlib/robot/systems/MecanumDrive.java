@@ -4,7 +4,6 @@ import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
-import edu.flash3388.flashlib.robot.VoltageScalable;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.hid.Stick;
@@ -239,10 +238,8 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		if (Math.abs(rotation) < sensitivityLimit)
 			rotation = 0;
 
-		if (angleRound != 0) {
+		if (angleRound != 0) 
 			direction = roundAngle(direction);
-		}
-
 		
 		magnitude = limit(magnitude) * Math.sqrt(2.0);
 		
@@ -257,7 +254,8 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		if (stabilizing && rotation == 0)
 			rotation = stabilizer.stabilizeByRotation(magnitude, direction);
 		
-		double wheelSpeeds[] = { (sinD * magnitude + rotation), // front left
+		double wheelSpeeds[] = { 
+				(sinD * magnitude + rotation), // front left
 				(cosD * magnitude - rotation), // front right
 				(cosD * magnitude + rotation), // rear left
 				(sinD * magnitude - rotation),// rear right
@@ -293,11 +291,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 	}
 
 	private double limit(double num) {
-		if (num > 1.0)
-			return 1.0;
-		if (num < -1.0)
-			return -1.0;
-		return num;
+		return Mathf.limit(scaleForVoltage(num), -1, 1);
 	}
 
 	private void normalize(double wheelSpeeds[]) {

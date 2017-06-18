@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.robot.systems;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.SystemAction;
-import edu.flash3388.flashlib.robot.VoltageScalable;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.MultiSpeedController;
 import edu.flash3388.flashlib.robot.System;

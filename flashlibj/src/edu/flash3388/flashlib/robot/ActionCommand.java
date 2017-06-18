@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.robot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
+/**
+ * Wraps an action inside a WPILib command object
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class ActionCommand extends Command{
 	
 	private Action action;

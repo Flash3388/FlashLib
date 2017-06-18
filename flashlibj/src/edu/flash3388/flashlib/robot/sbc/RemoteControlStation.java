@@ -174,6 +174,10 @@ public class RemoteControlStation extends Sendable{
 	public void onConnectionLost() {
 		attached = false;
 	}
+	
+	public boolean isAttached(){
+		return attached;
+	}
 
 	public void setState(byte state){
 		this.stateByte = state;

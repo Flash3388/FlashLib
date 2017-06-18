@@ -51,7 +51,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		}
 	}
 	
-	private boolean newSelection = false, newProcessing = false, newRunMode = false;
+	private boolean newSelection = false, newProcessing = false;
 	private Analysis[] lastAnalysis = new Analysis[2];
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
 	private int currentProcessing = -1;

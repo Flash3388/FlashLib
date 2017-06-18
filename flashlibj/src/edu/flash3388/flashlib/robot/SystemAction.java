@@ -2,6 +2,13 @@ package edu.flash3388.flashlib.robot;
 
 import java.util.Enumeration;
 
+/**
+ * A wrapper for an action which adds a system requirement. When the system action is executed it will run the
+ * methods of the wrapped action.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class SystemAction extends Action{
 
 	private Action action;
