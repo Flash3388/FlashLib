@@ -4,6 +4,12 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * Represents a label for double values on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DoubleProperty extends Sendable{
 	
 	private static final double CHAGNE_DIFFERENCE = 0.1;

@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.hid.HID;
 
+/**
+ * Represents a base for human interface devices on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public abstract class HIDSendable extends Sendable{
 	
 	private HID stick;

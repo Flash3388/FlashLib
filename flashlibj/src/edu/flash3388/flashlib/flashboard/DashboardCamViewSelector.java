@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraViewSelector;
 
+/**
+ * Represents a {@link CameraViewSelector} on the Flashboard. Uses a {@link DashboardChooser}.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DashboardCamViewSelector implements CameraViewSelector{
 
 	private DashboardChooser<Integer> chooser;

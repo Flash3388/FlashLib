@@ -7,6 +7,12 @@ import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 
+/**
+ * Represents a tracking wrapper for motors on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class TesterMotor extends Sendable{
 	
 	public static final byte UPDATE_TESTER_NAME = 0x5;
@@ -20,6 +26,13 @@ public class TesterMotor extends Sendable{
 	private double speed = 0.0, voltage = 0.0, current = 0.0;
 	private boolean brakemode = false;
 	
+	/**
+	 * Creates a new tester wrapper for a motor. 
+	 * 
+	 * @param name name of the motor
+	 * @param controller the motor controller
+	 * @param tester the tester which will use it
+	 */
 	public TesterMotor(String name, FlashSpeedController controller, Tester tester) {
 		super(name, FlashboardSendableType.MOTOR);
 		this.controller = controller;
@@ -29,14 +42,29 @@ public class TesterMotor extends Sendable{
 			brakeModeSource = ()->((ModableMotor)controller).inBrakeMode();
 	}
 
+	/**
+	 * Sets the source for the motor voltage usage.
+	 * @param source voltage source
+	 * @return this instance
+	 */
 	public TesterMotor setVoltageSource(DoubleDataSource source){
 		voltSource = source;
 		return this;
 	}
+	/**
+	 * Sets the source for the motor current usage.
+	 * @param source current source
+	 * @return this instance
+	 */
 	public TesterMotor setCurrentSource(DoubleDataSource source){
 		ampSource = source;
 		return this;
 	}
+	/**
+	 * Sets the source for the motor brake mode.
+	 * @param source brake mode source
+	 * @return this instance
+	 */
 	public TesterMotor setBrakeModeSource(BooleanDataSource source){
 		brakeModeSource = source;
 		return this;

@@ -4,6 +4,12 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.hid.Button;
 
+/**
+ * Represents a button on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DashboardButton extends Sendable{
 	
 	public static final byte DOWN = 0xe;

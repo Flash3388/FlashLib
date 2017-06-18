@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 
+/**
+ * Represents an input for values on the Flashboard. Uses ConstanstsHandler to save and edit the value.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DashboardInput extends Sendable{
 	
 	private InputType type;

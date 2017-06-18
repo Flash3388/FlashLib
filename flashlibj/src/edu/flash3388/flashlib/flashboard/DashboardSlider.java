@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * Represents a slider on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DashboardSlider extends Sendable{
 	
 	private double max, min, value;

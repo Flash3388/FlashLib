@@ -6,6 +6,12 @@ import java.util.Vector;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * Represents a combo box for values on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class DashboardChooser<T> extends Sendable{
 
 	public static class Option<T>{

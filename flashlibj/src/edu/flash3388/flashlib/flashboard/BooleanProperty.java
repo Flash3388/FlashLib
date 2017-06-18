@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 
+/**
+ * Represents a label for boolean values on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class BooleanProperty extends Sendable{
 	
 	private boolean lastValue = false, value = false, changed = false;

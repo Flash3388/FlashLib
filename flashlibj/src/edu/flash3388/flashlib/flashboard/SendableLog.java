@@ -6,6 +6,12 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.LoggingInterface;
 
+/**
+ * Sends log data to a remote source.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class SendableLog extends Sendable{
 	
 	private Vector<String> logs = new Vector<String>();

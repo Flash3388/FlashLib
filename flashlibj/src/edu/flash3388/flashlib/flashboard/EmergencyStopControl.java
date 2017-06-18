@@ -3,6 +3,12 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 
+/**
+ * Represents emergency stop control on the Flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class EmergencyStopControl extends Sendable{
 
 	private static final byte EMERGENCY = 0xe;
