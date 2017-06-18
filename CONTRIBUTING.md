@@ -14,8 +14,8 @@ and behave with professionalism.
   - If you find yourself unable to make the same changes in the other language, you can always ask for help!
  - Changes should be tested before being submited.
  - Since FlashLib is a library, code should be generally written in a general format, meaning:
-  - It should be able to handle most situations related to it.
-  - It needs to be dynamic enough to fit an array of user coding styles.
+   - It should be able to handle most situations related to it.
+   - It needs to be dynamic enough to fit an array of user coding styles.
 
 ## What to Contribute
 
