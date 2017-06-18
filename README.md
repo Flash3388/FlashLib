@@ -20,12 +20,12 @@ The library provides several different tools that can be both used for a robot d
 - Camera interfacing using openCV.
 - Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors for Raspberry PI and BeagleBone Black platforms.
 - Human Interface Devices Interfacing: Remote control of robots using Human Interfacing Devices.
-- Control Station: Pre-Made control software for robots using Raspberry PI and BeagleBone Black platforms.
+- Control Station: Pre-Made control software for robots using Raspberry PI and BeagleBone Black platforms. (WIP)
 - Action Scheduler: An action scheduling system to allow simple managment of robot system functionalities. Similar to the WPILib scheduling system but more sophisticated.
-- Algorithms: Built-In sensor-based motion algorithms and vision-based motion-algorithms.
+- Algorithms: Built-In sensor-based motion algorithms and vision-based motion algorithms.
 - Generic Drive Systems: Built-in generic drive systems, including: Tank drive, Mecanum drive and Omni-Directional drive.
 - Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
-- HAL: An Hardware Abstraction Layer with Raspberry PI and Beaglebone Black implementation.
+- HAL: An Hardware Abstraction Layer with Raspberry PI and Beaglebone Black implementation. (WIP)
 
 ## Dependencies
 
@@ -53,18 +53,18 @@ You can get grade here: https://gradle.org/ (for free of course..)
 FlashLib is here to help the community in the development of robotics solutions, and thus supports an open and welcoming 
 envirnoment for users and developers. We expect everyone to act with respect and according to our code of conduct.
 
-Please see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for further information about our code of conduct.
+Please see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for information about our code of conduct.
 
 ## Contributing
 
 As an open-source project we readily welcome any one wanting to contribute. But in order to maintain organization we have a few
 rules and guidelines for contributions.
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) with you are interested in contributing to this project.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contributing to this project.
 
 ## Disclaimer
 
-The FlashLib uses the following libraries, but those libraries do not belong to us:
+FlashLib uses the following libraries, but those libraries do not belong to us:
 - WPILib: WPILib is a robotics library for FRC teams created by the Worcester Polytechnic Institute: https://github.com/wpilibsuite/allwpilib
 - Bulldog: Bulldog is an IO library for Raspberry PI and BeagleBone Black created by Datenheld: https://github.com/Datenheld/Bulldog
 - OpenCV: OpenCV is an open source computer vision library: https://github.com/opencv/opencv
