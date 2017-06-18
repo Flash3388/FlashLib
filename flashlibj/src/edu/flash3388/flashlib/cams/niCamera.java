@@ -47,7 +47,6 @@ public class niCamera implements Camera{
 	/**
 	 * Reads a frame from the camera and returns a {@link Image} object.
 	 * @return a new frame
-	 * @see edu.wpi.first.wpilibj.vision.USBCamera#getImage(Image)
 	 */
 	public Image read(){
 		camera.getImage(image);
@@ -104,6 +103,8 @@ public class niCamera implements Camera{
 	public void setQuality(int quality) {}
 	/**
 	 * Sets the frame width and height.
+	 * @param width new width
+	 * @param height new height
 	 */
 	public void setSize(int width, int height){
 		camera.setSize(width, height);

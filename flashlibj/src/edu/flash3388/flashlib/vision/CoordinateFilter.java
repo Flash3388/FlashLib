@@ -2,6 +2,13 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+/**
+ * Filers out contours by their proximity to a coordinate in the frame.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionSource#closestToCoordinate(double, double, int)
+ */
 public class CoordinateFilter extends ProcessingFilter{
 	private double x, y;
 	private byte amount = 0;

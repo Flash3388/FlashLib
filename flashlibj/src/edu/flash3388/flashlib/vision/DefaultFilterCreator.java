@@ -2,8 +2,19 @@ package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * The default creator object for processing filters. Can load and create all basic filters provided with 
+ * FlashLib.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see FilterCreator
+ */
 public class DefaultFilterCreator implements FilterCreator{
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ProcessingFilter create(String name) {
 		switch (name) {
@@ -21,6 +32,9 @@ public class DefaultFilterCreator implements FilterCreator{
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getSaveName(ProcessingFilter filter) {
 		if(FlashUtil.instanceOf(filter, HighestFilter.class))

@@ -7,15 +7,24 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * 
+ * Provides a remote controller for vision running. Used together with {@link VisionRunner}.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionRunner
+ * @see Vision
+ */
 public class RemoteVision extends Sendable implements Vision{
 
-	public static final byte REMOTE_STOP = 0xe;
-	public static final byte REMOTE_START = 0x5;
+	static final byte REMOTE_STOP = 0xe;
+	static final byte REMOTE_START = 0x5;
 	
-	public static final byte REMOTE_RUN_MODE = 0x10;
-	public static final byte REMOTE_SELECT_MODE = 0x1;
-	public static final byte REMOTE_ANALYSIS_MODE = 0xf;
-	public static final byte REMOTE_PROC_MODE = 0x5;
+	static final byte REMOTE_RUN_MODE = 0x10;
+	static final byte REMOTE_SELECT_MODE = 0x1;
+	static final byte REMOTE_ANALYSIS_MODE = 0xf;
+	static final byte REMOTE_PROC_MODE = 0x5;
 	
 	private boolean stopRemote = false, startRemote = false;
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
@@ -25,6 +34,9 @@ public class RemoteVision extends Sendable implements Vision{
 			sendProps = false;
 	private int lastRec, recTimeout = 1000;
 	
+	/**
+	 * Creates a new remote vision controller.
+	 */
 	public RemoteVision() {
 		super(FlashboardSendableType.VISION);
 	}
@@ -36,19 +48,42 @@ public class RemoteVision extends Sendable implements Vision{
 		stopRemote = true;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If connected to a remote object, it is updated.
+	 * </p>
+	 */
 	@Override
 	public void start(){
 		startRemote();
 		running = true;
 		lastRec = FlashUtil.millisInt();
 	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If connected to a remote object, it is updated.
+	 * </p>
+	 */
 	@Override
 	public void stop(){
 		stopRemote();
 	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean isRunning(){
 		return running;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If connected to a remote object, it is updated.
+	 * </p>
+	 */
 	@Override
 	public void addProcessing(VisionProcessing proc) {
 		processing.add(proc);
@@ -56,6 +91,12 @@ public class RemoteVision extends Sendable implements Vision{
 		if(currentProcessing < 0)
 			selectProcessing(0);
 	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If connected to a remote object, it is updated.
+	 * </p>
+	 */
 	@Override
 	public void selectProcessing(int index) {
 		if(index < 0 || index >= procCount)
@@ -63,34 +104,58 @@ public class RemoteVision extends Sendable implements Vision{
 		currentProcessing = index;
 		updateProcessing = true;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public VisionProcessing getProcessing(int index) {
 		if(index < 0 || index >= processing.size())
 			return null;
 		return processing.get(index);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getSelectedProcessingIndex() {
 		return currentProcessing;
 	}
+	/**
+	 * Does nothing
+	 */
 	@Override
 	public VisionProcessing getProcessing() {
 		return null;//getProcessing(currentProcessing);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getProcessingCount() {
 		return procCount;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Analysis getAnalysis(){
 		return analysis;
 	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * The new analysis timeout is counted from the moment the object is received from the remote runner.
+	 * </p>
+	 */
 	@Override
 	public boolean hasNewAnalysis(){
 		return analysis != null && FlashUtil.millisInt() - lastRec < recTimeout;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 2) return;
@@ -117,6 +182,9 @@ public class RemoteVision extends Sendable implements Vision{
 			}
 		}
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public byte[] dataForTransmition() {
 		if(sendProps){
@@ -143,11 +211,17 @@ public class RemoteVision extends Sendable implements Vision{
 		updateProcessing = false;
 		return new byte[]{REMOTE_SELECT_MODE, (byte) currentProcessing};
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasChanged() {
 		return updateProcessing || stopRemote || startRemote || 
 				sendProps;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void onConnection() {
 		updateProcessing = true;
@@ -155,15 +229,24 @@ public class RemoteVision extends Sendable implements Vision{
 		else stopRemote = true;
 		sendProc = 0;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void onConnectionLost() {
 		procCount = 0;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setNewAnalysisTimeout(int timeout) {
 		recTimeout = timeout;
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getNewAnalysisTimeout() {
 		return recTimeout;

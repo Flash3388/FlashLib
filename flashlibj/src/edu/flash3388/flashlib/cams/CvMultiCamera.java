@@ -146,7 +146,7 @@ public class CvMultiCamera extends CameraView{
 	 * <p>
 	 * Sets the video capture property of {@link Videoio#CAP_PROP_FPS}
 	 * </p>
-	 * @see VideoCapture#set(int)
+	 * @see VideoCapture#set(int, double)
 	 * @throws IllegalArgumentException if fps is smaller than 10 or larger than 60
 	 */
 	@Override
@@ -158,7 +158,7 @@ public class CvMultiCamera extends CameraView{
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Sets the video compression matrix with a new{@link Videoio#CV_IMWRITE_JPEG_QUALITY}
+	 * Sets the video compression matrix with a new{@link Imgcodecs#CV_IMWRITE_JPEG_QUALITY}
 	 * value
 	 * </p>
 	 * @throws IllegalArgumentException if quality is smaller than 1 or larger than 100

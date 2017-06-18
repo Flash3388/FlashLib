@@ -234,7 +234,7 @@ public class Mat {
 	}
 	/**
 	 * Gets whether or not this matrix equals to a given 2-d array.
-	 * @param mat 2-d array to compare to
+	 * @param mat2 2-d array to compare to
 	 * @return true if the matrices are equal, false otherwise
 	 */
 	public boolean equals(double[][] mat2){

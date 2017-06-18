@@ -4,7 +4,7 @@ package edu.flash3388.flashlib.math;
  * Represents a 3-dimensional vector in Cartesian space.
  * <p>
  * In mathematics, physics, and engineering, a Euclidean vector 
- * (sometimes called a geometric[1] or spatial vector,[2] or—as here—simply a vector) 
+ * (sometimes called a geometric[1] or spatial vector,[2] or as here simply a vector) 
  * is a geometric object that has magnitude (or length) and direction. 
  * </p>
  * @author Tom Tzook

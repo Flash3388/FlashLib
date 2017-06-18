@@ -65,7 +65,7 @@ public class FileWriter {
 	 * Writes data to the file if the file exists and can be written to. If the writer was closed then
 	 * nothing will happen. The info cannot be null or empty.
 	 * 
-	 * @param info A string of information to write to the file. Cannot be null or empty.
+	 * @param lines A string of information to write to the file. Cannot be null or empty.
 	 */
 	public void write(String...lines){
 		for (int i = 0; i < lines.length; i++)

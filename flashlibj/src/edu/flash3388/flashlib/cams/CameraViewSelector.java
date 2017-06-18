@@ -19,7 +19,7 @@ public interface CameraViewSelector {
 	void remCam(Camera cam);
 	/**
 	 * Selects a camera index to use by a {@link CameraView}.
-	 * @param index
+	 * @param index index of filter to select
 	 */
 	void select(int index);
 	/**

@@ -44,7 +44,7 @@ public class FileStream {
 	/**
 	 * Gets an array of names of all the files in a directory.
 	 * 
-	 * @param path the path of the directory
+	 * @param directory the path of the directory
 	 * @return an array of names of all the files in a directory 
 	 * @see File#listFiles()
 	 */
@@ -124,7 +124,7 @@ public class FileStream {
 	}
 	/**
 	 * Writes lines to a FileWriter. Opens a {@link FileWriter} and 
-	 * calls {@link FileReader#write()}.
+	 * calls {@link FileWriter#write(String...)}.
 	 * 
 	 * @param file the file path
 	 * @param lines lines to write to the file
@@ -158,7 +158,7 @@ public class FileStream {
 	}
 	/**
 	 * Writes a line to a FileWriter. Opens a {@link FileWriter} and 
-	 * calls {@link FileReader#write()}.
+	 * calls {@link FileWriter#write(String)}.
 	 * 
 	 * @param file the file path
 	 * @param line line to write to the file

@@ -2,6 +2,14 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+
+/**
+ * Filers out contours using ratio filtering. Designed to locate to contours with specific position and side ratios.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionSource#contourRatio(double, double, double, double, double, double, double, double, double, double)
+ */
 public class RatioFilter extends ProcessingFilter{
 	private double heightRatio, widthRatio, dy, dx, maxScore, minScore, 
 			maxHeight, minHeight, maxWidth, minWidth;

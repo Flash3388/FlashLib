@@ -21,10 +21,23 @@ import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.math.Mathf;
 
+
+/**
+ * Provides openCV utilities and vision functionalities.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class CvProcessing {
 
 	private CvProcessing(){}
 	
+	/**
+	 * A vision source using openCV.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
 	public static class CvSource implements VisionSource{
 		
 		private Mat mat, threshold = new Mat(), contoursHierarchy = new Mat();
@@ -44,9 +57,14 @@ public class CvProcessing {
 			return contours;
 		}
 		
+		
 		public void setPipeline(CvPipeline pipe){
 			pipeline = pipe;
 		}
+		/**
+		 * Sets the {@link Mat} object to be used for vision.
+		 * @param mat frame
+		 */
 		public void prep(Mat mat){
 			this.mat = mat;
 			analysis = null;
@@ -59,6 +77,9 @@ public class CvProcessing {
 			CvProcessing.detectContours(threshold, contours, contoursHierarchy);
 		}
 		
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public Analysis getResult() {
 			if(analysis != null)
@@ -72,6 +93,9 @@ public class CvProcessing {
 			
 			return analysis;
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public Analysis[] getResults() {
 			Analysis[] ans = new Analysis[contours.size()];
@@ -83,6 +107,9 @@ public class CvProcessing {
 			return ans;
 		}
 		
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void filterHsv(int minH, int minS, int minV, int maxH, int maxS, int maxV) {
 			checkReady();
@@ -91,6 +118,9 @@ public class CvProcessing {
 			CvProcessing.filterMatColors(threshold, threshold, minH, maxH, minS, maxS, minV, maxV);
 			detectContours();
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void filterRgb(int minR, int minG, int minB, int maxR, int maxG, int maxB) {
 			checkReady();
@@ -98,7 +128,9 @@ public class CvProcessing {
 			CvProcessing.filterMatColors(mat, threshold, minR, maxR, minG, maxG, minB, maxB);
 			detectContours();
 		}
-
+		/**
+		 * {@inheritDoc}
+		 */
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> void filterByComparator(int amount, Comparator<T> comparator) {
@@ -106,25 +138,36 @@ public class CvProcessing {
 			
 			CvProcessing.filterByComparator(contours, amount, (Comparator<MatOfPoint>) comparator);
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void lowestContours(int amount) {
 			checkReady();
 			
 			CvProcessing.filterForLowestContours(contours, amount);
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void highestContours(int amount) {
 			checkReady();
 			
 			CvProcessing.filterForHighestContours(contours, amount);
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void largestContours(int amount) {
 			checkReady();
 			
 			CvProcessing.filterForLargestContours(contours, amount);
 		}
-
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void detectShapes(int amount, int vertecies, double accuracy) {
 			checkReady();
@@ -135,13 +178,18 @@ public class CvProcessing {
 					contours.remove(i);
 			}
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void detectShapes(int vertecies, double accuracy) {
 			checkReady();
 			
 			CvProcessing.detectContoursByShape(contours, vertecies, accuracy);
 		}
-
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void contourRatio(double heightRatio, double widthRatio, double dy, double dx, 
 				double maxScore, double minScore, 
@@ -153,26 +201,36 @@ public class CvProcessing {
 			if(analysis == null)
 				contours.clear();
 		}
-
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void closestToLeft(int amount) {
 			checkReady();
 			
 			CvProcessing.filterForClosestToLeft(contours, mat, amount);
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void closestToRight(int amount) {
 			checkReady();
 			
 			CvProcessing.filterForClosestToRight(contours, mat, amount);
 		}
-
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void closestToCoordinate(double x, double y, int amount) {
 			checkReady();
 			
 			CvProcessing.filterForClosestContoursToPoint(contours, x, y, amount);
 		}
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public void closestToCenterFrame(int amount) {
 			checkReady();
@@ -188,15 +246,42 @@ public class CvProcessing {
 	//------------------------------------------------------------------
 	//------------------------------------------------------------------
 	
+	/**
+	 * Converts a mat from RGB to HSV.
+	 * @param mat an RGB mat
+	 * @param hsv a mat to fill with HSV data
+	 * @return the hsv mat 
+	 * @see Imgproc#cvtColor(Mat, Mat, int)
+	 */
 	public static Mat rgbToHsv(Mat mat, Mat hsv){
 		Imgproc.cvtColor(mat, hsv, Imgproc.COLOR_RGB2HSV);
 		return hsv;
 	}
+	/**
+	 * Converts a mat from RGB to HSV.
+	 * @param mat an RGB mat
+	 * @return an HSV mat 
+	 * @see Imgproc#cvtColor(Mat, Mat, int)
+	 */
 	public static Mat rgbToHsv(Mat mat){
 		Mat hsv = new Mat();
 		return rgbToHsv(mat, hsv);
 	}
 	
+	/**
+	 * Filters mat data by colors. Data within the color boundary now represents a contour.  
+	 * 
+	 * @param mat the mat data
+	 * @param threshold the resulting binary image
+	 * @param min1 min boundary 1: min hue/red
+	 * @param max1 max boundary 1: max hue/red
+	 * @param min2 min boundary 2: min saturation/green
+	 * @param max2 max boundary 2: max saturation/green
+	 * @param min3 min boundary 3: min value/blue
+	 * @param max3 max boundary 3: max value/blue
+	 * @return the binary image
+	 * @see Core#inRange(Mat, Scalar, Scalar, Mat)
+	 */
 	public static Mat filterMatColors(Mat mat, Mat threshold, int min1, int max1, int min2, int max2, int min3, int max3){
 		Core.inRange(mat, 
 				new Scalar(min1, min2, min3), 
@@ -204,15 +289,44 @@ public class CvProcessing {
 				threshold);
 		return threshold;
 	}
+	/**
+	 * Filters mat data by colors. Data within the color boundary now represents a contour.  
+	 * 
+	 * @param mat the mat data
+	 * @param min1 min boundary 1: min hue/red
+	 * @param max1 max boundary 1: max hue/red
+	 * @param min2 min boundary 2: min saturation/green
+	 * @param max2 max boundary 2: max saturation/green
+	 * @param min3 min boundary 3: min value/blue
+	 * @param max3 max boundary 3: max value/blue
+	 * @return a binary image
+	 * @see Core#inRange(Mat, Scalar, Scalar, Mat)
+	 */
 	public static Mat filterMatColors(Mat mat, int min1, int max1, int min2, int max2, int min3, int max3){
 		Mat threshold = new Mat();
 		return filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
 	}
 	
+	/**
+	 * Detects contours within a binary image.
+	 * 
+	 * @param threshold the binary image
+	 * @param contours list of contours to fill
+	 * @param hierarchy hierarchy of contours
+	 * @return the contours param
+	 * @see Imgproc#findContours(Mat, List, Mat, int, int)
+	 */
 	public static List<MatOfPoint> detectContours(Mat threshold, List<MatOfPoint> contours, Mat hierarchy) {
 		Imgproc.findContours(threshold, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		return contours;
 	}
+	/**
+	 * Detects contours within a binary image.
+	 * 
+	 * @param threshold the binary image
+	 * @return the contours list
+	 * @see Imgproc#findContours(Mat, List, Mat, int, int)
+	 */
 	public static List<MatOfPoint> detectContours(Mat threshold){
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Mat hierarchy = new Mat();
@@ -220,7 +334,16 @@ public class CvProcessing {
 		return detectContours(threshold, contours, hierarchy);
 	}
 	
-	public static void detectContoursByShape(List<MatOfPoint> contours, int vertecies, double accuracy){
+	/**
+	 * Filters contours by shape. Iterates through the list of contours and approximates their shape. 
+	 * Compares the vertices of the shape to the desired vertices and removes the contour if they do not match.
+	 * 
+	 * @param contours list of contours
+	 * @param vertices vertices of the desired shape
+	 * @param accuracy the accuracy of approximation
+	 * @see Imgproc#approxPolyDP(MatOfPoint2f, MatOfPoint2f, double, boolean)
+	 */
+	public static void detectContoursByShape(List<MatOfPoint> contours, int vertices, double accuracy){
 		MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 		MatOfPoint2f approxCurve = new MatOfPoint2f();
 		
@@ -231,11 +354,19 @@ public class CvProcessing {
 		    Imgproc.approxPolyDP(matOfPoint2f, approxCurve, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
 		    long total = approxCurve.total();
 		    
-		    if (total != vertecies)
+		    if (total != vertices)
 		    	contours.remove(idx);
 		}
 	}
 	
+	/**
+	 * Sorts the contours by a comparator and removes contours for the bottom of the list if the list contains
+	 * too many contours. Can be used to filter contours by size, position, shape and more.
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @param comparator the comparator for sorting the list of contours
+	 */
 	public static void filterByComparator(List<MatOfPoint> contours, int amount, Comparator<MatOfPoint> comparator) {
 		contours.sort(comparator);
 		
@@ -243,7 +374,14 @@ public class CvProcessing {
 		for (int i = contours.size() - 1; i >= size; i--)
 			contours.remove(i);
 	}
-	
+	/**
+	 * Sorts the contours by their size and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForLargestContours(List<MatOfPoint> contours, int amount){
 		Comparator<MatOfPoint> sizeComparer = (MatOfPoint o1, MatOfPoint o2) ->{
 			if(o1.total() < o2.total()) return 1;
@@ -252,6 +390,14 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, sizeComparer);
 	}
+	/**
+	 * Sorts the contours by their size and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForSmallestContours(List<MatOfPoint> contours, int amount){
 		Comparator<MatOfPoint> sizeComparer = (MatOfPoint o1, MatOfPoint o2) ->{
 			if(o1.total() > o2.total()) return 1;
@@ -260,6 +406,14 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, sizeComparer);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForLowestContours(List<MatOfPoint> contours, int amount){
 		Comparator<MatOfPoint> heightComparer = (MatOfPoint o1, MatOfPoint o2) ->{
 			double y1 = contourCenter(o1).y, y2 = contourCenter(o2).y; 
@@ -269,6 +423,14 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, heightComparer);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForHighestContours(List<MatOfPoint> contours, int amount){
 		Comparator<MatOfPoint> heightComparer = (MatOfPoint o1, MatOfPoint o2) ->{
 			double y1 = contourCenter(o1).y, y2 = contourCenter(o2).y;
@@ -278,6 +440,16 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, heightComparer);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @param x x coordinate on the frame
+	 * @param y y coordinate on the frame
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForClosestContoursToPoint(List<MatOfPoint> contours, double x, double y, int amount) {
 		Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
 			Point p1 = CvProcessing.contourCenter(o1), p2 = CvProcessing.contourCenter(o2);
@@ -289,9 +461,27 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, comparator);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @param feed the frame
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForClosestContoursToCenter(List<MatOfPoint> contours, Mat feed, int amount) {
 		filterForClosestContoursToPoint(contours, feed.width() * 0.5, feed.height() * 0.5, amount);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param feed the frame
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForClosestToRight(List<MatOfPoint> contours, Mat feed, int amount){
 		Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
 			Point p1 = CvProcessing.contourCenter(o1), p2 = CvProcessing.contourCenter(o2);
@@ -303,6 +493,15 @@ public class CvProcessing {
 		};
 		filterByComparator(contours, amount, comparator);
 	}
+	/**
+	 * Sorts the contours by their position and removes contours for the bottom of the list if the list contains
+	 * too many contours. 
+	 * 
+	 * @param contours list of contours
+	 * @param amount the maximum amount of contours that should remain after the operation
+	 * @param feed the frame
+	 * @see #filterByComparator(List, int, Comparator)
+	 */
 	public static void filterForClosestToLeft(List<MatOfPoint> contours, Mat feed, int amount){
 		Comparator<MatOfPoint> comparator = (MatOfPoint o1, MatOfPoint o2) ->{
 			Point p1 = CvProcessing.contourCenter(o1), p2 = CvProcessing.contourCenter(o2);
@@ -365,6 +564,38 @@ public class CvProcessing {
 		return sum / count;
 	}
 	
+	/**
+	 * Searches for 2 contours with certain size ratios and size restrictions and filters out all remaining contours.
+	 * <p>
+	 * Ratio filtering is done by checking the ratio of sizes between the contours and comparing it to the desired result.
+	 * The best ratio is achieved when the difference between the actual result and the desired result is minimal.
+	 * </p>
+	 * <p>
+	 * Size restriction is done by checking the size of each contour. If the contour does not meet the requirements it is
+	 * ignored.
+	 * </p>
+	 * <p>
+	 * Scoring is between 0 and 1. where 0 is the best possible result. If a score is better than the min score it is automatically
+	 * used. If the result contours' score is bigger than the max score, they are ignored.
+	 * </p>
+	 * 
+	 * @param heightRatio the height ration between the two contours
+	 * @param widthRatio the width ration between the two contours
+	 * @param dy the expected ratio between the height of the first contour and the total height of both contours and the distance
+	 * between them
+	 * @param dx the expected ratio between the width of the first contour and the total width of both contours and the distance
+	 * between them
+	 * @param maxScore the worst possible score
+	 * @param minScore the best possible score
+	 * @param maxHeight max height restriction
+	 * @param minHeight min height restriction
+	 * @param maxWidth max width restriction
+	 * @param minWidth min width restriction
+	 * @param feed the frame
+	 * @param contours list of contours
+	 * 
+	 * @return the result of the ratio filtering. An analysis for both contours if found, or null otherwise
+	 */
 	public static Analysis filterForContoursByRatio(List<MatOfPoint> contours, Mat feed, 
 			double heightRatio, double widthRatio, double dy, double dx, 
 			double maxScore, double minScore, 
@@ -426,29 +657,94 @@ public class CvProcessing {
 	//---------------------Contour Drawing------------------------------
 	//------------------------------------------------------------------
 	
-	
+	/**
+	 * Draws a list of contours unto a mat.
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours list of contours to draw
+	 * @param color color to draw with
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, List<MatOfPoint> contours, Scalar color) {
 		for(int i = 0; i < contours.size(); i++)
 			Imgproc.drawContours(feed, contours, i, color);
 	}
+	/**
+	 * Draws a list of contours unto a mat.
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours list of contours to draw
+	 * @param r red value for color
+	 * @param g green value for color
+	 * @param b blue value for color
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, List<MatOfPoint> contours, int r, int g, int b) {
 		drawContours(feed, contours, new Scalar(r, g, b));
 	}
+	/**
+	 * Draws a list of contours unto a mat. Draws with RGB color (51, 51, 51)
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours list of contours to draw
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, List<MatOfPoint> contours) {
 		drawContours(feed, contours, new Scalar(51, 51, 51));
 	}
+	/**
+	 * Draws an array of contours unto a mat.
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours array of contours to draw
+	 * @param color color to draw with
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, Scalar color, MatOfPoint...contours) {
 		drawContours(feed, Arrays.asList(contours), color);
 	}
+	/**
+	 * Draws an array of contours unto a mat.
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours array of contours to draw
+	 * @param r red value for color
+	 * @param g green value for color
+	 * @param b blue value for color
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, int r, int g, int b, MatOfPoint...contours) {
 		drawContours(feed, new Scalar(r, g, b), contours);
 	}
+	/**
+	 * Draws an array of contours unto a mat. With an RGB color of (51, 51, 51).
+	 * 
+	 * @param feed the mat to draw on
+	 * @param contours array of contours to draw
+	 * @see Imgproc#drawContours(Mat, List, int, Scalar)
+	 */
 	public static void drawContours(Mat feed, MatOfPoint...contours) {
 		drawContours(feed, new Scalar(51, 51, 51), contours);
 	}
+	/**
+	 * Draws a {@link Rect} object unto a mat.
+	 * 
+	 * @param feed the mat to draw on
+	 * @param r object to draw
+	 * @param color color to draw with
+	 * @see Imgproc#rectangle(Mat, Point, Point, Scalar)
+	 */
 	public static void drawRect(Mat feed, Rect r, Scalar color){
 		Imgproc.rectangle(feed, r.tl(), r.br(), color);
 	}
+	/**
+	 * Draws an array of analysis objects unto a mat.
+	 * 
+	 * @param feed mat to draw on
+	 * @param color color to draw with
+	 * @param an array of analysis to draw
+	 * @see Imgproc#circle(Mat, Point, int, Scalar)
+	 */
 	public static void drawPostProcessing(Mat feed, Scalar color, Analysis... an){
 		for (int i = 0; i < an.length; i++) {
 			Analysis analysis = an[i];
@@ -456,6 +752,13 @@ public class CvProcessing {
 		}
 		Imgproc.line(feed, new Point(feed.width()/2, 0), new Point(feed.width()/2, feed.height()), new Scalar(0, 51, 255));
 	}
+	/**
+	 * Draws an array of analysis objects unto a mat. Draws with an RGB value of (51, 51, 51)
+	 * 
+	 * @param feed mat to draw on
+	 * @param an array of analysis to draw
+	 * @see Imgproc#circle(Mat, Point, int, Scalar)
+	 */
 	public static void drawPostProcessing(Mat feed, Analysis... an){
 		drawPostProcessing(feed, new Scalar(51,255, 51), an);
 	}
@@ -464,6 +767,13 @@ public class CvProcessing {
 	//---------------------------Util-----------------------------------
 	//------------------------------------------------------------------
 
+	/**
+	 * Gets the center point of a contour by summing the x and y coordinates of the points contained within it and
+	 * dividing it by the amount of points.
+	 * 
+	 * @param contour the contour
+	 * @return the center point of a contour
+	 */
 	public static Point contourCenter(MatOfPoint contour) {
 		List<Point> pointArr;
 		pointArr = contour.toList();
@@ -479,24 +789,53 @@ public class CvProcessing {
 		
 		return(new Point((int)sumX/size,(int)sumY/size));
 	}
+	/**
+	 * Gets the center point of a contour by creating a bounding rectangle and getting its center.
+	 * 
+	 * @param contour the contour
+	 * @return the center point of a contour
+	 */
 	public static Point contourCenter2(MatOfPoint contour) {
 		Rect rect = Imgproc.boundingRect(contour);
 		return contourCenter2(rect);
 	}
+	/**
+	 * Gets the center point of a rectangle by getting its x + half width and y + half height
+	 * 
+	 * @param rect the rectangle
+	 * @return the center point of a contour
+	 */
 	public static Point contourCenter2(Rect rect) {
 		return new Point(rect.x + rect.width/2, rect.y + rect.height/2);
 	}
 	
+	/**
+	 * Converts a buffered image object in to an openCV mat.
+	 * @param image buffered image
+	 * @return mat
+	 */
 	public static Mat bufferedImage2Mat(BufferedImage image){
 		byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();  		  
 		Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);  		  
 		mat.put(0, 0, data);  		  		  
 		return mat;  
 	}
+	/**
+	 * Converts a byte array into a mat object
+	 * @param data byte array
+	 * @return mat
+	 */
 	public static Mat byteArray2Mat(byte[] data){
 		return Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
 	}
 	
+	/**
+	 * Sets the values of an analysis object for a contour.
+	 * 
+	 * @param feed the image mat
+	 * @param contour the contour
+	 * @param analysis the analysis object
+	 */
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
 		Point center = contourCenter(contour);
 		
@@ -505,6 +844,12 @@ public class CvProcessing {
 		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
 		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
 	}
+	/**
+	 * Converts a list of contours into a list of a list of points. That is since a contour is a collection of points.
+	 * 
+	 * @param contours the list of contours
+	 * @return list of list of points
+	 */
 	public static List<List<Point>> contoursToPointList(List<MatOfPoint> contours) {
 		List<List<Point>> returnStruct = new ArrayList<List<Point>>();
 		for(int i = 0; i < contours.size(); i++){

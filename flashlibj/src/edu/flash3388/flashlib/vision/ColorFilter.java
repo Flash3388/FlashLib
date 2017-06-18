@@ -2,6 +2,14 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+/**
+ * Filers out contours by their color. Can work for HSV or RGB filtering.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionSource#filterHsv(int, int, int, int, int, int)
+ * @see VisionSource#filterRgb(int, int, int, int, int, int)
+ */
 public class ColorFilter extends ProcessingFilter{
 
 	private short min1, max1, min2, max2, min3, max3;

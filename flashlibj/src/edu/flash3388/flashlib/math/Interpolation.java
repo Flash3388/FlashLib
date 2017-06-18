@@ -155,7 +155,7 @@ public abstract class Interpolation {
 	}
 	/**
 	 * Loads values to the map from an XML file.
-	 * @param file
+	 * @param file xml file
 	 */
 	public void loadValuesFromXml(String file){
 		try {

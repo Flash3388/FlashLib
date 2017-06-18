@@ -143,7 +143,7 @@ public class CvCamera implements Camera{
 	 * 
 	 * @param propId id of the property
 	 * @param value the value of the property
-	 * @see VideoCapture#set(int)
+	 * @see VideoCapture#set(int, double)
 	 */
 	public void setCaptureProperty(int propId, double value){
 		capture.set(propId, value);
@@ -154,7 +154,7 @@ public class CvCamera implements Camera{
 	 * <p>
 	 * Sets the video capture property of {@link Videoio#CAP_PROP_FPS}
 	 * </p>
-	 * @see #setCaptureProperty(int)
+	 * @see #setCaptureProperty(int, double)
 	 * @throws IllegalArgumentException if fps is smaller than 10 or larger than 60
 	 */
 	@Override
@@ -166,7 +166,7 @@ public class CvCamera implements Camera{
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Sets the video compression matrix with a new{@link Videoio#CV_IMWRITE_JPEG_QUALITY}
+	 * Sets the video compression matrix with a new{@link Imgcodecs#CV_IMWRITE_JPEG_QUALITY}
 	 * value
 	 * </p>
 	 * @throws IllegalArgumentException if quality is smaller than 1 or larger than 100
@@ -208,7 +208,7 @@ public class CvCamera implements Camera{
 	 * </p>
 	 * @param width the frame width
 	 * @param height the frame height
-	 * @see #setCaptureProperty(int)
+	 * @see #setCaptureProperty(int, double)
 	 */
 	public void setSize(int width, int height){
 		capture.set(Videoio.CAP_PROP_FRAME_WIDTH, width);

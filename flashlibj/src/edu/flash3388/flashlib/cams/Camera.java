@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.cams;
 
 /**
- * An interface representing a camera. Used mainly for {@link CameraServer}.
+ * An interface representing a camera.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0

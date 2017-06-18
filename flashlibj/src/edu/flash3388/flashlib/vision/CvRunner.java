@@ -2,6 +2,13 @@ package edu.flash3388.flashlib.vision;
 
 import org.opencv.core.Mat;
 
+/**
+ * Vision runner using openCV. Uses {@link CvPipeline} to receive new openCV {@link Mat} object to analyze.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionRunner
+ */
 public class CvRunner extends VisionRunner implements CvPipeline{
 
 	private Mat[] frames = new Mat[2];

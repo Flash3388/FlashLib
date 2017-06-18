@@ -2,6 +2,14 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+
+/**
+ * Filers out contours by their proximity to a the lower edge of the frame.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionSource#lowestContours(int)
+ */
 public class LowestFilter extends ProcessingFilter{
 	private byte amount;
 

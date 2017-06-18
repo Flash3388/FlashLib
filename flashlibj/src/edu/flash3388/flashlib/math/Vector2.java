@@ -4,7 +4,7 @@ package edu.flash3388.flashlib.math;
  * Represents a 2-dimensional vector in Cartesian space.
  * <p>
  * In mathematics, physics, and engineering, a Euclidean vector 
- * (sometimes called a geometric[1] or spatial vector,[2] or—as here—simply a vector) 
+ * (sometimes called a geometric[1] or spatial vector,[2] or as here simply a vector) 
  * is a geometric object that has magnitude (or length) and direction. 
  * </p>
  * @author Tom Tzook
@@ -107,7 +107,6 @@ public class Vector2 {
 	 * 
 	 * @param x the new x coordinate
 	 * @param y the new y coordinate
-	 * @return this vector
 	 */
 	public void set(double x, double y){
 		this.x = x;
@@ -117,7 +116,6 @@ public class Vector2 {
 	 * Sets the coordinates of this vector to the coordinates of a given vector and returns this vector.
 	 * 
 	 * @param vec the vector to copy
-	 * @return this vector
 	 */
 	public void set(Vector2 vec){
 		this.x = vec.x;

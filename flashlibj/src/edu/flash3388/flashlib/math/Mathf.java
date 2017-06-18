@@ -198,7 +198,7 @@ public class Mathf {
 	 * 
 	 * @param a value a
 	 * @param c value c
-	 * @return 
+	 * @return result of the reverse Pythagorases
 	 */
 	public static double reversePythagorasTheorem(double a, double c){
 		return Math.sqrt((c * c) - (a * a));
@@ -285,7 +285,7 @@ public class Mathf {
 	 * </p>
 	 * @param samples an array of samples
 	 * @return the result of the fourier transform
-	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform</a>
 	 */
 	public static Complex[] discreteFourierTransform(double... samples){
 		Function func = (x)->{return samples[(int)x];};
@@ -307,7 +307,7 @@ public class Mathf {
 	 * @param func the function of time
 	 * @param samples the amount of samples to use
 	 * @return the result of the fourier transform
-	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform</a>
 	 */
 	public static Complex[] discreteFourierTransform(Function func, int samples){
 		Complex[] results = new Complex[samples];
@@ -332,7 +332,7 @@ public class Mathf {
 	 * @param samples the amount of samples to use
 	 * @param k the index
 	 * @return the result of the fourier transform
-	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform<a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">https://en.wikipedia.org/wiki/Discrete_Fourier_transform</a>
 	 */
 	public static Complex discreteFourierTransform(Function func, int k, int samples){
 		Complex result = new Complex();
@@ -515,7 +515,7 @@ public class Mathf {
 	
 	/**
 	 * Reverses the values in the matrix by multiplying it by -1.
-	 * @param mat
+	 * @param mat mat to reverse
 	 */
 	public static void reverseMatrixValues(double[][] mat){
 		for(int i = 0; i < mat.length; i++){
@@ -596,7 +596,7 @@ public class Mathf {
 	 * </p>
 	 * @param func the function to derive
 	 * @param x the x coordinate
-	 * @param changeConstant 
+	 * @param changeConstant differance constant
 	 * @return the result of the derivative 
 	 * @see <a href="http://mathworld.wolfram.com/ForwardDifference.html">http://mathworld.wolfram.com/ForwardDifference.html</a>
 	 */
@@ -628,7 +628,7 @@ public class Mathf {
 	 * </p>
 	 * @param func the function to derive
 	 * @param x the x coordinate
-	 * @param changeConstant 
+	 * @param changeConstant differance constant
 	 * @return the result of the derivative 
 	 * @see <a href="http://mathworld.wolfram.com/BackwardDifference.html">http://mathworld.wolfram.com/BackwardDifference.html</a>
 	 */
@@ -660,7 +660,7 @@ public class Mathf {
 	 * </p>
 	 * @param func the function to derive
 	 * @param x the x coordinate
-	 * @param changeConstant 
+	 * @param changeConstant differance constant
 	 * @return the result of the derivative 
 	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
 	 */
@@ -692,7 +692,7 @@ public class Mathf {
 	 * </p>
 	 * @param func the function to derive
 	 * @param x the x coordinate
-	 * @param changeConstant 
+	 * @param changeConstant differance constant
 	 * @return the result of the derivative 
 	 * @see <a href="http://mathworld.wolfram.com/CentralDifference.html">http://mathworld.wolfram.com/CentralDifference.html</a>
 	 */
@@ -941,7 +941,6 @@ public class Mathf {
 	 * }
 	 * </p>
 	 * @param magnitude the length of the vector
-	 * @param azimuth the azimuth of the vector
 	 * @param inclination the inclination of the vector
 	 * @return the x coordinate of the vector
 	 */

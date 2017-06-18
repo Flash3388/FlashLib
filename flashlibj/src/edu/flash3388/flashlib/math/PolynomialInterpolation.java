@@ -21,7 +21,7 @@ public class PolynomialInterpolation extends Interpolation{
 	 * because the coefficients of the polynomial are calculated using divided differences.
 	 * </p>
 	 * @param keyMargin the key margin
-	 * @see @see <a href="https://en.wikipedia.org/wiki/Newton_polynomial">https://en.wikipedia.org/wiki/Newton_polynomial</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/Newton_polynomial">https://en.wikipedia.org/wiki/Newton_polynomial</a>
 	 * @see <a href="https://en.wikipedia.org/wiki/Polynomial_interpolation">https://en.wikipedia.org/wiki/Polynomial_interpolation</a>
 	 */
 	public PolynomialInterpolation(double keyMargin){

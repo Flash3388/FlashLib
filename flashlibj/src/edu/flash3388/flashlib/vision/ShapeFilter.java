@@ -2,6 +2,14 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+
+/**
+ * Filers out contours by their shape.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see VisionSource#detectShapes(int, int, double)
+ */
 public class ShapeFilter extends ProcessingFilter{
 	private byte amount, vertecies;
 	private double accuracy;
