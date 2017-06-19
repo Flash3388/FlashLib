@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.rio;
 
-import java.util.List;
-
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.math.Mathf;
@@ -161,7 +159,7 @@ public class RioControllers implements FlashSpeedController, ModableMotor{
 	@Override
 	public void stop() {
 		for(int i = 0; i < motor_controllers.length; i++)
-			motor_controllers[i].stop();
+			motor_controllers[i].set(0);
 	}
 
 	/**

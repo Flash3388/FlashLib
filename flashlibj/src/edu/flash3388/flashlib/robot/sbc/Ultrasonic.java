@@ -96,7 +96,7 @@ public class Ultrasonic implements RangeFinder{
 			return 0.0;
 		return millisPeriod * SPEED_OF_SOUND_CM_MS * 0.5;
 	}
-	@Override
+	
 	public void ping() {
 		if(!isEnabled() || automaticEnabled) return;
 		pingInternal();
