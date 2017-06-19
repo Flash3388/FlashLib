@@ -1,0 +1,50 @@
+apply plugin: 'java'
+
+sourceCompatibility = pSourceCompatibility
+
+sourceSets{
+	main{
+		java{
+			srcDir 'src'
+		}
+	}
+}
+jar {
+   manifest {
+      
+   }
+}
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+dependencies {
+    compile ([name: 'WPILib'],
+			[name: 'cscore'],
+			[name: 'opencv'], 
+			[name: 'NetworkTables'],
+			[name: 'navx_frc'],
+			[name: 'CANJaguar'],
+			[name: 'TalonSRXLibJava'],
+			[name: 'niVisionWPI'],
+			[name: 'bulldog-core-0.3.0-SNAPSHOT'],
+			[name: 'bulldog-linux-0.3.0-SNAPSHOT'],
+			[name: 'bulldog-devices-0.3.0-SNAPSHOT'],
+			[name: 'jinput-2.0.5'])
+}
+

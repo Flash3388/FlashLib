@@ -1,0 +1,26 @@
+<vision name="processing1">
+	<filter name="color">
+		<param name="hsv" type="Boolean">true</param>
+		<param name="min1" type="Int">0</param>
+		<param name="max1" type="Int">180</param>
+		<param name="min2" type="Int">0</param>
+		<param name="max2" type="Int">255</param>
+		<param name="min3" type="Int">230</param>
+		<param name="max3" type="Int">255</param>
+	</filter>
+	<filter name="largest">
+		<param name="amount" type="Int">10</param>
+	</filter>
+	<filter name="ratio">
+		<param name="heightRatio" type="Double">2.0</param>
+		<param name="widthRatio" type="Double">1.0</param>
+		<param name="dx" type="Double">1.0</param>
+		<param name="dy" type="Double">2.5</param>
+		<param name="minScore" type="Double">0.1</param>
+		<param name="maxScore" type="Double">0.5</param>
+		<param name="minHeight" type="Double">5.0</param>
+		<param name="maxHeight" type="Double">1000.0</param>
+		<param name="minWidth" type="Double">5.0</param>
+		<param name="maxWidth" type="Double">1000.0</param>
+	</filter>
+</vision>
