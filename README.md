@@ -1,7 +1,7 @@
 # FlashLib
 FlashLib is a robotics software development library for Java and C++, originaly designed to improve and help FRC teams, but can work on other platforms, specifically - Raspberry PI and BeagleBone Black.
 
-FlashLib is still in beta, version 1.0.0 is in development.
+FlashLib version 1.0.0 is ready for FRC use. 
 
 - [Features](#features)
 - [Dependencies](#dependencies)
