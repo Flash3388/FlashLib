@@ -165,7 +165,7 @@ public class Dashboard extends Application {
 					communications = new Communications("Robot", commInterface);
 					communications.setSendableCreator(new FlashboardSendableCreator());
 					communications.start();
-					camClient = new CameraClient("Robot", localcamport, ad, remotecamport, CameraClient.DEFUALT_MAX_BYTES);
+					camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
 					camClient.addListener(camViewer);
 				   } catch (IOException e) {
 					   //log.reportError(e.getMessage());

@@ -172,7 +172,7 @@ public abstract class Action {
 	
 	/**
 	 * Adds a System that is used by this action.
-	 * @param subsystems a system used by this action
+	 * @param subsystem a system used by this action
 	 */
 	protected void requires(System subsystem){
 		requirements.addElement(subsystem);
@@ -202,7 +202,7 @@ public abstract class Action {
 	/**
 	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
 	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param milliseconds
+	 * @param milliseconds timeout in milliseconds
 	 */
 	protected void setTimeOut(long milliseconds){
 		timeout = milliseconds;

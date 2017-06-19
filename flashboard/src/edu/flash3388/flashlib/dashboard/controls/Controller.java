@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.math.Mathd;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -71,7 +71,7 @@ public class Controller extends Displayble{
 	}
 
 	public synchronized double getAxis(int axis){
-		return Mathd.roundDecimal((axes[axis] < 0)? axes[axis] / 128.0 : axes[axis] / 127.0);
+		return Mathf.roundDecimal((axes[axis] < 0)? axes[axis] / 128.0 : axes[axis] / 127.0);
 	}
 	public synchronized boolean getButton(int button){
 		return (buttons & (0x1 << button)) != 0;

@@ -204,7 +204,7 @@ public abstract class FlashRio extends SampleRobot {
 	}
 	/**
 	 * Gets the log used to log power data.
-	 * @return
+	 * @return the power log
 	 */
 	protected Log getPowerLog(){
 		return powerLog;

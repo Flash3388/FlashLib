@@ -15,7 +15,6 @@ import org.opencv.core.Mat;
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.communications.DataListener;
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.vision.CvPipeline;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
@@ -35,7 +34,7 @@ public class CameraViewer extends Displayble implements DataListener, CvPipeline
 	private DisplayMode mode = DisplayMode.Normal;
 	
 	public CameraViewer(String name, int id) {
-		super(name, id, FlashboardSendableType.CAM);
+		super(name, id, (byte)-1);
 		view = new ImageView();
 		view.setFitHeight(420);
 		view.setFitWidth(640);
