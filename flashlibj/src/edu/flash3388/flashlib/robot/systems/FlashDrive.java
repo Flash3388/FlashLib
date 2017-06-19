@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
@@ -19,76 +20,10 @@ import edu.flash3388.flashlib.robot.hid.Stick;
  * The autonomous methods allow for all-direction joystick-free movement.
  * 
  * @author Tom Tzook
+ * @since FlashLib 1.0.0
  */
 public class FlashDrive extends System implements TankDriveSystem, HolonomicDriveSystem{
-	
-	public static class InterfaceAction extends Action{
-		private DriveControlInterface driveInterface;
-		private FlashDrive drive;
-		
-		public InterfaceAction(FlashDrive drive, DriveControlInterface inter){
-			this.drive = drive;
-			this.driveInterface = inter;
-			this.driveInterface.setFlashDrive(drive);
-			this.requires(drive);
-		}
 
-		@Override
-		protected void execute() {
-			driveInterface.drive();
-		}
-		@Override
-		protected void end() {
-			drive.stop();
-		}
-	}
-	public static abstract class DriveControlInterface{
-		protected FlashDrive drive;
-		
-		protected void setFlashDrive(FlashDrive drive){
-			this.drive = drive;
-		}
-		
-		protected abstract void drive();
-	}
-	
-	public static class OmniControlInterface extends DriveControlInterface{
-		private Stick stick;
-		
-		public OmniControlInterface(Stick stick){
-			this.stick = stick;
-		}
-		
-		protected void drive(){
-			drive.omniDrive(stick);
-		}
-	}
-	
-	public static class TankControlInterface extends DriveControlInterface{
-		private Stick stick_l, stick_r;
-		
-		public TankControlInterface(Stick stickL, Stick stickR){
-			this.stick_l = stickL;
-			this.stick_r = stickR;
-		}
-		
-		protected void drive(){
-			drive.tankDrive(stick_r, stick_l);
-		}
-	}
-	
-	public static class ArcadeControlInterface extends DriveControlInterface{
-		private Stick stick;
-		
-		public ArcadeControlInterface(Stick stick){
-			this.stick = stick;
-		}
-		
-		protected void drive(){
-			drive.arcadeDrive(stick);
-		}
-	}
-	
 	public static enum MotorSide{
 		Front, Rear, Right, Left
 	}
@@ -129,7 +64,7 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		@Override
 		public void end() { stop();}
 	});
-	public final Action BRAKE = new SystemAction(this, new Action(){
+	public final Action STOP = new SystemAction(this, new Action(){
 		@Override
 		public void initialize() { stop();}
 		@Override
@@ -145,11 +80,10 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	private FlashSpeedController front_controllers;
 	private FlashSpeedController rear_controllers;
 	
-	private InterfaceAction interface_action;
-	
 	private double speed_limit = 1;
 	private double minSpeed = 0.0;
 	private double default_speed = 0.5;
+	private boolean voltageScaling = false;
 	
 	/**
 	 * Creates an instance of the FlashDrive class. Allows for an unlimited amount of motors on the sides 
@@ -207,7 +141,11 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 				break;
 		}
 	}
-	
+	/**
+	 * Gets the speed controllers used for a given side of the drive system.
+	 * @param s side of the motors
+	 * @return the speed controller object for that side.
+	 */
 	public FlashSpeedController getControllers(MotorSide s){
 		switch(s){
 			case Left:
@@ -222,18 +160,43 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		}
 	}
 	
+	/**
+	 * Sets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
+	 * @param limit speed limit [0...1]
+	 */
 	public void setSpeedLimit(double limit){
 		speed_limit = Math.abs(limit);
 	}
+	/**
+	 * Gets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
+	 * @return speed limit [0...1]
+	 */
 	public double getSpeedLimit(){
 		return speed_limit;
 	}
-	
+	/**
+	 * Sets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
+	 * it is decreased to 0.
+	 * @param limit speed limit [0...1]
+	 */
 	public void setMinSpeed(double limit){
 		minSpeed = Math.abs(limit);
 	}
+	/**
+	 * Gets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
+	 * it is decreased to 0.
+	 * @return speed limit [0...1]
+	 */
 	public double getMinSpeed(){
 		return minSpeed;
+	}
+	
+	/**
+	 * Sets the default speed to move the system. Used when calling drive methods with no parameters.
+	 * @param speed the default speed
+	 */
+	public void setDefaultSpeed(double speed){
+		speed = Math.abs(speed);
 	}
 	
 	/**
@@ -375,6 +338,17 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	public void arcadeDrive(Stick stick){
 		arcadeDrive(-stick.getY(), stick.getX());
 	}
+	/**
+	 * Arcade drive implements a single joystick drive. Given a joystick, the code sets the values of the Y axis 
+	 * as move value and X axis as the rotate value. The move value is responsible for moving the robot forward and 
+	 * backward while the rotate value is responsible for the robot rotation. When both values are not zero then the 
+	 * value taken is the absolute bigger.
+	 * 
+	 * @param mstick The joystick to use for Arcade single stick driving. The
+     *        Y axis will be selected for forwards and backwards
+     * @param rstick The joystick to use for Arcade single stick driving. The X axis will
+     *        be selected for rotation rate.
+	 */
 	public void arcadeDrive(Stick mstick, Stick rstick){
 		arcadeDrive(-mstick.getY(), rstick.getX());
 	}
@@ -394,6 +368,19 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	public void arcadeDrive(Stick stick, boolean squared){
 		arcadeDrive(-stick.getY(), stick.getX(), squared);
 	}
+	/**
+	 * Arcade drive implements a single joystick drive. Given a joystick, the code sets the values of the Y axis 
+	 * as move value and X axis as the rotate value. The move value is responsible for moving the robot forward and 
+	 * backward while the rotate value is responsible for the robot rotation. When both values are not zero then the 
+	 * value taken is the absolute bigger. Allows to decrease the values of the speeds by choosing to square them. 
+	 * Given a value SPEED when squared is true, the resulting value is SPEED * SPEED.
+	 * 
+	 * @param mstick The joystick to use for Arcade single stick driving. The
+     *        Y axis will be selected for forwards and backwards
+     * @param rstick The joystick to use for Arcade single stick driving. The X axis will
+     *        be selected for rotation rate.
+	 * @param squared If true, the speed will be multiplied by it self for smaller values.
+	 */
 	public void arcadeDrive(Stick mstick, Stick rstick, boolean squared){
 		arcadeDrive(-mstick.getY(), rstick.getX(), squared);
 	}
@@ -542,6 +529,20 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		omniDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(side_axis), squared);
 	}
 	
+	/**
+	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
+	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
+	 * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
+	 * the X value to move the wheels in the front and back.
+	 * 
+	 * <p>
+	 * Vectored tank drive is an experimental omni control which uses a motion vector just like Mecanum drive.
+	 * </p>
+	 * 
+	 * @param y y-axis value of the vector
+	 * @param x x-axis value of the vector
+	 * @param rotate rotation value
+	 */
 	public void vectoredOmniDrive_Cartesian(double y, double x, double rotate){
 		double right = 0, left = 0, front = 0, rear = 0;
 		
@@ -585,67 +586,113 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		setMotors(front, right, left, rear);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void driveY(double speed, boolean direction){
 		if(direction) forward(speed);
 		else backward(speed);
 	}
 	
+	/**
+	 * Sets the right left motors with speeds to move forward.
+	 * @param r value for right [0...1]
+	 * @param l value for left [0...1]
+	 */
 	public void forward(double r, double l){
 		setMotors(0, r, l, 0);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override 
 	public void forward(double speed){
 		forward(speed, speed);
 	}
+	/**
+	 * Moves the system forward at the default speed.
+	 */
 	public void forward(){
 		forward(default_speed);
 	}
-	
+	/**
+	 * Sets the right left motors with speeds to move backwards.
+	 * @param r value for right [0...1]
+	 * @param l value for left [0...1]
+	 */
 	public void backward(double r, double l){
 		setMotors(0, -r, -l, 0);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override 
 	public void backward(double speed){
 		backward(speed, speed);
 	}
+	/**
+	 * Moves the system backwards at the default speed.
+	 */
 	public void backward(){
 		backward(default_speed);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void driveX(double speed, boolean direction){
 		if(direction) right(speed);
 		else left(speed);
 	}
 	
+	/**
+	 * Sets the front and rear motors with speeds to move right.
+	 * @param r value for rear [0...1]
+	 * @param f value for front [0...1]
+	 */
 	public void right(double f, double r){
 		setMotors(f, 0, 0, r);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override 
 	public void right(double speed){
 		right(speed, speed);
 	}
+	/**
+	 * Moves the system right at the default speed.
+	 */
 	public void right(){
 		right(default_speed);
 	}
 	
+	/**
+	 * Sets the front and rear motors with speeds to move left.
+	 * @param r value for rear [0...1]
+	 * @param f value for front [0...1]
+	 */
 	public void left(double f, double r){
 		setMotors(-f, 0, 0, -r);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override 
 	public void left(double speed){
 		left(speed, speed);
 	}
+	/**
+	 * Moves the system left at the default speed.
+	 */
 	public void left(){
 		left(default_speed);
 	}
 	/**
-	 * Implements a joystick-free rotation movement at a given speed in a given direction. If side motors are defined then they
-	 * will be used as well.
-	 * 
-	 * @param speed The speed in which to rotate, between 0 and 1.
-	 * @param direction The direction in which to rotate. 1 for right, -1 for left
+	 * {@inheritDoc}
 	 */
 	@Override 
 	public void rotate(double speed, boolean direction){
@@ -655,58 +702,56 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		setMotors(-speed, -speed, speed, speed);
 	}
 	
-	/*public void rotate(int angle){
-		rotate(angle, speed_limit);
-	}
-	public void rotate(int angle, double speed){
-		speed = Math.abs(limit(speed));
-		new AbsoluteRotateAction(this, gyro, angle, speed).start();
-	}
-	public void relativeRotate(int angle){
-		relativeRotate(angle, speed_limit);
-	}
-	public void relativeRotate(int angle, double speed){
-		speed = Math.abs(limit(speed));
-		new RelativeRotateAction(this, gyro, angle, speed).start();
-	}*/
-	
 	/**
-	 * Implements a joystick-free right rotation movement at a given speed. If side motors are defined then they
-	 * will be used as well.
-	 * 
-	 * @param speed The speed in which to rotate right, between 0 and 1.
+	 * {@inheritDoc}
 	 */
 	@Override 
 	public void rotateRight(double speed){
 		rotate(speed, true);
 	}
+	/**
+	 * Rotates the system right at the default speed.
+	 */
 	public void rotateRight(){
 		rotateRight(default_speed);
 	}
 	/**
-	 * Implements a joystick-free left rotation movement at a given speed. If side motors are defined then they
-	 * will be used as well.
-	 * 
-	 * @param speed The speed in which to rotate left, between 0 and 1.
+	 * {@inheritDoc}
 	 */
 	@Override 
 	public void rotateLeft(double speed){
 		rotate(speed, false); 
 	}
+	/**
+	 * Rotates the system left at the default speed.
+	 */
 	public void rotateLeft(){
 		rotateLeft(default_speed);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void holonomicCartesian(double x, double y, double rotation) {
 		//implement for omni drive
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void holonomicPolar(double magnitude, double direction, double rotation) {
 		//implement for omni drive
 	}
 	
-	
+	/**
+	 * Sets values for all speed controllers. Limits them first according to set parameters.
+	 * 
+	 * @param f value for forward motors
+	 * @param r value for right motors
+	 * @param l value for left motors
+	 * @param b value for back motors
+	 */
 	public void setMotors(double f, double r, double l, double b){
 		f = limit(f);
 		r = limit(r);
@@ -723,7 +768,7 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 			rear_controllers.set(b); 
 	}
 	/**
-	 * Sets all the motors to speed 0, thus stopping the motors.
+	 * {@inheritDoc}
 	 */
 	@Override 
 	public void stop(){
@@ -738,40 +783,32 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	}
 	
 	private double limit(double speed){
+		if(voltageScaling)
+			speed = FlashRoboUtil.scaleVoltageBus(speed);
+		
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
-		
+			
 		speed *= speed_limit;
 		if(speed > speed_limit) speed = speed_limit;
 		else if(speed < -speed_limit) speed = -speed_limit;
 		return speed;
 	}
-	
-	public void startControlInterface(){
-		if(interface_action == null) return;
-		if(interface_action.isRunning()) interface_action.cancel();
-		interface_action.start();
-	}
-	public void startControlInterface(DriveControlInterface controlInterface){
-		if(interface_action != null && interface_action.isRunning()) 
-			interface_action.cancel();
-		setControlInterface(controlInterface);
-		interface_action.start();
-	}
-	public void setControlInterface(DriveControlInterface controlInterface){
-		controlInterface.setFlashDrive(this);
-		interface_action = new InterfaceAction(this, controlInterface);
-	}
-	public void setDefaultInterface(DriveControlInterface controlInterface){
-		setControlInterface(controlInterface);
-		setDefaultAction(interface_action);
-	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns this instance.
+	 * </p>
+	 */
 	@Override
 	public System getSystem() {
 		return this;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void enableBrakeMode(boolean mode) {
 		if(front_controllers != null && front_controllers instanceof ModableMotor)
@@ -783,6 +820,9 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		if(rear_controllers != null && rear_controllers instanceof ModableMotor)
 			((ModableMotor)rear_controllers).enableBrakeMode(mode);
 	}
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean inBrakeMode() {
 		return (front_controllers == null || (front_controllers instanceof ModableMotor && 
@@ -793,5 +833,20 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 												((ModableMotor)right_controllers).inBrakeMode()) && 
 				(rear_controllers == null || rear_controllers instanceof ModableMotor && 
 												((ModableMotor)rear_controllers).inBrakeMode());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void enableVoltageScaling(boolean en) {
+		voltageScaling = en;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isVoltageScaling() {
+		return voltageScaling;
 	}
 }

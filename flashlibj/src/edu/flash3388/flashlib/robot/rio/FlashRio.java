@@ -12,6 +12,14 @@ import edu.flash3388.flashlib.util.Log;
 
 import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
 
+/**
+ * The base for FRC robots wanting to use FlashLib in its fullest. Provides a control loop with power
+ * tracking and control modes. Manually initializes FlashLib to its full extent. Extends SampleRobot. 
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ * @see SampleRobot
+ */
 public abstract class FlashRio extends SampleRobot {
 	
 	private static final double WARNING_VOLTAGE = 8.5;
@@ -170,18 +178,34 @@ public abstract class FlashRio extends SampleRobot {
 		}
 	}
 	
+	/**
+	 * Sets whether or not to log data about power usage into a log.
+	 * @param log true to log data, false otherwise
+	 */
 	protected void setPowerLogging(boolean log) {
 		logPower = log;
 		if(!log)
 			powerLog.disable();
 		else powerLog.setLoggingMode(Log.MODE_FULL);
 	}
+	/**
+	 * Sets the total power draw which should prompt a warning from the power log.
+	 * @param current total current in Ampere
+	 */
 	protected void setPowerDrawWarning(double current){
 		warningPowerDraw = current;
 	}
+	/**
+	 * Sets the voltage level which should prompt a warning from the power log.
+	 * @param volts voltage in Volts
+	 */
 	protected void setVoltageDropWarning(double volts){
 		warningVoltage = volts;
 	}
+	/**
+	 * Gets the log used to log power data.
+	 * @return
+	 */
 	protected Log getPowerLog(){
 		return powerLog;
 	}

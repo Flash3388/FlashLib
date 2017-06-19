@@ -59,21 +59,49 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		reset();
 	}
 
+	/**
+	 * Gets whether or not the encoder is updated automatically through the scheduler.
+	 * @return true if the encoder is updated automatically
+	 */
 	public boolean isAutomaticUpdate(){
 		return !manualUpdate;
 	}
+	/**
+	 * Gets the amount of pulses from the encoder for an entire revolution. Useful in quadrature mode.
+	 * @return the amount of pulse in a revolution
+	 */
 	public double getPulsesPerRevolution(){
 		return ticksPerRev;
 	}
+	/**
+	 * Gets the distance passed when the encoder counts one revolution
+	 * @return distance per revolution
+	 */
 	public double getDistancePerRevolution(){
 		return distancePerRev;
 	}
+	/**
+	 * Gets the margin of data which causes a reset for the data accumulator.
+	 * @return reset margin
+	 */
 	public double getResetMargin(){
 		return changeMargin;
 	}
+	/**
+	 * Gets whether or not the data accumulator is being reset when the margin of data is too high.
+	 * @return true if reset occurs, false otherwise
+	 */
 	public boolean isResetAvgOnChange(){
 		return resetAvgOnChange;
 	}
+	/**
+	 * Sets the encoder for automatic updates. If true, the encoder is added as a task to the
+	 * scheduler. If not, the task is removed. When in automatic update, data from the encoder is evaluated constantly by
+	 * this class, allowing for more accurate tracking.
+	 * 
+	 * @param auto true to automatically update, false to manually update
+	 * @return true if the mode change was successful, false otherwise.
+	 */
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
 		if(Scheduler.schedulerHasInstance() && auto)
@@ -81,19 +109,41 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		else if(auto) return false;
 		return true;
 	}
+	
+	/**
+	 * Sets the amount of pulses being sent by the encoder to indicate a full revolution. Only needed when
+	 * in quadrature mode.
+	 * @param pulses amount of pulses
+	 */
 	public void setPulsesPerRevolution(int pulses){
 		ticksPerRev = pulses;
 	}
+	/**
+	 * Sets the distance passed when the encoder makes one revolution. Used to calculate distance passed.
+	 * @param d distance per revolution
+	 */
 	public void setDistancePerRevolution(double d){
 		this.distancePerRev = d;
 	}
+	/**
+	 * Sets the reset margin for the accumulator. When the margin between 2 velocities has passed this value, the accumulator
+	 * is reset.
+	 * @param m reset margin
+ 	 */
 	public void setResetMargin(double m){
 		changeMargin = m;
 	}
+	/**
+	 * Sets whether or not to reset the accumulator when margin between 2 velocities has passed the reset.
+	 * @param r true to allow reset, false otherwise
+ 	 */
 	public void setResetAvgOnChange(boolean r){
 		resetAvgOnChange = r;
 	}
 	
+	/**
+	 * Resets all data from the encoder.
+	 */
 	public void reset(){
 		counter.reset();
 		revs = 0;
@@ -101,10 +151,18 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		lastV = 0;
 		resetAvg();
 	}
+	/**
+	 * Resets the data accumulator.
+	 */
 	public void resetAvg(){
 		rateSum = 0;
 		updates = 0;
 	}
+	
+	/**
+	 * Updates the encoder data. Calculates the velocity and distance passed by the encoder.
+	 * When in auto mode, should not be called manually.
+	 */
 	public void update(){
 		int pulses = counter.get();
 		double period = counter.getPeriod();
@@ -130,23 +188,49 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 		lastV = velocity;
 	}
 	
+	/**
+	 * Gets the average angular velocity measured by the encoder. If in manual update mode, {@link #update()} will
+	 * be called.
+	 * @return the average velocity
+	 */
 	public double getAvgRate(){
 		if(manualUpdate) update();
 		return rateSum / updates;
 	}
+	/**
+	 * Gets the angular velocity measured by the encoder. If in manual update mode, {@link #update()} will
+	 * be called.
+	 * @return the angular velocity
+	 */
 	@Override
 	public double getRate(){
 		if(manualUpdate) update();
 		return velocity;
 	}
+	/**
+	 * Gets the revolutions measured by the encoder. If in manual update mode, {@link #update()} will
+	 * be called.
+	 * @return revolutions of the encoder
+	 */
 	public long getTotal(){
 		if(manualUpdate) update();
 		return revs;
 	}
+	/**
+	 * Gets the amount of pulses sent by the encoder. If in manual update mode, {@link #update()} will
+	 * be called.
+	 * @return pulses
+	 */
 	public int getTicks(){
 		if(manualUpdate) update();
 		return ticks;
 	}
+	/**
+	 * Gets the distance calculated. If in manual update mode, {@link #update()} will
+	 * be called.
+	 * @return the distance. Measurement units depends on the set distance per revolution data
+	 * @see #getDistancePerRevolution()
+	 */
 	@Override
 	public double getDistance(){
 		if(manualUpdate) update();

@@ -5,6 +5,12 @@ import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
+/**
+ * Wrapper for the PowerDistributionPanel. Allows attachment to the flashboard for data tracking.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public class PDP extends Sendable{
 	
 	public static final int CHANNELS = 16;
@@ -16,38 +22,80 @@ public class PDP extends Sendable{
 	private PowerDistributionPanel pdp;
 	private double voltage = 0;
 	
+	/**
+	 * Initializes the wrapper for a PDP at the given module.
+	 * @param module the module
+	 */
 	public PDP(int module){
-		super("PDP", FlashboardSendableType.PDP);
+		super("PDP"+module, FlashboardSendableType.PDP);
 		pdp = new PowerDistributionPanel(module);
 		
 		voltage = pdp.getVoltage();
 	}
+	/**
+	 * Initializes the wrapper for a PDP at the default module: 0.
+	 */
 	public PDP(){
 		this(0);
 	}
 
+	/**
+	 * Gets the wrapped {@link PowerDistributionPanel} object.
+	 * @return the wrapped object
+	 */
 	public PowerDistributionPanel getPanel(){
 		return pdp;
 	}
+	
+	/**
+	 * Gets the voltage measured by the PDP.
+	 * @return voltage in volts
+	 * @see PowerDistributionPanel#getVoltage()
+	 */
 	public double getVoltage(){
 		try{
 			voltage = pdp.getVoltage();
 		}catch(Throwable t){}
-		FlashUtil.getLog().log("PDP Voltage: "+voltage);
 		return voltage;
 	}
+	/**
+	 * Gets the total current measured by the PDP.
+	 * @return current in Ampere
+	 * @see PowerDistributionPanel#getTotalCurrent()
+	 */
 	public double getTotalCurrent(){
 		return pdp.getTotalCurrent();
 	}
+	/**
+	 * Gets the total power measured by the PDP.
+	 * @return power in watts
+	 * @see PowerDistributionPanel#getTotalPower()
+	 */
 	public double getTotalPower(){
 		return pdp.getTotalPower();
 	}
+	/**
+	 * Gets the total energy measured by the PDP.
+	 * @return energy in joules
+	 * @see PowerDistributionPanel#getTotalEnergy()
+	 */
 	public double getTotalEnergy(){
 		return pdp.getTotalEnergy();
 	}
+	/**
+	 * Gets the current measured by the PDP for a channel.
+	 * @param channel the channel index
+	 * @return current in Ampere
+	 * @see PowerDistributionPanel#getCurrent(int)
+	 */
 	public double getCurrent(int channel){
 		return pdp.getCurrent(channel);
 	}
+	/**
+	 * Gets the voltage measured by the PDP.
+	 * @return temperature in celsius
+	 * @see PowerDistributionPanel#getTemperature()
+	 */
 	public double getTemperature(){
 		return pdp.getTemperature();
 	}
