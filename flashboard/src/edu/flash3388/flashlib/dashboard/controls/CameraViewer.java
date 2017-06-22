@@ -14,9 +14,9 @@ import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.vision.CvPipeline;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

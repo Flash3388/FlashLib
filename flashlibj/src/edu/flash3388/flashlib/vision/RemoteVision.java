@@ -228,6 +228,8 @@ public class RemoteVision extends Sendable implements Vision{
 		if(isRunning()) startRemote = true;
 		else stopRemote = true;
 		sendProc = 0;
+		if(processing.size() > 0)
+			sendProps = true;
 	}
 	/**
 	 * {@inheritDoc}

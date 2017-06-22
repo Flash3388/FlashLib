@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Enumeration;
@@ -102,6 +103,7 @@ public class Dashboard extends Application {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		log.log("Loading settings and properties...", "Dashboard");
+		validateBasicHierarcy();
 		loadSettings();
 		validateBasicSettings();
 		printSettings();
@@ -256,6 +258,21 @@ public class Dashboard extends Application {
 		String propv = ConstantsHandler.getStringNative(prop);
 		return propv == null || propv.equals("");
 	}
+	private static void validateBasicHierarcy(){
+		File file = new File(FOLDER_DATA);
+		if(!file.exists()){
+			if(!file.mkdir()){
+				log.reportError("Unable to create DATA folder!!");
+				return;
+			}
+		}
+		file = new File(FOLDER_SAVES);
+		if(!file.exists())
+			file.mkdir();
+		file = new File(FOLDER_RESOURCE);
+		if(!file.exists())
+			file.mkdir();
+	}
 	private static void validateBasicSettings() throws Exception{
 		if(!ConstantsHandler.hasString(PROP_VISION_DEFAULT_PARAM))
 			ConstantsHandler.putString(PROP_VISION_DEFAULT_PARAM, "");
@@ -280,11 +297,10 @@ public class Dashboard extends Application {
 			ConstantsHandler.putNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
 	}
 	private static void loadSettings(){
-		ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
-		
 		try {
+			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
 			Remote.loadHosts(REMOTE_HOSTS_FILE);
-		} catch (NullPointerException | IOException e) {
+		} catch (Exception e) {
 			log.reportError(e.getMessage());
 		}
 	}

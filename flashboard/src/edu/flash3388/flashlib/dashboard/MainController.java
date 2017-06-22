@@ -139,10 +139,10 @@ public class MainController implements Initializable{
 		Dashboard.addRunnableForUpdate(threadTask);
 		
 		sbc_ssh.setOnAction((e)->{
-			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
+			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
 		});
 		sbc_sftp.setOnAction((e)->{
-			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
+			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
 		});
 		sbc_update.setOnAction((e)->{
 			//TODO: IMPLEMENT
