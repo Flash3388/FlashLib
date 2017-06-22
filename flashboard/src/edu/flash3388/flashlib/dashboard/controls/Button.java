@@ -39,6 +39,7 @@ public class Button extends Displayble{
 	}
 
 	private void press(){
+		press[0] = DashboardButton.DOWN;
 		changed = true;
 	}
 	@Override
@@ -47,6 +48,8 @@ public class Button extends Displayble{
 			FlashFxUtils.onFxThread(()->{
 				button.setDisable(false);
 			});
+			press[0] = DashboardButton.UP;
+			changed = true;
 		}
 	}
 	@Override

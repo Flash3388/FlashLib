@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
@@ -14,10 +15,10 @@ public class Slider extends Displayble{
 	private Label label;
 	private VBox container;
 	private SimpleDoubleProperty value;
-	private double min, max;
+	private double min, max, newValue = 0;
 	private int ticks;
 	private Runnable updater;
-	private boolean changed = false;
+	private boolean changed = false, local = false, valChanged = false;
 	private byte[] data = new byte[8];
 	
 	public Slider(String name, int id) {
@@ -26,7 +27,10 @@ public class Slider extends Displayble{
 		slider = new javafx.scene.control.Slider();
 		value = new SimpleDoubleProperty();
 		slider.valueProperty().addListener((observable, oldValue, newValue)->{
+			if(local) return;
 			value.set(newValue.doubleValue());
+			this.newValue = value.get();
+			label.setText(getName()+": "+Mathf.roundDecimal(this.newValue));
 			FlashUtil.fillByteArray(value.get(), data);
 			changed = true;
 		});
@@ -43,8 +47,17 @@ public class Slider extends Displayble{
 				slider.setMin(min);
 			if(max != slider.getMax())
 				slider.setMax(max);
-			if(ticks != slider.getMinorTickCount())
-				slider.setMinorTickCount(ticks);
+			if(ticks != slider.getMajorTickUnit()){
+				slider.setMajorTickUnit(ticks);
+			}
+			if(valChanged){
+				valChanged = false;
+				local = true;
+				value.set(newValue);
+				slider.setValue(newValue);
+				label.setText(getName()+": "+Mathf.roundDecimal(this.newValue));
+				local = false;
+			}
 		};
 	}
 
@@ -56,13 +69,22 @@ public class Slider extends Displayble{
 	protected Node getNode(){
 		return container;
 	}
+	@Override
+	public DisplayType getDisplayType(){
+		return DisplayType.Manual;
+	}
 	
 	@Override
 	public void newData(byte[] data) {
-		if(data.length < 20) return;
-		min = FlashUtil.toDouble(data, 0);
-		max = FlashUtil.toDouble(data, 8);
-		ticks = FlashUtil.toInt(data, 16);
+		if(data.length == 8){
+			newValue = FlashUtil.toDouble(data);
+			valChanged = true;
+		}
+		else if(data.length == 20){
+			min = FlashUtil.toDouble(data, 0);
+			max = FlashUtil.toDouble(data, 8);
+			ticks = FlashUtil.toInt(data, 16);
+		}
 	}
 	@Override
 	public byte[] dataForTransmition() {

@@ -189,7 +189,7 @@ public class Button implements ButtonListener, BooleanDataSource{
 				com.cancel();
 		}
 	}
-	public boolean actionsStilRunning(){
+	public boolean actionsStillRunning(){
 		boolean run = false;
 		Enumeration<ButtonCommand> commEnum = commands.elements();
 		while(commEnum.hasMoreElements()){
@@ -214,12 +214,12 @@ public class Button implements ButtonListener, BooleanDataSource{
     	setCommands(changedUp && (holdStart > 0 && FlashUtil.millisInt() - holdStart < 500));
 	}
 	public synchronized void setPressed(boolean press){
-		changedUp = true;
-		last = true;
-		current = false;
-		changedDown = false;
+		changedUp = press;
+		last = press;
+		current = !press;
+		changedDown = !press;
 		
-		setCommands(true);
+		setCommands(press);
 	}
 	protected void setCommands(boolean press){
 		if(!RobotState.isRobotTeleop()) return;
@@ -245,6 +245,7 @@ public class Button implements ButtonListener, BooleanDataSource{
 			ButtonCommand ex = commEnum.nextElement();
 			if(ex.type == ActivateType.Press){
 				ex.start();
+				System.out.println("Start");
 			}
 		}
 	}

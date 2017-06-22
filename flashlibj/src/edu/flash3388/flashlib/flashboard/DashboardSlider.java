@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -11,7 +13,8 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class DashboardSlider extends Sendable{
 	
-	private double max, min, value;
+	private DoubleDataSource source;
+	private double max, min, lastValue;
 	private int ticks;
 	private boolean changed = false;
 	private byte[] data = new byte[20];
@@ -22,9 +25,10 @@ public class DashboardSlider extends Sendable{
 		this.max = max;
 		this.min = min;
 		changed = true;
+		source = ConstantsHandler.getNumber(getName(), min);
 	}
 
-	public double getTicks(){
+	public int getTicks(){
 		return ticks;
 	}
 	public double maxValue(){
@@ -32,9 +36,6 @@ public class DashboardSlider extends Sendable{
 	}
 	public double minValue(){
 		return min;
-	}
-	public double doubleValue(){
-		return value;
 	}
 	public void setMinValue(double min){
 		this.min = min;
@@ -52,23 +53,31 @@ public class DashboardSlider extends Sendable{
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 8) return;
-		value = FlashUtil.toDouble(data);
+		double value = FlashUtil.toDouble(data);
+		ConstantsHandler.putNumber(getName(), value);
+		lastValue = value;
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		changed = false;
-		FlashUtil.fillByteArray(minValue(), 0, data);
-		FlashUtil.fillByteArray(maxValue(), 8, data);
-		FlashUtil.fillByteArray(getTicks(), 16, data);
-		return data;
+		if(changed){
+			changed = false;
+			FlashUtil.fillByteArray(minValue(), 0, data);
+			FlashUtil.fillByteArray(maxValue(), 8, data);
+			FlashUtil.fillByteArray(getTicks(), 16, data);
+			return data;
+		}else{
+			lastValue = source.get();
+			return FlashUtil.toByteArray(lastValue);
+		}
 	}
 	@Override
 	public boolean hasChanged() {
-		return changed;
+		return changed || source.get() != lastValue;
 	}
 	@Override
 	public void onConnection() {
 		changed = true;
+		lastValue = source.get() - 1;
 	}
 	@Override
 	public void onConnectionLost() {
