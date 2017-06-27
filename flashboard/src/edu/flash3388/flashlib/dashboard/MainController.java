@@ -6,13 +6,13 @@ import java.util.Enumeration;
 import java.util.ResourceBundle;
 
 import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
+import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
+import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
 import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FileDialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
-import edu.flash3388.flashlib.gui.ShellWindow;
-import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
@@ -62,7 +62,6 @@ public class MainController implements Initializable{
 				if(lastProc != Dashboard.getVision().getSelectedProcessingIndex()){
 					lastProc = Dashboard.getVision().getSelectedProcessingIndex();
 					controller.updateParamBoxSelection();
-					System.out.println("Selection changed");
 				}
 				controller.updateVisionRun();
 			}
@@ -70,8 +69,13 @@ public class MainController implements Initializable{
 				lastconnectionC = !lastconnectionC;
 				controller.connectionRect.setFill(lastconnectionC ? Color.GREEN : Color.RED);
 				
-				if(!lastconnectionC)
+				if(!lastconnectionC){
 					controller.resetDisplay();
+					PDPWindow.reset();
+					PDP.resetBoards();
+					TesterWindow.reset();
+					FlashboardTester.resetTesters();
+				}
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
 				lastconnectionS = !lastconnectionS;

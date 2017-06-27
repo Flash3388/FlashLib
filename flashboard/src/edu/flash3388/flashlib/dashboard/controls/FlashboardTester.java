@@ -85,4 +85,14 @@ public class FlashboardTester extends Sendable{
 	public static String[] getTestersNames(){
 		return testers.keySet().toArray(new String[testers.keySet().size()]);
 	}
+	public static void resetTesters(){
+		String[] testers = getTestersNames();
+		for (int i = 0; i < testers.length; i++){
+			FlashboardTester tester = getTester(testers[i]);
+			tester.enable(false);
+			tester.motors.clear();
+		}
+		FlashboardTester.testers.clear();
+		unallocatedMotors.clear();
+	}
 }

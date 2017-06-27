@@ -245,7 +245,6 @@ public class Button implements ButtonListener, BooleanDataSource{
 			ButtonCommand ex = commEnum.nextElement();
 			if(ex.type == ActivateType.Press){
 				ex.start();
-				System.out.println("Start");
 			}
 		}
 	}

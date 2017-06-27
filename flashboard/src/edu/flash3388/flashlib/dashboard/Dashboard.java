@@ -169,8 +169,10 @@ public class Dashboard extends Application {
 					communications.start();
 					camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
 					camClient.addListener(camViewer);
-				   } catch (IOException e) {
-					   //log.reportError(e.getMessage());
+				   }catch(java.net.UnknownHostException eh){
+					   
+				   }catch (IOException e) {
+					   log.reportError(e.getMessage());
 				   }
 			   }
 		 });

@@ -101,4 +101,9 @@ public class PDP extends Displayble{
 	public static PDP get(int i){
 		return pdps.get(i);
 	}
+	public static void resetBoards(){
+		for(Enumeration<PDP> pdpEnum = pdps.elements(); pdpEnum.hasMoreElements();)
+			pdpEnum.nextElement().disableSend();
+		pdps.clear();
+	}
 }

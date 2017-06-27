@@ -55,4 +55,8 @@ public class PDPWindow extends Stage{
 	public static boolean onScreen(){
 		return instance != null && instance.isShowing();
 	}
+	public static void reset(){
+		if(instance != null)
+			instance.controller.resetTotal();
+	}
 }

@@ -18,7 +18,7 @@ public class Slider extends Displayble{
 	private double min, max, newValue = 0;
 	private int ticks;
 	private Runnable updater;
-	private boolean changed = false, local = false, valChanged = false;
+	private boolean changed = false, local = false, valChanged = false, update = true;
 	private byte[] data = new byte[8];
 	
 	public Slider(String name, int id) {
@@ -34,6 +34,9 @@ public class Slider extends Displayble{
 			FlashUtil.fillByteArray(value.get(), data);
 			changed = true;
 		});
+		slider.setShowTickLabels(true);
+		slider.setShowTickMarks(true);
+		slider.setSnapToTicks(true);
 		container = new VBox();
 		container.setSpacing(5);
 		container.getChildren().addAll(label, slider);
@@ -43,12 +46,21 @@ public class Slider extends Displayble{
 		ticks = 10;
 		
 		updater = ()->{
-			if(min != slider.getMin())
+			update = false;
+			if(min != slider.getMin()){
 				slider.setMin(min);
-			if(max != slider.getMax())
+				slider.setBlockIncrement((max - min) / ticks);
+				slider.setMajorTickUnit(max - min);
+			}
+			if(max != slider.getMax()){
 				slider.setMax(max);
-			if(ticks != slider.getMajorTickUnit()){
-				slider.setMajorTickUnit(ticks);
+				slider.setBlockIncrement((max - min) / ticks);
+				slider.setMajorTickUnit(max - min);
+			}
+			if(ticks != slider.getMinorTickCount()){
+				slider.setMinorTickCount(ticks);
+				slider.setBlockIncrement((max - min) / ticks);
+				slider.setMajorTickUnit(max - min);
 			}
 			if(valChanged){
 				valChanged = false;
@@ -63,6 +75,7 @@ public class Slider extends Displayble{
 
 	@Override
 	public Runnable updateDisplay(){
+		if(!update) return null;
 		return updater;
 	}
 	@Override
@@ -79,11 +92,13 @@ public class Slider extends Displayble{
 		if(data.length == 8){
 			newValue = FlashUtil.toDouble(data);
 			valChanged = true;
+			update = true;
 		}
 		else if(data.length == 20){
 			min = FlashUtil.toDouble(data, 0);
 			max = FlashUtil.toDouble(data, 8);
 			ticks = FlashUtil.toInt(data, 16);
+			update = true;
 		}
 	}
 	@Override

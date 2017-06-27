@@ -46,19 +46,21 @@ public class Communications {
 		public void run() {
 			while(!stop){
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-				while(!comm.connect() && !stop);
+				while(!comm.connect() && !stop)
+					FlashUtil.delay(200);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
 				comm.resetAll();
 				
-				while(comm.isConnected()){
+				while(comm.isConnected() && !stop){
 					comm.sendAll();
 					comm.read();
 					
 					comm.commInterface.update(FlashUtil.millisInt());
 					FlashUtil.delay(10);
 				}
+				comm.commInterface.disconnect();
 				comm.onDisconnect();
 				FlashUtil.getLog().log("Disconnected", comm.logName);
 			}
@@ -450,6 +452,7 @@ public class Communications {
 	 */
 	public void close() {
 		disconnect();
+		commTask.stop();
 		commInterface.close();
 		detachAll();
 		

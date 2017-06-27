@@ -202,17 +202,23 @@ public class Flashboard {
 		if(!instance){
 			Flashboard.tcp = tcp;
 			try {
-				vision = new RemoteVision();
-				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+				if(vision == null)
+					vision = new RemoteVision();
+				if(camViewer == null)
+					camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
 				
-				CommInterface readi;
-				if(tcp)
-					readi = new TcpCommInterface(port);
-				else readi = new UdpCommInterface(port);
+				if(communications == null){
+					CommInterface readi;
+					if(tcp)
+						readi = new TcpCommInterface(port);
+					else readi = new UdpCommInterface(port);
+					
+					communications = new Communications("Flashboard", readi);
+					communications.attach(vision);
+				}
 				
-				communications = new Communications("Flashboard", readi);
-				camServer = new CameraServer("Flashboard", camport, camViewer);
-				communications.attach(vision);
+				if(camServer == null)
+					camServer = new CameraServer("Flashboard", camport, camViewer);
 				
 				instance = true;
 				FlashUtil.getLog().logTime("Flashboard: Initialized at port " + port);

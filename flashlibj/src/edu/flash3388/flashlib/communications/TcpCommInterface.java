@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import edu.flash3388.flashlib.util.FlashUtil;
+
 /**
  * {@link CommInterface} using the TCP/IP model communications. Extends {@link StreamCommInterface} because TCP is a
  * stream-based communications protocol, but does not used the checksum corruption detection implemented in {@link StreamCommInterface}.
@@ -96,8 +98,11 @@ public class TcpCommInterface extends StreamCommInterface{
 	}
 	
 	private void createSocket() throws IOException{
+		FlashUtil.getLog().log("Trying to create socket");
 		socket = new Socket();
+		socket.setReuseAddress(true);
 		socket.bind(new InetSocketAddress(localInet, localPort));
+		FlashUtil.getLog().log("Created socket");
 	}
 	
 	/**
@@ -132,25 +137,30 @@ public class TcpCommInterface extends StreamCommInterface{
 	public void connect(Packet packet){
 		try {
 			if(reset){
+				FlashUtil.getLog().log("Reseting");
 				resetBuffers();
 				
-				if(socket != null && !socket.isClosed())
+				if(socket != null && (!socket.isClosed() || !socket.isBound()))
 					socket.close();
-				if (!isBoundAsServer())
+				if (!isBoundAsServer() && (socket == null || socket.isClosed() || !socket.isBound()))
 					createSocket();
 				
 				reset = false;
 			}
 			
-			if(isBoundAsServer())
+			if(isBoundAsServer()){
 				socket = serverSocket.accept();
+				outInet = socket.getInetAddress();
+			}
 			else
 				socket.connect(new InetSocketAddress(outInet, portOut));
 			
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
-			reset = true;
 		} catch (IOException e) {	
+			e.printStackTrace();
+		}finally{
+			reset = true;
 		}
 	}
 	/**
@@ -161,8 +171,6 @@ public class TcpCommInterface extends StreamCommInterface{
 	 */
 	@Override
 	public void disconnect() {
-		if(!isConnected()) return;
-		
 		if(socket != null){
 			try {
 				socket.close();
@@ -170,6 +178,8 @@ public class TcpCommInterface extends StreamCommInterface{
 			}
 			socket = null;
 		}
+		if(isBoundAsServer())
+			outInet = null;
 	}
 	
 	/**
@@ -205,7 +215,12 @@ public class TcpCommInterface extends StreamCommInterface{
 	 */
 	@Override
 	public boolean isConnected() {
-		return socket != null? socket.isConnected() : false;
+		try {
+			return (socket != null? socket.isConnected() : false) &&
+					(outInet != null && outInet.isReachable(1000));
+		} catch (IOException e) {
+			return false;
+		}
 	}
 	
 	/**
@@ -255,6 +270,7 @@ public class TcpCommInterface extends StreamCommInterface{
 			out.write(data);
 		} catch (IOException e) {
 			disconnect();
+			FlashUtil.getLog().log("Write Exception");
 		}
 	}
 	/**
@@ -271,6 +287,7 @@ public class TcpCommInterface extends StreamCommInterface{
 			return 0;
 		} catch (IOException e) {
 			disconnect();
+			FlashUtil.getLog().log("Read Exception");
 			return 0;
 		} 
 	}
