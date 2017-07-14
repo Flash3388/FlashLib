@@ -28,6 +28,7 @@ public class DefaultFilterCreator implements FilterCreator{
 			case "closest-center": return new ClosestToCenterFilter();
 			case "coordinate": return new CoordinateFilter();
 			case "color": return new ColorFilter();
+			case "circle": return new CircleFilter();
 		}
 		return null;
 	}
@@ -57,6 +58,8 @@ public class DefaultFilterCreator implements FilterCreator{
 			return "coordinate";
 		if(FlashUtil.instanceOf(filter, ColorFilter.class))
 			return "color";
+		if(FlashUtil.instanceOf(filter, CircleFilter.class))
+			return "circle";
 		return null;
 	}
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -20,7 +21,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.math.Mathf;
-
+import edu.flash3388.flashlib.math.Vector3;
 
 /**
  * Provides openCV utilities and vision functionalities.
@@ -237,6 +238,16 @@ public class CvProcessing {
 			
 			CvProcessing.filterForClosestContoursToCenter(contours, mat, amount);
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void circleDetection() {
+			checkReady();
+			
+			CvProcessing.FilterByCircle(threshold,contours);
+		}
 	}
 	
 	//------------------------------------------------------------------
@@ -357,6 +368,57 @@ public class CvProcessing {
 		    if (total != vertices)
 		    	contours.remove(idx);
 		}
+	}
+	
+
+	/**
+	 * removes all contours which not found as circles
+	 * 
+	 * @param thresholded mat
+	 * @param list of contours
+	 * 
+	 */
+	public static void FilterByCircle(Mat threshold,List<MatOfPoint> contours) {
+	    Mat circles = DetectCircle(threshold,10);
+	    //MatOfPoint mpoints = new MatOfPoint(threshold);
+	   // MatOfPoint2f threshold2f = new MatOfPoint2f(mpoints.toArray());
+	    
+		System.out.println("circles Found - " + circles.rows());
+	    for (int i = 0; i < contours.size(); i++){
+			
+			boolean foundMatch = false;
+			for (int j = 0; j < circles.rows();j++){	
+
+				double[] data = circles.get(j, 0);
+				Point center = new Point(data[0],data[1]);
+				
+				double distance = Imgproc.pointPolygonTest(new MatOfPoint2f(contours.get(i)) , center, true);
+				if(distance < 0)//inside
+				{
+					foundMatch = true; //found matching circle for contour 
+					break;
+				}
+					
+			}
+			if(!foundMatch)
+				contours.remove(i);
+		}	
+		
+	}
+
+	
+	/**
+	 * 
+	 * 
+	 * @param The thresholded mat
+	 * @param min distance between circles
+	 */
+	public static Mat DetectCircle(Mat threshold,int distance) {
+
+	    Mat circles = new Mat();
+	    Imgproc.HoughCircles(threshold, circles, Imgproc.CV_HOUGH_GRADIENT,1,distance);
+
+	    return circles;
 	}
 	
 	/**
@@ -837,13 +899,71 @@ public class CvProcessing {
 	 * @param analysis the analysis object
 	 */
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
+		int testFov = 45;
 		Point center = contourCenter(contour);
 		
 		analysis.centerPointX = center.x;
 		analysis.centerPointY = center.y;
 		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
 		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
+		
+		analysis.offsetAngle = calcHorizontalOffsetInDegreese(feed, center, 45);
 	}
+	
+	
+
+	/**
+	 * calculates horizontal distance from the camera to the countour based on 
+	 * 2017 game
+	 * 
+	 * @param feed the image mat
+	 * @param top left of the reflective 
+	 * @param bottom right of light reflector 
+	 * @param angle of view of the camera
+	 */
+	public static double measureDistance(Mat feed,Point t1,Point b2, double angleOfView){
+		double width = b2.x - t1.x;//double height = b2.y - t1.y;
+		
+		return (20*feed.width()/(2*width*Math.tan(Math.toRadians(angleOfView))));
+	}
+	
+	
+	/**
+	 * horizontal angle from the focal to a pixel 
+	 * 
+	 * @param feed the image mat
+	 * @param pixel to calculate angle from 
+	 * @param angle of view of the camera in degreese
+	 */
+	public static double calcHorizontalOffsetInDegreese(Mat feed,Point p, double fovDegrees){
+		// Compute focal length in pixels from FOV
+		return Math.toDegrees(calcHorizontalOffset(feed,p,Math.toRadians(fovDegrees)));
+	}
+	
+	/**
+	 * horizontal angle from the focal to a pixel 
+	 * 
+	 * @param feed the image mat
+	 * @param pixel to calculate angle from 
+	 * @param angle of view of the camera in radians
+	 */
+	public static double calcHorizontalOffset(Mat feed,Point p, double fovRadians){
+		// Compute focal length in pixels from FOV
+		double f = (0.5 * feed.width()) / Math.tan(0.5 * fovRadians);
+		int center_x = feed.width()/2;
+		int center_y = feed.height()/2;
+		// Vectors subtending image center and pixel from optical center
+		// in camera coordinates.
+		Vector3 center = new Vector3(0, 0, f);		
+		Vector3 pixel = new Vector3(p.x - center_x, p.y - center_y, f);
+
+		// angle between vector (0, 0, f) and pixel
+		double dot = center.dot(pixel);
+		double alpha = Math.acos(dot / (center.length() * pixel.length()));
+		return alpha;
+	}
+	
+	
 	/**
 	 * Converts a list of contours into a list of a list of points. That is since a contour is a collection of points.
 	 * 
