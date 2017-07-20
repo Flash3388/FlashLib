@@ -47,7 +47,7 @@ public class Communications {
 			while(!stop){
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
 				while(!comm.connect() && !stop)
-					FlashUtil.delay(200);
+					FlashUtil.delay(50);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
@@ -60,7 +60,6 @@ public class Communications {
 					comm.commInterface.update(FlashUtil.millisInt());
 					FlashUtil.delay(10);
 				}
-				comm.commInterface.disconnect();
 				comm.onDisconnect();
 				FlashUtil.getLog().log("Disconnected", comm.logName);
 			}
@@ -77,6 +76,7 @@ public class Communications {
 	
 	private long currentMillis = -1, readStart = -1;
 	private int readTimeout;
+	private boolean allowConnection = true;
 	private Packet packet = new Packet();
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
@@ -351,12 +351,33 @@ public class Communications {
 	}
 	
 	/**
+	 * Sets whether to allow connection or not. If connection is not allowed, when connection is attempted it will be
+	 * aborted.
+	 * @param allow true to allow, false otherwise.
+	 * @see #connect()
+	 */
+	public void setAllowConnection(boolean allow){
+		allowConnection = allow;
+	}
+	/**
+	 * Gets whether to allow connection or not. If connection is not allowed, when connection is attempted it will be
+	 * aborted.
+	 * @return true if connection is allowed, false otherwise.
+	 * @see #connect()
+	 */
+	public boolean isConnectionAllowed(){
+		return allowConnection;
+	}
+	
+	/**
 	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect(Packet)}.
-	 * 
+	 * If connection is not allowed, the method will simply return false.
 	 * @return true if connection was established, false otherwise
 	 */
 	public boolean connect(){
 		if(isConnected()) return true;
+		if(!allowConnection) return false;
+		
 		updateClock();
 		commInterface.connect(packet);
 		if(isConnected()){

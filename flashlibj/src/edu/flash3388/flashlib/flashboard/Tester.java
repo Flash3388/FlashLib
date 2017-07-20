@@ -29,6 +29,15 @@ public class Tester extends Sendable{
 	}
 
 	/**
+	 * Gets whether or not the motor tester is enabled. This is determined by the Flashboard: if the 
+	 * tester motor window is open and this tester is selected, then it is enabled.
+	 * @return true if the tester is enabled, false otherwise.
+	 */
+	public boolean isEnabled(){
+		return sending;
+	}
+	
+	/**
 	 * Adds a new motor to the tester.
 	 * 
 	 * @param motor the wrapper for tester motor

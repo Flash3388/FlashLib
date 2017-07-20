@@ -188,7 +188,7 @@ public abstract class StreamCommInterface implements CommInterface{
 	 * 
 	 * @return true - server, false - client
 	 */
-	protected boolean isBoundAsServer(){
+	public boolean isBoundAsServer(){
 		return server;
 	}
 	/**

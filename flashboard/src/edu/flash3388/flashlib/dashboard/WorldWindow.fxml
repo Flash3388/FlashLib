@@ -87,6 +87,7 @@
                         <MenuItem fx:id="show_log" mnemonicParsing="false" text="Show Log" />
                         <MenuItem fx:id="motorTester" mnemonicParsing="false" text="Show Motor Tester" />
                         <MenuItem fx:id="showpdp" mnemonicParsing="false" text="Show PDP" />
+                        <MenuItem fx:id="pidtuner" mnemonicParsing="false" text="Show PID Tuner" />
                     </items>
                   </Menu>
                   <Menu fx:id="sbc_menu" mnemonicParsing="false" text="Tools">

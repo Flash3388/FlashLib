@@ -23,4 +23,5 @@ public class FlashboardSendableType {
 	public static final byte PDP = 0xe;
 	public static final byte SLIDER = 0x10;
 	public static final byte ESTOP = 0x00;
+	public static final byte PIDTUNER = 0x04;
 }

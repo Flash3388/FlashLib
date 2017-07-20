@@ -9,6 +9,7 @@ import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
+import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
 import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FileDialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
@@ -75,6 +76,7 @@ public class MainController implements Initializable{
 					PDP.resetBoards();
 					TesterWindow.reset();
 					FlashboardTester.resetTesters();
+					DashboardPidTuner.resetTuners();
 				}
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
@@ -116,7 +118,7 @@ public class MainController implements Initializable{
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
 	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, sbc_update, sbc_load,
-				   sbc_ssh, sbc_sftp, sbc_controller;
+				   sbc_ssh, sbc_sftp, sbc_controller, pidtuner;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -159,6 +161,7 @@ public class MainController implements Initializable{
 			saveParams();
 		});
 		motorTester.setOnAction((e)->showTester());
+		pidtuner.setOnAction((e)->showPidTuner());
 		show_log.setOnAction((e)->showLog());
 		showpdp.setOnAction((e)->showPDP());
 		prop_viewer.setOnAction((e)->showPropViewer());
@@ -464,6 +467,9 @@ public class MainController implements Initializable{
 	}
 	private void showTester(){
 		TesterWindow.showTester();
+	}
+	private void showPidTuner(){
+		PidTunerWindow.showTuner();
 	}
 	public void stop(){
 		

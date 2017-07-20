@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class UdpCommInterface implements CommInterface{
+public class UdpCommInterface implements IpCommInterface{
 	
 	private DatagramSocket socket;
 	private int portOut = -1;
@@ -290,39 +290,13 @@ public class UdpCommInterface implements CommInterface{
 	}
 	
 	/**
-	 * Gets whether or not this interface acts like as a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
-	 * 
-	 * @return true - server, false - client
+	 * {@inheritDoc}
 	 */
-	public boolean boundAsServer(){
+	@Override
+	public boolean isBoundAsServer(){
 		return server;
 	}
 	
-	/**
-	 * Gets the local port for socket binding.
-	 * @return port for local data listening
-	 */
-	public int getLocalPort(){
-		return socket.getLocalPort();
-	}
-	/**
-	 * Gets the remote data port.
-	 * @return remote data port
-	 */
-	public int getRemotePort(){
-		return portOut;
-	}
-	/**
-	 * Gets the remote side address.
-	 * @return address of remote size
-	 */
-	public InetAddress getRemoteAddress(){
-		return outInet;
-	}
 	
 	/**
 	 * Sets whether or not replacing of remote connection is allowed.
@@ -350,6 +324,83 @@ public class UdpCommInterface implements CommInterface{
 		return isConnected;
 	}
 
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getLocalAddress() {
+		return socket.getLocalAddress();
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getRemoteAddress() {
+		return outInet;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getLocalPort() {
+		return socket.getLocalPort();
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRemotePort() {
+		return portOut;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalAddress(InetAddress addr) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			socket = new DatagramSocket(socket.getLocalPort(), addr);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemoteAddress(InetAddress addr) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		outInet = addr;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalPort(int port) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			socket = new DatagramSocket(port, socket.getLocalAddress());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemotePort(int port) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		portOut = port;
+	}
+	
 	
 	private void writeHandshake(){
 		write(HANDSHAKE);

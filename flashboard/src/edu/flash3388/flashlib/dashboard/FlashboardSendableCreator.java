@@ -24,6 +24,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new CvRunner(name, id);
 			case FlashboardSendableType.PDP: return new PDP(name, id);
 			case FlashboardSendableType.ESTOP: return new EmergencyStopControl(id);
+			case FlashboardSendableType.PIDTUNER: return new DashboardPidTuner(name, id);
 		}
 		return null;
 	}

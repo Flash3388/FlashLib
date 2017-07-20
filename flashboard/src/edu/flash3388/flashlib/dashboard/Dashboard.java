@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.dashboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -17,6 +19,7 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.IpCommInterface;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
 import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.ConstantsHandler;
@@ -80,13 +83,16 @@ public class Dashboard extends Application {
 	private static Dashboard instance;
 	private static UpdateTask updateTask;
 	private static Thread updateThread;
-	private static CommInterface commInterface;
+	private static IpCommInterface commInterface;
 	private static Communications communications;
 	private static CameraClient camClient;
 	private static CameraViewer camViewer;
 	private static CvRunner vision;
 	private static EmergencyStopControl emergencyStop;
 	private static Log log;
+	
+	
+	private static long lastConAttmp = -1;
 	
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
@@ -174,7 +180,26 @@ public class Dashboard extends Application {
 				   }catch (IOException e) {
 					   log.reportError(e.getMessage());
 				   }
-			   }
+			   }/*else if(!communications.isConnected() && (lastConAttmp < 0 || FlashUtil.millis() - lastConAttmp > 5000)){
+				   if(communications.isConnectionAllowed())
+					   communications.setAllowConnection(false);
+				   
+				   try {
+						String host = ConstantsHandler.getStringNative(PROP_HOST_ROBOT);
+						
+						
+					    InetAddress remote = InetAddress.getByName(host);
+					    InetAddress local = FlashUtil.getLocalAddress(remote);
+					    
+					    commInterface.setLocalAddress(local);
+					    commInterface.setRemoteAddress(remote);
+					    communications.setAllowConnection(true);
+					    lastConAttmp = FlashUtil.millis();
+				   } catch (UnknownHostException | SocketException e) {
+				   }
+			   }else if(communications.isConnected() && lastConAttmp > 0){
+				   lastConAttmp = -1;
+			   }*/
 		 });
 		addRunnableForUpdate(()->{
 			byte[] img = visionImageNext[visionImageIndex];

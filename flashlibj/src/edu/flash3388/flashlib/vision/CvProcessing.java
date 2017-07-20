@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -27,6 +26,7 @@ import edu.flash3388.flashlib.math.Vector3;
  * Provides openCV utilities and vision functionalities.
  * 
  * @author Tom Tzook
+ * @author Alon Klein
  * @since FlashLib 1.0.0
  */
 public class CvProcessing {
@@ -374,8 +374,8 @@ public class CvProcessing {
 	/**
 	 * removes all contours which not found as circles
 	 * 
-	 * @param thresholded mat
-	 * @param list of contours
+	 * @param threshold mat
+	 * @param contours of contours
 	 * 
 	 */
 	public static void FilterByCircle(Mat threshold,List<MatOfPoint> contours) {
@@ -410,8 +410,8 @@ public class CvProcessing {
 	/**
 	 * 
 	 * 
-	 * @param The thresholded mat
-	 * @param min distance between circles
+	 * @param threshold The thresholded mat
+	 * @param distance min distance between circles
 	 */
 	public static Mat DetectCircle(Mat threshold,int distance) {
 
@@ -917,9 +917,9 @@ public class CvProcessing {
 	 * 2017 game
 	 * 
 	 * @param feed the image mat
-	 * @param top left of the reflective 
-	 * @param bottom right of light reflector 
-	 * @param angle of view of the camera
+	 * @param t1 top left of the reflective 
+	 * @param b2 bottom right of light reflector 
+	 * @param angleOfView angle of view of the camera
 	 */
 	public static double measureDistance(Mat feed,Point t1,Point b2, double angleOfView){
 		double width = b2.x - t1.x;//double height = b2.y - t1.y;
@@ -932,8 +932,8 @@ public class CvProcessing {
 	 * horizontal angle from the focal to a pixel 
 	 * 
 	 * @param feed the image mat
-	 * @param pixel to calculate angle from 
-	 * @param angle of view of the camera in degreese
+	 * @param p pixel to calculate angle from 
+	 * @param fovDegrees angle of view of the camera in degreese
 	 */
 	public static double calcHorizontalOffsetInDegreese(Mat feed,Point p, double fovDegrees){
 		// Compute focal length in pixels from FOV
@@ -944,8 +944,8 @@ public class CvProcessing {
 	 * horizontal angle from the focal to a pixel 
 	 * 
 	 * @param feed the image mat
-	 * @param pixel to calculate angle from 
-	 * @param angle of view of the camera in radians
+	 * @param p pixel to calculate angle from 
+	 * @param fovRadians angle of view of the camera in radians
 	 */
 	public static double calcHorizontalOffset(Mat feed,Point p, double fovRadians){
 		// Compute focal length in pixels from FOV
