@@ -1,10 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
 import java.util.Comparator;
-import java.util.List;
-
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 
 /**
  * Vision source provides a base for vision operations. To use a library for vision processing, it needs to implement this
@@ -33,10 +29,7 @@ public interface VisionSource {
 	Analysis[] getResults();
 	
 	/**
-	 * removes all contours which not found as circles
-	 * 
-	 * @param The thresholded mat
-	 * @param contours list of contours
+	 * Filters the image for any circles. Any non-circle contours are filtered out
 	 * 
 	 */
 	void circleDetection();

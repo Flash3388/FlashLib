@@ -3,11 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/jsch-0154.jar"/>
-	<classpathentry kind="lib" path="libs/opencv-300.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Flashboard/dist/flashboard_lib/linux"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="libs/opencv-300.jar"/>
 	<classpathentry kind="lib" path="libs/flashlib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

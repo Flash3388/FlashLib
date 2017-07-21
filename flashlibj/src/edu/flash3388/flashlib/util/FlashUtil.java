@@ -48,9 +48,14 @@ public final class FlashUtil {
 	public static final String VERSION = "1.0.1";
 	
 	private FlashUtil(){}
+	
 	private static long startTime = 0;
 	private static Log mainLog;
 	private static ExecutorService executor;
+	
+	private static final String os = System.getProperty("os.name").toLowerCase();
+	private static final String architecture = System.getProperty("os.arch");
+	private static final String version = System.getProperty("os.version");
 	
 	static{
 		setStartTime(System.currentTimeMillis());
@@ -1395,4 +1400,72 @@ public final class FlashUtil {
 		return null;
 	}
 	
+	//--------------------------------------------------------------------
+	//------------------------------OS------------------------------------
+	//--------------------------------------------------------------------
+	
+	/**
+	 * Gets whether or not the current operating system is windows.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isWindows(){
+		return os.indexOf("win") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is osx.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isMac(){
+		return os.indexOf("mac") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is unix or linux.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isUnix(){
+		return os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is solaris.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isSolaris(){
+		return os.indexOf("sunos") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is windows 7 or later.
+	 * @return true if the current OS is windows 7 or later.
+	 */
+	public static boolean isWin7OrLater(){
+		try{
+			return isWindows() && Float.parseFloat(version) >= 6.1f;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+	/**
+	 * Gets whether or not the current operating system is windows vista or later.
+	 * @return true if the current OS is windows vista or later.
+	 */
+	public static boolean isWinVistaOrLater(){
+		try{
+			return isWindows() && Float.parseFloat(version) >= 6.0f;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+	/**
+	 * Gets whether or not the current operating system architecture is 64bit.
+	 * @return true if the current OS architecture is 64bit.
+	 */
+	public static boolean isArchitectureX64(){
+		return architecture.indexOf("64") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system architecture is 32bit.
+	 * @return true if the current OS architecture is 32bit.
+	 */
+	public static boolean isArchitectureX86(){
+		return architecture.indexOf("86") >= 0;
+	}
 }

@@ -3,13 +3,13 @@ package edu.flash3388.flashlib.dashboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+
+import com.sun.javafx.PlatformUtil;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
@@ -17,7 +17,6 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
-import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.IpCommInterface;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
@@ -68,12 +67,14 @@ public class Dashboard extends Application {
 	public static final String PROP_COMM_PORT_REMOTE = "comm.port.remote";
 	public static final String PROP_CAM_PORT_LOCAL = "cam.port.local";
 	public static final String PROP_CAM_PORT_REMOTE = "cam.port.remote";
-	
+	public static final String PROP_DEPLOYED = "deployed";
 	public static final String PROP_VISION_DEFAULT_PARAM = "vision.default";
 	
 	public static final String FOLDER_SAVES = "data/saves/";
 	public static final String FOLDER_RESOURCE = "data/res/";
 	public static final String FOLDER_DATA = "data/";
+	public static final String FOLDER_LIBS = "flashboard_lib/";
+	public static final String DEV_FOLDER_LIBS = "dist/flashboard_lib/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
 	private static final String REMOTE_HOSTS_FILE = FOLDER_DATA+"hosts.ini";
@@ -91,9 +92,6 @@ public class Dashboard extends Application {
 	private static EmergencyStopControl emergencyStop;
 	private static Log log;
 	
-	
-	private static long lastConAttmp = -1;
-	
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
 	private static boolean visionParamLoadFailed = false;
@@ -101,19 +99,21 @@ public class Dashboard extends Application {
 	private static boolean commSettingError = false;
 	
 	public static void main(String[] args) throws Exception{
-		FlashUtil.setStart();
 		log = FlashUtil.getLog();
-		log.log("FlashLib version: "+FlashUtil.VERSION);
-		Remote.initializeJSCH();
-		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		log.log("opencv version: "+Core.VERSION, "Dashboard");
+		
 		log.log("Loading settings and properties...", "Dashboard");
 		validateBasicHierarcy();
 		loadSettings();
 		validateBasicSettings();
 		printSettings();
 		log.log("Done", "Dashboard");
+		
+		setupNativePath();
+		log.log("FlashLib version: "+FlashUtil.VERSION);
+		Remote.initializeJSCH();
+		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
+		loadNativeLibrary(Core.NATIVE_LIBRARY_NAME);
+		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		
 		log.log("Creating shutdown hook...", "Dashboard");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->close()));
@@ -123,6 +123,31 @@ public class Dashboard extends Application {
 		initStart();
 	    log.log("Launching FX...", "Dashboard");
 	    launch();
+	}
+	private static void setupNativePath(){
+		String path = ConstantsHandler.getBooleanNative(PROP_DEPLOYED)? FOLDER_LIBS : DEV_FOLDER_LIBS;
+		if(FlashUtil.isWindows()){
+			if(FlashUtil.isArchitectureX64())
+				path += "win64/";
+			else 
+				path += "win32/";
+		}
+		else if(FlashUtil.isUnix())
+			path += "linux/";
+		else
+			throw new RuntimeException("Incompatible Operating System");
+		
+		path = new File(path).getAbsolutePath();
+		log.log("java.library.path="+path, "Dashboard");
+		System.setProperty("java.library.path", path);
+	}
+	private static void loadNativeLibrary(String libname){
+		String path = System.getProperty("java.library.path")+"/";
+		if(FlashUtil.isWindows())
+			path += libname+".dll";
+		else if(FlashUtil.isUnix())
+			path += "lib"+libname+".so";
+		System.load(path);
 	}
 	private static void initStart(){
 		ProcessingFilter.setFilterCreator(new DefaultFilterCreator());
@@ -301,6 +326,8 @@ public class Dashboard extends Application {
 			file.mkdir();
 	}
 	private static void validateBasicSettings() throws Exception{
+		ConstantsHandler.addBoolean(PROP_DEPLOYED, false);
+		
 		if(!ConstantsHandler.hasString(PROP_VISION_DEFAULT_PARAM))
 			ConstantsHandler.putString(PROP_VISION_DEFAULT_PARAM, "");
 		if(!ConstantsHandler.hasString(PROP_HOST_ROBOT)){

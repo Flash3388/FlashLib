@@ -37,6 +37,7 @@ public class CvProcessing {
 	 * A vision source using openCV.
 	 * 
 	 * @author Tom Tzook
+	 * @author Alon Klein
 	 * @since FlashLib 1.0.0
 	 */
 	public static class CvSource implements VisionSource{
@@ -408,10 +409,11 @@ public class CvProcessing {
 
 	
 	/**
-	 * 
+	 * Detects circles in a binary image.
 	 * 
 	 * @param threshold The thresholded mat
 	 * @param distance min distance between circles
+	 * @return matrix of detected circles
 	 */
 	public static Mat DetectCircle(Mat threshold,int distance) {
 
@@ -899,7 +901,6 @@ public class CvProcessing {
 	 * @param analysis the analysis object
 	 */
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
-		int testFov = 45;
 		Point center = contourCenter(contour);
 		
 		analysis.centerPointX = center.x;
@@ -907,7 +908,7 @@ public class CvProcessing {
 		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
 		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
 		
-		analysis.offsetAngle = calcHorizontalOffsetInDegreese(feed, center, 45);
+		analysis.offsetAngle = calcHorizontalOffsetInDegrees(feed, center, 45);
 	}
 	
 	
@@ -920,6 +921,7 @@ public class CvProcessing {
 	 * @param t1 top left of the reflective 
 	 * @param b2 bottom right of light reflector 
 	 * @param angleOfView angle of view of the camera
+	 * @return estimated distance from object in centimeters
 	 */
 	public static double measureDistance(Mat feed,Point t1,Point b2, double angleOfView){
 		double width = b2.x - t1.x;//double height = b2.y - t1.y;
@@ -933,9 +935,10 @@ public class CvProcessing {
 	 * 
 	 * @param feed the image mat
 	 * @param p pixel to calculate angle from 
-	 * @param fovDegrees angle of view of the camera in degreese
+	 * @param fovDegrees angle of view of the camera in degrees
+	 * @return the offset of an object from the center in degrees
 	 */
-	public static double calcHorizontalOffsetInDegreese(Mat feed,Point p, double fovDegrees){
+	public static double calcHorizontalOffsetInDegrees(Mat feed,Point p, double fovDegrees){
 		// Compute focal length in pixels from FOV
 		return Math.toDegrees(calcHorizontalOffset(feed,p,Math.toRadians(fovDegrees)));
 	}
@@ -946,6 +949,7 @@ public class CvProcessing {
 	 * @param feed the image mat
 	 * @param p pixel to calculate angle from 
 	 * @param fovRadians angle of view of the camera in radians
+	 * @return the offset of an object from the center in radians
 	 */
 	public static double calcHorizontalOffset(Mat feed,Point p, double fovRadians){
 		// Compute focal length in pixels from FOV

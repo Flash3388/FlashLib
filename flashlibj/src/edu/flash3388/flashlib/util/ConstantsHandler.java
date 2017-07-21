@@ -38,13 +38,15 @@ import edu.flash3388.flashlib.robot.devices.StringDataSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public final class ConstantsHandler {
+public class ConstantsHandler {
 	
-	private static Map<String, DoubleDataSource.VarDataSource> doubleMap = 
+	private ConstantsHandler(){}
+	
+	private static final Map<String, DoubleDataSource.VarDataSource> doubleMap = 
 			new HashMap<String, DoubleDataSource.VarDataSource>();
-	private static Map<String, StringDataSource.VarDataSource> stringMap = 
+	private static final Map<String, StringDataSource.VarDataSource> stringMap = 
 			new HashMap<String, StringDataSource.VarDataSource>();
-	private static Map<String, BooleanDataSource.VarDataSource> booleanMap = 
+	private static final Map<String, BooleanDataSource.VarDataSource> booleanMap = 
 			new HashMap<String, BooleanDataSource.VarDataSource>();
 	
 	//--------------------------------------------------------------------
