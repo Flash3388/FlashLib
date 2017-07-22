@@ -27,19 +27,10 @@ import edu.flash3388.flashlib.io.FileStream;
 public abstract class Interpolation {
 
 	private HashMap<Double, Double> map = new HashMap<Double, Double>();
-	private double keyMargin = 0;
 	
 	/**
-	 * Creates a base for interpolation with a consistent value margin between 2 x coordinates.
-	 * @param margin the margin
-	 * @see #setKeyMargin(double)
-	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
-	 */
-	public Interpolation(double margin){
-		this.keyMargin = margin;
-	}
-	/**
 	 * Creates a base for interpolation.
+	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
 	 */
 	public Interpolation(){}
 	
@@ -50,22 +41,7 @@ public abstract class Interpolation {
 	public Map<Double, Double> getMap(){
 		return map;
 	}
-	/**
-	 * Sets the consistent value margin between 2 x coordinates. This value is used 
-	 * in some interpolations.
-	 * @param keyMargin the margin
-	 */
-	public void setKeyMargin(double keyMargin){
-		this.keyMargin = keyMargin;
-	}
-	/**
-	 * Gets the consistent value margin between 2 x coordinates. This value is used 
-	 * in some interpolations.
-	 * @return the margin
-	 */
-	public double getKeyMargin(){
-		return keyMargin;
-	}
+	
 	/**
 	 * Gets the count of values in the map
 	 * @return the size of the map
