@@ -179,6 +179,131 @@ public class Vector3 {
 	}
 	
 	/**
+	 * Adds the given coordinates to this vector.
+	 * 
+	 * @param x x coordinate to add
+	 * @param y y coordinate to add
+	 * @param z z coordinate to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(double x, double y, double z){
+		this.x += x;
+		this.y += y;
+		this.z += z;
+		return this;
+	}
+	/**
+	 * Adds the given scalar to all coordinates this vector.
+	 * 
+	 * @param scalar value to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(double scalar){
+		this.x += scalar;
+		this.y += scalar;
+		this.z += scalar;
+		return this;
+	}
+	/**
+	 * Adds the given vector to each coordinate to this vector.
+	 * 
+	 * @param vec vector to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(Vector3 vec){
+		this.x += vec.x;
+		this.y += vec.y;
+		this.z += vec.z;
+		return this;
+	}
+	/**
+	 * Subtracts the given coordinates from this vector.
+	 * 
+	 * @param x x coordinate to subtract
+	 * @param y y coordinate to subtract
+	 * @param z z coordinate to subtract
+	 * @return this vector
+	 */
+	public Vector3 subSelf(double x, double y, double z){
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+		return this;
+	}
+	/**
+	 * Subtracts the given scalar from all coordinates this vector.
+	 * 
+	 * @param scalar value to subtracts
+	 * @return this vector
+	 */
+	public Vector3 subSelf(double scalar){
+		this.x -= scalar;
+		this.y -= scalar;
+		this.z -= scalar;
+		return this;
+	}
+	/**
+	 * Subtracts the given vector from each coordinate to this vector.
+	 * 
+	 * @param vec vector to subtracts
+	 * @return this vector
+	 */
+	public Vector3 subSelf(Vector3 vec){
+		this.x -= vec.x;
+		this.y -= vec.y;
+		this.z -= vec.z;
+		return this;
+	}
+	/**
+	 * Multiplies each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to multiply by
+	 * @return this vector
+	 */
+	public Vector3 multiplySelf(double scalar){
+		this.x *= scalar;
+		this.y *= scalar;
+		this.z *= scalar;
+		return this;
+	}
+	/**
+	 * Multiplies this vector by the given vector.
+	 * 
+	 * @param vec vector to multiply by.
+	 * @return this vector
+	 */
+	public Vector3 multiplySelf(Vector3 vec){
+		this.x *= vec.x;
+		this.y *= vec.y;
+		this.z *= vec.z;
+		return this;
+	}
+	/**
+	 * Divides each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to divide by.
+	 * @return this vector
+	 */
+	public Vector3 divSelf(double scalar){
+		this.x /= scalar;
+		this.y /= scalar;
+		this.z /= scalar;
+		return this;
+	}
+	/**
+	 * Divides this vector by the given vector.
+	 * 
+	 * @param vec vector to divide by.
+	 * @return this vector
+	 */
+	public Vector3 divSelf(Vector3 vec){
+		this.x /= vec.x;
+		this.y /= vec.y;
+		this.z /= vec.z;
+		return this;
+	}
+	
+	/**
 	 * Returns a new vector which equals to the result of addition between 
 	 * this number and given coordinates.
 	 * 
@@ -301,6 +426,14 @@ public class Vector3 {
 	 */
 	public double dot(Vector3 vec){
 		return x * vec.x + y * vec.y + z * vec.z;
+	}
+	/**
+	 * Returns the angle between this vector and another vector.
+	 * @param vec the other vector
+	 * @return angle in degrees
+	 */
+	public double angleTo(Vector3 vec){
+		return angleBetween(this, vec);
 	}
 	
 	/**

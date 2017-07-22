@@ -123,6 +123,119 @@ public class Vector2 {
 	}
 	
 	/**
+	 * Adds the given coordinates to this vector.
+	 * 
+	 * @param x x coordinate to add
+	 * @param y y coordinate to add
+	 * @return this vector
+	 */
+	public Vector2 addSelf(double x, double y){
+		this.x += x;
+		this.y += y;
+		return this;
+	}
+	/**
+	 * Adds the given scalar to all coordinates this vector.
+	 * 
+	 * @param scalar value to add
+	 * @return this vector
+	 */
+	public Vector2 addSelf(double scalar){
+		this.x += scalar;
+		this.y += scalar;
+		return this;
+	}
+	/**
+	 * Adds the given vector to each coordinate to this vector.
+	 * 
+	 * @param vec vector to add
+	 * @return this vector
+	 */
+	public Vector2 addSelf(Vector2 vec){
+		this.x += vec.x;
+		this.y += vec.y;
+		return this;
+	}
+	/**
+	 * Subtracts the given coordinates from this vector.
+	 * 
+	 * @param x x coordinate to subtract
+	 * @param y y coordinate to subtract
+	 * @return this vector
+	 */
+	public Vector2 subSelf(double x, double y){
+		this.x -= x;
+		this.y -= y;
+		return this;
+	}
+	/**
+	 * Subtracts the given scalar from all coordinates this vector.
+	 * 
+	 * @param scalar value to subtracts
+	 * @return this vector
+	 */
+	public Vector2 subSelf(double scalar){
+		this.x -= scalar;
+		this.y -= scalar;
+		return this;
+	}
+	/**
+	 * Subtracts the given vector from each coordinate to this vector.
+	 * 
+	 * @param vec vector to subtracts
+	 * @return this vector
+	 */
+	public Vector2 subSelf(Vector2 vec){
+		this.x -= vec.x;
+		this.y -= vec.y;
+		return this;
+	}
+	/**
+	 * Multiplies each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to multiply by
+	 * @return this vector
+	 */
+	public Vector2 multiplySelf(double scalar){
+		this.x *= scalar;
+		this.y *= scalar;
+		return this;
+	}
+	/**
+	 * Multiplies this vector by the given vector.
+	 * 
+	 * @param vec vector to multiply by.
+	 * @return this vector
+	 */
+	public Vector2 multiplySelf(Vector2 vec){
+		this.x *= vec.x;
+		this.y *= vec.y;
+		return this;
+	}
+	/**
+	 * Divides each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to divide by.
+	 * @return this vector
+	 */
+	public Vector2 divSelf(double scalar){
+		this.x /= scalar;
+		this.y /= scalar;
+		return this;
+	}
+	/**
+	 * Divides this vector by the given vector.
+	 * 
+	 * @param vec vector to divide by.
+	 * @return this vector
+	 */
+	public Vector2 divSelf(Vector2 vec){
+		this.x /= vec.x;
+		this.y /= vec.y;
+		return this;
+	}
+	
+	/**
 	 * Returns a new vector which equals to the result of addition between 
 	 * this number and given coordinates.
 	 * 
@@ -242,6 +355,14 @@ public class Vector2 {
 	 */
 	public double dot(Vector2 vec){
 		return x * vec.x + y * vec.y;
+	}
+	/**
+	 * Returns the angle between this vector and another vector.
+	 * @param vec the other vector
+	 * @return angle in degrees
+	 */
+	public double angleTo(Vector2 vec){
+		return angleBetween(this, vec);
 	}
 	
 	/**
