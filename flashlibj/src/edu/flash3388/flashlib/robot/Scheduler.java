@@ -144,6 +144,7 @@ public class Scheduler {
 	 */
 	public static void disableScheduler(boolean disable){
 		if(!schedulerHasInstance()) return;
+		getInstance().removeAllActions();
 		getInstance().setDisabled(disable);
 	}
 	/**

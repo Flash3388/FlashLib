@@ -18,7 +18,6 @@ public class DashboardPidTuner extends Displayble{
 	private static final HashMap<String, DashboardPidTuner> tuners = new HashMap<String, DashboardPidTuner>();
 	
 	private LineChart.Series<Number, Number> series;
-	private Data<Number, Number> lastdata;
 	
 	private SimpleDoubleProperty kp, ki, kd, setpoint, valueBinder, timeBinder, funcPeriodBinder;
 	private SimpleStringProperty setpointBinder;
@@ -100,7 +99,6 @@ public class DashboardPidTuner extends Displayble{
 		lastValBigger = false;
 		lastValue = 0;
 		lastTimeUpdate = -1;
-		lastdata = null;
 		series.getData().clear();
 		
 		this.update = update;
@@ -134,14 +132,11 @@ public class DashboardPidTuner extends Displayble{
 				else{
 					double t = (FlashUtil.millis() - millisMaxFuncValue) * 0.001;
 					funcPeriodBinder.set(t);
-					if(lastdata != null)
-						((StackPane)lastdata.getNode()).setVisible(true);
 					millisMaxFuncValue = FlashUtil.millis();
 				}
 			}
 			
 			lastValue = newValue;
-			lastdata = data;
 		}
 		if(newSetpointSet){
 			setpoint.set(lastsetpoint);

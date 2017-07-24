@@ -639,4 +639,10 @@ public final class Log{
 		if(!parentDirectory.endsWith("/"))
 			parentDirectory += "/";
 	}
+	
+	public static void deleteLogFolder(){
+		File dir = new File(parentDirectory+"logs/");
+		if(dir.exists())
+			dir.delete();
+	}
 }

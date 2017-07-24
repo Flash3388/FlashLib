@@ -29,19 +29,9 @@ public class PidTunerWindow extends Stage{
 		P, PI, PD, ClassicPID, PessenIntegralRule, SomeOvershoot, NoOvershoot
 	}
 	private static abstract class PidTunningParam{
-		protected double kp, ki, kd;
+		double kp, ki, kd;
 		
-		public double getP(){
-			return kp;
-		}
-		public double getI(){
-			return ki;
-		}
-		public double getD(){
-			return kd;
-		}
-		
-		public abstract void calc(double ku, double tu);
+		abstract void calc(double ku, double tu);
 	}
 	
 	
@@ -363,6 +353,7 @@ public class PidTunerWindow extends Stage{
 		tunningControls.setPadding(new Insets(0, 10, 0, 10));
 		tunningControls.setAlignment(Pos.CENTER);
 		
+		Label kuLbl = new Label("Ku");
 		TextField kuField = new TextField();
 		kuField.setOnKeyPressed((e)->{
 			if(e.getCode() == KeyCode.ENTER){
@@ -373,6 +364,14 @@ public class PidTunerWindow extends Stage{
 					kuValue = val;
 			}
 		});
+		VBox kufieldbox = new VBox();
+		kufieldbox.getChildren().addAll(kuLbl, kuField);
+		
+		Button computeKu = new Button("Compute optimal kp");
+		computeKu.setOnAction((e)->{
+			
+		});
+		
 		if(tunningParams == null)
 			createTunningParams();
 		ComboBox<PidTunningMode> tuneModeBox = new ComboBox<PidTunningMode>();
@@ -398,7 +397,8 @@ public class PidTunerWindow extends Stage{
 				dslider.setValue(param.kd);
 			}
 		});
-		tunningControls.getChildren().addAll(kuField, tuneModeBox, tunepid);
+		tunningControls.getChildren().addAll(kufieldbox, tuneModeBox, tunepid);
+		tunningControls.setMaxWidth(150);
 		
 		BorderPane bottom = new BorderPane();
 		root.setBottom(bottom);
