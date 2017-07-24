@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -24,10 +25,31 @@ import javafx.stage.StageStyle;
 
 public class PidTunerWindow extends Stage{
 	
-	private static final double DEFAULT_X_RANGE = 10.0;
+	private static enum PidTunningMode{
+		P, PI, PD, ClassicPID, PessenIntegralRule, SomeOvershoot, NoOvershoot
+	}
+	private static abstract class PidTunningParam{
+		protected double kp, ki, kd;
+		
+		public double getP(){
+			return kp;
+		}
+		public double getI(){
+			return ki;
+		}
+		public double getD(){
+			return kd;
+		}
+		
+		public abstract void calc(double ku, double tu);
+	}
+	
+	
+	private static final double DEFAULT_X_RANGE = 5.0;
 	private static final double DEFAULT_Y_RANGE = 100.0;
 	
 	private static PidTunerWindow instance;
+	private static PidTunningParam[] tunningParams;
 	
 	private DashboardPidTuner tuner;
 	private ComboBox<String> keysBox;
@@ -44,11 +66,13 @@ public class PidTunerWindow extends Stage{
 	private SimpleDoubleProperty binderKi;
 	private SimpleDoubleProperty binderKd;
 	private SimpleDoubleProperty binderTime;
+	private SimpleDoubleProperty binderPeriod;
 	
 	private boolean localKUpdate = false;
 	
 	private double lastX = 0.0, lastY = 0.0;
 	private double yrange = DEFAULT_Y_RANGE, xrange = DEFAULT_X_RANGE;
+	private double kuValue;
 	
 	private PidTunerWindow(){
 		setTitle("FLASHboard - PID Tuner");
@@ -57,6 +81,8 @@ public class PidTunerWindow extends Stage{
         setResizable(false);
         setScene(loadScene());
         setOnCloseRequest((e)->{
+        	if(tuner != null)
+        		tuner.setUpdate(false);
         	instance = null;
         });
 	}
@@ -69,11 +95,18 @@ public class PidTunerWindow extends Stage{
 		pSlider.setMin(0);
 		pSlider.setMax(10.0);
 		pSlider.setMajorTickUnit(10.0);
-		pSlider.setMinorTickCount(100);
+		pSlider.setMinorTickCount(99);
 		pSlider.setBlockIncrement(0.1);
 		
 		return pSlider;
 	}
+	private void setSlider(Slider slider, double max, int ticks){
+		slider.setMax(max);
+		slider.setMajorTickUnit(max);
+		slider.setMinorTickCount(ticks - 1);
+		slider.setBlockIncrement(max / ticks);
+	}
+	
 	private void attachTuner(){
 		binderPropSp.bind(tuner.setPointBindProperty());
 		binderKd.bind(tuner.kdProperty());
@@ -81,6 +114,12 @@ public class PidTunerWindow extends Stage{
 		binderKp.bind(tuner.kpProperty());
 		binderValue.bind(tuner.valueBindProperty());
 		binderTime.bind(tuner.timeBindProperty());
+		binderPeriod.bind(tuner.periodBindProperty());
+		
+		setSlider(pslider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
+		setSlider(islider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
+		setSlider(dslider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
+		
 		chart.getData().add(tuner.getSeries());
 	}
 	private void disableControls(boolean disable){
@@ -96,6 +135,7 @@ public class PidTunerWindow extends Stage{
 		binderKi.unbind();
 		binderKp.unbind();
 		binderValue.unbind();
+		binderPeriod.unbind();
 		chart.getData().clear();
 		
 		
@@ -125,12 +165,13 @@ public class PidTunerWindow extends Stage{
 	private void checkRange(double val){
 		if(val - lastY > yrange){
 			yrange = val - lastY;
+			System.out.println("Increasing range");
 		}
 		
 		if(val > axisy.getUpperBound() || val < axisy.getLowerBound()){
-			double top = Mathf.roundToMultiplier(val, yrange, true);
-			axisy.setUpperBound(top);
-			axisy.setLowerBound(top - yrange);
+			//double top = Mathf.roundToMultiplier(val, yrange, true);
+			axisy.setUpperBound(val + yrange);
+			axisy.setLowerBound(val - yrange);
 		}
 		
 		lastY = val;
@@ -161,6 +202,7 @@ public class PidTunerWindow extends Stage{
 		
 		chart = new LineChart<Number, Number>(axisx, axisy);
 		chart.setLegendVisible(false);
+		chart.setAnimated(false);
 		
 		valLbl = new Label("Value: 0.0");
 		binderValue = new SimpleDoubleProperty();
@@ -179,6 +221,14 @@ public class PidTunerWindow extends Stage{
 				double val = newVal.doubleValue();
 				checkRangeTime(val);
 				timeLbl.setText("Time: "+val+" sec");
+			}
+		});
+		
+		Label periodLbl = new Label("Period: 0.0 sec");
+		binderPeriod = new SimpleDoubleProperty();
+		binderPeriod.addListener((obs, oldVal, newVal)->{
+			if(tuner != null){
+				periodLbl.setText("Period: "+Mathf.roundDecimal(newVal.doubleValue(), 3)+" sec");
 			}
 		});
 		
@@ -300,12 +350,55 @@ public class PidTunerWindow extends Stage{
 		HBox databox = new HBox();
 		databox.setSpacing(10);
 		databox.setAlignment(Pos.CENTER);
-		databox.getChildren().addAll(valLbl, timeLbl);
+		databox.getChildren().addAll(valLbl, timeLbl, periodLbl);
 		VBox center = new VBox();
 		center.setSpacing(5);
 		center.setAlignment(Pos.CENTER);
 		center.getChildren().addAll(databox, chart);
 		root.setCenter(center);
+		
+		VBox tunningControls = new VBox();
+		root.setLeft(tunningControls);
+		tunningControls.setSpacing(10);
+		tunningControls.setPadding(new Insets(0, 10, 0, 10));
+		tunningControls.setAlignment(Pos.CENTER);
+		
+		TextField kuField = new TextField();
+		kuField.setOnKeyPressed((e)->{
+			if(e.getCode() == KeyCode.ENTER){
+				Double val = validateVal(kuField.getText());
+				if(val == null)
+					Dialog.show(this, "Error", "Ku value is not a number");
+				else 
+					kuValue = val;
+			}
+		});
+		if(tunningParams == null)
+			createTunningParams();
+		ComboBox<PidTunningMode> tuneModeBox = new ComboBox<PidTunningMode>();
+		tuneModeBox.getItems().addAll(PidTunningMode.values());
+		tuneModeBox.getSelectionModel().select(0);
+	
+		Button tunepid = new Button("Tune PID");
+		tunepid.setOnAction((e)->{
+			if(tuner != null){
+				Double val = validateVal(kuField.getText());
+				if(val == null){
+					Dialog.show(this, "Error", "Ku value is not a number");
+					return;
+				}
+				kuValue = val;
+				
+				int index = tuneModeBox.getSelectionModel().getSelectedIndex();
+				PidTunningParam param = tunningParams[index];
+				param.calc(kuValue, binderPeriod.get());
+				
+				pslider.setValue(param.kp);
+				islider.setValue(param.ki);
+				dslider.setValue(param.kd);
+			}
+		});
+		tunningControls.getChildren().addAll(kuField, tuneModeBox, tunepid);
 		
 		BorderPane bottom = new BorderPane();
 		root.setBottom(bottom);
@@ -339,6 +432,74 @@ public class PidTunerWindow extends Stage{
 		return new Scene(root, 800, 500);
 	}
 	
+	private static void createTunningParams(){
+		PidTunningMode[] modes = PidTunningMode.values();
+		tunningParams = new PidTunningParam[modes.length];
+		for (int i = 0; i < modes.length; i++) {
+			tunningParams[i] = createTunningParam(modes[i]);
+		}
+	}
+	private static PidTunningParam createTunningParam(PidTunningMode mode){
+		switch(mode){
+			case ClassicPID: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.6 * ku;
+					this.ki = 2 / tu * kp;
+					this.kd = tu / 8 * kp;
+				}
+			};
+			case NoOvershoot: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.2 * ku;
+					this.ki = 2 / tu * kp;
+					this.kd = tu / 3 * kp;
+				}
+			};
+			case P: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.5 * ku;
+					this.ki = 0;
+					this.kd = 0;
+				}
+			};
+			case PD: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.8 * ku;
+					this.ki = 0.0;
+					this.kd = tu / 8 * kp;
+				}
+			};
+			case PI: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.45 * ku;
+					this.ki = 1.2 / tu * kp;
+					this.kd = 0.0;
+				}
+			};
+			case PessenIntegralRule:  return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.7 * ku;
+					this.ki = 2.5 / tu * kp;
+					this.kd = 3 * tu / 20 * kp;
+				}
+			};
+			case SomeOvershoot: return new PidTunningParam(){
+				@Override
+				public void calc(double ku, double tu) {
+					this.kp = 0.33 * ku;
+					this.ki = 2 / tu * kp;
+					this.kd = tu / 3 * kp;
+				}
+			};
+		}
+		return null;
+	}
 	public static void showTuner(){
 		if(instance != null){
 			Dialog.show(Dashboard.getPrimary(), "Error", "Tuner is already open!");

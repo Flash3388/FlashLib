@@ -11,14 +11,18 @@ public class PidTuner extends Sendable{
 	public static final byte SP_UPDATE = 0x2;
 	public static final byte CV_UPDATE = 0x3;
 	public static final byte RUN_UPDATE = 0x4;
+	public static final byte SLIDER_UPDATE = 0x5;
 	
 	private String kp, ki, kd, setpoint;
 	private DoubleDataSource pval, ival, dval, spval, currentValue;
+	private double maxValue;
+	private int ticks;
 	
-	private boolean update = false;
+	private boolean update = false, sliderValuesUpdated = false;
 	private double lastP, lastI, lastD, lastSetPoint, lastValue;
 	
-	public PidTuner(String name, String kp, String ki, String kd, String setPoint, DoubleDataSource currentValue) {
+	public PidTuner(String name, String kp, String ki, String kd, String setPoint, DoubleDataSource currentValue,
+			double maxValue, int ticks) {
 		super(name, FlashboardSendableType.PIDTUNER);
 		
 		this.kp = kp;
@@ -26,11 +30,16 @@ public class PidTuner extends Sendable{
 		this.kd = kd;
 		this.setpoint = setPoint;
 		this.currentValue = currentValue;
+		this.maxValue = maxValue;
+		this.ticks = ticks;
 		
 		pval = ConstantsHandler.addNumber(kp, 0);
 		ival = ConstantsHandler.addNumber(ki, 0);
 		dval = ConstantsHandler.addNumber(kd, 0);
 		spval = ConstantsHandler.addNumber(setPoint, 0);
+	}
+	public PidTuner(String name, String kp, String ki, String kd, String setPoint, DoubleDataSource currentValue){
+		this(name, kp, ki, kd, setPoint, currentValue, 10.0, 1000);
 	}
 
 	public boolean isEnabled(){
@@ -58,6 +67,15 @@ public class PidTuner extends Sendable{
 	}
 	@Override
 	public byte[] dataForTransmition() {
+		if(sliderValuesUpdated){
+			sliderValuesUpdated = false;
+			System.out.println("Slider update");
+			byte[] data = new byte[13];
+			data[0] = SLIDER_UPDATE;
+			FlashUtil.fillByteArray(maxValue, 1, data);
+			FlashUtil.fillByteArray(ticks, 9, data);
+			return data;
+		}
 		if(lastSetPoint != spval.get()){
 			lastSetPoint = spval.get();
 			
@@ -92,7 +110,7 @@ public class PidTuner extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return update;
+		return update || sliderValuesUpdated;
 	}
 	@Override
 	public void onConnection() {
@@ -104,6 +122,8 @@ public class PidTuner extends Sendable{
 		
 		lastSetPoint = spval.get() - 1;
 		lastValue = currentValue.get() - 1;
+		
+		sliderValuesUpdated = true;
 	}
 	@Override
 	public void onConnectionLost() {

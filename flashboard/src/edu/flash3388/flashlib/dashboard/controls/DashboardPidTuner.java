@@ -18,17 +18,21 @@ public class DashboardPidTuner extends Displayble{
 	private static final HashMap<String, DashboardPidTuner> tuners = new HashMap<String, DashboardPidTuner>();
 	
 	private LineChart.Series<Number, Number> series;
+	private Data<Number, Number> lastdata;
 	
-	private SimpleDoubleProperty kp, ki, kd, setpoint, valueBinder, timeBinder;
+	private SimpleDoubleProperty kp, ki, kd, setpoint, valueBinder, timeBinder, funcPeriodBinder;
 	private SimpleStringProperty setpointBinder;
 	private double lastkp, lastki, lastkd, lastsetpoint;
-	private double newValue;
+	private double newValue, lastValue;
+	private long millisMaxFuncValue = -1;
+	private double maxValue = 10.0;
+	private int ticks = 2000;
 	
 	private long startTime = 0;
 	private double lastTimeUpdate = -1;
 	
 	private boolean update = false, remoteUpdate = false, setUpdate = false,
-			newValueSet = false, newSetpointSet = false, newKSet = false;
+			newValueSet = false, newSetpointSet = false, newKSet = false, lastValBigger = false;
 	
 	public DashboardPidTuner(String name, int id) {
 		super(name, id, FlashboardSendableType.PIDTUNER);
@@ -41,6 +45,7 @@ public class DashboardPidTuner extends Displayble{
 		setpoint = new SimpleDoubleProperty();
 		valueBinder = new SimpleDoubleProperty();
 		timeBinder = new SimpleDoubleProperty();
+		funcPeriodBinder = new SimpleDoubleProperty();
 		
 		setpointBinder = new SimpleStringProperty("0.0");
 		
@@ -49,6 +54,10 @@ public class DashboardPidTuner extends Displayble{
 
 	public LineChart.Series<Number, Number> getSeries(){
 		return series;
+	}
+	
+	public SimpleDoubleProperty periodBindProperty(){
+		return funcPeriodBinder;
 	}
 	public SimpleDoubleProperty valueBindProperty(){
 		return valueBinder;
@@ -72,6 +81,13 @@ public class DashboardPidTuner extends Displayble{
 		return kd;
 	}
 	
+	public double getSliderMaxValue(){
+		return maxValue;
+	}
+	public int getSliderTicks(){
+		return ticks;
+	}
+	
 	public void setUpdate(boolean update){
 		if(this.update == update)
 			return;
@@ -80,7 +96,11 @@ public class DashboardPidTuner extends Displayble{
 			startTime = FlashUtil.millis();
 		}
 		
+		millisMaxFuncValue = -1;
+		lastValBigger = false;
+		lastValue = 0;
 		lastTimeUpdate = -1;
+		lastdata = null;
 		series.getData().clear();
 		
 		this.update = update;
@@ -104,6 +124,24 @@ public class DashboardPidTuner extends Displayble{
 			series.getData().add(data);
 			((StackPane)data.getNode()).setVisible(false);
 			valueBinder.set(Mathf.roundDecimal(newValue, 4));
+			
+			if(!lastValBigger && lastValue < newValue)
+				lastValBigger = true;
+			else if(lastValBigger && newValue < lastValue){
+				lastValBigger = false;
+				if(millisMaxFuncValue < 0)
+					millisMaxFuncValue = FlashUtil.millis();
+				else{
+					double t = (FlashUtil.millis() - millisMaxFuncValue) * 0.001;
+					funcPeriodBinder.set(t);
+					if(lastdata != null)
+						((StackPane)lastdata.getNode()).setVisible(true);
+					millisMaxFuncValue = FlashUtil.millis();
+				}
+			}
+			
+			lastValue = newValue;
+			lastdata = data;
 		}
 		if(newSetpointSet){
 			setpoint.set(lastsetpoint);
@@ -134,6 +172,11 @@ public class DashboardPidTuner extends Displayble{
 			lastsetpoint = FlashUtil.toDouble(data, 1);
 			newSetpointSet = true;
 		}
+		else if(data[0] == PidTuner.SLIDER_UPDATE){
+			System.out.println("Slider update");
+			maxValue = FlashUtil.toDouble(data, 1);
+			ticks = FlashUtil.toInt(data, 9);
+		}
 		remoteUpdate = true;
 	}
 	@Override
@@ -158,8 +201,8 @@ public class DashboardPidTuner extends Displayble{
 			byte[] data = new byte[25];
 			data[0] = PidTuner.K_UPDATE;
 			FlashUtil.fillByteArray(lastkp, 1, data);
-			FlashUtil.fillByteArray(lastkp, 9, data);
-			FlashUtil.fillByteArray(lastkp, 17, data);
+			FlashUtil.fillByteArray(lastki, 9, data);
+			FlashUtil.fillByteArray(lastkd, 17, data);
 			
 			return data;
 		}
