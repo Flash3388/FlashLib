@@ -14,7 +14,7 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 			double rotationMargin){
 		this.rotationMargin = rotationMargin;
 		
-		pidcontroller = new PidController(kp, ki, kd);
+		pidcontroller = new PidController(kp, ki, kd, 0);
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(rotationThreshold);
 	}
@@ -26,6 +26,7 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 	protected void initialize() {
 		dataSource.set(0);
 		pidcontroller.setEnabled(true);
+		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {

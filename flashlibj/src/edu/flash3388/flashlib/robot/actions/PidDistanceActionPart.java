@@ -14,7 +14,7 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 			double distanceMargin){
 		this.distanceMargin = distanceMargin;
 		
-		pidcontroller = new PidController(kp, ki, kd);
+		pidcontroller = new PidController(kp, ki, kd, 0);
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(distanceThreshold);
 	}
@@ -26,6 +26,7 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 	protected void initialize() {
 		dataSource.set(0);
 		pidcontroller.setEnabled(true);
+		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {
