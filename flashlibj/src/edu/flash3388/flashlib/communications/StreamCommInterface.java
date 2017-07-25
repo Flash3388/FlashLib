@@ -108,7 +108,7 @@ public abstract class StreamCommInterface implements CommInterface{
 		
 		return sdata;
 	}
-	private boolean handleData(Packet packet){
+	protected boolean handleData(Packet packet){
 		if(leftoverData.length < 4)
 			return false;
 		int datalen = FlashUtil.toInt(leftoverData);
@@ -136,6 +136,10 @@ public abstract class StreamCommInterface implements CommInterface{
 		
 		int len = readData(dataBuffer);
 		if(len < 1){
+			if(len < 0){
+				disconnect();
+				System.out.println("Stream end disconnection");
+			}
 			packet.length = 0;
 			return false;
 		}

@@ -47,7 +47,7 @@ public class Communications {
 			while(!stop){
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
 				while(!comm.connect() && !stop)
-					FlashUtil.delay(50);
+					FlashUtil.delay(1000);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);

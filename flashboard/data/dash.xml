@@ -6,5 +6,5 @@
 	<constant name="cam.port.remote" type="double">5803.0</constant>
 	<constant name="host.robot" type="string">roborio-3388-frc.local</constant>
 	<constant name="vision.default" type="string"></constant>
-	<constant name="comm.protocol" type="string">udp</constant>
+	<constant name="comm.protocol" type="string">tcp</constant>
 </constants-handler>

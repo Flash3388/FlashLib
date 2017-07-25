@@ -9,8 +9,6 @@ import java.util.Vector;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
-import com.sun.javafx.PlatformUtil;
-
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
@@ -56,6 +54,77 @@ public class Dashboard extends Application {
 			}
 		}
 	}
+	private static class ConnectionTask implements Runnable{
+
+		private static final int RECONNECTION_RATE = 5000;
+		private long lastConAttmp = -1;
+		
+		private boolean commInitialized = false;
+		private boolean commSettingError = false;
+		
+		@Override
+		public void run() {
+			if(lastConAttmp < 0 || FlashUtil.millis() - lastConAttmp >= RECONNECTION_RATE){
+				lastConAttmp = FlashUtil.millis();
+				if(!commInitialized){
+					try {
+						String host = ConstantsHandler.getStringNative(PROP_HOST_ROBOT);
+						String protocol = ConstantsHandler.getStringNative(PROP_COMM_PROTOCOL);
+						int localport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_LOCAL);
+						int remoteport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_REMOTE);
+						int localcamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_LOCAL);
+						int remotecamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_REMOTE);
+						if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
+								(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
+							if(!commSettingError){
+								userError("Failed to initialize communications: validate values of "+
+										PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
+								commSettingError = true;
+							}
+							
+							return;
+						}
+						if(localport < 100 || remoteport < 100 || localcamport < 100 || remotecamport < 100){
+							if(!commSettingError){
+								userError("Failed to initialize communications: validate values of "+
+										PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE + ", " + PROP_CAM_PORT_LOCAL +
+										" and " + PROP_CAM_PORT_REMOTE);
+								commSettingError = true;
+							}
+							
+							return;
+						}
+						
+						InetAddress ad = InetAddress.getByName(host);
+						log.log("Found host: "+host, "Dashboard");
+						if(protocol.equals("udp"))
+							commInterface = new UdpCommInterface(ad, localport, remoteport);
+						else if(protocol.equals("tcp")){
+							InetAddress local = FlashUtil.getLocalAddress(ad);
+							commInterface = new TcpCommInterface(local, ad, localport, remoteport);
+						}
+						
+						communications = new Communications("Robot", commInterface);
+						communications.setSendableCreator(new FlashboardSendableCreator());
+						communications.start();
+						camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
+						camClient.addListener(camViewer);
+						
+						commInitialized = true;
+					} catch (IOException e) {
+					}
+				}else if(commInitialized && !commInterface.isConnected()){
+					try {
+						if(!commInterface.getRemoteAddress().isReachable(RECONNECTION_RATE)){
+							communications.close();
+							commInitialized = false;
+						}
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+	}
 	private static class UpdateWrapper{
 		Runnable runnable;
 		boolean removeWhenFinished;
@@ -67,14 +136,12 @@ public class Dashboard extends Application {
 	public static final String PROP_COMM_PORT_REMOTE = "comm.port.remote";
 	public static final String PROP_CAM_PORT_LOCAL = "cam.port.local";
 	public static final String PROP_CAM_PORT_REMOTE = "cam.port.remote";
-	public static final String PROP_DEPLOYED = "deployed";
 	public static final String PROP_VISION_DEFAULT_PARAM = "vision.default";
 	
 	public static final String FOLDER_SAVES = "data/saves/";
 	public static final String FOLDER_RESOURCE = "data/res/";
 	public static final String FOLDER_DATA = "data/";
-	public static final String FOLDER_LIBS = "flashboard_lib/";
-	public static final String DEV_FOLDER_LIBS = "dist/flashboard_lib/";
+	public static final String FOLDER_LIBS_NATIVES = "libs/natives/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
 	private static final String REMOTE_HOSTS_FILE = FOLDER_DATA+"hosts.ini";
@@ -95,8 +162,6 @@ public class Dashboard extends Application {
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
 	private static boolean visionParamLoadFailed = false;
-	
-	private static boolean commSettingError = false;
 	
 	public static void main(String[] args) throws Exception{
 		log = FlashUtil.getLog();
@@ -125,7 +190,7 @@ public class Dashboard extends Application {
 	    launch();
 	}
 	private static void setupNativePath(){
-		String path = ConstantsHandler.getBooleanNative(PROP_DEPLOYED)? FOLDER_LIBS : DEV_FOLDER_LIBS;
+		String path = FOLDER_LIBS_NATIVES;
 		if(FlashUtil.isWindows()){
 			if(FlashUtil.isArchitectureX64())
 				path += "win64/";
@@ -156,76 +221,7 @@ public class Dashboard extends Application {
 	    updateThread.start();
 	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
-		addRunnableForUpdate(()->{
-			   if(commInterface == null){
-				   try {
-					String host = ConstantsHandler.getStringNative(PROP_HOST_ROBOT);
-					String protocol = ConstantsHandler.getStringNative(PROP_COMM_PROTOCOL);
-					int localport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_LOCAL);
-					int remoteport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_REMOTE);
-					int localcamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_LOCAL);
-					int remotecamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_REMOTE);
-					if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
-							(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
-						if(!commSettingError){
-							userError("Failed to initialize communications: validate values of "+
-									PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
-							commSettingError = true;
-						}
-						
-						return;
-					}
-					if(localport < 100 || remoteport < 100 || localcamport < 100 || remotecamport < 100){
-						if(!commSettingError){
-							userError("Failed to initialize communications: validate values of "+
-									PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE + ", " + PROP_CAM_PORT_LOCAL +
-									" and " + PROP_CAM_PORT_REMOTE);
-							commSettingError = true;
-						}
-						
-						return;
-					}
-					
-					InetAddress ad = InetAddress.getByName(host);
-					log.log("Found host: "+host, "Dashboard");
-					if(protocol.equals("udp"))
-						commInterface = new UdpCommInterface(ad, localport, remoteport);
-					else if(protocol.equals("tcp")){
-						InetAddress local = FlashUtil.getLocalAddress(ad);
-						commInterface = new TcpCommInterface(local, ad, localport, remoteport);
-					}
-					
-					communications = new Communications("Robot", commInterface);
-					communications.setSendableCreator(new FlashboardSendableCreator());
-					communications.start();
-					camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
-					camClient.addListener(camViewer);
-				   }catch(java.net.UnknownHostException eh){
-					   
-				   }catch (IOException e) {
-					   log.reportError(e.getMessage());
-				   }
-			   }/*else if(!communications.isConnected() && (lastConAttmp < 0 || FlashUtil.millis() - lastConAttmp > 5000)){
-				   if(communications.isConnectionAllowed())
-					   communications.setAllowConnection(false);
-				   
-				   try {
-						String host = ConstantsHandler.getStringNative(PROP_HOST_ROBOT);
-						
-						
-					    InetAddress remote = InetAddress.getByName(host);
-					    InetAddress local = FlashUtil.getLocalAddress(remote);
-					    
-					    commInterface.setLocalAddress(local);
-					    commInterface.setRemoteAddress(remote);
-					    communications.setAllowConnection(true);
-					    lastConAttmp = FlashUtil.millis();
-				   } catch (UnknownHostException | SocketException e) {
-				   }
-			   }else if(communications.isConnected() && lastConAttmp > 0){
-				   lastConAttmp = -1;
-			   }*/
-		 });
+		addRunnableForUpdate(new ConnectionTask());
 		addRunnableForUpdate(()->{
 			byte[] img = visionImageNext[visionImageIndex];
 			visionImageNext[visionImageIndex] = null;
@@ -326,8 +322,6 @@ public class Dashboard extends Application {
 			file.mkdir();
 	}
 	private static void validateBasicSettings() throws Exception{
-		ConstantsHandler.addBoolean(PROP_DEPLOYED, false);
-		
 		if(!ConstantsHandler.hasString(PROP_VISION_DEFAULT_PARAM))
 			ConstantsHandler.putString(PROP_VISION_DEFAULT_PARAM, "");
 		if(!ConstantsHandler.hasString(PROP_HOST_ROBOT)){

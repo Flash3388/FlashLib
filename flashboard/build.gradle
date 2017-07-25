@@ -29,7 +29,7 @@ jar {
    manifest {
         attributes (
 				'Main-Class': pMainClass,
-				'Class-Path': '. flashboard_lib/flashlib.jar flashboard_lib/jsch-0154.jar flashboard_lib/opencv-300.jar'
+				'Class-Path': '. libs/flashlib.jar libs/jsch-0154.jar libs/opencv-300.jar'
 		)
    }
 }

@@ -69,7 +69,6 @@ public class PidTuner extends Sendable{
 	public byte[] dataForTransmition() {
 		if(sliderValuesUpdated){
 			sliderValuesUpdated = false;
-			System.out.println("Slider update");
 			byte[] data = new byte[13];
 			data[0] = SLIDER_UPDATE;
 			FlashUtil.fillByteArray(maxValue, 1, data);

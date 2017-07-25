@@ -168,7 +168,6 @@ public class DashboardPidTuner extends Displayble{
 			newSetpointSet = true;
 		}
 		else if(data[0] == PidTuner.SLIDER_UPDATE){
-			System.out.println("Slider update");
 			maxValue = FlashUtil.toDouble(data, 1);
 			ticks = FlashUtil.toInt(data, 9);
 		}

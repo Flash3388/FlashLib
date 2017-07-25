@@ -226,17 +226,14 @@ public class UdpCommInterface implements IpCommInterface{
 			timeouts++;
 			lastRead = millis;
 			timeLastTimeout = millis;
-			FlashUtil.getLog().log("Timeout");
 		}
 		if(timeouts >= maxTimeouts){
-			FlashUtil.getLog().log("Max timeouts");
 			isConnected = false;
 		}
 		if(timeouts > 0 && timeLastTimeout != -1 && 
 				millis - timeLastTimeout > (connectionTimeout*3)){
 			timeouts = 0;
 			timeLastTimeout = -1;
-			FlashUtil.getLog().log("Timeout reset");
 		}
 		if(millis - lastSend >= connectionTimeout / 2)
 			writeHandshake();
