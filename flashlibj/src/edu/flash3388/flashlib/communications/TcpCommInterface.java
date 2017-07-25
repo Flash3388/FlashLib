@@ -35,9 +35,6 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	private OutputStream out;
 	private InputStream in;
 	
-	private int lastRead = -1, timeLastTimeout = -1, lastSend = -1;
-	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
-	
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a client TCP interface at a local
 	 * address which is received from {@link InetAddress#getLocalHost()}, and port. Address and port for a server are immediately
@@ -119,18 +116,6 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		}
 	}
 	
-	private void writeHandshake(){
-		write(HANDSHAKE);
-	}
-	
-	@Override
-	protected boolean handleData(Packet packet) {
-		boolean ret = super.handleData(packet);
-		if(ret && CommInterface.isHandshake(packet.data, packet.length))
-			return false;
-		return ret;
-	}
-	
 	/**
 	 * Does nothing
 	 */
@@ -165,9 +150,6 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	public void connect(Packet packet){
 		try {
 			if(reset){
-				FlashUtil.getLog().log("Reseting");
-				resetBuffers();
-				
 				closeSocket();
 				if (!isBoundAsServer()){
 					FlashUtil.delay(RECONNECTION_DELAY);
@@ -187,10 +169,8 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
 			
-			lastRead = FlashUtil.millisInt();
-			lastSend = FlashUtil.millisInt();
-			timeLastTimeout = -1;
-			timeouts = 0;
+			resetBuffers();
+			resetData();
 		} catch (IOException e) {	
 			FlashUtil.getLog().reportError(e.getMessage());
 		}finally{
@@ -252,49 +232,14 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	
 	/**
 	 * {@inheritDoc}
-	 * Checks for timeouts in connection. If such events occur than connection is declared as lost.
-	 */
-	@Override
-	public void update(int millis){
-		/*if(outInet != null && millis - lastRemoteReachCheck > CONNECTION_TIMEOUT){
-			System.out.println("Checking network reachable");
-			try {
-				if (!outInet.isReachable(CONNECTION_TIMEOUT)){
-					disconnect();
-					System.out.println("Network not reachable");
-				}
-			} catch (IOException e) {
-			}
-			lastRemoteReachCheck = millis;
-		}*/
-		if(millis - lastRead >= connectionTimeout){
-			timeouts++;
-			lastRead = millis;
-			timeLastTimeout = millis;
-		}
-		if(timeouts >= maxTimeouts){
-			disconnect();
-		}
-		if(timeouts > 0 && timeLastTimeout != -1 && 
-				millis - timeLastTimeout > (connectionTimeout*3)){
-			timeouts = 0;
-			timeLastTimeout = -1;
-		}
-		if(millis - lastSend >= connectionTimeout / 2)
-			writeHandshake();
-	}
-	
-	/**
-	 * {@inheritDoc}
 	 * <p>
 	 * If an {@link IOException} occurs during writing, than connection is terminated by calling {@link #disconnect()}.
 	 * </p>
 	 */
 	@Override
-	protected void writeData(byte[] data) {
+	protected void writeData(byte[] data, int start, int length) {
 		try {
-			out.write(data);
-			lastSend = FlashUtil.millisInt();
+			out.write(data, start, length);
 		} catch (IOException e) {
 			disconnect();
 		}
@@ -308,10 +253,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	@Override
 	protected int readData(byte[] buffer) {
 		try {
-			int len = in.read(buffer);
-			if(len > 0)
-				lastRead = FlashUtil.millisInt();
-			return len;
+			return in.read(buffer);
 		} catch (SocketTimeoutException e) {
 			return 0;
 		} catch (IOException e) {
@@ -399,37 +341,5 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	public void setRemotePort(int port) {
 		if (isConnected() || !isOpened() || isBoundAsServer()) return;
 		portOut = port;
-	}
-	
-	/**
-	 * Sets the amount of timeout events to occur before declaring loss of connection.
-	 * 
-	 * @param timeouts amount of timeout events for connection lost
-	 */
-	public void setMaxTimeoutsCount(int timeouts){
-		maxTimeouts = timeouts;
-	}
-	/**
-	 * Gets the amount of timeout events needed for declaration of connection loss.
-	 * @return amount of timeout events for connection lost
-	 */
-	public int getMaxTimeoutsCount(){
-		return maxTimeouts;
-	}
-	
-	/**
-	 * Sets the time in milliseconds to pass without any data received for a timeout event to occur.
-	 * 
-	 * @param timeout time in milliseconds of lack of data for a timeout event to occur.
-	 */
-	public void setConnectionTimeout(int timeout){
-		connectionTimeout = timeout;
-	}
-	/**
-	 * Gets the time in milliseconds to pass without any data received for a timeout event to occur.
-	 * @return time in milliseconds of lack of data for a timeout event to occur.
-	 */
-	public int getConnectionTimeout(){
-		return connectionTimeout;
 	}
 }

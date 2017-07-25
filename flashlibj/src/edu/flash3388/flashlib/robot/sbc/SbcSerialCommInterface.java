@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.sbc;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.PortCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -50,9 +51,9 @@ public class SbcSerialCommInterface extends PortCommInterface{
 	}
 
 	@Override
-	protected void writeData(byte[] data) {
+	protected void writeData(byte[] data, int start, int length) {
 		try {
-			port.writeBytes(data);
+			port.writeBytes(Arrays.copyOfRange(data, start, length));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -28,48 +28,51 @@ public abstract class FlashRio extends SampleRobot {
 	
 	private Log log;
 	private Log powerLog;
-	private double powerDrawState = 0;
 	private double warningVoltage = WARNING_VOLTAGE;
 	private double warningPowerDraw = POWER_DRAW_WARNING;
-	private boolean logPower = true;
+	private boolean logPower = true, logsEnabled = false;
 	
 	
 	@Override
-	protected void robotInit(){
+	protected final void robotInit(){
+		preInit();
 		initFlashLib();
+		
+		
 		log = FlashUtil.getLog();
-		powerLog = new Log("powerlog");
+		if(logsEnabled){
+			powerLog = new Log("powerlog");
+			if(!logPower)
+				powerLog.disable();
+		}else{
+			logPower = false;
+			log.disable();
+			log.delete();
+		}
+		
 		initRobot();
 		log.logTime("Robot initialized");
 	}
 	@Override
-	public void robotMain() {
+	public final void robotMain() {
 		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
-		powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), powerLogTime());
+		if(logPower)
+			powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), powerLogTime());
+		
 		while(true){
 			if(inEmergencyStop()){
-				log.logTime("NEW STATE - EMERGENCY STOP");
-				powerLog.logTime("New State: EMERGENCY STOP >> Voltage: "+m_ds.getBatteryVoltage(),
-						powerLogTime());
+				logNewState("EMERGENCY STOP");
 				disabledInit();
 				
 				while (inEmergencyStop()) {
 					disabledPeriodic();
 					delay(50);
 				}
-				
-				log.logTime("EMERGENCY STOP - DONE");
-				powerLog.logTime("Done State: EMERGENCY STOP >> Voltage: "+m_ds.getBatteryVoltage() + 
-						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}
 			if(isDisabled()){
-				log.logTime("NEW STATE - DISABLED");
-				powerLog.logTime("New State: Disabled >> Voltage: "+m_ds.getBatteryVoltage(),
-						powerLogTime());
-				log.save();
-				powerLog.save();
-				powerDrawState = 0;
+				logNewState("Disabled");
+				
 				disableScheduler(true);
 				m_ds.InDisabled(true);
 				disabledInit();
@@ -80,16 +83,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InDisabled(false);
-				log.logTime("DISABLED - DONE");
-				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
-						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else if(isAutonomous()){
-				log.logTime("NEW STATE - AUTONOMOUS");
-				powerLog.logTime("New State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage(),
-						powerLogTime());
-				log.save();
-				powerLog.save();
-				powerDrawState = 0;
+				logNewState("Autonomous");
+				
 				disableScheduler(false);
 				m_ds.InAutonomous(true);
 				autonomousInit();
@@ -101,16 +97,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InAutonomous(false);
-				log.logTime("AUTONOMOUS - DONE");
-				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
-						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else if(isTest()){
-				log.logTime("NEW STATE - TEST");
-				powerLog.logTime("New State: Test >> Voltage: "+m_ds.getBatteryVoltage(),
-						powerLogTime());
-				log.save();
-				powerLog.save();
-				powerDrawState = 0;
+				logNewState("Test");
+				
 				disableScheduler(false);
 				m_ds.InTest(true);
 				testInit();
@@ -122,16 +111,9 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InTest(false);
-				log.logTime("TEST - DONE");
-				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
-						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}else{
-				log.logTime("NEW STATE - TELEOP");
-				powerLog.logTime("New State: Teleop >> Voltage: "+m_ds.getBatteryVoltage(),
-						powerLogTime());
-				log.save();
-				powerLog.save();
-				powerDrawState = 0;
+				logNewState("Teleop");
+				
 				disableScheduler(false);
 				m_ds.InOperatorControl(true);
 				teleopInit();
@@ -143,9 +125,6 @@ public abstract class FlashRio extends SampleRobot {
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InOperatorControl(false);
-				log.logTime("TELEOP - DONE");
-				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage() + 
-						" >> SCurrent: "+powerDrawState, powerLogTime());
 			}
 		}
 	}
@@ -156,10 +135,10 @@ public abstract class FlashRio extends SampleRobot {
 	}
 	private void logLowVoltage(){
 		if(!logPower) return;
+		
 		double volts = m_ds.getBatteryVoltage();
 		double matchTime = powerLogTime();
 		double powerDraw = FlashRioUtil.getPDP().getTotalCurrent();
-		powerDrawState += powerDraw;
 		boolean emergencySave = false;
 		if(volts < warningVoltage){
 			powerLog.logTime("Low Voltage: "+volts, matchTime);
@@ -177,16 +156,36 @@ public abstract class FlashRio extends SampleRobot {
 			log.save();
 		}
 	}
+	private void logNewState(String state){
+		if(!logsEnabled)
+			return;
+		log.logTime("NEW STATE - "+state);
+		powerLog.logTime("New State: "+state+" >> Voltage: "+m_ds.getBatteryVoltage(),
+				powerLogTime());
+		log.save();
+		powerLog.save();
+	}
 	
+	/**
+	 * Enables the base log and power logs to be used. If the logs are not enabled (default), they will be initialized in
+	 * writing mode, but will not have file data. It is not possible to change this mode after FlashLib is initialized,
+	 * so it should be called during {@link #preInit()}.
+	 */
+	protected void enableLogs(){
+		logsEnabled = true;
+	}
 	/**
 	 * Sets whether or not to log data about power usage into a log.
 	 * @param log true to log data, false otherwise
 	 */
 	protected void setPowerLogging(boolean log) {
 		logPower = log;
-		if(!log)
-			powerLog.disable();
-		else powerLog.setLoggingMode(Log.MODE_FULL);
+		if(powerLog != null){
+			if(!log)
+				powerLog.disable();
+			else 
+				powerLog.setLoggingMode(Log.MODE_FULL);
+		}
 	}
 	/**
 	 * Sets the total power draw which should prompt a warning from the power log.
@@ -203,20 +202,51 @@ public abstract class FlashRio extends SampleRobot {
 		warningVoltage = volts;
 	}
 	/**
-	 * Gets the log used to log power data.
+	 * Gets the log used to log power data. If logs were not enabled, this will return null.
 	 * @return the power log
 	 */
 	protected Log getPowerLog(){
 		return powerLog;
 	}
 	
+	/**
+	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.
+	 */
+	protected void preInit(){}
+	/**
+	 * Called after initialization of FlashLib. Use this to initialize your robot systems and actions for use.
+	 */
 	protected abstract void initRobot();
-	protected abstract void teleopInit();
-	protected abstract void teleopPeriodic();
-	protected abstract void autonomousInit();
-	protected abstract void autonomousPeriodic();
+	/**
+	 * Called once when entering Disabled mode. Use this to disable your robot.
+	 */
 	protected abstract void disabledInit();
+	/**
+	 * Called periodically while in Disabled mode. Can be used to display data.
+	 */
 	protected abstract void disabledPeriodic();
+	/**
+	 * Called once when entering Teleoperation mode. Use this to initialize your robot for operator control.
+	 */
+	protected abstract void teleopInit();
+	/**
+	 * Called periodically while in Teleoperation mode. Use this to perform actions during operator control.
+	 */
+	protected abstract void teleopPeriodic();
+	/**
+	 * Called once when entering Autonomous mode. Use this to initialize your robot for automatic control.
+	 */
+	protected abstract void autonomousInit();
+	/**
+	 * Called periodically while in Autonomous mode. Use this to perform actions during automatic control.
+	 */
+	protected abstract void autonomousPeriodic();
+	/**
+	 * Called once when entering Test mode. Use this to initialize your robot for test control.
+	 */
 	protected void testInit(){}
+	/**
+	 * Called periodically while in Test mode. Use this to perform actions during test control.
+	 */
 	protected void testPeriodic(){}
 }
