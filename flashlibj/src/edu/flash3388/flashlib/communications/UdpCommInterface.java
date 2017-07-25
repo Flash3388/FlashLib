@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 /**
  * {@link CommInterface} using the UDP model communications. Uses a {@link DatagramSocket} for communications. Client-Server
  * relationship is used to determine who initiates communications. To insure connection, this comm interface extends the abstract
- * {@link ManualConnectionVerifierInerface}.
+ * {@link ManualConnectionVerifier}.
  * <p>
  * Connection is insured by checking the traffic going through the port. If data was not sent in a while, an handshake will
  * be sent instead. If data was not received for a while a timeout will occur. Once a defined amount of timeouts have occurred,
@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class UdpCommInterface extends ManualConnectionVerifierInerface implements IpCommInterface{
+public class UdpCommInterface extends ManualConnectionVerifier implements IpCommInterface{
 	
 	private DatagramSocket socket;
 	private int portOut = -1;

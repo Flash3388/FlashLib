@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 /**
  * An abstract logic for stream-based {@link CommInterface}s, such as: TCP/IP. Provides simple data corruption detection
  * using {@link CRC32} and separation of data to packets. To insure connection, this comm interface extends the abstract
- * {@link ManualConnectionVerifierInerface}.
+ * {@link ManualConnectionVerifier}.
  * <p>
  * Data to be sent is wrapped inside a packet which contains: the size of the data, the data itself and if defined, a CRC32
  * checksum. When reading data, the size of the data is checked first, than the data is extracted by its size. If CRC32 is 
@@ -27,7 +27,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class StreamCommInterface extends ManualConnectionVerifierInerface{
+public abstract class StreamCommInterface extends ManualConnectionVerifier{
 
 	private CRC32 crc;
 	private boolean server;
