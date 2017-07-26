@@ -10,8 +10,6 @@ import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
 import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
-import edu.flash3388.flashlib.gui.Dialog;
-import edu.flash3388.flashlib.gui.FileDialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -39,6 +37,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MainController implements Initializable{
 
@@ -152,7 +152,6 @@ public class MainController implements Initializable{
 		});
 		sbc_update.setOnAction((e)->{
 			//TODO: IMPLEMENT
-			//File folder = FileDialog.showDirectoryChooser(Dashboard.getPrimary());
 		});
 		load_params.setOnAction((e)->{
 			loadParams();
@@ -386,12 +385,14 @@ public class MainController implements Initializable{
 	
 	private void saveParams(){
 		if(Dashboard.getVision() == null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
 			return;
 		}
 		if(Dashboard.getVision().getProcessing() != null){
-			File file = FileDialog.showSaveDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, "param",
-					"xml");
+			FileChooser chooser = new FileChooser();
+			chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+			chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
+			File file = chooser.showSaveDialog(Dashboard.getPrimary());
 			if(file == null) return;
 			String path = file.getAbsolutePath();
 			FlashUtil.getLog().log("Saving parameters: "+path);
@@ -400,11 +401,13 @@ public class MainController implements Initializable{
 	}
 	private void loadParams(){
 		if(Dashboard.getVision() == null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
 			return;
 		}
-		File file = FileDialog.showLoadDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, 
-				"xml");
+		FileChooser chooser = new FileChooser();
+		chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+		chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
+		File file = chooser.showOpenDialog(Dashboard.getPrimary());
 		if(file == null) return;
 		String path = file.getAbsolutePath();
 		loadParam(path);

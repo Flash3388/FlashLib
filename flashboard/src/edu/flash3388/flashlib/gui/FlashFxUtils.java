@@ -13,13 +13,24 @@ import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 public class FlashFxUtils {
 	private FlashFxUtils(){}
 	
 	public static void onFxThread(Runnable r){
 		Platform.runLater(r);
+	}
+	
+	public static void showErrorDialog(Stage owner, String title, String error){
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setContentText(error);
+		alert.setTitle(title);
+		alert.initOwner(owner);
+		alert.showAndWait();
 	}
 	
 	public static Image bufferedImage2FxImage(BufferedImage img){
