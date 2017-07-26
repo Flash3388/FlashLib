@@ -31,11 +31,11 @@ public class ChannelInputWindow extends Stage{
 		String password = pField.getText();
 		
 		if(hostname.equals("")){
-			Dialog.show(this, "Error", "Missing hostname");
+			FlashFxUtils.showErrorDialog(this, "Error", "Missing hostname");
 			return;
 		}
 		if(username.equals("")){
-			Dialog.show(this, "Error", "Missing username");
+			FlashFxUtils.showErrorDialog(this, "Error", "Missing username");
 			return;
 		}
 		

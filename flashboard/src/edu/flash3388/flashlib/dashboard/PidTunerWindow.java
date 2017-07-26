@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.dashboard;
 
 import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
-import edu.flash3388.flashlib.gui.Dialog;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.math.Mathf;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -228,7 +228,7 @@ public class PidTunerWindow extends Stage{
 				if(tuner != null){
 					Double val = validateVal(spField.getText());
 					if(val == null)
-						Dialog.show(this, "Error", "SetPoint value is not a number");
+						FlashFxUtils.showErrorDialog(this, "Error", "SetPoint value is not a number");
 					else 
 						tuner.setpointProperty().set(val);
 				}
@@ -359,7 +359,7 @@ public class PidTunerWindow extends Stage{
 			if(e.getCode() == KeyCode.ENTER){
 				Double val = validateVal(kuField.getText());
 				if(val == null)
-					Dialog.show(this, "Error", "Ku value is not a number");
+					FlashFxUtils.showErrorDialog(this, "Error", "Ku value is not a number");
 				else 
 					kuValue = val;
 			}
@@ -383,7 +383,7 @@ public class PidTunerWindow extends Stage{
 			if(tuner != null){
 				Double val = validateVal(kuField.getText());
 				if(val == null){
-					Dialog.show(this, "Error", "Ku value is not a number");
+					FlashFxUtils.showErrorDialog(this, "Error", "Ku value is not a number");
 					return;
 				}
 				kuValue = val;
@@ -502,7 +502,7 @@ public class PidTunerWindow extends Stage{
 	}
 	public static void showTuner(){
 		if(instance != null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Tuner is already open!");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tuner is already open!");
 			return;
 		}
 		instance = new PidTunerWindow();

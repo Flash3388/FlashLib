@@ -2,10 +2,8 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
-import edu.flash3388.flashlib.flashboard.DashboardInput;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.InputType;
-import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
@@ -55,7 +53,7 @@ public class InputField extends Displayble{
 
 	private void receiveInput(){
 		if(type == null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Cannot edit input yet");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Cannot edit input yet");
 			return;
 		}
 		

@@ -12,7 +12,6 @@ import org.opencv.core.Mat;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.gui.Dialog;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
@@ -366,7 +365,7 @@ public class Dashboard extends Application {
 	public static void userError(String error){
 		log.reportError(error);
 		FlashFxUtils.onFxThread(()->{
-			Dialog.show(primaryStage, "Error", error);
+			FlashFxUtils.showErrorDialog(primaryStage, "Error", error);
 		});
 	}
 	
