@@ -147,7 +147,7 @@ public final class FlashUtil {
 	 * 
 	 * @param logType The {@link LoggingType} of the created log
 	 */
-	public static void setStart(Log.LoggingType logType){
+	public static void setStart(LoggingType logType){
 		if(mainLog == null){
 			switch(logType){
 				case Buffered: 
@@ -162,7 +162,7 @@ public final class FlashUtil {
 	/**
 	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
 	 * The main log uses a default mode as the logs {@link LoggingType} which can be set in 
-	 * {@link #setLogCreatingType(LoggingType)}, and does not override any existing files.
+	 * {@link #setLogCreatingType(LoggingType)} sting files.
 	 */
 	public static void setStart(){
 		setStart(defaultCreatingMode);
@@ -185,7 +185,7 @@ public final class FlashUtil {
 	 * 
 	 * @param mode the default logging type.
 	 */
-	public static void setLogCreatingType(Log.LoggingType mode){
+	public static void setLogCreatingType(LoggingType mode){
 		defaultCreatingMode = mode;
 	}
 	/**

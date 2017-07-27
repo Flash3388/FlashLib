@@ -105,7 +105,7 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
 		if(Scheduler.schedulerHasInstance() && auto)
-			Scheduler.getInstance().add(this);
+			Scheduler.getInstance().addTask(this);
 		else if(auto) return false;
 		return true;
 	}

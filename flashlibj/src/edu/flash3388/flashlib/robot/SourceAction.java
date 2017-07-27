@@ -11,10 +11,10 @@ import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
  */
 public abstract class SourceAction extends Action{
 	
-	protected final DoubleDataSource.VarDataSource dataSource;
+	protected final DoubleDataSource.DoubleVarDataSource dataSource;
 	
 	public SourceAction(){
-		dataSource = new DoubleDataSource.VarDataSource(0);
+		dataSource = new DoubleDataSource.DoubleVarDataSource(0);
 	}
 	
 	public DoubleDataSource getSource(){

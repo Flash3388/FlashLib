@@ -19,9 +19,8 @@ public class SendableLog extends Sendable{
 	
 	public SendableLog(Log log) {
 		super(log.getName(), FlashboardSendableType.LOG);
-		byte mode = log.getLoggingMode();
-		if((mode & Log.MODE_INTERFACES) == 0)
-			log.setLoggingMode((byte) (mode | Log.MODE_INTERFACES));
+		if(!log.isLoggingMode(Log.MODE_INTERFACES))
+			log.setLoggingMode(log.getLoggingMode() | Log.MODE_INTERFACES);
 		log.addLoggingInterface(new LoggingInterface(){
 			@Override
 			public void log(String log) {

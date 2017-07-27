@@ -14,14 +14,14 @@ public interface DoubleDataSource {
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
 	 */
-	public static class VarDataSource implements DoubleDataSource{
+	public static class DoubleVarDataSource implements DoubleDataSource{
 		
 		private double var;
 		
-		public VarDataSource(double initialVal){
+		public DoubleVarDataSource(double initialVal){
 			var = initialVal;
 		}
-		public VarDataSource(){
+		public DoubleVarDataSource(){
 			this(0);
 		}
 		

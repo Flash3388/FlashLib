@@ -21,11 +21,11 @@ public class Analysis {
 	/**
 	 * The x coordinate of the center of the contour.
 	 */
-	public double centerPointX;
+	public int centerPointX;
 	/**
 	 * The y coordinate of the center of the contour.
 	 */
-	public double centerPointY;
+	public int centerPointY;
 	/**
 	 * The distance of the target.
 	 */
@@ -52,24 +52,19 @@ public class Analysis {
 	 * @return a byte array with data about this analysis
 	 */
 	public byte[] transmit(){
-		byte[] bytes = new byte[32], x = FlashUtil.toByteArray((int)centerPointX), 
-				y = FlashUtil.toByteArray((int)centerPointY),
-				pixelsh = FlashUtil.toByteArray(horizontalDistance),
-				pixelsv = FlashUtil.toByteArray(verticalDistance),
-				dis = FlashUtil.toByteArray(targetDistance),
-				off = FlashUtil.toByteArray(offsetAngle);
+		byte[] bytes = new byte[32];
 		int pos = 0;
-		System.arraycopy(x, 0, bytes, pos, 4);
+		FlashUtil.fillByteArray(centerPointX, pos, bytes);
 		pos += 4;
-		System.arraycopy(y, 0, bytes, pos, 4);
+		FlashUtil.fillByteArray(centerPointY, pos, bytes);
 		pos += 4;
-		System.arraycopy(pixelsh, 0, bytes, pos, 4);
+		FlashUtil.fillByteArray(horizontalDistance, pos, bytes);
 		pos += 4;
-		System.arraycopy(pixelsv, 0, bytes, pos, 4);
+		FlashUtil.fillByteArray(verticalDistance, pos, bytes);
 		pos += 4;
-		System.arraycopy(dis, 0, bytes, pos, 8);
+		FlashUtil.fillByteArray(targetDistance, pos, bytes);
 		pos += 8;
-		System.arraycopy(off, 0, bytes, pos, 8);
+		FlashUtil.fillByteArray(offsetAngle, pos, bytes);
 		return bytes;
 	}
 	

@@ -15,14 +15,14 @@ public interface StringDataSource {
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
 	 */
-	public static class VarDataSource implements StringDataSource{
+	public static class StringVarDataSource implements StringDataSource{
 		
 		private String var;
 		
-		public VarDataSource(String initialVal){
+		public StringVarDataSource(String initialVal){
 			var = initialVal;
 		}
-		public VarDataSource(){
+		public StringVarDataSource(){
 			this("");
 		}
 		

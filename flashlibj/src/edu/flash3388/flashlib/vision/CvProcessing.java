@@ -599,8 +599,8 @@ public class CvProcessing {
 		drawRect(mat, r, new Scalar(21, 21, 21));
 		drawRect(mat, r2, new Scalar(71, 71, 71));
 		
-		an.centerPointX = r.x+r.width+(r2.x - (r.x + r.width)) / 2.0;
-		an.centerPointY = r.y + r.height + (r2.y - (r.y + r.height)) / 2.0;
+		an.centerPointX = (int) (r.x+r.width+(r2.x - (r.x + r.width)) / 2.0);
+		an.centerPointY = (int) (r.y + r.height + (r2.y - (r.y + r.height)) / 2.0);
 		an.verticalDistance = (int) (an.centerPointY - mat.height() * 0.5);
 		an.horizontalDistance = (int) (an.centerPointX - mat.width() * 0.5);
 	}
@@ -903,8 +903,8 @@ public class CvProcessing {
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
 		Point center = contourCenter(contour);
 		
-		analysis.centerPointX = center.x;
-		analysis.centerPointY = center.y;
+		analysis.centerPointX = (int) center.x;
+		analysis.centerPointY = (int) center.y;
 		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
 		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
 		

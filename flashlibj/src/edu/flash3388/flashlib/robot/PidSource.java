@@ -34,6 +34,16 @@ public interface PidSource {
 			this(gyro, PidType.Displacement);
 		}
 		
+		public void setGyro(Gyro gyro){
+			this.gyro = gyro;
+		}
+		public Gyro getGyro(){
+			return gyro;
+		}
+		public void setType(PidType type){
+			this.type = type;
+		}
+		
 		@Override
 		public double pidGet() {
 			return gyro.getAngle();
@@ -107,6 +117,16 @@ public interface PidSource {
 		}
 		public DoubleDataPidSource(DoubleDataSource source){
 			this(source, PidType.Displacement);
+		}
+		
+		public void setSource(DoubleDataSource source){
+			this.source = source;
+		}
+		public DoubleDataSource getSource(){
+			return source;
+		}
+		public void setType(PidType type){
+			this.type = type;
 		}
 		
 		@Override

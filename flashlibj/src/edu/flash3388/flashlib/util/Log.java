@@ -636,7 +636,12 @@ public abstract class Log{
 	public static Log createStreamLog(String name){
 		return new SimpleLog(name);
 	}
-	
+	/**
+	 * Creates a new log by a given type and name.
+	 * @param name the log name
+	 * @param type the log type
+	 * @return a new log
+	 */
 	public static Log createLogByType(String name, LoggingType type){
 		switch(type){
 			case Buffered: return createBufferedLog(name);

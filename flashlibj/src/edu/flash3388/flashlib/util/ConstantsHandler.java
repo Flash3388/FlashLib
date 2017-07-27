@@ -42,12 +42,12 @@ public class ConstantsHandler {
 	
 	private ConstantsHandler(){}
 	
-	private static final Map<String, DoubleDataSource.VarDataSource> doubleMap = 
-			new HashMap<String, DoubleDataSource.VarDataSource>();
-	private static final Map<String, StringDataSource.VarDataSource> stringMap = 
-			new HashMap<String, StringDataSource.VarDataSource>();
-	private static final Map<String, BooleanDataSource.VarDataSource> booleanMap = 
-			new HashMap<String, BooleanDataSource.VarDataSource>();
+	private static final Map<String, DoubleDataSource.DoubleVarDataSource> doubleMap = 
+			new HashMap<String, DoubleDataSource.DoubleVarDataSource>();
+	private static final Map<String, StringDataSource.StringVarDataSource> stringMap = 
+			new HashMap<String, StringDataSource.StringVarDataSource>();
+	private static final Map<String, BooleanDataSource.BooleanVarDataSource> booleanMap = 
+			new HashMap<String, BooleanDataSource.BooleanVarDataSource>();
 	
 	//--------------------------------------------------------------------
 	//-----------------------General--------------------------------------
@@ -107,9 +107,9 @@ public class ConstantsHandler {
 	 * @return a {@link DoubleDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
 	public static DoubleDataSource addNumber(String name, double iniVal){
-		DoubleDataSource.VarDataSource source = doubleMap.get(name);
+		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.VarDataSource(iniVal);
+			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
 			doubleMap.put(name, source);
 		}
 		return source;
@@ -123,9 +123,9 @@ public class ConstantsHandler {
 	 * @return a {@link DoubleDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
 	public static DoubleDataSource putNumber(String name, double iniVal){
-		DoubleDataSource.VarDataSource source = doubleMap.get(name);
+		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.VarDataSource(iniVal);
+			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
 			doubleMap.put(name, source);
 		}else source.set(iniVal);
 		
@@ -140,9 +140,9 @@ public class ConstantsHandler {
 	 * @return the {@link DoubleDataSource} wrapper represented by a given key in the map
 	 */
 	public static DoubleDataSource getNumber(String name, double iniVal){
-		DoubleDataSource.VarDataSource source = doubleMap.get(name);
+		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.VarDataSource(iniVal);
+			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
 			doubleMap.put(name, source);
 		}
 		return source;
@@ -249,9 +249,9 @@ public class ConstantsHandler {
 	 * @return a {@link StringDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
 	public static StringDataSource addString(String name, String iniVal){
-		StringDataSource.VarDataSource source = stringMap.get(name);
+		StringDataSource.StringVarDataSource source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.VarDataSource(iniVal);
+			source = new StringDataSource.StringVarDataSource(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
@@ -265,9 +265,9 @@ public class ConstantsHandler {
 	 * @return a {@link StringDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
 	public static StringDataSource putString(String name, String iniVal){
-		StringDataSource.VarDataSource source = stringMap.get(name);
+		StringDataSource.StringVarDataSource source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.VarDataSource(iniVal);
+			source = new StringDataSource.StringVarDataSource(iniVal);
 			stringMap.put(name, source);
 		}else source.set(iniVal);
 		
@@ -282,9 +282,9 @@ public class ConstantsHandler {
 	 * @return the {@link StringDataSource} wrapper represented by a given key in the map
 	 */
 	public static StringDataSource getString(String name, String iniVal){
-		StringDataSource.VarDataSource source = stringMap.get(name);
+		StringDataSource.StringVarDataSource source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.VarDataSource(iniVal);
+			source = new StringDataSource.StringVarDataSource(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
@@ -369,9 +369,9 @@ public class ConstantsHandler {
 	 * @return a {@link BooleanDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
 	public static BooleanDataSource addBoolean(String name, boolean iniVal){
-		BooleanDataSource.VarDataSource source = booleanMap.get(name);
+		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.VarDataSource(iniVal);
+			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
 			booleanMap.put(name, source);
 		}
 		return source;
@@ -385,9 +385,9 @@ public class ConstantsHandler {
 	 * @return a {@link BooleanDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
 	public static BooleanDataSource putBoolean(String name, boolean iniVal){
-		BooleanDataSource.VarDataSource source = booleanMap.get(name);
+		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.VarDataSource(iniVal);
+			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
 			booleanMap.put(name, source);
 		}else source.set(iniVal);
 		
@@ -402,9 +402,9 @@ public class ConstantsHandler {
 	 * @return the {@link BooleanDataSource} wrapper represented by a given key in the map
 	 */
 	public static BooleanDataSource getBoolean(String name, boolean iniVal){
-		BooleanDataSource.VarDataSource source = booleanMap.get(name);
+		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.VarDataSource(iniVal);
+			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
 			booleanMap.put(name, source);
 		}
 		return source;

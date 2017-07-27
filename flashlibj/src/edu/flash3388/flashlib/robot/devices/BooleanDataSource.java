@@ -14,13 +14,13 @@ public interface BooleanDataSource {
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
 	 */
-	public static class VarDataSource implements BooleanDataSource{
+	public static class BooleanVarDataSource implements BooleanDataSource{
 		private boolean var;
 		
-		public VarDataSource(boolean initialVal){
+		public BooleanVarDataSource(boolean initialVal){
 			var = initialVal;
 		}
-		public VarDataSource(){
+		public BooleanVarDataSource(){
 			this(false);
 		}
 		

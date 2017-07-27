@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.SendableLog;
+import edu.flash3388.flashlib.robot.RobotFactory.ImplType;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -168,7 +169,7 @@ public class FlashRoboUtil {
 	 * @param implType the platform used
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(int mode, RobotFactory.ImplType implType){
+	public static void initFlashLib(int mode, ImplType implType){
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		

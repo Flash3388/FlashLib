@@ -18,7 +18,7 @@ import java.util.Vector;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Scheduler {
+public final class Scheduler {
 	
 	private static abstract class TaskWrapper{
 		boolean removeOnFinish;
@@ -149,7 +149,7 @@ public class Scheduler {
 		return tasks.remove(runnable);
 	}
 	
-	void registerSystem(System system){
+	protected void registerSystem(System system){
 		systems.add(system);
 	}
 	
