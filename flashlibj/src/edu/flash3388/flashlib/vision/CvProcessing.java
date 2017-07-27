@@ -248,8 +248,6 @@ public class CvProcessing {
 			
 			analysis = CvProcessing.filterForContoursByRatio(contours, mat, heightRatio, widthRatio, dy, dx, 
 					maxScore, minScore, maxHeight, minHeight, maxWidth, minWidth);
-			if(analysis == null)
-				contours.clear();
 		}
 		/**
 		 * {@inheritDoc}
@@ -663,10 +661,10 @@ public class CvProcessing {
 	private static boolean impossibleSize(Rect rect, double maxHeight, double minHeight, double maxWidth, double minWidth){
 		return rect.height > maxHeight || rect.height < minHeight || rect.width > maxWidth || rect.width < minWidth;
 	}
-	private static void setAnalysisForRatio(List<MatOfPoint> contours, Rect[] rects, int i1, int i2, 
+	private static void setAnalysisForRatio(MatOfPoint contour1, MatOfPoint contour2, Rect[] rects, int i1, int i2, 
 			Analysis an, Mat mat){
-		Rect r = getRectFromArray(rects, contours.get(i1), i1);
-		Rect r2 = getRectFromArray(rects, contours.get(i2), i2);
+		Rect r = getRectFromArray(rects, contour1, i1);
+		Rect r2 = getRectFromArray(rects, contour2, i2);
 		
 		drawRect(mat, r, new Scalar(21, 21, 21));
 		drawRect(mat, r2, new Scalar(71, 71, 71));
@@ -714,6 +712,10 @@ public class CvProcessing {
 	 * Scoring is between 0 and 1. where 0 is the best possible result. If a score is better than the min score it is automatically
 	 * used. If the result contours' score is bigger than the max score, they are ignored.
 	 * </p>
+	 * <p>
+	 * The given list is emptied if no result is found. If the contours are found, they are the only remaining contours
+	 * in the list.
+	 * </p>
 	 * 
 	 * @param heightRatio the height ration between the two contours
 	 * @param widthRatio the width ration between the two contours
@@ -748,7 +750,6 @@ public class CvProcessing {
 			Rect r = getRectFromArray(rects, c1, i);
 			
 			if(impossibleSize(r, maxHeight, minHeight, maxWidth, minWidth)){
-				System.out.println("<SIZE> ->> H: "+r.height+" W: "+r.width);
 				continue;
 			}
 			
@@ -759,7 +760,6 @@ public class CvProcessing {
 				Rect r2 = getRectFromArray(rects, c2, j);
 				
 				if(impossibleSize(r2, maxHeight, minHeight, maxWidth, minWidth)){
-					System.out.println("<SIZE> ->> H: "+r2.height+" W: "+r2.width);
 					continue;
 				}
 				
@@ -769,9 +769,6 @@ public class CvProcessing {
 					bestIdx1 = i;
 					bestIdx2 = j;
 					
-					System.out.println("<POSSIBILITY> ->> H: "+r.height+" / "+r2.height+" || W: "+r.width+" / "+r2.width+
-							" || A: "+avg);
-					
 					if(best < minScore)
 						foundBest = true;
 				}
@@ -780,12 +777,17 @@ public class CvProcessing {
 				break;
 		}
 		if(best > maxScore || bestIdx1 < 0 || bestIdx2 < 0){
+			contours.clear();
 			return null;
 		}
 		
+		MatOfPoint contour1 = contours.get(bestIdx1), contour2 = contours.get(bestIdx2);
+		contours.clear();
+		contours.add(contour1);
+		contours.add(contour2);
+		
 		Analysis an = new Analysis();
-		setAnalysisForRatio(contours, rects, bestIdx1, bestIdx2, an, feed);
-		System.out.println();
+		setAnalysisForRatio(contour1, contour2, rects, bestIdx1, bestIdx2, an, feed);
 		return an;
 	}
 	

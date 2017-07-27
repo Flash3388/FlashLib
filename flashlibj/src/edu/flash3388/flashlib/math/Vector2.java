@@ -43,11 +43,19 @@ public class Vector2 {
 	}
 	/**
 	 * Gets the angle of the vector. Angle is the angle between the vector and the x-axis.
-	 * @return the angle of the vector
+	 * @return the angle of the vector in degrees
 	 */
 	public double angle(){
-		return Math.toDegrees(Math.atan2(y, y));
+		return Math.toDegrees(angleRad());
 	}
+	/**
+	 * Gets the angle of the vector. Angle is the angle between the vector and the x-axis.
+	 * @return the angle of the vector in radians
+	 */
+	public double angleRad(){
+		return Math.atan2(x, y);
+	}
+	
 	/**
 	 * Normalizes the vector size. Done by dividing its dimensions by its length.
 	 */
@@ -359,7 +367,7 @@ public class Vector2 {
 	/**
 	 * Returns the angle between this vector and another vector.
 	 * @param vec the other vector
-	 * @return angle in degrees
+	 * @return angle in radians
 	 */
 	public double angleTo(Vector2 vec){
 		return angleBetween(this, vec);
@@ -397,10 +405,10 @@ public class Vector2 {
 	 * 
 	 * @param u vector 1
 	 * @param v vector 2
-	 * @return the angle in degrees between the vectors
+	 * @return the angle in radians between the vectors
 	 */
 	public static double angleBetween(Vector2 u, Vector2 v){
-		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
+		return Math.acos(u.dot(v) / (u.length() + v.length()));
 	}
 	/**
 	 * Creates a new vector from polar coordinates. The coordinates are converted into Cartesian coordinates.

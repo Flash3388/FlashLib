@@ -53,18 +53,32 @@ public class Vector3 {
 	}
 	/**
 	 * Gets the inclination of the vector. Inclination is the angle between the vector and the z-axis.
-	 * @return the inclination of the vector
+	 * @return the inclination of the vector in degrees
 	 */
 	public double inclination(){
-		double angle = Math.toDegrees(Math.acos(z / length())); 
+		return Math.toDegrees(inclinationRad());
+	}
+	/**
+	 * Gets the inclination of the vector. Inclination is the angle between the vector and the z-axis.
+	 * @return the inclination of the vector in radians
+	 */
+	public double inclinationRad(){
+		double angle = Math.acos(z / length()); 
 		return (z < 0)? -angle : angle;
 	}
 	/**
 	 * Gets the azimuth of the vector. Azimuth is the angle between the vector and the x-axis.
-	 * @return the azimuth of the vector
+	 * @return the azimuth of the vector in degrees
 	 */
 	public double azimuth(){
-		return Math.toDegrees(Math.atan2(y, x));
+		return Math.toDegrees(azimuthRad());
+	}
+	/**
+	 * Gets the azimuth of the vector. Azimuth is the angle between the vector and the x-axis.
+	 * @return the azimuth of the vector in radians
+	 */
+	public double azimuthRad(){
+		return Math.atan2(y, x);
 	}
 	/**
 	 * Normalizes the vector size. Done by dividing its dimensions by its length.
