@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.communications;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
 /**
  * An abstract logic for IO port {@link CommInterface}s. Extends {@link StreamCommInterface} and adds manual connection
  * tracking to insure the existence of connection. Does not provide any data recovery. 

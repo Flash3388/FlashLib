@@ -19,9 +19,9 @@ public class DashboardPidTuner extends Displayble{
 	
 	private LineChart.Series<Number, Number> series;
 	
-	private SimpleDoubleProperty kp, ki, kd, setpoint, valueBinder, timeBinder, funcPeriodBinder;
+	private SimpleDoubleProperty kp, ki, kd, kf, setpoint, valueBinder, timeBinder, funcPeriodBinder;
 	private SimpleStringProperty setpointBinder;
-	private double lastkp, lastki, lastkd, lastsetpoint;
+	private double lastkp, lastki, lastkd, lastkf, lastsetpoint;
 	private double newValue, lastValue;
 	private long millisMaxFuncValue = -1;
 	private double maxValue = 10.0;
@@ -41,6 +41,7 @@ public class DashboardPidTuner extends Displayble{
 		kp = new SimpleDoubleProperty();
 		ki = new SimpleDoubleProperty();
 		kd = new SimpleDoubleProperty();
+		kf = new SimpleDoubleProperty();
 		setpoint = new SimpleDoubleProperty();
 		valueBinder = new SimpleDoubleProperty();
 		timeBinder = new SimpleDoubleProperty();
@@ -78,6 +79,9 @@ public class DashboardPidTuner extends Displayble{
 	}
 	public SimpleDoubleProperty kdProperty(){
 		return kd;
+	}
+	public SimpleDoubleProperty kfProperty(){
+		return kf;
 	}
 	
 	public double getSliderMaxValue(){
@@ -147,6 +151,7 @@ public class DashboardPidTuner extends Displayble{
 			kp.set(lastkp);
 			ki.set(lastki);
 			kd.set(lastkd);
+			kf.set(lastkf);
 			newKSet = false;
 		}
 	}
@@ -157,6 +162,7 @@ public class DashboardPidTuner extends Displayble{
 			lastkp = FlashUtil.toDouble(data, 1);
 			lastki = FlashUtil.toDouble(data, 9);
 			lastkd = FlashUtil.toDouble(data, 17);
+			lastkf = FlashUtil.toDouble(data, 25);
 			newKSet = true;
 		}
 		else if(data[0] == PidTuner.CV_UPDATE){
@@ -187,16 +193,18 @@ public class DashboardPidTuner extends Displayble{
 			FlashUtil.fillByteArray(lastsetpoint, 1, data);
 			return data;
 		}
-		if(!newKSet && (lastkp != kp.get() || lastki != ki.get() || lastkd != kd.get())){
+		if(!newKSet && (lastkp != kp.get() || lastki != ki.get() || lastkd != kd.get() || lastkf != kf.get())){
 			lastkp = kp.get();
 			lastki = ki.get();
 			lastkd = kd.get();
+			lastkf = kf.get();
 			
-			byte[] data = new byte[25];
+			byte[] data = new byte[32];
 			data[0] = PidTuner.K_UPDATE;
 			FlashUtil.fillByteArray(lastkp, 1, data);
 			FlashUtil.fillByteArray(lastki, 9, data);
 			FlashUtil.fillByteArray(lastkd, 17, data);
+			FlashUtil.fillByteArray(lastkf, 25, data);
 			
 			return data;
 		}
@@ -224,9 +232,6 @@ public class DashboardPidTuner extends Displayble{
 		return tuners.keySet().toArray(new String[tuners.keySet().size()]);
 	}
 	public static void resetTuners(){
-		String[] tunersN = getTunerNames();
-		for (int i = 0; i < tunersN.length; i++){
-		}
 		tuners.clear();
 	}
 }

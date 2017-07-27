@@ -46,8 +46,8 @@ public class PidTunerWindow extends Stage{
 	
 	private LineChart<Number, Number> chart;
 	private NumberAxis axisx, axisy;
-	private Slider pslider, islider, dslider;
-	private Label valLbl, pLbl, iLbl, dLbl, timeLbl;
+	private Slider pslider, islider, dslider, fslider;
+	private Label valLbl, pLbl, iLbl, dLbl, fLbl, timeLbl;
 	private TextField spField;
 	
 	private SimpleStringProperty binderPropSp;
@@ -55,6 +55,7 @@ public class PidTunerWindow extends Stage{
 	private SimpleDoubleProperty binderKp;
 	private SimpleDoubleProperty binderKi;
 	private SimpleDoubleProperty binderKd;
+	private SimpleDoubleProperty binderKf;
 	private SimpleDoubleProperty binderTime;
 	private SimpleDoubleProperty binderPeriod;
 	
@@ -102,6 +103,7 @@ public class PidTunerWindow extends Stage{
 		binderKd.bind(tuner.kdProperty());
 		binderKi.bind(tuner.kiProperty());
 		binderKp.bind(tuner.kpProperty());
+		binderKf.bind(tuner.kfProperty());
 		binderValue.bind(tuner.valueBindProperty());
 		binderTime.bind(tuner.timeBindProperty());
 		binderPeriod.bind(tuner.periodBindProperty());
@@ -109,6 +111,7 @@ public class PidTunerWindow extends Stage{
 		setSlider(pslider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
 		setSlider(islider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
 		setSlider(dslider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
+		setSlider(fslider, tuner.getSliderMaxValue(), tuner.getSliderTicks());
 		
 		chart.getData().add(tuner.getSeries());
 	}
@@ -116,6 +119,7 @@ public class PidTunerWindow extends Stage{
 		pslider.setDisable(disable);
 		islider.setDisable(disable);
 		dslider.setDisable(disable);
+		fslider.setDisable(disable);
 		spField.setDisable(disable);
 	}
 	private void resetBinds(){
@@ -124,6 +128,7 @@ public class PidTunerWindow extends Stage{
 		binderKd.unbind();
 		binderKi.unbind();
 		binderKp.unbind();
+		binderKf.unbind();
 		binderValue.unbind();
 		binderPeriod.unbind();
 		chart.getData().clear();
@@ -135,6 +140,9 @@ public class PidTunerWindow extends Stage{
 		pslider.setValue(0.0);
 		islider.setValue(0.0);
 		dslider.setValue(0.0);
+		fslider.setValue(0.0);
+		
+		spField.setText("0.0");
 		
 		xrange = DEFAULT_X_RANGE;
 		yrange = DEFAULT_Y_RANGE;
@@ -303,6 +311,27 @@ public class PidTunerWindow extends Stage{
 			}
 		});
 		
+		fslider = createSlider();
+		fslider.valueProperty().addListener((obs, oldVal, newVal)->{
+			if(tuner != null){
+				if(!localKUpdate){
+					localKUpdate = true;
+					tuner.kfProperty().set(newVal.doubleValue());
+					localKUpdate = false;
+				}
+				fLbl.setText("Kf: "+Mathf.roundDecimal(newVal.doubleValue(), 4));
+			}
+		});
+		fLbl = new Label("Kf: 0.0");
+		binderKf = new SimpleDoubleProperty();
+		binderKf.addListener((obs, oldVal, newVal)->{
+			if(!localKUpdate){
+				localKUpdate = true;
+				fslider.setValue(newVal.doubleValue());
+				localKUpdate = false;
+			}
+		});
+		
 		keysBox = new ComboBox<String>();
 		keysBox.getItems().add("-- Choose Tuner --");
 		keysBox.getSelectionModel().select(0);
@@ -363,14 +392,14 @@ public class PidTunerWindow extends Stage{
 				else 
 					kuValue = val;
 			}
-		});
-		VBox kufieldbox = new VBox();
-		kufieldbox.getChildren().addAll(kuLbl, kuField);
-		
-		Button computeKu = new Button("Compute optimal kp");
+		});		
+		Button computeKu = new Button("Compute Ku");
 		computeKu.setOnAction((e)->{
 			
 		});
+		computeKu.setDisable(true);//UNTIL IT IS FUNCTIONAL
+		VBox kufieldbox = new VBox();
+		kufieldbox.getChildren().addAll(kuLbl, kuField, computeKu);
 		
 		if(tunningParams == null)
 			createTunningParams();
@@ -413,7 +442,9 @@ public class PidTunerWindow extends Stage{
 		kibox.getChildren().addAll(iLbl, islider);
 		VBox kdbox = new VBox();
 		kdbox.getChildren().addAll(dLbl, dslider);
-		kbottom.getChildren().addAll(kpbox, kibox, kdbox);
+		VBox kfbox = new VBox();
+		kfbox.getChildren().addAll(fLbl, fslider);
+		kbottom.getChildren().addAll(kpbox, kibox, kdbox, kfbox);
 		
 		HBox spbottom = new HBox();
 		spbottom.setSpacing(10);

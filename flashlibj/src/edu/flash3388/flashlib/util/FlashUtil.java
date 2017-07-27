@@ -51,6 +51,7 @@ public final class FlashUtil {
 	
 	private static long startTime = 0;
 	private static Log mainLog;
+	private static Log.LoggingType defaultCreatingMode = Log.LoggingType.Stream;
 	private static ExecutorService executor;
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
@@ -145,19 +146,26 @@ public final class FlashUtil {
 	 * Initialized the main log of flashlib. Many features throughout the library log data to this log.
 	 * 
 	 * @param logType The {@link LoggingType} of the created log
-	 * @param overrideLog If true and previous files of the main log exist, they will be deleted.
 	 */
-	public static void setStart(Log.LoggingType logType, boolean overrideLog){
-		if(mainLog == null)
-			mainLog = new Log("flashlib", logType, overrideLog);
+	public static void setStart(Log.LoggingType logType){
+		if(mainLog == null){
+			switch(logType){
+				case Buffered: 
+					mainLog = Log.createBufferedLog("flashlib");
+					break;
+				case Stream:
+					mainLog = Log.createStreamLog("flashlib");
+					break;
+			}
+		}
 	}
 	/**
 	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
-	 * The main log uses {@link LoggingType#Stream} as the logs {@link LoggingType}, and does not override any 
-	 * existing files.
+	 * The main log uses a default mode as the logs {@link LoggingType} which can be set in 
+	 * {@link #setLogCreatingType(LoggingType)}, and does not override any existing files.
 	 */
 	public static void setStart(){
-		setStart(Log.LoggingType.Stream, false);
+		setStart(defaultCreatingMode);
 	}
 	/**
 	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized by calling
@@ -171,6 +179,23 @@ public final class FlashUtil {
 		return mainLog;
 	}
 
+	/**
+	 * Sets the default logging type for created log through FlashUtil. Used when creating log through 
+	 * {@link #createLog(String)}.
+	 * 
+	 * @param mode the default logging type.
+	 */
+	public static void setLogCreatingType(Log.LoggingType mode){
+		defaultCreatingMode = mode;
+	}
+	/**
+	 * Creates a new log using the default logging type set using {@link #setLogCreatingType(LoggingType)}.
+	 * @param name the name of the log
+	 * @return created log.
+	 */
+	public static Log createLog(String name){
+		return Log.createLogByType(name, defaultCreatingMode);
+	}
 	
 	/**
 	 * Sorts a given array using bubble sort. The rest of the given arrays are

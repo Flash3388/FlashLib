@@ -20,13 +20,58 @@ import java.util.Vector;
  */
 public class Scheduler {
 	
+	private static abstract class TaskWrapper{
+		boolean removeOnFinish;
+		
+		TaskWrapper(boolean removeFinshed){
+			this.removeOnFinish = removeFinshed;
+		}
+		
+		abstract boolean run();
+	}
+	private static class RunnableWrapper extends TaskWrapper{
+		Runnable runnable;
+		
+		RunnableWrapper(Runnable runnable, boolean removeOnFinish){
+			super(removeOnFinish);
+			this.runnable = runnable;
+		}
+
+		@Override
+		boolean run() {
+			runnable.run();
+			return true;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			return super.equals(obj) || runnable.equals(obj);
+		}
+	}
+	private static class ScheduledTaskWrapper extends TaskWrapper{
+		ScheduledTask task;
+		
+		ScheduledTaskWrapper(ScheduledTask task, boolean removeOnFinish){
+			super(removeOnFinish);
+			this.task = task;
+		}
+
+		@Override
+		boolean run() {
+			return task.run();
+		}
+		@Override
+		public boolean equals(Object obj) {
+			return super.equals(obj) || task.equals(obj);
+		}
+	}
+	
 	private static Scheduler instance;
 	
 	private boolean disabled = false;
 	
 	private Vector<Action> actions = new Vector<Action>();
 	private Vector<System> systems = new Vector<System>();
-	private Vector<ScheduledTask> tasks = new Vector<ScheduledTask>();
+	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
 	
 	private Scheduler(){}
 	
@@ -36,11 +81,11 @@ public class Scheduler {
 	public void run(){
 		if(disabled) return;
 		
-		ScheduledTask task = null;
-		for(Enumeration<ScheduledTask> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
-			task = taskEnum.nextElement();
-			if(!task.run())
-				tasks.remove(task);
+		TaskWrapper taskWrapper = null;
+		for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
+			taskWrapper = taskEnum.nextElement();
+			if(!taskWrapper.run() || taskWrapper.removeOnFinish)
+				tasks.remove(taskWrapper);
 		}
 		
 		Action action = null;
@@ -59,18 +104,49 @@ public class Scheduler {
 	}
 	
 	/**
-	 * Adds a new ScheduledTask to be executed.
+	 * Adds a new {@link ScheduledTask} to be executed continuously until manually removed or {@link ScheduledTask#run()}
+	 * returns false.
 	 * @param task task to execute
 	 */
-	public void add(ScheduledTask task){
-		tasks.addElement(task);
+	public void addTask(ScheduledTask task){
+		tasks.addElement(new ScheduledTaskWrapper(task, false));
 	}
 	/**
-	 * Removes a ScheduledTask from execution.
-	 * @param task task to remove
+	 * Adds a new {@link Runnable} to be executed continuously until manually removed.
+	 * @param runnable task to execute
 	 */
-	public void remove(ScheduledTask task){
-		tasks.remove(task);
+	public void addTask(Runnable runnable){
+		tasks.addElement(new RunnableWrapper(runnable, false));
+	}
+	/**
+	 * Adds a new {@link ScheduledTask} to be executed once.
+	 * @param task task to execute
+	 */
+	public void execute(ScheduledTask task){
+		tasks.addElement(new ScheduledTaskWrapper(task, true));
+	}
+	/**
+	 * Adds a new {@link Runnable} to be executed once.
+	 * @param runnable task to execute
+	 */
+	public void execute(Runnable runnable){
+		tasks.addElement(new RunnableWrapper(runnable, true));
+	}
+	/**
+	 * Removes a {@link ScheduledTask} from execution.
+	 * @param task task to remove
+	 * @return true if the task was in execution, false otherwise
+	 */
+	public boolean remove(ScheduledTask task){
+		return tasks.remove(task);
+	}
+	/**
+	 * Removes a {@link Runnable} from execution.
+	 * @param runnable task to remove
+	 * @return true if the task was in execution, false otherwise
+	 */
+	public boolean remove(Runnable runnable){
+		return tasks.remove(runnable);
 	}
 	
 	void registerSystem(System system){
@@ -78,7 +154,7 @@ public class Scheduler {
 	}
 	
 	/**
-	 * Adds a new Action to be executed by the scheduler. The action's system requirements are checked. If
+	 * Adds a new {@link Action} to be executed by the scheduler. The action's system requirements are checked. If
 	 * other actions use those same systems, those actions are canceled. If the scheduler is disabled, the action
 	 * cannot be added.
 	 * 
@@ -100,7 +176,7 @@ public class Scheduler {
 		return true;
 	}
 	/**
-	 * Removes an action from the scheduler. If the action is in the scheduler, it is removed and its required systems
+	 * Removes an {@link Action} from the scheduler. If the action is in the scheduler, it is removed and its required systems
 	 * are updated as lacking a current action.
 	 * @param action action to remove.
 	 */
@@ -114,7 +190,7 @@ public class Scheduler {
 		}
 	}
 	/**
-	 * Removes all the actions from the scheduler.
+	 * Removes all the {@link Action}s from the scheduler.
 	 */
 	public void removeAllActions(){
 		Enumeration<Action> actionEnum = actions.elements();

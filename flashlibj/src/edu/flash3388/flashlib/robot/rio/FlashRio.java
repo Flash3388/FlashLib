@@ -41,7 +41,7 @@ public abstract class FlashRio extends SampleRobot {
 		
 		log = FlashUtil.getLog();
 		if(logsEnabled){
-			powerLog = new Log("powerlog");
+			powerLog = FlashUtil.createLog("powerlog");
 			if(!logPower)
 				powerLog.disable();
 		}else{

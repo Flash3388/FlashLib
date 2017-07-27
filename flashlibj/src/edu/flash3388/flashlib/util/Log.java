@@ -4,13 +4,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import edu.flash3388.flashlib.io.FileStream;
 
 /**
  * <p>
@@ -39,7 +36,7 @@ import edu.flash3388.flashlib.io.FileStream;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public final class Log{
+public abstract class Log{
 	
 	/**
 	 * <p>
@@ -91,7 +88,6 @@ public final class Log{
 	 */
 	public static final byte MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
 	
-	private static final byte BUFFER_SIZE = 50;
 	private static final String EXTENSION = ".flog";
 	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
@@ -101,16 +97,13 @@ public final class Log{
 	private String name = null;
 	
 	private PrintStream out = System.out;
-	private FileWriter writerLog = null, writerErrorLog = null;
-	private String[] logLines = null, errorLines = null;
-	private String absPath = null, absPathError = null;
+	private File logFile, errorLogFile;
 	private boolean closed = true;
-	private byte logMode, indexLog, indexErrorLog;
-	private LoggingType type;
+	private byte logMode;
 	
 	
 	/**
-	 * Creates a new log using a given {@link LoggingType} and logging mode. 
+	 * Creates a new log. 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
 	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
@@ -128,63 +121,47 @@ public final class Log{
 	 * 
 	 * @param directory The directory in which to save the log
 	 * @param name The name of the log
-	 * @param type The {@link LoggingType} of the created log
-	 * @param override If true, any existing log files with the same name will be deleted
+	 * @param override true to override existing log files with the same name, false otherwise.
 	 * @param logMode The logging output types
 	 */
-	public Log(String directory, String name, LoggingType type, boolean override, byte logMode){
+	public Log(String directory, String name, boolean override, int logMode){
 		this.name = name;
-		this.logMode = logMode;
-		this.type = type;
+		this.logMode = (byte) logMode;
+		
 		Date date = new Date();
-		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
 		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
 		
+		dateFormat.applyPattern("_hh_mm");
+		
+		name = directory + name + dateFormat.format(date);
 		byte counter = 0;
-		File logFile = new File(directory + name + EXTENSION);
+		File logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(directory + name + (++counter) + EXTENSION);
+			logFile = new File(name + (++counter) + EXTENSION);
 		
 		try {
-			if((logMode & MODE_PRINT) != 0)
+			if(isLoggingMode(MODE_PRINT))
 				out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
-			File errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
+			File errorFile = new File(name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
 			
-			dateFormat = new SimpleDateFormat("hh:mm:ss");
-			String timestr = "Time: "+dateFormat.format(date);
-			absPath = logFile.getAbsolutePath();
-			absPathError = errorFile.getAbsolutePath();
-			
-			if(type == LoggingType.Buffered){
-				logLines = new String[BUFFER_SIZE];
-				errorLines = new String[BUFFER_SIZE];
-				
-				FileStream.writeLine(absPath, timestr);
-				FileStream.writeLine(absPathError, timestr);
-			}else{
-				writerLog = new FileWriter(logFile);
-				writerErrorLog = new FileWriter(errorFile);
-				
-				timestr += "\n";
-				writerLog.write(timestr);
-				writerErrorLog.write(timestr);
-			}
-			
 			closed = false;
-		} catch (IOException e) {
+		}catch(IOException e){
 			e.printStackTrace();
+			setLoggingMode(MODE_INTERFACES | MODE_PRINT);
+			closed = true;
 		}
 	}
 	/**
-	 * Creates a new log using a given {@link LoggingType} and logging mode. 
+	 * Creates a new log.
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
 	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
@@ -196,21 +173,16 @@ public final class Log{
 	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
 	 * is a new file of the same name. 
 	 * </p>
-	 * <p>
-	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
-	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
-	 * </p>
 	 * 
 	 * @param name The name of the log
-	 * @param type The {@link LoggingType} of the created log
 	 * @param override If true, any existing log files with the same name will be deleted
 	 * @param logMode The logging output types
 	 */
-	public Log(String name, LoggingType type, boolean override, byte logMode){
-		this(parentDirectory+"logs/", name, type, override, logMode);
+	public Log(String name, boolean override, int logMode){
+		this(parentDirectory+"logs/", name, override, logMode);
 	}
 	/**
-	 * Creates a new log using a given {@link LoggingType} with a {@link #MODE_FULL full log output mode}. 
+	 * Creates a new log with a {@link #MODE_FULL full log output mode}. 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
 	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
@@ -221,20 +193,15 @@ public final class Log{
 	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
 	 * is a new file of the same name. 
 	 * </p>
-	 * <p>
-	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
-	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
-	 * </p>
 	 * 
 	 * @param name The name of the log
-	 * @param type The {@link LoggingType} of the created log
 	 * @param override If true, any existing log files with the same name will be deleted
 	 */
-	public Log(String name, LoggingType type, boolean override){
-		this(parentDirectory+"logs/", name, type, override, MODE_FULL);
+	public Log(String name, boolean override){
+		this(parentDirectory+"logs/", name, override, MODE_FULL);
 	}
 	/**
-	 * Creates a new {@link LoggingType#Stream} log with a {@link #MODE_FULL full log output mode}. 
+	 * Creates a new log with a {@link #MODE_FULL full log output mode} without overriding any previous logs. 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
 	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
@@ -244,18 +211,14 @@ public final class Log{
 	 * parent directories do not exist, they will be created. If a log file with same name is present, an integer will be added to the name specifying it
 	 * is a new file of the same name. 
 	 * </p>
-	 * <p>
-	 * If the given {@link LoggingType} is {@link LoggingType#Buffered Buffered} than a buffer will be created to store
-	 * logged data. The buffer will be flush when the {@link #save()} is called, or when the buffer is full.
-	 * </p>
 	 * 
 	 * @param name The name of the log
 	 */
 	public Log(String name){
-		this(name, LoggingType.Stream, false);
+		this(name, false);
 	}
 	
-	private synchronized void flushLogFile(){
+	/*private synchronized void flushLogFile(){
 		if(indexLog == 0) return;
 		FileStream.appendLines(absPath, logLines);
 		indexLog = 0;
@@ -264,7 +227,29 @@ public final class Log{
 		if(indexErrorLog == 0) return;
 		FileStream.appendLines(absPathError, errorLines);
 		indexErrorLog = 0;
-	}
+	}*/
+	
+	/**
+	 * Writes data to the standard log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 */
+	protected abstract void writeToStandardLog(String log);
+	/**
+	 * Writes data to the error log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 */
+	protected abstract void writeToErrorLog(String log);
+	/**
+	 * Closes the internal writing objects of the log. Called from {@link #close()}. 
+	 * Implementation of closing is user-dependent.
+	 */
+	protected abstract void closeInternal();
+	/**
+	 * Saves the internal writing objects of the log. Called from {@link #save()}. 
+	 * Implementation of saving is user-dependent.
+	 */
+	protected abstract void saveInternal();
+	
 	
 	/**
 	 * Sets the {@link java.io.PrintStream} to which log data is printed if the output mode include {@link #MODE_PRINT}.
@@ -284,17 +269,7 @@ public final class Log{
 	 */
 	public synchronized void write(String mess){
 		if(isClosed()) return;
-		if(type == LoggingType.Buffered){
-			if(indexLog >= BUFFER_SIZE)
-				flushLogFile();
-			logLines[indexLog++] = mess;
-		}else{
-			try {
-				writerLog.write(mess+"\n");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		writeToStandardLog(mess);
 	}
 	
 	/**
@@ -306,17 +281,7 @@ public final class Log{
 	public synchronized void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
-		if(type == LoggingType.Buffered){
-			if(indexErrorLog >= BUFFER_SIZE)
-				flushErrorLogFile();
-			errorLines[indexErrorLog++] = mess;
-		}else{
-			try {
-				writerErrorLog.write(mess+"\n");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		writeToErrorLog(mess);
 	}
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
@@ -328,19 +293,8 @@ public final class Log{
 	public synchronized void writeError(String mess, String stacktrace){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
-		if(type == LoggingType.Buffered){
-			if(indexErrorLog + 1 >= BUFFER_SIZE)
-				flushErrorLogFile();
-			errorLines[indexErrorLog++] = mess;
-			errorLines[indexErrorLog++] = stacktrace;
-		}else{
-			try {
-				writerErrorLog.write(mess+"\n");
-				writerErrorLog.write(stacktrace);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		writeToErrorLog(mess);
+		writeToErrorLog(stacktrace);
 	}
 	
 	/**
@@ -349,6 +303,7 @@ public final class Log{
 	public synchronized void close(){
 		if(isClosed()) return;
 		save();
+		closeInternal();
 		closed = true;
 	}
 	
@@ -358,8 +313,8 @@ public final class Log{
 	public synchronized void delete(){
 		if(!isClosed())
 			close();
-		new File(absPath).delete();
-		new File(absPathError).delete();
+		logFile.delete();
+		errorLogFile.delete();
 	}
 	
 	/**
@@ -368,22 +323,8 @@ public final class Log{
 	 * If the log is closed or if the logging mode is set to {@link #MODE_DISABLED} than nothing will happen.
 	 */
 	public synchronized void save(){
-		if(isClosed() || isDisabled()) return;
-		
-		if(type == LoggingType.Buffered){
-			flushLogFile();
-			flushErrorLogFile();
-		}else{
-			try {
-				writerLog.flush();
-				writerErrorLog.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		closed = false;
-		if((logMode & MODE_PRINT) != 0)
+		saveInternal();
+		if(isLoggingMode(MODE_PRINT))
 			out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	
@@ -401,8 +342,22 @@ public final class Log{
 	 * 
 	 * @return The {@link LoggingType} used for this log.
 	 */
-	public LoggingType getLoggingType(){
-		return type;
+	public abstract LoggingType getLoggingType();
+	
+	/**
+	 * Gets the {@link File} object of the error log file.
+	 * @return the error log file.
+	 */
+	public File getErrorLogFile(){
+		return errorLogFile;
+	}
+	
+	/**
+	 * Gets the {@link File} object of the standard log file.
+	 * @return the standard log file.
+	 */
+	public File getStandardLogFile(){
+		return logFile;
 	}
 	
 	/**
@@ -411,7 +366,7 @@ public final class Log{
 	 * @return True if the log is closed.
 	 */
 	public boolean isClosed(){
-		return closed || (type == LoggingType.Stream && (writerLog == null || writerErrorLog == null));
+		return closed;
 	}
 	
 	/**
@@ -449,8 +404,8 @@ public final class Log{
  	 * 
 	 * @param mode The logging mode to set for use in this log
 	 */
-	public void setLoggingMode(byte mode){
-		this.logMode = mode;
+	public void setLoggingMode(int mode){
+		this.logMode = (byte) mode;
 	}
 	
 	/**
@@ -473,8 +428,24 @@ public final class Log{
 	 * 
 	 * @return The logging mode use by this log
 	 */
-	public byte getLoggingMode(){
+	public int getLoggingMode(){
 		return logMode;
+	}
+	
+	/**
+	 * Gets whether or not the given mode is the current logging mode set in the log.
+	 * There are several types of logging which can be used simultaneously:
+	 * <ul>
+ 	 * 		<li>File writing: {@link #MODE_WRITE}</li>
+ 	 * 		<li>PrintStream writing: {@link #MODE_PRINT}</li>
+ 	 * 		<li>External logging interfaces: {@link #MODE_INTERFACES}</li>
+ 	 * </ul> 
+	 * 
+	 * @param mode logging mode to check
+	 * @return true if the log is in the given mode.
+	 */
+	public boolean isLoggingMode(int mode){
+		return (logMode & mode) != 0;
 	}
 	
 	/**
@@ -500,14 +471,14 @@ public final class Log{
 		if(isDisabled()) return;
 		String err = "ERROR\n\t" + 
 					FlashUtil.secs() + " : " + error;
-		if((logMode & MODE_WRITE) != 0){
+		if(isLoggingMode(MODE_WRITE)){
 			String trace = getErrorStackTrace();
 			writeError(error, trace);
 			write(err);
 		}
-		if((logMode & MODE_PRINT) != 0)
+		if(isLoggingMode(MODE_PRINT))
 			System.err.println(name + "> " + err);
-		if((logMode & MODE_INTERFACES) != 0){
+		if(isLoggingMode(MODE_INTERFACES)){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().reportError(error);
 		}
@@ -526,13 +497,13 @@ public final class Log{
 		if(isDisabled()) return;
 		String war = "WARNING\n\t" + 
 				FlashUtil.secs() + " : " + warning;
-		if((logMode & MODE_PRINT) != 0)
+		if(isLoggingMode(MODE_PRINT))
 			System.err.println(name + "> " + war);
-		if((logMode & MODE_WRITE) != 0){
+		if(isLoggingMode(MODE_WRITE)){
 			writeError("WARNING - " +warning);
 			write(war);
 		}
-		if((logMode & MODE_INTERFACES) != 0){
+		if(isLoggingMode(MODE_INTERFACES)){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().reportWarning(warning);
 		}
@@ -571,11 +542,11 @@ public final class Log{
 	public void log(String msg, String caller){
 		if(isDisabled()) return;
 		msg = caller+": "+msg;
-		if((logMode & MODE_WRITE) != 0)
+		if(isLoggingMode(MODE_WRITE))
 			write(msg);
-		if((logMode & MODE_PRINT) != 0)
+		if(isLoggingMode(MODE_PRINT))
 			out.println(name + "> " + msg);
-		if((logMode & MODE_INTERFACES) != 0){
+		if(isLoggingMode(MODE_INTERFACES)){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().log(msg);
 		}
@@ -604,11 +575,11 @@ public final class Log{
 	public void logTime(String msg, double time){
 		if(isDisabled()) return;
 		msg = time + " : ---------->" + msg;
-		if((logMode & MODE_WRITE) != 0)
+		if(isLoggingMode(MODE_WRITE))
 			write(msg);
-		if((logMode & MODE_PRINT) != 0)
+		if(isLoggingMode(MODE_PRINT))
 			out.println(name + "> " + msg);
-		if((logMode & MODE_INTERFACES) != 0){
+		if(isLoggingMode(MODE_INTERFACES)){
 			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 				lEnum.nextElement().log(msg);
 		}
@@ -630,7 +601,7 @@ public final class Log{
 	
 	/**
 	 * Sets the directory in which to save logs files whose directories were not defined. Such logs are created using
-	 * {@link #Log(String, LoggingType, boolean, byte)}.
+	 * {@link #Log(String, boolean, int)}. The default directory is the local directory.
 	 * 
 	 * @param directory The directory in which to save logs.
 	 */
@@ -639,10 +610,38 @@ public final class Log{
 		if(!parentDirectory.endsWith("/"))
 			parentDirectory += "/";
 	}
-	
+	/**
+	 * Deletes the default log folder. The folder is the "logs" folder in the parent directory
+	 * which is set by {@link #setParentDirectory(String)}.
+	 */
 	public static void deleteLogFolder(){
 		File dir = new File(parentDirectory+"logs/");
 		if(dir.exists())
 			dir.delete();
+	}
+	
+	/**
+	 * Creates and returns a new buffered log. The created class may differ depending on platforms. 
+	 * @param name the name of the log.
+	 * @return a new buffered log. 
+	 */
+	public static Log createBufferedLog(String name){
+		return new SimpleBufferedLog(name);
+	}
+	/**
+	 * Creates and returns a new stream log. The created class may differ depending on platforms. 
+	 * @param name the name of the log.
+	 * @return a new stream log. 
+	 */
+	public static Log createStreamLog(String name){
+		return new SimpleLog(name);
+	}
+	
+	public static Log createLogByType(String name, LoggingType type){
+		switch(type){
+			case Buffered: return createBufferedLog(name);
+			case Stream: return createStreamLog(name);
+		}
+		throw new IllegalArgumentException("Unknown logging type");
 	}
 }

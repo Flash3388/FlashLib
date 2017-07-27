@@ -29,6 +29,7 @@ public class FlashFxUtils {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setContentText(error);
 		alert.setTitle(title);
+		alert.setHeaderText("");
 		alert.initOwner(owner);
 		alert.showAndWait();
 	}
