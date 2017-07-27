@@ -1,9 +1,14 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
@@ -414,7 +419,17 @@ public class MainController implements Initializable{
 	}
 	public boolean loadParam(String path){
 		FlashUtil.getLog().log("Loading file: "+path);
-		VisionProcessing proc = VisionProcessing.createFromXml(path);
+		VisionProcessing proc = null;
+		try {
+			proc = VisionProcessing.createFromXml(path);
+		} catch (Exception e) {
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "XML Parsing Error", e.getMessage());
+			
+			FlashUtil.getLog().reportError(e.getMessage());
+			FlashUtil.getLog().log("Loading failed");
+			return false;
+		}
+		
 		if(proc != null){
 			FlashUtil.getLog().log("Parameters loaded");
 			Dashboard.getVision().addProcessing(proc);

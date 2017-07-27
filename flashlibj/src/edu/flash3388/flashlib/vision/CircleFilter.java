@@ -12,9 +12,9 @@ public class CircleFilter extends ProcessingFilter {
 	}
 
 	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {}
+	public void parseParameters(Map<String, VisionParam> parameters) {}
 	@Override
-	public FilterParam[] getParameters() {
+	public VisionParam[] getParameters() {
 		return null;
 	}
 

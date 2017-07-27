@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Vision source provides a base for vision operations. To use a library for vision processing, it needs to implement this
@@ -16,6 +17,23 @@ import java.util.Comparator;
 public interface VisionSource {
 
 	/**
+	 * Gets the width of the current used frame. If no frame exists, returns 0.
+	 * @return the width in pixels of the current frame, or 0 if no frame exists.
+	 */
+	int getFrameWidth();
+	/**
+	 * Gets the height of the current used frame. If no frame exists, returns 0.
+	 * @return the height in pixels of the current frame, or 0 if no frame exists.
+	 */
+	int getFrameHeight();
+	/**
+	 * Gets the contours available in the frame. Uses a contour wrapper class to contain contour data
+	 * from the used implementation.
+	 * @return list of contours on the frame.
+	 */
+	List<Contour> getContours();
+	
+	/**
 	 * Gets the result of the filtering. This is done by checking the amount of contours left. If only one remains, it is
 	 * returned. Otherwise null is returned.
 	 * @return the analysis of the vision
@@ -29,32 +47,40 @@ public interface VisionSource {
 	Analysis[] getResults();
 	
 	/**
-	 * Filters the image for any circles. Any non-circle contours are filtered out
-	 * 
+	 * Converts the image to a HSV format.
 	 */
-	void circleDetection();
+	void convertHsv();
 	/**
-	 * Filters the image for HSV values. Pixels with color within the given parameters are regarded as contours.
-	 * 
-	 * @param minH min hue
-	 * @param minS min saturation
-	 * @param minV min value
-	 * @param maxH max hue
-	 * @param maxS max saturation
-	 * @param maxV max value
+	 * Converts the image to a RGB format.
 	 */
-	void filterHsv(int minH, int minS, int minV,int maxH, int maxS, int maxV);
+	void convertRgb();
 	/**
-	 * Filters the image for RGB values. Pixels with color within the given parameters are regarded as contours.
-	 * 
-	 * @param minR min red
-	 * @param minG min green
-	 * @param minB min blue
-	 * @param maxR max red
-	 * @param maxG max green
-	 * @param maxB max blue
+	 * Converts the image to a gray scale format.
 	 */
-	void filterRgb(int minR, int minG, int minB,int maxR, int maxG, int maxB);
+	void convertGrayscale();
+	
+	/**
+	 * 
+	 * Filters image for data in a given color range. All data in range is considered a contour.
+	 * Used only for RGB or HSV images.
+	 * 
+	 * @param min1 minimum first value. Red for RGB, Hue for HSV.
+	 * @param min2 minimum second value. Green for RGB, Saturation for HSV.
+	 * @param min3 minimum third value. Blue for RGB, Value for HSV.
+	 * @param max1 maximum first value. Red for RGB, Hue for HSV.
+	 * @param max2 maximum second value. Green for RGB, Saturation for HSV.
+	 * @param max3 maximum third value. Blue for RGB, Value for HSV.
+	 */
+	void filterColorRange(int min1, int min2, int min3, int max1, int max2, int max3);
+	/**
+	 * 
+	 * Filters image for data in a given color range. All data in range is considered a contour.
+	 * Used only for grayscale images.
+	 * 
+	 * @param min minimum value.
+	 * @param max maximum value.
+	 */
+	void filterColorRange(int min, int max);
 	
 	/**
 	 * Sorts the contours by a comparator and removes contours for the bottom of the list if the list contains
@@ -105,6 +131,10 @@ public interface VisionSource {
 	 * @param accuracy the accuracy of approximation
 	 */
 	void detectShapes(int vertecies, double accuracy);
+	/**
+	 * Filters the image for any circles. Any non-circle contours are filtered out.
+	 */
+	void circleDetection();
 	
 	/**
 	 * Searches for 2 contours with certain size ratios and size restrictions and filters out all remaining contours.
@@ -169,3 +199,13 @@ public interface VisionSource {
 	 */
 	void closestToCenterFrame(int amount);
 }
+
+/*
+ * 
+	/**
+	 * Gets an analysis object for a given list of contours. 
+	 * @param contours list of contours
+	 * @return an {@link Analysis} object for the given contours
+	 */
+	//Analysis getAnalysisForContours(List<Contour> contours);
+

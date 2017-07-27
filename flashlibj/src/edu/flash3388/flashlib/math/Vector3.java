@@ -430,7 +430,7 @@ public class Vector3 {
 	/**
 	 * Returns the angle between this vector and another vector.
 	 * @param vec the other vector
-	 * @return angle in degrees
+	 * @return angle in radians
 	 */
 	public double angleTo(Vector3 vec){
 		return angleBetween(this, vec);
@@ -475,10 +475,10 @@ public class Vector3 {
 	 * 
 	 * @param u vector 1
 	 * @param v vector 2
-	 * @return the angle in degrees between the vectors
+	 * @return the angle in radians between the vectors
 	 */
 	public static double angleBetween(Vector3 u, Vector3 v){
-		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
+		return Math.acos(u.dot(v) / (u.length() + v.length()));
 	}
 	/**
 	 * Creates a new vector from polar coordinates. The coordinates are converted into Cartesian coordinates.

@@ -1385,6 +1385,13 @@ public final class FlashUtil {
     public static boolean instanceOf(Object obj, Class<?> cl){
     	return obj.getClass() == cl || isAssignable(obj.getClass(), cl);
     }
+    public static Object createInstance(String name){
+    	try {
+			return Class.forName(name).newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			return null;
+		}
+    }
 	
 	//--------------------------------------------------------------------
 	//----------------------Communications--------------------------------

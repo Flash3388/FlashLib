@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
 /**
  * The default creator object for processing filters. Can load and create all basic filters provided with 
  * FlashLib.
@@ -28,6 +26,7 @@ public class DefaultFilterCreator implements FilterCreator{
 			case "closest-center": return new ClosestToCenterFilter();
 			case "coordinate": return new CoordinateFilter();
 			case "color": return new ColorFilter();
+			case "gray": return new GrayFilter();
 			case "circle": return new CircleFilter();
 		}
 		return null;
@@ -38,27 +37,29 @@ public class DefaultFilterCreator implements FilterCreator{
 	 */
 	@Override
 	public String getSaveName(ProcessingFilter filter) {
-		if(FlashUtil.instanceOf(filter, HighestFilter.class))
+		if(filter instanceof HighestFilter)
 			return "highest";
-		if(FlashUtil.instanceOf(filter, LowestFilter.class))
+		if(filter instanceof LowestFilter)
 			return "lowest";
-		if(FlashUtil.instanceOf(filter, LargestFilter.class))
+		if(filter instanceof LargestFilter)
 			return "largest";
-		if(FlashUtil.instanceOf(filter, ShapeFilter.class))
+		if(filter instanceof ShapeFilter)
 			return "shape";
-		if(FlashUtil.instanceOf(filter, RatioFilter.class))
+		if(filter instanceof RatioFilter)
 			return "ratio";
-		if(FlashUtil.instanceOf(filter, ClosestToLeftFilter.class))
+		if(filter instanceof ClosestToLeftFilter)
 			return "closest-left";
-		if(FlashUtil.instanceOf(filter, ClosestToRightFilter.class))
+		if(filter instanceof ClosestToRightFilter)
 			return "closest-right";
-		if(FlashUtil.instanceOf(filter, ClosestToCenterFilter.class))
+		if(filter instanceof ClosestToCenterFilter)
 			return "closest-center";
-		if(FlashUtil.instanceOf(filter, CoordinateFilter.class))
+		if(filter instanceof CoordinateFilter)
 			return "coordinate";
-		if(FlashUtil.instanceOf(filter, ColorFilter.class))
+		if(filter instanceof ColorFilter)
 			return "color";
-		if(FlashUtil.instanceOf(filter, CircleFilter.class))
+		if(filter instanceof GrayFilter)
+			return "gray";
+		if(filter instanceof CircleFilter)
 			return "circle";
 		return null;
 	}

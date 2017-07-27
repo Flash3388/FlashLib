@@ -2,6 +2,8 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.Map;
 
+import edu.flash3388.flashlib.util.FlashUtil;
+
 /**
  * A base for filters used for vision processing. Each filter is used to filter data out of an image during processing. 
  * <p>
@@ -15,7 +17,7 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionProcessing
  * @see FilterCreator
- * @see FilterParam
+ * @see VisionParam
  */
 public abstract class ProcessingFilter {
 	
@@ -28,14 +30,15 @@ public abstract class ProcessingFilter {
 	 * Loads parameters for the filter. Used when loading the filter from a file or a byte stream.
 	 * @param parameters a map of parameters where the key is the name.
 	 */
-	public abstract void parseParameters(Map<String, FilterParam> parameters);
+	public abstract void parseParameters(Map<String, VisionParam> parameters);
 	/**
 	 * Gets the parameters of the filter. Used mostly when saving the filter into a file or a byte stream.
 	 * @return an array of parameters
 	 */
-	public abstract FilterParam[] getParameters();
+	public abstract VisionParam[] getParameters();
 	
-	private static FilterCreator creator;
+	
+	private static FilterCreator creator = new DefaultFilterCreator();
 	
 	/**
 	 * Sets the filter creator used to save and load filters.
@@ -54,7 +57,8 @@ public abstract class ProcessingFilter {
 	
 	/**
 	 * Creates a new filter by name and loads parameters into it. Uses the set filter creator to get the class
-	 * representing the filter.
+	 * representing the filter. If the filter creator was unable to create the filter, it is attempted to look at
+	 * the name as a class name and create an instance of it. If this too fails, null returns.
 	 * 
 	 * @param name the name of the filter used by the filter creator
 	 * @param parameters parameters for the filter
@@ -62,19 +66,24 @@ public abstract class ProcessingFilter {
 	 * @throws IllegalStateException if a filter creator was not set
 	 * @see FilterCreator#create(String)
 	 */
-	public static ProcessingFilter createFilter(String name, Map<String, FilterParam> parameters){
+	public static ProcessingFilter createFilter(String name, Map<String, VisionParam> parameters){
 		if(creator == null)
 			throw new IllegalStateException("Filter creator was not defined");
 		
 		ProcessingFilter filter = creator.create(name);
-		if(filter == null)
-			return null;
+		if(filter == null){
+			Object obj = FlashUtil.createInstance(name);
+			if(obj == null || !(obj instanceof ProcessingFilter))
+				return null;
+			filter = (ProcessingFilter)filter;
+		}
 		
 		filter.parseParameters(parameters);
 		return filter;
 	}
 	/**
-	 * Gets the name of a filter according to the filter creator.
+	 * Gets the name of a filter according to the filter creator. If the creator was unable to
+	 * provide a save name, the class name is used instead.
 	 * 
 	 * @param filter the filter
 	 * @return the name of the filter, or null if not defined by the filter creator
@@ -84,6 +93,9 @@ public abstract class ProcessingFilter {
 		if(creator == null)
 			throw new IllegalStateException("Filter creator was now defined");
 		
-		return creator.getSaveName(filter);
+		String name = creator.getSaveName(filter);
+		if(name == null)
+			name = filter.getClass().getName();
+		return name;
 	}
 }

@@ -48,17 +48,17 @@ public class ShapeFilter extends ProcessingFilter{
 			source.detectShapes(amount, vertecies, accuracy);
 	}
 	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
-		vertecies = (byte) FilterParam.getIntValue(parameters.get("vertecies"));
-		accuracy = FilterParam.getDoubleValue(parameters.get("accuracy"));
+	public void parseParameters(Map<String, VisionParam> parameters) {
+		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
+		vertecies = (byte) VisionParam.getIntValue(parameters.get("vertecies"));
+		accuracy = VisionParam.getDoubleValue(parameters.get("accuracy"));
 	}
 	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount),
-				new FilterParam.IntParam("vertecies", vertecies),
-				new FilterParam.DoubleParam("accuracy", accuracy)
+	public VisionParam[] getParameters() {
+		return new VisionParam[]{
+				new VisionParam.IntParam("amount", amount),
+				new VisionParam.IntParam("vertecies", vertecies),
+				new VisionParam.DoubleParam("accuracy", accuracy)
 		};
 	}
 }

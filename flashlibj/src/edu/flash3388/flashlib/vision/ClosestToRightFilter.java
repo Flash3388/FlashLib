@@ -31,13 +31,13 @@ public class ClosestToRightFilter extends ProcessingFilter{
 		source.closestToRight(amount);
 	}
 	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
+	public void parseParameters(Map<String, VisionParam> parameters) {
+		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
 	}
 	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount)
+	public VisionParam[] getParameters() {
+		return new VisionParam[]{
+				new VisionParam.IntParam("amount", amount)
 		};
 	}
 }

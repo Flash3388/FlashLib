@@ -35,9 +35,10 @@ public class Analysis {
 	 */
 	public double offsetAngle;
 	/**
-	 * Ratio between pixels and cm in the frame.
+	 * Ratio between pixels and real life dimensions in the frame. The measurement unit depends on the provided data and
+	 * user implementation.
 	 */
-	public double pixelsToCmRatio;
+	public double pixelsToRealRatio;
 	
 	/**
 	 * Prints data about this analysis to {@link java.lang.System#out}
@@ -52,7 +53,7 @@ public class Analysis {
 	 * @return a byte array with data about this analysis
 	 */
 	public byte[] transmit(){
-		byte[] bytes = new byte[32];
+		byte[] bytes = new byte[40];
 		int pos = 0;
 		FlashUtil.fillByteArray(centerPointX, pos, bytes);
 		pos += 4;
@@ -65,6 +66,8 @@ public class Analysis {
 		FlashUtil.fillByteArray(targetDistance, pos, bytes);
 		pos += 8;
 		FlashUtil.fillByteArray(offsetAngle, pos, bytes);
+		pos += 8;
+		FlashUtil.fillByteArray(pixelsToRealRatio, pos, bytes);
 		return bytes;
 	}
 	
@@ -74,15 +77,17 @@ public class Analysis {
 	 * @return a new analysis object
 	 */
 	public static Analysis fromBytes(byte[] bytes){
-		if(bytes.length < 32) return null;
+		if(bytes.length != 40) return null;
 		Analysis an = new Analysis();
+		
 		int pos = 0;
 		an.centerPointX = FlashUtil.toInt(bytes, pos); pos+=4;
 		an.centerPointY = FlashUtil.toInt(bytes, pos); pos+=4;
 		an.horizontalDistance = FlashUtil.toInt(bytes, pos); pos+=4;
 		an.verticalDistance = FlashUtil.toInt(bytes, pos); pos+=4;
 		an.targetDistance = FlashUtil.toDouble(bytes, pos); pos+=8;
-		an.offsetAngle = FlashUtil.toDouble(bytes, pos);
+		an.offsetAngle = FlashUtil.toDouble(bytes, pos); pos += 8;
+		an.pixelsToRealRatio = FlashUtil.toDouble(bytes, pos);
 		
 		return an;
 	}

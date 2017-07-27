@@ -29,16 +29,24 @@ import edu.flash3388.flashlib.io.FileStream;
  * in the image which are the objects we are looking for.
  * </p>
  * <p>
+ * By default, analysis data is returned from {@link VisionSource#getResult()} which provides simple data.
+ * But it is possible to use an {@link AnalysisCreator} to provide more data from vision.
+ * </p>
+ * <p>
  * Data can be loaded from and saved to XML files or bytes, for transfer of processing data.
  * </p>
  * @author Tom Tzook
  * @since FlashLib 1.0.0
+ * 
  * @see ProcessingFilter
  * @see VisionSource
+ * @see AnalysisCreator
  */
 public final class VisionProcessing {
 	
 	private List<ProcessingFilter> filters;
+	private AnalysisCreator analysisCreator;
+	
 	private String name;
 	private static byte instances = 0;
 	
@@ -63,6 +71,25 @@ public final class VisionProcessing {
 	 */
 	public String getName(){
 		return name;
+	}
+	
+	/**
+	 * Sets the {@link AnalysisCreator} object used by this processing to create the appropriate
+	 * {@link Analysis} from the vision. If the creator is null, {@link VisionSource#getResult()} will
+	 * be used to get the {@link Analysis}.
+	 * @param creator the creator object
+	 */
+	public void setAnalysisCreator(AnalysisCreator creator){
+		this.analysisCreator = creator;
+	}
+	/**
+	 * Gets the {@link AnalysisCreator} object used by this processing to create the appropriate
+	 * {@link Analysis} from the vision. If the creator is null, {@link VisionSource#getResult()} will
+	 * be used to get the {@link Analysis}.
+	 * @return the creator object, or null if it not set
+	 */
+	public AnalysisCreator getAnalysisCreator(){
+		return analysisCreator;
 	}
 	
 	/**
@@ -128,14 +155,17 @@ public final class VisionProcessing {
 			filter.process(source);
 	}
 	/**
-	 * Processes all filters using a given vision source and returns the result of {@link VisionSource#getResult()}. 
+	 * Processes all filters using a given vision source and returns an {@link Analysis} object which contains the
+	 * result. The result is received from the {@link AnalysisCreator} object set to this processing, or if no creator
+	 * is set, {@link VisionSource#getResult()} is used. 
 	 * Calls {@link ProcessingFilter#process(VisionSource)} for all the filters.
 	 * @param source the vision source for analyzing.
 	 * @return the result of the processing
 	 */
 	public Analysis processAndGet(VisionSource source){
 		process(source);
-		return source.getResult();
+		return analysisCreator != null? analysisCreator.createAnalysis(source, source.getContours()) : 
+			source.getResult();
 	}
 	/**
 	 * Processes all filters using a given vision source and returns the result of {@link VisionSource#getResults()}. 
@@ -158,12 +188,12 @@ public final class VisionProcessing {
 			throw new IllegalStateException("Missing filter creator");
 		
 		name = filters[0];
-		for (int i = 1; i < filters.length; i++) {
+		for (int i = 1; i < filters.length - 1; i++) {
 			String[] splits = filters[i].split(":");
 			if(splits.length < 1) continue;
 			String namestr = splits[0];
 			
-			Map<String, FilterParam> params = new HashMap<String, FilterParam>();
+			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
 			
 			for (int j = 1; j < splits.length; j++) {
 				String[] tSpl = splits[j].split(",");
@@ -171,7 +201,7 @@ public final class VisionProcessing {
 					continue;
 				
 				try {
-					FilterParam p = FilterParam.createParam(tSpl[0], tSpl[1], tSpl[2]);
+					VisionParam p = VisionParam.createParam(tSpl[0], tSpl[1], tSpl[2]);
 					if(p != null)
 						params.put(tSpl[0], p);
 				} catch (RuntimeException e) {
@@ -180,6 +210,29 @@ public final class VisionProcessing {
 			}
 			
 			addFilter(ProcessingFilter.createFilter(namestr, params));
+		}
+		String creatorData = filters[filters.length-1];
+		if(!creatorData.isEmpty()){
+			String[] splits = creatorData.split(":");
+			if(splits.length < 1) return;
+			String namestr = splits[0];
+			
+			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
+			
+			for (int j = 1; j < splits.length; j++) {
+				String[] tSpl = splits[j].split(",");
+				if(tSpl.length != 3)
+					continue;
+				
+				try {
+					VisionParam p = VisionParam.createParam(tSpl[0], tSpl[1], tSpl[2]);
+					if(p != null)
+						params.put(tSpl[0], p);
+				} catch (RuntimeException e) {
+					continue;
+				}
+			}
+			setAnalysisCreator(AnalysisCreator.create(namestr, params));
 		}
 	}
 	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException{
@@ -208,7 +261,7 @@ public final class VisionProcessing {
 				String namestr = element.getAttribute("name");
 				
 				NodeList paramsNodeList = element.getElementsByTagName("param");
-				Map<String, FilterParam> params = new HashMap<String, FilterParam>();
+				Map<String, VisionParam> params = new HashMap<String, VisionParam>();
 				for (int j = 0; j < paramsNodeList.getLength(); j++) {
 					NamedNodeMap attrs = paramsNodeList.item(j).getAttributes();
 					
@@ -225,7 +278,7 @@ public final class VisionProcessing {
 					String name = n.getTextContent();
 					
 					try {
-						FilterParam p = FilterParam.createParam(name, type, val);
+						VisionParam p = VisionParam.createParam(name, type, val);
 						if(p == null)
 							throw new RuntimeException("Invalid type attribute for param "+name+": "+type);
 						params.put(name, p);
@@ -236,6 +289,40 @@ public final class VisionProcessing {
 				
 				addFilter(ProcessingFilter.createFilter(namestr, params));
 			}
+		}
+		NodeList creatorList = doc.getElementsByTagName("analysis-creator");
+		if(creatorList.getLength() > 0){
+			Element element = (Element) creatorList.item(0);
+			String namestr = element.getAttribute("name");
+			
+			NodeList paramsNodeList = element.getElementsByTagName("param");
+			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
+			for (int j = 0; j < paramsNodeList.getLength(); j++) {
+				NamedNodeMap attrs = paramsNodeList.item(j).getAttributes();
+				
+				String val = paramsNodeList.item(j).getTextContent();
+				
+				Node n = attrs.getNamedItem("type");
+				if(n == null)
+					throw new RuntimeException("Type attribute is missing value");
+				String type = n.getTextContent();
+				
+				n = attrs.getNamedItem("name");
+				if(n == null)
+					throw new RuntimeException("Name attribute is missing value");
+				String name = n.getTextContent();
+				
+				try {
+					VisionParam p = VisionParam.createParam(name, type, val);
+					if(p == null)
+						throw new RuntimeException("Invalid type attribute for param "+name+": "+type);
+					params.put(name, p);
+				} catch (RuntimeException e) {
+					throw new RuntimeException(e.getMessage());
+				}
+			}
+			
+			setAnalysisCreator(AnalysisCreator.create(namestr, params));
 		}
 	}
 	
@@ -255,13 +342,20 @@ public final class VisionProcessing {
 			String name = ProcessingFilter.getSaveName(filters[i]);
 			filterstr += name + ":";
 					
-			FilterParam[] params = filters[i].getParameters();
+			VisionParam[] params = filters[i].getParameters();
 			for (int j = 0; j < params.length; j++) 
 				filterstr += params[j].getName() + "," + params[j].getType() + "," + params[j].getValue() + 
 				(j < params.length - 1? ":" : "");
 			filterstr +=  "|";
 		}
-		return filterstr.substring(0, filterstr.length()).getBytes();
+		if(analysisCreator != null){
+			filterstr += analysisCreator.getClass().getName();
+			VisionParam[] params = analysisCreator.getParameters();
+			for (int j = 0; j < params.length; j++) 
+				filterstr += params[j].getName() + "," + params[j].getType() + "," + params[j].getValue() + 
+				(j < params.length - 1? ":" : "");
+		}
+		return filterstr.getBytes();
 	}
 	/**
 	 * Saves all the filters from this object to an XML file for reuse.
@@ -275,13 +369,27 @@ public final class VisionProcessing {
 		ProcessingFilter[] filters = getFilters();
 		ArrayList<String> lines = new ArrayList<String>();
 		
+		lines.add("<?xml version=\"1.0\" ?>");
 		lines.add("<vision name=\""+name+"\">");
 		for (ProcessingFilter filter : filters) {
 			lines.add("\t<filter name=\""+ProcessingFilter.getSaveName(filter)+"\">");
-			FilterParam[] params = filter.getParameters();
-			for (FilterParam d : params) 
-				lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+d.getValue()+"</param>");
+			VisionParam[] params = filter.getParameters();
+			if(params != null){
+				for (VisionParam d : params) 
+					lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+
+								d.getValue()+"</param>");
+			}
 			lines.add("\t</filter>");
+		}
+		if(analysisCreator != null){
+			lines.add("\t<analysis-creator name=\""+analysisCreator.getClass().getName()+"\">");
+			VisionParam[] params = analysisCreator.getParameters();
+			if(params != null){
+				for (VisionParam d : params) 
+					lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+
+								d.getValue()+"</param>");
+			}
+			lines.add("\t</analysis-creator>");
 		}
 		lines.add("</vision>");
 		FileStream.writeLines(file, lines.toArray(new String[lines.size()]));
@@ -303,18 +411,16 @@ public final class VisionProcessing {
 	 * Creates a new processing object from an XML file.
 	 * @param file the xml file
 	 * @return a new processing object, or null if parsing failed
+	 * @throws ParserConfigurationException if a DocumentBuilder cannot be created which satisfies the configuration requested.
+	 * @throws IOException If any IO errors occur.
+	 * @throws SAXException If any parse errors occur.
 	 * @throws IllegalStateException if no filter creator exists ({@link ProcessingFilter#hasFilterCreator()} returns false).
 	 */
-	public static VisionProcessing createFromXml(String file){
+	public static VisionProcessing createFromXml(String file) throws SAXException, IOException, ParserConfigurationException{
 		if(!new File(file).isFile())
 			return null;
 		VisionProcessing proc = new VisionProcessing();
-		try {
-			proc.parseXml(file);
-		} catch (SAXException | IOException | ParserConfigurationException | RuntimeException e) {
-			e.printStackTrace();
-			return null;
-		}
+		proc.parseXml(file);
 		return proc;
 	}
 }

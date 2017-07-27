@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
 /**
- * FilterParam is a parameter used by filters to define their operation.
+ * VisionParam is a parameter used by filters and analysis creators to define their operation.
  * There are 3 base types for parameters:
  * <ul>
  * 	<li>A double parameter {@link DoubleParam}</li>
@@ -13,17 +13,17 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see ProcessingFilter
  */
-public abstract class FilterParam {
+public abstract class VisionParam {
 	
 	/**
-	 * Represent a filter parameter with double data. Could be used to define ratios and
+	 * Represent a parameter with double data. Could be used to define ratios and
 	 * dimensions.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
-	 * @see FilterParam
+	 * @see VisionParam
 	 */
-	public static class DoubleParam extends FilterParam{
+	public static class DoubleParam extends VisionParam{
 
 		private double value;
 		
@@ -43,13 +43,13 @@ public abstract class FilterParam {
 		
 	}
 	/**
-	 * Represent a filter parameter with int data. Could be used to define amounts.
+	 * Represent a parameter with int data. Could be used to define amounts.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
-	 * @see FilterParam
+	 * @see VisionParam
 	 */
-	public static class IntParam extends FilterParam{
+	public static class IntParam extends VisionParam{
 
 		private int value;
 		
@@ -69,14 +69,14 @@ public abstract class FilterParam {
 		
 	}
 	/**
-	 * Represent a filter parameter with boolean data. Could be used to define if something is to be 
+	 * Represent a parameter with boolean data. Could be used to define if something is to be 
 	 * executed or not.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
-	 * @see FilterParam
+	 * @see VisionParam
 	 */
-	public static class BooleanParam extends FilterParam{
+	public static class BooleanParam extends VisionParam{
 
 		private boolean value;
 		
@@ -98,7 +98,7 @@ public abstract class FilterParam {
 	
 	private String name;
 	
-	public FilterParam(String name){
+	public VisionParam(String name){
 		this.name = name;
 	}
 	
@@ -118,41 +118,73 @@ public abstract class FilterParam {
 	public abstract String getType();
 	
 	/**
+	 * Gets the value of a parameter as a double value. If the filter is not an instance of {@link DoubleParam}, a default value
+	 * will be returned.
+	 * @param param the param
+	 * @param defaultVal the default value
+	 * @return the double value, or defaultVal if the param is not an instance of {@link DoubleParam}
+	 */
+	public static double getDoubleValue(VisionParam param, double defaultVal){
+		if(param == null || !(param instanceof DoubleParam))
+			return defaultVal;
+		return ((DoubleParam)param).value;
+	}
+	/**
 	 * Gets the value of a parameter as a double value. If the filter is not an instance of {@link DoubleParam}, 0
 	 * will be returned.
-	 * @param param the filter param
+	 * @param param the param
 	 * @return the double value, or 0 if the param is not an instance of {@link DoubleParam}
 	 */
-	public static double getDoubleValue(FilterParam param){
-		if(param == null || !(param instanceof DoubleParam))
-			return 0.0;
-		return ((DoubleParam)param).value;
+	public static double getDoubleValue(VisionParam param){
+		return getDoubleValue(param, 0.0);
+	}
+	
+	/**
+	 * Gets the value of a parameter as a int value. If the filter is not an instance of {@link IntParam}, a default value
+	 * will be returned.
+	 * @param param the param
+	 * @param defaultVal the default value
+	 * @return the double value, or defaultVal if the param is not an instance of {@link IntParam}
+	 */
+	public static int getIntValue(VisionParam param, int defaultVal){
+		if(param == null || !(param instanceof IntParam))
+			return defaultVal;
+		return ((IntParam)param).value;
 	}
 	/**
 	 * Gets the value of a parameter as a int value. If the filter is not an instance of {@link IntParam}, 0
 	 * will be returned.
-	 * @param param the filter param
+	 * @param param the param
 	 * @return the double value, or 0 if the param is not an instance of {@link IntParam}
 	 */
-	public static int getIntValue(FilterParam param){
-		if(param == null || !(param instanceof IntParam))
-			return 0;
-		return ((IntParam)param).value;
+	public static int getIntValue(VisionParam param){
+		return getIntValue(param, 0);
+	}
+	
+	/**
+	 * Gets the value of a parameter as a boolean value. If the filter is not an instance of {@link BooleanParam}, the defualt value
+	 * will be returned.
+	 * @param param the param
+	 * @param defaultVal the defualt value
+	 * @return the double value, or defaultVal if the param is not an instance of {@link BooleanParam}
+	 */
+	public static boolean getBooleanValue(VisionParam param, boolean defaultVal){
+		if(param == null || !(param instanceof BooleanParam))
+			return defaultVal;
+		return ((BooleanParam)param).value;
 	}
 	/**
 	 * Gets the value of a parameter as a boolean value. If the filter is not an instance of {@link BooleanParam}, false
 	 * will be returned.
-	 * @param param the filter param
+	 * @param param the param
 	 * @return the double value, or false if the param is not an instance of {@link BooleanParam}
 	 */
-	public static boolean getBooleanValue(FilterParam param){
-		if(param == null || !(param instanceof BooleanParam))
-			return false;
-		return ((BooleanParam)param).value;
+	public static boolean getBooleanValue(VisionParam param){
+		return getBooleanValue(param, false);
 	}
 	
 	/**
-	 * Creates a new filter parameter by name, type and value:
+	 * Creates a new parameter by name, type and value:
 	 * <ul>
 	 * 	<li>If the type is "int" an {@link IntParam} is returned</li>
 	 * 	<li>If the type is "double" an {@link DoubleParam} is returned</li>
@@ -162,11 +194,11 @@ public abstract class FilterParam {
 	 * @param name the name of the parameter
 	 * @param type the type of the parameter
 	 * @param value the value of the parameter
-	 * @return a new filter parameter, or null if one could not be created
+	 * @return a new parameter, or null if one could not be created
 	 * @throws IllegalArgumentException if the name, type of value are null
 	 * @throws RuntimeException if parsing the value to the appropriate type has failed
 	 */
-	public static FilterParam createParam(String name, String type, String value){
+	public static VisionParam createParam(String name, String type, String value){
 		if(name == null)
 			throw new IllegalArgumentException("Name value missing");
 		if(value == null)

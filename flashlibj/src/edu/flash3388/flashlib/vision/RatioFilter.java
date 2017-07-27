@@ -98,31 +98,31 @@ public class RatioFilter extends ProcessingFilter{
 				maxHeight, minHeight, maxWidth, minWidth);
 	}
 	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		heightRatio = FilterParam.getDoubleValue(parameters.get("heightRatio"));
-		widthRatio = FilterParam.getDoubleValue(parameters.get("widthRatio"));
-		dx = FilterParam.getDoubleValue(parameters.get("dx"));
-		dy = FilterParam.getDoubleValue(parameters.get("dy"));
-		minScore = FilterParam.getDoubleValue(parameters.get("minScore"));
-		maxScore = FilterParam.getDoubleValue(parameters.get("maxScore"));
-		minHeight = FilterParam.getDoubleValue(parameters.get("minHeight"));
-		maxHeight = FilterParam.getDoubleValue(parameters.get("maxHeight"));
-		minWidth = FilterParam.getDoubleValue(parameters.get("minWidth"));
-		maxWidth = FilterParam.getDoubleValue(parameters.get("maxWidth"));
+	public void parseParameters(Map<String, VisionParam> parameters) {
+		heightRatio = VisionParam.getDoubleValue(parameters.get("heightRatio"));
+		widthRatio = VisionParam.getDoubleValue(parameters.get("widthRatio"));
+		dx = VisionParam.getDoubleValue(parameters.get("dx"));
+		dy = VisionParam.getDoubleValue(parameters.get("dy"));
+		minScore = VisionParam.getDoubleValue(parameters.get("minScore"));
+		maxScore = VisionParam.getDoubleValue(parameters.get("maxScore"));
+		minHeight = VisionParam.getDoubleValue(parameters.get("minHeight"));
+		maxHeight = VisionParam.getDoubleValue(parameters.get("maxHeight"));
+		minWidth = VisionParam.getDoubleValue(parameters.get("minWidth"));
+		maxWidth = VisionParam.getDoubleValue(parameters.get("maxWidth"));
 	}
 	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.DoubleParam("heightRatio", heightRatio),
-				new FilterParam.DoubleParam("widthRatio", widthRatio),
-				new FilterParam.DoubleParam("dx", dx),
-				new FilterParam.DoubleParam("dy", dy),
-				new FilterParam.DoubleParam("minScore", minScore),
-				new FilterParam.DoubleParam("maxScore", maxScore),
-				new FilterParam.DoubleParam("minHeight", minHeight),
-				new FilterParam.DoubleParam("maxHeight", maxHeight),
-				new FilterParam.DoubleParam("minWidth", minWidth),
-				new FilterParam.DoubleParam("maxWidth", maxWidth)
+	public VisionParam[] getParameters() {
+		return new VisionParam[]{
+				new VisionParam.DoubleParam("heightRatio", heightRatio),
+				new VisionParam.DoubleParam("widthRatio", widthRatio),
+				new VisionParam.DoubleParam("dx", dx),
+				new VisionParam.DoubleParam("dy", dy),
+				new VisionParam.DoubleParam("minScore", minScore),
+				new VisionParam.DoubleParam("maxScore", maxScore),
+				new VisionParam.DoubleParam("minHeight", minHeight),
+				new VisionParam.DoubleParam("maxHeight", maxHeight),
+				new VisionParam.DoubleParam("minWidth", minWidth),
+				new VisionParam.DoubleParam("maxWidth", maxWidth)
 		};
 	}
 }

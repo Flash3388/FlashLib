@@ -20,7 +20,6 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.math.Vector3;
 
 /**
  * Provides openCV utilities and vision functionalities.
@@ -47,19 +46,22 @@ public class CvProcessing {
 		private Analysis analysis;
 		private CvPipeline pipeline;
 
-		private void checkReady(){
+		private void checkReady(boolean tryContours){
 			if(mat == null)
 				throw new VisionSourceImageMissingException();
+			if(tryContours && contours == null)
+				detectContours();
+		}
+		private void detectContours(){
+			if(pipeline != null)
+				pipeline.newImage(threshold, CvPipeline.TYPE_THRESHOLD);
+			contours.clear();
+			CvProcessing.detectContours(threshold, contours, contoursHierarchy);
 		}
 		
 		public Mat getThreshold(){
 			return threshold;
 		}
-		public List<MatOfPoint> getContours(){
-			return contours;
-		}
-		
-		
 		public void setPipeline(CvPipeline pipe){
 			pipeline = pipe;
 		}
@@ -70,13 +72,34 @@ public class CvProcessing {
 		public void prep(Mat mat){
 			this.mat = mat;
 			analysis = null;
+			contours = null;
 		}
 		
-		private void detectContours(){
-			if(pipeline != null)
-				pipeline.newImage(threshold, CvPipeline.TYPE_THRESHOLD);
-			contours.clear();
-			CvProcessing.detectContours(threshold, contours, contoursHierarchy);
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int getFrameWidth() {
+			return mat != null? mat.width() : 0;
+		}
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int getFrameHeight() {
+			return mat != null? mat.height() : 0;
+		}
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public List<Contour> getContours() {
+			checkReady(true);
+			
+			List<Contour> wrapperContours = new ArrayList<Contour>();
+			for (MatOfPoint contour : contours)
+				wrapperContours.add(CvProcessing.wrapCvContour(contour));
+			return wrapperContours;
 		}
 		
 		/**
@@ -113,30 +136,55 @@ public class CvProcessing {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void filterHsv(int minH, int minS, int minV, int maxH, int maxS, int maxV) {
-			checkReady();
+		public void convertHsv() {
+			checkReady(false);
 			
 			CvProcessing.rgbToHsv(mat, threshold);
-			CvProcessing.filterMatColors(threshold, threshold, minH, maxH, minS, maxS, minV, maxV);
-			detectContours();
+		}
+		/**
+		 * {@inheritDoc}
+		 * Does nothing at the moment
+		 */
+		@Override
+		public void convertRgb() {
+			checkReady(false);
 		}
 		/**
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void filterRgb(int minR, int minG, int minB, int maxR, int maxG, int maxB) {
-			checkReady();
+		public void convertGrayscale(){
+			checkReady(false);
 			
-			CvProcessing.filterMatColors(mat, threshold, minR, maxR, minG, maxG, minB, maxB);
-			detectContours();
+			CvProcessing.rgbToGray(mat, threshold);
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void filterColorRange(int min1, int min2, int min3, int max1, int max2, int max3){
+			checkReady(false);
+			
+			CvProcessing.filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
+		}
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void filterColorRange(int min, int max){
+			checkReady(false);
+			
+			CvProcessing.filterMatColors(mat, threshold, min, max, min, max, min, max);
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> void filterByComparator(int amount, Comparator<T> comparator) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterByComparator(contours, amount, (Comparator<MatOfPoint>) comparator);
 		}
@@ -145,7 +193,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void lowestContours(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForLowestContours(contours, amount);
 		}
@@ -154,7 +202,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void highestContours(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForHighestContours(contours, amount);
 		}
@@ -163,7 +211,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void largestContours(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForLargestContours(contours, amount);
 		}
@@ -172,7 +220,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void detectShapes(int amount, int vertecies, double accuracy) {
-			checkReady();
+			checkReady(true);
 			
 			detectShapes(vertecies, accuracy);
 			if(amount < contours.size()){
@@ -185,7 +233,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void detectShapes(int vertecies, double accuracy) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.detectContoursByShape(contours, vertecies, accuracy);
 		}
@@ -196,7 +244,7 @@ public class CvProcessing {
 		public void contourRatio(double heightRatio, double widthRatio, double dy, double dx, 
 				double maxScore, double minScore, 
 				double maxHeight, double minHeight, double maxWidth, double minWidth) {
-			checkReady();
+			checkReady(true);
 			
 			analysis = CvProcessing.filterForContoursByRatio(contours, mat, heightRatio, widthRatio, dy, dx, 
 					maxScore, minScore, maxHeight, minHeight, maxWidth, minWidth);
@@ -208,7 +256,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void closestToLeft(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForClosestToLeft(contours, mat, amount);
 		}
@@ -217,7 +265,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void closestToRight(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForClosestToRight(contours, mat, amount);
 		}
@@ -226,7 +274,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void closestToCoordinate(double x, double y, int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForClosestContoursToPoint(contours, x, y, amount);
 		}
@@ -235,7 +283,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void closestToCenterFrame(int amount) {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.filterForClosestContoursToCenter(contours, mat, amount);
 		}
@@ -245,7 +293,7 @@ public class CvProcessing {
 		 */
 		@Override
 		public void circleDetection() {
-			checkReady();
+			checkReady(true);
 			
 			CvProcessing.FilterByCircle(threshold,contours);
 		}
@@ -270,7 +318,7 @@ public class CvProcessing {
 		return hsv;
 	}
 	/**
-	 * Converts a mat from RGB to HSV.
+	 * Converts an RGB mat to HSV.
 	 * @param mat an RGB mat
 	 * @return an HSV mat 
 	 * @see Imgproc#cvtColor(Mat, Mat, int)
@@ -278,6 +326,30 @@ public class CvProcessing {
 	public static Mat rgbToHsv(Mat mat){
 		Mat hsv = new Mat();
 		return rgbToHsv(mat, hsv);
+	}
+	/**
+	 * Converts a mat to gray.
+	 * @param mat a mat to convert
+	 * @param gray a mat to fill with gray data
+	 * @return the gray mat 
+	 * @see Imgproc#cvtColor(Mat, Mat, int)
+	 */
+	public static Mat rgbToGray(Mat mat, Mat gray){
+		if(mat.type() == CvType.CV_8UC1)
+			mat.copyTo(gray);
+		else if(mat.type() == CvType.CV_8UC3)
+			Imgproc.cvtColor(mat, gray, Imgproc.COLOR_RGB2GRAY);
+		return gray;
+	}
+	/**
+	 * Converts an RGB mat to gray.
+	 * @param mat an RGB mat
+	 * @return the gray mat 
+	 * @see Imgproc#cvtColor(Mat, Mat, int)
+	 */
+	public static Mat rgbToGray(Mat mat){
+		Mat gray = new Mat();
+		return rgbToGray(mat, gray);
 	}
 	
 	/**
@@ -907,66 +979,20 @@ public class CvProcessing {
 		analysis.centerPointY = (int) center.y;
 		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
 		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
-		
-		analysis.offsetAngle = calcHorizontalOffsetInDegrees(feed, center, 45);
-	}
-	
-	
-
-	/**
-	 * calculates horizontal distance from the camera to the countour based on 
-	 * 2017 game
-	 * 
-	 * @param feed the image mat
-	 * @param t1 top left of the reflective 
-	 * @param b2 bottom right of light reflector 
-	 * @param angleOfView angle of view of the camera
-	 * @return estimated distance from object in centimeters
-	 */
-	public static double measureDistance(Mat feed,Point t1,Point b2, double angleOfView){
-		double width = b2.x - t1.x;//double height = b2.y - t1.y;
-		
-		return (20*feed.width()/(2*width*Math.tan(Math.toRadians(angleOfView))));
-	}
-	
-	
-	/**
-	 * horizontal angle from the focal to a pixel 
-	 * 
-	 * @param feed the image mat
-	 * @param p pixel to calculate angle from 
-	 * @param fovDegrees angle of view of the camera in degrees
-	 * @return the offset of an object from the center in degrees
-	 */
-	public static double calcHorizontalOffsetInDegrees(Mat feed,Point p, double fovDegrees){
-		// Compute focal length in pixels from FOV
-		return Math.toDegrees(calcHorizontalOffset(feed,p,Math.toRadians(fovDegrees)));
 	}
 	
 	/**
-	 * horizontal angle from the focal to a pixel 
+	 * Saves data from an opencv {@link MatOfPoint} into a {@link Contour} object
+	 * to simplify data for user.
 	 * 
-	 * @param feed the image mat
-	 * @param p pixel to calculate angle from 
-	 * @param fovRadians angle of view of the camera in radians
-	 * @return the offset of an object from the center in radians
+	 * @param contour opencv contour
+	 * @return a contour wrapper
 	 */
-	public static double calcHorizontalOffset(Mat feed,Point p, double fovRadians){
-		// Compute focal length in pixels from FOV
-		double f = (0.5 * feed.width()) / Math.tan(0.5 * fovRadians);
-		int center_x = feed.width()/2;
-		int center_y = feed.height()/2;
-		// Vectors subtending image center and pixel from optical center
-		// in camera coordinates.
-		Vector3 center = new Vector3(0, 0, f);		
-		Vector3 pixel = new Vector3(p.x - center_x, p.y - center_y, f);
-
-		// angle between vector (0, 0, f) and pixel
-		double dot = center.dot(pixel);
-		double alpha = Math.acos(dot / (center.length() * pixel.length()));
-		return alpha;
+	public static Contour wrapCvContour(MatOfPoint contour){
+		Rect rect = Imgproc.boundingRect(contour);
+		Point center = contourCenter2(rect);
+		return new Contour((int)center.x, (int)center.y, rect.width, rect.height);
 	}
-	
 	
 	/**
 	 * Converts a list of contours into a list of a list of points. That is since a contour is a collection of points.

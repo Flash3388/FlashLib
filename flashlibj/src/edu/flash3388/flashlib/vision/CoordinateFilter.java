@@ -44,17 +44,17 @@ public class CoordinateFilter extends ProcessingFilter{
 		source.closestToCoordinate(x, y, amount);
 	}
 	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
-		x = FilterParam.getDoubleValue(parameters.get("x"));
-		y = FilterParam.getDoubleValue(parameters.get("y"));
+	public void parseParameters(Map<String, VisionParam> parameters) {
+		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
+		x = VisionParam.getDoubleValue(parameters.get("x"));
+		y = VisionParam.getDoubleValue(parameters.get("y"));
 	}
 	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount),
-				new FilterParam.DoubleParam("x", x),
-				new FilterParam.DoubleParam("y", y)
+	public VisionParam[] getParameters() {
+		return new VisionParam[]{
+				new VisionParam.IntParam("amount", amount),
+				new VisionParam.DoubleParam("x", x),
+				new VisionParam.DoubleParam("y", y)
 		};
 	}
 }
