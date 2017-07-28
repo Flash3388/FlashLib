@@ -1,5 +1,17 @@
 package edu.flash3388.flashlib.vision;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.BooleanProperty;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.StringProperty;
+
 /**
  * VisionParam is a parameter used by filters and analysis creators to define their operation.
  * There are 3 base types for parameters:
@@ -7,14 +19,41 @@ package edu.flash3388.flashlib.vision;
  * 	<li>A double parameter {@link DoubleParam}</li>
  * 	<li>A boolean parameter {@link BooleanParam}</li>
  *  <li>An int parameter {@link IntParam}</li>
+ *  <li>A string parameter {@link StringParam}</li>
  * </ul>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
- * @see ProcessingFilter
+ * @see VisionFilter
  */
 public abstract class VisionParam {
 	
+	/**
+	 * Represent a parameter with string data.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 * @see VisionParam
+	 */
+	public static class StringParam extends VisionParam{
+
+		private String value;
+		
+		public StringParam(String name, String value) {
+			super(name);
+			this.value = value;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+		@Override
+		public String getType() {
+			return "String";
+		}
+		
+	}
 	/**
 	 * Represent a parameter with double data. Could be used to define ratios and
 	 * dimensions.
@@ -184,11 +223,153 @@ public abstract class VisionParam {
 	}
 	
 	/**
+	 * Gets the value of a parameter as a string value. If the filter is not an instance of {@link StringParam}, the defualt value
+	 * will be returned.
+	 * @param param the param
+	 * @param defaultVal the defualt value
+	 * @return the double value, or defaultVal if the param is not an instance of {@link StringParam}
+	 */
+	public static String getStringValue(VisionParam param, String defaultVal){
+		if(param == null || !(param instanceof StringParam))
+			return defaultVal;
+		return ((StringParam)param).value;
+	}
+	/**
+	 * Gets the value of a parameter as a string value. If the filter is not an instance of {@link StringParam}, an empty string
+	 * will be returned.
+	 * @param param the param
+	 * @return the double value, or an empty if the param is not an instance of {@link StringParam}
+	 */
+	public static String getStringValue(VisionParam param){
+		return getStringValue(param, "");
+	}
+	
+	/**
+	 * Sets property data of a method which returns a bean property with a given vision param value. 
+	 * If the property type does not match the given param type, nothing is done.
+	 * 
+	 * @param method the method to call
+	 * @param param the param to set data from
+	 * @param instance instance of the class containing the property to use
+	 */
+	public static void setValueForMethod(Method method, VisionParam param, Object instance){
+		Class<?> retType = method.getReturnType();
+		if(retType == null)
+			return;
+		
+		Object obj = null;
+		try {
+			obj = method.invoke(instance);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		}
+		if(obj == null)
+			return;
+		
+		if(FlashUtil.isAssignable(retType, BooleanProperty.class) && param instanceof BooleanParam){
+			((BooleanProperty)obj).set(getBooleanValue(param));
+		}
+		else if(FlashUtil.isAssignable(retType, DoubleProperty.class) && param instanceof DoubleParam){
+			((DoubleProperty)obj).set(getDoubleValue(param));
+		}
+		else if(FlashUtil.isAssignable(retType, IntegerProperty.class) && param instanceof IntParam){
+			((IntegerProperty)obj).set(getIntValue(param));
+		}
+		else if(FlashUtil.isAssignable(retType, StringProperty.class) && param instanceof StringParam){
+			((StringProperty)obj).set(getStringValue(param));
+		}
+	}
+	/**
+	 * Gets a VisionParam from a method which should return a property.
+	 * 
+	 * @param method the method to get data from
+	 * @param instance instance which contains the method
+	 * @param name name of the property
+	 * @return a new vision parameter with the data from the method, or null if unable to get data
+	 */
+	public static VisionParam getValueFromMethod(Method method, Object instance, String name){
+		Class<?> retType = method.getReturnType();
+		if(retType == null)
+			return null;
+		
+		Object obj = null;
+		try {
+			obj = method.invoke(instance);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		}
+		if(obj == null)
+			return null;
+		
+		if(FlashUtil.isAssignable(retType, BooleanProperty.class)){
+			boolean val = ((BooleanProperty)obj).get();
+			return new BooleanParam(name, val);
+		}
+		else if(FlashUtil.isAssignable(retType, DoubleProperty.class)){
+			double val = ((DoubleProperty)obj).get();
+			return new DoubleParam(name, val);
+		}
+		else if(FlashUtil.isAssignable(retType, IntegerProperty.class)){
+			int val = ((IntegerProperty)obj).get();
+			return new IntParam(name, val);
+		}
+		else if(FlashUtil.isAssignable(retType, StringProperty.class)){
+			String val = ((StringProperty)obj).get();
+			return new StringParam(name, val);
+		}
+		
+		return null;
+	}
+	/**
+	 * Gets the parameters of a creator by searching for methods which end with the name "Property" and
+	 * return a type of bean (DoubleProperty, IntegerProperty, StringProperty, BooleanProperty).
+	 * @param object object to get parameters for.
+	 *
+	 * @return an array of parameters.
+	 */
+	public static VisionParam[] getParameters(Object object){
+		List<VisionParam> parameters = new ArrayList<VisionParam>();
+		
+		Method[] methods = object.getClass().getMethods();
+		for (Method method : methods) {
+			int idx = method.getName().indexOf("Property");
+			if(idx >= 0 && idx + 8 == method.getName().length()){
+				String propName = method.getName().substring(0, idx);
+				
+				VisionParam param = VisionParam.getValueFromMethod(method, object, propName);
+				if(param != null)
+					parameters.add(param);
+			}
+		}
+		return parameters.toArray(new VisionParam[parameters.size()]);
+	}
+	/**
+	 * Sets the value of properties with an instance in accordance to values of given
+	 * parameters.
+	 * 
+	 * @param instance the instance to set data for
+	 * @param parameters the parameters to set
+	 */
+	public static void setParameters(Object instance, Map<String, VisionParam> parameters){
+		Method[] methods = instance.getClass().getMethods();
+		for (Method method : methods) {
+			int idx = method.getName().indexOf("Property");
+			if(idx >= 0 && idx + 8 == method.getName().length()){
+				String propName = method.getName().substring(0, idx);
+				VisionParam param = parameters.get(propName);
+				if(param == null)
+					continue;
+				
+				VisionParam.setValueForMethod(method, param, instance);
+			}
+		}
+	}
+	
+	/**
 	 * Creates a new parameter by name, type and value:
 	 * <ul>
 	 * 	<li>If the type is "int" an {@link IntParam} is returned</li>
 	 * 	<li>If the type is "double" an {@link DoubleParam} is returned</li>
 	 * 	<li>If the type is "boolean" an {@link BooleanParam} is returned</li>
+	 * 	<li>If the type is "string" an {@link StringParam} is returned</li>
 	 * </ul>
 	 * 
 	 * @param name the name of the parameter
@@ -233,6 +414,10 @@ public abstract class VisionParam {
 			}
 			return new BooleanParam(name, val);
 		}
+		if(type.equalsIgnoreCase("String")){
+			return new StringParam(name, value);
+		}
+		
 		return null;
 	}
 }

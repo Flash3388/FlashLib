@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -28,7 +28,7 @@ import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 public class PidController {
 	
 	private PidSource source;
-	private DoubleDataSource setPoint;
+	private DoubleSource setPoint;
 	private double minimumOutput = -1, maximumOutput = 1;
 	private double kp, ki, kd, kf;
 	private double lastVal, lastOut;
@@ -46,7 +46,7 @@ public class PidController {
 	 * @param setPoint the set point
 	 * @param source the feedback source
 	 */
-	public PidController(double kp, double ki, double kd, double kf, DoubleDataSource setPoint, PidSource source){
+	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PidSource source){
 		setPID(kp, ki, kd, kf);
 		this.setPoint = setPoint;
 		this.source = source;
@@ -60,7 +60,7 @@ public class PidController {
 	 * @param kf the feed forward constant
 	 * @param setPoint the set point
 	 */
-	public PidController(double kp, double ki, double kd, double kf, DoubleDataSource setPoint){
+	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint){
 		this(kp, ki, kd, kf, setPoint, null);
 	}
 	/**
@@ -90,7 +90,7 @@ public class PidController {
 		
 		double currentVal = source.pidGet();
 		if(setpointRange != 0)
-			currentVal = Mathf.limit(currentVal, currentVal - setpointRange, currentVal + setpointRange);
+			currentVal = Mathf.constrain(currentVal, currentVal - setpointRange, currentVal + setpointRange);
 		
 		double result = 0;
 		error = setPoint.get() - currentVal;
@@ -108,24 +108,24 @@ public class PidController {
 		double dOut = -kd * (currentVal - lastVal);
 		
 		if(maxIOutput != 0)
-			iOut = Mathf.limit(iOut, -maxIOutput, maxIOutput);
+			iOut = Mathf.constrain(iOut, -maxIOutput, maxIOutput);
 		
 		result = pOut + iOut + dOut + fOut;
 		
 		totalError += error;
 		
-		if(minimumOutput != maximumOutput && !Mathf.limited(result, minimumOutput, maximumOutput))
+		if(minimumOutput != maximumOutput && !Mathf.constrained(result, minimumOutput, maximumOutput))
 			totalError = error;
 		else if(maxIOutput != 0)
-			totalError = Mathf.limit(totalError + error, -maxError, maxError);
+			totalError = Mathf.constrain(totalError + error, -maxError, maxError);
 		
-		if(outRampRate != 0 && !Mathf.limited(result, lastOut - outRampRate, lastOut + outRampRate)){
+		if(outRampRate != 0 && !Mathf.constrained(result, lastOut - outRampRate, lastOut + outRampRate)){
 			totalError = error;
-			result = Mathf.limit(result, lastOut - outRampRate, lastOut + outRampRate);
+			result = Mathf.constrain(result, lastOut - outRampRate, lastOut + outRampRate);
 		}
 		
 		if(minimumOutput != maximumOutput)
-			result = Mathf.limit(result, minimumOutput, maximumOutput);
+			result = Mathf.constrain(result, minimumOutput, maximumOutput);
 		
 		lastOut = result;
 		return result;
@@ -195,7 +195,7 @@ public class PidController {
 	 * Gets the set point data source used by this loop.
 	 * @return set point
 	 */
-	public DoubleDataSource getSetPoint(){
+	public DoubleSource getSetPoint(){
 		return setPoint;
 	}
 	/**
@@ -297,7 +297,7 @@ public class PidController {
 	 * Sets the set point source used by this loop.
 	 * @param setpoint set point source
 	 */
-	public void setSetPoint(DoubleDataSource setpoint){
+	public void setSetPoint(DoubleSource setpoint){
 		this.setPoint = setpoint;
 	}
 	/**

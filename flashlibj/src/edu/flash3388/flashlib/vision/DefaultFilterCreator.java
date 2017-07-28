@@ -14,7 +14,7 @@ public class DefaultFilterCreator implements FilterCreator{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ProcessingFilter create(String name) {
+	public VisionFilter create(String name) {
 		switch (name) {
 			case "highest": return new HighestFilter();
 			case "lowest": return new LowestFilter();
@@ -36,7 +36,7 @@ public class DefaultFilterCreator implements FilterCreator{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getSaveName(ProcessingFilter filter) {
+	public String getSaveName(VisionFilter filter) {
 		if(filter instanceof HighestFilter)
 			return "highest";
 		if(filter instanceof LowestFilter)

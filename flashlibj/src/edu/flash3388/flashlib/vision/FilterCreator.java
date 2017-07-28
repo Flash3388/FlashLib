@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.vision;
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
- * @see ProcessingFilter
+ * @see VisionFilter
  */
 public interface FilterCreator {
 	/**
@@ -14,12 +14,12 @@ public interface FilterCreator {
 	 * @param name the name of the filter
 	 * @return a new filter object
 	 */
-	ProcessingFilter create(String name);
+	VisionFilter create(String name);
 	/**
 	 * Gets the name used to represent the filter.
 	 * 
 	 * @param filter the filter
 	 * @return the name of the filter
 	 */
-	String getSaveName(ProcessingFilter filter);
+	String getSaveName(VisionFilter filter);
 }

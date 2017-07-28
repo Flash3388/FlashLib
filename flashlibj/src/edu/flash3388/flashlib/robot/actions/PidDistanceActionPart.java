@@ -3,14 +3,14 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
 import edu.flash3388.flashlib.robot.SourceAction;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class PidDistanceActionPart extends SourceAction implements PidAction{
 
 	private PidController pidcontroller;
 	private double distanceMargin;
 	
-	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd, DoubleDataSource distanceThreshold, 
+	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd, DoubleSource distanceThreshold, 
 			double distanceMargin){
 		this.distanceMargin = distanceMargin;
 		

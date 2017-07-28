@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * Represents a label for boolean values on the Flashboard.
@@ -9,22 +9,22 @@ import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class BooleanProperty extends Sendable{
+public class DashboardBooleanProperty extends Sendable{
 	
 	private boolean lastValue = false, value = false, changed = false;
-	private BooleanDataSource src;
+	private BooleanSource src;
 	private byte[] bytes = new byte[1];
 	
-	public BooleanProperty(String name, BooleanDataSource data) {
+	public DashboardBooleanProperty(String name, BooleanSource data) {
 		super(name, FlashboardSendableType.BOOLEAN);
 		src = data;
 	}
 
-	public void set(BooleanDataSource src){
+	public void set(BooleanSource src){
 		lastValue = src.get();
 		this.src = src;
 	}
-	public BooleanDataSource get(){
+	public BooleanSource get(){
 		return src;
 	}
 	

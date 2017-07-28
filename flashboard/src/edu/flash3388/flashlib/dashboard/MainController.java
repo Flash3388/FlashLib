@@ -1,14 +1,9 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
@@ -20,7 +15,7 @@ import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.CvRunner;
-import edu.flash3388.flashlib.vision.ProcessingFilter;
+import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -192,7 +187,7 @@ public class MainController implements Initializable{
 		hsv_check.setOnAction((e)->{
 			if(!checkVision()) return;
 			
-			colorFilter.setHsv(hsv_check.isSelected());
+			colorFilter.hsvProperty().set(hsv_check.isSelected());
 			setForHSV(hsv_check.isSelected());
 		});
 		h_min.setMin(0);
@@ -205,7 +200,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val) {
 				if(!checkVision()) return;
 				
-				colorFilter.setMin1(new_val.intValue());
+				colorFilter.min1Property().set(new_val.intValue());
 				h_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -237,7 +232,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax1(new_val.intValue());
+				colorFilter.max1Property().set(new_val.intValue());
 				h_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -269,7 +264,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMin2(new_val.intValue());
+				colorFilter.min2Property().set(new_val.intValue());
 				s_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -301,7 +296,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax2(new_val.intValue());
+				colorFilter.max2Property().set(new_val.intValue());
 				s_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -333,7 +328,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMin3(new_val.intValue());
+				colorFilter.max3Property().set(new_val.intValue());
 				v_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -365,7 +360,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax3(new_val.intValue());
+				colorFilter.max3Property().set(new_val.intValue());
 				v_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -422,7 +417,7 @@ public class MainController implements Initializable{
 		VisionProcessing proc = null;
 		try {
 			proc = VisionProcessing.createFromXml(path);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "XML Parsing Error", e.getMessage());
 			
 			FlashUtil.getLog().reportError(e.getMessage());
@@ -494,31 +489,37 @@ public class MainController implements Initializable{
 	}
 	public void updateParam(){
 		if(Dashboard.getVision() == null || Dashboard.getVision().getProcessing() == null) return;
-		ProcessingFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
-		for (ProcessingFilter filter : filters) {
-			if(FlashUtil.instanceOf(filter, ColorFilter.class)){
+		VisionFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
+		for (VisionFilter filter : filters) {
+			if(filter instanceof ColorFilter){
 				colorFilter = (ColorFilter) filter;
 				break;
 			}
 		}
 		if(colorFilter == null) return;
 		local = true;
-		h_max.setValue(colorFilter.getMax1());  h_max_val.setText(String.valueOf(colorFilter.getMax1()));
-		h_min.setValue(colorFilter.getMin1());  h_min_val.setText(String.valueOf(colorFilter.getMin1()));
-		s_max.setValue(colorFilter.getMax2());  s_max_val.setText(String.valueOf(colorFilter.getMax2()));
-		s_min.setValue(colorFilter.getMin2());  s_min_val.setText(String.valueOf(colorFilter.getMin2()));
-		v_max.setValue(colorFilter.getMax3());  v_max_val.setText(String.valueOf(colorFilter.getMax3()));
-		v_min.setValue(colorFilter.getMin3());  v_min_val.setText(String.valueOf(colorFilter.getMin3()));
-		if(hsv_check.isSelected() != colorFilter.isHsv()){
-			hsv_check.setSelected(colorFilter.isHsv());
-			setForHSV(colorFilter.isHsv());
+		h_max.setValue(colorFilter.max1Property().get());  
+		h_max_val.setText(String.valueOf(colorFilter.max1Property().get()));
+		h_min.setValue(colorFilter.min1Property().get()); 
+		h_min_val.setText(String.valueOf(colorFilter.min1Property().get()));
+		s_max.setValue(colorFilter.max2Property().get());  
+		s_max_val.setText(String.valueOf(colorFilter.max2Property().get()));
+		s_min.setValue(colorFilter.min2Property().get());  
+		s_min_val.setText(String.valueOf(colorFilter.min2Property().get()));
+		v_max.setValue(colorFilter.max3Property().get());  
+		v_max_val.setText(String.valueOf(colorFilter.max3Property().get()));
+		v_min.setValue(colorFilter.min3Property().get());  
+		v_min_val.setText(String.valueOf(colorFilter.min3Property().get()));
+		if(hsv_check.isSelected() != colorFilter.hsvProperty().get()){
+			hsv_check.setSelected(colorFilter.hsvProperty().get());
+			setForHSV(colorFilter.hsvProperty().get());
 		}
 		local = false;
 	}
 	public void setParam(){
 		if(Dashboard.getVision() == null) return;
 		colorFilter = new ColorFilter();
-		colorFilter.setHsv(hsv_check.isSelected());
+		colorFilter.hsvProperty().set(hsv_check.isSelected());
 		colorFilter.set((int) h_min.getValue(), (int)h_max.getValue(), 
 				(int) s_min.getValue(), (int)s_max.getValue(), 
 				(int) v_min.getValue(), (int)v_max.getValue());

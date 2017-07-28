@@ -24,17 +24,6 @@ public interface AnalysisCreator {
 	Analysis createAnalysis(VisionSource source, List<Contour> contours);
 	
 	/**
-	 * Loads parameters for the creator. Used when loading the creator from a file or a byte stream.
-	 * @param parameters a map of parameters where the key is the name.
-	 */
-	void parseParameters(Map<String, VisionParam> parameters);
-	/**
-	 * Gets the parameters of the creator. Used mostly when saving the creator into a file or a byte stream.
-	 * @return an array of parameters
-	 */
-	VisionParam[] getParameters();
-	
-	/**
 	 * Creates a new AnalysisCreator. Creation is done by attempting to instantiate a class with the given name.
 	 * @param name the name of the creator class
 	 * @param parameters parameters for the creator
@@ -45,7 +34,10 @@ public interface AnalysisCreator {
 		if(obj == null || !(obj instanceof AnalysisCreator))
 			return null;
 		AnalysisCreator creator = (AnalysisCreator)obj;
-		creator.parseParameters(parameters);
+		
+		//setting parameters
+		VisionParam.setParameters(creator, parameters);
+		
 		return creator;
 	}
 }

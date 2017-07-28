@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
 
 /**
@@ -109,20 +109,20 @@ public interface PidSource {
 	public static class DoubleDataPidSource implements PidSource{
 
 		private PidType type;
-		private DoubleDataSource source;
+		private DoubleSource source;
 		
-		public DoubleDataPidSource(DoubleDataSource source, PidType t){
+		public DoubleDataPidSource(DoubleSource source, PidType t){
 			this.source = source;
 			this.type = t;
 		}
-		public DoubleDataPidSource(DoubleDataSource source){
+		public DoubleDataPidSource(DoubleSource source){
 			this(source, PidType.Displacement);
 		}
 		
-		public void setSource(DoubleDataSource source){
+		public void setSource(DoubleSource source){
 			this.source = source;
 		}
-		public DoubleDataSource getSource(){
+		public DoubleSource getSource(){
 			return source;
 		}
 		public void setType(PidType type){

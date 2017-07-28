@@ -1,14 +1,14 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
 
 public class PidVisionDistanceActionPart extends PidDistanceActionPart implements VisionAction{
 	
 	public PidVisionDistanceActionPart(Vision source, double kp, double ki, double kd,
-			DoubleDataSource rotationThreshold, double rotationMargin){
+			DoubleSource rotationThreshold, double rotationMargin){
 		super(new PidSource.VisionPidSource(source, false, true), kp, ki, kd, rotationThreshold, rotationMargin);
 	}
 	public PidVisionDistanceActionPart(Vision source, double kp, double ki, double kd){

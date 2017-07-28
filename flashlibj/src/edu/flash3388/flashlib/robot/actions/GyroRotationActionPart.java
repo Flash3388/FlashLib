@@ -2,17 +2,17 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class GyroRotationActionPart extends PidRotationActionPart{
 
 	private Gyro gyro;
-	private DoubleDataSource rotationThreshold;
+	private DoubleSource rotationThreshold;
 	private boolean relative = false;
 	private double initialAngle;
 	
-	public GyroRotationActionPart(Gyro gyro, double kp, double ki, double kd, DoubleDataSource rotationThreshold,
+	public GyroRotationActionPart(Gyro gyro, double kp, double ki, double kd, DoubleSource rotationThreshold,
 			double rotationMargin) {
 		super(new PidSource.DoubleDataPidSource(null), kp, ki, kd, ()->0, rotationMargin);
 		((PidSource.DoubleDataPidSource)getPidController().getSource()).setSource(()->getValue());
@@ -21,8 +21,8 @@ public class GyroRotationActionPart extends PidRotationActionPart{
 	}
 
 	private double getValue(){
-		double val = Mathf.limitAngle(rotationThreshold.get());
-		double curr = Mathf.limitAngle(gyro.getAngle() - initialAngle);
+		double val = Mathf.translateAngle(rotationThreshold.get());
+		double curr = Mathf.translateAngle(gyro.getAngle() - initialAngle);
 		
 		double max = Math.max(curr, val), min = Math.min(curr, val);
 		

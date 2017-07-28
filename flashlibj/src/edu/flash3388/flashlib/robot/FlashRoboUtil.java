@@ -4,11 +4,11 @@ import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.RobotFactory.ImplType;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Provides utilities for robots.
@@ -26,7 +26,7 @@ public class FlashRoboUtil {
 	private static boolean init = false;
 	private static boolean emergencyStop = false;
 	private static byte initCode = 0;
-	private static DoubleDataSource voltageSource;
+	private static DoubleSource voltageSource;
 	private static EmergencyStopControl estopControl;
 	private static double expectedVoltage = 13.3;
 	
@@ -118,7 +118,7 @@ public class FlashRoboUtil {
 	 * Sets the voltage source to use when calling {@link #scaleVoltageBus(double)}.
 	 * @param source battery voltage source
 	 */
-	public static void setVoltageSource(DoubleDataSource source){
+	public static void setVoltageSource(DoubleSource source){
 		voltageSource = source;
 	}
 	/**

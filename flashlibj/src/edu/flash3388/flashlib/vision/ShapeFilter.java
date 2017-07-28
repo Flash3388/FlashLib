@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 
 /**
@@ -10,55 +13,34 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#detectShapes(int, int, double)
  */
-public class ShapeFilter extends ProcessingFilter{
-	private byte amount, vertecies;
-	private double accuracy;
+public class ShapeFilter extends VisionFilter{
+	
+	private DoubleProperty accuracy = new SimpleDoubleProperty();
+	private IntegerProperty amount = new SimpleIntegerProperty();
+	private IntegerProperty vertecies = new SimpleIntegerProperty();
 
 	public ShapeFilter(){}
 	public ShapeFilter(int amount, int vertecies, double accuracy){
-		this.amount = (byte) amount;
-		this.vertecies = (byte) vertecies;
-		this.accuracy = accuracy;
+		this.amount.set(amount);
+		this.vertecies.set(vertecies);
+		this.accuracy.set(accuracy);
 	}
 	
-	public int getAmount(){
+	public IntegerProperty amountProperty(){
 		return amount;
 	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
-	}
-	public int getVertecies(){
+	public IntegerProperty verteciesProperty(){
 		return vertecies;
 	}
-	public void setVertecies(int vertecies){
-		this.vertecies = (byte) vertecies;
-	}
-	public double getAccuracy(){
+	public DoubleProperty accuracyProperty(){
 		return accuracy;
-	}
-	public void setAccuracy(double accuracy){
-		this.accuracy = accuracy;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(amount <= 0)
-			source.detectShapes(vertecies, accuracy);
+		if(amount.get() <= 0)
+			source.detectShapes(vertecies.get(), accuracy.get());
 		else
-			source.detectShapes(amount, vertecies, accuracy);
-	}
-	@Override
-	public void parseParameters(Map<String, VisionParam> parameters) {
-		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
-		vertecies = (byte) VisionParam.getIntValue(parameters.get("vertecies"));
-		accuracy = VisionParam.getDoubleValue(parameters.get("accuracy"));
-	}
-	@Override
-	public VisionParam[] getParameters() {
-		return new VisionParam[]{
-				new VisionParam.IntParam("amount", amount),
-				new VisionParam.IntParam("vertecies", vertecies),
-				new VisionParam.DoubleParam("accuracy", accuracy)
-		};
+			source.detectShapes(amount.get(), vertecies.get(), accuracy.get());
 	}
 }

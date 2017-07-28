@@ -19,23 +19,13 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @see FilterCreator
  * @see VisionParam
  */
-public abstract class ProcessingFilter {
+public abstract class VisionFilter {
 	
 	/**
 	 * Processes data in an image from the vision source and filters out non matching data.
 	 * @param source the source of the vision
 	 */
 	public abstract void process(VisionSource source);
-	/**
-	 * Loads parameters for the filter. Used when loading the filter from a file or a byte stream.
-	 * @param parameters a map of parameters where the key is the name.
-	 */
-	public abstract void parseParameters(Map<String, VisionParam> parameters);
-	/**
-	 * Gets the parameters of the filter. Used mostly when saving the filter into a file or a byte stream.
-	 * @return an array of parameters
-	 */
-	public abstract VisionParam[] getParameters();
 	
 	
 	private static FilterCreator creator = new DefaultFilterCreator();
@@ -45,7 +35,7 @@ public abstract class ProcessingFilter {
 	 * @param creator the creator
 	 */
 	public static void setFilterCreator(FilterCreator creator){
-		ProcessingFilter.creator = creator;
+		VisionFilter.creator = creator;
 	}
 	/**
 	 * Gets whether or not a filter creator was set.
@@ -66,19 +56,21 @@ public abstract class ProcessingFilter {
 	 * @throws IllegalStateException if a filter creator was not set
 	 * @see FilterCreator#create(String)
 	 */
-	public static ProcessingFilter createFilter(String name, Map<String, VisionParam> parameters){
+	public static VisionFilter createFilter(String name, Map<String, VisionParam> parameters){
 		if(creator == null)
 			throw new IllegalStateException("Filter creator was not defined");
 		
-		ProcessingFilter filter = creator.create(name);
+		VisionFilter filter = creator.create(name);
 		if(filter == null){
 			Object obj = FlashUtil.createInstance(name);
-			if(obj == null || !(obj instanceof ProcessingFilter))
+			if(obj == null || !(obj instanceof VisionFilter))
 				return null;
-			filter = (ProcessingFilter)filter;
+			filter = (VisionFilter)filter;
 		}
 		
-		filter.parseParameters(parameters);
+		//setting parameters
+		VisionParam.setParameters(filter, parameters);
+		
 		return filter;
 	}
 	/**
@@ -87,9 +79,9 @@ public abstract class ProcessingFilter {
 	 * 
 	 * @param filter the filter
 	 * @return the name of the filter, or null if not defined by the filter creator
-	 * @see FilterCreator#getSaveName(ProcessingFilter)
+	 * @see FilterCreator#getSaveName(VisionFilter)
 	 */
-	public static String getSaveName(ProcessingFilter filter){
+	public static String getSaveName(VisionFilter filter){
 		if(creator == null)
 			throw new IllegalStateException("Filter creator was now defined");
 		

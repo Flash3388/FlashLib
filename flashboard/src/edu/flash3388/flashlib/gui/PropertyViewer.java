@@ -36,11 +36,11 @@ public class PropertyViewer extends Stage{
 		public String getValue(){
 			switch(type){
 				case Boolean: 
-					return String.valueOf(ConstantsHandler.getBooleanNative(name));
+					return String.valueOf(ConstantsHandler.getBooleanValue(name));
 				case Number: 
-					return String.valueOf(ConstantsHandler.getNumberNative(name));
+					return String.valueOf(ConstantsHandler.getNumberValue(name));
 				case String: 
-					return ConstantsHandler.getStringNative(name);
+					return ConstantsHandler.getStringValue(name);
 				default: return "";
 			}
 		}

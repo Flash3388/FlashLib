@@ -82,7 +82,7 @@ public abstract class SbcBot {
 		
 		log.log("Initializing FlashLib...");
 		int initcode = SCHEDULER_INIT | 
-				(ConstantsHandler.getBooleanNative(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
+				(ConstantsHandler.getBooleanValue(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
 		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
 		log.log("Initializing Communications...");
@@ -108,7 +108,7 @@ public abstract class SbcBot {
 		SbcBot userClass = null;
 		String userClassName = "";
 		try {
-			userClassName = ConstantsHandler.getStringNative(PROP_USER_CLASS);
+			userClassName = ConstantsHandler.getStringValue(PROP_USER_CLASS);
 			if(userClassName == null || userClassName.equals(""))
 				throw new ClassNotFoundException("User class missing! Must be set to "+PROP_USER_CLASS+" property");
 			userClass = (SbcBot) Class.forName(userClassName).newInstance();
@@ -134,15 +134,15 @@ public abstract class SbcBot {
 		}
 	}
 	private static CommInterface setupCommInterface() throws IOException{
-		int port = ConstantsHandler.getIntegerNative(PROP_COMM_PORT);
+		int port = ConstantsHandler.getIntegerValue(PROP_COMM_PORT);
 		if(port <= 0) return null;
-		String interfaceType = ConstantsHandler.getStringNative(PROP_COMM_INTERFACE, "");
+		String interfaceType = ConstantsHandler.getStringValue(PROP_COMM_INTERFACE, "");
 		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UdpCommInterface(port);
         else if(interfaceType.equalsIgnoreCase("tcp"))
 			return new TcpCommInterface(port);
         else if(interfaceType.equalsIgnoreCase("serial")){
-        	String data = ConstantsHandler.getStringNative(PROP_COMM_SERIAL_PORT);
+        	String data = ConstantsHandler.getStringValue(PROP_COMM_SERIAL_PORT);
         	if(data == null){
         		log.reportError("To initialize serial port comm, a serial port has to be defined under "+
         				PROP_COMM_SERIAL_PORT+" property");
@@ -204,7 +204,7 @@ public abstract class SbcBot {
 		log.log("Settings saved");
 		
 		log.logTime("Shutdown successful");
-		boolean shutdown = ConstantsHandler.getBooleanNative(PROP_BOARD_SHUTDOWN);
+		boolean shutdown = ConstantsHandler.getBooleanValue(PROP_BOARD_SHUTDOWN);
 		log.log("Board shutdown="+shutdown);
 		log.save();
 		log.close();

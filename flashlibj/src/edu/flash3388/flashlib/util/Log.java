@@ -139,19 +139,19 @@ public abstract class Log{
 		
 		name = directory + name + dateFormat.format(date);
 		byte counter = 0;
-		File logFile = new File(name + EXTENSION);
+		logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
 			logFile = new File(name + (++counter) + EXTENSION);
 		
 		try {
 			if(isLoggingMode(MODE_PRINT))
-				out.println(name+"> Log file: "+logFile.getAbsolutePath());
+				out.println(this.name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
-			File errorFile = new File(name + (counter > 0? counter : "") + ERROR_EXTENSION);
-			if(!errorFile.exists())
-				errorFile.createNewFile();
+			errorLogFile = new File(name + (counter > 0? counter : "") + ERROR_EXTENSION);
+			if(!errorLogFile.exists())
+				errorLogFile.createNewFile();
 			
 			closed = false;
 		}catch(IOException e){

@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot;
 
 import java.util.Enumeration;
 
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * An action which executes a selected action when started. 
@@ -17,7 +17,7 @@ public class SelectableAction extends Action{
 	private Action runningAction;
 	private int nextActionIndex;
 	private int selectedIndex = -1;
-	private DoubleDataSource source;
+	private DoubleSource source;
 	
 	/**
 	 * Creates a new selectable action. 
@@ -25,7 +25,7 @@ public class SelectableAction extends Action{
 	 * @param source the index source
 	 * @param actions an array of actions to select from
 	 */
-	public SelectableAction(DoubleDataSource source, Action...actions){
+	public SelectableAction(DoubleSource source, Action...actions){
 		this.actions = new Action[actions.length];
 		java.lang.System.arraycopy(actions, 0, this.actions, 0, actions.length);
 		nextActionIndex = actions.length;
@@ -93,7 +93,7 @@ public class SelectableAction extends Action{
 	 * @param source the source of index
 	 * @return this instance
 	 */
-	public SelectableAction setIndexSource(DoubleDataSource source){
+	public SelectableAction setIndexSource(DoubleSource source){
 		this.source = source;
 		return this;
 	}

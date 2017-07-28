@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Represents a label for double values on the Flashboard.
@@ -10,25 +10,25 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DoubleProperty extends Sendable{
+public class DashboardDoubleProperty extends Sendable{
 	
 	private static final double CHAGNE_DIFFERENCE = 0.1;
 	
 	private double lastValue = 0.0, value = 0.0;
 	private boolean changed = false;
-	private DoubleDataSource src;
+	private DoubleSource src;
 	private byte[] bytes = new byte[8];
 	
-	public DoubleProperty(String name, DoubleDataSource data) {
+	public DashboardDoubleProperty(String name, DoubleSource data) {
 		super(name, FlashboardSendableType.DOUBLE);
 		src = data;
 	}
 
-	public void set(DoubleDataSource src){
+	public void set(DoubleSource src){
 		lastValue = src.get();
 		this.src = src;
 	}
-	public DoubleDataSource get(){
+	public DoubleSource get(){
 		return src;
 	}
 	

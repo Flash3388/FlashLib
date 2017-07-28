@@ -67,7 +67,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 			lastRotDir = 0;
 			changed = CHANGED_NOTHING;
 			changesCount = 0;
-			movmentAngle = Mathf.limitAngle(gyro.getAngle());
+			movmentAngle = Mathf.translateAngle(gyro.getAngle());
 			FlashUtil.getLog().log("\nStabilizer: New Feed - (" + magnitude + ", " + direction + ") - " + movmentAngle);
 		}
 
@@ -84,7 +84,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 				return;
 			if (magnitude != this.magnitude || direction != this.direction)
 				feedNew(magnitude, direction);
-			double currentAngle = Mathf.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.translateAngle(gyro.getAngle());
 			// FlashUtil.getLog().log("Stabilizer: CurrentAngle: "+currentAngle);
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				// FlashUtil.getLog().log("Stabilizer: Offset minimal");
@@ -159,7 +159,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 				feedNew(magnitude, direction);
 				FlashUtil.getLog().log("Feed new");
 			}
-			double currentAngle = Mathf.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.translateAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				return 0;
 			}
@@ -175,12 +175,12 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 				feedNew(magnitude, direction);
 				FlashUtil.getLog().log("Feed new");
 			}
-			double currentAngle = Mathf.limitAngle(gyro.getAngle());
+			double currentAngle = Mathf.translateAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
 				return 0;
 			}
 			int rotationDir = -getRotationDirection(currentAngle);
-			double offset = Mathf.limitAngle(currentAngle - movmentAngle);
+			double offset = Mathf.translateAngle(currentAngle - movmentAngle);
 			FlashUtil.getLog().log("Offset! >>Mag: "+offset+" Dir: "+rotationDir);
 			return offset * rotationDir;
 		}
@@ -470,7 +470,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	}
 
 	private double limit(double num) {
-		return Mathf.limit(scaleForVoltage(num), -1, 1);
+		return Mathf.constrain(scaleForVoltage(num), -1, 1);
 	}
 
 	private void normalize(double wheelSpeeds[]) {

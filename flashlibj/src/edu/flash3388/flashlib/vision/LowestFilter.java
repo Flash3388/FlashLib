@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 
 /**
@@ -10,35 +11,21 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#lowestContours(int)
  */
-public class LowestFilter extends ProcessingFilter{
-	private byte amount;
+public class LowestFilter extends VisionFilter{
 
+	private IntegerProperty amount = new SimpleIntegerProperty();
+	
 	public LowestFilter(){}
 	public LowestFilter(int amount){
-		this.amount = (byte) amount;
+		this.amount.set(amount);
 	}
 	
-	public int getAmount(){
+	public IntegerProperty amountProperty(){
 		return amount;
-	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(amount <= 0)
-			amount = 1;
-		source.lowestContours(amount);
-	}
-	@Override
-	public void parseParameters(Map<String, VisionParam> parameters) {
-		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
-	}
-	@Override
-	public VisionParam[] getParameters() {
-		return new VisionParam[]{
-				new VisionParam.IntParam("amount", amount)
-		};
+		source.lowestContours(amount.get());
 	}
 }

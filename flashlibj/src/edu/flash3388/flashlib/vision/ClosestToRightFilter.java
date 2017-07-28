@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 /**
  * Filers out contours by their proximity to the right side of the frame. 
@@ -9,35 +10,21 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToRight(int)
  */
-public class ClosestToRightFilter extends ProcessingFilter{
-	private byte amount;
+public class ClosestToRightFilter extends VisionFilter{
+	
+	private IntegerProperty amount = new SimpleIntegerProperty();
 
 	public ClosestToRightFilter(){}
 	public ClosestToRightFilter(int amount){
-		this.amount = (byte) amount;
+		this.amount.set(amount);
 	}
 	
-	public int getAmount(){
+	public IntegerProperty amountProperty(){
 		return amount;
-	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(amount <= 0)
-			amount = 1;
-		source.closestToRight(amount);
-	}
-	@Override
-	public void parseParameters(Map<String, VisionParam> parameters) {
-		amount = (byte) VisionParam.getIntValue(parameters.get("amount"));
-	}
-	@Override
-	public VisionParam[] getParameters() {
-		return new VisionParam[]{
-				new VisionParam.IntParam("amount", amount)
-		};
+		source.closestToRight(amount.get());
 	}
 }

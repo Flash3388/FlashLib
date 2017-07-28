@@ -71,7 +71,7 @@ public class SbcPwm{
 	}
 	
 	public void setSpeed(double speed) {
-		speed = Mathf.limit(speed, -1.0, 1.0);
+		speed = Mathf.constrain(speed, -1.0, 1.0);
 		if(speed == 0.0)
 			setDutyCycle(0.0);
 		else if(speed > 0.0)
@@ -82,7 +82,7 @@ public class SbcPwm{
 	public void setPosition(double pos){
 		if(pos < 0.0)
 			pos = Math.abs(pos);
-		pos = Mathf.limit(pos, 0.0, 1.0);
+		pos = Mathf.constrain(pos, 0.0, 1.0);
 		
 		setDutyCycle(getMinNegative() + pos * getFullScaleFactor());
 	}

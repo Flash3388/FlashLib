@@ -17,9 +17,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.io.FileStream;
-import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
-import edu.flash3388.flashlib.robot.devices.StringDataSource;
+import edu.flash3388.flashlib.util.beans.BooleanProperty;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
+import edu.flash3388.flashlib.util.beans.StringProperty;
 
 /**
  * 
@@ -28,9 +31,9 @@ import edu.flash3388.flashlib.robot.devices.StringDataSource;
  * <p>
  * Values are wrapped in data source objects which allows updating of values in real time:
  * <ul>
- * 		<li> double: {@link DoubleDataSource} </li>
- * 		<li> string: {@link StringDataSource} </li>
- * 		<li> boolean: {@link BooleanDataSource} </li>
+ * 		<li> double: {@link DoubleProperty} </li>
+ * 		<li> string: {@link StringProperty} </li>
+ * 		<li> boolean: {@link BooleanProperty} </li>
  * </ul>
  * <p>
  * It is possible to save and load values from XML files using the XML DOM parser {@link org.w3c.dom}.
@@ -42,12 +45,12 @@ public class ConstantsHandler {
 	
 	private ConstantsHandler(){}
 	
-	private static final Map<String, DoubleDataSource.DoubleVarDataSource> doubleMap = 
-			new HashMap<String, DoubleDataSource.DoubleVarDataSource>();
-	private static final Map<String, StringDataSource.StringVarDataSource> stringMap = 
-			new HashMap<String, StringDataSource.StringVarDataSource>();
-	private static final Map<String, BooleanDataSource.BooleanVarDataSource> booleanMap = 
-			new HashMap<String, BooleanDataSource.BooleanVarDataSource>();
+	private static final Map<String, DoubleProperty> doubleMap = 
+			new HashMap<String, DoubleProperty>();
+	private static final Map<String, StringProperty> stringMap = 
+			new HashMap<String, StringProperty>();
+	private static final Map<String, BooleanProperty> booleanMap = 
+			new HashMap<String, BooleanProperty>();
 	
 	//--------------------------------------------------------------------
 	//-----------------------General--------------------------------------
@@ -93,9 +96,9 @@ public class ConstantsHandler {
 	 * Removes a number value represented by a given key from the numbers map.
 	 * 
 	 * @param name the key representing the value in the map
-	 * @return the {@link DoubleDataSource} wrapper of the value
+	 * @return the {@link DoubleProperty} wrapper of the value
 	 */
-	public static DoubleDataSource removeNumber(String name){
+	public static DoubleProperty removeNumber(String name){
 		return doubleMap.remove(name);
 	}
 	/**
@@ -104,12 +107,12 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the new value
 	 * @param iniVal the initial value
-	 * @return a {@link DoubleDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
+	 * @return a {@link DoubleProperty} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
-	public static DoubleDataSource addNumber(String name, double iniVal){
-		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
+	public static DoubleProperty addNumber(String name, double iniVal){
+		DoubleProperty source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
+			source = new SimpleDoubleProperty(iniVal);
 			doubleMap.put(name, source);
 		}
 		return source;
@@ -120,41 +123,41 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal the new value
-	 * @return a {@link DoubleDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
+	 * @return a {@link DoubleProperty} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
-	public static DoubleDataSource putNumber(String name, double iniVal){
-		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
+	public static DoubleProperty putNumber(String name, double iniVal){
+		DoubleProperty source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
+			source = new SimpleDoubleProperty(iniVal);
 			doubleMap.put(name, source);
 		}else source.set(iniVal);
 		
 		return source;
 	}
 	/**
-	 * Gets the {@link DoubleDataSource} wrapper represented by a given key in the map. If such a key does not exist in the map,
+	 * Gets the {@link DoubleProperty} wrapper represented by a given key in the map. If such a key does not exist in the map,
 	 * a new wrapper is created with a given initial value.
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal a initial value in case the key does not exist
-	 * @return the {@link DoubleDataSource} wrapper represented by a given key in the map
+	 * @return the {@link DoubleProperty} wrapper represented by a given key in the map
 	 */
-	public static DoubleDataSource getNumber(String name, double iniVal){
-		DoubleDataSource.DoubleVarDataSource source = doubleMap.get(name);
+	public static DoubleProperty getNumber(String name, double iniVal){
+		DoubleProperty source = doubleMap.get(name);
 		if(source == null){
-			source = new DoubleDataSource.DoubleVarDataSource(iniVal);
+			source = new SimpleDoubleProperty(iniVal);
 			doubleMap.put(name, source);
 		}
 		return source;
 	}
 	/**
-	 * Gets the {@link DoubleDataSource} wrapper represented by a given key in the map. If the key does not exist in the map,
+	 * Gets the {@link DoubleProperty} wrapper represented by a given key in the map. If the key does not exist in the map,
 	 * null is returned.
 	 * 
 	 * @param name the key of the wrapper
-	 * @return the {@link DoubleDataSource} wrapper represented by a given key in the map
+	 * @return the {@link DoubleProperty} wrapper represented by a given key in the map
 	 */
-	public static DoubleDataSource getNumber(String name){
+	public static DoubleProperty getNumber(String name){
 		return doubleMap.get(name);
 	}
 	/**
@@ -172,8 +175,8 @@ public class ConstantsHandler {
 	 * @param name the key representing the wrapper
 	 * @return double value saved in the wrapper, 0 if the key does not exist.
 	 */
-	public static double getNumberNative(String name){
-		return getNumberNative(name, 0.0);
+	public static double getNumberValue(String name){
+		return getNumberValue(name, 0.0);
 	}
 	/**
 	 * Gets a double value from the wrapper represented by a given key. If the key does not exist, an initial value is returned.
@@ -182,8 +185,8 @@ public class ConstantsHandler {
 	 * @param iniVal a value to return if the key does not exist
 	 * @return double value saved in the wrapper, an initial value if the key does not exist.
 	 */
-	public static double getNumberNative(String name, double iniVal){
-		DoubleDataSource source = doubleMap.get(name);
+	public static double getNumberValue(String name, double iniVal){
+		DoubleProperty source = doubleMap.get(name);
 		if(source == null)
 			return iniVal;
 		return source.get();
@@ -194,8 +197,8 @@ public class ConstantsHandler {
 	 * @param name the key representing the wrapper
 	 * @return integer value saved in the wrapper, 0 if the key does not exist.
 	 */
-	public static int getIntegerNative(String name){
-		return getIntegerNative(name, 0);
+	public static int getIntegerValue(String name){
+		return getIntegerValue(name, 0);
 	}
 	/**
 	 * Gets an integer value from the wrapper represented by a given key. If the key does not exist, an initial value is returned.
@@ -204,8 +207,8 @@ public class ConstantsHandler {
 	 * @param iniVal a value to return if the key does not exist
 	 * @return integer value saved in the wrapper, an initial value if the key does not exist.
 	 */
-	public static int getIntegerNative(String name, int iniVal){
-		DoubleDataSource source = doubleMap.get(name);
+	public static int getIntegerValue(String name, int iniVal){
+		DoubleProperty source = doubleMap.get(name);
 		if(source == null)
 			return iniVal;
 		return (int) source.get();
@@ -235,9 +238,9 @@ public class ConstantsHandler {
 	 * Removes a string value represented by a given key from the strings map.
 	 * 
 	 * @param name the key representing the value in the map
-	 * @return the {@link StringDataSource} wrapper of the value
+	 * @return the {@link StringProperty} wrapper of the value
 	 */
-	public static StringDataSource removeString(String name){
+	public static StringProperty removeString(String name){
 		return stringMap.remove(name);
 	}
 	/**
@@ -246,12 +249,12 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the new value
 	 * @param iniVal the initial value
-	 * @return a {@link StringDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
+	 * @return a {@link StringProperty} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
-	public static StringDataSource addString(String name, String iniVal){
-		StringDataSource.StringVarDataSource source = stringMap.get(name);
+	public static StringProperty addString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.StringVarDataSource(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
@@ -262,41 +265,41 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal the new value
-	 * @return a {@link StringDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
+	 * @return a {@link StringProperty} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
-	public static StringDataSource putString(String name, String iniVal){
-		StringDataSource.StringVarDataSource source = stringMap.get(name);
+	public static StringProperty putString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.StringVarDataSource(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}else source.set(iniVal);
 		
 		return source;
 	}
 	/**
-	 * Gets the {@link StringDataSource} wrapper represented by a given key in the map. If such a key does not exist in the map,
+	 * Gets the {@link StringProperty} wrapper represented by a given key in the map. If such a key does not exist in the map,
 	 * a new wrapper is created with a given initial value.
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal a initial value in case the key does not exist
-	 * @return the {@link StringDataSource} wrapper represented by a given key in the map
+	 * @return the {@link StringProperty} wrapper represented by a given key in the map
 	 */
-	public static StringDataSource getString(String name, String iniVal){
-		StringDataSource.StringVarDataSource source = stringMap.get(name);
+	public static StringProperty getString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new StringDataSource.StringVarDataSource(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
 	}
 	/**
-	 * Gets the {@link StringDataSource} wrapper represented by a given key in the map. If the key does not exist in the map,
+	 * Gets the {@link StringProperty} wrapper represented by a given key in the map. If the key does not exist in the map,
 	 * null is returned.
 	 * 
 	 * @param name the key of the wrapper
-	 * @return the {@link StringDataSource} wrapper represented by a given key in the map
+	 * @return the {@link StringProperty} wrapper represented by a given key in the map
 	 */
-	public static StringDataSource getString(String name){
+	public static StringProperty getString(String name){
 		return stringMap.get(name);
 	}
 	/**
@@ -314,8 +317,8 @@ public class ConstantsHandler {
 	 * @param name the key representing the wrapper
 	 * @return string value saved in the wrapper, null if the key does not exist.
 	 */
-	public static String getStringNative(String name){
-		return getStringNative(name, null);
+	public static String getStringValue(String name){
+		return getStringValue(name, null);
 	}
 	/**
 	 * Gets a string value from the wrapper represented by a given key. If the key does not exist, an initial value is returned.
@@ -324,8 +327,8 @@ public class ConstantsHandler {
 	 * @param iniVal a value to return if the key does not exist
 	 * @return string value saved in the wrapper, an initial value if the key does not exist.
 	 */
-	public static String getStringNative(String name, String iniVal){
-		StringDataSource source = stringMap.get(name);
+	public static String getStringValue(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null)
 			return iniVal;
 		return source.get();
@@ -355,9 +358,9 @@ public class ConstantsHandler {
 	 * Removes a string value represented by a given key from the boolean map.
 	 * 
 	 * @param name the key representing the value in the map
-	 * @return the {@link BooleanDataSource} wrapper of the value
+	 * @return the {@link BooleanProperty} wrapper of the value
 	 */
-	public static BooleanDataSource removeBoolean(String name){
+	public static BooleanProperty removeBoolean(String name){
 		return booleanMap.remove(name);
 	}
 	/**
@@ -366,12 +369,12 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the new value
 	 * @param iniVal the initial value
-	 * @return a {@link BooleanDataSource} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
+	 * @return a {@link BooleanProperty} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
-	public static BooleanDataSource addBoolean(String name, boolean iniVal){
-		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
+	public static BooleanProperty addBoolean(String name, boolean iniVal){
+		BooleanProperty source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
+			source = new SimpleBooleanProperty(iniVal);
 			booleanMap.put(name, source);
 		}
 		return source;
@@ -382,41 +385,41 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal the new value
-	 * @return a {@link BooleanDataSource} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
+	 * @return a {@link BooleanProperty} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
-	public static BooleanDataSource putBoolean(String name, boolean iniVal){
-		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
+	public static BooleanProperty putBoolean(String name, boolean iniVal){
+		BooleanProperty source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
+			source = new SimpleBooleanProperty(iniVal);
 			booleanMap.put(name, source);
 		}else source.set(iniVal);
 		
 		return source;
 	}
 	/**
-	 * Gets the {@link BooleanDataSource} wrapper represented by a given key in the map. If such a key does not exist in the map,
+	 * Gets the {@link BooleanProperty} wrapper represented by a given key in the map. If such a key does not exist in the map,
 	 * a new wrapper is created with a given initial value.
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal a initial value in case the key does not exist
-	 * @return the {@link BooleanDataSource} wrapper represented by a given key in the map
+	 * @return the {@link BooleanProperty} wrapper represented by a given key in the map
 	 */
-	public static BooleanDataSource getBoolean(String name, boolean iniVal){
-		BooleanDataSource.BooleanVarDataSource source = booleanMap.get(name);
+	public static BooleanProperty getBoolean(String name, boolean iniVal){
+		BooleanProperty source = booleanMap.get(name);
 		if(source == null){
-			source = new BooleanDataSource.BooleanVarDataSource(iniVal);
+			source = new SimpleBooleanProperty(iniVal);
 			booleanMap.put(name, source);
 		}
 		return source;
 	}
 	/**
-	 * Gets the {@link BooleanDataSource} wrapper represented by a given key in the map. If the key does not exist in the map,
+	 * Gets the {@link BooleanProperty} wrapper represented by a given key in the map. If the key does not exist in the map,
 	 * null is returned.
 	 * 
 	 * @param name the key of the wrapper
-	 * @return the {@link BooleanDataSource} wrapper represented by a given key in the map
+	 * @return the {@link BooleanProperty} wrapper represented by a given key in the map
 	 */
-	public static BooleanDataSource getBoolean(String name){
+	public static BooleanProperty getBoolean(String name){
 		return booleanMap.get(name);
 	}
 	/**
@@ -434,8 +437,8 @@ public class ConstantsHandler {
 	 * @param name the key representing the wrapper
 	 * @return boolean value saved in the wrapper, false if the key does not exist.
 	 */
-	public static boolean getBooleanNative(String name){
-		return getBooleanNative(name, false);
+	public static boolean getBooleanValue(String name){
+		return getBooleanValue(name, false);
 	}
 	/**
 	 * Gets a boolean value from the wrapper represented by a given key. If the key does not exist, an initial value is returned.
@@ -444,8 +447,8 @@ public class ConstantsHandler {
 	 * @param iniVal a value to return if the key does not exist
 	 * @return boolean value saved in the wrapper, an initial value if the key does not exist.
 	 */
-	public static boolean getBooleanNative(String name, boolean iniVal){
-		BooleanDataSource source = booleanMap.get(name);
+	public static boolean getBooleanValue(String name, boolean iniVal){
+		BooleanProperty source = booleanMap.get(name);
 		if(source == null)
 			return iniVal;
 		return source.get();
@@ -492,6 +495,7 @@ public class ConstantsHandler {
 	private static void saveXml(File file){
 		ArrayList<String> lines = new ArrayList<String>();
 		
+		lines.add("<?xml version=\"1.0\" ?>");
 		lines.add("<constants-handler>");
 		fillXmlBoolean(lines);
 		fillXmlDouble(lines);
@@ -505,19 +509,19 @@ public class ConstantsHandler {
 		String[] names = getStringMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"string\">"+(getStringNative(names[i]))+"</constant>");
+			 lines.add("\t<constant name=\""+names[i]+"\" type=\"string\">"+(getStringValue(names[i]))+"</constant>");
 	}
 	private static void fillXmlBoolean(ArrayList<String> lines){
 		String[] names = getBooleanMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"boolean\">"+(getBooleanNative(names[i]))+"</constant>");
+			 lines.add("\t<constant name=\""+names[i]+"\" type=\"boolean\">"+(getBooleanValue(names[i]))+"</constant>");
 	}
 	private static void fillXmlDouble(ArrayList<String> lines){
 		String[] names = getNumberMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"double\">"+(getNumberNative(names[i]))+"</constant>");
+			 lines.add("\t<constant name=\""+names[i]+"\" type=\"double\">"+(getNumberValue(names[i]))+"</constant>");
 	}
 	
 	/**
@@ -584,7 +588,7 @@ public class ConstantsHandler {
 		
 		String str = "String Constants:\n";
 		for (int i = 0; i < names.length; i++) 
-			str += "\t"+names[i]+" : "+getStringNative(names[i])+"\n";
+			str += "\t"+names[i]+" : "+getStringValue(names[i])+"\n";
 		return str;
 	}
 	/**
@@ -596,7 +600,7 @@ public class ConstantsHandler {
 		
 		String str = "Boolean Constants:\n";
 		for (int i = 0; i < names.length; i++) 
-			str += "\t"+names[i]+" : "+getBooleanNative(names[i])+"\n";
+			str += "\t"+names[i]+" : "+getBooleanValue(names[i])+"\n";
 		return str;
 	}
 	/**
@@ -608,7 +612,7 @@ public class ConstantsHandler {
 		
 		String str = "Number Constants:\n";
 		for (int i = 0; i < names.length; i++) 
-			str += "\t"+names[i]+" : "+getNumberNative(names[i])+"\n";
+			str += "\t"+names[i]+" : "+getNumberValue(names[i])+"\n";
 		return str;
 	}
 }

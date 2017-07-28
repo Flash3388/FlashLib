@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.vision.CvProcessing;
 import edu.flash3388.flashlib.vision.CvRunner;
 import edu.flash3388.flashlib.vision.DefaultFilterCreator;
-import edu.flash3388.flashlib.vision.ProcessingFilter;
+import edu.flash3388.flashlib.vision.VisionFilter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -67,12 +67,12 @@ public class Dashboard extends Application {
 				lastConAttmp = FlashUtil.millis();
 				if(!commInitialized){
 					try {
-						String host = ConstantsHandler.getStringNative(PROP_HOST_ROBOT);
-						String protocol = ConstantsHandler.getStringNative(PROP_COMM_PROTOCOL);
-						int localport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_LOCAL);
-						int remoteport = ConstantsHandler.getIntegerNative(PROP_COMM_PORT_REMOTE);
-						int localcamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_LOCAL);
-						int remotecamport = ConstantsHandler.getIntegerNative(PROP_CAM_PORT_REMOTE);
+						String host = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
+						String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
+						int localport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_LOCAL);
+						int remoteport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_REMOTE);
+						int localcamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_LOCAL);
+						int remotecamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
 						if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
 								(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 							if(!commSettingError){
@@ -172,11 +172,11 @@ public class Dashboard extends Application {
 		printSettings();
 		log.log("Done", "Dashboard");
 		
-		setupNativePath();
+		setupValuePath();
 		log.log("FlashLib version: "+FlashUtil.VERSION);
 		Remote.initializeJSCH();
 		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
-		loadNativeLibrary(Core.NATIVE_LIBRARY_NAME);
+		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		
 		log.log("Creating shutdown hook...", "Dashboard");
@@ -188,7 +188,7 @@ public class Dashboard extends Application {
 	    log.log("Launching FX...", "Dashboard");
 	    launch();
 	}
-	private static void setupNativePath(){
+	private static void setupValuePath(){
 		String path = FOLDER_LIBS_NATIVES;
 		if(FlashUtil.isWindows()){
 			if(FlashUtil.isArchitectureX64())
@@ -205,7 +205,7 @@ public class Dashboard extends Application {
 		log.log("java.library.path="+path, "Dashboard");
 		System.setProperty("java.library.path", path);
 	}
-	private static void loadNativeLibrary(String libname){
+	private static void loadValueLibrary(String libname){
 		String path = System.getProperty("java.library.path")+"/";
 		if(FlashUtil.isWindows())
 			path += libname+".dll";
@@ -214,7 +214,7 @@ public class Dashboard extends Application {
 		System.load(path);
 	}
 	private static void initStart(){
-		ProcessingFilter.setFilterCreator(new DefaultFilterCreator());
+		VisionFilter.setFilterCreator(new DefaultFilterCreator());
 		updateTask = new UpdateTask();
 		updateThread = new Thread(updateTask);
 	    updateThread.start();
@@ -281,7 +281,7 @@ public class Dashboard extends Application {
 	}
 	public static void loadDefaultParameters(){
 		if(vision == null || visionParamLoadFailed) return;
-		String filename = ConstantsHandler.getStringNative(PROP_VISION_DEFAULT_PARAM);
+		String filename = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
 		if(filename != null){
 			log.log("Loading default parameters: "+filename, "Dashboard");
 			visionParamLoadFailed = !instance.controller.loadParam(FOLDER_SAVES+filename);
@@ -302,7 +302,7 @@ public class Dashboard extends Application {
 		Dashboard.emergencyStop = estop;
 	}
 	private static boolean emptyProperty(String prop){
-		String propv = ConstantsHandler.getStringNative(prop);
+		String propv = ConstantsHandler.getStringValue(prop);
 		return propv == null || propv.equals("");
 	}
 	private static void validateBasicHierarcy(){
@@ -330,8 +330,8 @@ public class Dashboard extends Application {
 		
 		if(!ConstantsHandler.hasString(PROP_COMM_PROTOCOL))
 			ConstantsHandler.putString(PROP_COMM_PROTOCOL, "tcp");
-		else if(!ConstantsHandler.getStringNative(PROP_COMM_PROTOCOL).equals("tcp") && 
-				!ConstantsHandler.getStringNative(PROP_COMM_PROTOCOL).equals("udp"))
+		else if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL).equals("tcp") && 
+				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL).equals("udp"))
 			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
 		
 		if(emptyProperty(PROP_COMM_PORT_LOCAL))

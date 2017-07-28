@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Represents a slider on the Flashboard.
@@ -13,7 +13,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class DashboardSlider extends Sendable{
 	
-	private DoubleDataSource source;
+	private DoubleSource source;
 	private double max, min, lastValue;
 	private int ticks;
 	private boolean changed = false;

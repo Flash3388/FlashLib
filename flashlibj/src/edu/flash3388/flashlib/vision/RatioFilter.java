@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 
 /**
@@ -10,119 +11,70 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#contourRatio(double, double, double, double, double, double, double, double, double, double)
  */
-public class RatioFilter extends ProcessingFilter{
-	private double heightRatio, widthRatio, dy, dx, maxScore, minScore, 
-			maxHeight, minHeight, maxWidth, minWidth;
+public class RatioFilter extends VisionFilter{
+	
+	private DoubleProperty heightRatio = new SimpleDoubleProperty();
+	private DoubleProperty widthRatio = new SimpleDoubleProperty();
+	private DoubleProperty dy = new SimpleDoubleProperty();
+	private DoubleProperty dx = new SimpleDoubleProperty();
+	private DoubleProperty maxScore = new SimpleDoubleProperty();
+	private DoubleProperty minScore = new SimpleDoubleProperty();
+	private DoubleProperty maxHeight = new SimpleDoubleProperty();
+	private DoubleProperty minHeight = new SimpleDoubleProperty();
+	private DoubleProperty maxWidth = new SimpleDoubleProperty();
+	private DoubleProperty minWidth = new SimpleDoubleProperty();
 
 	public RatioFilter(){}
 	public RatioFilter(double heightRatio, double widthRatio, double dy, double dx, double maxScore, double minScore, 
 			double maxHeight, double minHeight, double maxWidth, double minWidth){
-		this.maxScore = maxScore;
-		this.dx = dx;
-		this.dy = dy; 
-		this.heightRatio = heightRatio;
-		this.maxHeight = maxHeight;
-		this.maxWidth = maxWidth;
-		this.minHeight = minHeight;
-		this.minScore = minScore;
-		this.minWidth = minWidth;
-		this.widthRatio = widthRatio;
+		this.maxScore.set(maxScore);
+		this.dx.set(dx);
+		this.dy.set(dy);
+		this.heightRatio.set(heightRatio);
+		this.maxHeight.set(maxHeight);
+		this.maxWidth.set(maxWidth);
+		this.minHeight.set(minHeight);
+		this.minScore.set(minScore);
+		this.minWidth.set(minWidth);
+		this.widthRatio.set(widthRatio);
 	}
 	
-	public double getHeightRatio(){
+	public DoubleProperty heightRatioProperty(){
 		return heightRatio;
 	}
-	public void setHeightRatio(double heightRatio){
-		this.heightRatio = heightRatio;
-	}
-	public double getWidthRatio(){
+	public DoubleProperty widthRatioProperty(){
 		return widthRatio;
 	}
-	public void setWidthRatio(double widthRatio){
-		this.widthRatio = widthRatio;
-	}
-	public double getXRatio(){
+	public DoubleProperty dxProperty(){
 		return dx;
 	}
-	public void setXRatio(double dx){
-		this.dx = dx;
-	}
-	public double getYRatio(){
+	public DoubleProperty dyProperty(){
 		return dy;
 	}
-	public void setYRatio(double dy){
-		this.dy = dy;
-	}
 	
-	public double getMaxScore(){
+	public DoubleProperty maxScoreProperty(){
 		return maxScore;
 	}
-	public void setMaxScore(double maxScore){
-		this.maxScore = maxScore;
-	}
-	public double getMinScore(){
+	public DoubleProperty minScoreProperty(){
 		return minScore;
 	}
-	public void setMinScore(double minScore){
-		this.minScore = minScore;
-	}
 	
-	public double getMaxHeight(){
+	public DoubleProperty maxHeightProperty(){
 		return maxHeight;
 	}
-	public void setMaxHeight(double maxHeight){
-		this.maxHeight = maxHeight;
-	}
-	public double getMinHeight(){
+	public DoubleProperty minHeightProperty(){
 		return minHeight;
 	}
-	public void setMinHeight(double minHeight){
-		this.minHeight = minHeight;
-	}
-	public double getMaxWidth(){
+	public DoubleProperty maxWidthProperty(){
 		return maxWidth;
 	}
-	public void setMaxWidth(double maxWidth){
-		this.maxWidth = maxWidth;
-	}
-	public double getMinWidth(){
+	public DoubleProperty minWidthProperty(){
 		return minWidth;
-	}
-	public void setMinWidth(double minWidth){
-		this.minWidth = minWidth;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.contourRatio(heightRatio, widthRatio, dy, dx, maxScore, minScore, 
-				maxHeight, minHeight, maxWidth, minWidth);
-	}
-	@Override
-	public void parseParameters(Map<String, VisionParam> parameters) {
-		heightRatio = VisionParam.getDoubleValue(parameters.get("heightRatio"));
-		widthRatio = VisionParam.getDoubleValue(parameters.get("widthRatio"));
-		dx = VisionParam.getDoubleValue(parameters.get("dx"));
-		dy = VisionParam.getDoubleValue(parameters.get("dy"));
-		minScore = VisionParam.getDoubleValue(parameters.get("minScore"));
-		maxScore = VisionParam.getDoubleValue(parameters.get("maxScore"));
-		minHeight = VisionParam.getDoubleValue(parameters.get("minHeight"));
-		maxHeight = VisionParam.getDoubleValue(parameters.get("maxHeight"));
-		minWidth = VisionParam.getDoubleValue(parameters.get("minWidth"));
-		maxWidth = VisionParam.getDoubleValue(parameters.get("maxWidth"));
-	}
-	@Override
-	public VisionParam[] getParameters() {
-		return new VisionParam[]{
-				new VisionParam.DoubleParam("heightRatio", heightRatio),
-				new VisionParam.DoubleParam("widthRatio", widthRatio),
-				new VisionParam.DoubleParam("dx", dx),
-				new VisionParam.DoubleParam("dy", dy),
-				new VisionParam.DoubleParam("minScore", minScore),
-				new VisionParam.DoubleParam("maxScore", maxScore),
-				new VisionParam.DoubleParam("minHeight", minHeight),
-				new VisionParam.DoubleParam("maxHeight", maxHeight),
-				new VisionParam.DoubleParam("minWidth", minWidth),
-				new VisionParam.DoubleParam("maxWidth", maxWidth)
-		};
+		source.contourRatio(heightRatio.get(), widthRatio.get(), dy.get(), dx.get(), maxScore.get(), minScore.get(), 
+				maxHeight.get(), minHeight.get(), maxWidth.get(), minWidth.get());
 	}
 }

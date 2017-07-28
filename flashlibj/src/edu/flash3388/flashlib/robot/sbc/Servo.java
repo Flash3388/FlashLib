@@ -48,7 +48,7 @@ public class Servo extends SbcPwm implements FlashSpeedController{
 		if(angle < 0.0)
 			angle = Math.abs(angle);
 		
-		angle = Mathf.limit(angle, 0.0, 180.0);
+		angle = Mathf.constrain(angle, 0.0, 180.0);
 		
 		setPosition((angle - minAngle) / getAngleRange());
 	}

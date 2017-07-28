@@ -1385,6 +1385,12 @@ public final class FlashUtil {
     public static boolean instanceOf(Object obj, Class<?> cl){
     	return obj.getClass() == cl || isAssignable(obj.getClass(), cl);
     }
+    /**
+     * Creates a new instance of a class by a given name if possible. 
+     * 
+     * @param name class name including packages
+     * @return a new instance of that class, or null if could not be created or was not found.
+     */
     public static Object createInstance(String name){
     	try {
 			return Class.forName(name).newInstance();

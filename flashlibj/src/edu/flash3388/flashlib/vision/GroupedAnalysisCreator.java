@@ -1,7 +1,11 @@
 package edu.flash3388.flashlib.vision;
 
 import java.util.List;
-import java.util.Map;
+
+import edu.flash3388.flashlib.util.beans.BooleanProperty;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 /**
  * This creator provides the maximum data available for {@link Analysis}. It can work with a group of
@@ -20,16 +24,17 @@ import java.util.Map;
  */
 public class GroupedAnalysisCreator implements AnalysisCreator{
 
-	private double targetWidth, targetHeight;
-	private double camFov;
-	private boolean distanceHeight;
+	private DoubleProperty targetWidth = new SimpleDoubleProperty(), 
+			targetHeight = new SimpleDoubleProperty(),
+			camFov = new SimpleDoubleProperty();
+	private BooleanProperty distanceHeight = new SimpleBooleanProperty();
 	
 	public GroupedAnalysisCreator(){}
 	public GroupedAnalysisCreator(double targetWidth, double targetHeight, double camFov, boolean distanceHeight){
-		this.targetHeight = targetHeight;
-		this.targetWidth = targetWidth;
-		this.camFov = camFov;
-		this.distanceHeight = distanceHeight;
+		this.targetHeight.set(targetHeight);
+		this.targetWidth.set(targetWidth);
+		this.camFov.set(camFov);
+		this.distanceHeight.set(distanceHeight);
 	}
 	
 	/**
@@ -40,7 +45,7 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		double centerX = 0, centerY = 0;
 		double sumDimension = 0;
 		for (Contour contour : contours){
-			sumDimension += distanceHeight? contour.getHeight() : contour.getWidth();
+			sumDimension += distanceHeight.get()? contour.getHeight() : contour.getWidth();
 			centerX += contour.getX();
 			centerY += contour.getY();
 		}
@@ -53,37 +58,15 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		analysis.horizontalDistance = (int) (centerY - source.getFrameWidth() * 0.5);
 		
 		analysis.offsetAngle = VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
-				centerX, centerY, camFov);
-		analysis.targetDistance = distanceHeight? 
-				VisionUtils.measureDistance(source.getFrameHeight(), sumDimension, targetHeight, 
-						camFov)  : 
-			VisionUtils.measureDistance(source.getFrameWidth(), sumDimension, targetWidth, 
-					camFov);
+				centerX, centerY, camFov.get());
+		analysis.targetDistance = distanceHeight.get()? 
+				VisionUtils.measureDistance(source.getFrameHeight(), sumDimension, targetHeight.get(), 
+						camFov.get())  : 
+			VisionUtils.measureDistance(source.getFrameWidth(), sumDimension, targetWidth.get(), 
+					camFov.get());
 				
-		analysis.pixelsToRealRatio = (distanceHeight? targetHeight : targetWidth) / sumDimension;
+		analysis.pixelsToRealRatio = (distanceHeight.get()? targetHeight.get() : targetWidth.get()) / sumDimension;
 		
 		return analysis;
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void parseParameters(Map<String, VisionParam> parameters) {
-		targetWidth = VisionParam.getDoubleValue(parameters.get("target-width"));
-		targetHeight = VisionParam.getDoubleValue(parameters.get("target-height"));
-		camFov = VisionParam.getDoubleValue(parameters.get("cam-fov"));
-		distanceHeight = VisionParam.getBooleanValue(parameters.get("distance-height"));
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public VisionParam[] getParameters() {
-		return new VisionParam[]{
-				new VisionParam.DoubleParam("target-width", targetWidth),
-				new VisionParam.DoubleParam("target-height", targetHeight),
-				new VisionParam.DoubleParam("cam-fov", camFov),
-				new VisionParam.BooleanParam("distance-height", distanceHeight)
-		};
 	}
 }

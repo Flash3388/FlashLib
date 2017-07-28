@@ -6,8 +6,8 @@ import java.util.Vector;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RobotState;
-import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * Represents a button on a Human Interface Device. Can activate actions depending on the state of 
@@ -16,7 +16,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Button implements ButtonListener, BooleanDataSource{
+public class Button implements ButtonListener, BooleanSource{
 	
 	protected static class ButtonCommand{
 		public final ActivateType type;

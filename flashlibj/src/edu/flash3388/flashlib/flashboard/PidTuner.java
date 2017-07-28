@@ -1,10 +1,17 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
+/**
+ * PidTuner provides real-time tracking and tuning of pid controllers and loops. It is possible to 
+ * edit only specific pid controller values using the tuner window on the flashboard.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.1
+ */
 public class PidTuner extends Sendable{
 
 	public static final byte K_UPDATE = 0x1;
@@ -13,15 +20,16 @@ public class PidTuner extends Sendable{
 	public static final byte RUN_UPDATE = 0x4;
 	public static final byte SLIDER_UPDATE = 0x5;
 	
-	private String kp, ki, kd, kf, setpoint;
-	private DoubleDataSource pval, ival, dval, fval, spval, currentValue;
+	private DoubleProperty kp, ki, kd, kf, setpoint;
+	private DoubleSource currentValue;
 	private double maxValue;
 	private int ticks;
 	
 	private boolean update = false, sliderValuesUpdated = false;
 	private double lastP, lastI, lastD, lastF, lastSetPoint, lastValue;
 	
-	public PidTuner(String name, String kp, String ki, String kd, String kf, String setPoint, DoubleDataSource currentValue,
+	public PidTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
+			DoubleProperty setPoint, DoubleSource currentValue,
 			double maxValue, int ticks) {
 		super(name, FlashboardSendableType.PIDTUNER);
 		
@@ -33,19 +41,34 @@ public class PidTuner extends Sendable{
 		this.currentValue = currentValue;
 		this.maxValue = maxValue;
 		this.ticks = ticks;
-		
-		pval = ConstantsHandler.addNumber(kp, 0);
-		ival = ConstantsHandler.addNumber(ki, 0);
-		dval = ConstantsHandler.addNumber(kd, 0);
-		fval = ConstantsHandler.addNumber(kf, 0);
-		spval = ConstantsHandler.addNumber(setPoint, 0);
 	}
-	public PidTuner(String name, String kp, String ki, String kd, String kf, String setPoint, DoubleDataSource currentValue){
+	public PidTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
+			DoubleProperty setPoint, DoubleSource currentValue){
 		this(name, kp, ki, kd, kf, setPoint, currentValue, 10.0, 1000);
 	}
 
 	public boolean isEnabled(){
 		return update;
+	}
+	
+	public DoubleProperty kpProperty(){
+		return kp;
+	}
+	public DoubleProperty kiProperty(){
+		return ki;
+	}
+	public DoubleProperty kdProperty(){
+		return kd;
+	}
+	public DoubleProperty kfProperty(){
+		return kf;
+	}
+	public DoubleProperty setPointProperty(){
+		return setpoint;
+	}
+	
+	public DoubleSource valueSource(){
+		return currentValue;
 	}
 	
 	@Override
@@ -56,14 +79,14 @@ public class PidTuner extends Sendable{
 			lastD = FlashUtil.toDouble(data, 17);
 			lastF = FlashUtil.toDouble(data, 25);
 			
-			ConstantsHandler.putNumber(kp, lastP);
-			ConstantsHandler.putNumber(ki, lastI);
-			ConstantsHandler.putNumber(kd, lastD);
-			ConstantsHandler.putNumber(kf, lastF);
+			kp.set(lastP);
+			ki.set(lastI);
+			kd.set(lastD);
+			kf.set(lastF);
 		}
 		else if(data[0] == SP_UPDATE){
 			lastSetPoint = FlashUtil.toDouble(data, 1);
-			ConstantsHandler.putNumber(setpoint, lastSetPoint);
+			setpoint.set(lastSetPoint);
 		}
 		else if(data[0] == RUN_UPDATE){
 			update = data[1] == 1;
@@ -79,8 +102,8 @@ public class PidTuner extends Sendable{
 			FlashUtil.fillByteArray(ticks, 9, data);
 			return data;
 		}
-		if(lastSetPoint != spval.get()){
-			lastSetPoint = spval.get();
+		if(lastSetPoint != setpoint.get()){
+			lastSetPoint = setpoint.get();
 			
 			byte[] data = new byte[9];
 			data[0] = SP_UPDATE;
@@ -95,11 +118,11 @@ public class PidTuner extends Sendable{
 			FlashUtil.fillByteArray(lastValue, 1, data);
 			return data;
 		}
-		if(lastP != pval.get() || lastI != ival.get() || lastD != dval.get() || lastF != fval.get()){
-			lastP = pval.get();
-			lastI = ival.get();
-			lastD = dval.get();
-			lastF = fval.get();
+		if(lastP != kp.get() || lastI != ki.get() || lastD != kd.get() || lastF != kf.get()){
+			lastP = kp.get();
+			lastI = ki.get();
+			lastD = kd.get();
+			lastF = kf.get();
 			
 			byte[] data = new byte[32];
 			data[0] = K_UPDATE;
@@ -121,12 +144,12 @@ public class PidTuner extends Sendable{
 	public void onConnection() {
 		update = false;
 		
-		lastP = pval.get() - 1;
-		lastI = ival.get() - 1;
-		lastD = dval.get() - 1;
-		lastF = fval.get() - 1;
+		lastP = kp.get() - 1;
+		lastI = ki.get() - 1;
+		lastD = kd.get() - 1;
+		lastF = kf.get() - 1;
 		
-		lastSetPoint = spval.get() - 1;
+		lastSetPoint = setpoint.get() - 1;
 		lastValue = currentValue.get() - 1;
 		
 		sliderValuesUpdated = true;

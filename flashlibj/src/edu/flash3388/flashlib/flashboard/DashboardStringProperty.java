@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.StringDataSource;
+import edu.flash3388.flashlib.util.beans.StringSource;
 
 /**
  * Represents a label for string values on the Flashboard.
@@ -9,22 +9,22 @@ import edu.flash3388.flashlib.robot.devices.StringDataSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class StringProperty extends Sendable{
+public class DashboardStringProperty extends Sendable{
 	
 	private String lastValue = "", value = "";
 	private boolean changed = false;
-	private StringDataSource src;
+	private StringSource src;
 	
-	public StringProperty(String name, StringDataSource data) {
+	public DashboardStringProperty(String name, StringSource data) {
 		super(name, FlashboardSendableType.STRING);
 		src = data;
 	}
 
-	public void set(StringDataSource src){
+	public void set(StringSource src){
 		lastValue = src.get();
 		this.src = src;
 	}
-	public StringDataSource get(){
+	public StringSource get(){
 		return src;
 	}
 	

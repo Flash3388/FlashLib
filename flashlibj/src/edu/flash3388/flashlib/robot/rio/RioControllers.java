@@ -125,7 +125,7 @@ public class RioControllers implements FlashSpeedController, ModableMotor{
 	 */
 	@Override
 	public void set(double speed) {
-		speed = Mathf.limit(speed, -1, 1);
+		speed = Mathf.constrain(speed, -1, 1);
 		for (int i = 0; i < motor_controllers.length; i++)
 			motor_controllers[i].set(speed);
 	}
