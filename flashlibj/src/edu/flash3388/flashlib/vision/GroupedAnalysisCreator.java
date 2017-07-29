@@ -51,21 +51,20 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		}
 		
 		Analysis analysis = new Analysis();
-		analysis.centerPointX = (int) centerX;
-		analysis.centerPointY = (int) centerY;
 		
-		analysis.verticalDistance = (int) (centerX - source.getFrameHeight() * 0.5);
-		analysis.horizontalDistance = (int) (centerY - source.getFrameWidth() * 0.5);
-		
-		analysis.offsetAngle = VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
-				centerX, centerY, camFov.get());
-		analysis.targetDistance = distanceHeight.get()? 
+		analysis.setDouble(Analysis.PROP_CENTER_X, centerX);
+		analysis.setDouble(Analysis.PROP_CENTER_Y, centerY);
+		analysis.setDouble(Analysis.PROP_HORIZONTAL_DISTANCE, (centerY - source.getFrameWidth() * 0.5));
+		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (centerX - source.getFrameHeight() * 0.5));
+		analysis.setDouble(Analysis.PROP_ANGLE_OFFSET, 
+				VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
+				centerX, centerY, camFov.get()));
+		analysis.setDouble(Analysis.PROP_TARGET_DISTANCE, 
+				distanceHeight.get()? 
 				VisionUtils.measureDistance(source.getFrameHeight(), sumDimension, targetHeight.get(), 
 						camFov.get())  : 
 			VisionUtils.measureDistance(source.getFrameWidth(), sumDimension, targetWidth.get(), 
-					camFov.get());
-				
-		analysis.pixelsToRealRatio = (distanceHeight.get()? targetHeight.get() : targetWidth.get()) / sumDimension;
+					camFov.get()));
 		
 		return analysis;
 	}

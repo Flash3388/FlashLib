@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 
 /**
@@ -94,11 +95,11 @@ public interface PidSource {
 		public double pidGet() {
 			if(!vision.hasNewAnalysis()) return previous;
 			if(distance)
-				previous = vision.getAnalysis().targetDistance;
+				previous = vision.getAnalysis().getDouble(Analysis.PROP_TARGET_DISTANCE);
 			else
 				previous = horizontal? 
-							vision.getAnalysis().horizontalDistance : 
-							vision.getAnalysis().verticalDistance;
+							vision.getAnalysis().getDouble(Analysis.PROP_HORIZONTAL_DISTANCE) : 
+							vision.getAnalysis().getDouble(Analysis.PROP_VERTICAL_DISTANCE);
 			return previous;
 		}
 		@Override

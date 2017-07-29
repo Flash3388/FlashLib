@@ -668,11 +668,14 @@ public class CvProcessing {
 		
 		drawRect(mat, r, new Scalar(21, 21, 21));
 		drawRect(mat, r2, new Scalar(71, 71, 71));
+	
+		double centerx = (r.x+r.width+(r2.x - (r.x + r.width)) / 2.0);
+		double centery = (r.y + r.height + (r2.y - (r.y + r.height)) / 2.0);
 		
-		an.centerPointX = (int) (r.x+r.width+(r2.x - (r.x + r.width)) / 2.0);
-		an.centerPointY = (int) (r.y + r.height + (r2.y - (r.y + r.height)) / 2.0);
-		an.verticalDistance = (int) (an.centerPointY - mat.height() * 0.5);
-		an.horizontalDistance = (int) (an.centerPointX - mat.width() * 0.5);
+		an.setDouble(Analysis.PROP_CENTER_X, centerx);
+		an.setDouble(Analysis.PROP_CENTER_Y, centery);
+		an.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (centery - mat.height() * 0.5));
+		an.setDouble(Analysis.PROP_HORIZONTAL_DISTANCE, (centerx - mat.width() * 0.5));
 	}
 	private static double getAvgForRatio(Rect r, Rect r2, double heightRatio, double widthRatio, double dy, double dx){
 		int count = 0;
@@ -886,7 +889,9 @@ public class CvProcessing {
 	public static void drawPostProcessing(Mat feed, Scalar color, Analysis... an){
 		for (int i = 0; i < an.length; i++) {
 			Analysis analysis = an[i];
-			Imgproc.circle(feed, new Point(analysis.centerPointX, analysis.centerPointY), 3, color, 2);
+			Imgproc.circle(feed, 
+					new Point(analysis.getDouble(Analysis.PROP_CENTER_X), analysis.getDouble(Analysis.PROP_CENTER_Y)), 
+					3, color, 2);
 		}
 		Imgproc.line(feed, new Point(feed.width()/2, 0), new Point(feed.width()/2, feed.height()), new Scalar(0, 51, 255));
 	}
@@ -977,10 +982,10 @@ public class CvProcessing {
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
 		Point center = contourCenter(contour);
 		
-		analysis.centerPointX = (int) center.x;
-		analysis.centerPointY = (int) center.y;
-		analysis.verticalDistance = (int) (center.y - feed.height() * 0.5);
-		analysis.horizontalDistance = (int) (center.x - feed.width() * 0.5);
+		analysis.setDouble(Analysis.PROP_CENTER_X, center.x);
+		analysis.setDouble(Analysis.PROP_CENTER_Y, center.y);
+		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (center.y - feed.height() * 0.5));
+		analysis.setDouble(Analysis.PROP_HORIZONTAL_DISTANCE, (center.x - feed.width() * 0.5));
 	}
 	
 	/**

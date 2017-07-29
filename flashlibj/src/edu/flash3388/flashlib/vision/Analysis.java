@@ -1,51 +1,61 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
- * Represents a post vision analysis. Contains data about the located contour.
+ * Represents a post vision analysis.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public class Analysis {
 	
-	/**
-	 * The horizontal distance between the located contour and the center of the frame.
-	 */
-	public int horizontalDistance;
-	/**
-	 * The vertical distance between the located contour and the center of the frame.
-	 */
-	public int verticalDistance;
-	/**
-	 * The x coordinate of the center of the contour.
-	 */
-	public int centerPointX;
-	/**
-	 * The y coordinate of the center of the contour.
-	 */
-	public int centerPointY;
-	/**
-	 * The distance of the target.
-	 */
-	public double targetDistance;
-	/**
-	 * The offset horizontal angle between the center of the frame and the center of the contour.
-	 */
-	public double offsetAngle;
-	/**
-	 * Ratio between pixels and real life dimensions in the frame. The measurement unit depends on the provided data and
-	 * user implementation.
-	 */
-	public double pixelsToRealRatio;
+	public static final String PROP_CENTER_X = "centerx";
+	public static final String PROP_CENTER_Y = "centery";
+	public static final String PROP_HORIZONTAL_DISTANCE = "hor-dis";
+	public static final String PROP_VERTICAL_DISTANCE = "ver-dis";
+	public static final String PROP_TARGET_DISTANCE = "tar-dis";
+	public static final String PROP_ANGLE_OFFSET = "angle-offset";
 	
-	/**
-	 * Prints data about this analysis to {@link java.lang.System#out}
-	 */
-	public void print(){
-		String all = "H_dis: "+horizontalDistance+" V_dis: "+verticalDistance+" Dis: "+targetDistance+" Angle:"+offsetAngle;
-		System.out.println(all);
+	private final Map<String, Object> data = new HashMap<String, Object>();
+	
+	public void setInteger(String key, int value){
+		data.put(key, value);
+	}
+	public void setString(String key, String value){
+		data.put(key, value);
+	}
+	public void setDouble(String key, double value){
+		data.put(key, value);
+	}
+	public void setBoolean(String key, boolean value){
+		data.put(key, value);
+	}
+	
+	public int getInteger(String key){
+		Object o = data.get(key);
+		if(o instanceof Integer || o instanceof Double)
+			return (int)o;
+		throw new IllegalArgumentException("Value is not an int");
+	}
+	public double getDouble(String key){
+		Object o = data.get(key);
+		if(o instanceof Double || o instanceof Integer)
+			return (double)o;
+		throw new IllegalArgumentException("Value is not a double");
+	}
+	public String getString(String key){
+		Object o = data.get(key);
+		return o.toString();
+	}
+	public boolean getBoolean(String key){
+		Object o = data.get(key);
+		if(o instanceof Boolean)
+			return (boolean)o;
+		throw new IllegalArgumentException("Value is not a boolean");
 	}
 	
 	/**
@@ -53,22 +63,23 @@ public class Analysis {
 	 * @return a byte array with data about this analysis
 	 */
 	public byte[] transmit(){
-		byte[] bytes = new byte[40];
-		int pos = 0;
-		FlashUtil.fillByteArray(centerPointX, pos, bytes);
-		pos += 4;
-		FlashUtil.fillByteArray(centerPointY, pos, bytes);
-		pos += 4;
-		FlashUtil.fillByteArray(horizontalDistance, pos, bytes);
-		pos += 4;
-		FlashUtil.fillByteArray(verticalDistance, pos, bytes);
-		pos += 4;
-		FlashUtil.fillByteArray(targetDistance, pos, bytes);
-		pos += 8;
-		FlashUtil.fillByteArray(offsetAngle, pos, bytes);
-		pos += 8;
-		FlashUtil.fillByteArray(pixelsToRealRatio, pos, bytes);
-		return bytes;
+		String str = "";
+		for (String key : data.keySet()) {
+			Object val = data.get(key);
+			String type = "";
+			
+			if(val instanceof Integer)
+				type = "i";
+			else if(val instanceof Double)
+				type = "d";
+			else if(val instanceof Boolean)
+				type = "b";
+			else type = "s";
+			
+			str += key + ":" + val + ":" + type + "|";
+		}
+		
+		return str.getBytes();
 	}
 	
 	/**
@@ -77,17 +88,25 @@ public class Analysis {
 	 * @return a new analysis object
 	 */
 	public static Analysis fromBytes(byte[] bytes){
-		if(bytes.length != 40) return null;
 		Analysis an = new Analysis();
 		
-		int pos = 0;
-		an.centerPointX = FlashUtil.toInt(bytes, pos); pos+=4;
-		an.centerPointY = FlashUtil.toInt(bytes, pos); pos+=4;
-		an.horizontalDistance = FlashUtil.toInt(bytes, pos); pos+=4;
-		an.verticalDistance = FlashUtil.toInt(bytes, pos); pos+=4;
-		an.targetDistance = FlashUtil.toDouble(bytes, pos); pos+=8;
-		an.offsetAngle = FlashUtil.toDouble(bytes, pos); pos += 8;
-		an.pixelsToRealRatio = FlashUtil.toDouble(bytes, pos);
+		String[] data = new String(bytes).split("\\|");
+		for (String str : data) {
+			String[] subdata = str.split(":");
+			if(subdata.length != 3)
+				continue;
+			
+			Object val;
+			if(subdata[2].equals("i"))
+				val = FlashUtil.toInt(subdata[1]);
+			else if(subdata[2].equals("b"))
+				val = FlashUtil.toBoolean(subdata[1]);
+			else if(subdata[2].equals("d"))
+				val = FlashUtil.toDouble(subdata[1]);
+			else val = subdata[1];
+			
+			an.data.put(subdata[0], val);
+		}
 		
 		return an;
 	}
