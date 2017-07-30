@@ -1,5 +1,12 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import edu.flash3388.flashlib.util.FlashUtil;
+
 /**
  * The default creator object for processing filters. Can load and create all basic filters provided with 
  * FlashLib.
@@ -10,26 +17,34 @@ package edu.flash3388.flashlib.vision;
  */
 public class DefaultFilterCreator implements FilterCreator{
 
+	private final Map<String, Object> map = 
+			new HashMap<String, Object>();
+	
+	public DefaultFilterCreator() {
+		map.put("highest", HighestFilter.class);
+		map.put("lowest", LowestFilter.class);
+		map.put("largest", LargestFilter.class);
+		map.put("shape", ShapeFilter.class);
+		map.put("ratio", RatioFilter.class);
+		map.put("closest-left", ClosestToLeftFilter.class);
+		map.put("closest-right", ClosestToRightFilter.class);
+		map.put("closest-center", ClosestToCenterFilter.class);
+		map.put("coordinate", CoordinateFilter.class);
+		map.put("color", ColorFilter.class);
+		map.put("gray", GrayFilter.class);
+		map.put("circle", CircleFilter.class);
+		map.put("template", TemplateFilter.class);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public VisionFilter create(String name) {
-		switch (name) {
-			case "highest": return new HighestFilter();
-			case "lowest": return new LowestFilter();
-			case "largest": return new LargestFilter();
-			case "shape": return new ShapeFilter();
-			case "ratio": return new RatioFilter();
-			case "closest-left": return new ClosestToLeftFilter();
-			case "closest-right": return new ClosestToRightFilter();
-			case "closest-center": return new ClosestToCenterFilter();
-			case "coordinate": return new CoordinateFilter();
-			case "color": return new ColorFilter();
-			case "gray": return new GrayFilter();
-			case "circle": return new CircleFilter();
-		}
-		return null;
+		Class<?> cl = (Class<?>)map.get(name);
+		if(cl == null || !FlashUtil.isAssignable(cl, VisionFilter.class))
+			return null;
+		return (VisionFilter) FlashUtil.createInstance(name);
 	}
 
 	/**
@@ -37,31 +52,20 @@ public class DefaultFilterCreator implements FilterCreator{
 	 */
 	@Override
 	public String getSaveName(VisionFilter filter) {
-		if(filter instanceof HighestFilter)
-			return "highest";
-		if(filter instanceof LowestFilter)
-			return "lowest";
-		if(filter instanceof LargestFilter)
-			return "largest";
-		if(filter instanceof ShapeFilter)
-			return "shape";
-		if(filter instanceof RatioFilter)
-			return "ratio";
-		if(filter instanceof ClosestToLeftFilter)
-			return "closest-left";
-		if(filter instanceof ClosestToRightFilter)
-			return "closest-right";
-		if(filter instanceof ClosestToCenterFilter)
-			return "closest-center";
-		if(filter instanceof CoordinateFilter)
-			return "coordinate";
-		if(filter instanceof ColorFilter)
-			return "color";
-		if(filter instanceof GrayFilter)
-			return "gray";
-		if(filter instanceof CircleFilter)
-			return "circle";
+		for (Iterator<Entry<String, Object>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
+			Entry<String, Object> en = iterator.next();
+			Class<?> cl = (Class<?>)en.getValue();
+			if(cl == null || !FlashUtil.isAssignable(cl, VisionFilter.class))
+				continue;
+			if(cl == filter.getClass())
+				return en.getKey();
+		}
 		return null;
+	}
+
+	@Override
+	public Map<String, Object> getFiltersMap() {
+		return map;
 	}
 
 }

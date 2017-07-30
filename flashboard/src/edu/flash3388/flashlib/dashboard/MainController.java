@@ -14,9 +14,10 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
-import edu.flash3388.flashlib.vision.CvRunner;
+import edu.flash3388.flashlib.vision.cv.CvRunner;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -56,10 +57,9 @@ public class MainController implements Initializable{
 						controller.addParamToBox(vision.getProcessing(i).getName());
 					lastProcCount = vision.getProcessingCount();
 				}
-				if(vision.getProcessing() == null)
-					Dashboard.loadDefaultParameters();
-				else 
+				if(vision.getProcessing() != null)
 					controller.updateParam();
+					
 				if(lastProc != Dashboard.getVision().getSelectedProcessingIndex()){
 					lastProc = Dashboard.getVision().getSelectedProcessingIndex();
 					controller.updateParamBoxSelection();
@@ -328,7 +328,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.max3Property().set(new_val.intValue());
+				colorFilter.min3Property().set(new_val.intValue());
 				v_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -410,9 +410,9 @@ public class MainController implements Initializable{
 		File file = chooser.showOpenDialog(Dashboard.getPrimary());
 		if(file == null) return;
 		String path = file.getAbsolutePath();
-		loadParam(path);
+		loadParam(path, true);
 	}
-	public boolean loadParam(String path){
+	public boolean loadParam(String path, boolean show){
 		FlashUtil.getLog().log("Loading file: "+path);
 		VisionProcessing proc = null;
 		try {
@@ -428,7 +428,7 @@ public class MainController implements Initializable{
 		if(proc != null){
 			FlashUtil.getLog().log("Parameters loaded");
 			Dashboard.getVision().addProcessing(proc);
-			updateParam();
+			Platform.runLater(()->updateParam());
 			addParamToBox(proc.getName());
 			return true;
 		}else {
@@ -442,13 +442,17 @@ public class MainController implements Initializable{
 				return;
 			}
 		}
-		mode_box.getItems().add(name);
-		mode_box.getSelectionModel().select(name);
+		Platform.runLater(()->{
+			mode_box.getItems().add(name);
+			mode_box.getSelectionModel().select(name);
+		});
 	}
-	private void updateParamBoxSelection(){
-		local = true;
-		mode_box.getSelectionModel().select(Dashboard.getVision().getSelectedProcessingIndex());
-		local = false;
+	public void updateParamBoxSelection(){
+		Platform.runLater(()->{
+			local = true;
+			mode_box.getSelectionModel().select(Dashboard.getVision().getSelectedProcessingIndex());
+			local = false;
+		});
 	}
 	private boolean checkVision(){
 		if(local) 

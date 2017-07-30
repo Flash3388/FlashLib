@@ -31,6 +31,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	private InetAddress outInet, localInet;
 	
 	private boolean closed = false, reset = false;
+	private int readTimeout = 0;
 	
 	private OutputStream out;
 	private InputStream in;
@@ -169,6 +170,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
 			
+			setReadTimeout(readTimeout);
 			resetBuffers();
 			resetData();
 		} catch (IOException e) {	
@@ -202,6 +204,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		try {
 			if(socket != null)
 				socket.setSoTimeout(millis);
+			readTimeout = millis;
 		} catch (IOException e) {}
 	}
 	/**
@@ -210,7 +213,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	@Override
 	public int getTimeout() {
 		try {
-			return socket != null? socket.getSoTimeout() : 0;
+			return socket != null? socket.getSoTimeout() : readTimeout;
 		} catch (IOException e) {}
 		return -1;
 	}

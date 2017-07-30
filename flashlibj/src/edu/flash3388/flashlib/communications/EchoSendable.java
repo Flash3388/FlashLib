@@ -28,6 +28,7 @@ public class EchoSendable extends Sendable{
 		System.arraycopy(data, 0, byteData, 0, 
 				data.length);
 
+		System.out.println(new String(getName()+": "+data));
 		rec = true;
 	}
 	@Override

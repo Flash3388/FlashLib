@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <constants-handler>
-	<constant name="deployed" type="boolean">false</constant>
 	<constant name="comm.port.remote" type="double">5801.0</constant>
 	<constant name="comm.port.local" type="double">5800.0</constant>
 	<constant name="cam.port.local" type="double">5802.0</constant>

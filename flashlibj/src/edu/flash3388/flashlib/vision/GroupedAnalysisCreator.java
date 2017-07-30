@@ -62,6 +62,8 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 			centerX += contour.getX();
 			centerY += contour.getY();
 		}
+		centerX /= contours.size();
+		centerY /= contours.size();
 		
 		Analysis analysis = new Analysis();
 		

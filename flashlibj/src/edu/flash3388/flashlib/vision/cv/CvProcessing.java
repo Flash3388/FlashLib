@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.vision;
+package edu.flash3388.flashlib.vision.cv;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -21,7 +21,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.vision.CvTemplateMatcher.Method;
+import edu.flash3388.flashlib.vision.Analysis;
+import edu.flash3388.flashlib.vision.Contour;
+import edu.flash3388.flashlib.vision.cv.CvTemplateMatcher.Method;
 
 /**
  * Provides openCV utilities and vision functionalities.
@@ -33,271 +35,6 @@ import edu.flash3388.flashlib.vision.CvTemplateMatcher.Method;
 public class CvProcessing {
 
 	private CvProcessing(){}
-	
-	/**
-	 * A vision source using openCV.
-	 * 
-	 * @author Tom Tzook
-	 * @author Alon Klein
-	 * @since FlashLib 1.0.0
-	 */
-	public static class CvSource implements VisionSource{
-		
-		private Mat mat, threshold = new Mat(), contoursHierarchy = new Mat();
-		private List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-		private Analysis analysis;
-		private CvPipeline pipeline;
-
-		private void checkReady(boolean tryContours){
-			if(mat == null)
-				throw new VisionSourceImageMissingException();
-			if(tryContours && contours == null)
-				detectContours();
-		}
-		private void detectContours(){
-			if(pipeline != null)
-				pipeline.newImage(threshold, CvPipeline.TYPE_THRESHOLD);
-			contours.clear();
-			CvProcessing.detectContours(threshold, contours, contoursHierarchy);
-		}
-		
-		public Mat getThreshold(){
-			return threshold;
-		}
-		public void setPipeline(CvPipeline pipe){
-			pipeline = pipe;
-		}
-		/**
-		 * Sets the {@link Mat} object to be used for vision.
-		 * @param mat frame
-		 */
-		public void prep(Mat mat){
-			this.mat = mat;
-			analysis = null;
-			contours = null;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public int getFrameWidth() {
-			return mat != null? mat.width() : 0;
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public int getFrameHeight() {
-			return mat != null? mat.height() : 0;
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public List<Contour> getContours() {
-			checkReady(true);
-			
-			List<Contour> wrapperContours = new ArrayList<Contour>();
-			for (MatOfPoint contour : contours)
-				wrapperContours.add(CvProcessing.wrapCvContour(contour));
-			return wrapperContours;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Analysis getResult() {
-			if(analysis != null)
-				return analysis;
-			if(contours.size() != 1)
-				return null;
-			
-			MatOfPoint contour = contours.get(0);
-			analysis = new Analysis();
-			CvProcessing.setAnalysisForContour(mat, contour, analysis);
-			
-			return analysis;
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public Analysis[] getResults() {
-			Analysis[] ans = new Analysis[contours.size()];
-			
-			for (int i = 0; i < ans.length; i++) {
-				ans[i] = new Analysis();
-				CvProcessing.setAnalysisForContour(mat, contours.get(i), ans[i]);
-			}
-			return ans;
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void convertHsv() {
-			checkReady(false);
-			
-			CvProcessing.rgbToHsv(mat, threshold);
-		}
-		/**
-		 * {@inheritDoc}
-		 * Does nothing at the moment
-		 */
-		@Override
-		public void convertRgb() {
-			checkReady(false);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void convertGrayscale(){
-			checkReady(false);
-			
-			CvProcessing.rgbToGray(mat, threshold);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void filterColorRange(int min1, int min2, int min3, int max1, int max2, int max3){
-			checkReady(false);
-			
-			CvProcessing.filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void filterColorRange(int min, int max){
-			checkReady(false);
-			
-			CvProcessing.filterMatColors(mat, threshold, min, max, min, max, min, max);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> void filterByComparator(int amount, Comparator<T> comparator) {
-			checkReady(true);
-			
-			CvProcessing.filterByComparator(contours, amount, (Comparator<MatOfPoint>) comparator);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void lowestContours(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForLowestContours(contours, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void highestContours(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForHighestContours(contours, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void largestContours(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForLargestContours(contours, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void detectShapes(int amount, int vertecies, double accuracy) {
-			checkReady(true);
-			
-			detectShapes(vertecies, accuracy);
-			if(amount < contours.size()){
-				for (int i = contours.size() - 1; i >= amount; i--)
-					contours.remove(i);
-			}
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void detectShapes(int vertecies, double accuracy) {
-			checkReady(true);
-			
-			CvProcessing.detectContoursByShape(contours, vertecies, accuracy);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void contourRatio(double heightRatio, double widthRatio, double dy, double dx, 
-				double maxScore, double minScore, 
-				double maxHeight, double minHeight, double maxWidth, double minWidth) {
-			checkReady(true);
-			
-			analysis = CvProcessing.filterForContoursByRatio(contours, mat, heightRatio, widthRatio, dy, dx, 
-					maxScore, minScore, maxHeight, minHeight, maxWidth, minWidth);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void closestToLeft(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForClosestToLeft(contours, mat, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void closestToRight(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForClosestToRight(contours, mat, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void closestToCoordinate(double x, double y, int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForClosestContoursToPoint(contours, x, y, amount);
-		}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void closestToCenterFrame(int amount) {
-			checkReady(true);
-			
-			CvProcessing.filterForClosestContoursToCenter(contours, mat, amount);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void circleDetection() {
-			checkReady(true);
-			
-			CvProcessing.FilterByCircle(threshold,contours);
-		}
-	}
 	
 	//------------------------------------------------------------------
 	//------------------------------------------------------------------
@@ -1017,15 +754,26 @@ public class CvProcessing {
 		return returnStruct;
 	}
 	
-
-	public static void resize(Mat img,int scaleFactor)
-	{
-		Imgproc.resize(img, img, new Size(img.width()-scaleFactor,img.height()-scaleFactor));
+	/**
+	 * Resizes the given image by a given factor. If the scale factor is positive, the image is enlarged, otherwise
+	 * it's size is decreased.
+	 * 
+	 * @param img the image to resize
+	 * @param scaleFactor the size factor in pixels
+	 */
+	public static void resize(Mat img, int scaleFactor){
+		Imgproc.resize(img, img, new Size(img.width() + scaleFactor, img.height() + scaleFactor));
 	}
-	
-	public static CvTemplateMatcher.TemplateResult matchTemplate(Mat scene,Mat templ,Method method, int scaleFactor)
-	{
+	/**
+	 * Searches for a given template in a given image and returns the best part of the image which matches the result.
+	 * 
+	 * @param scene the full image to search
+	 * @param templ the template image
+	 * @param method the method of template matching
+	 * @param scaleFactor resizing factor in pixels
+	 * @return a result of the match
+	 */
+	public static CvTemplateMatcher.TemplateResult matchTemplate(Mat scene, Mat templ, Method method, int scaleFactor){
 		return CvTemplateMatcher.match(scene, templ, method, scaleFactor);
 	}
-
 }

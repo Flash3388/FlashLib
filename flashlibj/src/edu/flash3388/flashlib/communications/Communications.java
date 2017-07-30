@@ -152,7 +152,7 @@ public class Communications {
 		if(s != null){
 			s.setAttached(true);
 			s.setRemoteInit(true);
-			sendables.put(s.getID(), s);
+			sendables.put(id, s);
 		}
 	}
 	private void resetAll(){

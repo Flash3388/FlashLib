@@ -1,6 +1,9 @@
-package edu.flash3388.flashlib.vision;
+package edu.flash3388.flashlib.vision.cv;
 
 import org.opencv.core.Mat;
+
+import edu.flash3388.flashlib.vision.Analysis;
+import edu.flash3388.flashlib.vision.VisionRunner;
 
 /**
  * Vision runner using openCV. Uses {@link CvPipeline} to receive new openCV {@link Mat} object to analyze.
@@ -13,7 +16,7 @@ public class CvRunner extends VisionRunner implements CvPipeline{
 
 	private Mat[] frames = new Mat[2];
 	private int frameIndex = 0;
-	private CvProcessing.CvSource source = new CvProcessing.CvSource();
+	private CvSource source = new CvSource();
 	private CvPipeline pipline;
 	
 	public CvRunner(String name, int id) {
@@ -36,8 +39,8 @@ public class CvRunner extends VisionRunner implements CvPipeline{
 		Mat mat = frames[frameIndex];
 		frames[frameIndex] = null;
 		frameIndex ^= 1;
-		if(mat != null){
-			source.prep(mat);
+		if(mat != null && getProcessing() != null){
+			source.prep(mat.clone());
 			Analysis an = getProcessing().processAndGet(source);
 			if(an != null)
 				CvProcessing.drawPostProcessing(mat, an);

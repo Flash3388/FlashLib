@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Enumeration;
@@ -21,8 +22,8 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.vision.CvProcessing;
-import edu.flash3388.flashlib.vision.CvRunner;
+import edu.flash3388.flashlib.vision.cv.CvProcessing;
+import edu.flash3388.flashlib.vision.cv.CvRunner;
 import edu.flash3388.flashlib.vision.DefaultFilterCreator;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import javafx.application.Application;
@@ -160,7 +161,6 @@ public class Dashboard extends Application {
 	
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
-	private static boolean visionParamLoadFailed = false;
 	
 	public static void main(String[] args) throws Exception{
 		log = FlashUtil.getLog();
@@ -279,13 +279,29 @@ public class Dashboard extends Application {
 	public static CvRunner getVision(){
 		return vision;
 	}
-	public static void loadDefaultParameters(){
-		if(vision == null || visionParamLoadFailed) return;
-		String filename = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
-		if(filename != null){
-			log.log("Loading default parameters: "+filename, "Dashboard");
-			visionParamLoadFailed = !instance.controller.loadParam(FOLDER_SAVES+filename);
+	private static void loadVisionSaves(){
+		log.log("Loading vision files from saves folder...");
+		File savesFolder = new File(FOLDER_SAVES);
+		File[] files = savesFolder.listFiles(new FilenameFilter(){
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".xml");
+			}
+		});
+		
+		for (File file : files) 
+			instance.controller.loadParam(file.getAbsolutePath(), false);
+		
+		String name = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
+		if(name != null){
+			for (int i = 0; i < vision.getProcessingCount(); i++) {
+				if(vision.getProcessing(i).getName().equals(name)){
+					vision.selectProcessing(i);
+					instance.controller.updateParamBoxSelection();
+				}
+			}
 		}
+		log.log("done");
 	}
 	public static boolean visionInitialized(){
 		return vision != null;
@@ -297,6 +313,11 @@ public class Dashboard extends Application {
 	protected static void setVision(CvRunner vision){
 		Dashboard.vision = vision;
 		vision.setPipeline(camViewer);
+		if(vision != null){
+			runLater(()->{
+				loadVisionSaves();
+			});
+		}
 	}
 	protected static void setEmergencyStopControl(EmergencyStopControl estop){
 		Dashboard.emergencyStop = estop;

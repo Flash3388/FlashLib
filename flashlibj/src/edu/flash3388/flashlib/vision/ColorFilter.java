@@ -33,7 +33,7 @@ public class ColorFilter extends VisionFilter{
 		this.min1.set(min1);
 		this.min2.set(min2);
 		this.min3.set(min3);
-		this.min1.set(max1);
+		this.max1.set(max1);
 		this.max2.set(max2);
 		this.max3.set(max3);
 	}
@@ -41,21 +41,21 @@ public class ColorFilter extends VisionFilter{
 	public BooleanProperty hsvProperty(){
 		return hsv;
 	}
-	
+
 	public IntegerProperty min1Property(){
 		return min1;
-	}
-	public IntegerProperty min2Property(){
-		return min2;
-	}
-	public IntegerProperty min3Property(){
-		return min3;
 	}
 	public IntegerProperty max1Property(){
 		return max1;
 	}
+	public IntegerProperty min2Property(){
+		return min2;
+	}
 	public IntegerProperty max2Property(){
 		return max2;
+	}
+	public IntegerProperty min3Property(){
+		return min3;
 	}
 	public IntegerProperty max3Property(){
 		return max3;

@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.dashboard.controls.*;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.vision.CvRunner;
+import edu.flash3388.flashlib.vision.cv.CvRunner;
 
 public class FlashboardSendableCreator implements SendableCreator{
 

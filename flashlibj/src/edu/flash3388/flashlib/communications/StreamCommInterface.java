@@ -168,7 +168,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	@Override
 	public void write(byte[] data, int start, int length) {
 		data = assemblePacket(data, start, length);
-		writeData(data, start, length);
+		writeData(data, 0, data.length);
 		newDataSent();
 	}
 	

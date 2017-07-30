@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.vision;
 import java.util.Comparator;
 import java.util.List;
 
+import edu.flash3388.flashlib.util.beans.ObjectSource;
+
 /**
  * Vision source provides a base for vision operations. To use a library for vision processing, it needs to implement this
  * class and than can be used by the vision system. 
@@ -199,9 +201,24 @@ public interface VisionSource {
 	 */
 	void closestToCenterFrame(int amount);
 	
-	void  templateMatch();
+	/**
+	 * Using template matching algorithms, attempts to find a given template from the stored image. The new stored
+	 * image now contains the part of the image where the template was best matched. To work on every size, the template
+	 * size is changed until the match is the best possible. 
+	 * 
+	 * @param img a reference to the template image contained in a source object. The image type must correlate to the implementation used.
+	 * @param method the method of template matching. Options vary between implementations
+	 * @param scaleFactor the resize factor
+	 */
+	void matchTemplate(ObjectSource<Object> img, int method, int scaleFactor);
 	
-	
+	/**
+	 * Loads an image and wraps it in a reference to the image type used by the implementation.
+	 * 
+	 * @param imgPath path to the image
+	 * @return the loaded image, or null if unable to load
+	 */
+	ObjectSource<Object> loadImage(String imgPath);
 }
 
 /*

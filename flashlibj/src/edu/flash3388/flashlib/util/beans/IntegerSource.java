@@ -6,6 +6,7 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
+@FunctionalInterface
 public interface IntegerSource {
 
 	/**
