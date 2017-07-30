@@ -16,10 +16,12 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.vision.CvTemplateMatcher.Method;
 
 /**
  * Provides openCV utilities and vision functionalities.
@@ -1014,4 +1016,16 @@ public class CvProcessing {
 		}
 		return returnStruct;
 	}
+	
+
+	public static void resize(Mat img,int scaleFactor)
+	{
+		Imgproc.resize(img, img, new Size(img.width()-scaleFactor,img.height()-scaleFactor));
+	}
+	
+	public static CvTemplateMatcher.TemplateResult matchTemplate(Mat scene,Mat templ,Method method, int scaleFactor)
+	{
+		return CvTemplateMatcher.match(scene, templ, method, scaleFactor);
+	}
+
 }

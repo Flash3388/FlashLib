@@ -46,6 +46,7 @@ dependencies {
 			[name: 'bulldog-core-0.3.0-SNAPSHOT'],
 			[name: 'bulldog-linux-0.3.0-SNAPSHOT'],
 			[name: 'bulldog-devices-0.3.0-SNAPSHOT'],
-			[name: 'jinput-2.0.5'])
+			[name: 'jinput-2.0.5'],
+			[name: 'RXTXcomm'])
 }
 

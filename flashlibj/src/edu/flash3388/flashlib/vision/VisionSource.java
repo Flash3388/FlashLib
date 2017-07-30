@@ -198,6 +198,10 @@ public interface VisionSource {
 	 * @param amount the maximum amount of contours that should remain after the operation
 	 */
 	void closestToCenterFrame(int amount);
+	
+	void  templateMatch();
+	
+	
 }
 
 /*
