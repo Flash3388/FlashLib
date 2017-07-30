@@ -3,8 +3,10 @@ package edu.flash3388.flashlib.robot.rio;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
-import static edu.flash3388.flashlib.robot.Scheduler.*;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
+
+import edu.flash3388.flashlib.robot.RobotFactory;
+
 import static edu.flash3388.flashlib.robot.FlashRoboUtil.inEmergencyStop;
 
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -73,7 +75,7 @@ public abstract class FlashRio extends SampleRobot {
 			if(isDisabled()){
 				logNewState("Disabled");
 				
-				disableScheduler(true);
+				RobotFactory.disableScheduler(true);
 				m_ds.InDisabled(true);
 				disabledInit();
 				
@@ -86,12 +88,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isAutonomous()){
 				logNewState("Autonomous");
 				
-				disableScheduler(false);
+				RobotFactory.disableScheduler(false);
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
 				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
-					runScheduler();
+					RobotFactory.runScheduler();
 					autonomousPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -100,12 +102,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isTest()){
 				logNewState("Test");
 				
-				disableScheduler(false);
+				RobotFactory.disableScheduler(false);
 				m_ds.InTest(true);
 				testInit();
 				
 				while(isEnabled() && isTest() && !inEmergencyStop()){
-					runScheduler();
+					RobotFactory.runScheduler();
 					testPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -114,12 +116,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else{
 				logNewState("Teleop");
 				
-				disableScheduler(false);
+				RobotFactory.disableScheduler(false);
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				
 				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
-					runScheduler();
+					RobotFactory.runScheduler();
 					teleopPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);

@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
 import edu.flash3388.flashlib.robot.SystemAction;
@@ -28,52 +29,48 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		Front, Rear, Right, Left
 	}
 	
-	public final Action FORWARD = new SystemAction(this, new Action(){
+	public final Action FORWARD = new SystemAction(new Action(){
 		@Override
 		public void execute() {forward();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action BACKWARD = new SystemAction(this, new Action(){
+	}, this);
+	public final Action BACKWARD = new SystemAction(new Action(){
 		@Override
 		public void execute() {backward();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action RIGHT = new SystemAction(this, new Action(){
+	}, this);
+	public final Action RIGHT = new SystemAction(new Action(){
 		@Override
 		public void execute() {right();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action LEFT = new SystemAction(this, new Action(){
+	}, this);
+	public final Action LEFT = new SystemAction(new Action(){
 		@Override
 		public void execute() {left();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action ROTATE_RIGHT = new SystemAction(this, new Action(){
+	}, this);
+	public final Action ROTATE_RIGHT = new SystemAction(new Action(){
 		@Override
 		public void execute() {rotateRight();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action ROTATE_LEFT = new SystemAction(this, new Action(){
+	}, this);
+	public final Action ROTATE_LEFT = new SystemAction(new Action(){
 		@Override
 		public void execute() {rotateLeft();}
 		@Override
 		public void end() { stop();}
-	});
-	public final Action STOP = new SystemAction(this, new Action(){
+	}, this);
+	public final Action STOP = new SystemAction(new InstantAction(){
 		@Override
-		public void initialize() { stop();}
-		@Override
-		public void execute() {}
+		public void execute() {stop();}
 		@Override
 		public void end() {}
-		@Override
-		public boolean isFinished() {return true;}
-	});
+	}, this);
 	
 	private FlashSpeedController right_controllers;
 	private FlashSpeedController left_controllers;

@@ -17,26 +17,26 @@ public class DualPneumaticSystem extends System {
 		Forward, Backward, Off
 	}
 	
-	public final Action FORWARD_ACTION = new SystemAction(this, new InstantAction(){
+	public final Action FORWARD_ACTION = new SystemAction(new InstantAction(){
 		@Override
 		protected void execute() {forward();}
-	});
-	public final Action BACKWARD_ACTION = new SystemAction(this, new InstantAction(){
+	}, this);
+	public final Action BACKWARD_ACTION = new SystemAction(new InstantAction(){
 		@Override
 		public void execute() {backward();}
-	});
-	public final Action OFF_ACTION = new SystemAction(this, new InstantAction(){
+	}, this);
+	public final Action OFF_ACTION = new SystemAction(new InstantAction(){
 		@Override
 		public void execute() {off();}
-	});
-	public final Action SWITCH_ACTION = new SystemAction(this, new InstantAction(){
+	}, this);
+	public final Action SWITCH_ACTION = new SystemAction(new InstantAction(){
 		@Override
 		public void execute() {
 			if(open)
 				backward();
 			else forward();
 		}
-	});
+	}, this);
 	
 	private DoubleSolenoid solenoid_1, solenoid_2;
 	private State state = State.Off;

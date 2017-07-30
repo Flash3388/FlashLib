@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.sbc;
 
+import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RobotState;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
@@ -42,8 +42,7 @@ public abstract class IterativeSbc extends SbcBot{
 			if(isDisabled())
 				disabledPeriodic();
 			else {
-				if(Scheduler.schedulerHasInstance())
-					Scheduler.runScheduler();
+				RobotFactory.runScheduler();
 				statePeriodic(state);
 			}
 			

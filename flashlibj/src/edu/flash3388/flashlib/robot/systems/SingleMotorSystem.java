@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
@@ -16,28 +17,24 @@ import edu.flash3388.flashlib.robot.System;
  */
 public class SingleMotorSystem extends System implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable, ModableMotor{
 	
-	public final Action FORWARD_ACTION = new SystemAction(this, new Action(){
+	public final Action FORWARD_ACTION = new SystemAction(new Action(){
 		@Override
 		protected void execute() {forward();}
 		@Override
 		protected void end() {stop();}
-	});
-	public final Action BACKWARD_ACTION = new SystemAction(this, new Action(){
+	}, this);
+	public final Action BACKWARD_ACTION = new SystemAction(new Action(){
 		@Override
 		protected void execute() {backward();}
 		@Override
 		protected void end() { stop();}
-	});
-	public final Action STOP_ACTION = new SystemAction(this, new Action(){
+	}, this);
+	public final Action STOP_ACTION = new SystemAction(new InstantAction(){
 		@Override
-		protected void initialize(){ stop();}
+		protected void execute() { stop();}
 		@Override
-		protected void execute() { }
-		@Override 
-		protected boolean isFinished() {return true;}
-		@Override
-		protected void end() { stop();}
-	});
+		protected void end() {}
+	}, this);
 	
 	private FlashSpeedController controller;
 	private double default_speed_forward = 0.5, default_speed_backward = 0.5;

@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.rio;
 
+import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ScheduledTask;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -104,8 +104,8 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 	 */
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
-		if(Scheduler.schedulerHasInstance() && auto)
-			Scheduler.getInstance().addTask(this);
+		if(RobotFactory.hasSchedulerInstance() && auto)
+			RobotFactory.getScheduler().addTask(this);
 		else if(auto) return false;
 		return true;
 	}

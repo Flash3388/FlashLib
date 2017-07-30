@@ -15,7 +15,7 @@ public abstract class System{
 	private String name = null;
 	
 	protected System(String name){
-		Scheduler.getInstance().registerSystem(this);
+		RobotFactory.getScheduler().registerSystem(this);
 		this.name = name;
 	}
 	

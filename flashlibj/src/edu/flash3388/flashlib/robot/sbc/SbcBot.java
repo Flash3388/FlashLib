@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
-import static edu.flash3388.flashlib.robot.Scheduler.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -183,9 +181,8 @@ public abstract class SbcBot {
 				FlashUtil.delay(5);
 			}
 		}
-		if(schedulerHasInstance()){
-			disableScheduler(true);
-			Scheduler.getInstance().removeAllActions();
+		if(RobotFactory.hasSchedulerInstance()){
+			RobotFactory.disableScheduler(true);
 		}
 		if(communications != null){
 			log.log("Closing communications...");

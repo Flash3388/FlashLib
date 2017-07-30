@@ -37,6 +37,19 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		this.distanceHeight.set(distanceHeight);
 	}
 	
+	public DoubleProperty targetWidthProperty(){
+		return targetWidth;
+	}
+	public DoubleProperty targetHeightProperty(){
+		return targetHeight;
+	}
+	public DoubleProperty camFovProperty(){
+		return camFov;
+	}
+	public BooleanProperty distanceHeightProperty(){
+		return distanceHeight;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

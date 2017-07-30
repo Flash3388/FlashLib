@@ -272,6 +272,6 @@ public class Button implements ButtonListener, BooleanSource{
 	}
 	
 	public void refresh(){
-		set(RobotFactory.getStickButton(getJoystick(), (byte)getNumber()));
+		set(RobotFactory.getHidInterface().getHIDButton(stick, number));
 	}
 }

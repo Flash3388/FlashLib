@@ -1,9 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
 /**
  * Represents a slider on the Flashboard.
@@ -13,19 +12,19 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  */
 public class DashboardSlider extends Sendable{
 	
-	private DoubleSource source;
+	private DoubleProperty valData;
 	private double max, min, lastValue;
 	private int ticks;
 	private boolean changed = false;
 	private byte[] data = new byte[20];
 	
-	public DashboardSlider(String name, double min, double max, int ticks) {
+	public DashboardSlider(String name, DoubleProperty data, double min, double max, int ticks) {
 		super(name, FlashboardSendableType.SLIDER);
 		this.ticks = ticks;
 		this.max = max;
 		this.min = min;
+		this.valData = data;
 		changed = true;
-		source = ConstantsHandler.getNumber(getName(), min);
 	}
 
 	public int getTicks(){
@@ -50,11 +49,15 @@ public class DashboardSlider extends Sendable{
 		changed = true;
 	}
 	
+	public DoubleProperty valueProperty(){
+		return valData;
+	}
+	
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 8) return;
 		double value = FlashUtil.toDouble(data);
-		ConstantsHandler.putNumber(getName(), value);
+		valData.set(value);
 		lastValue = value;
 	}
 	@Override
@@ -66,18 +69,18 @@ public class DashboardSlider extends Sendable{
 			FlashUtil.fillByteArray(getTicks(), 16, data);
 			return data;
 		}else{
-			lastValue = source.get();
+			lastValue = valData.get();
 			return FlashUtil.toByteArray(lastValue);
 		}
 	}
 	@Override
 	public boolean hasChanged() {
-		return changed || source.get() != lastValue;
+		return changed || valData.get() != lastValue;
 	}
 	@Override
 	public void onConnection() {
 		changed = true;
-		lastValue = source.get() - 1;
+		lastValue = valData.get() - 1;
 	}
 	@Override
 	public void onConnectionLost() {

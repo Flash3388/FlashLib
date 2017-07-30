@@ -46,10 +46,7 @@ public class FlashRoboUtil {
 		
 		FlashUtil.getLog().logTime("!EMERGENCY STOP!");
 		
-		if(Scheduler.schedulerHasInstance()){
-			Scheduler.disableScheduler(true);
-			Scheduler.getInstance().removeAllActions();
-		}
+		RobotFactory.disableScheduler(true);
 		if(RobotFactory.isSbcImpl())
 			MotorSafetyHelper.disableAll();
 		
@@ -64,8 +61,8 @@ public class FlashRoboUtil {
 		
 		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED");
 		
-		if(Scheduler.schedulerHasInstance()){
-			Scheduler.disableScheduler(false);
+		if(RobotFactory.hasSchedulerInstance()){
+			RobotFactory.getScheduler().setDisabled(true);
 		}
 		if(RobotFactory.isSbcImpl())
 			MotorSafetyHelper.enableAll();
@@ -185,7 +182,7 @@ public class FlashRoboUtil {
 						      new SendableLog(FlashUtil.getLog()));
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
-			Scheduler.init();
+			RobotFactory.getScheduler().setDisabled(false);
 		}
 		
 		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - " +

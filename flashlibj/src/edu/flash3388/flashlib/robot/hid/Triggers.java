@@ -47,7 +47,7 @@ public class Triggers{
 		 * @return the value of the trigger
 		 */
 		public double getValue(){
-			return RobotFactory.getStickAxis(getJoystick(), getNumber());
+			return RobotFactory.getHidInterface().getHIDAxis(getJoystick(), getNumber());
 		}
 		/**
 		 * Gets the sensitivity of the axis. When exceeded, the button is considered pushed.

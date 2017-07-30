@@ -92,7 +92,7 @@ public abstract class Action {
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && Scheduler.schedulerHasInstance() && Scheduler.getInstance().add(this)){
+		if(!running && RobotFactory.hasSchedulerInstance() && RobotFactory.getScheduler().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;

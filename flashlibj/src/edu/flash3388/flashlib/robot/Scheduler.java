@@ -12,7 +12,6 @@ import java.util.Vector;
  * 
  * <p>
  * To run the scheduler, it is necessary to manually call {@link #run()}.
- * To initialize the scheduler, call {@link #init()}.
  * </p>
  * 
  * @author Tom Tzook
@@ -65,15 +64,11 @@ public final class Scheduler {
 		}
 	}
 	
-	private static Scheduler instance;
-	
 	private boolean disabled = false;
 	
 	private Vector<Action> actions = new Vector<Action>();
 	private Vector<System> systems = new Vector<System>();
 	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
-	
-	private Scheduler(){}
 	
 	/**
 	 * Runs the scheduler. 
@@ -211,44 +206,5 @@ public final class Scheduler {
 	 */
 	public boolean isDisabled(){
 		return disabled;
-	}
-	
-	/**
-	 * If the scheduler has an instance, the given value is passed to {@link #setDisabled(boolean)}.
-	 * 
-	 * @param disable true to disable, false to enable
-	 */
-	public static void disableScheduler(boolean disable){
-		if(!schedulerHasInstance()) return;
-		getInstance().removeAllActions();
-		getInstance().setDisabled(disable);
-	}
-	/**
-	 * If the scheduler has an instance, the {@link #run()} method is called.
-	 */
-	public static void runScheduler(){
-		if(!schedulerHasInstance()) return;
-		getInstance().run();
-	}
-	/**
-	 * Gets whether or not the scheduler has an instance.
-	 * @return true if the scheduler has an instance, false otherwise
-	 */
-	public static boolean schedulerHasInstance(){
-		return instance != null;
-	}
-	/**
-	 * Gets the instance of the scheduler. 
-	 * @return the instance of the scheduler, null if the scheduler was not initialized
-	 */
-	public static Scheduler getInstance(){
-		return instance;
-	}
-	/**
-	 * Initializes the scheduler, if it was not initialized.
-	 */
-	public static void init(){
-		if(instance == null)
-			instance = new Scheduler();
 	}
 }

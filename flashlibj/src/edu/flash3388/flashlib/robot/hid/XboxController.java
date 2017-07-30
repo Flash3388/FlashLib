@@ -60,7 +60,7 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 		LeftStick = new Stick(channel, 0, 1);
 		RightStick = new Stick(channel, 4, 5);
 		
-		DPad = new DPad(channel);
+		DPad = new DPad(channel, 0);
 		Triggers = new Triggers(channel, 2, 3);
 		
 		for(int i = 0; i < buttons.length; i++)
@@ -110,14 +110,14 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getStickAxis(channel, axis);
+		return RobotFactory.getHidInterface().getHIDAxis(channel, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getStickButton(channel, (byte)button);
+		return RobotFactory.getHidInterface().getHIDButton(channel, button);
 	}
 	/**
 	 * {@inheritDoc}
