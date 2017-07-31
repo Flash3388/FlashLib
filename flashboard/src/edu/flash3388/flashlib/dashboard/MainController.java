@@ -74,7 +74,8 @@ public class MainController implements Initializable{
 					controller.resetDisplay();
 					PDPWindow.reset();
 					PDP.resetBoards();
-					TesterWindow.reset();
+					TesterWindow.closeTester();
+					PidTunerWindow.reset();
 					FlashboardTester.resetTesters();
 					DashboardPidTuner.resetTuners();
 				}

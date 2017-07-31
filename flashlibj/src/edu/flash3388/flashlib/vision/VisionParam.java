@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.Property;
 
 /**
  * VisionParam is a parameter used by filters and analysis creators to define their operation.
@@ -252,6 +252,7 @@ public abstract class VisionParam {
 	 * @param param the param to set data from
 	 * @param instance instance of the class containing the property to use
 	 */
+	@SuppressWarnings("unchecked")
 	public static void setValueForMethod(Method method, VisionParam param, Object instance){
 		Class<?> retType = method.getReturnType();
 		if(retType == null)
@@ -274,8 +275,8 @@ public abstract class VisionParam {
 		else if(FlashUtil.isAssignable(retType, IntegerProperty.class) && param instanceof IntParam){
 			((IntegerProperty)obj).set(getIntValue(param));
 		}
-		else if(FlashUtil.isAssignable(retType, StringProperty.class) && param instanceof StringParam){
-			((StringProperty)obj).set(getStringValue(param));
+		else if(FlashUtil.isAssignable(retType, Property.class) && param instanceof StringParam){
+			((Property<String>)obj).setValue(getStringValue(param));
 		}
 	}
 	/**
@@ -286,6 +287,7 @@ public abstract class VisionParam {
 	 * @param name name of the property
 	 * @return a new vision parameter with the data from the method, or null if unable to get data
 	 */
+	@SuppressWarnings("unchecked")
 	public static VisionParam getValueFromMethod(Method method, Object instance, String name){
 		Class<?> retType = method.getReturnType();
 		if(retType == null)
@@ -311,8 +313,8 @@ public abstract class VisionParam {
 			int val = ((IntegerProperty)obj).get();
 			return new IntParam(name, val);
 		}
-		else if(FlashUtil.isAssignable(retType, StringProperty.class)){
-			String val = ((StringProperty)obj).get();
+		else if(FlashUtil.isAssignable(retType, Property.class)){
+			String val = ((Property<String>)obj).getValue();
 			return new StringParam(name, val);
 		}
 		
@@ -320,7 +322,7 @@ public abstract class VisionParam {
 	}
 	/**
 	 * Gets the parameters of a creator by searching for methods which end with the name "Property" and
-	 * return a type of bean (DoubleProperty, IntegerProperty, StringProperty, BooleanProperty).
+	 * return a type of bean (DoubleProperty, IntegerProperty, Property, BooleanProperty).
 	 * @param object object to get parameters for.
 	 *
 	 * @return an array of parameters.

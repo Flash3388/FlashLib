@@ -16,7 +16,7 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
 /**
@@ -276,7 +276,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringInput putInputField(String name, StringProperty prop){
+	public static DashboardStringInput putInputField(String name, Property<String> prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
@@ -362,7 +362,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringProperty putData(String name, StringProperty prop){
+	public static DashboardStringProperty putData(String name, Property<String> prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){

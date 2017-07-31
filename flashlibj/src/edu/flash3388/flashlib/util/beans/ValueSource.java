@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.util.beans;
 
 @FunctionalInterface
-public interface ObjectSource<T> {
+public interface ValueSource<T> {
 	
-	T get();
+	T getValue();
 }

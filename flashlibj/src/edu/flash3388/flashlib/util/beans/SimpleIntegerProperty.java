@@ -25,4 +25,12 @@ public class SimpleIntegerProperty implements IntegerProperty{
 	public void set(int i) {
 		this.var = i;
 	}
+	@Override
+	public void setValue(Integer o) {
+		set(o == null? 0 : o.intValue());
+	}
+	@Override
+	public Integer getValue() {
+		return var;
+	}
 }

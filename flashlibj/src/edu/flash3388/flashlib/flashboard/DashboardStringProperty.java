@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.util.beans.StringSource;
+import edu.flash3388.flashlib.util.beans.ValueSource;
 
 /**
  * Represents a label for string values on the Flashboard.
@@ -13,18 +13,18 @@ public class DashboardStringProperty extends Sendable{
 	
 	private String lastValue = "", value = "";
 	private boolean changed = false;
-	private StringSource src;
+	private ValueSource<String> src;
 	
-	public DashboardStringProperty(String name, StringSource data) {
+	public DashboardStringProperty(String name, ValueSource<String> data) {
 		super(name, FlashboardSendableType.STRING);
 		src = data;
 	}
 
-	public void set(StringSource src){
-		lastValue = src.get();
+	public void set(ValueSource<String> src){
+		lastValue = src.getValue();
 		this.src = src;
 	}
-	public StringSource get(){
+	public ValueSource<String> get(){
 		return src;
 	}
 	
@@ -39,7 +39,7 @@ public class DashboardStringProperty extends Sendable{
 	@Override
 	public boolean hasChanged() {
 		if(src == null) return false;
-		value = src.get();
+		value = src.getValue();
 		return changed || !(value.equals(lastValue));
 	}
 	@Override
