@@ -25,4 +25,12 @@ public class SimpleDoubleProperty implements DoubleProperty{
 	public double get(){
 		return var;
 	}
+	@Override
+	public void setValue(Double o) {
+		set(o == null? 0.0 : o.doubleValue());
+	}
+	@Override
+	public Double getValue() {
+		return var;
+	}
 }

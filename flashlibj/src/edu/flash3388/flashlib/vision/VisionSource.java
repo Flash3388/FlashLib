@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.vision;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.flash3388.flashlib.util.beans.ObjectSource;
+import edu.flash3388.flashlib.util.beans.ValueSource;
 
 /**
  * Vision source provides a base for vision operations. To use a library for vision processing, it needs to implement this
@@ -210,7 +210,7 @@ public interface VisionSource {
 	 * @param method the method of template matching. Options vary between implementations
 	 * @param scaleFactor the resize factor
 	 */
-	void matchTemplate(ObjectSource<Object> img, int method, int scaleFactor);
+	void matchTemplate(ValueSource<Object> img, int method, int scaleFactor);
 	
 	/**
 	 * Loads an image and wraps it in a reference to the image type used by the implementation.
@@ -218,7 +218,7 @@ public interface VisionSource {
 	 * @param imgPath path to the image
 	 * @return the loaded image, or null if unable to load
 	 */
-	ObjectSource<Object> loadImage(String imgPath);
+	ValueSource<Object> loadImage(String imgPath);
 }
 
 /*

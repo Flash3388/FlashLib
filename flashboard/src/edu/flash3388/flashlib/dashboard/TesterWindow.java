@@ -99,13 +99,11 @@ public class TesterWindow extends Stage{
 		instance = new TesterWindow();
 		instance.show();
 	}
-	public static void reset(){
+	public static void closeTester(){
 		if(instance != null){
-			instance.keysBox.getItems().clear();
-			instance.keysBox.getItems().add("-- Choose Tester --");
-			instance.keysBox.getSelectionModel().select(0);
 			if(instance.tester != null)
 				instance.tester.enable(false);
+			instance.close();
 		}
 	}
 }

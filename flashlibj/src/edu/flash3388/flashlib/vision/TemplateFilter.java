@@ -1,10 +1,10 @@
 package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.ObjectSource;
+import edu.flash3388.flashlib.util.beans.Property;
+import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.SimpleProperty;
 
 /**
  * Filters for a part of the image which matches a given template.
@@ -14,14 +14,14 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  */
 public class TemplateFilter extends VisionFilter{
 
-	private ObjectSource<Object> img;
+	private ValueSource<Object> img;
 	private IntegerProperty scaleFactor = new SimpleIntegerProperty();
 	private IntegerProperty method = new SimpleIntegerProperty();
-	private StringProperty imgPath = new SimpleStringProperty();
+	private Property<String> imgPath = new SimpleProperty<String>();
 	
 	public TemplateFilter(){}
 	public TemplateFilter(String imgPath, int method, int scaleFactor){
-		this.imgPath.set(imgPath);
+		this.imgPath.setValue(imgPath);
 		this.scaleFactor.set(scaleFactor);
 		this.method.set(method);
 	}
@@ -32,14 +32,14 @@ public class TemplateFilter extends VisionFilter{
 	public IntegerProperty methodProperty(){
 		return method;
 	}
-	public StringProperty imagePathProperty(){
+	public Property<String> imagePathProperty(){
 		return imgPath;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
 		if(img == null)
-			img = source.loadImage(imgPath.get());
+			img = source.loadImage(imgPath.getValue());
 		source.matchTemplate(img, method.get(), scaleFactor.get());
 	}
 }

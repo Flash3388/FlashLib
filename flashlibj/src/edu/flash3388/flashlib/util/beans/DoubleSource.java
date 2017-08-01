@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.util.beans;
  * @since FlashLib 1.0.0
  */
 @FunctionalInterface
-public interface DoubleSource {
+public interface DoubleSource{
 	
 	/**
 	 * Gets the value. Implementation is user dependent.

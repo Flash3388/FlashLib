@@ -541,13 +541,12 @@ public class PidTunerWindow extends Stage{
 	}
 	public static void reset(){
 		if(instance != null){
-			instance.keysBox.getItems().clear();
-			instance.keysBox.getItems().add("-- Choose Tuner --");
-			instance.keysBox.getSelectionModel().select(0);
 			if(instance.tuner != null){
 				instance.tuner.setUpdate(false);
 				instance.tuner = null;
 			}
+			instance.close();
+			instance = null;
 		}
 	}
 }

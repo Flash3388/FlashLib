@@ -9,8 +9,8 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import edu.flash3388.flashlib.util.beans.ObjectSource;
-import edu.flash3388.flashlib.util.beans.SimpleObjectProperty;
+import edu.flash3388.flashlib.util.beans.SimpleProperty;
+import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
 import edu.flash3388.flashlib.vision.VisionSource;
@@ -296,8 +296,8 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void matchTemplate(ObjectSource<Object> templateImg, int method, int scaleFactor) {
-		Object imgData = templateImg.get();
+	public void matchTemplate(ValueSource<Object> templateImg, int method, int scaleFactor) {
+		Object imgData = templateImg.getValue();
 		if(imgData == null)
 			throw new NullPointerException("template image cannot be null");
 		if(!(imgData instanceof Mat))
@@ -325,10 +325,10 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ObjectSource<Object> loadImage(String imgPath) {
+	public ValueSource<Object> loadImage(String imgPath) {
 		Mat mat = Imgcodecs.imread(imgPath);
 		if(mat == null)
 			return null;
-		return new SimpleObjectProperty<Object>(mat);
+		return new SimpleProperty<Object>(mat);
 	}
 }

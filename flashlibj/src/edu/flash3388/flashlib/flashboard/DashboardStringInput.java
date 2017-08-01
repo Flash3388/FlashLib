@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.Property;
 
 /**
  * Represents an input for string values on the Flashboard. 
@@ -14,25 +14,25 @@ public class DashboardStringInput extends Sendable{
 	private InputType type;
 	private boolean updateType = false;
 	private String lastValue, value;
-	private StringProperty property;
+	private Property<String> property;
 	
-	public DashboardStringInput(String name, StringProperty property, InputType type) {
+	public DashboardStringInput(String name, Property<String> property, InputType type) {
 		super(name, FlashboardSendableType.INPUT);
 		this.type = type;
 		this.property = property;
 	}
 	
-	public StringProperty valueProperty(){
+	public Property<String> valueProperty(){
 		return property;
 	}
-	protected void setProperty(StringProperty property){
+	protected void setProperty(Property<String> property){
 		this.property = property;
 	}
 	
 	@Override
 	public void newData(byte[] data) {
 		String str = new String(data);
-		property.set(str);
+		property.setValue(str);
 	}
 	@Override
 	public byte[] dataForTransmition() {
@@ -49,7 +49,7 @@ public class DashboardStringInput extends Sendable{
 	@Override
 	public boolean hasChanged() {
 		if(updateType) return true;
-		value = property.get();
+		value = property.getValue();
 		return !value.equals(lastValue);
 	}
 	@Override

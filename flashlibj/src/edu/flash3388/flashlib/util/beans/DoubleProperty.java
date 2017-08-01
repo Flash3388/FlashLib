@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public interface DoubleProperty extends DoubleSource{
+public interface DoubleProperty extends Property<Double>, DoubleSource{
 
 	/**
 	 * Sets the value of the bean. Implementation is user dependent.

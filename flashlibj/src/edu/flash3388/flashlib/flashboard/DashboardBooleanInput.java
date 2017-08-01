@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.Property;
 
 /**
  * Represents input for boolean values on the flashboard.
@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class DashboardBooleanInput extends DashboardStringInput implements StringProperty{
+public class DashboardBooleanInput extends DashboardStringInput implements Property<String>{
 
 	private BooleanProperty property;
 	
@@ -25,11 +25,11 @@ public class DashboardBooleanInput extends DashboardStringInput implements Strin
 	}
 	
 	@Override
-	public String get() {
+	public String getValue() {
 		return String.valueOf(property.get());
 	}
 	@Override
-	public void set(String s) {
+	public void setValue(String s) {
 		property.set(FlashUtil.toBoolean(s, property.get()));
 	}
 }
