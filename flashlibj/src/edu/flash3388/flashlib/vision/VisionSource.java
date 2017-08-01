@@ -206,11 +206,11 @@ public interface VisionSource {
 	 * image now contains the part of the image where the template was best matched. To work on every size, the template
 	 * size is changed until the match is the best possible. 
 	 * 
-	 * @param img a reference to the template image contained in a source object. The image type must correlate to the implementation used.
+	 * @param imgs a reference to the template image contained in a source object. The image type must correlate to the implementation used.
 	 * @param method the method of template matching. Options vary between implementations
 	 * @param scaleFactor the resize factor
 	 */
-	void matchTemplate(ValueSource<Object> img, int method, int scaleFactor);
+	void matchTemplate(ValueSource<Object>[] imgs, int method, int scaleFactor);
 	
 	/**
 	 * Loads an image and wraps it in a reference to the image type used by the implementation.

@@ -14,14 +14,14 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
  */
 public class TemplateFilter extends VisionFilter{
 
-	private ValueSource<Object> img;
+	private ValueSource<Object>[] imgs;
 	private IntegerProperty scaleFactor = new SimpleIntegerProperty();
 	private IntegerProperty method = new SimpleIntegerProperty();
-	private Property<String> imgPath = new SimpleProperty<String>();
+	private Property<String> imgDirPath = new SimpleProperty<String>();
 	
 	public TemplateFilter(){}
-	public TemplateFilter(String imgPath, int method, int scaleFactor){
-		this.imgPath.setValue(imgPath);
+	public TemplateFilter(String imgDirPath, int method, int scaleFactor){
+		this.imgDirPath.setValue(imgDirPath);
 		this.scaleFactor.set(scaleFactor);
 		this.method.set(method);
 	}
@@ -32,14 +32,15 @@ public class TemplateFilter extends VisionFilter{
 	public IntegerProperty methodProperty(){
 		return method;
 	}
-	public Property<String> imagePathProperty(){
-		return imgPath;
+	public Property<String> imageDirectoryPathProperty(){
+		return imgDirPath;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(img == null)
-			img = source.loadImage(imgPath.getValue());
-		source.matchTemplate(img, method.get(), scaleFactor.get());
+		if(imgs == null){
+			
+		}
+		//source.matchTemplate(method.get(), scaleFactor.get(), imgs);
 	}
 }

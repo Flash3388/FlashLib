@@ -19,17 +19,21 @@ public class CvTemplateMatcher {
 	public static enum Method {SQDIFF,SQDIFF_NORMED,TM_CCORR,TM_CCORR_NORMED,TM_COEFF,TM_COEFF_NORMED};
 	
 	private Method method;
-	private Mat template;
+	private Mat templates[];
 	
 	public CvTemplateMatcher(Mat templ,Method m) {
-		method = m;
-		this.template= templ;
+		this(new Mat[]{templ},m);
 	}
-	public MatchResult match(Mat scene,int resizeFactor){
-		return match(scene,template,method,resizeFactor);
+
+	public CvTemplateMatcher(Mat[] templ,Method m) {
+		method = m;
+		this.templates= templ;
+	}
+	public MatchResult match(Mat scene,double scaleFactor){
+		return match(scene,templates,method,scaleFactor);
 	}
 	
-	public static MatchResult match(Mat scene, Mat[] templs, Method method, int scaleFactor){
+	public static MatchResult match(Mat scene, Mat[] templs, Method method, double scaleFactor){
 			
 		MatchRunner[] t = new MatchRunner[templs.length];
 		ExecutorService sr = Executors.newFixedThreadPool(templs.length);
@@ -40,39 +44,37 @@ public class CvTemplateMatcher {
 			
 		}
 		try {
+			sr.shutdown();
 			sr.awaitTermination(1, TimeUnit.DAYS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		sr.shutdownNow();
 		
-		 MatchResult best = null;
-		for(MatchRunner match : t){
-			if(best == null || best.maxVal < match.result.maxVal )
-			{
-				best = match.result;
-			}
-			if(best != null){
-				
-				Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(50,203,122));
-				Imgcodecs.imwrite("test.png", scene);
-			}
+		MatchResult best = findBestMatch(t);
+		if(best != null){
+			
+			Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(50,203,122));
+			Imgcodecs.imwrite("test.png", scene);
 		}
+		return best;
 	}
 	
-	
-	
-	public static MatchResult match(Mat scene, Mat templ, Method method, int scaleFactor){
-		return match(scene, new Mat[]{templ}, method, scaleFactor);
+	private static MatchResult findBestMatch(MatchRunner[] matches) {
+		MatchResult best = null;
+		for(MatchRunner match : matches){
+			if(best == null || best.maxVal < match.result.maxVal )
+				best = match.result;
+		}
+		return best;
 	}
 	
 	public static class MatchResult{
 		public Point center;
-		public int scaleFactor;
+		public double scaleFactor;
 		public double maxVal;
 		
-		public MatchResult(Point center,int scaleFactor,double maxVal) {
+		public MatchResult(Point center,double scaleFactor,double maxVal) {
 			this.center = center;
 			this.scaleFactor = scaleFactor;
 			this.maxVal = maxVal;
@@ -84,10 +86,10 @@ public class CvTemplateMatcher {
 		private Mat scene;
 		private Mat templ;
 		private Method method;
-		private int scaleFactor;
+		private double scaleFactor;
 		public MatchResult result;
 		
-		public MatchRunner(Mat scene, Mat templ, Method method, int scaleFactor)
+		public MatchRunner(Mat scene, Mat templ, Method method, double scaleFactor)
 		{
 			this.scene = scene;
 			this.templ = templ;
@@ -100,10 +102,10 @@ public class CvTemplateMatcher {
 			result = match(scene, templ, method, scaleFactor);
 			
 		}
-		public MatchResult match(Mat scene, Mat templ, Method method, int scaleFactor){
+		public MatchResult match(Mat scene, Mat templ, Method method, double scaleFactor){
 			int tw = templ.width();
 			int th = templ.height();
-			int currScaleFactor = scaleFactor;
+			double currScaleFactor = scaleFactor;
 			MatchResult bestScore = null;
 			
 			for(Mat img = scene.clone(); img.width() > tw && img.height() > th;

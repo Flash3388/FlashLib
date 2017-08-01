@@ -761,8 +761,8 @@ public class CvProcessing {
 	 * @param img the image to resize
 	 * @param scaleFactor the size factor in pixels
 	 */
-	public static void resize(Mat img, int scaleFactor){
-		Imgproc.resize(img, img, new Size(img.width() + scaleFactor, img.height() + scaleFactor));
+	public static void resize(Mat img, double scaleFactor){
+		Imgproc.resize(img, img, new Size(0,0),scaleFactor,scaleFactor,Imgproc.INTER_CUBIC);		
 	}
 	/**
 	 * Searches for a given template in a given image and returns the best part of the image which matches the result.
@@ -774,6 +774,10 @@ public class CvProcessing {
 	 * @return a result of the match
 	 */
 	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ, Method method, int scaleFactor){
+		return matchTemplate(scene, new Mat[]{templ}, method, scaleFactor);
+	}
+	
+	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ[], Method method, int scaleFactor){
 		return CvTemplateMatcher.match(scene, templ, method, scaleFactor);
 	}
 }

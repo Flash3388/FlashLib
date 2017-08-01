@@ -296,8 +296,8 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void matchTemplate(ValueSource<Object> templateImg, int method, int scaleFactor) {
-		Object imgData = templateImg.getValue();
+	public void matchTemplate(ValueSource<Object>[] templateImgs, int method, int scaleFactor) {
+		Object imgData = null;//templateImg.getValue();
 		if(imgData == null)
 			throw new NullPointerException("template image cannot be null");
 		if(!(imgData instanceof Mat))
