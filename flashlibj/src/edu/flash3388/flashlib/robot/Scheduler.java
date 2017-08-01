@@ -76,25 +76,31 @@ public final class Scheduler {
 	public void run(){
 		if(disabled) return;
 		
-		TaskWrapper taskWrapper = null;
-		for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
-			taskWrapper = taskEnum.nextElement();
-			if(!taskWrapper.run() || taskWrapper.removeOnFinish)
-				tasks.remove(taskWrapper);
+		if(tasks.size() > 0){
+			TaskWrapper taskWrapper = null;
+			for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
+				taskWrapper = taskEnum.nextElement();
+				if(!taskWrapper.run() || taskWrapper.removeOnFinish)
+					tasks.remove(taskWrapper);
+			}
 		}
 		
-		Action action = null;
-		for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
-			action = actionEnum.nextElement();
-			if(!action.run())
-				remove(action);
+		if(actions.size() > 0){
+			Action action = null;
+			for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
+				action = actionEnum.nextElement();
+				if(!action.run())
+					remove(action);
+			}
 		}
 		
-		System system = null;
-		for(Enumeration<System> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
-			system = systemEnum.nextElement();
-			if(!system.hasCurrentAction() && !RobotState.isRobotDisabled())
-				system.startDefaultAction();
+		if(systems.size() > 0){
+			System system = null;
+			for(Enumeration<System> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
+				system = systemEnum.nextElement();
+				if(!system.hasCurrentAction() && !RobotState.isRobotDisabled())
+					system.startDefaultAction();
+			}
 		}
 	}
 	

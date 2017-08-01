@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.RobotState;
+import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -18,28 +18,73 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  */
 public class Button implements ButtonListener, BooleanSource{
 	
-	protected static class ButtonCommand{
-		public final ActivateType type;
-		private Action action;
-		
-		public ButtonCommand(Action c, ActivateType t){
-			action = c;
-			type = t;
-		}
-		
-		public boolean isRunning(){
-			return action.isRunning();
-		}
-		public void start(){
-			if(action != null) action.start();
-		}
-		public void cancel(){
-			if(action != null) action.cancel();
-		}
-	}
 	protected static enum ActivateType {
 		Press, Hold, Release
 	}
+	private static abstract class ButtonCommand{
+		final ActivateType type;
+		
+		ButtonCommand(ActivateType t){
+			type = t;
+		}
+		
+		abstract boolean isRunning();
+		abstract void start();
+		abstract void cancel();
+	}
+	private static class ButtonAction extends ButtonCommand{
+
+		final Action action;
+		
+		ButtonAction(ActivateType t, Action action) {
+			super(t);
+			this.action = action;
+		}
+
+		@Override
+		boolean isRunning() {
+			return action.isRunning();
+		}
+		@Override
+		void start() {
+			action.start();
+		}
+		@Override
+		void cancel() {
+			action.cancel();
+		}
+	}
+	private static class ButtonTask extends ButtonCommand{
+
+		final ScheduledTask task;
+		private boolean running = false;
+		
+		ButtonTask(ActivateType t, ScheduledTask task) {
+			super(t);
+			this.task = task;
+		}
+
+		@Override
+		boolean isRunning() {
+			return running;
+		}
+		@Override
+		void start() {
+			if(!running){
+				RobotFactory.getScheduler().addTask(task);
+				running = true;
+			}
+		}
+		@Override
+		void cancel() {
+			if(running){
+				RobotFactory.getScheduler().remove(task);
+				running = false;
+			}
+		}
+	}
+
+	private static final int MAX_MILLIS_PRESS = 500;
 	
 	private boolean current = false, last = false, changedDown = false, changedUp = false;
 	private String name;
@@ -83,28 +128,28 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @return True if the button has changed down.
 	 */
-	public synchronized boolean changedDown() { return changedDown;}
+	public final boolean changedDown() { return changedDown;}
 	
 	/**
 	 * Gets if the button state was changed and is now released.
 	 * 
 	 * @return True if the button has changed up.
 	 */
-	public synchronized boolean changedUp() { return changedUp;}
+	public final boolean changedUp() { return changedUp;}
 	
 	/**
 	 * Gets if the button is now held.
 	 * 
 	 * @return True if the button is held down.
 	 */
-	public synchronized boolean isHeld() { return current && last;}
+	public final boolean isHeld() { return current && last;}
 	
 	/**
 	 * Gets if the button state was changed in any way (up or down).
 	 * 
 	 * @return True if the button state was changed.
 	 */
-	public synchronized boolean hasChanged() { return changedDown || changedUp;}
+	public final boolean hasChanged() { return changedDown || changedUp;}
 	
 	/**
 	 * Gets the name representing the button. Either auto-generated or manually given.
@@ -118,27 +163,27 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @return An instance of Joystick.
 	 */
-	public int getJoystick() {return stick;}
+	public final int getJoystick() {return stick;}
 	
 	/**
 	 * Gets the number of the button on its joystick.
 	 * 
 	 * @return An Integer representing the number of the button on its joystick.
 	 */
-	public int getNumber() {return number;}
+	public final int getNumber() {return number;}
 	
 	/**
 	 * Gets whether the button is pressed currently
 	 * @return True if the button is pressed currently.
 	 */
-	public synchronized boolean get(){ return current;}
+	public final boolean get(){ return current;}
 	
 	/**
 	 * Add an event listener to listen to button events. 
 	 * 
 	 * @param listener An instance of an object implementing ButtonHold.
 	 */
-	public void addListener(ButtonListener listener){ 
+	public final void addListener(ButtonListener listener){ 
 		listeners.add(listener);
 	}
 	
@@ -147,12 +192,12 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @param c The Command/Action to activate on press.
 	 */
-	public void whenPressed(Action c){
-		commands.add(new ButtonCommand(c, ActivateType.Press));
+	public final void whenPressed(Action c){
+		commands.add(new ButtonAction(ActivateType.Press, c));
 	}
-	public void whenPressed(Action... actions){
+	public final void whenPressed(Action... actions){
 		for(Action a : actions)
-			commands.add(new ButtonCommand(a, ActivateType.Press));
+			commands.add(new ButtonAction(ActivateType.Press, a));
 	}
 	
 	/**
@@ -161,11 +206,11 @@ public class Button implements ButtonListener, BooleanSource{
 	 * @param c The Command/Action to activate on hold.
 	 */
 	public void whileHeld(Action c){
-		commands.add(new ButtonCommand(c, ActivateType.Hold));
+		commands.add(new ButtonAction(ActivateType.Hold, c));
 	}
 	public void whileHeld(Action... actions){
 		for(Action a : actions)
-			commands.add(new ButtonCommand(a, ActivateType.Hold));
+			commands.add(new ButtonAction(ActivateType.Hold, a));
 	}
 	
 	/**
@@ -174,14 +219,53 @@ public class Button implements ButtonListener, BooleanSource{
 	 * @param c The Command/Action to activate on release.
 	 */
 	public void whenReleased(Action c){
-		commands.add(new ButtonCommand(c, ActivateType.Release));
+		commands.add(new ButtonAction(ActivateType.Release, c));
 	}
 	public void whenReleased(Action... actions){
 		for(Action a : actions)
-			commands.add(new ButtonCommand(a, ActivateType.Release));
+			commands.add(new ButtonAction(ActivateType.Release, a));
 	}
 	
-	public synchronized void stopAll(){
+	/**
+	 * Adds a task to automatically start when the button is pressed.
+	 * 
+	 * @param c The task to activate on press.
+	 */
+	public final void whenPressed(ScheduledTask c){
+		commands.add(new ButtonTask(ActivateType.Press, c));
+	}
+	public final void whenPressed(ScheduledTask... ts){
+		for(ScheduledTask a : ts)
+			commands.add(new ButtonTask(ActivateType.Press, a));
+	}
+	
+	/**
+	 * Adds a task to automatically run while the button is held, stops on release.
+	 * 
+	 * @param c The task to activate on hold.
+	 */
+	public void whileHeld(ScheduledTask c){
+		commands.add(new ButtonTask(ActivateType.Hold, c));
+	}
+	public void whileHeld(ScheduledTask... ts){
+		for(ScheduledTask a : ts)
+			commands.add(new ButtonTask(ActivateType.Hold, a));
+	}
+	
+	/**
+	 * Adds a task to automatically start when the button is released.
+	 * 
+	 * @param c The task to activate on release.
+	 */
+	public void whenReleased(ScheduledTask c){
+		commands.add(new ButtonTask(ActivateType.Release, c));
+	}
+	public void whenReleased(ScheduledTask... ts){
+		for(ScheduledTask a : ts)
+			commands.add(new ButtonTask(ActivateType.Release, a));
+	}
+	
+	public void stopAll(){
 		Enumeration<ButtonCommand> commEnum = commands.elements();
 		while(commEnum.hasMoreElements()){
 			ButtonCommand com = commEnum.nextElement();
@@ -202,7 +286,7 @@ public class Button implements ButtonListener, BooleanSource{
 		return run;
 	}
 	
-	public synchronized void set(boolean down){
+	public void set(boolean down){
 		last = current;
 		current = down;
 		changedDown = !last && current;
@@ -211,9 +295,9 @@ public class Button implements ButtonListener, BooleanSource{
     	if(changedDown)
     		holdStart = FlashUtil.millisInt();
     	
-    	setCommands(changedUp && (holdStart > 0 && FlashUtil.millisInt() - holdStart < 500));
+    	setCommands(changedUp && (holdStart > 0 && FlashUtil.millisInt() - holdStart < MAX_MILLIS_PRESS));
 	}
-	public synchronized void setPressed(boolean press){
+	public void setPressed(boolean press){
 		changedUp = press;
 		last = press;
 		current = !press;
@@ -222,8 +306,6 @@ public class Button implements ButtonListener, BooleanSource{
 		setCommands(press);
 	}
 	protected void setCommands(boolean press){
-		if(!RobotState.isRobotTeleop()) return;
-		
 		if(press) holdStart = -1;
 		Enumeration<ButtonListener> listenersEnum = listeners.elements();
 		while(listenersEnum.hasMoreElements()){
@@ -243,9 +325,8 @@ public class Button implements ButtonListener, BooleanSource{
 		Enumeration<ButtonCommand> commEnum = commands.elements();
 		while(commEnum.hasMoreElements()){
 			ButtonCommand ex = commEnum.nextElement();
-			if(ex.type == ActivateType.Press){
+			if(ex.type == ActivateType.Press)
 				ex.start();
-			}
 		}
 	}
 	@Override

@@ -37,17 +37,14 @@ public class CvTemplateMatcher {
 			
 		MatchRunner[] t = new MatchRunner[templs.length];
 		ExecutorService sr = Executors.newFixedThreadPool(templs.length);
-		for(int i = 0; i < templs.length; i++)
-		{
-			t[i] = new MatchRunner(scene,templs[i],method.TM_CCORR,scaleFactor);
+		for(int i = 0; i < templs.length; i++){
+			t[i] = new MatchRunner(scene,templs[i],method,scaleFactor);
 			sr.execute(t[i]);
-			
 		}
 		try {
 			sr.shutdown();
 			sr.awaitTermination(1, TimeUnit.DAYS);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -117,7 +114,7 @@ public class CvTemplateMatcher {
 		        	bestScore = currResult;
 		        	bestScore.scaleFactor = currScaleFactor;
 		        }
-		        currScaleFactor  += scaleFactor;
+		        currScaleFactor  *= scaleFactor;
 		     }
 			
 			

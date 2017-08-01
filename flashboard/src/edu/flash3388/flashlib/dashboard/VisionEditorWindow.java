@@ -84,13 +84,14 @@ public class VisionEditorWindow extends Stage{
 	private ComboBox<String> procBox;
 	
 	private VisionEditorWindow(Vision vision){
+		this.visionObject = vision;
+		
 		setTitle("FLASHboard - Vision Editor");
 		initStyle(StageStyle.DECORATED);
         initModality(Modality.NONE);
         setResizable(false);
         setScene(loadScene());
         setOnCloseRequest((e)->{
-        	
         	instance = null;
         });
 	}
@@ -101,12 +102,15 @@ public class VisionEditorWindow extends Stage{
 	}
 	private void resetParams(){
 		paramRoot.getChildren().clear();
-		params.clear();
+		if(params != null)
+			params.clear();
 	}
 	private void newSelection(int index){
 		visionObject.selectProcessing(index);
 		VisionFilter[] filters = visionObject.getProcessing().getFilters();
 		for (VisionFilter filter : filters) {
+			if(filter == null)
+				continue;
 			String name = VisionFilter.getSaveName(filter);
 			filterView.getItems().add(name);
 		}
@@ -151,8 +155,8 @@ public class VisionEditorWindow extends Stage{
 		procBox = new ComboBox<String>();
 		procBox.getItems().add("----SELECT VISION----");
 		procBox.getSelectionModel().select(0);
-		procBox.selectionModelProperty().addListener((obs, o, n)->{
-			int selected = procBox.getSelectionModel().getSelectedIndex();
+		procBox.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
+			int selected = n.intValue();
 			if(selected == 0)
 				reset();
 			else 
@@ -176,8 +180,8 @@ public class VisionEditorWindow extends Stage{
 		////filter
 		HBox filterBox = new HBox();
 		filterView = new ListView<String>();
-		filterView.selectionModelProperty().addListener((obs, o, n)->{
-			newFilterSelection(filterView.getSelectionModel().getSelectedIndex());
+		filterView.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
+			newFilterSelection(n.intValue());
 		});
 		Button addFilter = new Button("Add");
 		addFilter.setOnAction(e -> {
@@ -217,10 +221,17 @@ public class VisionEditorWindow extends Stage{
 		
 		
 		//right
-		
+		right.setSpacing(5);
+		paramRoot = right;
+		params = new ArrayList<ParamField<?>>();
 		
 		//bottom
 		
+		
+		reset();
+		for (int i = 0; i < visionObject.getProcessingCount(); i++)
+			procBox.getItems().add(visionObject.getProcessing(i).getName());
+		procBox.getSelectionModel().select(visionObject.getSelectedProcessingIndex() + 1);
 		
 		return new Scene(root, 800, 500);
 	}
@@ -229,6 +240,11 @@ public class VisionEditorWindow extends Stage{
 		if(filterTypes != null)
 			return;
 		filterTypes = new ArrayList<String>();
+		
+		FilterCreator creator = VisionFilter.getFilterCreator();
+		String[] types = creator.getFiltersMap().keySet().toArray(new String[creator.getFiltersMap().size()]);
+		for (String type : types)
+			filterTypes.add(type);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -249,8 +265,8 @@ public class VisionEditorWindow extends Stage{
 				if(returnVal != null && returnVal instanceof Property){
 					ParamField<?> param = null;
 					
-					Class<?> typeClass = (Class<?>) (((ParameterizedType)returnVal.getClass().getGenericSuperclass())
-							.getActualTypeArguments()[0]);
+					ParameterizedType superType = (ParameterizedType) returnVal.getClass().getGenericSuperclass();
+					Class<?> typeClass = (Class<?>) superType.getActualTypeArguments()[0];
 					if(FlashUtil.isAssignable(typeClass, Double.class))
 						param = new ParamField<Double>(propName, (Property<Double>)returnVal);
 					else if(FlashUtil.isAssignable(typeClass, String.class))

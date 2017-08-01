@@ -1,5 +1,8 @@
 package edu.flash3388.flashlib.vision;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.util.beans.ValueSource;
@@ -36,11 +39,23 @@ public class TemplateFilter extends VisionFilter{
 		return imgDirPath;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void process(VisionSource source) {
 		if(imgs == null){
-			
+			File dir = new File(imgDirPath.getValue());
+			if(!dir.exists() || !dir.isDirectory())
+				return;
+			File[] files = dir.listFiles();
+			ArrayList<ValueSource<Object>> imgList = new ArrayList<ValueSource<Object>>();
+			for (int i = 0; i < files.length; i++) {
+				ValueSource<Object> img = source.loadImage(files[i].getAbsolutePath());
+				if(img != null && img.getValue() != null)
+					imgList.add(null);
+			}
+			imgs = new ValueSource[imgList.size()];
+			imgList.toArray(imgs);
 		}
-		//source.matchTemplate(method.get(), scaleFactor.get(), imgs);
+		source.matchTemplate(imgs, method.get(), scaleFactor.get());
 	}
 }

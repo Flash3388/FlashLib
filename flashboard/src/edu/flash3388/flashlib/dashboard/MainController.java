@@ -75,6 +75,7 @@ public class MainController implements Initializable{
 					PDPWindow.reset();
 					PDP.resetBoards();
 					TesterWindow.closeTester();
+					VisionEditorWindow.closeEditor();
 					PidTunerWindow.reset();
 					FlashboardTester.resetTesters();
 					DashboardPidTuner.resetTuners();
@@ -119,7 +120,7 @@ public class MainController implements Initializable{
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
 	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, sbc_update, sbc_load,
-				   sbc_ssh, sbc_sftp, sbc_controller, pidtuner;
+				   sbc_ssh, sbc_sftp, sbc_controller, pidtuner, vision_editor;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -159,6 +160,9 @@ public class MainController implements Initializable{
 		});
 		save_params.setOnAction((e)->{
 			saveParams();
+		});
+		vision_editor.setOnAction(e ->{
+			showVisionEditor();
 		});
 		motorTester.setOnAction((e)->showTester());
 		pidtuner.setOnAction((e)->showPidTuner());
@@ -488,6 +492,11 @@ public class MainController implements Initializable{
 	}
 	private void showPidTuner(){
 		PidTunerWindow.showTuner();
+	}
+	private void showVisionEditor(){
+		if(Dashboard.visionInitialized())
+			VisionEditorWindow.showEditor(Dashboard.getVision());
+		else FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Vision Missing", "No Vision Runner was found");
 	}
 	public void stop(){
 		

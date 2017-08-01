@@ -81,6 +81,7 @@
          			<Menu fx:id="vision_menu" text="Vision">
             			<MenuItem fx:id="load_params" mnemonicParsing="false" text="Load Parameters" />
             			<MenuItem fx:id="save_params" mnemonicParsing="false" text="Save Parameters" />
+            			<MenuItem fx:id="vision_editor" mnemonicParsing="false" text="Show Vision Editor"/>
          			</Menu>
                   <Menu fx:id="monitor_menu" mnemonicParsing="false" text="Monitoring">
                     <items>

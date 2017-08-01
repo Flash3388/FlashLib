@@ -297,27 +297,33 @@ public class CvSource implements VisionSource{
 	 */
 	@Override
 	public void matchTemplate(ValueSource<Object>[] templateImgs, int method, int scaleFactor) {
-		Object imgData = null;//templateImg.getValue();
-		if(imgData == null)
-			throw new NullPointerException("template image cannot be null");
-		if(!(imgData instanceof Mat))
-			throw new IllegalArgumentException("Image format does not match vision source");
 		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
 			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
 					+method + ":" + CvTemplateMatcher.Method.values().length);
 		
+		Mat[] templates = new Mat[templateImgs.length];
+		Object imgData = null;
+		for (int i = 0; i < templates.length; i++) {
+			imgData = templateImgs[i].getValue();
+			if(imgData == null)
+				throw new NullPointerException("template image cannot be null: "+i);
+			if(!(imgData instanceof Mat))
+				throw new IllegalArgumentException("Image format does not match vision source: "+i);
+			templates[i] = (Mat)imgData;
+		}
+		
 		checkReady(false, true);
 		
-		Mat templateMat = (Mat)imgData;
 		CvTemplateMatcher.MatchResult result = 
-				CvProcessing.matchTemplate(threshold, templateMat, CvTemplateMatcher.Method.values()[method], 
+				CvProcessing.matchTemplate(threshold, templates, CvTemplateMatcher.Method.values()[method], 
 						scaleFactor);
 		
 		threshold = threshold.submat(new Rect(new double[]{
-							result.center.x - templateMat.width() * 0.5, 
-							result.center.x + templateMat.width() * 0.5, 
-							result.center.y - templateMat.height() * 0.5, 
-							result.center.y + templateMat.height() * 0.5}));
+							result.center.x - threshold.width() * 0.5 * result.scaleFactor, 
+							result.center.x + threshold.width() * 0.5 * result.scaleFactor, 
+							result.center.y - threshold.height() * 0.5 * result.scaleFactor, 
+							result.center.y + threshold.height() * 0.5 * result.scaleFactor
+							}));
 		contours = null;
 	}
 	

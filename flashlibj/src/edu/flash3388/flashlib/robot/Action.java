@@ -41,7 +41,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @see Scheduler
  * @see System
  */
-public abstract class Action {
+public abstract class Action{
 	
 	/**
 	 * An action which does nothing
@@ -75,18 +75,6 @@ public abstract class Action {
 		this("");
 	}
 	
-	public Action addRequirement(System sys){
-		requires(sys);
-		return this;
-	}
-	public Action setTimeout(double sec){
-		return setTimeout((long)(sec * 1000));
-	}
-	public Action setTimeout(long millis){
-		setTimeOut(millis);
-		return this;
-	}
-	
 	/**
 	 * Starts the action. If the Scheduler was initialized, than the action is added to the
 	 * Scheduler for running. If the action is running than it is not added.
@@ -117,7 +105,7 @@ public abstract class Action {
 		start_time = -1;
 	}
 	boolean run(){
-		if((RobotState.isRobotDisabled() && removeOnDisabled()) || isTimedOut())
+		if(isTimedOut())
 			cancel();
 		if(canceled)
 			return false;

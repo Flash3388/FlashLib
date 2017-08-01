@@ -44,7 +44,11 @@ public class DefaultFilterCreator implements FilterCreator{
 		Class<?> cl = (Class<?>)map.get(name);
 		if(cl == null || !FlashUtil.isAssignable(cl, VisionFilter.class))
 			return null;
-		return (VisionFilter) FlashUtil.createInstance(name);
+		try {
+			return (VisionFilter) cl.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			return null;
+		}
 	}
 
 	/**

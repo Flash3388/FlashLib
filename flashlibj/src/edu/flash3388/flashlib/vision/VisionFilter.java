@@ -45,6 +45,10 @@ public abstract class VisionFilter {
 		return creator != null;
 	}
 	
+	public static FilterCreator getFilterCreator(){
+		return creator;
+	}
+	
 	/**
 	 * Creates a new filter by name and loads parameters into it. Uses the set filter creator to get the class
 	 * representing the filter. If the filter creator was unable to create the filter, it is attempted to look at
