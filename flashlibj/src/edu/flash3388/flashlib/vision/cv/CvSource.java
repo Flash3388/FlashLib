@@ -309,7 +309,7 @@ public class CvSource implements VisionSource{
 		checkReady(false, true);
 		
 		Mat templateMat = (Mat)imgData;
-		CvTemplateMatcher.TemplateResult result = 
+		CvTemplateMatcher.MatchResult result = 
 				CvProcessing.matchTemplate(threshold, templateMat, CvTemplateMatcher.Method.values()[method], 
 						scaleFactor);
 		
