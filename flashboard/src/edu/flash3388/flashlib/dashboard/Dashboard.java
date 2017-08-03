@@ -14,6 +14,9 @@ import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.ScheduledTask;
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.IpCommInterface;
@@ -26,6 +29,7 @@ import edu.flash3388.flashlib.vision.cv.CvProcessing;
 import edu.flash3388.flashlib.vision.cv.CvRunner;
 import edu.flash3388.flashlib.vision.DefaultFilterCreator;
 import edu.flash3388.flashlib.vision.VisionFilter;
+import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -36,24 +40,54 @@ import javafx.stage.Stage;
 
 public class Dashboard extends Application {
 
-	private static class UpdateTask implements Runnable{
-		Vector<UpdateWrapper> updatables = new Vector<UpdateWrapper>();
-		boolean stop = false;
-		boolean fxReady = false;
-		@Override
-		public void run() {
-			while(!fxReady) FlashUtil.delay(50);
-			while (!stop) {
-				for(Enumeration<UpdateWrapper> upenum = updatables.elements(); upenum.hasMoreElements();){
-					UpdateWrapper up = upenum.nextElement();
-					up.runnable.run();
-					if(up.removeWhenFinished)
-						updatables.remove(up);
+	public static class Updater{
+		private Scheduler scheduler = new Scheduler();
+		private boolean stop = false;
+		private Runnable task;
+		
+		public Updater() {
+			task = ()->{
+				while(!fxInitialized() && !stop) 
+					FlashUtil.delay(100);
+				while (!stop) {
+					scheduler.run();
+					FlashUtil.delay(5);
 				}
-				FlashUtil.delay(3);
-			}
+			};
+		}
+		
+		public void addTask(Runnable runnable){
+			scheduler.addTask(runnable);
+		}
+		public void execute(Runnable runnable){
+			scheduler.execute(runnable);
+		}
+		public boolean removeTask(Runnable runnable){
+			return scheduler.remove(runnable);
+		}
+		
+		public void addTask(ScheduledTask task){
+			scheduler.addTask(task);
+		}
+		public void execute(ScheduledTask task){
+			scheduler.execute(task);
+		}
+		public boolean removeTask(ScheduledTask task){
+			return scheduler.remove(task);
+		}
+		
+		public void addAction(Action action){
+			scheduler.add(action);
+		}
+		
+		public void stop(){
+			stop = true;
+		}
+		public Runnable getThreadTask(){
+			return task;
 		}
 	}
+	
 	private static class ConnectionTask implements Runnable{
 
 		private static final int RECONNECTION_RATE = 5000;
@@ -125,10 +159,6 @@ public class Dashboard extends Application {
 			}
 		}
 	}
-	private static class UpdateWrapper{
-		Runnable runnable;
-		boolean removeWhenFinished;
-	}
 	
 	public static final String PROP_HOST_ROBOT = "host.robot";
 	public static final String PROP_COMM_PROTOCOL = "comm.protocol";
@@ -149,7 +179,7 @@ public class Dashboard extends Application {
 	private static Vector<Displayble> displayables = new Vector<Displayble>();
 	private static Stage primaryStage;
 	private static Dashboard instance;
-	private static UpdateTask updateTask;
+	private static Updater updater;
 	private static Thread updateThread;
 	private static IpCommInterface commInterface;
 	private static Communications communications;
@@ -158,6 +188,8 @@ public class Dashboard extends Application {
 	private static CvRunner vision;
 	private static EmergencyStopControl emergencyStop;
 	private static Log log;
+	
+	private static boolean fxready = false;
 	
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
@@ -215,13 +247,13 @@ public class Dashboard extends Application {
 	}
 	private static void initStart(){
 		VisionFilter.setFilterCreator(new DefaultFilterCreator());
-		updateTask = new UpdateTask();
-		updateThread = new Thread(updateTask);
+		updater = new Updater();
+		updateThread = new Thread(updater.getThreadTask());
 	    updateThread.start();
 	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
-		addRunnableForUpdate(new ConnectionTask());
-		addRunnableForUpdate(()->{
+	    updater.addTask(new ConnectionTask());
+	    updater.addTask(()->{
 			byte[] img = visionImageNext[visionImageIndex];
 			visionImageNext[visionImageIndex] = null;
 			visionImageIndex ^= 1;
@@ -252,17 +284,8 @@ public class Dashboard extends Application {
 		}
 		addDisplayable(camViewer);
 	}
-	public static void addRunnableForUpdate(Runnable run){
-		UpdateWrapper up = new UpdateWrapper();
-		up.runnable = run;
-		up.removeWhenFinished = false;
-		updateTask.updatables.addElement(up);
-	}
-	public static void runLater(Runnable run){
-		UpdateWrapper up = new UpdateWrapper();
-		up.runnable = run;
-		up.removeWhenFinished = true;
-		updateTask.updatables.addElement(up);
+	public static Updater getUpdater(){
+		return updater;
 	}
 	public static void addDisplayable(Displayble d){
 		displayables.addElement(d);
@@ -314,7 +337,7 @@ public class Dashboard extends Application {
 		Dashboard.vision = vision;
 		vision.setPipeline(camViewer);
 		if(vision != null){
-			runLater(()->{
+			updater.execute(()->{
 				loadVisionSaves();
 			});
 		}
@@ -380,7 +403,10 @@ public class Dashboard extends Application {
 		Remote.saveHosts(REMOTE_HOSTS_FILE);
 	}
 	private static void fxReady(){
-		updateTask.fxReady = true;
+		fxready = true;
+	}
+	private static boolean fxInitialized(){
+		return fxready;
 	}
 	
 	public static void userError(String error){
@@ -429,8 +455,13 @@ public class Dashboard extends Application {
 	}
 	public static void close(){
 		log.log("Shutting down");
-		updateTask.stop = true;
+		updater.stop();
 		if(visionInitialized()){
+			for (int i = 0; i < vision.getProcessingCount(); i++) {
+				VisionProcessing proc = vision.getProcessing(i);
+				proc.saveXml(FOLDER_SAVES+proc.getName()+".xml");
+			}
+			
 			log.log("Stopping image processing...");
 			vision.close();
 		}
@@ -443,6 +474,14 @@ public class Dashboard extends Application {
 			communications.close();
 		}
 		Remote.closeSessions();
+		if(updateThread.isAlive()){
+			try {
+				updateThread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				Thread.currentThread().interrupt();
+			}
+		}
 		saveSettings();
 		log.log("Settings saved");
 		log.close();

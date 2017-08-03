@@ -17,4 +17,9 @@ public class SimpleProperty<T> implements Property<T> {
 	public void setValue(T o) {
 		this.value = o;
 	}
+	
+	@Override
+	public String toString() {
+		return value.toString();
+	}
 }

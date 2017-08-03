@@ -3,14 +3,19 @@ package edu.flash3388.flashlib.dashboard;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.vision.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -34,13 +39,15 @@ public class VisionEditorWindow extends Stage{
 	private static class ParamField<T>{
 		private TextField field;
 		private Property<T> valueProperty;
-		private T lastValue;
+		private Object lastValue;
+		private Class<T> genericType;
 		private Pane root;
 		
-		ParamField(String name, Property<T> prop) {
+		ParamField(String name, Property<T> prop, Class<T> genericType) {
 			field = new TextField();
 			Label lbl = new Label(name);
 			valueProperty = prop;
+			this.genericType = genericType;
 			
 			lastValue = prop.getValue();
 			field.setText(lastValue.toString());
@@ -58,10 +65,42 @@ public class VisionEditorWindow extends Stage{
 		}
 		
 		private void newValue(){
+			if(!parseNewValue()){
+				FlashFxUtils.showErrorDialog(instance, "Format Error", "Inputed value is incompatible of data type");
+				field.setText(lastValue.toString());
+			}
+		}
+		@SuppressWarnings("unchecked")
+		private boolean parseNewValue(){
+			String value = field.getText();
+			Object newValue = null;
+			if(FlashUtil.isAssignable(genericType, Double.class)){
+				try{
+					newValue = Double.parseDouble(value);
+				}catch(NumberFormatException e){return false;}
+			}
+			if(FlashUtil.isAssignable(genericType, Integer.class)){
+				try{
+					newValue = Integer.parseInt(value);
+				}catch(NumberFormatException e){return false;}
+			}
+			if(FlashUtil.isAssignable(genericType, Boolean.class)){
+				try{
+					newValue = Boolean.parseBoolean(value);
+				}catch(NumberFormatException e){return false;}
+			}
+			if(FlashUtil.isAssignable(genericType, String.class)){
+				newValue = value;
+			}
 			
+			if(newValue != null && !newValue.equals(lastValue)){
+				lastValue = newValue;
+				valueProperty.setValue((T)lastValue);
+			}
+			return true;
 		}
 		void checkValueChanged(){
-			T val = valueProperty.getValue();
+			Object val = valueProperty.getValue();
 			if(!val.equals(lastValue)){
 				lastValue = val;
 				field.setText(val.toString());
@@ -106,6 +145,7 @@ public class VisionEditorWindow extends Stage{
 			params.clear();
 	}
 	private void newSelection(int index){
+		reset();
 		visionObject.selectProcessing(index);
 		VisionFilter[] filters = visionObject.getProcessing().getFilters();
 		for (VisionFilter filter : filters) {
@@ -117,9 +157,12 @@ public class VisionEditorWindow extends Stage{
 	}
 	private void newFilterSelection(int idx){
 		resetParams();
-		getFilterParameters(params, visionObject.getProcessing().getFilter(idx));
-		for (ParamField<?> field : params)
-			paramRoot.getChildren().add(field.getRoot());
+		VisionFilter filter = visionObject.getProcessing().getFilter(idx);
+		if(filter != null){
+			getFilterParameters(params, filter);
+			for (ParamField<?> field : params)
+				paramRoot.getChildren().add(field.getRoot());
+		}
 	}
 	private void addNewFilter(String type){
 		VisionFilter filter = VisionFilter.createFilter(type, null);
@@ -128,15 +171,16 @@ public class VisionEditorWindow extends Stage{
 		filterView.getSelectionModel().select(filterView.getItems().size() - 1);
 	}
 	private void removeFilter(int idx){
+		resetParams();
 		visionObject.getProcessing().removeFilter(idx);
 		filterView.getItems().remove(idx);
 	}
 	private void addNewProcessing(String name){
 		VisionProcessing newProcObj = new VisionProcessing(name);
 		procBox.getItems().add(newProcObj.getName());
-		procBox.getSelectionModel().select(visionObject.getSelectedProcessingIndex());
 		visionObject.addProcessing(newProcObj);
 		visionObject.selectProcessing(visionObject.getProcessingCount() - 1);
+		procBox.getSelectionModel().select(visionObject.getSelectedProcessingIndex() + 1);
 	}
 	
 	private Scene loadScene(){
@@ -167,12 +211,15 @@ public class VisionEditorWindow extends Stage{
 			TextInputDialog nameSelect = new TextInputDialog("vision");
 			nameSelect.initOwner(this);
 			nameSelect.setContentText("Enter processing name");
+			nameSelect.setTitle("New Vision Processing");
+			nameSelect.setHeaderText("");
 			Optional<String> result = nameSelect.showAndWait();
 			if(result.isPresent())
 				addNewProcessing(result.get());
 		});
 		top.setSpacing(10);
 		top.setAlignment(Pos.CENTER);
+		top.setPadding(new Insets(10, 0, 5, 0));
 		top.getChildren().addAll(procBox, newProc);
 		
 		
@@ -181,7 +228,8 @@ public class VisionEditorWindow extends Stage{
 		HBox filterBox = new HBox();
 		filterView = new ListView<String>();
 		filterView.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
-			newFilterSelection(n.intValue());
+			if(procBox.getSelectionModel().getSelectedIndex() > 0 && n.intValue() >= 0)
+				newFilterSelection(n.intValue());
 		});
 		Button addFilter = new Button("Add");
 		addFilter.setOnAction(e -> {
@@ -193,6 +241,8 @@ public class VisionEditorWindow extends Stage{
 			}
 			ChoiceDialog<String> dialog = new ChoiceDialog<String>(filterTypes.get(0), filterTypes);
 			dialog.setContentText("Select Filter Type");
+			dialog.setTitle("New Filter Type");
+			dialog.setHeaderText("");
 			
 			Optional<String> result = dialog.showAndWait();
 			if(result.isPresent())
@@ -218,10 +268,12 @@ public class VisionEditorWindow extends Stage{
 		
 		center.setSpacing(10);
 		center.getChildren().addAll(filterBox);
+		center.setPadding(new Insets(0, 10, 0, 10));
 		
 		
 		//right
 		right.setSpacing(5);
+		right.setPadding(new Insets(0, 10, 0, 10));
 		paramRoot = right;
 		params = new ArrayList<ParamField<?>>();
 		
@@ -249,36 +301,41 @@ public class VisionEditorWindow extends Stage{
 	
 	@SuppressWarnings("unchecked")
 	private static void getFilterParameters(List<ParamField<?>> params, VisionFilter filter){
-		Method[] methods = filter.getClass().getMethods();
-		for (Method method : methods) {
-			int idx = method.getName().indexOf("Property");
-			if(idx >= 0 && idx + 8 == method.getName().length()){
-				String propName = method.getName().substring(0, idx);
-				
-				Object returnVal = null;
-				try {
-					returnVal = method.invoke(filter);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					continue;
-				}
-				
-				if(returnVal != null && returnVal instanceof Property){
-					ParamField<?> param = null;
-					
-					ParameterizedType superType = (ParameterizedType) returnVal.getClass().getGenericSuperclass();
-					Class<?> typeClass = (Class<?>) superType.getActualTypeArguments()[0];
-					if(FlashUtil.isAssignable(typeClass, Double.class))
-						param = new ParamField<Double>(propName, (Property<Double>)returnVal);
-					else if(FlashUtil.isAssignable(typeClass, String.class))
-						param = new ParamField<String>(propName, (Property<String>)returnVal);
-					else if(FlashUtil.isAssignable(typeClass, Integer.class))
-						param = new ParamField<Integer>(propName, (Property<Integer>)returnVal);
-					else if(FlashUtil.isAssignable(typeClass, Boolean.class))
-						param = new ParamField<Boolean>(propName, (Property<Boolean>)returnVal);
-					
-					if(param != null)
-						params.add(param);
-				}
+		Map<String, Method> methods = VisionParam.findParametersMethods(filter.getClass());
+		for (Iterator<Entry<String, Method>> entries = methods.entrySet().iterator(); entries.hasNext();) {
+			Entry<String, Method> entry = entries.next();
+			String name = entry.getKey();
+			Method method = entry.getValue();
+			
+			Class<?> retType = method.getReturnType();
+			if(retType == null)
+				continue;
+			
+			Object obj = null;
+			try {
+				obj = method.invoke(filter);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			}
+			if(obj == null || !(FlashUtil.isAssignable(retType, Property.class)))
+				continue;
+			
+			Type[] genericTypes = FlashUtil.findGenericArgumentsOfSuperType(retType, Property.class);
+			if(genericTypes == null || genericTypes.length < 1 || genericTypes[0] instanceof ParameterizedType)
+				continue;
+			
+			Property<?> prop = (Property<?>)obj;
+			Class<?> propType = (Class<?>)genericTypes[0];
+			if(FlashUtil.isAssignable(propType, Boolean.class)){
+				params.add(new ParamField<Boolean>(name, (Property<Boolean>)prop, Boolean.class));
+			}
+			else if(FlashUtil.isAssignable(propType, Double.class)){
+				params.add(new ParamField<Double>(name, (Property<Double>)prop, Double.class));
+			}
+			else if(FlashUtil.isAssignable(propType, Integer.class)){
+				params.add(new ParamField<Integer>(name, (Property<Integer>)prop, Integer.class));
+			}
+			else if(FlashUtil.isAssignable(propType, String.class)){
+				params.add(new ParamField<String>(name, (Property<String>)prop, String.class));
 			}
 		}
 	}

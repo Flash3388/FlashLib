@@ -33,4 +33,9 @@ public class SimpleIntegerProperty implements IntegerProperty{
 	public Integer getValue() {
 		return var;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(var);
+	}
 }

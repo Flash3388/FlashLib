@@ -38,4 +38,9 @@ public class SimpleBooleanProperty implements BooleanProperty{
 	public Boolean getValue() {
 		return var;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(var);
+	}
 }

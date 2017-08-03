@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -1374,6 +1376,58 @@ public final class FlashUtil {
         	supers.addAll(Arrays.asList(interfaces));
         return supers;
     }
+    /**
+     * Gets the generic types defined for a super type of a given class. The method searches
+     * all the super types of the given class and finds along the inheritance hierarchy a type which
+     * corresponds to the given super type to find. If that type is a generic type, the types used are returned. 
+     * Otherwise null is returned.
+     * 
+     * @param child the subclass 
+     * @param supertype the generic super type to find
+     * @return an array of the generic types defined, or null if not found.
+     */
+    public 	static Type[] findGenericArgumentsOfSuperType(Class<?> child, Class<?> supertype){
+		if(!supertype.isAssignableFrom(child))
+			return null;
+		
+		Class<?> interclass = null;
+		ParameterizedType paramType = null;
+		Type rawType = null;
+		
+		rawType = child.getGenericSuperclass();
+		if(rawType instanceof ParameterizedType){
+			paramType = (ParameterizedType)rawType;
+			rawType = paramType.getRawType();
+		}
+		interclass = (Class<?>)rawType;
+		
+		if(interclass != null){
+			if(paramType != null && interclass.equals(supertype))
+				return paramType.getActualTypeArguments();
+			
+			Type[] types = findGenericArgumentsOfSuperType(interclass, supertype);
+			if(types != null)
+				return types;
+		}
+		
+		Type[] superinterfaces = child.getGenericInterfaces();
+		for (int i = 0; i < superinterfaces.length; i++) {
+			rawType = superinterfaces[i];
+			if(rawType instanceof ParameterizedType){
+				paramType = (ParameterizedType)rawType;
+				rawType = paramType.getRawType();
+			}
+			interclass = (Class<?>)rawType;
+			
+			if(paramType != null && interclass.equals(supertype))
+				return paramType.getActualTypeArguments();
+			
+			Type[] types = findGenericArgumentsOfSuperType(interclass, supertype);
+			if(types != null)
+				return types;
+		}
+		return null;
+	}
     
     /**
      * Gets whether an object related to a class type.
