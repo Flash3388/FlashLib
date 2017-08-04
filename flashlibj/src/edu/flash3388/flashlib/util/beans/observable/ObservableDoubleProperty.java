@@ -1,18 +1,17 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.PropertyHelper;
 
 public abstract class ObservableDoubleProperty implements ObservableProperty<Double>, ObservableDoubleValue, DoubleProperty{
 
 	private ObservableDoubleValue observable = null;
-	private PropertyHelper<Double> helper = null;
+	private ObservablePropertyHelper<Double> helper = null;
 	private ChangeListener<Double> listener = null;
 	
 	@Override
 	public void fireValueChangedEvent() {
-        PropertyHelper.fireValueChangedEvent(helper);
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
     }
 	
 	@Override
@@ -33,12 +32,12 @@ public abstract class ObservableDoubleProperty implements ObservableProperty<Dou
 
 	@Override
 	public void addListener(ChangeListener<? super Double> listener) {
-		helper = PropertyHelper.addListener(helper, this, listener);
+		helper = ObservablePropertyHelper.addListener(helper, this, listener);
 		
 	}
 	@Override
 	public void removeListener(ChangeListener<? super Double> listener) {
-		helper = PropertyHelper.removeListener(helper, listener);
+		helper = ObservablePropertyHelper.removeListener(helper, listener);
 	}
 
 	@Override

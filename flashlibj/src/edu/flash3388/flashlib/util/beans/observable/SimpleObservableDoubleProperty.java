@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 public class SimpleObservableDoubleProperty extends ObservableDoubleProperty{
 

@@ -1,18 +1,17 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.PropertyHelper;
 
 public abstract class ObservableIntegerProperty implements ObservableProperty<Integer>, ObservableIntegerValue, IntegerProperty{
 
 	private ObservableIntegerValue observable = null;
-	private PropertyHelper<Integer> helper = null;
+	private ObservablePropertyHelper<Integer> helper = null;
 	private ChangeListener<Integer> listener = null;
 	
 	@Override
 	public void fireValueChangedEvent() {
-        PropertyHelper.fireValueChangedEvent(helper);
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
     }
 	
 	@Override
@@ -33,12 +32,12 @@ public abstract class ObservableIntegerProperty implements ObservableProperty<In
 
 	@Override
 	public void addListener(ChangeListener<? super Integer> listener) {
-		helper = PropertyHelper.addListener(helper, this, listener);
+		helper = ObservablePropertyHelper.addListener(helper, this, listener);
 		
 	}
 	@Override
 	public void removeListener(ChangeListener<? super Integer> listener) {
-		helper = PropertyHelper.removeListener(helper, listener);
+		helper = ObservablePropertyHelper.removeListener(helper, listener);
 	}
 
 	@Override

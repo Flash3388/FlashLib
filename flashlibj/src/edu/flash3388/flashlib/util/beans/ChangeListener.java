@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.util.beans;
 
-import edu.flash3388.flashlib.util.beans.observables.ObservableValue;
+import edu.flash3388.flashlib.util.beans.observable.ObservableValue;
 
 @FunctionalInterface
 public interface ChangeListener<T> {

@@ -1,18 +1,17 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.PropertyHelper;
 
 public abstract class ObservableBooleanProperty implements ObservableProperty<Boolean>, ObservableBooleanValue, BooleanProperty{
 
 	private ObservableBooleanValue observable = null;
-	private PropertyHelper<Boolean> helper = null;
+	private ObservablePropertyHelper<Boolean> helper = null;
 	private ChangeListener<Boolean> listener = null;
 	
 	@Override
 	public void fireValueChangedEvent() {
-        PropertyHelper.fireValueChangedEvent(helper);
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
     }
 	
 	@Override
@@ -33,12 +32,12 @@ public abstract class ObservableBooleanProperty implements ObservableProperty<Bo
 
 	@Override
 	public void addListener(ChangeListener<? super Boolean> listener) {
-		helper = PropertyHelper.addListener(helper, this, listener);
+		helper = ObservablePropertyHelper.addListener(helper, this, listener);
 		
 	}
 	@Override
 	public void removeListener(ChangeListener<? super Boolean> listener) {
-		helper = PropertyHelper.removeListener(helper, listener);
+		helper = ObservablePropertyHelper.removeListener(helper, listener);
 	}
 
 	@Override

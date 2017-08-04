@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import edu.flash3388.flashlib.util.beans.Property;
 

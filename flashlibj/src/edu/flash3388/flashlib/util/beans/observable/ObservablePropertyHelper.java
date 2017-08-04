@@ -1,25 +1,25 @@
-package edu.flash3388.flashlib.util.beans;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.observables.ObservableValue;
+import edu.flash3388.flashlib.util.beans.ChangeListener;
 
-public abstract class PropertyHelper<T> {
+public abstract class ObservablePropertyHelper<T> {
 
-    public static <T> PropertyHelper<T> addListener(PropertyHelper<T> helper, ObservableValue<T> observable, ChangeListener<? super T> listener) {
+    public static <T> ObservablePropertyHelper<T> addListener(ObservablePropertyHelper<T> helper, ObservableValue<T> observable, ChangeListener<? super T> listener) {
         if ((observable == null) || (listener == null)) 
             throw new NullPointerException();
         return (helper == null)? new Generic<T>(observable, listener) : helper.addListener(listener);
     }
 
-    public static <T> PropertyHelper<T> removeListener(PropertyHelper<T> helper, ChangeListener<? super T> listener) {
+    public static <T> ObservablePropertyHelper<T> removeListener(ObservablePropertyHelper<T> helper, ChangeListener<? super T> listener) {
         if (listener == null) 
             throw new NullPointerException();
         return (helper == null)? null : helper.removeListener(listener);
     }
 
-    public static <T> void fireValueChangedEvent(PropertyHelper<T> helper) {
+    public static <T> void fireValueChangedEvent(ObservablePropertyHelper<T> helper) {
         if (helper != null) 
             helper.fireValueChangedEvent();
     }
@@ -27,17 +27,17 @@ public abstract class PropertyHelper<T> {
 	
 	protected final ObservableValue<T> observable;
 	
-	protected PropertyHelper(ObservableValue<T> observable){
+	protected ObservablePropertyHelper(ObservableValue<T> observable){
 		this.observable = observable;
 	}
 	
-	protected abstract PropertyHelper<T> addListener(ChangeListener<? super T> listener);
-	protected abstract PropertyHelper<T> removeListener(ChangeListener<? super T> listener);
+	protected abstract ObservablePropertyHelper<T> addListener(ChangeListener<? super T> listener);
+	protected abstract ObservablePropertyHelper<T> removeListener(ChangeListener<? super T> listener);
 	
 	protected abstract void fireValueChangedEvent();
 	
 	
-	private static class Generic<T> extends PropertyHelper<T>{
+	private static class Generic<T> extends ObservablePropertyHelper<T>{
 
 		private ChangeListener<? super T>[] changeListeners;
 		private int changeListeneresCount;
@@ -52,7 +52,7 @@ public abstract class PropertyHelper<T> {
 		}
 
 		@Override
-		protected PropertyHelper<T> addListener(ChangeListener<? super T> listener) {
+		protected ObservablePropertyHelper<T> addListener(ChangeListener<? super T> listener) {
 			final int oldCapacity = changeListeners.length;
 			int newCapacity = (changeListeneresCount < oldCapacity)? oldCapacity : (oldCapacity * 3) / 2 + 1;
 			if(newCapacity != oldCapacity)
@@ -61,7 +61,7 @@ public abstract class PropertyHelper<T> {
 			return this;
 		}
 		@Override
-		protected PropertyHelper<T> removeListener(ChangeListener<? super T> listener) {
+		protected ObservablePropertyHelper<T> removeListener(ChangeListener<? super T> listener) {
 			int idx = FlashUtil.indexOf(changeListeners, 0, changeListeneresCount, listener);
 			if(idx >= 0){
 				changeListeners[idx] = null;

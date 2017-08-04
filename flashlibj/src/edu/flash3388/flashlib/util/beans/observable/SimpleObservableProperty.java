@@ -1,13 +1,12 @@
-package edu.flash3388.flashlib.util.beans.observables;
+package edu.flash3388.flashlib.util.beans.observable;
 
 import edu.flash3388.flashlib.util.beans.ChangeListener;
-import edu.flash3388.flashlib.util.beans.PropertyHelper;
 
 public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 
 	private T value;
 	private ObservableValue<T> observable = null;
-	private PropertyHelper<T> helper = null;
+	private ObservablePropertyHelper<T> helper = null;
 	private ChangeListener<T> listener = null;
 	
 	
@@ -17,7 +16,7 @@ public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 	
 	@Override
     public void fireValueChangedEvent() {
-        PropertyHelper.fireValueChangedEvent(helper);
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
     }
 	
 	@Override
@@ -36,11 +35,11 @@ public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 
 	@Override
 	public void addListener(ChangeListener<? super T> listener) {
-		helper = PropertyHelper.addListener(helper, this, listener);
+		helper = ObservablePropertyHelper.addListener(helper, this, listener);
 	}
 	@Override
 	public void removeListener(ChangeListener<? super T> listener) {
-		helper = PropertyHelper.removeListener(helper, listener);
+		helper = ObservablePropertyHelper.removeListener(helper, listener);
 	}
 	
 	@SuppressWarnings("unchecked")
