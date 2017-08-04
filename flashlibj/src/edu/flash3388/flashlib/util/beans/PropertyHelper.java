@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.util.beans;
 import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.observables.ObservableValue;
 
 public abstract class PropertyHelper<T> {
 
