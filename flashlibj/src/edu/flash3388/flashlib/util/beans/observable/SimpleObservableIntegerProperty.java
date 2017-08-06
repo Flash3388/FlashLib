@@ -12,11 +12,11 @@ public class SimpleObservableIntegerProperty extends ObservableIntegerProperty{
 	}
 	
 	@Override
-	public int get() {
+	protected int getInternal() {
 		return value;
 	}
 	@Override
-	public void set(int i) {
+	protected void setInternal(int i) {
 		this.value = i;
 	}
 }

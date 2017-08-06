@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
-import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
 public abstract class ObservableDoubleProperty implements ObservableProperty<Double>, ObservableDoubleValue, DoubleProperty{
@@ -9,26 +8,36 @@ public abstract class ObservableDoubleProperty implements ObservableProperty<Dou
 	private ObservablePropertyHelper<Double> helper = null;
 	private ChangeListener<Double> listener = null;
 	
-	@Override
-	public void fireValueChangedEvent() {
-        ObservablePropertyHelper.fireValueChangedEvent(helper);
-    }
+	
+	protected abstract void setInternal(double d);
+	protected abstract double getInternal();
 	
 	@Override
-	public void setValue(Double o) {
+	public void set(double d) {
 		if(isBound())
 			throw new RuntimeException("This property is bound and cannot be set");
-		if(o == null)
-			o = 0.0;
-		if(get() != o){
-			set(o);
+		if(get() != d){
+			setInternal(d);
 			fireValueChangedEvent();
 		}
 	}
 	@Override
-	public Double getValue() {
-		return observable == null? get() : observable.get();
+	public double get() {
+		return observable == null? getInternal() : observable.get();
 	}
+	@Override
+	public void setValue(Double o) {
+		set(o == null? 0.0 : o);
+	}
+	@Override
+	public Double getValue() {
+		return get();
+	}
+
+	@Override
+	public void fireValueChangedEvent() {
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
+    }
 
 	@Override
 	public void addListener(ChangeListener<? super Double> listener) {
@@ -45,7 +54,7 @@ public abstract class ObservableDoubleProperty implements ObservableProperty<Dou
 		if(observable == null)
 			throw new NullPointerException("cannot bind to null");
 		
-		if(!observable.equals(this.observable)){
+		if(this.observable == null || !observable.equals(this.observable)){
 			if (isBound())
 				unbind();
 			

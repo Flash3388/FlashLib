@@ -3,15 +3,16 @@ package examples.communications.tcp;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.Packet;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/*
+ * Example tcp client
+ */
 public class ExampleTcpClient {
 
-	public static void main(String[] args) throws IOException {
-		FlashUtil.setStart();//Initializes the main flashlib log
-		
+	public static void main(String[] args) throws IOException{
 		/*
 		 * Gets the IP address of a computer with the hostname "hostname". This should be the remote address.
 		 */
@@ -33,43 +34,45 @@ public class ExampleTcpClient {
 		 * Creates a TCP client communications interface for the address and ports we got earlier.
 		 */
 		TcpCommInterface clientInterface = new TcpCommInterface(localAddress, remoteAddress, localPort, remotePort);
+		/*
+		 * Sets the maximum amount of milliseconds to wait while reading. If data was not received during this
+		 * time frame, reading is stopped.
+		 */
+		clientInterface.setReadTimeout(20);
 		
 		/*
-		 * Creates a communications manager for the TCP communications interface 
+		 * Creates a new packet instance. Packets is used to store read data from a CommInterface.
 		 */
-		Communications client = new Communications("testing-client", clientInterface);
+		Packet packet = new Packet();
 		
 		/*
-		 * Starts the communications manager
+		 * Performs connection to a remote source continuously until it is established
 		 */
-		client.start();
+		while(!clientInterface.isConnected()){
+			FlashUtil.delay(100);// 100 ms delay
+			clientInterface.connect(packet); // connecting
+		}
 		
 		/*
-		 * While the communications manager is not connected
+		 * Sending bytes of data to the server
 		 */
-		while(!client.isConnected()) 
-			FlashUtil.delay(1000);// delay for 1000 milliseconds, i.e. 1 second
-		
-		System.out.println("Connection");
+		clientInterface.write("Hi".getBytes());
+		/*
+		 * Waiting 100 milliseconds before reading to insure data has arrived and response has had time to be
+		 * received
+		 */
+		FlashUtil.delay(100);
+		/*
+		 * Reading data from the server. If received, we print it
+		 */
+		if(clientInterface.read(packet)){
+			String data = new String(packet.data, 0, packet.length);
+			System.out.println(data);
+		}
 		
 		/*
-		 * Counter to wait while connected.
+		 * Disconnecting and closing the client
 		 */
-		int count = 10;
-		
-		/*
-		 * While the communications manager is connected. Decreases the value of the counter. When the counter
-		 * reaches 0, the loop stops.
-		 */
-		while(client.isConnected() && (--count) > 0)
-			FlashUtil.delay(1000);// delay for 1000 milliseconds, i.e. 1 second
-		
-		System.out.println("Not Connected");
-		
-		/*
-		 * Terminates the communications manager
-		 */
-		client.close();
+		clientInterface.close();
 	}
-
 }

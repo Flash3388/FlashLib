@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
-import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 
 public abstract class ObservableIntegerProperty implements ObservableProperty<Integer>, ObservableIntegerValue, IntegerProperty{
@@ -9,27 +8,36 @@ public abstract class ObservableIntegerProperty implements ObservableProperty<In
 	private ObservablePropertyHelper<Integer> helper = null;
 	private ChangeListener<Integer> listener = null;
 	
-	@Override
-	public void fireValueChangedEvent() {
-        ObservablePropertyHelper.fireValueChangedEvent(helper);
-    }
+	
+	protected abstract void setInternal(int i);
+	protected abstract int getInternal();
 	
 	@Override
-	public void setValue(Integer o) {
+	public void set(int i) {
 		if(isBound())
 			throw new RuntimeException("This property is bound and cannot be set");
-		if(o == null)
-			o = 0;
-		if(get() != o){
-			set(o);
+		if(get() != i){
+			setInternal(i);
 			fireValueChangedEvent();
 		}
 	}
 	@Override
+	public int get() {
+		return observable == null? getInternal() : observable.get();
+	}
+	@Override
+	public void setValue(Integer o) {
+		set(o == null? 0 : o);
+	}
+	@Override
 	public Integer getValue() {
-		return observable == null? get() : observable.get();
+		return get();
 	}
 
+	@Override
+    public void fireValueChangedEvent() {
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
+    }
 	@Override
 	public void addListener(ChangeListener<? super Integer> listener) {
 		helper = ObservablePropertyHelper.addListener(helper, this, listener);
@@ -45,7 +53,7 @@ public abstract class ObservableIntegerProperty implements ObservableProperty<In
 		if(observable == null)
 			throw new NullPointerException("cannot bind to null");
 		
-		if(!observable.equals(this.observable)){
+		if(this.observable == null || !observable.equals(this.observable)){
 			if (isBound())
 				unbind();
 			

@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
-import edu.flash3388.flashlib.util.beans.ChangeListener;
-
 public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 
 	private T value;
@@ -48,7 +46,7 @@ public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 		if(observable == null)
 			throw new NullPointerException("cannot bind to null");
 		
-		if(!observable.equals(this.observable)){
+		if(this.observable == null || !observable.equals(this.observable)){
 			if (isBound())
 				unbind();
 			

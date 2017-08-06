@@ -1,8 +1,11 @@
 package examples.vision.filters;
+
+import org.opencv.core.Core;
+
 import edu.flash3388.flashlib.cams.CvCamera;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
-import edu.flash3388.flashlib.vision.CvRunner;
+import edu.flash3388.flashlib.vision.cv.CvRunner;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 
 /*
@@ -11,6 +14,10 @@ import edu.flash3388.flashlib.vision.VisionProcessing;
 public class ExampleVision {
 
 	public static void main(String[] args){
+		/*
+		 * Loads the openCV native library 
+		 */
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		/*
 		 * Loads a processing object from a file.
@@ -68,7 +75,7 @@ public class ExampleVision {
 			
 			Analysis an = visionRunner.getAnalysis();
 			if(an != null)
-				an.print();
+				System.out.println("new analysis");
 		}
 	}
 }

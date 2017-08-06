@@ -1,7 +1,7 @@
-package examples.util.constants;
+package examples.util.beans;
 
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.ConstantsHandler;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
 /*
  * An example for using the flashlib ConstantsHandler.
@@ -16,12 +16,12 @@ public class ExampleConstantsHandler {
 		
 		/*
 		 * Adds a new constant to the map with the value of 50. If the constant already exists, nothing will occur.
-		 * Returns a data source pointing to that value. 
+		 * Returns a data property pointing to that value. 
 		 */
-		DoubleDataSource addNum = ConstantsHandler.addNumber("addNum", 50.0);
+		DoubleProperty addNum = ConstantsHandler.addNumber("addNum", 50.0);
 		System.out.println("addNum: "+addNum.get());
 		/*
-		 * Sets the value in the map of the constant to 20.5. This updates the data source as well. 
+		 * Sets the value in the map of the constant to 20.5. This updates the data property as well. 
 		 */
 		ConstantsHandler.putNumber("addNum", 20.5);
 		System.out.println("addNum: "+addNum.get());
@@ -31,9 +31,9 @@ public class ExampleConstantsHandler {
 		 */
 		ConstantsHandler.putString("putString", "a string");
 		/*
-		 * Gets the native value of a constant, instead of a data source.
+		 * Gets the value of a constant, instead of a data property.
 		 */
-		System.out.println("putString: "+ConstantsHandler.getStringNative("putString"));
+		System.out.println("putString: "+ConstantsHandler.getStringValue("putString"));
 		
 		ConstantsHandler.putString("putString", "new string");
 		

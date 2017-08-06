@@ -199,7 +199,7 @@ public class DashboardPidTuner extends Displayble{
 			lastkd = kd.get();
 			lastkf = kf.get();
 			
-			byte[] data = new byte[32];
+			byte[] data = new byte[33];
 			data[0] = PidTuner.K_UPDATE;
 			FlashUtil.fillByteArray(lastkp, 1, data);
 			FlashUtil.fillByteArray(lastki, 9, data);

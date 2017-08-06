@@ -365,27 +365,20 @@ public class Dashboard extends Application {
 			file.mkdir();
 	}
 	private static void validateBasicSettings() throws Exception{
-		if(!ConstantsHandler.hasString(PROP_VISION_DEFAULT_PARAM))
-			ConstantsHandler.putString(PROP_VISION_DEFAULT_PARAM, "");
-		if(!ConstantsHandler.hasString(PROP_HOST_ROBOT)){
-			ConstantsHandler.putString(PROP_HOST_ROBOT, "");
+		ConstantsHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
+		ConstantsHandler.addString(PROP_HOST_ROBOT, "");
+		if(emptyProperty(PROP_HOST_ROBOT))
 			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
-		}
 		
-		if(!ConstantsHandler.hasString(PROP_COMM_PROTOCOL))
-			ConstantsHandler.putString(PROP_COMM_PROTOCOL, "tcp");
-		else if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL).equals("tcp") && 
-				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL).equals("udp"))
+		ConstantsHandler.addString(PROP_COMM_PROTOCOL, "tcp");
+		if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("tcp") && 
+				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("udp"))
 			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
 		
-		if(emptyProperty(PROP_COMM_PORT_LOCAL))
-			ConstantsHandler.putNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
-		if(emptyProperty(PROP_COMM_PORT_REMOTE))
-			ConstantsHandler.putNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
-		if(emptyProperty(PROP_CAM_PORT_LOCAL))
-			ConstantsHandler.putNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
-		if(emptyProperty(PROP_CAM_PORT_REMOTE))
-			ConstantsHandler.putNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
+		ConstantsHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
+		ConstantsHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
+		ConstantsHandler.addNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
+		ConstantsHandler.addNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
 	}
 	private static void loadSettings(){
 		try {

@@ -2,26 +2,17 @@ package examples.robot.frc;
 
 import com.ctre.CANTalon;
 
-import edu.flash3388.flashlib.cams.Camera;
-import edu.flash3388.flashlib.cams.CvCamera;
-import edu.flash3388.flashlib.flashboard.DashboardInput;
-import edu.flash3388.flashlib.flashboard.DashboardSlider;
-import edu.flash3388.flashlib.flashboard.DoubleProperty;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.flashboard.InputType;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.SystemAction;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.rio.FlashRio;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.util.ConstantsHandler;
-import edu.flash3388.flashlib.vision.ColorFilter;
-import edu.flash3388.flashlib.vision.LargestFilter;
-import edu.flash3388.flashlib.vision.VisionProcessing;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.wpi.first.wpilibj.Ultrasonic;
 
 /*
@@ -38,10 +29,7 @@ public class ExampleFlashboard extends FlashRio{
 	Ultrasonic sonic1;
 	Ultrasonic sonic2;
 	
-	DoubleDataSource driveFilterSpeed = ConstantsHandler.putNumber("filterSpeed", 1.0);
-	DoubleDataSource sonicOffset = ConstantsHandler.putNumber("sonicOffset", 0.0);
-	
-	Camera camera;
+	DoubleProperty driveFilterSpeed = ConstantsHandler.putNumber("filterSpeed", 1.0);
 	
 	@Override
 	protected void initRobot() {
@@ -66,7 +54,7 @@ public class ExampleFlashboard extends FlashRio{
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
 		 */
-		driveTrain.setDefaultAction(new SystemAction(driveTrain, new Action(){
+		driveTrain.setDefaultAction(new SystemAction(new Action(){
 			@Override
 			protected void execute() {
 				/*
@@ -87,7 +75,7 @@ public class ExampleFlashboard extends FlashRio{
 				 */
 				driveTrain.stop();
 			}
-		}));
+		}, driveTrain));
 		
 		/*
 		 * Creating an xbox controller at index 0
@@ -116,69 +104,22 @@ public class ExampleFlashboard extends FlashRio{
 		sonic1.setAutomaticMode(true);
 		
 		/*
-		 * Creates flashboard double properties. Creates double data sources pointing to the ultrasonics.
+		 * Creates and attaches flashboard double properties. Creates double data sources pointing to the ultrasonics.
 		 */
-		DoubleProperty propSonic1 = new DoubleProperty("sonic1", ()->sonic1.getRangeMM()+sonicOffset.get());
-		DoubleProperty propSonic2 = new DoubleProperty("sonic2", ()->sonic2.getRangeMM()+sonicOffset.get());
-		/*
-		 * Creates an input from flashboard to update our filterSpeed. It updates it directly through
-		 * ConstantsHandler.
-		 */
-		DashboardSlider inputFilter = new DashboardSlider("driveFilter", 0.0, 1.0, 10);
-		/*
-		 * Creates an input from flashboard to update our sonicOffset. It updates it directly through
-		 * ConstantsHandler.
-		 */
-		DashboardInput inputOffset = new DashboardInput("sonicOffset", InputType.Double);
+		Flashboard.putData("sonic1", ()->sonic1.getRangeMM());
+		Flashboard.putData("sonic1", ()->sonic2.getRangeMM());
 		
 		/*
-		 * Attaches the properties to the flashboard.
+		 * Creates a slider infput from flashboard to update our filterSpeed. It updates our property directly.
+		 * The slider as a minimum value of 0.0, a maximum value of 1.0 and the default change of values is
+		 * 0.1 ((1.0 - 0.0) / 10).
 		 */
-		Flashboard.attach(propSonic1, propSonic2, inputOffset, inputFilter);
-		
-		/*
-		 * Creates a new openCV camera with device index 0, resolution 320x240 and compression quality of 50%. 
-		 */
-		camera = new CvCamera(0, 320, 240, 50);
-		/*
-		 * Adds the camera to the Flashboard camera view
-		 */
-		Flashboard.getCameraView().add(camera);
-		
-		/*
-		 * Creating a new processing object to define our filters
-		 */
-		VisionProcessing proc = new VisionProcessing();
-		/*
-		 * Creating a color filter for HSV colors with ranges:
-		 * Hue 0->180
-		 * Saturation 0->255
-		 * Value 230->255 
-		 */
-		ColorFilter colorFilter = new ColorFilter(true, 0, 180, 0, 255, 230, 255);
-		/*
-		 * Creating a largest filter. Filters out all but the largest contour because the amount is 1.
-		 */
-		LargestFilter largestFilter = new LargestFilter(1);
-		/*
-		 * Adding the filters to the processing object 
-		 */
-		proc.addFilters(colorFilter, largestFilter);
-		/*
-		 * Adding the processing object to the Flashboard vision controller
-		 */
-		Flashboard.getVision().addProcessing(proc);
-		/*
-		 * Starting the vision processing
-		 */
-		Flashboard.getVision().start();
-		
+		Flashboard.putSlider("Drive Filter", driveFilterSpeed, 0.0, 1.0, 10);
 		
 		/*
 		 * Starts the flashboard
 		 */
 		Flashboard.start();
-	
 	}
 	
 	@Override
@@ -186,11 +127,6 @@ public class ExampleFlashboard extends FlashRio{
 	}
 	@Override
 	protected void teleopPeriodic() {
-		/*
-		 * Updates the controllers. Used to refresh the buttons on controllers so that actions attached to
-		 * them will be executed when needed.
-		 */
-		FlashRoboUtil.updateHID();
 	}
 
 	@Override

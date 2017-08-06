@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
-import edu.flash3388.flashlib.util.beans.ChangeListener;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 
 public abstract class ObservableBooleanProperty implements ObservableProperty<Boolean>, ObservableBooleanValue, BooleanProperty{
@@ -9,27 +8,36 @@ public abstract class ObservableBooleanProperty implements ObservableProperty<Bo
 	private ObservablePropertyHelper<Boolean> helper = null;
 	private ChangeListener<Boolean> listener = null;
 	
-	@Override
-	public void fireValueChangedEvent() {
-        ObservablePropertyHelper.fireValueChangedEvent(helper);
-    }
+	
+	protected abstract void setInternal(boolean b);
+	protected abstract boolean getInternal();
 	
 	@Override
-	public void setValue(Boolean o) {
+	public void set(boolean b) {
 		if(isBound())
 			throw new RuntimeException("This property is bound and cannot be set");
-		if(o == null)
-			o = false;
-		if(get() != o){
-			set(o);
+		if(get() != b){
+			setInternal(b);
 			fireValueChangedEvent();
 		}
 	}
 	@Override
+	public boolean get() {
+		return observable == null? getInternal() : observable.get();
+	}
+	@Override
+	public void setValue(Boolean o) {
+		set(o == null? false : o);
+	}
+	@Override
 	public Boolean getValue() {
-		return observable == null? get() : observable.get();
+		return get();
 	}
 
+	@Override
+	public void fireValueChangedEvent() {
+        ObservablePropertyHelper.fireValueChangedEvent(helper);
+    }
 	@Override
 	public void addListener(ChangeListener<? super Boolean> listener) {
 		helper = ObservablePropertyHelper.addListener(helper, this, listener);
@@ -45,7 +53,7 @@ public abstract class ObservableBooleanProperty implements ObservableProperty<Bo
 		if(observable == null)
 			throw new NullPointerException("cannot bind to null");
 		
-		if(!observable.equals(this.observable)){
+		if(this.observable == null || !observable.equals(this.observable)){
 			if (isBound())
 				unbind();
 			

@@ -12,11 +12,11 @@ public class SimpleObservableDoubleProperty extends ObservableDoubleProperty{
 	}
 	
 	@Override
-	public double get() {
+	protected double getInternal() {
 		return value;
 	}
 	@Override
-	public void set(double d) {
+	protected void setInternal(double d) {
 		this.value = d;
 	}
 }

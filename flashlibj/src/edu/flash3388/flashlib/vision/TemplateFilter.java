@@ -19,7 +19,7 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
  */
 public class TemplateFilter extends VisionFilter{
 
-	private ValueSource<Object>[] imgs;
+	private TemplateMatcher matcher;
 	private DoubleProperty scaleFactor = new SimpleDoubleProperty();
 	private IntegerProperty method = new SimpleIntegerProperty();
 	private Property<String> imgDirPath = new SimpleProperty<String>();
@@ -44,20 +44,24 @@ public class TemplateFilter extends VisionFilter{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void process(VisionSource source) {
-		if(imgs == null){
+		if(matcher == null){
+			ValueSource<Object>[] imgs = null;
+			
 			File dir = new File(imgDirPath.getValue());
 			if(!dir.exists() || !dir.isDirectory())
 				return;
 			File[] files = dir.listFiles();
 			ArrayList<ValueSource<Object>> imgList = new ArrayList<ValueSource<Object>>();
 			for (int i = 0; i < files.length; i++) {
-				ValueSource<Object> img = source.loadImage(files[i].getAbsolutePath());
+				ValueSource<Object> img = source.loadImage(files[i].getAbsolutePath(), true);
 				if(img != null && img.getValue() != null)
 					imgList.add(img);
 			}
 			imgs = new ValueSource[imgList.size()];
 			imgList.toArray(imgs);
+			
+			matcher = source.matchTemplate(null, imgs, method.get(), scaleFactor.get());
 		}
-		source.matchTemplate(imgs, method.get(), scaleFactor.get());
+		source.matchTemplate(matcher, null, method.get(), scaleFactor.get());
 	}
 }

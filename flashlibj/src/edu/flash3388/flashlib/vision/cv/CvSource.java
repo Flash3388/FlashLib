@@ -14,8 +14,10 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
+import edu.flash3388.flashlib.vision.TemplateMatcher;
 import edu.flash3388.flashlib.vision.VisionSource;
 import edu.flash3388.flashlib.vision.VisionSourceImageMissingException;
+import edu.flash3388.flashlib.vision.cv.CvTemplateMatcher.Method;
 
 /**
  * A vision source using openCV.
@@ -297,27 +299,29 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void matchTemplate(ValueSource<Object>[] templateImgs, int method, double scaleFactor) {
-		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
-			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
-					+method + ":" + CvTemplateMatcher.Method.values().length);
-		
-		Mat[] templates = new Mat[templateImgs.length];
-		Object imgData = null;
-		for (int i = 0; i < templates.length; i++) {
-			imgData = templateImgs[i].getValue();
-			if(imgData == null)
-				throw new NullPointerException("template image cannot be null: "+i);
-			if(!(imgData instanceof Mat))
-				throw new IllegalArgumentException("Image format does not match vision source: "+i);
-			templates[i] = (Mat)imgData;
+	public TemplateMatcher matchTemplate(TemplateMatcher matcher, ValueSource<Object>[] templateImgs, int method, double scaleFactor) {
+		if(matcher == null){
+			if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
+				throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
+						+method + ":" + CvTemplateMatcher.Method.values().length);
+			
+			Mat[] templates = new Mat[templateImgs.length];
+			Object imgData = null;
+			for (int i = 0; i < templates.length; i++) {
+				imgData = templateImgs[i].getValue();
+				if(imgData == null)
+					throw new NullPointerException("template image cannot be null: "+i);
+				if(!(imgData instanceof Mat))
+					throw new IllegalArgumentException("Image format does not match vision source: "+i);
+				templates[i] = (Mat)imgData;
+			}
+			
+			matcher = new CvTemplateMatcher(templates, Method.values()[method]);
 		}
 		
 		checkReady(false, true);
 		
-		CvTemplateMatcher.MatchResult result = 
-				CvProcessing.matchTemplate(threshold, templates, CvTemplateMatcher.Method.values()[method], 
-						scaleFactor);
+		CvTemplateMatcher.MatchResult result = ((CvTemplateMatcher)matcher).match(threshold, scaleFactor);
 		
 		
 	   double x= result.center.x - threshold.width() * 0.5 * result.scaleFactor,
@@ -329,6 +333,8 @@ public class CvSource implements VisionSource{
 							Math.min(threshold.height() - y, threshold.height() * result.scaleFactor)
 							}));
 		contours = null;
+		
+		return matcher;
 	}
 	
 	/**

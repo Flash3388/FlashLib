@@ -48,7 +48,7 @@ public class MainController implements Initializable{
 		boolean lastconnectionC = false, lastconnectionS = false;
 		int lastProcCount = 0, lastProc = -1;
 		Runnable dxUpdate = ()->{
-			if(Dashboard.communicationsConnected())
+			if(Dashboard.communicationsConnected() || Dashboard.camConnected())
 				controller.update(); 
 			CvRunner vision = Dashboard.getVision();
 			if(vision != null){

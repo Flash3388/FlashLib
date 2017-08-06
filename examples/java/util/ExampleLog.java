@@ -1,4 +1,4 @@
-package examples.util.log;
+package examples.util;
 
 import edu.flash3388.flashlib.util.Log;
 
@@ -17,13 +17,13 @@ public class ExampleLog {
 		 * Creating a new log named "test" which immediately writes data into the log file. The log
 		 * overrides any existing files with the same name.
 		 */
-		Log log = new Log("test", Log.LoggingType.Stream, true);
+		Log log = Log.createStreamLog("test log");
 		
 		/*
 		 * Sets the logging mode to Write and Print. Meaning data will be printed to the out stream
 		 * and written to the log files 
 		 */
-		log.setLoggingMode((byte) (Log.MODE_PRINT | Log.MODE_WRITE));
+		log.setLoggingMode(Log.MODE_PRINT | Log.MODE_WRITE);
 		
 		log.log("HELLO!! 1"); // Use this for standard log data
 		log.logTime("IMPORTANT HELLO!! 1"); // Use this to record the time of the data log
@@ -49,5 +49,10 @@ public class ExampleLog {
 		log.logTime("IMPORTANT HELLO!! 3"); // Use this to record the time of the data log
 		log.reportError("ERROR!! 3"); // Use to log errors
 		log.reportWarning("WARNING!! 3"); // Use to log warnings
+		
+		/*
+		 * Saves and closes the log. After that, the log is no longer available for use
+		 */
+		log.close();
 	}
 }

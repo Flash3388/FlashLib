@@ -2,8 +2,6 @@ package edu.flash3388.flashlib.util.beans.observable;
 
 import java.lang.ref.WeakReference;
 
-import edu.flash3388.flashlib.util.beans.ChangeListener;
-
 public class ObservableChangeListener<T> implements ChangeListener<T>{
 	
 	private final WeakReference<ObservableProperty<T>> wref;

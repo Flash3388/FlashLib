@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <constants-handler>
-	<constant name="comm.port.remote" type="double">5801.0</constant>
+	<constant name="comm.port.remote" type="double">5800.0</constant>
 	<constant name="comm.port.local" type="double">5800.0</constant>
 	<constant name="cam.port.local" type="double">5802.0</constant>
-	<constant name="cam.port.remote" type="double">5803.0</constant>
+	<constant name="cam.port.remote" type="double">5802.0</constant>
 	<constant name="host.robot" type="string">roborio-3388-frc.local</constant>
 	<constant name="vision.default" type="string"></constant>
 	<constant name="comm.protocol" type="string">tcp</constant>

@@ -11,10 +11,11 @@ import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-public class CvTemplateMatcher {
+import edu.flash3388.flashlib.vision.TemplateMatcher;
+
+public class CvTemplateMatcher implements TemplateMatcher{
 	
 	public static enum Method {SQDIFF,SQDIFF_NORMED,TM_CCORR,TM_CCORR_NORMED,TM_COEFF,TM_COEFF_NORMED};
 	
@@ -24,11 +25,11 @@ public class CvTemplateMatcher {
 	public CvTemplateMatcher(Mat templ,Method m) {
 		this(new Mat[]{templ},m);
 	}
-
 	public CvTemplateMatcher(Mat[] templ,Method m) {
 		method = m;
-		this.templates= templ;
+		this.templates = templ;
 	}
+	
 	public MatchResult match(Mat scene,double scaleFactor){
 		return match(scene,templates,method,scaleFactor);
 	}
@@ -80,16 +81,14 @@ public class CvTemplateMatcher {
 		}
 	}
 	
-	private static class MatchRunner implements Runnable
-	{
+	private static class MatchRunner implements Runnable{
 		private Mat scene;
 		private Mat templ;
 		private Method method;
 		private double scaleFactor;
 		public MatchResult result;
 		
-		public MatchRunner(Mat scene, Mat templ, Method method, double scaleFactor)
-		{
+		public MatchRunner(Mat scene, Mat templ, Method method, double scaleFactor){
 			this.scene = scene;
 			this.templ = templ;
 			this.method = method;
@@ -175,5 +174,4 @@ public class CvTemplateMatcher {
 		
 		
 	}
-
 }

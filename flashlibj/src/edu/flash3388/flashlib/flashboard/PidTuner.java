@@ -124,7 +124,7 @@ public class PidTuner extends Sendable{
 			lastD = kd.get();
 			lastF = kf.get();
 			
-			byte[] data = new byte[32];
+			byte[] data = new byte[33];
 			data[0] = K_UPDATE;
 			FlashUtil.fillByteArray(lastP, 1, data);
 			FlashUtil.fillByteArray(lastI, 9, data);

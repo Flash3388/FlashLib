@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.util.beans.observable;
 import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.ChangeListener;
 
 public abstract class ObservablePropertyHelper<T> {
 
@@ -81,8 +80,7 @@ public abstract class ObservablePropertyHelper<T> {
 			if(listenersCount > 0){
 				final T oldValue = currentValue;
 				currentValue = observable.getValue();
-				final boolean changed = (currentValue == null)? (oldValue != null) : !currentValue.equals(oldValue);
-				if(changed){
+				if((currentValue == null)? (oldValue != null) : !currentValue.equals(oldValue)){
 					for (int i = 0; i < listeners.length; i++) {
 						try {
 							listeners[i].changed(observable, oldValue, currentValue);

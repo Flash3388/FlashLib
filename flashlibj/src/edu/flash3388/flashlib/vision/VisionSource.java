@@ -206,23 +206,22 @@ public interface VisionSource {
 	 * image now contains the part of the image where the template was best matched. To work on every size, the template
 	 * size is changed until the match is the best possible. 
 	 * 
+	 * @param matcher the template matcher used to match between template. If null, one will be created
 	 * @param imgs a reference to the template image contained in a source object. The image type must correlate to the implementation used.
 	 * @param method the method of template matching. Options vary between implementations
 	 * @param scaleFactor the resize factor
+	 * @return the given template matcher if not null, or a new template matcher
 	 */
-	void matchTemplate(ValueSource<Object>[] imgs, int method, double scaleFactor);
+	TemplateMatcher matchTemplate(TemplateMatcher matcher, ValueSource<Object>[] imgs, int method, double scaleFactor);
 	
 	/**
 	 * Loads an image and wraps it in a reference to the image type used by the implementation.
 	 * 
 	 * @param imgPath path to the image
+	 * @param binary true to load the image as a binary image
 	 * @return the loaded image, or null if unable to load
 	 */
 	ValueSource<Object> loadImage(String imgPath, boolean binary);
-	
-	default ValueSource<Object> loadImage(String imgPath){
-		return loadImage(imgPath, true);
-	}
 }
 
 /*

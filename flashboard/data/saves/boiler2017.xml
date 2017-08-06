@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <vision name="boiler2017">
 	<filter name="color">
+		<param name="hsv" type="Boolean">true</param>
 		<param name="min1" type="Int">0</param>
 		<param name="max1" type="Int">180</param>
 		<param name="min2" type="Int">0</param>
 		<param name="max2" type="Int">255</param>
 		<param name="min3" type="Int">230</param>
 		<param name="max3" type="Int">255</param>
-		<param name="hsv" type="Boolean">true</param>
 	</filter>
 	<filter name="largest">
 		<param name="amount" type="Int">10</param>
@@ -25,9 +25,9 @@
 		<param name="minScore" type="Double">0.1</param>
 	</filter>
 	<analysis-creator name="edu.flash3388.flashlib.vision.GroupedAnalysisCreator">
-		<param name="targetWidth" type="Double">20.0</param>
-		<param name="distanceHeight" type="Boolean">false</param>
-		<param name="camFov" type="Double">32.0</param>
 		<param name="targetHeight" type="Double">20.0</param>
+		<param name="camFov" type="Double">32.0</param>
+		<param name="distanceHeight" type="Boolean">false</param>
+		<param name="targetWidth" type="Double">20.0</param>
 	</analysis-creator>
 </vision>

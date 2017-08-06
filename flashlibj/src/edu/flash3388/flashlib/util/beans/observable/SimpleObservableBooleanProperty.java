@@ -12,11 +12,11 @@ public class SimpleObservableBooleanProperty extends ObservableBooleanProperty{
 	}
 	
 	@Override
-	public boolean get() {
+	protected boolean getInternal() {
 		return value;
 	}
 	@Override
-	public void set(boolean b) {
+	protected void setInternal(boolean b) {
 		this.value = b;
 	}
 }

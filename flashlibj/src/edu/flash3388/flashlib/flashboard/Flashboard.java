@@ -15,8 +15,11 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.util.beans.Property;
+import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
 /**
@@ -33,7 +36,7 @@ public class Flashboard {
 	/**
 	 * Default communications port for Flashboard from the robot.
 	 */
-	public static final int PORT_ROBOT = 5801;
+	public static final int PORT_ROBOT = 5800;
 	/**
 	 * Default communications port for Flashboard from the software.
 	 */
@@ -41,7 +44,7 @@ public class Flashboard {
 	/**
 	 * Default camera communications port for Flashboard from the robot.
 	 */
-	public static final int CAMERA_PORT_ROBOT = 5803;
+	public static final int CAMERA_PORT_ROBOT = 5802;
 	/**
 	 * Default camera communications port for Flashboard from the software.
 	 */
@@ -336,7 +339,7 @@ public class Flashboard {
 	}
 	
 	
-	public static DashboardDoubleProperty putData(String name, DoubleProperty prop){
+	public static DashboardDoubleProperty putData(String name, DoubleSource prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
@@ -349,7 +352,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardBooleanProperty putData(String name, BooleanProperty prop){
+	public static DashboardBooleanProperty putData(String name, BooleanSource prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
@@ -362,7 +365,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringProperty putData(String name, Property<String> prop){
+	public static DashboardStringProperty putData(String name, ValueSource<String> prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
