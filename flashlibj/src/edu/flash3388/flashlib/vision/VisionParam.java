@@ -2,14 +2,16 @@ package edu.flash3388.flashlib.vision;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.util.beans.Property;
 
 /**
@@ -263,19 +265,25 @@ public abstract class VisionParam {
 			obj = method.invoke(instance);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		}
-		if(obj == null)
+		if(obj == null || !(FlashUtil.isAssignable(retType, Property.class)))
 			return;
 		
-		if(FlashUtil.isAssignable(retType, BooleanProperty.class) && param instanceof BooleanParam){
-			((BooleanProperty)obj).set(getBooleanValue(param));
+		Type[] genericTypes = FlashUtil.findGenericArgumentsOfSuperType(retType, Property.class);
+		if(genericTypes == null || genericTypes.length < 1 || genericTypes[0] instanceof ParameterizedType)
+			return;
+		
+		Property<?> prop = (Property<?>)obj;
+		Class<?> propType = (Class<?>)genericTypes[0];
+		if(FlashUtil.isAssignable(propType, Boolean.class) && param instanceof BooleanParam){
+			((Property<Boolean>)prop).setValue(getBooleanValue(param));
 		}
-		else if(FlashUtil.isAssignable(retType, DoubleProperty.class) && param instanceof DoubleParam){
-			((DoubleProperty)obj).set(getDoubleValue(param));
+		else if(FlashUtil.isAssignable(propType, Double.class) && param instanceof DoubleParam){
+			((Property<Double>)prop).setValue(getDoubleValue(param));
 		}
-		else if(FlashUtil.isAssignable(retType, IntegerProperty.class) && param instanceof IntParam){
-			((IntegerProperty)obj).set(getIntValue(param));
+		else if(FlashUtil.isAssignable(propType, Integer.class) && param instanceof IntParam){
+			((Property<Integer>)obj).setValue(getIntValue(param));
 		}
-		else if(FlashUtil.isAssignable(retType, Property.class) && param instanceof StringParam){
+		else if(FlashUtil.isAssignable(propType, String.class) && param instanceof StringParam){
 			((Property<String>)obj).setValue(getStringValue(param));
 		}
 	}
@@ -287,7 +295,6 @@ public abstract class VisionParam {
 	 * @param name name of the property
 	 * @return a new vision parameter with the data from the method, or null if unable to get data
 	 */
-	@SuppressWarnings("unchecked")
 	public static VisionParam getValueFromMethod(Method method, Object instance, String name){
 		Class<?> retType = method.getReturnType();
 		if(retType == null)
@@ -298,23 +305,29 @@ public abstract class VisionParam {
 			obj = method.invoke(instance);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		}
-		if(obj == null)
+		if(obj == null || !(FlashUtil.isAssignable(retType, Property.class)))
 			return null;
 		
-		if(FlashUtil.isAssignable(retType, BooleanProperty.class)){
-			boolean val = ((BooleanProperty)obj).get();
+		Type[] genericTypes = FlashUtil.findGenericArgumentsOfSuperType(retType, Property.class);
+		if(genericTypes == null || genericTypes.length < 1 || genericTypes[0] instanceof ParameterizedType)
+			return null;
+		
+		Property<?> prop = (Property<?>)obj;
+		Class<?> propType = (Class<?>)genericTypes[0];
+		if(FlashUtil.isAssignable(propType, Boolean.class)){
+			boolean val = (Boolean)prop.getValue();
 			return new BooleanParam(name, val);
 		}
-		else if(FlashUtil.isAssignable(retType, DoubleProperty.class)){
-			double val = ((DoubleProperty)obj).get();
+		else if(FlashUtil.isAssignable(propType, Double.class)){
+			double val = (Double)prop.getValue();
 			return new DoubleParam(name, val);
 		}
-		else if(FlashUtil.isAssignable(retType, IntegerProperty.class)){
-			int val = ((IntegerProperty)obj).get();
+		else if(FlashUtil.isAssignable(propType, Integer.class)){
+			int val = (Integer)prop.getValue();
 			return new IntParam(name, val);
 		}
-		else if(FlashUtil.isAssignable(retType, Property.class)){
-			String val = ((Property<String>)obj).getValue();
+		else if(FlashUtil.isAssignable(propType, String.class)){
+			String val = (String)prop.getValue();
 			return new StringParam(name, val);
 		}
 		
@@ -323,23 +336,21 @@ public abstract class VisionParam {
 	/**
 	 * Gets the parameters of a creator by searching for methods which end with the name "Property" and
 	 * return a type of bean (DoubleProperty, IntegerProperty, Property, BooleanProperty).
-	 * @param object object to get parameters for.
+	 * @param instance object to get parameters for.
 	 *
 	 * @return an array of parameters.
 	 */
-	public static VisionParam[] getParameters(Object object){
+	public static VisionParam[] getParameters(Object instance){
 		List<VisionParam> parameters = new ArrayList<VisionParam>();
-		
-		Method[] methods = object.getClass().getMethods();
-		for (Method method : methods) {
-			int idx = method.getName().indexOf("Property");
-			if(idx >= 0 && idx + 8 == method.getName().length()){
-				String propName = method.getName().substring(0, idx);
-				
-				VisionParam param = VisionParam.getValueFromMethod(method, object, propName);
-				if(param != null)
-					parameters.add(param);
-			}
+		Map<String, Method> methods = findParametersMethods(instance.getClass());
+		for (Iterator<Entry<String, Method>> entries = methods.entrySet().iterator(); entries.hasNext();) {
+			Entry<String, Method> entry = entries.next();
+			String name = entry.getKey();
+			Method method = entry.getValue();
+			
+			VisionParam param = VisionParam.getValueFromMethod(method, instance, name);
+			if(param != null)
+				parameters.add(param);
 		}
 		return parameters.toArray(new VisionParam[parameters.size()]);
 	}
@@ -351,18 +362,35 @@ public abstract class VisionParam {
 	 * @param parameters the parameters to set
 	 */
 	public static void setParameters(Object instance, Map<String, VisionParam> parameters){
-		Method[] methods = instance.getClass().getMethods();
+		Map<String, Method> methods = findParametersMethods(instance.getClass());
+		for (Iterator<Entry<String, Method>> entries = methods.entrySet().iterator(); entries.hasNext();) {
+			Entry<String, Method> entry = entries.next();
+			String name = entry.getKey();
+			Method method = entry.getValue();
+			
+			VisionParam param = parameters.get(name);
+			if(param != null)
+				VisionParam.setValueForMethod(method, param, instance);
+		}
+	}
+	/**
+	 * Gets all the methods in the given class which are used to get properties according to
+	 * the convention used for vision parameters.
+	 * 
+	 * @param cl the class to search
+	 * @return a map of methods as values and property names as keys
+	 */
+	public static Map<String, Method> findParametersMethods(Class<?> cl){
+		Map<String, Method> methodMap = new LinkedHashMap<String, Method>();
+		Method[] methods = cl.getMethods();
 		for (Method method : methods) {
 			int idx = method.getName().indexOf("Property");
 			if(idx >= 0 && idx + 8 == method.getName().length()){
 				String propName = method.getName().substring(0, idx);
-				VisionParam param = parameters.get(propName);
-				if(param == null)
-					continue;
-				
-				VisionParam.setValueForMethod(method, param, instance);
+				methodMap.put(propName, method);
 			}
 		}
+		return methodMap;
 	}
 	
 	/**

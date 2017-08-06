@@ -73,7 +73,8 @@ public abstract class VisionFilter {
 		}
 		
 		//setting parameters
-		VisionParam.setParameters(filter, parameters);
+		if(parameters != null)
+			VisionParam.setParameters(filter, parameters);
 		
 		return filter;
 	}

@@ -33,4 +33,9 @@ public class SimpleDoubleProperty implements DoubleProperty{
 	public Double getValue() {
 		return var;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(var);
+	}
 }

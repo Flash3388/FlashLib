@@ -53,8 +53,7 @@ public class MainController implements Initializable{
 			CvRunner vision = Dashboard.getVision();
 			if(vision != null){
 				if(vision.getProcessingCount() != lastProcCount){
-					for (int i = lastProcCount; i < vision.getProcessingCount(); i++)
-						controller.addParamToBox(vision.getProcessing(i).getName());
+					controller.updateParamBox();
 					lastProcCount = vision.getProcessingCount();
 				}
 				if(vision.getProcessing() != null)
@@ -144,7 +143,7 @@ public class MainController implements Initializable{
 	public void initialize(URL location, ResourceBundle resources) {
 		threadTask = new UpdateTask();
 		threadTask.controller = this;
-		Dashboard.addRunnableForUpdate(threadTask);
+		Dashboard.getUpdater().addTask(threadTask);
 		
 		sbc_ssh.setOnAction((e)->{
 			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
@@ -434,22 +433,18 @@ public class MainController implements Initializable{
 			FlashUtil.getLog().log("Parameters loaded");
 			Dashboard.getVision().addProcessing(proc);
 			Platform.runLater(()->updateParam());
-			addParamToBox(proc.getName());
+			updateParamBox();
 			return true;
 		}else {
 			FlashUtil.getLog().log("Loading failed");
 			return false;
 		}
 	}
-	private void addParamToBox(String name){
-		for (String str : mode_box.getItems()) {
-			if(name.equals(str)){
-				return;
-			}
-		}
+	private void updateParamBox(){
 		Platform.runLater(()->{
-			mode_box.getItems().add(name);
-			mode_box.getSelectionModel().select(name);
+			mode_box.getItems().clear();
+			for (int i = 0; i < Dashboard.getVision().getProcessingCount(); i++)
+				mode_box.getItems().add(Dashboard.getVision().getProcessing(i).getName());
 		});
 	}
 	public void updateParamBoxSelection(){
@@ -494,8 +489,10 @@ public class MainController implements Initializable{
 		PidTunerWindow.showTuner();
 	}
 	private void showVisionEditor(){
-		if(Dashboard.visionInitialized())
+		if(Dashboard.visionInitialized()){
 			VisionEditorWindow.showEditor(Dashboard.getVision());
+			updateParam();
+		}
 		else FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Vision Missing", "No Vision Runner was found");
 	}
 	public void stop(){
