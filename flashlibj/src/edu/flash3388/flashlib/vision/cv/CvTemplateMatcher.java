@@ -52,7 +52,9 @@ public class CvTemplateMatcher {
 		if(best != null){
 			
 			Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(50,203,122));
+			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
 			Imgcodecs.imwrite("test.png", scene);
+			
 		}
 		return best;
 	}
@@ -99,6 +101,28 @@ public class CvTemplateMatcher {
 			result = match(scene, templ, method, scaleFactor);
 			
 		}
+		public MatchResult scaleTemplateMatch(Mat scene, Mat templ, Method method, double scaleFactor){
+			int tw = templ.width();
+			int th = templ.height();
+			double currScaleFactor = scaleFactor;
+			MatchResult bestScore = null;
+			
+			for(Mat img = templ.clone(); img.width() > tw*0.25;
+					CvProcessing.resize(img, scaleFactor)){
+				
+				MatchResult currResult = match(scene, img, method, img);
+		        
+		        if(bestScore == null || bestScore.maxVal < currResult.maxVal){
+		        	bestScore = currResult;
+		        	bestScore.scaleFactor = currScaleFactor;
+		        }
+		        currScaleFactor  *= scaleFactor;
+		     }
+			
+			
+	       	return bestScore;
+		}
+
 		public MatchResult match(Mat scene, Mat templ, Method method, double scaleFactor){
 			int tw = templ.width();
 			int th = templ.height();
@@ -108,7 +132,7 @@ public class CvTemplateMatcher {
 			for(Mat img = scene.clone(); img.width() > tw && img.height() > th;
 					CvProcessing.resize(img, scaleFactor)){
 				
-				MatchResult currResult = match(scene, templ, method, img);
+				MatchResult currResult = match(img, templ, method, img);
 		        
 		        if(bestScore == null || bestScore.maxVal < currResult.maxVal){
 		        	bestScore = currResult;
@@ -123,8 +147,8 @@ public class CvTemplateMatcher {
 
 		public MatchResult match(Mat scene, Mat templ, Method method, Mat img) {
 			
-			int result_cols = img.cols() - templ.cols() + 1;
-			int result_rows = img.rows() - templ.rows() + 1;
+			int result_cols = scene.cols() - templ.cols() + 1;
+			int result_rows = scene.rows() - templ.rows() + 1;
 			Mat result = new Mat(result_rows, result_cols, CV_32FC1);
 			Imgproc.matchTemplate(scene, templ, result, method.ordinal());
 			//Core.normalize(result, result, 0, 1, 32,-1,new Mat());

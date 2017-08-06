@@ -296,7 +296,7 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void matchTemplate(ValueSource<Object>[] templateImgs, int method, int scaleFactor) {
+	public void matchTemplate(ValueSource<Object>[] templateImgs, int method, double scaleFactor) {
 		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
 			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
 					+method + ":" + CvTemplateMatcher.Method.values().length);

@@ -773,11 +773,11 @@ public class CvProcessing {
 	 * @param scaleFactor resizing factor in pixels
 	 * @return a result of the match
 	 */
-	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ, Method method, int scaleFactor){
-		return matchTemplate(scene, new Mat[]{templ}, method, scaleFactor);
+	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ, Method method, double scaleFactor){
+		return CvProcessing.matchTemplate(scene, (new Mat[]{templ}), method, scaleFactor);
 	}
 	
-	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ[], Method method, int scaleFactor){
+	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat[] templ, Method method, double scaleFactor){
 		return CvTemplateMatcher.match(scene, templ, method, scaleFactor);
 	}
 }

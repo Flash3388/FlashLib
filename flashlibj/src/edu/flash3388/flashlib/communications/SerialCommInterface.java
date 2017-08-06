@@ -29,7 +29,7 @@ public class SerialCommInterface extends PortCommInterface {
 	
 	
 	public SerialCommInterface(boolean server, String port,int timeout,int baudrate) {
-		super(server);
+		super(server, false);
 		portName = port;
 		this.timeout = timeout;
 		this.baudrate = baudrate;

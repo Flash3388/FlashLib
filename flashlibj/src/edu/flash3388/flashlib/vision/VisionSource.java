@@ -210,7 +210,7 @@ public interface VisionSource {
 	 * @param method the method of template matching. Options vary between implementations
 	 * @param scaleFactor the resize factor
 	 */
-	void matchTemplate(ValueSource<Object>[] imgs, int method, int scaleFactor);
+	void matchTemplate(ValueSource<Object>[] imgs, int method, double scaleFactor);
 	
 	/**
 	 * Loads an image and wraps it in a reference to the image type used by the implementation.

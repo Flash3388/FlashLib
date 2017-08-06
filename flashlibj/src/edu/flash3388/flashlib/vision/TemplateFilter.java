@@ -3,8 +3,10 @@ package edu.flash3388.flashlib.vision;
 import java.io.File;
 import java.util.ArrayList;
 
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.util.beans.Property;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 import edu.flash3388.flashlib.util.beans.SimpleProperty;
@@ -18,18 +20,18 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
 public class TemplateFilter extends VisionFilter{
 
 	private ValueSource<Object>[] imgs;
-	private IntegerProperty scaleFactor = new SimpleIntegerProperty();
+	private DoubleProperty scaleFactor = new SimpleDoubleProperty();
 	private IntegerProperty method = new SimpleIntegerProperty();
 	private Property<String> imgDirPath = new SimpleProperty<String>();
 	
 	public TemplateFilter(){}
-	public TemplateFilter(String imgDirPath, int method, int scaleFactor){
+	public TemplateFilter(String imgDirPath, int method, double scaleFactor){
 		this.imgDirPath.setValue(imgDirPath);
 		this.scaleFactor.set(scaleFactor);
 		this.method.set(method);
 	}
 	
-	public IntegerProperty scaleFactorProperty(){
+	public DoubleProperty scaleFactorProperty(){
 		return scaleFactor;
 	}
 	public IntegerProperty methodProperty(){

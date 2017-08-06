@@ -587,7 +587,7 @@ public final class FlashUtil {
 	 */
 	public static void printArray(byte[] s){
 		for(int i = 0; i < s.length; i++)
-			System.out.println((int)s[i]);
+			System.out.print((char)s[i]);
 	}
 	/**
 	 * Prints the array values.
