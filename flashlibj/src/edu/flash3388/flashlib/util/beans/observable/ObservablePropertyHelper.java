@@ -39,43 +39,44 @@ public abstract class ObservablePropertyHelper<T> {
 	private static class Generic<T> extends ObservablePropertyHelper<T>{
 
 		private ChangeListener<? super T>[] changeListeners;
-		private int changeListeneresCount;
+		private int changeListenersCount;
 		private T currentValue;
 		
 		@SuppressWarnings("unchecked")
 		private Generic(ObservableValue<T> observable, ChangeListener<? super T> changeListener) {
 			super(observable);
 			this.changeListeners = new ChangeListener[]{changeListener};
-			this.changeListeneresCount = 1;
+			this.changeListenersCount = 1;
 			this.currentValue = observable.getValue();
 		}
 
 		@Override
 		protected ObservablePropertyHelper<T> addListener(ChangeListener<? super T> listener) {
 			final int oldCapacity = changeListeners.length;
-			int newCapacity = (changeListeneresCount < oldCapacity)? oldCapacity : (oldCapacity * 3) / 2 + 1;
+			int newCapacity = (changeListenersCount < oldCapacity)? oldCapacity : (oldCapacity * 3) / 2 + 1;
 			if(newCapacity != oldCapacity)
 				changeListeners = Arrays.copyOf(changeListeners, newCapacity);
-			changeListeners[changeListeneresCount++] = listener;
+			changeListeners[changeListenersCount++] = listener;
 			return this;
 		}
 		@Override
 		protected ObservablePropertyHelper<T> removeListener(ChangeListener<? super T> listener) {
-			int idx = FlashUtil.indexOf(changeListeners, 0, changeListeneresCount, listener);
+			int idx = FlashUtil.indexOf(changeListeners, 0, changeListenersCount, listener);
 			if(idx >= 0){
 				changeListeners[idx] = null;
-				FlashUtil.shiftArrayL(changeListeners, idx, changeListeneresCount);
-				--changeListeneresCount;
+				if(changeListenersCount > 1)
+					FlashUtil.shiftArrayL(changeListeners, idx, changeListenersCount);
+				--changeListenersCount;
 				
-				if(changeListeneresCount < (changeListeners.length / 3 * 2))
-					changeListeners = Arrays.copyOf(changeListeners, changeListeneresCount);
+				if(changeListenersCount < (changeListeners.length / 3 * 2))
+					changeListeners = Arrays.copyOf(changeListeners, changeListenersCount);
 			}
 			return this;
 		}
 		@Override
 		protected void fireValueChangedEvent() {
 			final ChangeListener<? super T>[] listeners = changeListeners;
-			final int listenersCount = changeListeneresCount;
+			final int listenersCount = changeListenersCount;
 			
 			if(listenersCount > 0){
 				final T oldValue = currentValue;

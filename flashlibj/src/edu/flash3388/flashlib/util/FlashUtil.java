@@ -370,6 +370,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(byte[] data, int start, int end, byte ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -385,6 +386,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(short[] data, int start, int end, short ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -400,6 +402,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(int[] data, int start, int end, int ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -415,6 +418,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(long[] data, int start, int end, long ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -430,6 +434,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(double[] data, int start, int end, double ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -445,6 +450,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(float[] data, int start, int end, float ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -460,6 +466,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(char[] data, int start, int end, char ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -475,9 +482,10 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(Object[] data, int start, int end, Object ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
-			if(data[i].equals(ch)) return i;
+			if(data[i] != null && data[i].equals(ch)) return i;
 		return -1;
 	}
 	
@@ -665,9 +673,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(byte[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -677,9 +687,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(short[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -689,9 +701,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(int[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -701,9 +715,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(long[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -713,9 +729,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(double[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -725,9 +743,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(float[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -737,9 +757,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(char[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -749,9 +771,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(Object[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	
 	
