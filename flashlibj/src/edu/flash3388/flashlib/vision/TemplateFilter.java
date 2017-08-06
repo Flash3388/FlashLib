@@ -53,7 +53,7 @@ public class TemplateFilter extends VisionFilter{
 			for (int i = 0; i < files.length; i++) {
 				ValueSource<Object> img = source.loadImage(files[i].getAbsolutePath());
 				if(img != null && img.getValue() != null)
-					imgList.add(null);
+					imgList.add(img);
 			}
 			imgs = new ValueSource[imgList.size()];
 			imgList.toArray(imgs);

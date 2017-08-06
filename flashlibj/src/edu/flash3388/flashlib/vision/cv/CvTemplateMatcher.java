@@ -51,9 +51,9 @@ public class CvTemplateMatcher {
 		MatchResult best = findBestMatch(t);
 		if(best != null){
 			
-			Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(50,203,122));
+			Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(51,51,51));
 			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
-			Imgcodecs.imwrite("test.png", scene);
+			//Imgcodecs.imwrite("test.png", scene);
 			
 		}
 		return best;

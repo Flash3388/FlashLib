@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
@@ -318,11 +319,14 @@ public class CvSource implements VisionSource{
 				CvProcessing.matchTemplate(threshold, templates, CvTemplateMatcher.Method.values()[method], 
 						scaleFactor);
 		
+		
+	   double x= result.center.x - threshold.width() * 0.5 * result.scaleFactor,
+			   y= result.center.y - threshold.height() * 0.5 * result.scaleFactor;
 		threshold = threshold.submat(new Rect(new double[]{
-							result.center.x - threshold.width() * 0.5 * result.scaleFactor, 
-							result.center.x + threshold.width() * 0.5 * result.scaleFactor, 
-							result.center.y - threshold.height() * 0.5 * result.scaleFactor, 
-							result.center.y + threshold.height() * 0.5 * result.scaleFactor
+							Math.max(0, x),
+							Math.max(0, y),
+							Math.min(threshold.width() - x, threshold.width() * result.scaleFactor),
+							Math.min(threshold.height() - y, threshold.height() * result.scaleFactor)
 							}));
 		contours = null;
 	}
@@ -331,8 +335,8 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ValueSource<Object> loadImage(String imgPath) {
-		Mat mat = Imgcodecs.imread(imgPath);
+	public ValueSource<Object> loadImage(String imgPath, boolean binary) {
+		Mat mat = Imgcodecs.imread(imgPath,binary ? CvType.CV_8UC1 : CvType.CV_8UC3);
 		if(mat == null)
 			return null;
 		return new SimpleProperty<Object>(mat);

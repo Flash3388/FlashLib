@@ -218,7 +218,11 @@ public interface VisionSource {
 	 * @param imgPath path to the image
 	 * @return the loaded image, or null if unable to load
 	 */
-	ValueSource<Object> loadImage(String imgPath);
+	ValueSource<Object> loadImage(String imgPath, boolean binary);
+	
+	default ValueSource<Object> loadImage(String imgPath){
+		return loadImage(imgPath, true);
+	}
 }
 
 /*
