@@ -1,5 +1,13 @@
 package edu.flash3388.flashlib.util.beans;
 
+/**
+ * A simple implementation of {@link Property}. Holds a variable of the generic type which can be
+ * set or get.
+ * 
+ * @author Tom Tzook
+ * @param <T> type of value of this property
+ * @since FlashLib 1.0.1
+ */
 public class SimpleProperty<T> implements Property<T> {
 
 	private T value;

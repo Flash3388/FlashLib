@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.util.beans;
 
 /**
- * A int getter and setter bean which contains a variable. 
+ * A simple implementation of {@link IntegerProperty}. Holds a primitive integer variable which can be
+ * set or get.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.1

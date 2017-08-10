@@ -1,10 +1,11 @@
 package edu.flash3388.flashlib.util.beans;
 
 /**
- * A double getter and setter bean which contains a variable. 
+ * A simple implementation of {@link DoubleProperty}. Holds a primitive double variable which can be
+ * set or get.
  * 
  * @author Tom Tzook
- * @since FlashLib 1.0.0
+ * @since FlashLib 1.0.1
  */
 public class SimpleDoubleProperty implements DoubleProperty{
 

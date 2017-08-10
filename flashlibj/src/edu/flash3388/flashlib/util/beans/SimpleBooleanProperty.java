@@ -1,10 +1,11 @@
 package edu.flash3388.flashlib.util.beans;
 
 /**
- * A boolean getter and setter bean which contains a variable. 
+ * A simple implementation of {@link BooleanProperty}. Holds a primitive boolean variable which can be
+ * set or get.
  * 
  * @author Tom Tzook
- * @since FlashLib 1.0.0
+ * @since FlashLib 1.0.1
  */
 public class SimpleBooleanProperty implements BooleanProperty{
 

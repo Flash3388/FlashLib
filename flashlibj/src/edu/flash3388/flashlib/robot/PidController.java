@@ -128,6 +128,7 @@ public class PidController {
 			result = Mathf.constrain(result, minimumOutput, maximumOutput);
 		
 		lastOut = result;
+		lastVal = currentVal;
 		return result;
 	}
 	/**

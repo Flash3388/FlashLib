@@ -1,5 +1,12 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
+/**
+ * A simple implementation of an {@link ObservableProperty} for generic values. Implements all requirements for 
+ * being observable and uses a simple variable to store this property's value.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.1
+ */
 public class SimpleObservableProperty<T> implements ObservableProperty<T>{
 
 	private T value;

@@ -1,5 +1,12 @@
 package edu.flash3388.flashlib.util.beans.observable;
 
+/**
+ * A simple implementation of {@link ObservableDoubleProperty} using a primitive double variable which
+ * stores the property's value.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.1
+ */
 public class SimpleObservableDoubleProperty extends ObservableDoubleProperty{
 
 	private double value;
