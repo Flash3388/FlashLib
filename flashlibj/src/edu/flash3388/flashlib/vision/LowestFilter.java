@@ -20,6 +20,12 @@ public class LowestFilter extends VisionFilter{
 		this.amount.set(amount);
 	}
 	
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public IntegerProperty amountProperty(){
 		return amount;
 	}

@@ -25,12 +25,28 @@ public class CoordinateFilter extends VisionFilter{
 		this.amount.set(amount);
 	}
 	
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the x coordinate to filter around.
+	 * @return the property
+	 */
 	public DoubleProperty xProperty(){
 		return x;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the y coordinate to filter around.
+	 * @return the property
+	 */
 	public DoubleProperty yProperty(){
 		return y;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public IntegerProperty amountProperty(){
 		return amount;
 	}

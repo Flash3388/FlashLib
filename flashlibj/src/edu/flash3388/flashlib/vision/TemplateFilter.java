@@ -31,12 +31,29 @@ public class TemplateFilter extends VisionFilter{
 		this.method.set(method);
 	}
 	
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the scale factor used to resize the image per iteration.
+	 * @return the property
+	 */
 	public DoubleProperty scaleFactorProperty(){
 		return scaleFactor;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the method used to perform the template matching with.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public IntegerProperty methodProperty(){
 		return method;
 	}
+	/**
+	 * A {@link Property} using a String type.
+	 * Indicates the path to a folder containing the template images. All images in that folder will be loaded as
+	 * templates.
+	 * @return the property
+	 */
 	public Property<String> imageDirectoryPathProperty(){
 		return imgDirPath;
 	}

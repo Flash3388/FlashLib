@@ -26,9 +26,19 @@ public class GrayFilter extends VisionFilter{
 		this.max.set(max);
 	}
 	
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the minimum value of the color filter.
+	 * @return the property
+	 */
 	public IntegerProperty minProperty(){
 		return min;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the maximum value of the color filter.
+	 * @return the property
+	 */
 	public IntegerProperty maxProperty(){
 		return max;
 	}

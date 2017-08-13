@@ -1410,7 +1410,7 @@ public final class FlashUtil {
      * @param supertype the generic super type to find
      * @return an array of the generic types defined, or null if not found.
      */
-    public 	static Type[] findGenericArgumentsOfSuperType(Class<?> child, Class<?> supertype){
+    public static Type[] findGenericArgumentsOfSuperType(Class<?> child, Class<?> supertype){
 		if(!supertype.isAssignableFrom(child))
 			return null;
 		

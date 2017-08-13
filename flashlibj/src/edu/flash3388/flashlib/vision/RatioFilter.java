@@ -39,35 +39,105 @@ public class RatioFilter extends VisionFilter{
 		this.widthRatio.set(widthRatio);
 	}
 	
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the height ratio between the first contour and the second contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty heightRatioProperty(){
 		return heightRatio;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the width ratio between the first contour and the second contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty widthRatioProperty(){
 		return widthRatio;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the x axis positioning ratio between the first contour and the second contour. This indicates the
+	 * ratio between the x distance of the right edge of the second contour and the left edge of the first to the
+	 * width of the first contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty dxProperty(){
 		return dx;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the y axis positioning ratio between the first contour and the second contour. This indicates the
+	 * ratio between the y distance of the bottom edge of the second contour and the top edge of the first to the
+	 * width of the first contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty dyProperty(){
 		return dy;
 	}
 	
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the worst possible value of a ratio result. When the best result is larger than the worst, it will be 
+	 * discarded.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty maxScoreProperty(){
 		return maxScore;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the best possible value of a ratio result. When a result is smaller than the best, it will be 
+	 * Immediately regarded as the best.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty minScoreProperty(){
 		return minScore;
 	}
 	
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the maximum possible height of a contour. Contours whose height is bigger than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty maxHeightProperty(){
 		return maxHeight;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the minimum possible height of a contour. Contours whose height is smaller than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty minHeightProperty(){
 		return minHeight;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the maximum possible width of a contour. Contours whose width is bigger than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty maxWidthProperty(){
 		return maxWidth;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the minimum possible width of a contour. Contours whose width is smaller than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty minWidthProperty(){
 		return minWidth;
 	}

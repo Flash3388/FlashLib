@@ -37,15 +37,35 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		this.distanceHeight.set(distanceHeight);
 	}
 	
+	/**
+	 * An {@link DoubleProperty}.
+	 * Indicates the real life target's width.
+	 * @return the property
+	 */
 	public DoubleProperty targetWidthProperty(){
 		return targetWidth;
 	}
+	/**
+	 * An {@link DoubleProperty}.
+	 * Indicates the real life target's height.
+	 * @return the property
+	 */
 	public DoubleProperty targetHeightProperty(){
 		return targetHeight;
 	}
+	/**
+	 * An {@link DoubleProperty}.
+	 * Indicates the camera's field of view in radians.
+	 * @return the property
+	 */
 	public DoubleProperty camFovProperty(){
 		return camFov;
 	}
+	/**
+	 * An {@link BooleanProperty}.
+	 * Indicates whether to use height ratios to calculate distance or width rations.
+	 * @return the property
+	 */
 	public BooleanProperty distanceHeightProperty(){
 		return distanceHeight;
 	}

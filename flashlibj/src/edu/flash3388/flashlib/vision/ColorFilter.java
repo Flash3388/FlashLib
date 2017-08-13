@@ -38,25 +38,60 @@ public class ColorFilter extends VisionFilter{
 		this.max3.set(max3);
 	}
 	
+	/**
+	 * A {@link BooleanProperty}.
+	 * Indicates whether to filter the image for HSV values or RGB values.
+	 * @return the property
+	 */
 	public BooleanProperty hsvProperty(){
 		return hsv;
 	}
 
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the first minimum value of the color filter. Minimum Hue in HSV or minimum Red in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty min1Property(){
 		return min1;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the first maximum value of the color filter. Maximum Hue in HSV or Maximum Red in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty max1Property(){
 		return max1;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the second minimum value of the color filter. Minimum Saturation in HSV or minimum Green in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty min2Property(){
 		return min2;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the second maximum value of the color filter. Maximum Saturation in HSV or maximum Green in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty max2Property(){
 		return max2;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the third minimum value of the color filter. Minimum Value in HSV or minimum Blue in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty min3Property(){
 		return min3;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the value of the third maximum value of the color filter. Maximum Value in HSV or maximum Blue in RGB.
+	 * @return the property
+	 */
 	public IntegerProperty max3Property(){
 		return max3;
 	}

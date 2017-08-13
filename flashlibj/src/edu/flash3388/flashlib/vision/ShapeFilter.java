@@ -26,12 +26,30 @@ public class ShapeFilter extends VisionFilter{
 		this.accuracy.set(accuracy);
 	}
 	
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public IntegerProperty amountProperty(){
 		return amount;
 	}
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the amount of vertices and the requested shape to find.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public IntegerProperty verteciesProperty(){
 		return vertecies;
 	}
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the accuracy of the shape approximation. Higher values offer less accurate shapes.
+	 * Must be non-negative
+	 * @return the property
+	 */
 	public DoubleProperty accuracyProperty(){
 		return accuracy;
 	}
