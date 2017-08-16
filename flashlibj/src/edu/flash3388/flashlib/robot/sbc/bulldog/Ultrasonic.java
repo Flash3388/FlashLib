@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot.sbc.bulldog;
 
 import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -86,7 +86,7 @@ public class Ultrasonic implements RangeFinder{
 	private void pingInternal(){
 		millisPeriod = -1;
 		trigger.high();
-		FlashUtil.delayns(PING_TIME_NS);
+		//delay!!!
 		trigger.low();
 	}
 	

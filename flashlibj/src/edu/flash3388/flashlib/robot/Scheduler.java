@@ -46,23 +46,6 @@ public final class Scheduler {
 			return super.equals(obj) || runnable.equals(obj);
 		}
 	}
-	private static class ScheduledTaskWrapper extends TaskWrapper{
-		ScheduledTask task;
-		
-		ScheduledTaskWrapper(ScheduledTask task, boolean removeOnFinish){
-			super(removeOnFinish);
-			this.task = task;
-		}
-
-		@Override
-		boolean run() {
-			return task.run();
-		}
-		@Override
-		public boolean equals(Object obj) {
-			return super.equals(obj) || task.equals(obj);
-		}
-	}
 	
 	private boolean disabled = false;
 	
@@ -105,41 +88,28 @@ public final class Scheduler {
 	}
 	
 	/**
-	 * Adds a new {@link ScheduledTask} to be executed continuously until manually removed or {@link ScheduledTask#run()}
-	 * returns false.
-	 * @param task task to execute
-	 */
-	public void addTask(ScheduledTask task){
-		tasks.addElement(new ScheduledTaskWrapper(task, false));
-	}
-	/**
 	 * Adds a new {@link Runnable} to be executed continuously until manually removed.
 	 * @param runnable task to execute
+	 * @return true if the task was added, false if the task already exists
 	 */
-	public void addTask(Runnable runnable){
-		tasks.addElement(new RunnableWrapper(runnable, false));
-	}
-	/**
-	 * Adds a new {@link ScheduledTask} to be executed once.
-	 * @param task task to execute
-	 */
-	public void execute(ScheduledTask task){
-		tasks.addElement(new ScheduledTaskWrapper(task, true));
+	public boolean addTask(Runnable runnable){
+		if(!tasks.contains(runnable)){
+			tasks.addElement(new RunnableWrapper(runnable, false));
+			return true;
+		}
+		return false;
 	}
 	/**
 	 * Adds a new {@link Runnable} to be executed once.
 	 * @param runnable task to execute
+	 * @return true if the task was added, false if the task already exists
 	 */
-	public void execute(Runnable runnable){
-		tasks.addElement(new RunnableWrapper(runnable, true));
-	}
-	/**
-	 * Removes a {@link ScheduledTask} from execution.
-	 * @param task task to remove
-	 * @return true if the task was in execution, false otherwise
-	 */
-	public boolean remove(ScheduledTask task){
-		return tasks.remove(task);
+	public boolean execute(Runnable runnable){
+		if(!tasks.contains(runnable)){
+			tasks.addElement(new RunnableWrapper(runnable, true));
+			return true;
+		}
+		return false;
 	}
 	/**
 	 * Removes a {@link Runnable} from execution.
@@ -150,7 +120,7 @@ public final class Scheduler {
 		return tasks.remove(runnable);
 	}
 	
-	protected void registerSystem(System system){
+	void registerSystem(System system){
 		systems.add(system);
 	}
 	

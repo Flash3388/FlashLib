@@ -8,7 +8,6 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RobotState;
-import edu.flash3388.flashlib.robot.ScheduledTask;
 
 import static edu.flash3388.flashlib.robot.FlashRoboUtil.inEmergencyStop;
 
@@ -27,34 +26,43 @@ import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
  */
 public abstract class FlashRio extends SampleRobot {
 	
-	private static class HidScheduledTask implements ScheduledTask{
+	private static class HidScheduledTask implements Runnable{
 		@Override
-		public boolean run() {
+		public void run() {
 			if(RobotState.isRobotTeleop())
 				FlashRoboUtil.updateHID();
-			return true;
 		}
+	}
+	protected static class RobotInitializer{
+		public boolean logsEnabled = false;
+		public boolean autoUpdateHid = true;
+		public boolean logPower = true;
+		public double warningVoltage = WARNING_VOLTAGE;
+		public double warningPowerDraw = POWER_DRAW_WARNING;
 	}
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final byte ITERATION_DELAY = 20;
+	private static final byte ITERATION_DELAY = 10;
 	
 	private Log log;
 	private Log powerLog;
-	private double warningVoltage = WARNING_VOLTAGE;
-	private double warningPowerDraw = POWER_DRAW_WARNING;
-	private boolean logPower = true, logsEnabled = false, autoUpdateHid = true;
+	private double warningVoltage;
+	private double warningPowerDraw;
+	private boolean logPower, logsEnabled;
 	
 	
 	@Override
 	protected final void robotInit(){
-		preInit();
+		RobotInitializer initializer = new RobotInitializer();
+		preInit(initializer);
 		initFlashLib();
 		
 		
 		log = FlashUtil.getLog();
-		if(logsEnabled){
+		logPower = initializer.logPower;
+		logsEnabled = initializer.logsEnabled;
+		if(initializer.logsEnabled){
 			powerLog = FlashUtil.createLog("powerlog");
 			if(!logPower)
 				powerLog.disable();
@@ -64,7 +72,7 @@ public abstract class FlashRio extends SampleRobot {
 			log.delete();
 		}
 		
-		if(autoUpdateHid)
+		if(initializer.autoUpdateHid)
 			RobotFactory.getScheduler().addTask(new HidScheduledTask());
 		
 		initRobot();
@@ -184,21 +192,6 @@ public abstract class FlashRio extends SampleRobot {
 	}
 	
 	/**
-	 * Disables the update task used to update HIDs in teleop mode. By default this option is enabled. 
-	 * Must be called on {@link #preInit()} to work.
-	 */
-	protected void disableAutoHidUpdate(){
-		autoUpdateHid = false;
-	}
-	/**
-	 * Enables the base log and power logs to be used. If the logs are not enabled (default), they will be initialized in
-	 * writing mode, but will not have file data. It is not possible to change this mode after FlashLib is initialized,
-	 * so it should be called during {@link #preInit()}.
-	 */
-	protected void enableLogs(){
-		logsEnabled = true;
-	}
-	/**
 	 * Sets whether or not to log data about power usage into a log.
 	 * @param log true to log data, false otherwise
 	 */
@@ -236,7 +229,7 @@ public abstract class FlashRio extends SampleRobot {
 	/**
 	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.
 	 */
-	protected void preInit(){}
+	protected void preInit(RobotInitializer initializer){}
 	/**
 	 * Called after initialization of FlashLib. Use this to initialize your robot systems and actions for use.
 	 */

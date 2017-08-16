@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot.sbc.bulldog;
 
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import io.silverspoon.bulldog.core.pin.Pin;

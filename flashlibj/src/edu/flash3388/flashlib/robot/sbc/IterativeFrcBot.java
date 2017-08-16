@@ -5,10 +5,10 @@ public abstract class IterativeFrcBot extends IterativeSbc{
 	@Override
 	protected void stateInit(byte state) {
 		switch (state) {
-			case STATE_AUTONOMOUS:
+			case StateSelector.STATE_AUTONOMOUS:
 				autonomousInit();
 				break;
-			case STATE_TELEOP:
+			case StateSelector.STATE_TELEOP:
 				teleopInit();
 				break;
 		}
@@ -16,10 +16,10 @@ public abstract class IterativeFrcBot extends IterativeSbc{
 	@Override
 	protected void statePeriodic(byte state) {
 		switch (state) {
-			case STATE_AUTONOMOUS:
+			case StateSelector.STATE_AUTONOMOUS:
 				autonomousPeriodic();
 				break;
-			case STATE_TELEOP:
+			case StateSelector.STATE_TELEOP:
 				teleopPeriodic();
 				break;
 		}

@@ -15,13 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import edu.flash3388.flashlib.util.Log.LoggingType;
 
@@ -54,7 +48,6 @@ public final class FlashUtil {
 	private static long startTime = 0;
 	private static Log mainLog;
 	private static Log.LoggingType defaultCreatingMode = Log.LoggingType.Stream;
-	private static ExecutorService executor;
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
 	private static final String architecture = System.getProperty("os.arch");
@@ -67,20 +60,6 @@ public final class FlashUtil {
 	//--------------------------------------------------------------------
 	//-----------------------General--------------------------------------
 	//--------------------------------------------------------------------
-	
-	/**
-	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
-	 * nanoseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
-	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long, int)}.
-	 * 
-	 * @param nanos the length of time to sleep in nanoseconds.
-	 */
-	public static void delayns(int nanos){
-		if(nanos <= 0) return;
-		try {
-			Thread.sleep(0, nanos);
-		} catch (InterruptedException e) {}
-	}
 	
 	/**
 	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
@@ -197,80 +176,6 @@ public final class FlashUtil {
 	 */
 	public static Log createLog(String name){
 		return Log.createLogByType(name, defaultCreatingMode);
-	}
-	
-	/**
-	 * Sorts a given array using bubble sort. The rest of the given arrays are
-	 * sorted by the change of indexes in the first array. Used to make sure data stays the same.
-	 * 
-	 * @param as the arrays to sort.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void sort(Object[]...as){
-		if(as == null)
-			throw new NullPointerException("Array is null");
-		if(as.length < 1) 
-			throw new IllegalArgumentException("Less than 1 array was passed");
-		
-		Object[] main = as[0];
-		for (int i = 0; i < main.length; i++) {
-			for (int j = 0; j < main.length-1; j++) {
-				if(((Comparable)main[j]).compareTo(main[j+1]) > 0){
-					for (int j2 = 0; j2 < as.length; j2++) {
-						Object t = as[j2][j];
-						as[j2][j] = as[j2][j+1];
-						as[j2][j+1] = t;
-					}
-				}
-			}
-		}
-	}
-	//--------------------------------------------------------------------
-	//-----------------------Executor-------------------------------------
-	//--------------------------------------------------------------------
-
-	private static void initExecutor(){
-		if (executor == null)
-			executor = Executors.newCachedThreadPool();
-	}
-	private static boolean isExecutorInit(){
-		return executor != null;
-	}
-	
-	public static void awaitExecutorTermination(){
-		if(!isExecutorInit()) return;
-		executor.shutdown();
-	}
-	public static void terminateExecutor(){
-		if(!isExecutorInit()) return;
-		executor.shutdownNow();
-	}
-	public static boolean isExecutorShutdown(){
-		return isExecutorInit() && executor.isShutdown();
-	}
-	
-	public static void execute(Runnable r){
-		initExecutor();
-		executor.execute(r);
-	}
-	/**
-	 * Executes a {@link java.util.concurrent.Callable} object for a given time in milliseconds. Uses a cached thread pool executor.
-	 * 
-	 * @param callable object to execute
-	 * @param ms time in milliseconds to execute the {@link java.util.concurrent.Callable} object
-	 * @param <T> the result type of method call
-	 * @return the result of the {@link java.util.concurrent.Callable} object after execution, 
-	 * or null if the execution was interrupted or has timedout
-	 */
-	public static <T> T executeForTime(Callable<T> callable, long ms){
-		initExecutor();
-		
-		Future<T> future = executor.submit(callable); 
-		try {
-			return future.get(ms, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			return null;
-		}
 	}
 
 	//--------------------------------------------------------------------

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +15,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+import com.sun.media.sound.StandardMidiFileWriter;
 
 import edu.flash3388.flashlib.io.FileStream;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -199,16 +203,17 @@ public class Remote {
 	}
 	
 	public static void loadHosts(String file) throws NullPointerException, IOException{
-		File fileW = new File(file);
+		System.out.println("Deprecated: "+Remote.class.getName()+" - loadHosts(String)");
+		/*File fileW = new File(file);
 		if(!fileW.exists())
 			return;
-		String[] lines = FileStream.readAllLines(file); 
-		if(lines == null || lines.length < 1) 
+		List<String> lines = Files.readAllLines(fileW.toPath());
+		if(lines == null || lines.size() < 1) 
 			return;
 		boolean foundHost = false;
 		RemoteHost currentHost = null;
-		for (int i = 0; i < lines.length; i++) {
-			String line = lines[i].trim();
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i).trim();
 			String[] splits;
 			if(line.startsWith("host:") && !foundHost){
 				splits = line.split(":");
@@ -227,10 +232,11 @@ public class Remote {
 				foundHost = false;
 				hosts.add(currentHost);
 			}
-		}
+		}*/
 	}
 	public static void saveHosts(String file){
-		String lines = "";
+		System.out.println("Deprecated: "+Remote.class.getName()+" - saveHosts(String)");
+		/*String lines = "";
 		RemoteHost[] remoteHosts = getHosts();
 		for (int i = 0; i < remoteHosts.length; i++) {
 			RemoteHost host = remoteHosts[i];
@@ -242,6 +248,6 @@ public class Remote {
 			}
 			lines+="done\n";
 		}
-		FileStream.writeLine(file, lines);
+		//Files.write(Paths.get(file), lines., StandardOpenOption.CREATE);*/
 	}
 }

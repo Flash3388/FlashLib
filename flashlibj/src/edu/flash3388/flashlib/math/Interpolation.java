@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.math;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +16,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import edu.flash3388.flashlib.io.FileStream;
 
 /**
  * Provides a base for interpolation. In the mathematical field of numerical analysis, 
@@ -93,7 +94,11 @@ public abstract class Interpolation {
 		}
 		lines.add("</interpolation>");
 		
-		FileStream.writeLines(file, lines.toArray(new String[lines.size()]));
+		try {
+			Files.write(Paths.get(file), lines, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException{
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()

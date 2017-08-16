@@ -1,5 +1,7 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot.sbc.bulldog;
 
+import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
+import edu.flash3388.flashlib.robot.sbc.SafeMotor;
 import io.silverspoon.bulldog.core.pin.Pin;
 
 public class SafePwm extends SbcPwm implements SafeMotor{

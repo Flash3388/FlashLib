@@ -324,8 +324,8 @@ public class CvSource implements VisionSource{
 		CvTemplateMatcher.MatchResult result = ((CvTemplateMatcher)matcher).match(threshold, scaleFactor);
 		
 		
-	   double x= result.center.x - threshold.width() * 0.5 * result.scaleFactor,
-			   y= result.center.y - threshold.height() * 0.5 * result.scaleFactor;
+	   double x = result.center.x - threshold.width() * 0.5 * result.scaleFactor,
+			   y = result.center.y - threshold.height() * 0.5 * result.scaleFactor;
 		threshold = threshold.submat(new Rect(new double[]{
 							Math.max(0, x),
 							Math.max(0, y),
