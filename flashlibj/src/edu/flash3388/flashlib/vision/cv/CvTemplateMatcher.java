@@ -13,8 +13,16 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import edu.flash3388.flashlib.vision.MatchResult;
 import edu.flash3388.flashlib.vision.TemplateMatcher;
 
+/**
+ * A template matching using openCV.
+ * 
+ * @author Tom Tzook
+ * @author Alon Klein
+ * @since FlashLib 1.1.0
+ */
 public class CvTemplateMatcher implements TemplateMatcher{
 	
 	public static enum Method {SQDIFF,SQDIFF_NORMED,TM_CCORR,TM_CCORR_NORMED,TM_COEFF,TM_COEFF_NORMED};
@@ -52,7 +60,7 @@ public class CvTemplateMatcher implements TemplateMatcher{
 		MatchResult best = findBestMatch(t);
 		if(best != null){
 			
-			Imgproc.circle(scene, new Point(best.center.x +best.scaleFactor,best.center.y +best.scaleFactor) ,3,new Scalar(51,51,51));
+			Imgproc.circle(scene, new Point(best.centerx +best.scaleFactor,best.centery +best.scaleFactor) ,3,new Scalar(51,51,51));
 			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
 			//Imgcodecs.imwrite("test.png", scene);
 			
@@ -67,18 +75,6 @@ public class CvTemplateMatcher implements TemplateMatcher{
 				best = match.result;
 		}
 		return best;
-	}
-	
-	public static class MatchResult{
-		public Point center;
-		public double scaleFactor;
-		public double maxVal;
-		
-		public MatchResult(Point center,double scaleFactor,double maxVal) {
-			this.center = center;
-			this.scaleFactor = scaleFactor;
-			this.maxVal = maxVal;
-		}
 	}
 	
 	private static class MatchRunner implements Runnable{
@@ -168,7 +164,7 @@ public class CvTemplateMatcher implements TemplateMatcher{
 			    maxVal = mmr.maxVal;
 			}
 			
-			MatchResult currResult = new MatchResult(new Point(matchLoc.x +(templ.cols()/2),matchLoc.y +(templ.rows()/2)),0,maxVal);
+			MatchResult currResult = new MatchResult(matchLoc.x +(templ.cols()/2),matchLoc.y +(templ.rows()/2),0,maxVal);
 			return currResult;
 		}
 		

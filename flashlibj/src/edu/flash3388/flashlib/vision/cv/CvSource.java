@@ -14,6 +14,7 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
+import edu.flash3388.flashlib.vision.MatchResult;
 import edu.flash3388.flashlib.vision.TemplateMatcher;
 import edu.flash3388.flashlib.vision.VisionSource;
 import edu.flash3388.flashlib.vision.VisionSourceImageMissingException;
@@ -299,42 +300,46 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public TemplateMatcher matchTemplate(TemplateMatcher matcher, ValueSource<Object>[] templateImgs, int method, double scaleFactor) {
+	public MatchResult matchTemplate(TemplateMatcher matcher, double scaleFactor) {
 		if(matcher == null){
-			if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
-				throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
-						+method + ":" + CvTemplateMatcher.Method.values().length);
-			
-			Mat[] templates = new Mat[templateImgs.length];
-			Object imgData = null;
-			for (int i = 0; i < templates.length; i++) {
-				imgData = templateImgs[i].getValue();
-				if(imgData == null)
-					throw new NullPointerException("template image cannot be null: "+i);
-				if(!(imgData instanceof Mat))
-					throw new IllegalArgumentException("Image format does not match vision source: "+i);
-				templates[i] = (Mat)imgData;
-			}
-			
-			matcher = new CvTemplateMatcher(templates, Method.values()[method]);
+
 		}
 		
 		checkReady(false, true);
 		
-		CvTemplateMatcher.MatchResult result = ((CvTemplateMatcher)matcher).match(threshold, scaleFactor);
+		MatchResult result = ((CvTemplateMatcher)matcher).match(threshold, scaleFactor);
 		
 		
-	   double x= result.center.x - threshold.width() * 0.5 * result.scaleFactor,
-			   y= result.center.y - threshold.height() * 0.5 * result.scaleFactor;
+	   /*double x = result.center.x - threshold.width() * 0.5 * result.scaleFactor,
+			   y = result.center.y - threshold.height() * 0.5 * result.scaleFactor;
 		threshold = threshold.submat(new Rect(new double[]{
 							Math.max(0, x),
 							Math.max(0, y),
 							Math.min(threshold.width() - x, threshold.width() * result.scaleFactor),
 							Math.min(threshold.height() - y, threshold.height() * result.scaleFactor)
-							}));
+							}));*/
 		contours = null;
 		
-		return matcher;
+		return result;
+	}
+	
+	public TemplateMatcher createTemplateMatcher(ValueSource<Object>[] imgs, int method) {
+		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
+			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
+					+method + ":" + CvTemplateMatcher.Method.values().length);
+		
+		Mat[] templates = new Mat[imgs.length];
+		Object imgData = null;
+		for (int i = 0; i < templates.length; i++) {
+			imgData = imgs[i].getValue();
+			if(imgData == null)
+				throw new NullPointerException("template image cannot be null: "+i);
+			if(!(imgData instanceof Mat))
+				throw new IllegalArgumentException("Image format does not match vision source: "+i);
+			templates[i] = (Mat)imgData;
+		}
+		
+		return new CvTemplateMatcher(templates, Method.values()[method]);
 	}
 	
 	/**

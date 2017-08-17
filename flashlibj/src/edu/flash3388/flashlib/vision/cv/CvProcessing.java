@@ -23,6 +23,8 @@ import org.opencv.imgproc.Imgproc;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
+import edu.flash3388.flashlib.vision.MatchResult;
+import edu.flash3388.flashlib.vision.VisionUtils;
 import edu.flash3388.flashlib.vision.cv.CvTemplateMatcher.Method;
 
 /**
@@ -720,7 +722,17 @@ public class CvProcessing {
 	 */
 	public static void setAnalysisForContour(Mat feed, MatOfPoint contour, Analysis analysis){
 		Point center = contourCenter(contour);
-		
+		setAnalysisForCenter(feed,center,analysis);
+	}
+	
+	/**
+	 * Sets the values of an analysis object for a center.
+	 * 
+	 * @param feed the image mat
+	 * @param center the center of target as Point
+	 * @param analysis the analysis object
+	 */
+	public static void setAnalysisForCenter(Mat feed, Point center, Analysis analysis){
 		analysis.setDouble(Analysis.PROP_CENTER_X, center.x);
 		analysis.setDouble(Analysis.PROP_CENTER_Y, center.y);
 		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (center.y - feed.height() * 0.5));
@@ -773,11 +785,11 @@ public class CvProcessing {
 	 * @param scaleFactor resizing factor in pixels
 	 * @return a result of the match
 	 */
-	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat templ, Method method, double scaleFactor){
+	public static MatchResult matchTemplate(Mat scene, Mat templ, Method method, double scaleFactor){
 		return CvProcessing.matchTemplate(scene, (new Mat[]{templ}), method, scaleFactor);
 	}
 	
-	public static CvTemplateMatcher.MatchResult matchTemplate(Mat scene, Mat[] templ, Method method, double scaleFactor){
+	public static MatchResult matchTemplate(Mat scene, Mat[] templ, Method method, double scaleFactor){
 		return CvTemplateMatcher.match(scene, templ, method, scaleFactor);
 	}
 }

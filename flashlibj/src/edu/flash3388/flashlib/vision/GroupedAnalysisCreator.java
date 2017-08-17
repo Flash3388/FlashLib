@@ -89,8 +89,8 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		
 		analysis.setDouble(Analysis.PROP_CENTER_X, centerX);
 		analysis.setDouble(Analysis.PROP_CENTER_Y, centerY);
-		analysis.setDouble(Analysis.PROP_HORIZONTAL_DISTANCE, (centerY - source.getFrameWidth() * 0.5));
-		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (centerX - source.getFrameHeight() * 0.5));
+		analysis.setDouble(Analysis.PROP_HORIZONTAL_DISTANCE, (centerX - source.getFrameWidth() * 0.5));
+		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (centerY - source.getFrameHeight() * 0.5));
 		analysis.setDouble(Analysis.PROP_ANGLE_OFFSET, 
 				VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
 				centerX, centerY, camFov.get()));

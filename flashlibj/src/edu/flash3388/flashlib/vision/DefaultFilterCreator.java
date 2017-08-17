@@ -33,7 +33,6 @@ public class DefaultFilterCreator implements FilterCreator{
 		map.put("color", ColorFilter.class);
 		map.put("gray", GrayFilter.class);
 		map.put("circle", CircleFilter.class);
-		map.put("template", TemplateFilter.class);
 	}
 	
 	/**
