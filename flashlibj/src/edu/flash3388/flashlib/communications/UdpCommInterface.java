@@ -133,8 +133,6 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 			}
 			
 			newDataRead();
-			packet.senderAddress = outInet;
-			packet.senderPort = portOut;
 			packet.data = recp.getData();
 			packet.length = recp.getLength();
 			

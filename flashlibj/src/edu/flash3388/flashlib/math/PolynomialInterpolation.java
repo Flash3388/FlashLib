@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.math;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
 /**
  * Represents a base for polynomial interpolation. 
  * <p>
@@ -45,7 +43,7 @@ public abstract class PolynomialInterpolation extends Interpolation {
 			getMap().values().toArray(values);
 			getMap().keySet().toArray(keys);
 			
-			FlashUtil.sort(keys, values);
+			sort(keys, values);
 			valueUpdated = true;
 		}
 	}
@@ -73,5 +71,22 @@ public abstract class PolynomialInterpolation extends Interpolation {
 	 */
 	protected double getKey(int idx){
 		return keys[idx];
+	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void sort(Object[]...as){
+		Object[] main = as[0];
+		for (int i = 0; i < main.length; i++) {
+			for (int j = 0; j < main.length-1; j++) {
+				if(((Comparable)main[j]).compareTo(main[j+1]) > 0){
+					for (int j2 = 0; j2 < as.length; j2++) {
+						Object t = as[j2][j];
+						as[j2][j] = as[j2][j+1];
+						as[j2][j+1] = t;
+					}
+				}
+			}
+		}
 	}
 }

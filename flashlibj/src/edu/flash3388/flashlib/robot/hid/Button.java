@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -56,10 +55,10 @@ public class Button implements ButtonListener, BooleanSource{
 	}
 	private static class ButtonTask extends ButtonCommand{
 
-		final ScheduledTask task;
+		final Runnable task;
 		private boolean running = false;
 		
-		ButtonTask(ActivateType t, ScheduledTask task) {
+		ButtonTask(ActivateType t, Runnable task) {
 			super(t);
 			this.task = task;
 		}
@@ -231,11 +230,11 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @param c The task to activate on press.
 	 */
-	public final void whenPressed(ScheduledTask c){
+	public final void whenPressed(Runnable c){
 		commands.add(new ButtonTask(ActivateType.Press, c));
 	}
-	public final void whenPressed(ScheduledTask... ts){
-		for(ScheduledTask a : ts)
+	public final void whenPressed(Runnable... ts){
+		for(Runnable a : ts)
 			commands.add(new ButtonTask(ActivateType.Press, a));
 	}
 	
@@ -244,11 +243,11 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @param c The task to activate on hold.
 	 */
-	public void whileHeld(ScheduledTask c){
+	public void whileHeld(Runnable c){
 		commands.add(new ButtonTask(ActivateType.Hold, c));
 	}
-	public void whileHeld(ScheduledTask... ts){
-		for(ScheduledTask a : ts)
+	public void whileHeld(Runnable... ts){
+		for(Runnable a : ts)
 			commands.add(new ButtonTask(ActivateType.Hold, a));
 	}
 	
@@ -257,11 +256,11 @@ public class Button implements ButtonListener, BooleanSource{
 	 * 
 	 * @param c The task to activate on release.
 	 */
-	public void whenReleased(ScheduledTask c){
+	public void whenReleased(Runnable c){
 		commands.add(new ButtonTask(ActivateType.Release, c));
 	}
-	public void whenReleased(ScheduledTask... ts){
-		for(ScheduledTask a : ts)
+	public void whenReleased(Runnable... ts){
+		for(Runnable a : ts)
 			commands.add(new ButtonTask(ActivateType.Release, a));
 	}
 	

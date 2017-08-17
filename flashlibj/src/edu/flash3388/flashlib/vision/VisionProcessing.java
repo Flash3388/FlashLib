@@ -2,6 +2,9 @@ package edu.flash3388.flashlib.vision;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -384,7 +387,12 @@ public final class VisionProcessing {
 			lines.add("\t</analysis-creator>");
 		}
 		lines.add("</vision>");
-		FileStream.writeLines(file, lines.toArray(new String[lines.size()]));
+		
+		try {
+			Files.write(Paths.get(file), lines, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 

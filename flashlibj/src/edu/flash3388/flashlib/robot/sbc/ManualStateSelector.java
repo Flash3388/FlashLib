@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.sbc;
 
 public class ManualStateSelector implements StateSelector{
 
-	private byte selectedState = SbcBot.STATE_DISABLED;
+	private byte selectedState = STATE_DISABLED;
 	
 	public void setState(byte state){
 		this.selectedState = state;

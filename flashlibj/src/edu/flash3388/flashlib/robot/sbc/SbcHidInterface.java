@@ -8,7 +8,7 @@ public class SbcHidInterface implements HIDInterface{
 
 	@Override
 	public boolean isHIDConnected(int hid) {
-		return SbcBot.getControlStation().isStickConnected(hid);
+		return SbcControlStation.getInstance().isStickConnected(hid);
 	}
 	@Override
 	public boolean isAxisConnected(int hid, int axis) {
@@ -20,25 +20,25 @@ public class SbcHidInterface implements HIDInterface{
 	}
 	@Override
 	public boolean isButtonConnected(int hid, int button) {
-		return SbcBot.getControlStation().getButtonsCount(hid) >= button;
+		return SbcControlStation.getInstance().getButtonsCount(hid) >= button;
 	}
 
 	@Override
 	public double getHIDAxis(int hid, int axis) {
 		if(FlashRoboUtil.inEmergencyStop() || RobotState.isRobotDisabled())
 			return 0;
-		return SbcBot.getControlStation().getStickAxis(hid, axis);
+		return SbcControlStation.getInstance().getStickAxis(hid, axis);
 	}
 	@Override
 	public boolean getHIDButton(int hid, int button) {
 		if(FlashRoboUtil.inEmergencyStop() || RobotState.isRobotDisabled())
 			return false;
-		return SbcBot.getControlStation().getStickButton(hid, (byte)button);
+		return SbcControlStation.getInstance().getStickButton(hid, (byte)button);
 	}
 	@Override
 	public int getHIDPOV(int hid, int pov) {
 		if(FlashRoboUtil.inEmergencyStop() || RobotState.isRobotDisabled())
 			return -1;
-		return SbcBot.getControlStation().getStickPOV(hid);
+		return SbcControlStation.getInstance().getStickPOV(hid);
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public final class SbcControlStation extends Sendable{
+public final class SbcControlStation{
 	
 	public static class CsStateSelector implements StateSelector{
 
@@ -37,10 +37,57 @@ public final class SbcControlStation extends Sendable{
 			cs.task();
 		}
 	}
+	private static class CsSendable extends Sendable{
+		
+		private SbcControlStation cs;
+		private boolean confirm = false;
+		private boolean updateData = true;
+		private Object recieveObject = new Object();
+		
+		public CsSendable(SbcControlStation cs){
+			super("ControlStation", CONTROL_STATION_SENDABLE_ID, SbcSendableType.CONSTROL_STATION);
+			this.cs = cs;
+		}
+		
+		@Override
+		public void newData(byte[] data) {
+			if(!updateData) return;
+			
+			if(data.length != cs.controllersData.length)
+				cs.controllersData = Arrays.copyOf(data, data.length);
+			else System.arraycopy(data, 0, cs.controllersData, 0, data.length);
+			
+			synchronized (recieveObject) {
+				recieveObject.notifyAll();	
+			}
+		}
+		@Override
+		public byte[] dataForTransmition() {
+			return new byte[]{cs.stateByte};
+		}
+		@Override
+		public boolean hasChanged() {
+			return confirm;
+		}
+
+		@Override
+		public void onConnection() {
+			cs.attached = true;
+			cs.stateByte = StateSelector.STATE_DISABLED;
+		}
+		@Override
+		public void onConnectionLost() {
+			cs.attached = false;
+			cs.stateByte = StateSelector.STATE_DISABLED;
+		}
+	}
 	
 	public static final byte MAX_CONTROLLERS = 3;
 	public static final byte CONTROLLER_AXES = 6;
+	static final byte CONTROL_STATION_SENDABLE_ID = -1;
 	static final byte CONTROLLER_DATA_SIZE = (5 + CONTROLLER_AXES) * MAX_CONTROLLERS + 2;
+	
+	private static SbcControlStation instance;
 	
 	private byte[][] controllerAxes = new byte[MAX_CONTROLLERS][CONTROLLER_AXES];
 	private short[] controllerPovs = new short[MAX_CONTROLLERS];
@@ -49,21 +96,20 @@ public final class SbcControlStation extends Sendable{
 	private byte[] controllersData = new byte[CONTROLLER_DATA_SIZE];
 	private byte connectedControllers = 0;
 	private byte stateByte = 0;
-	private boolean confirm = false;
-	private boolean updateData = true;
 	private boolean stop = false;
     private boolean attached = false;
 	
-	private Object recieveObject = new Object(), waitObject = new Object();
+	private Object waitObject = new Object();
 	
 	private UpdateTask upTask;
 	private Thread csThread;
+	private CsSendable csSendable;
 	
 	SbcControlStation() {
-		super("CS-"+SbcBot.getBoardName(), -1, SbcSendableType.CONSTROL_STATION);
-		
 		for (int i = 0; i < controllerButtons.length; i++)
 			controllerButtons[i] = new ControllerButtons();
+		
+		csSendable = new CsSendable(this);
 		upTask = new UpdateTask(this);
 		csThread = new Thread(upTask, "CS-Update");
 		csThread.setPriority((Thread.MAX_PRIORITY + Thread.NORM_PRIORITY) / 2);
@@ -73,12 +119,15 @@ public final class SbcControlStation extends Sendable{
 		stop = true;
 		stateByte = 0;
 	}
+	Sendable getSendable(){
+		return csSendable;
+	}
 	
 	private void task(){
 		while(!stop){
-			synchronized (recieveObject) {
+			synchronized (csSendable.recieveObject) {
 				try {
-					recieveObject.wait();
+					csSendable.recieveObject.wait();
 				} catch (InterruptedException e) {
 				}
 			}
@@ -91,13 +140,13 @@ public final class SbcControlStation extends Sendable{
 		}
 	}
 	private void update(){
-		updateData = false;
+		csSendable.updateData = false;
 		int pos = 0;
 		
 		byte b = controllersData[pos++];
 		if(stateByte != b){
 			stateByte = b;
-			confirm = true;
+			csSendable.confirm = true;
 		}
 		
 		connectedControllers = controllersData[pos++];
@@ -117,40 +166,10 @@ public final class SbcControlStation extends Sendable{
 			controllerPovs[i] |= (controllersData[pos++] << 8);
 		}
 		
-		updateData = true;
+		csSendable.updateData = true;
 	}
 	
-	@Override
-	public void newData(byte[] data) {
-		if(!updateData) return;
-		
-		if(data.length != controllersData.length)
-			controllersData = Arrays.copyOf(data, data.length);
-		else System.arraycopy(data, 0, controllersData, 0, data.length);
-		
-		synchronized (recieveObject) {
-			recieveObject.notifyAll();	
-		}
-	}
-	@Override
-	public byte[] dataForTransmition() {
-		return new byte[]{stateByte};
-	}
-	@Override
-	public boolean hasChanged() {
-		return confirm;
-	}
 
-	@Override
-	public void onConnection() {
-		attached = true;
-		stateByte = SbcBot.STATE_DISABLED;
-	}
-	@Override
-	public void onConnectionLost() {
-		attached = false;
-		stateByte = SbcBot.STATE_DISABLED;
-	}
 	
 	public void waitForData(){
 		waitForData(0);
@@ -227,5 +246,14 @@ public final class SbcControlStation extends Sendable{
 	}
 	public byte getState(){
 		return stateByte;
+	}
+	
+	static void init(){
+		instance = new SbcControlStation();
+	}
+	public static SbcControlStation getInstance(){
+		if(instance == null)
+			throw new IllegalStateException("Sbc control station was not initialized");
+		return instance;
 	}
 }

@@ -15,7 +15,6 @@ import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
@@ -64,16 +63,6 @@ public class Dashboard extends Application {
 		}
 		public boolean removeTask(Runnable runnable){
 			return scheduler.remove(runnable);
-		}
-		
-		public void addTask(ScheduledTask task){
-			scheduler.addTask(task);
-		}
-		public void execute(ScheduledTask task){
-			scheduler.execute(task);
-		}
-		public boolean removeTask(ScheduledTask task){
-			return scheduler.remove(task);
 		}
 		
 		public void addAction(Action action){

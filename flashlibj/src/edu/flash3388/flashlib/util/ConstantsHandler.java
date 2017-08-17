@@ -2,8 +2,11 @@ package edu.flash3388.flashlib.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -502,8 +505,11 @@ public class ConstantsHandler {
 		fillXmlString(lines);
 		lines.add("</constants-handler>");
 		
-		String[] linesArr = new String[lines.size()];
-		FileStream.writeLines(file.getAbsolutePath(), lines.toArray(linesArr));
+		try {
+			Files.write(file.toPath(), lines, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	private static void fillXmlString(ArrayList<String> lines){
 		String[] names = getStringMapNames();

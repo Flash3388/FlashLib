@@ -5,7 +5,7 @@ import edu.flash3388.flashlib.robot.RobotState;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class IterativeSbc extends SbcBot{
+public abstract class IterativeSbc extends SbcRobot{
 
 	private boolean stop = false;
 	private Log log;
@@ -16,7 +16,7 @@ public abstract class IterativeSbc extends SbcBot{
 		robotInit();
 		
 		byte lastObsState = -1;
-		byte state = STATE_DISABLED;
+		byte state = StateSelector.STATE_DISABLED;
 		while (!stop) {
 			if(RobotState.inEmergencyStop()){
 				log.save();
