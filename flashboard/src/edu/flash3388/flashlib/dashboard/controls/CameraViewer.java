@@ -16,13 +16,13 @@ import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.DataListener;
-import edu.flash3388.flashlib.vision.cv.CvPipeline;
+import edu.flash3388.flashlib.vision.ImagePipeline;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 
-public class CameraViewer extends Displayble implements DataListener, CvPipeline{
+public class CameraViewer extends Displayble implements DataListener, ImagePipeline{
 	
 	public static enum DisplayMode{
 		Normal, PostProcess, Threshold
@@ -112,9 +112,9 @@ public class CameraViewer extends Displayble implements DataListener, CvPipeline
 		mode = m;
 	}
 	@Override
-	public void newImage(Mat mat, byte type) {
-		if((mode == DisplayMode.Threshold && type == CvPipeline.TYPE_THRESHOLD) ||
-				(mode == DisplayMode.PostProcess && type == CvPipeline.TYPE_POST_PROCESS))
-			setMatImage(mat);
+	public void newImage(Object frame, byte type) {
+		if((mode == DisplayMode.Threshold && type == ImagePipeline.TYPE_THRESHOLD) ||
+				(mode == DisplayMode.PostProcess && type == ImagePipeline.TYPE_POST_PROCESS))
+			setMatImage((Mat)frame);
 	}
 }

@@ -24,7 +24,6 @@ import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
 import edu.flash3388.flashlib.vision.MatchResult;
-import edu.flash3388.flashlib.vision.VisionUtils;
 import edu.flash3388.flashlib.vision.cv.CvTemplateMatcher.Method;
 
 /**

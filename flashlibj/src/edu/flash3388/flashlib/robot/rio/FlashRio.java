@@ -58,7 +58,6 @@ public abstract class FlashRio extends SampleRobot {
 		preInit(initializer);
 		initFlashLib();
 		
-		
 		log = FlashUtil.getLog();
 		logPower = initializer.logPower;
 		logsEnabled = initializer.logsEnabled;
@@ -98,7 +97,7 @@ public abstract class FlashRio extends SampleRobot {
 			if(isDisabled()){
 				logNewState("Disabled");
 				
-				RobotFactory.disableScheduler(true);
+				RobotFactory.getScheduler().removeAllActions();
 				m_ds.InDisabled(true);
 				disabledInit();
 				
@@ -111,7 +110,7 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isAutonomous()){
 				logNewState("Autonomous");
 				
-				RobotFactory.disableScheduler(false);
+				RobotFactory.getScheduler().removeAllActions();
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
@@ -125,7 +124,7 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isTest()){
 				logNewState("Test");
 				
-				RobotFactory.disableScheduler(false);
+				RobotFactory.getScheduler().removeAllActions();
 				m_ds.InTest(true);
 				testInit();
 				
@@ -139,7 +138,7 @@ public abstract class FlashRio extends SampleRobot {
 			}else{
 				logNewState("Teleop");
 				
-				RobotFactory.disableScheduler(false);
+				RobotFactory.getScheduler().removeAllActions();
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				

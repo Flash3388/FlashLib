@@ -7,16 +7,19 @@ import java.util.jar.Manifest;
 
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.TcpCommInterface;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class SbcRobot {
+public abstract class SbcRobot{
 	
 	protected static class RobotInitializer{
 		public CommInterface commInterface;
+		
 		public StateSelector stateSelector;
+		private boolean useStateSelector = true;
 		
 		public int flashlibInitMode = -1;
 		
@@ -25,7 +28,9 @@ public abstract class SbcRobot {
 		public boolean initControlStation = true;
 	}
 	
-	private static ShellExecutor executor;
+	protected static final int DEFAULT_COMM_INTERFACE_LOCAL_PORT = 5809;
+	
+	private static LocalShell executor;
 	private static Communications communications;
 	private static byte currentState;
 	private static StateSelector stateSelector;
@@ -48,7 +53,7 @@ public abstract class SbcRobot {
 		log.log("Done");
 		
 		log.log("Initializing board...", "RobotBase");
-		executor = new ShellExecutor();
+		executor = new LocalShell();
 		log.log("Done", "RobotBase");
 		
 		log.log("Loading user class...", "RobotBase");
@@ -63,8 +68,7 @@ public abstract class SbcRobot {
 		
 		if(!initializer.logEnabled){
 			log.delete();
-			log.setLoggingMode(Log.MODE_PRINT);
-			log.log("Deleted logs", "RobotBase");
+			log.disable();
 		}
 		if(initializer.initControlStation){
 			SbcControlStation.init();
@@ -97,15 +101,17 @@ public abstract class SbcRobot {
 		log.save();
 		
 		log.logTime("Starting Robot");
-		if (initializer.stateSelector == null) {
-			log.reportWarning("User did not provide a state selector, using default");
-			if(!initializer.initControlStation){
-				log.reportWarning("Control Station was not enabled, using manual selector");
-				initializer.stateSelector = new ManualStateSelector();
-			}else
-				initializer.stateSelector = new SbcControlStation.CsStateSelector(SbcControlStation.getInstance());
+		if(initializer.useStateSelector){
+			if (initializer.stateSelector == null) {
+				log.reportWarning("User did not provide a state selector, using default");
+				if(!initializer.initControlStation){
+					log.reportWarning("Control Station was not enabled, using manual selector");
+					initializer.stateSelector = new ManualStateSelector();
+				}else
+					initializer.stateSelector = new SbcControlStation.CsStateSelector(SbcControlStation.getInstance());
+			}
+			stateSelector = initializer.stateSelector;
 		}
-		stateSelector = initializer.stateSelector;
 		
 		currentState = StateSelector.STATE_DISABLED;
 		communications.start();
@@ -133,7 +139,7 @@ public abstract class SbcRobot {
 	        ex.printStackTrace();
 	      }
 	    }
-		log.log("User class found: "+robotName);
+		log.log("User class found: "+robotName, "RobotBase");
 		
 		try {
 			return (SbcRobot) Class.forName(robotName).newInstance();
@@ -143,7 +149,7 @@ public abstract class SbcRobot {
 		return null;
 	}
 	private static CommInterface setupDefaultCommInterface() throws IOException{
-		return null;
+		return new TcpCommInterface(DEFAULT_COMM_INTERFACE_LOCAL_PORT);
 	}
 	private static void onShutdown(){
 		log.logTime("Shuting down...");
@@ -187,10 +193,10 @@ public abstract class SbcRobot {
 		return currentState;
 	}
 	public static boolean isDisabled(){
-		return currentState == StateSelector.STATE_DISABLED;
+		return getCurrentState() == StateSelector.STATE_DISABLED;
 	}
 	
-	public static ShellExecutor shell(){
+	public static Shell shell(){
 		return executor;
 	}
 	public static StateSelector stateSelector(){

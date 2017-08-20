@@ -19,6 +19,31 @@ import edu.flash3388.flashlib.util.beans.ValueSource;
 public interface VisionSource {
 
 	/**
+	 * Sets the pipeline of images used by this vision source.
+	 * The images will be sent to the pipeline before the vision process and when a threshold 
+	 * is calculates
+	 * 
+	 * @param pipeline the pipeline
+	 */
+	void setImagePipeline(ImagePipeline pipeline);
+	/**
+	 * Gets the pipeline of images used by this vision source.
+	 * The images will be sent to the pipeline before the vision process and when a threshold 
+	 * is calculates
+	 * 
+	 * @returns the pipeline
+	 */
+	ImagePipeline getImagePipeline();
+	
+	/**
+	 * Sets the current frame to use for the vision process. The frame class must match the implementation
+	 * of VisionSource.
+	 * 
+	 * @param frame the new frame
+	 */
+	void setFrame(Object frame);
+	
+	/**
 	 * Gets the width of the current used frame. If no frame exists, returns 0.
 	 * @return the width in pixels of the current frame, or 0 if no frame exists.
 	 */

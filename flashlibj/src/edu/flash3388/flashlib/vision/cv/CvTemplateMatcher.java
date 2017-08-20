@@ -17,11 +17,10 @@ import edu.flash3388.flashlib.vision.MatchResult;
 import edu.flash3388.flashlib.vision.TemplateMatcher;
 
 /**
- * A template matching using openCV.
+ * Provides template matching algorithm using openCV
  * 
- * @author Tom Tzook
  * @author Alon Klein
- * @since FlashLib 1.1.0
+ * @since FlashLib 1.0.1
  */
 public class CvTemplateMatcher implements TemplateMatcher{
 	
@@ -30,16 +29,16 @@ public class CvTemplateMatcher implements TemplateMatcher{
 	private Method method;
 	private Mat templates[];
 	
-	public CvTemplateMatcher(Mat templ,Method m) {
-		this(new Mat[]{templ},m);
+	public CvTemplateMatcher(Mat templ, Method m) {
+		this(new Mat[]{templ}, m);
 	}
-	public CvTemplateMatcher(Mat[] templ,Method m) {
+	public CvTemplateMatcher(Mat[] templ, Method m) {
 		method = m;
 		this.templates = templ;
 	}
 	
-	public MatchResult match(Mat scene,double scaleFactor){
-		return match(scene,templates,method,scaleFactor);
+	public MatchResult match(Mat scene, double scaleFactor){
+		return match(scene, templates, method, scaleFactor);
 	}
 	
 	public static MatchResult match(Mat scene, Mat[] templs, Method method, double scaleFactor){
@@ -94,7 +93,6 @@ public class CvTemplateMatcher implements TemplateMatcher{
 		@Override
 		public void run() {
 			result = match(scene, templ, method, scaleFactor);
-			
 		}
 		public MatchResult scaleTemplateMatch(Mat scene, Mat templ, Method method, double scaleFactor){
 			int tw = templ.width();

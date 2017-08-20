@@ -144,6 +144,13 @@ public class RemoteVision extends Sendable implements Vision{
 	}
 	/**
 	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean hasAnalysis() {
+		return analysis != null;
+	}
+	/**
+	 * {@inheritDoc}
 	 * <p>
 	 * The new analysis timeout is counted from the moment the object is received from the remote runner.
 	 * </p>
@@ -237,6 +244,7 @@ public class RemoteVision extends Sendable implements Vision{
 	@Override
 	public void onConnectionLost() {
 		procCount = 0;
+		analysis = null;
 	}
 
 	/**

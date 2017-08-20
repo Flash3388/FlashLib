@@ -14,7 +14,7 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
-import edu.flash3388.flashlib.vision.cv.CvRunner;
+import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.application.Platform;
@@ -50,7 +50,7 @@ public class MainController implements Initializable{
 		Runnable dxUpdate = ()->{
 			if(Dashboard.communicationsConnected() || Dashboard.camConnected())
 				controller.update(); 
-			CvRunner vision = Dashboard.getVision();
+			Vision vision = Dashboard.getVision();
 			if(vision != null){
 				if(vision.getProcessingCount() != lastProcCount){
 					controller.updateParamBox();
@@ -457,7 +457,7 @@ public class MainController implements Initializable{
 	private boolean checkVision(){
 		if(local) 
 			return false;
-		CvRunner vision = Dashboard.getVision();
+		Vision vision = Dashboard.getVision();
 		if(vision == null) 
 			return false;
 		if(vision.getProcessing() == null)

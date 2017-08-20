@@ -24,11 +24,14 @@ import edu.flash3388.flashlib.communications.UdpCommInterface;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.vision.cv.CvProcessing;
-import edu.flash3388.flashlib.vision.cv.CvRunner;
 import edu.flash3388.flashlib.vision.DefaultFilterCreator;
+import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
+import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
+import edu.flash3388.flashlib.vision.VisionRunner;
+import edu.flash3388.flashlib.vision.cv.CvProcessing;
+import edu.flash3388.flashlib.vision.cv.CvSource;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -39,6 +42,10 @@ import javafx.stage.Stage;
 
 public class Dashboard extends Application {
 
+	//--------------------------------------------------------------------
+	//-----------------------Classes--------------------------------------
+	//--------------------------------------------------------------------
+	
 	public static class Updater{
 		private Scheduler scheduler = new Scheduler();
 		private boolean stop = false;
@@ -174,6 +181,24 @@ public class Dashboard extends Application {
 		}
 	}
 	
+	private static class VisionRunnerDataTask implements Runnable{
+
+		@Override
+		public void run() {
+			byte[] img = visionImageNext[visionImageIndex];
+			visionImageNext[visionImageIndex] = null;
+			visionImageIndex ^= 1;
+			if(vision != null && img != null){
+				Mat m = CvProcessing.byteArray2Mat(img);
+				vision.frameProperty().setValue(m);
+			}
+		}
+	}
+	
+	//--------------------------------------------------------------------
+	//-------------------------Props--------------------------------------
+	//--------------------------------------------------------------------
+	
 	public static final String PROP_HOST_ROBOT = "host.robot";
 	public static final String PROP_HOST_CAM = "host.cam";
 	public static final String PROP_COMM_PROTOCOL = "comm.protocol";
@@ -191,23 +216,230 @@ public class Dashboard extends Application {
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
 	private static final String REMOTE_HOSTS_FILE = FOLDER_DATA+"hosts.ini";
 	
+	
+	private static boolean emptyProperty(String prop){
+		String propv = ConstantsHandler.getStringValue(prop);
+		return propv == null || propv.equals("");
+	}
+	private static void validateBasicSettings() throws Exception{
+		ConstantsHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
+		ConstantsHandler.addString(PROP_HOST_ROBOT, "");
+		ConstantsHandler.addString(PROP_HOST_CAM, "");
+		if(emptyProperty(PROP_HOST_ROBOT))
+			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
+		if(emptyProperty(PROP_HOST_CAM))
+			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
+		
+		ConstantsHandler.addString(PROP_COMM_PROTOCOL, "tcp");
+		if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("tcp") && 
+				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("udp"))
+			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
+		
+		ConstantsHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
+		ConstantsHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
+		ConstantsHandler.addNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
+		ConstantsHandler.addNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
+	}
+	private static void loadSettings(){
+		try {
+			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
+			Remote.loadHosts(REMOTE_HOSTS_FILE);
+		} catch (Exception e) {
+			log.reportError(e.getMessage());
+		}
+	}
+	private static void printSettings(){
+		ConstantsHandler.printAll(log);
+	}
+	private static void saveSettings(){
+		ConstantsHandler.saveConstantsToXml(SETTINGS_FILE);
+		Remote.saveHosts(REMOTE_HOSTS_FILE);
+	}
+
+	//--------------------------------------------------------------------
+	//-----------------------Display--------------------------------------
+	//--------------------------------------------------------------------
+	
 	private static Vector<Displayble> displayables = new Vector<Displayble>();
 	private static Stage primaryStage;
-	private static Dashboard instance;
+	private static CameraViewer camViewer;
+	private static EmergencyStopControl emergencyStop;
+	private static boolean fxready = false;
+	
+	private MainController controller;
+	
+	public static void updateParamDisplay(){
+		Platform.runLater(()->{
+			instance.controller.updateParam();
+		});
+	}
+	public static Stage getPrimary(){
+		return primaryStage;
+	}
+	
+	public static Enumeration<Displayble> getDisplaybles(){
+		return displayables.elements();
+	}
+	public static void addDisplayable(Displayble d){
+		displayables.addElement(d);
+	}
+	public static void resetDisplaybles(){
+		displayables.clear();
+		closeVision();
+		addDisplayable(camViewer);
+	}
+	
+	private static void fxReady(){
+		fxready = true;
+	}
+	private static boolean fxInitialized(){
+		return fxready;
+	}
+	
+	public static void userError(String error){
+		log.reportError(error);
+		FlashFxUtils.onFxThread(()->{
+			FlashFxUtils.showErrorDialog(primaryStage, "Error", error);
+		});
+	}
+	
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		Dashboard.primaryStage = primaryStage;
+		Dashboard.instance = this;
+		
+		BorderPane root = new BorderPane();
+		
+		try {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(Dashboard.class.getResource("WorldWindow.fxml"));
+			loader.setRoot(root);
+			root = loader.load();
+			controller = loader.getController(); 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Scene scene = new Scene(root, 1300, 680);
+		scene.setOnKeyPressed((e)->{
+			if(e.getCode() == KeyCode.SPACE && Dashboard.emergencyStop != null){
+				System.out.println("SPACE! THE FINAL FRONTIER!");
+				Dashboard.emergencyStop.change();
+			}
+		});
+		
+		primaryStage.setScene(scene);
+		primaryStage.setResizable(true);
+		primaryStage.setOnCloseRequest((e)->{
+			controller.stop();
+			System.exit(0);
+		});
+		primaryStage.setTitle("FLASHboard");
+		
+		fxReady();
+		primaryStage.show();
+	}
+	
+	//--------------------------------------------------------------------
+	//-----------------------Updater--------------------------------------
+	//--------------------------------------------------------------------
+	
 	private static Updater updater;
 	private static Thread updateThread;
+	
+	public static Updater getUpdater(){
+		return updater;
+	}
+
+	//--------------------------------------------------------------------
+	//-----------------------Communications--------------------------------------
+	//--------------------------------------------------------------------
+	
 	private static IpCommInterface commInterface;
 	private static Communications communications;
 	private static CameraClient camClient;
-	private static CameraViewer camViewer;
-	private static CvRunner vision;
-	private static EmergencyStopControl emergencyStop;
-	private static Log log;
 	
-	private static boolean fxready = false;
+	public static boolean communicationsConnected(){
+		return communications != null && communications.isConnected();
+	}
+	public static boolean camConnected(){
+		return camClient != null && camClient.isConnected();
+	}
+	public static CameraViewer getCamViewer(){
+		return camViewer;
+	}
 	
+	protected static void setEmergencyStopControl(EmergencyStopControl estop){
+		Dashboard.emergencyStop = estop;
+	}
+	
+	//--------------------------------------------------------------------
+	//-----------------------Vision--------------------------------------
+	//--------------------------------------------------------------------
+	
+	private static VisionRunner vision;
 	private static byte[][] visionImageNext = new byte[2][2];
 	private static int visionImageIndex = 0;
+	
+	public static Vision getVision(){
+		return vision;
+	}
+	public static void closeVision(){
+		if(visionInitialized()){
+			vision.stop();
+			if(vision instanceof ThreadedVisionRunner)
+				((ThreadedVisionRunner)vision).close();
+			vision = null;
+		}
+	}
+	private static void loadVisionSaves(){
+		log.log("Loading vision files from saves folder...");
+		File savesFolder = new File(FOLDER_SAVES);
+		File[] files = savesFolder.listFiles(new FilenameFilter(){
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".xml");
+			}
+		});
+		
+		for (File file : files) 
+			instance.controller.loadParam(file.getAbsolutePath(), false);
+		
+		String name = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
+		if(name != null){
+			for (int i = 0; i < vision.getProcessingCount(); i++) {
+				if(vision.getProcessing(i).getName().equals(name)){
+					vision.selectProcessing(i);
+					instance.controller.updateParamBoxSelection();
+				}
+			}
+		}
+		log.log("done");
+	}
+	public static boolean visionInitialized(){
+		return vision != null;
+	}
+	public static void setForVision(byte[] image){
+		if(vision != null)
+			visionImageNext[1-visionImageIndex] = image;
+	}
+	protected static void setVision(VisionRunner vision){
+		Dashboard.vision = vision;
+		vision.setVisionSource(new CvSource());
+		vision.getVisionSource().setImagePipeline(camViewer);
+		if(vision != null){
+			updater.execute(()->{
+				loadVisionSaves();
+			});
+		}
+	}
+	
+	//--------------------------------------------------------------------
+	//-----------------------Init & Shut----------------------------------
+	//--------------------------------------------------------------------
+	
+	private static Dashboard instance;
+	private static Log log;
 	
 	public static void main(String[] args) throws Exception{
 		log = FlashUtil.getLog();
@@ -268,101 +500,7 @@ public class Dashboard extends Application {
 	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
 	    updater.addTask(new ConnectionTask());
-	    updater.addTask(()->{
-			byte[] img = visionImageNext[visionImageIndex];
-			visionImageNext[visionImageIndex] = null;
-			visionImageIndex ^= 1;
-			if(vision != null && img != null){
-				Mat m = CvProcessing.byteArray2Mat(img);
-				vision.newImage(m, (byte)0);
-			}
-		});
-	}
-
-	public static void updateParamDisplay(){
-		Platform.runLater(()->{
-			instance.controller.updateParam();
-		});
-	}
-	public static Stage getPrimary(){
-		return primaryStage;
-	}
-	
-	public static Enumeration<Displayble> getDisplaybles(){
-		return displayables.elements();
-	}
-	public static void resetDisplaybles(){
-		displayables.clear();
-		if(visionInitialized()){
-			vision.close();
-			vision = null;
-		}
-		addDisplayable(camViewer);
-	}
-	public static Updater getUpdater(){
-		return updater;
-	}
-	public static void addDisplayable(Displayble d){
-		displayables.addElement(d);
-	}
-	public static boolean communicationsConnected(){
-		return communications != null && communications.isConnected();
-	}
-	public static boolean camConnected(){
-		return camClient != null && camClient.isConnected();
-	}
-	public static CameraViewer getCamViewer(){
-		return camViewer;
-	}
-	public static CvRunner getVision(){
-		return vision;
-	}
-	private static void loadVisionSaves(){
-		log.log("Loading vision files from saves folder...");
-		File savesFolder = new File(FOLDER_SAVES);
-		File[] files = savesFolder.listFiles(new FilenameFilter(){
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".xml");
-			}
-		});
-		
-		for (File file : files) 
-			instance.controller.loadParam(file.getAbsolutePath(), false);
-		
-		String name = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
-		if(name != null){
-			for (int i = 0; i < vision.getProcessingCount(); i++) {
-				if(vision.getProcessing(i).getName().equals(name)){
-					vision.selectProcessing(i);
-					instance.controller.updateParamBoxSelection();
-				}
-			}
-		}
-		log.log("done");
-	}
-	public static boolean visionInitialized(){
-		return vision != null;
-	}
-	public static void setForVision(byte[] image){
-		if(vision != null)
-			visionImageNext[1-visionImageIndex] = image;
-	}
-	protected static void setVision(CvRunner vision){
-		Dashboard.vision = vision;
-		vision.setPipeline(camViewer);
-		if(vision != null){
-			updater.execute(()->{
-				loadVisionSaves();
-			});
-		}
-	}
-	protected static void setEmergencyStopControl(EmergencyStopControl estop){
-		Dashboard.emergencyStop = estop;
-	}
-	private static boolean emptyProperty(String prop){
-		String propv = ConstantsHandler.getStringValue(prop);
-		return propv == null || propv.equals("");
+	    updater.addTask(new VisionRunnerDataTask());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);
@@ -379,91 +517,6 @@ public class Dashboard extends Application {
 		if(!file.exists())
 			file.mkdir();
 	}
-	private static void validateBasicSettings() throws Exception{
-		ConstantsHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
-		ConstantsHandler.addString(PROP_HOST_ROBOT, "");
-		ConstantsHandler.addString(PROP_HOST_CAM, "");
-		if(emptyProperty(PROP_HOST_ROBOT))
-			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
-		if(emptyProperty(PROP_HOST_CAM))
-			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
-		
-		ConstantsHandler.addString(PROP_COMM_PROTOCOL, "tcp");
-		if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("tcp") && 
-				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("udp"))
-			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
-		
-		ConstantsHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
-		ConstantsHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
-		ConstantsHandler.addNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
-		ConstantsHandler.addNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
-	}
-	private static void loadSettings(){
-		try {
-			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
-			Remote.loadHosts(REMOTE_HOSTS_FILE);
-		} catch (Exception e) {
-			log.reportError(e.getMessage());
-		}
-	}
-	private static void printSettings(){
-		ConstantsHandler.printAll(log);
-	}
-	private static void saveSettings(){
-		ConstantsHandler.saveConstantsToXml(SETTINGS_FILE);
-		Remote.saveHosts(REMOTE_HOSTS_FILE);
-	}
-	private static void fxReady(){
-		fxready = true;
-	}
-	private static boolean fxInitialized(){
-		return fxready;
-	}
-	
-	public static void userError(String error){
-		log.reportError(error);
-		FlashFxUtils.onFxThread(()->{
-			FlashFxUtils.showErrorDialog(primaryStage, "Error", error);
-		});
-	}
-	
-	private MainController controller;
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		Dashboard.primaryStage = primaryStage;
-		Dashboard.instance = this;
-		
-		BorderPane root = new BorderPane();
-		
-		try {
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(Dashboard.class.getResource("WorldWindow.fxml"));
-			loader.setRoot(root);
-			root = loader.load();
-			controller = loader.getController(); 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		Scene scene = new Scene(root, 1300, 680);
-		scene.setOnKeyPressed((e)->{
-			if(e.getCode() == KeyCode.SPACE && Dashboard.emergencyStop != null){
-				System.out.println("SPACE! THE FINAL FRONTIER!");
-				Dashboard.emergencyStop.change();
-			}
-		});
-		
-		primaryStage.setScene(scene);
-		primaryStage.setResizable(true);
-		primaryStage.setOnCloseRequest((e)->{
-			controller.stop();
-			System.exit(0);
-		});
-		primaryStage.setTitle("FLASHboard");
-		
-		fxReady();
-		primaryStage.show();
-	}
 	public static void close(){
 		log.log("Shutting down");
 		updater.stop();
@@ -474,7 +527,7 @@ public class Dashboard extends Application {
 			}
 			
 			log.log("Stopping image processing...");
-			vision.close();
+			closeVision();
 		}
 		if(camClient != null){
 			log.log("Stopping camera client...");
