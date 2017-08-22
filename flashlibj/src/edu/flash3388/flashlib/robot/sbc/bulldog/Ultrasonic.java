@@ -31,7 +31,7 @@ public class Ultrasonic implements RangeFinder{
 	}
 	
 	private static final double SPEED_OF_SOUND_CM_MS = 1130.0 * 12.0 * 2.54;
-	private static final int PING_TIME_NS = (int) (10 * 1e3);
+	//private static final int PING_TIME_NS = (int) (10 * 1e3);
 	
 	private static Ultrasonic head = null;
 	private static boolean automaticEnabled = false;

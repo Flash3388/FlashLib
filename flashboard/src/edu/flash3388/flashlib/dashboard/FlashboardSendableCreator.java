@@ -4,7 +4,8 @@ import edu.flash3388.flashlib.dashboard.controls.*;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.vision.cv.CvRunner;
+import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
+import edu.flash3388.flashlib.vision.VisionRunner;
 
 public class FlashboardSendableCreator implements SendableCreator{
 
@@ -21,7 +22,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.TESTER: return new FlashboardTester(name, id);
 			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name, id);
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name, id);
-			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new CvRunner(name, id);
+			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new ThreadedVisionRunner(name, id);
 			case FlashboardSendableType.PDP: return new PDP(name, id);
 			case FlashboardSendableType.ESTOP: return new EmergencyStopControl(id);
 			case FlashboardSendableType.PIDTUNER: return new DashboardPidTuner(name, id);
@@ -31,8 +32,8 @@ public class FlashboardSendableCreator implements SendableCreator{
 	@Override
 	public Sendable create(String name, int id, byte type) {
 		Sendable s = get(name, id, type);
-		if(s != null && s instanceof CvRunner)
-			Dashboard.setVision((CvRunner)s);
+		if(s != null && s instanceof VisionRunner)
+			Dashboard.setVision((VisionRunner)s);
 		if(s != null && s instanceof Displayble)
 			Dashboard.addDisplayable((Displayble)s);
 		if(s != null && s instanceof EmergencyStopControl)

@@ -6,14 +6,11 @@ import java.util.Arrays;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
 
 /**
  * Provides a base for running vision processing. The processing is executed in a separate thread which receives new analysis
  * and stores them for use. It is possible to control this runner through a {@link RemoteVision} object.
- * <p>
- * When extending it is required to implement {@link #analyse()} which returns an {@link Analysis} object. Which 
- * library is used and how images are received does not influence the operation of the base.
- * <p>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -21,46 +18,15 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @see Vision
  */
 public abstract class VisionRunner extends Sendable implements Vision{
-
-	private static class VisionRunnerTask implements Runnable{
-		private boolean stop = false;
-		private VisionRunner runner;
-		
-		public VisionRunnerTask(VisionRunner v){
-			this.runner = v;
-		}
-		
-		@Override
-		public void run() {
-			while(!stop){
-				if(!runner.isRunning() || runner.getProcessing() == null){
-					FlashUtil.delay(5);
-					continue;
-				}
-				
-				Analysis an = runner.analyse();
-				runner.lastAnalysis[1-runner.analysisIndex] = an;
-				if(an != null)
-					runner.lastRec = FlashUtil.millisInt();
-				
-				FlashUtil.delay(5);
-			}
-		}
-		public void stop(){
-			stop = true;
-		}
-	}
 	
 	private boolean newSelection = false, newProcessing = false;
-	private Analysis[] lastAnalysis = new Analysis[2];
+	
 	private ArrayList<VisionProcessing> processing = new ArrayList<VisionProcessing>();
+	private VisionSource visionSource;
+	
 	private int currentProcessing = -1;
-	private int analysisIndex = 0;
 	private int recTimeout = 1000, lastRec;
 	private boolean running = false;
-	
-	private Thread visionThread;
-	private VisionRunnerTask runTask;
 	
 	/**
 	 * Creates a base for running vision. When using {@link RemoteVision} it is required to use this constructor, otherwise
@@ -72,8 +38,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	public VisionRunner(String name, int id) {
 		super(name, id, FlashboardSendableType.VISION);
 		
-		runTask = new VisionRunnerTask(this);
-		visionThread = new Thread(runTask, name);
+		
 	}
 	/**
 	 * Creates a base for running vision. When using the runner for local vision and not remote, this constructor is
@@ -91,23 +56,13 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	public VisionRunner(){
 		this("VisionRunner");
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean hasNewAnalysis() {
-		return lastAnalysis[analysisIndex] != null && FlashUtil.millisInt() - lastRec < recTimeout;
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Analysis getAnalysis() {
-		Analysis last = lastAnalysis[analysisIndex];
-		lastAnalysis[analysisIndex] = null;
-		analysisIndex ^= 1;
-		return last;
+		return hasAnalysis() && FlashUtil.millisInt() - lastRec < recTimeout;
 	}
 	/**
 	 * {@inheritDoc}
@@ -119,34 +74,19 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * Starts the vision thread if it is not running.
-	 * </p>
 	 */
 	@Override
 	public void start() {
 		if(isRunning()) return;
-		if(!visionThread.isAlive())
-			visionThread.start();
 		running = true;
 		lastRec = FlashUtil.millisInt();
 	}
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * Pauses the vision thread, if it is running.
-	 * </p>
 	 */
 	@Override
 	public void stop() {
 		running = false;
-	}
-	/**
-	 * Closes the vision thread. Call to this method disables this runner object from further use.
-	 */
-	public void close(){
-		stop();
-		runTask.stop();
 	}
 	
 	/**
@@ -224,7 +164,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				FlashUtil.getLog().log("Stopping vision");
 			}
 		}else if(data[0] == RemoteVision.REMOTE_SELECT_MODE){
-			currentProcessing = data[1];
+			selectProcessing(data[1]);
 		}else if(data[0] == RemoteVision.REMOTE_PROC_MODE){
 			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 1, data.length));
 			if(proc != null)
@@ -287,8 +227,61 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	}
 	
 	/**
-	 * Analyzes available images and returns the resulting {@link Analysis} object.
-	 * @return a new analysis
+	 * Sets the {@link VisionSource} to be used by this runner to perform vision operations
+	 * @param source the vision source
 	 */
-	protected abstract Analysis analyse();
+	public void setVisionSource(VisionSource source){
+		this.visionSource = source;
+	}
+	/**
+	 * Gets the {@link VisionSource} used by this runner to perform vision
+	 * operation.
+	 * @return the vision object, or null if one does not exist
+	 */
+	public VisionSource getVisionSource(){
+		return visionSource;
+	}
+	
+	/**
+	 * Analyzes available images and saves the resulting {@link Analysis} object.
+	 * 
+	 * @return true if an analysis was saved, false otherwise
+	 */
+	public boolean analyze(){
+		if(!isRunning() || getProcessing() == null || visionSource == null)
+			return false;
+		
+		Object frame = getNextFrame();
+		
+		if(frame != null){
+			visionSource.setFrame(frame);
+			
+			Analysis an = getProcessing().processAndGet(visionSource);
+			if(an != null){
+				ImagePipeline pipe = visionSource.getImagePipeline();
+				if(pipe != null){
+					visionSource.drawAnalysisResult(frame, an);
+					pipe.newImage(frame, ImagePipeline.TYPE_POST_PROCESS);
+				}
+				
+				newAnalysis(an);
+				if(an != null)
+					lastRec = FlashUtil.millisInt();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Gets the property used to hold the newest frame to be received.
+	 * The frame type depends on the vision library used.
+	 * This is an {@link ObservableProperty} and can be bound.
+	 * 
+	 * @return the frame property
+	 */
+	public abstract ObservableProperty<Object> frameProperty();
+	
+	protected abstract Object getNextFrame();
+	protected abstract void newAnalysis(Analysis an);
 }

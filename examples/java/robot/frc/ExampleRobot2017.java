@@ -3,7 +3,6 @@ package examples.robot.frc;
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.robot.InstantAction;
-import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -11,6 +10,7 @@ import edu.flash3388.flashlib.robot.rio.FlashRio;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
+
 import edu.wpi.first.wpilibj.VictorSP;
 
 /*
@@ -32,14 +32,14 @@ public class ExampleRobot2017 extends FlashRio{
 	 * it, but possible.
 	 */
 	@Override
-	protected void preInit() {
+	protected void preInit(RobotInitializer initializer) {
 		/*
 		 * Enables the robot logs to be used. The robot logs are both the default flashlib test which is used
 		 * by several features throughout flashlib. In addition to the default log, there is the robot
 		 * power log which tracks data issues with the power supply of the robot.
 		 * By default, this feature is disabled.
 		 */
-		//enableLogs();
+		//initializer.logsEnabled = true;
 		
 		/*
 		 * Sets whether or not to enable the power log. This can be used when the use of the main flashlib
@@ -47,6 +47,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * this will do nothing.
 		 */
 		//setPowerLogging(log);
+		//initializer.logPower = true;
 		
 		/*
 		 * Sets the total current draw from the PDP which will warrant a log into the power log.
@@ -54,6 +55,7 @@ public class ExampleRobot2017 extends FlashRio{
 	     * The default is 80 Ampere.
 		 */
 		//setPowerDrawWarning(current);
+		//initializer.warningPowerDraw = 100.0;
 		
 		/*
 		 * Sets the PDP voltage level which will warrant logging into the power log. As soon
@@ -61,6 +63,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * The default is 8.0 volts.
 		 */
 		//setVoltageDropWarning(volts);
+		//initializer.warningVoltage = 6.0;
 		
 		/*
 		 * Sets the flashboard to use UDP protocol and not TCP (which is the default). You must make sure

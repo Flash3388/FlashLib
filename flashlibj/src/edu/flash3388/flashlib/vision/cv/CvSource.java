@@ -7,13 +7,13 @@ import java.util.List;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Rect;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import edu.flash3388.flashlib.util.beans.SimpleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
+import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.MatchResult;
 import edu.flash3388.flashlib.vision.TemplateMatcher;
 import edu.flash3388.flashlib.vision.VisionSource;
@@ -32,7 +32,7 @@ public class CvSource implements VisionSource{
 	private Mat mat, threshold = new Mat(), contoursHierarchy = new Mat();
 	private List<MatOfPoint> contours;
 	private Analysis analysis;
-	private CvPipeline pipeline;
+	private ImagePipeline pipeline;
 
 	private void checkReady(boolean insureContours, boolean insureThreshold){
 		if(mat == null)
@@ -47,7 +47,7 @@ public class CvSource implements VisionSource{
 	}
 	private void detectContours(){
 		if(pipeline != null)
-			pipeline.newImage(threshold, CvPipeline.TYPE_THRESHOLD);
+			pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
 		
 		if(contours == null)
 			contours = new ArrayList<MatOfPoint>();
@@ -60,9 +60,23 @@ public class CvSource implements VisionSource{
 	public Mat getThreshold(){
 		return threshold;
 	}
-	public void setPipeline(CvPipeline pipe){
-		pipeline = pipe;
+	
+	@Override
+	public void setImagePipeline(ImagePipeline pipeline){
+		this.pipeline = pipeline;
 	}
+	@Override
+	public ImagePipeline getImagePipeline(){
+		return pipeline;
+	}
+	@Override
+	public void drawAnalysisResult(Object frame, Analysis analysis){
+		if(frame instanceof Mat)
+			CvProcessing.drawPostProcessing((Mat)frame, analysis);
+		else
+			throw new IllegalArgumentException("Frame is not compatible with this implementation: cv");
+	}
+	
 	/**
 	 * Sets the {@link Mat} object to be used for vision.
 	 * @param mat frame
@@ -72,6 +86,14 @@ public class CvSource implements VisionSource{
 		analysis = null;
 		threshold = null;
 		contours = null;
+	}
+	
+	@Override
+	public void setFrame(Object frame){
+		if(frame instanceof Mat)
+			prep(((Mat)frame).clone());
+		else 
+			throw new IllegalArgumentException("Frame is not compatible with this implementation: cv");
 	}
 	
 	/**
@@ -301,9 +323,10 @@ public class CvSource implements VisionSource{
 	 */
 	@Override
 	public MatchResult matchTemplate(TemplateMatcher matcher, double scaleFactor) {
-		if(matcher == null){
-
-		}
+		if(matcher == null)
+			throw new NullPointerException("Template matcher is null");
+		if(!(matcher instanceof CvTemplateMatcher))
+			throw new IllegalArgumentException("Template Matcher is not compatible with this vision source");
 		
 		checkReady(false, true);
 		

@@ -181,9 +181,6 @@ public class FlashRoboUtil {
 			Flashboard.attach(estopControl,
 						      new SendableLog(FlashUtil.getLog()));
 		}
-		if((mode & (SCHEDULER_INIT)) != 0){
-			RobotFactory.getScheduler().setDisabled(false);
-		}
 		
 		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - " +
 								Integer.toBinaryString(mode) + " - "+implType);

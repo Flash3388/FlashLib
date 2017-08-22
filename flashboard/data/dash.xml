@@ -7,4 +7,5 @@
 	<constant name="host.robot" type="string">roborio-3388-frc.local</constant>
 	<constant name="vision.default" type="string"></constant>
 	<constant name="comm.protocol" type="string">tcp</constant>
+	<constant name="host.cam" type="string">roborio-3388-frc.local</constant>
 </constants-handler>

@@ -227,6 +227,17 @@ public class Analysis {
 		return str.getBytes();
 	}
 	
+	@Override
+	public String toString(){
+		String ret = "";
+		for(Iterator<String> it = data.keySet().iterator(); it.hasNext(); ) {
+			String key = it.next();
+			String val = data.get(key).toString();
+			ret += key + " -> " + val + ", ";
+		}
+		return ret.substring(0, ret.length()-2);
+	}
+	
 	/**
 	 * Creates an analysis from a byte array. 
 	 * @param bytes byte array with analysis data.
@@ -254,22 +265,5 @@ public class Analysis {
 		}
 		
 		return an;
-	}
-	
-	/**
-	 * Creates an analysis from a byte array. 
-	 * @param bytes byte array with analysis data.
-	 * @return a new analysis object
-	 */
-	@Override
-	public String toString()
-	{
-		String ret = null;
-		for(Iterator<String> it = data.keySet().iterator(); it.hasNext(); ) {
-			String key = it.next();
-			String val = data.get(it).toString();
-			ret += key + " -> " + val + ", ";
-		}
-		return ret.substring(0, ret.length()-2);
 	}
 }

@@ -39,7 +39,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see Scheduler
- * @see System
+ * @see SubSystem
  */
 public abstract class Action{
 	
@@ -53,7 +53,7 @@ public abstract class Action{
 		protected void end() {}
 	};
 
-	private Vector<System> requirements = new Vector<System>(2);
+	private Vector<SubSystem> requirements = new Vector<SubSystem>(2);
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
@@ -147,7 +147,7 @@ public abstract class Action{
 	public boolean isRunning(){
 		return running;
 	}
-	public Enumeration<System> getRequirements(){
+	public Enumeration<SubSystem> getRequirements(){
 		return requirements.elements();
 	}
 	/**
@@ -162,15 +162,15 @@ public abstract class Action{
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
 	 */
-	protected void requires(System subsystem){
+	protected void requires(SubSystem subsystem){
 		requirements.addElement(subsystem);
 	}
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
 	 */
-	protected void requires(System... subsystems){
-		for(System s : subsystems)
+	protected void requires(SubSystem... subsystems){
+		for(SubSystem s : subsystems)
 			requirements.add(s);
 	}
 	/**
@@ -178,7 +178,7 @@ public abstract class Action{
 	 * @param action action to copy requirements from
 	 */
 	protected void copyRequirements(Action action){
-		for (Enumeration<System> sys = action.getRequirements(); sys.hasMoreElements(); )
+		for (Enumeration<SubSystem> sys = action.getRequirements(); sys.hasMoreElements(); )
 			requires(sys.nextElement());
 	}
 	/**

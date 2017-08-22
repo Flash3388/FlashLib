@@ -11,7 +11,7 @@ public class SystemAction extends Action{
 
 	private Action action;
 	
-	public SystemAction(Action action, System... systems){
+	public SystemAction(Action action, SubSystem... systems){
 		this.action = action;
 		
 		setTimeOut(action.getTimeOut());

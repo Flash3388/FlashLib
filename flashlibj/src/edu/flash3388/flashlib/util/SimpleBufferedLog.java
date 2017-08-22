@@ -207,6 +207,19 @@ public class SimpleBufferedLog extends Log{
 		errBuffer[errIdx++] = log;
 	}
 	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If the logging buffer is full, data is saved and the buffer is reset.
+	 * </p>
+	 */
+	@Override
+	protected void writeToErrorLog(String log, String stacktrace) {
+		if(errIdx >= errBuffer.length)
+			flushLogFile();
+		errBuffer[errIdx++] = log;
+		errBuffer[errIdx++] = stacktrace;
+	}
+	/**
 	 * Does nothing
 	 */
 	@Override

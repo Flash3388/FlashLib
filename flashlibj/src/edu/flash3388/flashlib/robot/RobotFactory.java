@@ -83,10 +83,8 @@ public final class RobotFactory {
 		return scheduler != null;
 	}
 	public static void disableScheduler(boolean disable){
-		if(hasSchedulerInstance()){
-			scheduler.removeAllActions();
+		if(hasSchedulerInstance())
 			scheduler.setDisabled(disable);
-		}
 	}
 	public static void runScheduler(){
 		if(hasSchedulerInstance())
