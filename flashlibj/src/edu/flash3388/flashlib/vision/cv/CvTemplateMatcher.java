@@ -62,7 +62,7 @@ public class CvTemplateMatcher implements TemplateMatcher{
 			
 			Imgproc.circle(scene, new Point(best.centerx +best.scaleFactor,best.centery +best.scaleFactor) ,3,new Scalar(51,51,51));
 			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
-			Imgcodecs.imwrite("~/dev/frc/test.png", scene);
+			Imgcodecs.imwrite("/home/klein/dev/frc/test.png", scene);
 			
 		}
 		return best;
@@ -71,6 +71,8 @@ public class CvTemplateMatcher implements TemplateMatcher{
 	private static MatchResult findBestMatch(MatchRunner[] matches) {
 		MatchResult best = null;
 		for(MatchRunner match : matches){
+			if(match.result == null)
+				continue;
 			if(best == null || best.maxVal < match.result.maxVal )
 				best = match.result;
 		}

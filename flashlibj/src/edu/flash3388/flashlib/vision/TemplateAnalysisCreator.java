@@ -132,6 +132,8 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 		
 	}
 	private Analysis setUpAnalysis(VisionSource source, MatchResult result) {
+		if(result == null)
+			return null;
 		Analysis analysis = new Analysis();
 		analysis.setDouble(Analysis.PROP_CENTER_X, result.centerx);
 		analysis.setDouble(Analysis.PROP_CENTER_Y, result.centery);
