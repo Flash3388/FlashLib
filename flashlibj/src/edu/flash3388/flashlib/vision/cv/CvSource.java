@@ -69,6 +69,13 @@ public class CvSource implements VisionSource{
 	public ImagePipeline getImagePipeline(){
 		return pipeline;
 	}
+	@Override
+	public void drawAnalysisResult(Object frame, Analysis analysis){
+		if(frame instanceof Mat)
+			CvProcessing.drawPostProcessing((Mat)frame, analysis);
+		else
+			throw new IllegalArgumentException("Frame is not compatible with this implementation: cv");
+	}
 	
 	/**
 	 * Sets the {@link Mat} object to be used for vision.
@@ -84,7 +91,7 @@ public class CvSource implements VisionSource{
 	@Override
 	public void setFrame(Object frame){
 		if(frame instanceof Mat)
-			prep((Mat)frame);
+			prep(((Mat)frame).clone());
 		else 
 			throw new IllegalArgumentException("Frame is not compatible with this implementation: cv");
 	}

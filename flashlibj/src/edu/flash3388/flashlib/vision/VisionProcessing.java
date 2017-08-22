@@ -167,7 +167,7 @@ public final class VisionProcessing {
 	 */
 	public Analysis processAndGet(VisionSource source){
 		process(source);
-		return analysisCreator != null? analysisCreator.createAnalysis(source, source.getContours()) : 
+		return analysisCreator != null? analysisCreator.createAnalysis(source) : 
 			source.getResult();
 	}
 	/**

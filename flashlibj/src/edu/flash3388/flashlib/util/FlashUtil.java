@@ -107,7 +107,7 @@ public final class FlashUtil {
 	 * @return the difference, measured in seconds, between the current time and the time when the program was started.
 	 */
 	public static double secs(){
-		return millis() / 1000.0;
+		return millis() * 0.001;
 	}
 	/**
 	 * Returns the current value of the running Java Virtual Machine's high-resolution time source, in seconds. 

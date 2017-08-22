@@ -74,7 +74,9 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Analysis createAnalysis(VisionSource source, List<Contour> contours) {
+	public Analysis createAnalysis(VisionSource source) {
+		List<Contour> contours = source.getContours();
+		
 		double centerX = 0, centerY = 0;
 		double sumDimension = 0;
 		for (Contour contour : contours){

@@ -423,6 +423,9 @@ public class Dashboard extends Application {
 		if(vision != null)
 			visionImageNext[1-visionImageIndex] = image;
 	}
+	public static void setForVision(Object frame){
+		vision.frameProperty().setValue(frame);
+	}
 	protected static void setVision(VisionRunner vision){
 		Dashboard.vision = vision;
 		vision.setVisionSource(new CvSource());
@@ -500,7 +503,7 @@ public class Dashboard extends Application {
 	    camViewer = new CameraViewer("Robot-CamViewer", -1);
 	    addDisplayable(camViewer);
 	    updater.addTask(new ConnectionTask());
-	    updater.addTask(new VisionRunnerDataTask());
+	    //updater.addTask(new VisionRunnerDataTask());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);

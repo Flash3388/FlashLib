@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+
 /**
  * <p>
  * Convenience class for logging states and errors into files, allowing for real-time and post-run code debugging.
@@ -101,6 +104,9 @@ public abstract class Log{
 	private boolean closed = true;
 	private byte logMode;
 	
+	private DoubleSource timeSourcems;
+	private boolean showTime = false;
+	
 	
 	/**
 	 * Creates a new log. 
@@ -127,6 +133,7 @@ public abstract class Log{
 	public Log(String directory, String name, boolean override, int logMode){
 		this.name = name;
 		this.logMode = (byte) logMode;
+		this.timeSourcems = ()->FlashUtil.millis();
 		
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
@@ -218,17 +225,6 @@ public abstract class Log{
 		this(name, false);
 	}
 	
-	/*private synchronized void flushLogFile(){
-		if(indexLog == 0) return;
-		FileStream.appendLines(absPath, logLines);
-		indexLog = 0;
-	}
-	private synchronized void flushErrorLogFile(){
-		if(indexErrorLog == 0) return;
-		FileStream.appendLines(absPathError, errorLines);
-		indexErrorLog = 0;
-	}*/
-	
 	/**
 	 * Writes data to the standard log file. Implementation of writing is user-dependent.
 	 * @param log data to write.
@@ -240,6 +236,12 @@ public abstract class Log{
 	 */
 	protected abstract void writeToErrorLog(String log);
 	/**
+	 * Writes data to the error log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 * @param stacktrace the stacktrace data
+	 */
+	protected abstract void writeToErrorLog(String log, String stacktrace);
+	/**
 	 * Closes the internal writing objects of the log. Called from {@link #close()}. 
 	 * Implementation of closing is user-dependent.
 	 */
@@ -250,6 +252,33 @@ public abstract class Log{
 	 */
 	protected abstract void saveInternal();
 	
+	/**
+	 * Gets the time data for logging
+	 * 
+	 * @param secs if true, returns the time in seconds, millis otherwise
+	 * @return the time
+	 */
+	protected double getTime(boolean secs){
+		return secs? timeSourcems.get() * 0.001 : timeSourcems.get();
+	}
+	
+	/**
+	 * Sets the data source which returns the current time in milliseconds, used when print or logging data.
+	 * @param source the time source
+	 */
+	public void setLoggingTimeSource(DoubleSource source){
+		if(source == null)
+			throw new NullPointerException("Source is null");
+		this.timeSourcems = source;
+	}
+	/**
+	 * Sets whether or not to add a timestamp to standard log output. If true, a timestamp
+	 * will be added in seconds.
+	 * @param showTime true to show time, false otherwise
+	 */
+	public void enableShowTime(boolean showTime){
+		this.showTime = showTime;
+	}
 	
 	/**
 	 * Sets the {@link java.io.PrintStream} to which log data is printed if the output mode include {@link #MODE_PRINT}.
@@ -260,6 +289,30 @@ public abstract class Log{
 	public void setPrintStream(PrintStream out){
 		this.out = out;
 	}
+	/**
+	 * Prints a warning message to the used {@link PrintStream}.
+	 * @param warning a warning
+	 */
+	public void printWarning(String warning){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		out.println(name+"> ["+Mathf.roundDecimal(getTime(true))+"] <WARNING> : "+warning);
+	}
+	/**
+	 * Prints an error message to the used {@link PrintStream}.
+	 * @param error an error
+	 */
+	public void printError(String error){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		out.println(name+"> ["+Mathf.roundDecimal(getTime(true))+"] <ERROR> : "+error);
+	}
+	/**
+	 * Prints a message to the used {@link PrintStream}.
+	 * @param log a log data
+	 */
+	public void print(String log){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		out.println(name+"> "+log);
+	}
 	
 	/**
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
@@ -268,10 +321,9 @@ public abstract class Log{
 	 * @param mess A line to log to the standard log file or buffer
 	 */
 	public synchronized void write(String mess){
-		if(isClosed()) return;
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		writeToStandardLog(mess);
 	}
-	
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
@@ -279,8 +331,8 @@ public abstract class Log{
 	 * @param mess A line to log to the error log file or buffer
 	 */
 	public synchronized void writeError(String mess){
-		if(isClosed()) return;
-		mess = (FlashUtil.secs()) + ": " + mess;
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		mess = "[" +Mathf.roundDecimal(getTime(false))+ "] : " + mess;
 		writeToErrorLog(mess);
 	}
 	/**
@@ -291,10 +343,22 @@ public abstract class Log{
 	 * @param stacktrace A stack trace of the error
 	 */
 	public synchronized void writeError(String mess, String stacktrace){
-		if(isClosed()) return;
-		mess = (FlashUtil.secs()) + ": " + mess;
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		write("<ERROR> : "+mess);
+		mess = "[" +Mathf.roundDecimal(getTime(false))+ "] <ERROR> : " + mess;
+		writeToErrorLog(mess, stacktrace);
+	}
+	/**
+	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
+	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
+	 * 
+	 * @param mess A line to log to the error log file or buffer
+	 */
+	public synchronized void writeWarning(String mess){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		write("<WARNING> : "+mess);
+		mess = "[" +Mathf.roundDecimal(getTime(false))+ "] <WARNING> : " + mess;
 		writeToErrorLog(mess);
-		writeToErrorLog(stacktrace);
 	}
 	
 	/**
@@ -324,8 +388,7 @@ public abstract class Log{
 	 */
 	public synchronized void save(){
 		saveInternal();
-		if(isLoggingMode(MODE_PRINT))
-			out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
+		print("Log Saved");
 	}
 	
 	/**
@@ -459,6 +522,34 @@ public abstract class Log{
 	}
 	
 	/**
+	 * Logs the given data to all attached log interfaces by calling {@link LoggingInterface#log(String)}.
+	 * @param log data to log
+	 */
+	public void interfaceLog(String log){
+		if(!isLoggingMode(MODE_INTERFACES)) return;
+		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+			lEnum.nextElement().log(log);
+	}
+	/**
+	 * Logs the given data to all attached log interfaces by calling {@link LoggingInterface#reportError(String)}.
+	 * @param error error to log
+	 */
+	public void interfaceReportError(String error){
+		if(!isLoggingMode(MODE_INTERFACES)) return;
+		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+			lEnum.nextElement().reportError(error);
+	}
+	/**
+	 * Logs the given data to all attached log interfaces by calling {@link LoggingInterface#reportWarning(String)}.
+	 * @param warning warning to log
+	 */
+	public void interfaceReportWarning(String warning){
+		if(!isLoggingMode(MODE_INTERFACES)) return;
+		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+			lEnum.nextElement().reportWarning(warning);
+	}
+	
+	/**
 	 * Reports an error. The data output depends on the logging mode currently set:
 	 * <ul>
 	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to both the standard and error files or buffers. A stack trace of the error is added as well. </li>
@@ -469,19 +560,10 @@ public abstract class Log{
 	 */
 	public void reportError(String error){
 		if(isDisabled()) return;
-		String err = "ERROR\n\t" + 
-					FlashUtil.secs() + " : " + error;
-		if(isLoggingMode(MODE_WRITE)){
-			String trace = getErrorStackTrace();
-			writeError(error, trace);
-			write(err);
-		}
-		if(isLoggingMode(MODE_PRINT))
-			System.err.println(name + "> " + err);
-		if(isLoggingMode(MODE_INTERFACES)){
-			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-				lEnum.nextElement().reportError(error);
-		}
+		
+		writeError(error, getErrorStackTrace());
+		printError(error);
+		interfaceReportError(error);
 	}
 	
 	/**
@@ -495,18 +577,10 @@ public abstract class Log{
 	 */
 	public void reportWarning(String warning){
 		if(isDisabled()) return;
-		String war = "WARNING\n\t" + 
-				FlashUtil.secs() + " : " + warning;
-		if(isLoggingMode(MODE_PRINT))
-			System.err.println(name + "> " + war);
-		if(isLoggingMode(MODE_WRITE)){
-			writeError("WARNING - " +warning);
-			write(war);
-		}
-		if(isLoggingMode(MODE_INTERFACES)){
-			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-				lEnum.nextElement().reportWarning(warning);
-		}
+		
+		printWarning(warning);
+		writeWarning(warning);
+		interfaceReportWarning(warning);
 	}
 	
 	/**
@@ -541,25 +615,25 @@ public abstract class Log{
 	 */
 	public void log(String msg, String caller){
 		if(isDisabled()) return;
-		msg = caller+": "+msg;
-		if(isLoggingMode(MODE_WRITE))
-			write(msg);
-		if(isLoggingMode(MODE_PRINT))
-			out.println(name + "> " + msg);
-		if(isLoggingMode(MODE_INTERFACES)){
-			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-				lEnum.nextElement().log(msg);
-		}
+		
+		msg = "("+caller+") : "+msg;
+		if(showTime)
+			msg = "["+Mathf.roundDecimal(getTime(true))+"] " +msg;
+			
+		
+		write(msg);
+		print(msg);
+		interfaceLog(msg);
 	}
 	
 	/**
 	 * Logs data with information about the current time. Calls {@link #logTime(String, double)} and passes it 
-	 * {@link FlashUtil#secs()} as a time stamp.
+	 * the timestamp from the time interface used by this log.
 	 * 
 	 * @param msg The log data.
 	 */
 	public void logTime(String msg){
-		logTime(msg, FlashUtil.secs());
+		logTime(msg, getTime(true));
 	}
 	
 	/**
@@ -574,15 +648,12 @@ public abstract class Log{
 	 */
 	public void logTime(String msg, double time){
 		if(isDisabled()) return;
-		msg = time + " : ---------->" + msg;
-		if(isLoggingMode(MODE_WRITE))
-			write(msg);
-		if(isLoggingMode(MODE_PRINT))
-			out.println(name + "> " + msg);
-		if(isLoggingMode(MODE_INTERFACES)){
-			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-				lEnum.nextElement().log(msg);
-		}
+		
+		msg = "[" + Mathf.roundDecimal(time) + "] : ----------> " + msg;
+		
+		write(msg);
+		print(msg);
+		interfaceLog(msg);
 	}
 	
 	private static String getCallerClass(){
@@ -634,7 +705,7 @@ public abstract class Log{
 	 * @return a new stream log. 
 	 */
 	public static Log createStreamLog(String name){
-		return new SimpleLog(name);
+		return new SimpleStreamLog(name);
 	}
 	/**
 	 * Creates a new log by a given type and name.

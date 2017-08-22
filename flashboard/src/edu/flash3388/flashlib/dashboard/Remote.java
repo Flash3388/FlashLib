@@ -1,12 +1,8 @@
 package edu.flash3388.flashlib.dashboard;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +11,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-import com.sun.media.sound.StandardMidiFileWriter;
 
-import edu.flash3388.flashlib.io.FileStream;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class Remote {

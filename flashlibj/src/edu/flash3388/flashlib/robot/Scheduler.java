@@ -50,7 +50,7 @@ public final class Scheduler {
 	private boolean disabled = false;
 	
 	private Vector<Action> actions = new Vector<Action>();
-	private Vector<System> systems = new Vector<System>();
+	private Vector<SubSystem> systems = new Vector<SubSystem>();
 	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
 	
 	/**
@@ -78,8 +78,8 @@ public final class Scheduler {
 		}
 		
 		if(systems.size() > 0){
-			System system = null;
-			for(Enumeration<System> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
+			SubSystem system = null;
+			for(Enumeration<SubSystem> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
 				system = systemEnum.nextElement();
 				if(!system.hasCurrentAction() && !RobotState.isRobotDisabled())
 					system.startDefaultAction();
@@ -120,7 +120,7 @@ public final class Scheduler {
 		return tasks.remove(runnable);
 	}
 	
-	void registerSystem(System system){
+	void registerSystem(SubSystem system){
 		systems.add(system);
 	}
 	
@@ -135,9 +135,9 @@ public final class Scheduler {
 	public boolean add(Action action){
 		if(disabled) return false;
 		
-		Enumeration<System> requirements = action.getRequirements();
+		Enumeration<SubSystem> requirements = action.getRequirements();
 		while(requirements.hasMoreElements()){
-			System system = requirements.nextElement();
+			SubSystem system = requirements.nextElement();
 			if(system.hasCurrentAction())
 				remove(system.getCurrentAction());
 			system.setCurrentAction(action);
@@ -153,7 +153,7 @@ public final class Scheduler {
 	 */
 	public void remove(Action action){
 		if(actions.removeElement(action)){
-			Enumeration<System> requirements = action.getRequirements();
+			Enumeration<SubSystem> requirements = action.getRequirements();
 			while(requirements.hasMoreElements())
 				requirements.nextElement().setCurrentAction(null);
 			

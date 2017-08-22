@@ -17,9 +17,9 @@ public class ExampleServer {
 
 	public static void main(String[] args) throws IOException {
 		/*
-		 * Gets the IP address of a computer with the hostname "hostname". This should be the local address.
+		 * Gets the local IP address
 		 */
-		InetAddress address = InetAddress.getByName("hostname");
+		InetAddress address = InetAddress.getLocalHost();
 		/*
 		 * Local port to listen to for connection
 		 */

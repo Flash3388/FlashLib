@@ -17,6 +17,7 @@ import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.vision.ImagePipeline;
+import edu.flash3388.flashlib.vision.cv.CvProcessing;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -70,22 +71,27 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	}
 	@Override
 	public void newData(byte[] bytes) {
-		Dashboard.setForVision(bytes);
-		
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
- 
-        ImageReader reader = (ImageReader) readers.next();
-        Object source = bis; 
-       
-		try {
-			ImageInputStream iis = ImageIO.createImageInputStream(source); 
-		    reader.setInput(iis, true);
-		    ImageReadParam param = reader.getDefaultReadParam();
-		    BufferedImage image = reader.read(0, param); 
-		    setImage(image);
-		} catch (IOException e) {
+		if(Dashboard.visionInitialized()){
+			Mat m = CvProcessing.byteArray2Mat(bytes);
+			Dashboard.setForVision(m);
 		}
+		if(mode == DisplayMode.Normal){
+			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+	        Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
+	 
+	        ImageReader reader = (ImageReader) readers.next();
+	        Object source = bis; 
+	       
+			try {
+				ImageInputStream iis = ImageIO.createImageInputStream(source); 
+			    reader.setInput(iis, true);
+			    ImageReadParam param = reader.getDefaultReadParam();
+			    BufferedImage image = reader.read(0, param); 
+			    setImage(image);
+			} catch (IOException e) {
+			}
+		}
+
 	}
 	@Override
 	public byte[] dataForTransmition() {return null;}

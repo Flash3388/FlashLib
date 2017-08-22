@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.List;
 import java.util.Map;
 
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -18,10 +17,9 @@ public interface AnalysisCreator {
 	 * Creates an {@link Analysis} object to represent data about the searched destination. 
 	 * 
 	 * @param source the object performing the vision.
-	 * @param contours list of contours in the image that were not filtered out.
 	 * @return an analysis from the performed vision.
 	 */
-	Analysis createAnalysis(VisionSource source, List<Contour> contours);
+	Analysis createAnalysis(VisionSource source);
 	
 	/**
 	 * Creates a new AnalysisCreator. Creation is done by attempting to instantiate a class with the given name.

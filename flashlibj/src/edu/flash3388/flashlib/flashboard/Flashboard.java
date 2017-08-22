@@ -33,6 +33,13 @@ public class Flashboard {
 	
 	private Flashboard(){}
 	
+	public static class FlashboardInitData{
+		public int initMode = INIT_FULL;
+		public int camPort = CAMERA_PORT_ROBOT;
+		public int commPort = PORT_ROBOT;
+		public boolean tcp = true;
+	}
+	
 	/**
 	 * Indicates the initialization to initialize only the flashboard camera server.
 	 * Set this value using {@link #setInitMode(int)}. It will be used when {@link #init()} is
@@ -70,8 +77,9 @@ public class Flashboard {
 	 */
 	public static final int CAMERA_PORT_BOARD = 5802;
 	
-	private static boolean instance = false, tcp = true;
+	private static boolean instance = false;
 	private static int initMode = INIT_FULL;
+	private static FlashboardInitData initData = null;
 	
 	private static CameraView camViewer;
 	private static CameraServer camServer;
@@ -87,18 +95,30 @@ public class Flashboard {
 	}
 	
 	/**
+	 * Gets the flashboard initialization data holder. It is an instance of {@link FlashboardInitData}
+	 * which will be used to fill missing initialization data when initializing the Flashboard.
+	 * @return the initialization data holder.
+	 */
+	public static FlashboardInitData getInitData(){
+		if(initData == null)
+			initData = new FlashboardInitData();
+		return initData;
+	}
+	/**
 	 * Sets the Flashboard to use TCP protocol for communications. 
 	 * Works only if Flashboard was not initialized yet.
 	 */
 	public static void setProtocolTcp(){
-		tcp = true;
+		if(!instance)
+			getInitData().tcp = true;
 	}
 	/**
 	 * Sets the Flashboard to use UDP protocol for communications. 
 	 * Works only if Flashboard was not initialized yet.
 	 */
 	public static void setProtocolUdp(){
-		tcp = false;
+		if(!instance)
+			getInitData().tcp = false;
 	}
 	/**
 	 * Sets the initialization mode to be used when {@link #init()} is called. If flashboard was initialized,
@@ -108,7 +128,27 @@ public class Flashboard {
 	 */
 	public static void setInitMode(int mode){
 		if(!instance)
-			initMode = mode;
+			getInitData().initMode = mode;
+	}
+	/**
+	 * Sets the communications port used when initializing flashboard using {@link #init(int, boolean)}.
+	 * If flashboard was already initialized, this will do nothing.
+	 * 
+	 * @param port the local communications port
+	 */
+	public static void setCommPort(int port){
+		if(!instance)
+			getInitData().commPort = port;
+	}
+	/**
+	 * Sets the camera server port used when initializing flashboard using {@link #init(int, boolean)}.
+	 * If flashboard was already initialized, this will do nothing.
+	 * 
+	 * @param port the local camera server port
+	 */
+	public static void setCamPort(int port){
+		if(!instance)
+			getInitData().camPort = port;
 	}
 	
 	/**
@@ -228,7 +268,7 @@ public class Flashboard {
 	 * Uses a value set by {@link #setInitMode(int mode)} for initialization. Default is {@link #INIT_FULL}.
 	 */
 	public static void init(){
-		init(initMode);
+		init(getInitData().initMode);
 	}
 	/**
 	 * Initializes Flashboard control. Uses protocol set before initialization 
@@ -238,7 +278,7 @@ public class Flashboard {
 	 * @param mode indicates how to initialize the flashboard control mode
 	 */
 	public static void init(int mode){
-		init(mode, tcp);
+		init(mode, getInitData().tcp);
 	}
 	/**
 	 * Initializes Flashboard control. Uses a given protocol for communications. Uses the 
@@ -248,7 +288,7 @@ public class Flashboard {
 	 * @param tcp protocol to use: True for TCP, false for UDP.
 	 */
 	public static void init(int mode, boolean tcp){
-		init(mode, PORT_ROBOT, CAMERA_PORT_ROBOT, tcp);
+		init(mode, getInitData().commPort, getInitData().camPort, tcp);
 	}
 	/**
 	 * Intializes Flashboard control for a given mode. Uses given parameters for ports and protocol in initialization.
@@ -263,7 +303,6 @@ public class Flashboard {
 	 */
 	public static void init(int mode, int port, int camport, boolean tcp){
 		if(!instance){
-			Flashboard.tcp = tcp;
 			try {
 				if(vision == null && (initMode & INIT_COMM) != 0)
 					vision = new RemoteVision();

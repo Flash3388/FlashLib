@@ -5,8 +5,10 @@ import org.opencv.core.Core;
 import edu.flash3388.flashlib.cams.CvCamera;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
-import edu.flash3388.flashlib.vision.cv.CvRunner;
+import edu.flash3388.flashlib.vision.SimpleVisionRunner;
 import edu.flash3388.flashlib.vision.VisionProcessing;
+import edu.flash3388.flashlib.vision.VisionRunner;
+import edu.flash3388.flashlib.vision.cv.CvSource;
 
 /*
  * Example for running vision
@@ -33,9 +35,14 @@ public class ExampleVision {
 		}
 		
 		/*
-		 * Creates a vision runner for openCV.
+		 * Creates a simple vision runner
 		 */
-		CvRunner visionRunner = new CvRunner();
+		VisionRunner visionRunner = new SimpleVisionRunner();
+		/*
+		 * Set the vision source to a openCV implementation
+		 */
+		visionRunner.setVisionSource(new CvSource());
+		
 		/*
 		 * Adds a processing object to the vision runner
 		 */
@@ -65,17 +72,21 @@ public class ExampleVision {
 		 */
 		long delay = 1 / camera.getFPS();
 		/*
-		 * Forever read a frame from the camera and add it to the vision runner, wait the delay time and
-		 * get the analysis result to print it.
+		 * Forever read a frame from the camera and add it to the vision runner, attempt
+		 * analysis and wait a certain the delay time
 		 */
 		while(true){
-			visionRunner.newImage(camera.read(), (byte) 0);
+			//set a new image to the vision runner
+			visionRunner.frameProperty().setValue(camera.read());
 			
-			FlashUtil.delay(delay);
+			//attempt analysis of the frame. If returns true then we got a new
+			//analysis so get the analysis and print
+			if(visionRunner.analyze()){
+				Analysis an = visionRunner.getAnalysis();
+				System.out.println("new analysis: "+an.toString());
+			}
 			
-			Analysis an = visionRunner.getAnalysis();
-			if(an != null)
-				System.out.println("new analysis");
+			FlashUtil.delay(delay);	
 		}
 	}
 }

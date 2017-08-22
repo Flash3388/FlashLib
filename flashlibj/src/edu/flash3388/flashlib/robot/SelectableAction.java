@@ -54,10 +54,10 @@ public class SelectableAction extends Action{
 		this(5);
 	}
 	
-	private void validateRequirements(Enumeration<System> systems){
+	private void validateRequirements(Enumeration<SubSystem> systems){
 		resetRequirements();
 		for (; systems.hasMoreElements();) {
-			System s = systems.nextElement();
+			SubSystem s = systems.nextElement();
 			if(s != null)
 				requires(s);
 		}

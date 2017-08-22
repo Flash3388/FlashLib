@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.vision;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -108,7 +107,7 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Analysis createAnalysis(VisionSource source, List<Contour> contours) {
+	public Analysis createAnalysis(VisionSource source) {
 		if(matcher == null){
 			ValueSource<Object>[] imgs = null;
 			

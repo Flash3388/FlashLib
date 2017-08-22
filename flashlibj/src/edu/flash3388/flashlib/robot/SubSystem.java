@@ -7,14 +7,14 @@ package edu.flash3388.flashlib.robot;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class System{
+public abstract class SubSystem{
 	
 	private Action default_action;
 	private Action current_action;
 	
 	private String name = null;
 	
-	protected System(String name){
+	protected SubSystem(String name){
 		RobotFactory.getScheduler().registerSystem(this);
 		this.name = name;
 	}

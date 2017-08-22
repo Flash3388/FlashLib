@@ -14,11 +14,10 @@ import java.io.IOException;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class SimpleLog extends Log{
+public class SimpleStreamLog extends Log{
 
 	private FileWriter stdWriter;
 	private FileWriter errWriter;
-	private boolean showTime;
 	
 	/**
 	 * Creates a new simple stream log.
@@ -38,14 +37,13 @@ public class SimpleLog extends Log{
 	 * @param name The name of the log
 	 * @param override true to override existing log files with the same name, false otherwise.
 	 * @param logMode The logging output types
-	 * @param showTime true to always timestamp logs, false otherwise.
 	 * 
 	 * @see Log#Log(String, String, boolean, int)
 	 */
-	public SimpleLog(String directory, String name, boolean override, int logMode, boolean showTime) {
+	public SimpleStreamLog(String directory, String name, boolean override, int logMode) {
 		super(directory, name, override, logMode);
 		
-		init(showTime);
+		init();
 	}
 	/**
 	 * Creates a new simple stream log.
@@ -64,14 +62,13 @@ public class SimpleLog extends Log{
 	 * @param name The name of the log
 	 * @param override true to override existing log files with the same name, false otherwise.
 	 * @param logMode The logging output types
-	 * @param showTime true to always timestamp logs, false otherwise.
 	 * 
 	 * @see Log#Log(String, boolean, int)
 	 */
-	public SimpleLog(String name, boolean override, int logMode, boolean showTime) {
+	public SimpleStreamLog(String name, boolean override, int logMode) {
 		super(name, override, logMode);
 		
-		init(showTime);
+		init();
 	}
 	/**
 	 * Creates a new simple stream log.
@@ -89,14 +86,13 @@ public class SimpleLog extends Log{
 	 * 
 	 * @param name The name of the log
 	 * @param override true to override existing log files with the same name, false otherwise.
-	 * @param showTime true to always timestamp logs, false otherwise.
 	 * 
 	 * @see Log#Log(String, boolean)
 	 */
-	public SimpleLog(String name, boolean override, boolean showTime) {
+	public SimpleStreamLog(String name, boolean override) {
 		super(name, override);
 		
-		init(showTime);
+		init();
 	}
 	/**
 	 * Creates a new simple stream log.
@@ -113,40 +109,16 @@ public class SimpleLog extends Log{
 	 * </p>
 	 * 
 	 * @param name The name of the log
-	 * @param showTime true to always timestamp logs, false otherwise.
 	 * 
 	 * @see Log#Log(String)
 	 */
-	public SimpleLog(String name, boolean showTime) {
+	public SimpleStreamLog(String name) {
 		super(name);
 		
-		init(showTime);
-	}
-	/**
-	 * Creates a new simple stream log. With a timestamp output for every standard log output.
-	 * 
-	 * <p>
-	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
-	 * method call. The later saves errors and warning from {@link #reportError(String)} and {@link #reportWarning(String)}
-	 * </p>
-	 * <p>
-	 * The log files are created in the given directory and the file name is the log name. If the directory or any of its 
-	 * parent directories do not exist, they will be created. If override is true, any existing log files with the same name 
-	 * will be deleted, otherwise if a log file with same name is present, an integer will be added to the name specifying it
-	 * is a new file of the same name. 
-	 * </p>
-	 * 
-	 * @param name The name of the log
-	 * 
-	 * @see Log#Log(String)
-	 */
-	public SimpleLog(String name) {
-		this(name, true);
+		init();
 	}
 
-	private void init(boolean showTime){
-		this.showTime = showTime;
-		
+	private void init(){
 		try {
 			stdWriter = new FileWriter(getStandardLogFile(), false);
 			errWriter = new FileWriter(getErrorLogFile(), false);
@@ -161,8 +133,6 @@ public class SimpleLog extends Log{
 	 */
 	@Override
 	protected void writeToStandardLog(String log) {
-		if(showTime)
-			log = FlashUtil.millis() + ": " + log;
 		try {
 			stdWriter.write(log + "\n");
 		} catch (IOException e) {
@@ -175,7 +145,19 @@ public class SimpleLog extends Log{
 	@Override
 	protected void writeToErrorLog(String log) {
 		try {
-			errWriter.write(log);
+			errWriter.write(log+"\n");
+		} catch (IOException e) {
+			close();
+		}
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void writeToErrorLog(String log, String stacktrace) {
+		try {
+			errWriter.write(log + "\n");
+			errWriter.write(stacktrace + "\n");
 		} catch (IOException e) {
 			close();
 		}
@@ -216,14 +198,5 @@ public class SimpleLog extends Log{
 	@Override
 	public LoggingType getLoggingType() {
 		return LoggingType.Stream;
-	}
-	
-	/**
-	 * Sets whether or not to add a timestamp to all standard log outputs. If true, 
-	 * timestamp in milliseconds will be added for every standard log writes.
-	 * @param enable true to enable, false otherwise.
-	 */
-	public void enableTimeShow(boolean enable){
-		showTime = enable;
 	}
 }

@@ -258,6 +258,12 @@ public abstract class VisionRunner extends Sendable implements Vision{
 			
 			Analysis an = getProcessing().processAndGet(visionSource);
 			if(an != null){
+				ImagePipeline pipe = visionSource.getImagePipeline();
+				if(pipe != null){
+					visionSource.drawAnalysisResult(frame, an);
+					pipe.newImage(frame, ImagePipeline.TYPE_POST_PROCESS);
+				}
+				
 				newAnalysis(an);
 				if(an != null)
 					lastRec = FlashUtil.millisInt();

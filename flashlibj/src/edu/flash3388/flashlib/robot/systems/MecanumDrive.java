@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.SubSystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
@@ -14,7 +14,7 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 /**
  * Implements the Mecanum drive system. Mecanum drive is a specialized holonomic system which uses 4
- * unique wheels for 360-vectored motion, which makes this system an extremely maneuverable one.
+ * unique wheels for 360-vectored motion, making this system extremely maneuverable.
  * 
  * <p>
  * The Mecanum wheel is a design for a wheel which can move a vehicle in any direction. It is sometimes called the 
@@ -36,12 +36,12 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * @see <a href="https://en.wikipedia.org/wiki/Mecanum_wheel">https://en.wikipedia.org/wiki/Mecanum_wheel</a>
  * @see <a href="http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf">http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf</a>
  */
-public class MecanumDrive extends System implements HolonomicDriveSystem {
+public class MecanumDrive extends SubSystem implements HolonomicDriveSystem {
 
 	/**
 	 * Because the Mecanum drive is so sensitive to weight distributions and motor output differences, it
 	 * is sometimes needed to stabilize it by modifying the output to compensate for those differences. 
-	 * MecanumStabilizer provides several ways to do so.
+	 * MecanumStabilizer is an interface for algorithms designed to do so.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
@@ -83,9 +83,10 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 		public PidController getPidController(){
 			return pidcontroller;
 		}
+		
 		@Override
 		public double[] stabilize(double magnitude, double direction, double rotation) {
-			if(rotation == 0)
+			if(rotation != 0)
 				return null;
 			if(values[0] != magnitude && values[1] != direction){
 				values[0] = magnitude;
@@ -104,8 +105,10 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	private FlashSpeedController rear_right;
 
 	private MecanumStabilizer stabilizer;
-	private boolean stabilizing = false, scaleVoltage = false;
+	private boolean stabilizing = false, voltageScaling = false;
 	private double sensitivityLimit = 0;
+	private double speed_limit = 1.0;
+	private double minSpeed = 0.0;
 	private int angleRound = 0;
 
 	/**
@@ -118,19 +121,12 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	 */
 	public MecanumDrive(FlashSpeedController right_front, FlashSpeedController right_back, FlashSpeedController left_front,
 			FlashSpeedController left_back) {
-		super(null);
+		super("");
 		front_right = right_front;
 		rear_right = right_back;
 		front_left = left_front;
 		rear_left = left_back;
 		enableBrakeMode(false);
-	}
-
-	private double scaleForVoltage(double s) {
-		return scaleVoltage? FlashRoboUtil.scaleVoltageBus(s) : s;
-	}
-	private double roundAngle(double angle) {
-		return Mathf.roundToMultiplier(angle, angleRound);
 	}
 	
 	/**
@@ -179,6 +175,36 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 		return sensitivityLimit;
 	}
 	/**
+	 * Sets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
+	 * @param limit speed limit [0...1]
+	 */
+	public void setSpeedLimit(double limit){
+		speed_limit = Math.abs(limit);
+	}
+	/**
+	 * Gets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
+	 * @return speed limit [0...1]
+	 */
+	public double getSpeedLimit(){
+		return speed_limit;
+	}
+	/**
+	 * Sets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
+	 * it is decreased to 0.
+	 * @param limit speed limit [0...1]
+	 */
+	public void setMinSpeed(double limit){
+		minSpeed = Math.abs(limit);
+	}
+	/**
+	 * Gets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
+	 * it is decreased to 0.
+	 * @return speed limit [0...1]
+	 */
+	public double getMinSpeed(){
+		return minSpeed;
+	}
+	/**
 	 * Gets the current angle round. Angle rounding rounds the given motion vector direction to a
 	 * multiplier of the given rounding value.
 	 * @return multiplier for rounding value.
@@ -194,7 +220,27 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	public void setAngleRounding(int round) {
 		angleRound = round;
 	}
-
+	
+	/**
+	 * Sets values for all speed controllers. Limits them first according to set parameters.
+	 * 
+	 * @param fr value for forward right
+	 * @param rr value for rear right
+	 * @param fl value for front left
+	 * @param rl value for rear left
+	 */
+	public void setMotors(double fr, double rr, double fl, double rl){
+		fr = limit(fr);
+		rr = limit(rr);
+		fl = limit(fl);
+		rl = limit(rl);
+		
+		front_right.set(fr);
+		front_left.set(fl);
+		rear_right.set(rr);
+		rear_left.set(rl);
+	}
+	
 	/**
 	 * Drives the mecanum system using a cartesian vector. Calculates the motor outputs and 
 	 * uses the rotation value to set rotation of the system. 
@@ -218,14 +264,14 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	 */
 	public void mecanumDrive_polar(double magnitude, double direction, double rotation) {
 		if (magnitude < sensitivityLimit)
-			magnitude = 0;
+			magnitude = 0.0;
 		if (Math.abs(rotation) < sensitivityLimit)
-			rotation = 0;
+			rotation = 0.0;
 
 		if (angleRound != 0) 
 			direction = roundAngle(direction);
 		
-		magnitude = limit(magnitude) * Math.sqrt(2.0);
+		magnitude = magnitude * Math.sqrt(2.0);
 		
 		if (stabilizing && stabilizer != null){
 			double[] result = stabilizer.stabilize(magnitude, direction, rotation);
@@ -251,10 +297,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 
 		normalize(wheelSpeeds);
 
-		front_left.set(wheelSpeeds[0]);
-		front_right.set(-wheelSpeeds[1]);
-		rear_left.set(wheelSpeeds[2]);
-		rear_right.set(-wheelSpeeds[3]);
+		setMotors(-wheelSpeeds[1], -wheelSpeeds[3], wheelSpeeds[0], wheelSpeeds[2]);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -376,10 +419,21 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 		mecanumDrive_polar(stick.getMagnitude(), stick.getAngle(), stickR.getX(), gyroAngle);
 	}
 
-	private double limit(double num) {
-		return Mathf.constrain(scaleForVoltage(num), -1, 1);
+	
+	private double roundAngle(double angle) {
+		return Mathf.roundToMultiplier(angle, angleRound);
 	}
-
+	private double limit(double speed){
+		if(voltageScaling)
+			speed = FlashRoboUtil.scaleVoltageBus(speed);
+		
+		if(Math.abs(speed) < minSpeed)
+			return 0.0;
+			
+		if(speed_limit != 1.0)
+			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
+		return speed;
+	}
 	private void normalize(double wheelSpeeds[]) {
 		double maxMagnitude = Math.abs(wheelSpeeds[0]);
 		for (int i = 1; i < 4; i++) {
@@ -493,7 +547,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	 * </p>
 	 */
 	@Override
-	public System getSystem() {
+	public SubSystem getSystem() {
 		return this;
 	}
 
@@ -526,13 +580,13 @@ public class MecanumDrive extends System implements HolonomicDriveSystem {
 	 */
 	@Override
 	public boolean isVoltageScaling() {
-		return scaleVoltage;
+		return voltageScaling;
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void enableVoltageScaling(boolean en) {
-		scaleVoltage = en;
+		voltageScaling = en;
 	}
 }

@@ -74,6 +74,9 @@ public abstract class FlashRio extends SampleRobot {
 		if(initializer.autoUpdateHid)
 			RobotFactory.getScheduler().addTask(new HidScheduledTask());
 		
+		warningPowerDraw = initializer.warningPowerDraw;
+		warningVoltage = initializer.warningVoltage;
+		
 		initRobot();
 		log.logTime("Robot initialized");
 	}

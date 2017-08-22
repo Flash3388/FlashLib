@@ -19,6 +19,15 @@ import edu.flash3388.flashlib.util.beans.ValueSource;
 public interface VisionSource {
 
 	/**
+	 * Draws the result of an {@link Analysis} object on the given frame.
+	 * The frame must be compatible with the vision source implementation.
+	 * 
+	 * @param frame frame to draw on
+	 * @param analysis analysis
+	 */
+	void drawAnalysisResult(Object frame, Analysis analysis);
+	
+	/**
 	 * Sets the pipeline of images used by this vision source.
 	 * The images will be sent to the pipeline before the vision process and when a threshold 
 	 * is calculates
