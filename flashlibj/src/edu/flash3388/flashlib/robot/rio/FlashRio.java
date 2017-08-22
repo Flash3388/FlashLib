@@ -5,9 +5,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.HidUpdateTask;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.RobotState;
 
 import static edu.flash3388.flashlib.robot.FlashRoboUtil.inEmergencyStop;
 
@@ -26,13 +25,6 @@ import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
  */
 public abstract class FlashRio extends SampleRobot {
 	
-	private static class HidScheduledTask implements Runnable{
-		@Override
-		public void run() {
-			if(RobotState.isRobotTeleop())
-				FlashRoboUtil.updateHID();
-		}
-	}
 	protected static class RobotInitializer{
 		public boolean logsEnabled = false;
 		public boolean autoUpdateHid = true;
@@ -72,7 +64,7 @@ public abstract class FlashRio extends SampleRobot {
 		}
 		
 		if(initializer.autoUpdateHid)
-			RobotFactory.getScheduler().addTask(new HidScheduledTask());
+			RobotFactory.getScheduler().addTask(new HidUpdateTask());
 		
 		warningPowerDraw = initializer.warningPowerDraw;
 		warningVoltage = initializer.warningVoltage;

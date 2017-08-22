@@ -55,6 +55,9 @@ public class ExampleVision {
 		/*
 		 * Opens a new camera using openCV. The device index is 0, the frame width 640,
 		 * the frame height 480, the compression quality is 50%.
+		 * 
+		 * It is not mendetory to use this implementation of a camera to work with the vision runner.
+		 * Any camera interfacing is possible, just the resulting image must be an OpenCV Mat object.
 		 */
 		CvCamera camera = new CvCamera(0, 640, 480, 50);
 		/*
@@ -63,17 +66,19 @@ public class ExampleVision {
 		camera.setFPS(30);
 		
 		/*
-		 * Starts the vision runner thread
+		 * Starts the vision runner. Since we are using a simple vision runner
+		 * implementation, this call merely resets data and changes isRunning() to indicate
+		 * the vision process is active
 		 */
 		visionRunner.start();
 		
 		/*
-		 * Gets the delay time between its frame.
+		 * Gets the time period between 2 camera frames (1 / frequency = period).
 		 */
-		long delay = 1 / camera.getFPS();
+		long peiod = 1 / camera.getFPS();
 		/*
 		 * Forever read a frame from the camera and add it to the vision runner, attempt
-		 * analysis and wait a certain the delay time
+		 * analysis and wait the camera frame period
 		 */
 		while(true){
 			//set a new image to the vision runner
@@ -86,7 +91,7 @@ public class ExampleVision {
 				System.out.println("new analysis: "+an.toString());
 			}
 			
-			FlashUtil.delay(delay);	
+			FlashUtil.delay(peiod);	
 		}
 	}
 }

@@ -257,7 +257,7 @@ public abstract class VisionParam {
 	@SuppressWarnings("unchecked")
 	public static void setValueForMethod(Method method, VisionParam param, Object instance){
 		Class<?> retType = method.getReturnType();
-		if(retType == null)
+		if(retType == null || !(FlashUtil.isAssignable(retType, Property.class)))
 			return;
 		
 		Object obj = null;
@@ -265,7 +265,7 @@ public abstract class VisionParam {
 			obj = method.invoke(instance);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		}
-		if(obj == null || !(FlashUtil.isAssignable(retType, Property.class)))
+		if(obj == null)
 			return;
 		
 		Type[] genericTypes = FlashUtil.findGenericArgumentsOfSuperType(retType, Property.class);
@@ -297,7 +297,7 @@ public abstract class VisionParam {
 	 */
 	public static VisionParam getValueFromMethod(Method method, Object instance, String name){
 		Class<?> retType = method.getReturnType();
-		if(retType == null)
+		if(retType == null || !(FlashUtil.isAssignable(retType, Property.class)))
 			return null;
 		
 		Object obj = null;
@@ -305,31 +305,22 @@ public abstract class VisionParam {
 			obj = method.invoke(instance);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 		}
-		if(obj == null || !(FlashUtil.isAssignable(retType, Property.class)))
-			return null;
-		
-		Type[] genericTypes = FlashUtil.findGenericArgumentsOfSuperType(retType, Property.class);
-		if(genericTypes == null || genericTypes.length < 1 || genericTypes[0] instanceof ParameterizedType)
+		if(obj == null)
 			return null;
 		
 		Property<?> prop = (Property<?>)obj;
-		Class<?> propType = (Class<?>)genericTypes[0];
-		if(FlashUtil.isAssignable(propType, Boolean.class)){
-			boolean val = (Boolean)prop.getValue();
-			return new BooleanParam(name, val);
-		}
-		else if(FlashUtil.isAssignable(propType, Double.class)){
-			double val = (Double)prop.getValue();
-			return new DoubleParam(name, val);
-		}
-		else if(FlashUtil.isAssignable(propType, Integer.class)){
-			int val = (Integer)prop.getValue();
-			return new IntParam(name, val);
-		}
-		else if(FlashUtil.isAssignable(propType, String.class)){
-			String val = (String)prop.getValue();
-			return new StringParam(name, val);
-		}
+		Object val = prop.getValue();
+		if(val == null)
+			return null;
+		
+		if(FlashUtil.isAssignable(val.getClass(), Boolean.class))
+			return new BooleanParam(name, (Boolean)val);
+		else if(FlashUtil.isAssignable(val.getClass(), Double.class))
+			return new DoubleParam(name, (Double)val);
+		else if(FlashUtil.isAssignable(val.getClass(), Integer.class))
+			return new IntParam(name, (Integer)val);
+		else if(FlashUtil.isAssignable(val.getClass(), String.class))
+			return new StringParam(name, (String)val);
 		
 		return null;
 	}

@@ -2,7 +2,7 @@ package examples.util;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.util.SimpleLog;
+import edu.flash3388.flashlib.util.SimpleStreamLog;
 
 public class ExampleFlashUtil {
 	
@@ -47,7 +47,7 @@ public class ExampleFlashUtil {
 		//create an instance of a class by its name
 		Object o = FlashUtil.createInstance("examples.util.ExampleFlashUtil");
 		//check inheritance between class types
-		boolean inherits = FlashUtil.isAssignable(SimpleLog.class, Log.class);
+		boolean inherits = FlashUtil.isAssignable(SimpleStreamLog.class, Log.class);
 		
 		/*
 		 * And much more!

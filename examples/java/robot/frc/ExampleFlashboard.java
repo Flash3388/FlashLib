@@ -31,6 +31,46 @@ public class ExampleFlashboard extends FlashRio{
 	DoubleProperty driveFilterSpeed = ConstantsHandler.putNumber("filterSpeed", 1.0);
 	
 	@Override
+	protected void preInit(RobotInitializer initializer) {
+		/*
+		 * Sets the flashboard to use UDP protocol and not TCP (which is the default). You must make sure
+		 * the flashboard software is set to use UDP or they won't be able to connect to each other.
+		 */
+		 //Flashboard.setProtocolUdp();
+		
+		/*
+		 * Sets the initialization mode of the Flashboard control. There are 2 initialization parameters:
+		 * camera server and communications. Camera server initialization initializes the Flashboard camera server, 
+		 * allowing users to send data to the Flashboard. Communications initialization initializes the Flashboard
+		 * standard data communications, allowing users to show and receive information from the Flashboard including
+		 * vision data.
+		 * 
+		 * The init mode is an integer holding initialization bits. Each bit represents whether to initialize
+		 * a certain feature. 
+		 * For only camera server, use Flashboard.INIT_CAM.
+		 * For only communications, use Flashboard.INIT_COMM.
+		 * For both, use Flashboard.INIT_FULL.
+		 * 
+		 * By default, the initCode is Flashboard.INIT_FULL
+		 */
+		//Flashboard.setInitMode(mode);
+		
+		/*
+		 * Sets the local communications server port. If the initialization mode when Flashboard initializes
+		 * does not initialize the communications server, this will have no effect. The default port
+		 * is described by Flashboard.PORT_ROBOT. It is necessary to make sure the flashboard software
+		 * is also updated to this port in its configuration, otherwise connection will not be successful.
+		 */
+		//Flashboard.setCommPort(port);
+		/*
+		 * Sets the local camera server port. If the initialization mode when Flashboard initializes
+		 * does not initialize the camera server, this will have no effect. The default port
+		 * is described by Flashboard.CAMERA_PORT_ROBOT. It is necessary to make sure the flashboard software
+		 * is also updated to this port in its configuration, otherwise connection will not be successful.
+		 */
+		//Flashboard.setCamPort(port);
+	}
+	@Override
 	protected void initRobot() {
 		/*
 		 * Creates all the speed controllers used for the drive system.

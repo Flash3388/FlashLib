@@ -7,7 +7,7 @@ import edu.flash3388.flashlib.robot.sbc.SbcHidInterface;
 import edu.flash3388.flashlib.robot.sbc.SbcRobotState;
 
 /**
- * To allow FlashLib to work with several different platforms, RobotFactory provides assistance based on the platform in
+ * To allow FlashLib to work with several different platforms, This class provides assistance based on the platform in
  * question. When FlashLib is initialized from {@link FlashRoboUtil#initFlashLib(int, ImplType)}, it sets the implementation
  * type which than allows users calling functions to get the result according to the platform.
  * 
@@ -37,7 +37,7 @@ public final class RobotFactory {
 	private static HIDInterface hid;
 	private static Scheduler scheduler;
 	
-	protected static void setImplementationType(ImplType type){
+	static void setImplementationType(ImplType type){
 		RobotFactory.type = type;
 		
 		if(isSbcImpl()){
@@ -48,7 +48,7 @@ public final class RobotFactory {
 			RobotState.setImplementation(new RioRobotState());
 		}
 	}
-	public static void setHidInterface(HIDInterface hid){
+	static void setHidInterface(HIDInterface hid){
 		RobotFactory.hid = hid;
 	}
 	

@@ -10,6 +10,7 @@ import edu.flash3388.flashlib.robot.rio.FlashRio;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
+import edu.flash3388.flashlib.robot.systems.Systems;
 
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -64,12 +65,6 @@ public class ExampleRobot2017 extends FlashRio{
 		 */
 		//setVoltageDropWarning(volts);
 		//initializer.warningVoltage = 6.0;
-		
-		/*
-		 * Sets the flashboard to use UDP protocol and not TCP (which is the default). You must make sure
-		 * the flashboard software is set to use UDP or they won't be able to connect to each other.
-		 */
-		 //Flashboard.setProtocolUdp();
 	}
 	@Override
 	protected void initRobot() {
@@ -174,7 +169,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * When B is pressed on the controller, an action is executed which rotates the motor controlled
 		 * by the climbing system, basically causes the robot to climb.
 		 */
-		controller.B.whenPressed(climbingSystem.FORWARD_ACTION);
+		controller.B.whenPressed(Systems.forwardAction(climbingSystem, 0.8));
 	}
 
 	@Override

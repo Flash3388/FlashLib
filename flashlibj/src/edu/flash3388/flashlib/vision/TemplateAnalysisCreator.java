@@ -11,7 +11,8 @@ import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
 import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
+import edu.flash3388.flashlib.util.beans.StringProperty;
 
 /**
  * Filters for a part of the image which matches a given template.
@@ -25,7 +26,7 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 	
 	private DoubleProperty scaleFactor = new SimpleDoubleProperty();
 	private IntegerProperty method = new SimpleIntegerProperty();
-	private Property<String> imgDirPath = new SimpleProperty<String>();
+	private StringProperty imgDirPath = new SimpleStringProperty();
 	
 	private DoubleProperty targetWidth = new SimpleDoubleProperty(), 
 			targetHeight = new SimpleDoubleProperty(),
@@ -101,7 +102,7 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 	 * templates.
 	 * @return the property
 	 */
-	public Property<String> imageDirectoryPathProperty(){
+	public StringProperty imageDirectoryPathProperty(){
 		return imgDirPath;
 	}
 	

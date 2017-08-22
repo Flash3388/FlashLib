@@ -44,11 +44,13 @@ public class CvSource implements VisionSource{
 		}
 		if(insureContours && contours == null)
 			detectContours();
-	}
-	private void detectContours(){
-		if(pipeline != null)
-			pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
 		
+		if(threshold != null){
+			if(pipeline != null)
+				pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
+		}
+	}
+	private void detectContours(){		
 		if(contours == null)
 			contours = new ArrayList<MatOfPoint>();
 		else

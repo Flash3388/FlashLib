@@ -352,6 +352,15 @@ public final class VisionProcessing {
 		}
 		return filterstr.getBytes();
 	}
+	
+	/**
+	 * Saves all the filters from this object to an XML file for reuse.
+	 * Uses {@link #getName()} as the file name with an .xml extension.
+	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
+	 */
+	public void saveXml(){
+		saveXml(name+".xml");
+	}
 	/**
 	 * Saves all the filters from this object to an XML file for reuse.
 	 * @param file path to the file for use.
