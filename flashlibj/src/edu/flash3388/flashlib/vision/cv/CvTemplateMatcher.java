@@ -11,6 +11,7 @@ import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import edu.flash3388.flashlib.vision.MatchResult;
@@ -62,7 +63,7 @@ public class CvTemplateMatcher implements TemplateMatcher{
 			
 			Imgproc.circle(scene, new Point(best.centerx +best.scaleFactor,best.centery +best.scaleFactor) ,3,new Scalar(51,51,51));
 			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
-			//Imgcodecs.imwrite("test.png", scene);
+			Imgcodecs.imwrite("~/dev/frc/test.png", scene);
 			
 		}
 		return best;
