@@ -21,8 +21,8 @@ public class Slider extends Displayble{
 	private boolean changed = false, local = false, valChanged = false, update = true;
 	private byte[] data = new byte[8];
 	
-	public Slider(String name, int id) {
-		super(name, id, FlashboardSendableType.SLIDER);
+	public Slider(String name) {
+		super(name, FlashboardSendableType.SLIDER);
 		label = new Label(name);
 		slider = new javafx.scene.control.Slider();
 		value = new SimpleDoubleProperty();

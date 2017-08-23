@@ -28,8 +28,8 @@ public class InputField extends Displayble{
 	private javafx.scene.control.Button button;
 	private VBox node;
 	
-	public InputField(String name, int id) {
-		super(name, id, FlashboardSendableType.INPUT);
+	public InputField(String name) {
+		super(name, FlashboardSendableType.INPUT);
 		
 		node = new VBox();
 		label = new Label(name);

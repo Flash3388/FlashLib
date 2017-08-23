@@ -9,29 +9,29 @@ import edu.flash3388.flashlib.vision.VisionRunner;
 
 public class FlashboardSendableCreator implements SendableCreator{
 
-	private Sendable get(String name, int id, byte type) {
+	private Sendable get(String name, byte type) {
 		switch(type){
-			case FlashboardSendableType.ACTIVATABLE: return new Button(name, id);
-			case FlashboardSendableType.BOOLEAN: return new BooleanProperty(name, id);
-			case FlashboardSendableType.DOUBLE: return new DoubleProperty(name, id);
-			case FlashboardSendableType.STRING: return new StringProperty(name, id);
-			case FlashboardSendableType.INPUT: return new InputField(name, id);
-			case FlashboardSendableType.SLIDER: return new Slider(name, id);
-			case FlashboardSendableType.JOYSTICK: return new Controller(name, id);
-			case FlashboardSendableType.CHOOSER: return new Chooser(name, id);
-			case FlashboardSendableType.TESTER: return new FlashboardTester(name, id);
-			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name, id);
-			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name, id);
-			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new ThreadedVisionRunner(name, id);
-			case FlashboardSendableType.PDP: return new PDP(name, id);
-			case FlashboardSendableType.ESTOP: return new EmergencyStopControl(id);
-			case FlashboardSendableType.PIDTUNER: return new DashboardPidTuner(name, id);
+			case FlashboardSendableType.ACTIVATABLE: return new Button(name);
+			case FlashboardSendableType.BOOLEAN: return new BooleanProperty(name);
+			case FlashboardSendableType.DOUBLE: return new DoubleProperty(name);
+			case FlashboardSendableType.STRING: return new StringProperty(name);
+			case FlashboardSendableType.INPUT: return new InputField(name);
+			case FlashboardSendableType.SLIDER: return new Slider(name);
+			case FlashboardSendableType.JOYSTICK: return new Controller(name);
+			case FlashboardSendableType.CHOOSER: return new Chooser(name);
+			case FlashboardSendableType.TESTER: return new FlashboardTester(name);
+			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name);
+			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name);
+			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new ThreadedVisionRunner(name);
+			case FlashboardSendableType.PDP: return new PDP(name);
+			case FlashboardSendableType.ESTOP: return new EmergencyStopControl();
+			case FlashboardSendableType.PIDTUNER: return new DashboardPidTuner(name);
 		}
 		return null;
 	}
 	@Override
-	public Sendable create(String name, int id, byte type) {
-		Sendable s = get(name, id, type);
+	public Sendable create(String name, byte type) {
+		Sendable s = get(name, type);
 		if(s != null && s instanceof VisionRunner)
 			Dashboard.setVision((VisionRunner)s);
 		if(s != null && s instanceof Displayble)

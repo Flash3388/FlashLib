@@ -26,8 +26,8 @@ public class LogWindow extends Stage{
 		private ArrayList<String> logs = new ArrayList<String>();
 		private LogWindow window;
 		
-		public RemoteLog(String name, int id) {
-			super(name, id, FlashboardSendableType.LOG);
+		public RemoteLog(String name) {
+			super(name, FlashboardSendableType.LOG);
 			LogWindow.newLog(this);
 		}
 

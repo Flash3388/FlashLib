@@ -132,7 +132,7 @@ public final class Systems {
 	 * @param system the system
 	 * @return the action
 	 */
-	public static Action stopAction(YAxisMovable system, double speed){
+	public static Action stopAction(YAxisMovable system){
 		return new InstantAction(){
 			{requires(system.getSystem());}
 			@Override
@@ -147,7 +147,7 @@ public final class Systems {
 	 * @param system the system
 	 * @return the action
 	 */
-	public static Action stopAction(XAxisMovable system, double speed){
+	public static Action stopAction(XAxisMovable system){
 		return new InstantAction(){
 			{requires(system.getSystem());}
 			@Override
@@ -162,7 +162,7 @@ public final class Systems {
 	 * @param system the system
 	 * @return the action
 	 */
-	public static Action stopAction(Rotatable system, double speed){
+	public static Action stopAction(Rotatable system){
 		return new InstantAction(){
 			{requires(system.getSystem());}
 			@Override

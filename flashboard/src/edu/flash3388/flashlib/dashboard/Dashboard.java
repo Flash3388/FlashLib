@@ -500,7 +500,7 @@ public class Dashboard extends Application {
 		updater = new Updater();
 		updateThread = new Thread(updater.getThreadTask());
 	    updateThread.start();
-	    camViewer = new CameraViewer("Robot-CamViewer", -1);
+	    camViewer = new CameraViewer("Robot-CamViewer");
 	    addDisplayable(camViewer);
 	    updater.addTask(new ConnectionTask());
 	    //updater.addTask(new VisionRunnerDataTask());

@@ -305,7 +305,7 @@ public class Flashboard {
 		if(!instance){
 			try {
 				if(vision == null && (initMode & INIT_COMM) != 0)
-					vision = new RemoteVision();
+					vision = new RemoteVision("FlashboardVision");
 				if(camViewer == null && (initMode & INIT_CAM) != 0)
 					camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
 				

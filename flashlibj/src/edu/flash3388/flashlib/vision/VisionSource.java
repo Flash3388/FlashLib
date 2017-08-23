@@ -40,7 +40,7 @@ public interface VisionSource {
 	 * The images will be sent to the pipeline before the vision process and when a threshold 
 	 * is calculates
 	 * 
-	 * @returns the pipeline
+	 * @return the pipeline
 	 */
 	ImagePipeline getImagePipeline();
 	

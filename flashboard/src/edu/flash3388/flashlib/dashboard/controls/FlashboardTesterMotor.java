@@ -22,8 +22,8 @@ public class FlashboardTesterMotor extends Displayble{
 	private boolean brakemode = false;
 	private double speed = 0.0, current = 0.0, voltage = 0.0;
 	
-	public FlashboardTesterMotor(String name, int id) {
-		super(name, id, FlashboardSendableType.MOTOR);
+	public FlashboardTesterMotor(String name) {
+		super(name, FlashboardSendableType.MOTOR);
 		FlashboardTester.allocateTesterMotor(this);
 		nameprop = new SimpleStringProperty(name);
 	}

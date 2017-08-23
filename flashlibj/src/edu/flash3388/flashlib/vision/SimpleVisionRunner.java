@@ -13,11 +13,8 @@ public class SimpleVisionRunner extends VisionRunner{
 	private Analysis analysis;
 	private ObservableProperty<Object> newFrame = new SimpleObservableProperty<Object>();
 	
-	public SimpleVisionRunner(String name, int id) {
-		super(name, id);
-	}
-	public SimpleVisionRunner(String name){
-		this(name, -10);
+	public SimpleVisionRunner(String name) {
+		super(name);
 	}
 	public SimpleVisionRunner() {
 		this("SimpleVisionRunner");

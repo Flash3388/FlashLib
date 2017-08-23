@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import edu.flash3388.flashlib.util.Log.LoggingType;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * FlashUtil contains utility functions used throughout flashLib.
@@ -83,6 +84,46 @@ public final class FlashUtil {
 	 */
 	public static void delay(double secs){
 		delay((long)(secs * 1000));
+	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) until a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time given as a parameter.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @param delayTime the sleep period length in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayUntil(BooleanSource source, long timeout, long delayTime){
+		if(timeout < 0)
+			throw new IllegalArgumentException("Timeout cannot be negative");
+		if(delayTime < 0)
+			throw new IllegalArgumentException("Delay time cannot be negative");
+		
+		if(timeout < 1)
+			timeout = 10000;
+		if(delayTime < 1)
+			delayTime = 1;
+		long start = millis();
+		
+		while(!source.get() && millis() - start < timeout)
+			delay(delayTime);
+		return source.get();
+	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) until a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time calculated depending on the timeout.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayUntil(BooleanSource source, long timeout){
+		return delayUntil(source, timeout, timeout >> 4);
 	}
 	
 	/**

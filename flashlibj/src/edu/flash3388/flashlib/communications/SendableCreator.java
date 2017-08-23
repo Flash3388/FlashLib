@@ -10,13 +10,12 @@ package edu.flash3388.flashlib.communications;
 @FunctionalInterface
 public interface SendableCreator {
 	/**
-	 * Creates a new {@link Sendable} with the provided name, id and type, if possible.
+	 * Creates a new {@link Sendable} with the provided name and type, if possible.
 	 * 
 	 * @param name name of the new sendable
-	 * @param id id of the new sendable
 	 * @param type type of the new sendable
 	 * 
 	 * @return a new sendable
 	 */
-	Sendable create(String name, int id, byte type);
+	Sendable create(String name, byte type);
 }

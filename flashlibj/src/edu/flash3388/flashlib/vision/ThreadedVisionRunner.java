@@ -73,14 +73,11 @@ public class ThreadedVisionRunner extends VisionRunner{
 	private Thread visionThread;
 	private VisionRunnerTask runTask;
 	
-	public ThreadedVisionRunner(String name, int id) {
-		super(name, id);
+	public ThreadedVisionRunner(String name) {
+		super(name);
 		
 		runTask = new VisionRunnerTask(this);
 		visionThread = new Thread(runTask, name);
-	}
-	public ThreadedVisionRunner(String name){
-		this(name, -10);
 	}
 	public ThreadedVisionRunner() {
 		this("ThreadedVisionRunner");

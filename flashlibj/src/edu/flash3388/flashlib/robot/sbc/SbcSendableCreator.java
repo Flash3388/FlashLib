@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.communications.SendableCreator;
 public class SbcSendableCreator implements SendableCreator{
 
 	@Override
-	public Sendable create(String name, int id, byte type) {
+	public Sendable create(String name, byte type) {
 		return null;
 	}
 

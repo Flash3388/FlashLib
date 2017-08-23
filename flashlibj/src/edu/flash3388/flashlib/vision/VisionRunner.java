@@ -29,29 +29,19 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	private boolean running = false;
 	
 	/**
-	 * Creates a base for running vision. When using {@link RemoteVision} it is required to use this constructor, otherwise
-	 * the sendable id is not usable. Uses {@link FlashboardSendableType#VISION} as a sendable type.
+	 * Creates a base for running vision. 
+	 * Uses {@link FlashboardSendableType#VISION} as a sendable type.
 	 * 
 	 * @param name the name of the runner
-	 * @param id the sendable id for the runner
 	 */
-	public VisionRunner(String name, int id) {
-		super(name, id, FlashboardSendableType.VISION);
+	public VisionRunner(String name) {
+		super(name, FlashboardSendableType.VISION);
 		
 		
 	}
 	/**
 	 * Creates a base for running vision. When using the runner for local vision and not remote, this constructor is
-	 * usable. For remote vision, see {@link #VisionRunner(String, int)}.
-	 * 
-	 * @param name the name of the runner
-	 */
-	public VisionRunner(String name){
-		this(name, -10);
-	}
-	/**
-	 * Creates a base for running vision. When using the runner for local vision and not remote, this constructor is
-	 * usable. For remote vision, see {@link #VisionRunner(String, int)}. The name of the runner is "VisionRunner".
+	 * usable. For remote vision, see {@link #VisionRunner(String)}. The name of the runner is "VisionRunner".
 	 */
 	public VisionRunner(){
 		this("VisionRunner");

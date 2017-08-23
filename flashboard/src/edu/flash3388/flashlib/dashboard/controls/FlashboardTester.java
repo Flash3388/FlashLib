@@ -19,8 +19,8 @@ public class FlashboardTester extends Sendable{
 	private Vector<FlashboardTesterMotor> motors = new Vector<FlashboardTesterMotor>();
 	private boolean updateEnable = false, enable = false;
 	
-	public FlashboardTester(String name, int id) {
-		super(name, id, FlashboardSendableType.TESTER);
+	public FlashboardTester(String name) {
+		super(name, FlashboardSendableType.TESTER);
 		
 		testers.put(name, this);
 		List<FlashboardTesterMotor> motors = unallocatedMotors.get(name);

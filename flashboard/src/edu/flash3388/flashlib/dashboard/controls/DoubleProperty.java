@@ -19,8 +19,8 @@ public class DoubleProperty extends Displayble{
 	private Runnable updater;
 	private boolean changed = true;
 	
-	public DoubleProperty(String name, int id) {
-		super(name, id, FlashboardSendableType.DOUBLE);
+	public DoubleProperty(String name) {
+		super(name, FlashboardSendableType.DOUBLE);
 		node = new VBox();
 		label = new Label(name + ": " + value);
 		label.setPrefSize(LABEL_WIDTH, LABEL_HEIGHT);

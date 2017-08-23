@@ -33,8 +33,8 @@ public class DashboardPidTuner extends Displayble{
 	private boolean update = false, remoteUpdate = false, setUpdate = false,
 			newValueSet = false, newSetpointSet = false, newKSet = false, lastValBigger = false;
 	
-	public DashboardPidTuner(String name, int id) {
-		super(name, id, FlashboardSendableType.PIDTUNER);
+	public DashboardPidTuner(String name) {
+		super(name, FlashboardSendableType.PIDTUNER);
 		
 		series = new LineChart.Series<Number, Number>();
 		

@@ -45,7 +45,7 @@ public final class SbcControlStation{
 		private Object recieveObject = new Object();
 		
 		public CsSendable(SbcControlStation cs){
-			super("ControlStation", CONTROL_STATION_SENDABLE_ID, SbcSendableType.CONSTROL_STATION);
+			super("ControlStation", SbcSendableType.CONSTROL_STATION);
 			this.cs = cs;
 		}
 		
@@ -84,7 +84,6 @@ public final class SbcControlStation{
 	
 	public static final byte MAX_CONTROLLERS = 3;
 	public static final byte CONTROLLER_AXES = 6;
-	static final byte CONTROL_STATION_SENDABLE_ID = -1;
 	static final byte CONTROLLER_DATA_SIZE = (5 + CONTROLLER_AXES) * MAX_CONTROLLERS + 2;
 	
 	private static SbcControlStation instance;

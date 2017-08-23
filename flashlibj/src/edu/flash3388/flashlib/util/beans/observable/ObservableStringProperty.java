@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * 
  * An abstract implementation of an {@link ObservableProperty} for String values. Implements all requirements for 
  * being observable but leaves the implementation of the getter and setter of the property's value user dependent.
- * When extending this, implement {@link #setInternal(String)} for setting the value and {@link #getInternal()} for
+ * When extending this, implement {@link ObservablePropertyBase#setInternal(Object)} for setting the value and {@link ObservablePropertyBase#getInternal()} for
  * getting the value. The rest must remain untouched for the current implementation of the observable to function.
  * 
  * @author Tom Tzook

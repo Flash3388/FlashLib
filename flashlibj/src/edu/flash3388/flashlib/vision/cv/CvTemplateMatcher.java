@@ -97,6 +97,7 @@ public class CvTemplateMatcher implements TemplateMatcher{
 		public void run() {
 			result = match(scene, templ, method, scaleFactor);
 		}
+		@SuppressWarnings("unused")
 		public MatchResult scaleTemplateMatch(Mat scene, Mat templ, Method method, double scaleFactor){
 			int tw = templ.width();
 			int th = templ.height();

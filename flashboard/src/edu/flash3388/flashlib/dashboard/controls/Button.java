@@ -20,8 +20,8 @@ public class Button extends Displayble{
 	private byte[] press = {DashboardButton.DOWN};
 	private boolean changed = false;
 	
-	public Button(String name, int id) {
-		super(name, id, FlashboardSendableType.ACTIVATABLE);
+	public Button(String name) {
+		super(name, FlashboardSendableType.ACTIVATABLE);
 		node = new HBox();
 		node.setAlignment(Pos.TOP_CENTER);
 		

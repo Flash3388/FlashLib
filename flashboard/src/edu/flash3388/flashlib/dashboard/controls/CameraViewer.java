@@ -34,8 +34,8 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	private Runnable updater;
 	private DisplayMode mode = DisplayMode.Normal;
 	
-	public CameraViewer(String name, int id) {
-		super(name, id, (byte)-1);
+	public CameraViewer(String name) {
+		super(name, (byte)-1);
 		view = new ImageView();
 		view.setFitHeight(420);
 		view.setFitWidth(640);

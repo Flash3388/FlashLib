@@ -12,7 +12,7 @@ public interface StringProperty extends Property<String>, StringSource{
 
 	/**
 	 * Sets the value of the property. Implementation is user dependent.
-	 * @param i new value
+	 * @param s new value
 	 */
 	void set(String s);
 }
