@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.cams;
+package edu.flash3388.flashlib.cams.ni;
 
 import java.nio.ByteBuffer;
 

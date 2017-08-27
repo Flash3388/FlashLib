@@ -154,6 +154,7 @@ public class Communications {
 			s.setId(id);
 			s.setAttached(true);
 			s.setRemoteInit(true);
+			s.onConnection();
 			sendables.put(id, s);
 		}
 	}

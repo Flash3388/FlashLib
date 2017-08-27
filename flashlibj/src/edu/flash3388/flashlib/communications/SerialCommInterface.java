@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.communications;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class PortCommInterface extends StreamCommInterface{
+public abstract class SerialCommInterface extends StreamCommInterface{
 	
 	private boolean isConnected = false;
 	
@@ -17,16 +17,16 @@ public abstract class PortCommInterface extends StreamCommInterface{
 	 * @param server indicates whether this interface initiates connection - client or waits for connection - server
 	 * @param crcallow if true, data will be processed with CRC32 to dump data corruption
 	 */
-	public PortCommInterface(boolean server, boolean crcallow){
+	public SerialCommInterface(boolean server, boolean crcallow){
 		super(server, crcallow);
 	}
 	/**
 	 * Creates a new CommInterface for IO ports. Data is passed to the super class {@link StreamCommInterface}.
-	 * CRC32 is initialized through this constructor. To control CRC usage, use {@link #PortCommInterface(boolean, boolean)}.
+	 * CRC32 is initialized through this constructor. To control CRC usage, use {@link #SerialCommInterface(boolean, boolean)}.
 	 * 
 	 * @param server indicates whether this interface initiates connection - client or waits for connection - server
 	 */
-	public PortCommInterface(boolean server){
+	public SerialCommInterface(boolean server){
 		super(server);
 	}
 	

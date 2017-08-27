@@ -21,15 +21,15 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public abstract class ManualConnectionVerifier implements CommInterface{
 
 	/**
-	 * An handshake byte array. Used by {@link UdpCommInterface} and {@link PortCommInterface}
+	 * An handshake byte array. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE = {0x01, 0xe, 0x07};
 	/**
-	 * A server connection handshake. Used by {@link UdpCommInterface} and {@link PortCommInterface}
+	 * A server connection handshake. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE_CONNECT_SERVER = {0xb, 0x02, 0xa};
 	/**
-	 * A client connection handshake. Used by {@link UdpCommInterface} and {@link PortCommInterface}
+	 * A client connection handshake. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE_CONNECT_CLIENT = {0xc, 0x10, 0x06};
 	

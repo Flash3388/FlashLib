@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.cams;
+package edu.flash3388.flashlib.cams.cv;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
@@ -7,6 +7,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
+import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**

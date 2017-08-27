@@ -49,6 +49,6 @@ public class LinearInterpolation extends Interpolation implements MarginInterpol
 		double x3 = Mathf.roundToMultiplier(x2, getKeyMargin(), true);
 		double y1 = getValue(x1);
 		double y3 = getValue(x3);
-		return (((x2 - x1)*(y3-y1))/(x3-x1))+y1;
+		return (((x2 - x1) * (y3 - y1)) / (x3 - x1)) + y1;
 	}
 }

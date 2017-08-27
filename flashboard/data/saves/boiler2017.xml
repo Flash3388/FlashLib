@@ -17,17 +17,17 @@
 		<param name="minHeight" type="Double">5.0</param>
 		<param name="maxWidth" type="Double">1000.0</param>
 		<param name="maxHeight" type="Double">1000.0</param>
-		<param name="dx" type="Double">1.0</param>
-		<param name="heightRatio" type="Double">2.0</param>
 		<param name="widthRatio" type="Double">1.0</param>
+		<param name="dx" type="Double">1.0</param>
 		<param name="dy" type="Double">0.6666666666666666</param>
 		<param name="maxScore" type="Double">0.7</param>
 		<param name="minScore" type="Double">0.1</param>
+		<param name="heightRatio" type="Double">2.0</param>
 	</filter>
 	<analysis-creator name="edu.flash3388.flashlib.vision.GroupedAnalysisCreator">
-		<param name="camFov" type="Double">32.0</param>
 		<param name="targetWidth" type="Double">20.0</param>
 		<param name="targetHeight" type="Double">20.0</param>
+		<param name="camFov" type="Double">32.0</param>
 		<param name="distanceHeight" type="Boolean">false</param>
 	</analysis-creator>
 </vision>

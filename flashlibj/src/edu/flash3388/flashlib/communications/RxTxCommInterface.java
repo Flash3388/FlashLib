@@ -9,14 +9,14 @@ import gnu.io.*;
 /**
  * 
  * Manages a serial communications port using the RXTX communications library. 
- * Extends {@link PortCommInterface}, allowing for data management and connection management. Does
+ * Extends {@link SerialCommInterface}, allowing for data management and connection management. Does
  * not provide any data loss/corruption handling.
  * 
  * @author Tom Tzook
  * @author Alon Klein
  * @since FlashLib 1.0.1
  */
-public class RxTxCommInterface extends PortCommInterface {
+public class RxTxCommInterface extends SerialCommInterface {
 
 	private String portName;
 	private int baudrate;

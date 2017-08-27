@@ -35,7 +35,7 @@ public abstract class PolynomialInterpolation extends Interpolation {
 	 * by {@link #interpolate(double)}
 	 */
 	public void updateValues(){
-		if(valuesUpdated()){
+		if(updateRequired()){
 			if(values.length != getMap().size()){
 				values = new Double[getMap().size()];
 				keys = new Double[getMap().size()];
@@ -47,7 +47,7 @@ public abstract class PolynomialInterpolation extends Interpolation {
 			valueUpdated = true;
 		}
 	}
-	private boolean valuesUpdated(){
+	private boolean updateRequired(){
 		return values == null || !valueUpdated;
 	}
 	
