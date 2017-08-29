@@ -1,7 +1,7 @@
 # FlashLib
-FlashLib is a robotics software development library for Java and C++, originaly designed to improve and help FRC teams, but can work on other platforms, specifically - Raspberry PI and BeagleBone Black.
+FlashLib is a robotics software development library for Java, originaly designed to improve and help FRC teams, but can work on other non-FRC platforms. Although currently available only for Java, we aim to make FlashLib available for C++ as well.
 
-FlashLib version 1.0.0 is ready for FRC use. 
+The latest version of FlashLib is 1.0.1
 
 - [Features](#features)
 - [Dependencies](#dependencies)
@@ -25,14 +25,14 @@ The library provides several different tools that can be both used for a robot d
 - Algorithms: Built-In sensor-based motion algorithms and vision-based motion algorithms.
 - Generic Drive Systems: Built-in generic drive systems, including: Tank drive, Mecanum drive and Omni-Directional drive.
 - Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
-- HAL: An Hardware Abstraction Layer with Raspberry PI and Beaglebone Black implementation. (WIP)
+- HAL: An Hardware Abstraction Layer with several built-in implementations. (WIP)
 
 ## Dependencies
 
 FlashLib depends on several libraries for its functionalities:
-- Image processing and Camera Interfacing requires openCV 3.0.0
+- The openCV implementation of the vision system uses openCV 3.0.0
+- The openCV implementation for camera interfacing uses openCV 3.0.0
 - Robots working with the RoboRio platform require WPILib
-- Robots working with the Raspberry PI or BeagleBone Black platforms require Bulldog 0.3.0
 - Flashboard requires openCV 3.0.0 and Jsch 0.1.54
 
 All of those libraries are available in the "libs" folder of their respective parts.
@@ -46,7 +46,7 @@ To build an individual part, run the build script in that part's folder.
 You can find the binary files in the "build/libs" folder in each part's directory. Flashboard binary files are located under 
 flashboard/build/flashboard
 
-You can get grade here: https://gradle.org/ (for free of course..)
+You can get gradle here: https://gradle.org/ (for free of course..)
 
 ## Code Of Conduct
 
@@ -66,6 +66,5 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contribut
 
 FlashLib uses the following libraries, but those libraries do not belong to us:
 - WPILib: WPILib is a robotics library for FRC teams created by the Worcester Polytechnic Institute: https://github.com/wpilibsuite/allwpilib
-- Bulldog: Bulldog is an IO library for Raspberry PI and BeagleBone Black created by Datenheld: https://github.com/Datenheld/Bulldog
 - OpenCV: OpenCV is an open source computer vision library: https://github.com/opencv/opencv
 - JSCH: Jsch is a remote protocols library: http://www.jcraft.com/jsch/
