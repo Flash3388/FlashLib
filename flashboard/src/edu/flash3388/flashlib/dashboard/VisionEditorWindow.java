@@ -99,6 +99,7 @@ public class VisionEditorWindow extends Stage{
 			}
 			return true;
 		}
+		@SuppressWarnings("unused")
 		void checkValueChanged(){
 			Object val = valueProperty.getValue();
 			if(!val.equals(lastValue)){
@@ -114,6 +115,7 @@ public class VisionEditorWindow extends Stage{
 	private static VisionEditorWindow instance = null;
 	
 	private Vision visionObject;
+	@SuppressWarnings("unused")
 	private Runnable updateListener;
 	private List<String> filterTypes;
 	

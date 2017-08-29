@@ -41,9 +41,9 @@ public class ExampleServer {
 		 */
 		server.setSendableCreator(new SendableCreator(){
 			@Override
-			public Sendable create(String name, int id, byte type) {
+			public Sendable create(String name, byte type) {
 				if(type == 0)// when the type is '0' we expect to use an echo sendable.
-					return new EchoSendable(name, id, type);
+					return new EchoSendable(name, type, false);
 				return null;
 			}
 		});

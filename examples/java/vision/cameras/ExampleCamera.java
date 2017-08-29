@@ -3,7 +3,7 @@ package examples.vision.cameras;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
-import edu.flash3388.flashlib.cams.CvCamera;
+import edu.flash3388.flashlib.cams.cv.CvCamera;
 
 /*
  * Example for using openCV camera.

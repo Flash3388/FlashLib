@@ -2,7 +2,7 @@ package examples.vision.filters;
 
 import org.opencv.core.Core;
 
-import edu.flash3388.flashlib.cams.CvCamera;
+import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.SimpleVisionRunner;

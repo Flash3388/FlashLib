@@ -181,6 +181,7 @@ public class Dashboard extends Application {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static class VisionRunnerDataTask implements Runnable{
 
 		@Override
