@@ -7,7 +7,8 @@ import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * An abstract logic for stream-based {@link CommInterface}s, such as: TCP/IP. Provides simple data corruption detection
- * using {@link CRC32} and separation of data to packets.
+ * using {@link CRC32} and separation of data to packets. To insure connection, this comm interface extends the abstract
+ * {@link ManualConnectionVerifier}.
  * <p>
  * Data to be sent is wrapped inside a packet which contains: the size of the data, the data itself and if defined, a CRC32
  * checksum. When reading data, the size of the data is checked first, than the data is extracted by its size. If CRC32 is 
@@ -19,14 +20,14 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * does not exist in its entirety, the data is saved to a secondary buffer which is updated next time data is read.
  * </p>
  * <p>
- * It is necessary to implement {@link #readData(byte[])} for reading data from the port and {@link #writeData(byte[])} 
+ * It is necessary to implement {@link #readData(byte[])} for reading data from the port and {@link #writeData(byte[], int, int)} 
  * for writing data to the port used.
  * </p>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class StreamCommInterface implements CommInterface{
+public abstract class StreamCommInterface extends ManualConnectionVerifier{
 
 	private CRC32 crc;
 	private boolean server;
@@ -94,16 +95,16 @@ public abstract class StreamCommInterface implements CommInterface{
 		packet.data = datarec;
 		return true;
 	}
-	private byte[] assemblePacket(byte[] data){
-		byte[] sdata = new byte[data.length + 4 + crclen];
-		FlashUtil.fillByteArray(data.length, 0, sdata);
-		System.arraycopy(data, 0, sdata, 4, data.length);
+	private byte[] assemblePacket(byte[] data, int start, int len){
+		byte[] sdata = new byte[len + 4 + crclen];
+		FlashUtil.fillByteArray(len, 0, sdata);
+		System.arraycopy(data, start, sdata, 4, len);
 		
 		if(crclen > 0){
 			crc.reset();
 			crc.update(data);
 			long crcd = crc.getValue();
-			FlashUtil.fillByteArray(crcd, 4 + data.length, sdata);
+			FlashUtil.fillByteArray(crcd, 4 + len, sdata);
 		}
 		
 		return sdata;
@@ -117,6 +118,9 @@ public abstract class StreamCommInterface implements CommInterface{
 		
 		boolean ret = disassemblePacket(leftoverData, 4, datalen - crclen, packet);
 		leftoverData = Arrays.copyOfRange(leftoverData, 4 + datalen, leftoverData.length);
+		
+		if(ret && isHandshake(packet.data, packet.length))
+			return false;
 		
 		return ret;
 	}
@@ -136,9 +140,12 @@ public abstract class StreamCommInterface implements CommInterface{
 		
 		int len = readData(dataBuffer);
 		if(len < 1){
+			if(len < 0)
+				disconnect();
 			packet.length = 0;
 			return false;
 		}
+		newDataRead();
 		
 		leftoverData = Arrays.copyOf(leftoverData, leftoverData.length + len);
 		System.arraycopy(dataBuffer, 0, leftoverData, leftoverData.length - len, len);
@@ -153,15 +160,16 @@ public abstract class StreamCommInterface implements CommInterface{
 	 */
 	@Override
 	public void write(byte[] data) {
-		data = assemblePacket(data);
-		writeData(data);
+		write(data, 0, data.length);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void write(byte[] data, int start, int length) {
-		write(Arrays.copyOfRange(data, start, start + length));
+		data = assemblePacket(data, start, length);
+		writeData(data, 0, data.length);
+		newDataSent();
 	}
 	
 	/**
@@ -188,7 +196,7 @@ public abstract class StreamCommInterface implements CommInterface{
 	 * 
 	 * @return true - server, false - client
 	 */
-	protected boolean isBoundAsServer(){
+	public boolean isBoundAsServer(){
 		return server;
 	}
 	/**
@@ -205,8 +213,10 @@ public abstract class StreamCommInterface implements CommInterface{
 	 * handle packet and data logic.
 	 * 
 	 * @param data an array of bytes to send
+	 * @param start the start index to send data from
+	 * @param length the amount of bytes to send
 	 */
-	protected abstract void writeData(byte[] data);
+	protected abstract void writeData(byte[] data, int start, int length);
 	/**
 	 * Reads raw data from the IO port used for communications. Unlike {@link #readData(byte[])}, this method does not 
 	 * handle packet and data logic.

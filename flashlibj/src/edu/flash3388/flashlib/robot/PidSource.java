@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 
 /**
@@ -32,6 +33,16 @@ public interface PidSource {
 		}
 		public GyroPidSource(Gyro gyro){
 			this(gyro, PidType.Displacement);
+		}
+		
+		public void setGyro(Gyro gyro){
+			this.gyro = gyro;
+		}
+		public Gyro getGyro(){
+			return gyro;
+		}
+		public void setType(PidType type){
+			this.type = type;
 		}
 		
 		@Override
@@ -84,11 +95,11 @@ public interface PidSource {
 		public double pidGet() {
 			if(!vision.hasNewAnalysis()) return previous;
 			if(distance)
-				previous = vision.getAnalysis().targetDistance;
+				previous = vision.getAnalysis().getDouble(Analysis.PROP_TARGET_DISTANCE);
 			else
 				previous = horizontal? 
-							vision.getAnalysis().horizontalDistance : 
-							vision.getAnalysis().verticalDistance;
+							vision.getAnalysis().getDouble(Analysis.PROP_HORIZONTAL_DISTANCE) : 
+							vision.getAnalysis().getDouble(Analysis.PROP_VERTICAL_DISTANCE);
 			return previous;
 		}
 		@Override
@@ -99,14 +110,24 @@ public interface PidSource {
 	public static class DoubleDataPidSource implements PidSource{
 
 		private PidType type;
-		private DoubleDataSource source;
+		private DoubleSource source;
 		
-		public DoubleDataPidSource(DoubleDataSource source, PidType t){
+		public DoubleDataPidSource(DoubleSource source, PidType t){
 			this.source = source;
 			this.type = t;
 		}
-		public DoubleDataPidSource(DoubleDataSource source){
+		public DoubleDataPidSource(DoubleSource source){
 			this(source, PidType.Displacement);
+		}
+		
+		public void setSource(DoubleSource source){
+			this.source = source;
+		}
+		public DoubleSource getSource(){
+			return source;
+		}
+		public void setType(PidType type){
+			this.type = type;
 		}
 		
 		@Override

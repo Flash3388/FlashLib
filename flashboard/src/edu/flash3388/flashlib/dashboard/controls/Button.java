@@ -20,8 +20,8 @@ public class Button extends Displayble{
 	private byte[] press = {DashboardButton.DOWN};
 	private boolean changed = false;
 	
-	public Button(String name, int id) {
-		super(name, id, FlashboardSendableType.ACTIVATABLE);
+	public Button(String name) {
+		super(name, FlashboardSendableType.ACTIVATABLE);
 		node = new HBox();
 		node.setAlignment(Pos.TOP_CENTER);
 		
@@ -39,6 +39,7 @@ public class Button extends Displayble{
 	}
 
 	private void press(){
+		press[0] = DashboardButton.DOWN;
 		changed = true;
 	}
 	@Override
@@ -47,6 +48,8 @@ public class Button extends Displayble{
 			FlashFxUtils.onFxThread(()->{
 				button.setDisable(false);
 			});
+			press[0] = DashboardButton.UP;
+			changed = true;
 		}
 	}
 	@Override

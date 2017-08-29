@@ -4,6 +4,7 @@ import java.util.Enumeration;
 
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTesterMotor;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -18,7 +19,9 @@ import javafx.stage.StageStyle;
 
 public class TesterWindow extends Stage{
 
+	private static TesterWindow instance;
 	private FlashboardTester tester;
+	private ComboBox<String> keysBox;
 	
 	private TesterWindow(){
 		setTitle("FLASHboard - Tester");
@@ -26,6 +29,9 @@ public class TesterWindow extends Stage{
         initModality(Modality.NONE);
         setResizable(false);
         setScene(loadScene());
+        setOnCloseRequest((e)->{
+        	instance = null;
+        });
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -47,14 +53,15 @@ public class TesterWindow extends Stage{
 		nameCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, String>("name"));
 		brakeCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Boolean>("brakeMode"));
 		speedCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("speed"));
-		voltageCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("current"));
-		currentCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("voltage"));
+		voltageCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("voltage"));
+		currentCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("current"));
 		
 		motorsView.getColumns().addAll(nameCol, brakeCol, speedCol, voltageCol, currentCol);
 		
-		ComboBox<String> keysBox = new ComboBox<String>();
+		keysBox = new ComboBox<String>();
 		VBox.setMargin(keysBox, new Insets(5.0, 0.0, 0.0, 0.0));
 		keysBox.getItems().add("-- Choose Tester --");
+		keysBox.getSelectionModel().select(0);
 		keysBox.getItems().addAll(FlashboardTester.getTestersNames());
 		keysBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
 			motorsView.getItems().clear();
@@ -85,7 +92,18 @@ public class TesterWindow extends Stage{
 	}
 	
 	public static void showTester(){
-		TesterWindow tester = new TesterWindow();
-		tester.show();
+		if(instance != null){
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tester is already open!");
+			return;
+		}
+		instance = new TesterWindow();
+		instance.show();
+	}
+	public static void closeTester(){
+		if(instance != null){
+			if(instance.tester != null)
+				instance.tester.enable(false);
+			instance.close();
+		}
 	}
 }

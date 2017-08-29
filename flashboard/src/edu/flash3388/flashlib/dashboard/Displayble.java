@@ -9,8 +9,8 @@ public abstract class Displayble extends Sendable{
 		Cam, Data, Controller, Manual
 	}
 	
-	protected Displayble(String name, int id, byte type) {
-		super(name, id, type);
+	protected Displayble(String name, byte type) {
+		super(name, type);
 	}
 
 	private boolean init = true;

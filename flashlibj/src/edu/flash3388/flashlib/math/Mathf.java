@@ -63,7 +63,7 @@ public class Mathf {
 	 * @param value An angle in degrees to limit.
 	 * @return The value of the angle after being limited.
 	 */
-	public static double limitAngle(double value){
+	public static double translateAngle(double value){
 		value %= 360;
 		if(value < 0)
 			value += 360;
@@ -80,7 +80,7 @@ public class Mathf {
 	 * @param max The maximum limit
 	 * @return The new value after making sure it is within the given limit.
 	 */
-	public static double limit(double value, double min, double max){
+	public static double constrain(double value, double min, double max){
 		if(value > max) value = max;
 		else if(value < min) value = min;
 		return value;
@@ -98,7 +98,7 @@ public class Mathf {
 	 * @param max The maximum limit
 	 * @return The new value after making sure it is within the given limit.
 	 */
-	public static double limit2(double value, double min, double max){
+	public static double constrain2(double value, double min, double max){
 		double mag = Math.abs(value);
 		if(mag > max) mag = max;
 		else if(mag < min) mag = min;
@@ -111,7 +111,7 @@ public class Mathf {
 	 * @param max upper boundary
 	 * @return true if the value is limited, false otherwise
 	 */
-	public static boolean limited(double value, double min, double max){
+	public static boolean constrained(double value, double min, double max){
 		return value >= min && value <= max;
 	}
 	/**

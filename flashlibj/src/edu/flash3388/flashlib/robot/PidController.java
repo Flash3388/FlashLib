@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -28,11 +28,13 @@ import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 public class PidController {
 	
 	private PidSource source;
-	private DoubleDataSource setPoint;
+	private DoubleSource setPoint;
 	private double minimumOutput = -1, maximumOutput = 1;
-	private double kp, ki, kd;
-	private double totalError, error, preError;
-	private boolean enabled = true;
+	private double kp, ki, kd, kf;
+	private double lastVal, lastOut;
+	private double maxIOutput = 0, setpointRange = 0, outRampRate = 0;
+	private double totalError, error, maxError = 0;
+	private boolean enabled = false, firstRun = true;
 	
 	/**
 	 * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid source
@@ -40,13 +42,12 @@ public class PidController {
 	 * @param kp the proportional constant
 	 * @param ki the integral constant
 	 * @param kd the differential constant
+	 * @param kf the feed forward constant
 	 * @param setPoint the set point
 	 * @param source the feedback source
 	 */
-	public PidController(double kp, double ki, double kd, DoubleDataSource setPoint, PidSource source){
-		this.kp = kp;
-		this.ki = ki;
-		this.kd = kd;
+	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PidSource source){
+		setPID(kp, ki, kd, kf);
 		this.setPoint = setPoint;
 		this.source = source;
 	}
@@ -56,19 +57,21 @@ public class PidController {
 	 * @param kp the proportional constant
 	 * @param ki the integral constant
 	 * @param kd the differential constant
+	 * @param kf the feed forward constant
 	 * @param setPoint the set point
 	 */
-	public PidController(double kp, double ki, double kd, DoubleDataSource setPoint){
-		this(kp, ki, kd, setPoint, null);
+	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint){
+		this(kp, ki, kd, kf, setPoint, null);
 	}
 	/**
 	 * Creates a new PID controller. Uses given constant for the control loop, without a set point and a pid source
 	 * @param kp the proportional constant
 	 * @param ki the integral constant
 	 * @param kd the differential constant
+	 * @param kf the feed forward constant
 	 */
-	public PidController(double kp, double ki, double kd){
-		this(kp, ki, kd, null);
+	public PidController(double kp, double ki, double kd, double kf){
+		this(kp, ki, kd, kf, null);
 	}
 	
 	/**
@@ -86,36 +89,74 @@ public class PidController {
 			throw new IllegalStateException("PID SetPoint is missing!");
 		
 		double currentVal = source.pidGet();
+		if(setpointRange != 0)
+			currentVal = Mathf.constrain(currentVal, currentVal - setpointRange, currentVal + setpointRange);
+		
 		double result = 0;
 		error = setPoint.get() - currentVal;
 		
-		if(source.getType() == PidType.Rate){
-			double pGain = (totalError + error) * kp;
-			if(Mathf.limited(pGain, minimumOutput, maximumOutput))
-				totalError += error;
-			else if(pGain < maximumOutput)
-				totalError = minimumOutput / kp;
-			else 
-				totalError = maximumOutput / kp;
-			
-			result = kp * totalError + kd * error;
-		}else{//DISPLACEMENT!
-			double iGain = (totalError + error) * ki;
-			if(Mathf.limited(iGain, minimumOutput, maximumOutput))
-				totalError += error;
-			else if(iGain < maximumOutput)
-				totalError = minimumOutput / ki;
-			else 
-				totalError = maximumOutput / ki;
-			
-			result = kp * error + ki * totalError + kd * (error - preError);
+		double pOut = kp * error;
+		double fOut = kf * setPoint.get();
+		
+		if(firstRun){
+			firstRun = false;
+			lastOut = pOut + fOut;
+			lastVal = currentVal;
 		}
 		
-		preError = error;
-		result = Mathf.limit(result, minimumOutput, maximumOutput);
+		double iOut = ki * totalError;
+		double dOut = -kd * (currentVal - lastVal);
+		
+		if(maxIOutput != 0)
+			iOut = Mathf.constrain(iOut, -maxIOutput, maxIOutput);
+		
+		result = pOut + iOut + dOut + fOut;
+		
+		totalError += error;
+		
+		if(minimumOutput != maximumOutput && !Mathf.constrained(result, minimumOutput, maximumOutput))
+			totalError = error;
+		else if(maxIOutput != 0)
+			totalError = Mathf.constrain(totalError + error, -maxError, maxError);
+		
+		if(outRampRate != 0 && !Mathf.constrained(result, lastOut - outRampRate, lastOut + outRampRate)){
+			totalError = error;
+			result = Mathf.constrain(result, lastOut - outRampRate, lastOut + outRampRate);
+		}
+		
+		if(minimumOutput != maximumOutput)
+			result = Mathf.constrain(result, minimumOutput, maximumOutput);
+		
+		lastOut = result;
+		lastVal = currentVal;
 		return result;
 	}
-	
+	/**
+	 * Resets the controller. This erases the I term buildup, and removes 
+	 * D gain on the next loop.
+	 */
+	public void reset(){
+		firstRun = true;
+		totalError = 0;
+	}
+
+	/**
+     * Set the maximum rate the output can increase per cycle.
+     * 
+	 * @param rate rate of output change per cycle
+	 */
+	public void setOutputRampRate(double rate){
+		outRampRate = rate;
+	}
+
+	/** 
+     * Set a limit on how far the setpoint can be from the current position.
+     * 
+     * @param range range of setpoint
+	 */
+	public void setSetpointRange(double range){
+		setpointRange = range;
+	}
 	/**
 	 * Gets the maximum output of the loop.
 	 * @return the maximum output
@@ -155,7 +196,7 @@ public class PidController {
 	 * Gets the set point data source used by this loop.
 	 * @return set point
 	 */
-	public DoubleDataSource getSetPoint(){
+	public DoubleSource getSetPoint(){
 		return setPoint;
 	}
 	/**
@@ -166,19 +207,25 @@ public class PidController {
 		return source;
 	}
 	
-	/**
-	 * Sets the maximum output of the loop
-	 * @param m maximum output
-	 */
-	public void setMaximumOutput(double m){
-		this.maximumOutput = m;
+	public void setMaxIOutput(double maximum){
+		maxIOutput=maximum;
+		if(ki != 0)
+			maxError=maxIOutput / ki;
 	}
+	
 	/**
-	 * Sets the minimum output of the loop
-	 * @param m minimum output
+	 * Sets the minimum and maximum outputs of the loop.
+	 * @param min minimum output
+	 * @param max maximum output
 	 */
-	public void setMinimumOutput(double m){
-		this.minimumOutput = m;
+	public void setOutputLimit(double min, double max){
+		if(max < min)
+			throw new IllegalArgumentException("The min value cannot be bigger than the max");
+		this.minimumOutput = min;
+		this.maximumOutput = max;
+		
+		if(maxIOutput == 0 || maxIOutput > (max - min))
+			setMaxIOutput(max - min);
 	}
 	/**
 	 * Sets the output limit of the loop. The maximum output will be equal to the given value, while the minimum output
@@ -201,6 +248,11 @@ public class PidController {
 	 * @param i integral constant
 	 */
 	public void setI(double i){
+		if(ki != 0)
+			totalError = totalError * ki/i;
+		if(maxIOutput != 0)
+			maxError = maxIOutput / i;
+		
 		this.ki = i;
 	}
 	/**
@@ -211,6 +263,13 @@ public class PidController {
 		this.kd = d;
 	}
 	/**
+	 * Sets the feed forward gain value
+	 * @param f feed forward gain
+	 */
+	public void setF(double f){
+		this.kf = f;
+	}
+	/**
 	 * Sets the PID constants: proportional, integral and differential used by this loop.
 	 * @param p proportional constant
 	 * @param i integral constant
@@ -218,14 +277,28 @@ public class PidController {
 	 */
 	public void setPID(double p, double i, double d){
 		this.kp = p;
-		this.ki = i;
+		setI(i);
 		this.kd = d;
 	}
+	/**
+	 * Sets the PID constants: proportional, integral and differential used by this loop.
+	 * @param p proportional constant
+	 * @param i integral constant
+	 * @param d differential constant
+	 * @param f feed forward gain
+	 */
+	public void setPID(double p, double i, double d, double f){
+		this.kp = p;
+		setI(i);
+		this.kd = d;
+		this.kf = f;
+	}
+	
 	/**
 	 * Sets the set point source used by this loop.
 	 * @param setpoint set point source
 	 */
-	public void setSetPoint(DoubleDataSource setpoint){
+	public void setSetPoint(DoubleSource setpoint){
 		this.setPoint = setpoint;
 	}
 	/**
@@ -251,3 +324,24 @@ public class PidController {
 		this.enabled = enable;
 	}
 }
+/*if(source.getType() == PidType.Rate){
+double pGain = (totalError + error) * kp;
+if(Mathf.limited(pGain, minimumOutput, maximumOutput))
+	totalError += error;
+else if(pGain < maximumOutput)
+	totalError = minimumOutput / kp;
+else 
+	totalError = maximumOutput / kp;
+
+result = kp * totalError + kd * error;
+}else{//DISPLACEMENT!
+double iGain = (totalError + error) * ki;
+if(Mathf.limited(iGain, minimumOutput, maximumOutput))
+	totalError += error;
+else if(iGain < maximumOutput)
+	totalError = minimumOutput / ki;
+else 
+	totalError = maximumOutput / ki;
+
+result = kp * error + ki * totalError + kd * (error - preError);
+}*/

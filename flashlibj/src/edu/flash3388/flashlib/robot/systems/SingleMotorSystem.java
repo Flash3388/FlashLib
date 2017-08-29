@@ -2,11 +2,10 @@ package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
-import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.devices.MultiSpeedController;
-import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.SubSystem;
 
 /**
  * A generic single motor system. Implements XAxisMovable, YAxisMovable, Rotatable, ModableMotor, and VoltageScalable.
@@ -14,30 +13,7 @@ import edu.flash3388.flashlib.robot.System;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class SingleMotorSystem extends System implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable, ModableMotor{
-	
-	public final Action FORWARD_ACTION = new SystemAction(this, new Action(){
-		@Override
-		protected void execute() {forward();}
-		@Override
-		protected void end() {stop();}
-	});
-	public final Action BACKWARD_ACTION = new SystemAction(this, new Action(){
-		@Override
-		protected void execute() {backward();}
-		@Override
-		protected void end() { stop();}
-	});
-	public final Action STOP_ACTION = new SystemAction(this, new Action(){
-		@Override
-		protected void initialize(){ stop();}
-		@Override
-		protected void execute() { }
-		@Override 
-		protected boolean isFinished() {return true;}
-		@Override
-		protected void end() { stop();}
-	});
+public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable, ModableMotor{
 	
 	private FlashSpeedController controller;
 	private double default_speed_forward = 0.5, default_speed_backward = 0.5;
@@ -76,7 +52,7 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	 * @param defaultAction default system action
 	 */
 	public SingleMotorSystem(FlashSpeedController controller, Action defaultAction){
-		super(null);
+		super("");
 		this.controller = controller;
 		setDefaultAction(defaultAction);
 		enableBrakeMode(false);
@@ -243,7 +219,7 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 	 * </p>
 	 */
 	@Override
-	public System getSystem() {
+	public SubSystem getSystem() {
 		return this;
 	}
 	/**

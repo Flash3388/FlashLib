@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.math;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +17,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.flash3388.flashlib.io.FileStream;
-
 /**
  * Provides a base for interpolation. In the mathematical field of numerical analysis, 
  * interpolation is a method of constructing new data points within the range of a discrete 
@@ -27,19 +28,10 @@ import edu.flash3388.flashlib.io.FileStream;
 public abstract class Interpolation {
 
 	private HashMap<Double, Double> map = new HashMap<Double, Double>();
-	private double keyMargin = 0;
 	
 	/**
-	 * Creates a base for interpolation with a consistent value margin between 2 x coordinates.
-	 * @param margin the margin
-	 * @see #setKeyMargin(double)
-	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
-	 */
-	public Interpolation(double margin){
-		this.keyMargin = margin;
-	}
-	/**
 	 * Creates a base for interpolation.
+	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
 	 */
 	public Interpolation(){}
 	
@@ -50,22 +42,7 @@ public abstract class Interpolation {
 	public Map<Double, Double> getMap(){
 		return map;
 	}
-	/**
-	 * Sets the consistent value margin between 2 x coordinates. This value is used 
-	 * in some interpolations.
-	 * @param keyMargin the margin
-	 */
-	public void setKeyMargin(double keyMargin){
-		this.keyMargin = keyMargin;
-	}
-	/**
-	 * Gets the consistent value margin between 2 x coordinates. This value is used 
-	 * in some interpolations.
-	 * @return the margin
-	 */
-	public double getKeyMargin(){
-		return keyMargin;
-	}
+	
 	/**
 	 * Gets the count of values in the map
 	 * @return the size of the map
@@ -117,7 +94,11 @@ public abstract class Interpolation {
 		}
 		lines.add("</interpolation>");
 		
-		FileStream.writeLines(file, lines.toArray(new String[lines.size()]));
+		try {
+			Files.write(Paths.get(file), lines, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException{
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()

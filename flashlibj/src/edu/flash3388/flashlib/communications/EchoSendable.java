@@ -13,12 +13,10 @@ public class EchoSendable extends Sendable{
 	private byte[] byteData = new byte[0];
 	private boolean rec = false;
 	
-	public EchoSendable(String name, byte type) {
+	public EchoSendable(String name, byte type, boolean init) {
 		super(name, type);
-		origindata = name.getBytes();
-	}
-	public EchoSendable(String name, int id, byte type){
-		super(name, id, type);
+		if(init)
+			origindata = name.getBytes();
 	}
 
 	@Override
@@ -28,6 +26,7 @@ public class EchoSendable extends Sendable{
 		System.arraycopy(data, 0, byteData, 0, 
 				data.length);
 
+		System.out.println(getName()+": "+new String(data));
 		rec = true;
 	}
 	@Override

@@ -12,23 +12,46 @@ import java.util.Vector;
  * 
  * <p>
  * To run the scheduler, it is necessary to manually call {@link #run()}.
- * To initialize the scheduler, call {@link #init()}.
  * </p>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Scheduler {
+public final class Scheduler {
 	
-	private static Scheduler instance;
+	private static abstract class TaskWrapper{
+		boolean removeOnFinish;
+		
+		TaskWrapper(boolean removeFinshed){
+			this.removeOnFinish = removeFinshed;
+		}
+		
+		abstract boolean run();
+	}
+	private static class RunnableWrapper extends TaskWrapper{
+		Runnable runnable;
+		
+		RunnableWrapper(Runnable runnable, boolean removeOnFinish){
+			super(removeOnFinish);
+			this.runnable = runnable;
+		}
+
+		@Override
+		boolean run() {
+			runnable.run();
+			return true;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			return super.equals(obj) || runnable.equals(obj);
+		}
+	}
 	
 	private boolean disabled = false;
 	
 	private Vector<Action> actions = new Vector<Action>();
-	private Vector<System> systems = new Vector<System>();
-	private Vector<ScheduledTask> tasks = new Vector<ScheduledTask>();
-	
-	private Scheduler(){}
+	private Vector<SubSystem> systems = new Vector<SubSystem>();
+	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
 	
 	/**
 	 * Runs the scheduler. 
@@ -36,49 +59,73 @@ public class Scheduler {
 	public void run(){
 		if(disabled) return;
 		
-		ScheduledTask task = null;
-		for(Enumeration<ScheduledTask> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
-			task = taskEnum.nextElement();
-			if(!task.run())
-				tasks.remove(task);
+		if(tasks.size() > 0){
+			TaskWrapper taskWrapper = null;
+			for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
+				taskWrapper = taskEnum.nextElement();
+				if(!taskWrapper.run() || taskWrapper.removeOnFinish)
+					tasks.remove(taskWrapper);
+			}
 		}
 		
-		Action action = null;
-		for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
-			action = actionEnum.nextElement();
-			if(!action.run())
-				remove(action);
+		if(actions.size() > 0){
+			Action action = null;
+			for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
+				action = actionEnum.nextElement();
+				if(!action.run())
+					remove(action);
+			}
 		}
 		
-		System system = null;
-		for(Enumeration<System> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
-			system = systemEnum.nextElement();
-			if(!system.hasCurrentAction() && !RobotState.isRobotDisabled())
-				system.startDefaultAction();
+		if(systems.size() > 0){
+			SubSystem system = null;
+			for(Enumeration<SubSystem> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
+				system = systemEnum.nextElement();
+				if(!system.hasCurrentAction() && !RobotState.isRobotDisabled())
+					system.startDefaultAction();
+			}
 		}
 	}
 	
 	/**
-	 * Adds a new ScheduledTask to be executed.
-	 * @param task task to execute
+	 * Adds a new {@link Runnable} to be executed continuously until manually removed.
+	 * @param runnable task to execute
+	 * @return true if the task was added, false if the task already exists
 	 */
-	public void add(ScheduledTask task){
-		tasks.addElement(task);
+	public boolean addTask(Runnable runnable){
+		if(!tasks.contains(runnable)){
+			tasks.addElement(new RunnableWrapper(runnable, false));
+			return true;
+		}
+		return false;
 	}
 	/**
-	 * Removes a ScheduledTask from execution.
-	 * @param task task to remove
+	 * Adds a new {@link Runnable} to be executed once.
+	 * @param runnable task to execute
+	 * @return true if the task was added, false if the task already exists
 	 */
-	public void remove(ScheduledTask task){
-		tasks.remove(task);
+	public boolean execute(Runnable runnable){
+		if(!tasks.contains(runnable)){
+			tasks.addElement(new RunnableWrapper(runnable, true));
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Removes a {@link Runnable} from execution.
+	 * @param runnable task to remove
+	 * @return true if the task was in execution, false otherwise
+	 */
+	public boolean remove(Runnable runnable){
+		return tasks.remove(runnable);
 	}
 	
-	void registerSystem(System system){
+	void registerSystem(SubSystem system){
 		systems.add(system);
 	}
 	
 	/**
-	 * Adds a new Action to be executed by the scheduler. The action's system requirements are checked. If
+	 * Adds a new {@link Action} to be executed by the scheduler. The action's system requirements are checked. If
 	 * other actions use those same systems, those actions are canceled. If the scheduler is disabled, the action
 	 * cannot be added.
 	 * 
@@ -88,9 +135,9 @@ public class Scheduler {
 	public boolean add(Action action){
 		if(disabled) return false;
 		
-		Enumeration<System> requirements = action.getRequirements();
+		Enumeration<SubSystem> requirements = action.getRequirements();
 		while(requirements.hasMoreElements()){
-			System system = requirements.nextElement();
+			SubSystem system = requirements.nextElement();
 			if(system.hasCurrentAction())
 				remove(system.getCurrentAction());
 			system.setCurrentAction(action);
@@ -100,13 +147,13 @@ public class Scheduler {
 		return true;
 	}
 	/**
-	 * Removes an action from the scheduler. If the action is in the scheduler, it is removed and its required systems
+	 * Removes an {@link Action} from the scheduler. If the action is in the scheduler, it is removed and its required systems
 	 * are updated as lacking a current action.
 	 * @param action action to remove.
 	 */
 	public void remove(Action action){
 		if(actions.removeElement(action)){
-			Enumeration<System> requirements = action.getRequirements();
+			Enumeration<SubSystem> requirements = action.getRequirements();
 			while(requirements.hasMoreElements())
 				requirements.nextElement().setCurrentAction(null);
 			
@@ -114,7 +161,7 @@ public class Scheduler {
 		}
 	}
 	/**
-	 * Removes all the actions from the scheduler.
+	 * Removes all the {@link Action}s from the scheduler.
 	 */
 	public void removeAllActions(){
 		Enumeration<Action> actionEnum = actions.elements();
@@ -135,43 +182,5 @@ public class Scheduler {
 	 */
 	public boolean isDisabled(){
 		return disabled;
-	}
-	
-	/**
-	 * If the scheduler has an instance, the given value is passed to {@link #setDisabled(boolean)}.
-	 * 
-	 * @param disable true to disable, false to enable
-	 */
-	public static void disableScheduler(boolean disable){
-		if(!schedulerHasInstance()) return;
-		getInstance().setDisabled(disable);
-	}
-	/**
-	 * If the scheduler has an instance, the {@link #run()} method is called.
-	 */
-	public static void runScheduler(){
-		if(!schedulerHasInstance()) return;
-		getInstance().run();
-	}
-	/**
-	 * Gets whether or not the scheduler has an instance.
-	 * @return true if the scheduler has an instance, false otherwise
-	 */
-	public static boolean schedulerHasInstance(){
-		return instance != null;
-	}
-	/**
-	 * Gets the instance of the scheduler. 
-	 * @return the instance of the scheduler, null if the scheduler was not initialized
-	 */
-	public static Scheduler getInstance(){
-		return instance;
-	}
-	/**
-	 * Initializes the scheduler, if it was not initialized.
-	 */
-	public static void init(){
-		if(instance == null)
-			instance = new Scheduler();
 	}
 }

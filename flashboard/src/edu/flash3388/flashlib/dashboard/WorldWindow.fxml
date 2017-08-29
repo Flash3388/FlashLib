@@ -81,12 +81,14 @@
          			<Menu fx:id="vision_menu" text="Vision">
             			<MenuItem fx:id="load_params" mnemonicParsing="false" text="Load Parameters" />
             			<MenuItem fx:id="save_params" mnemonicParsing="false" text="Save Parameters" />
+            			<MenuItem fx:id="vision_editor" mnemonicParsing="false" text="Show Vision Editor"/>
          			</Menu>
                   <Menu fx:id="monitor_menu" mnemonicParsing="false" text="Monitoring">
                     <items>
                         <MenuItem fx:id="show_log" mnemonicParsing="false" text="Show Log" />
                         <MenuItem fx:id="motorTester" mnemonicParsing="false" text="Show Motor Tester" />
                         <MenuItem fx:id="showpdp" mnemonicParsing="false" text="Show PDP" />
+                        <MenuItem fx:id="pidtuner" mnemonicParsing="false" text="Show PID Tuner" />
                     </items>
                   </Menu>
                   <Menu fx:id="sbc_menu" mnemonicParsing="false" text="Tools">

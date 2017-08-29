@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 /**
  * Filers out contours by their proximity to a coordinate in the frame.
@@ -9,52 +12,47 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToCoordinate(double, double, int)
  */
-public class CoordinateFilter extends ProcessingFilter{
-	private double x, y;
-	private byte amount = 0;
+public class CoordinateFilter extends VisionFilter{
+	
+	private DoubleProperty x = new SimpleDoubleProperty(),
+						   y = new SimpleDoubleProperty();
+	private IntegerProperty amount = new SimpleIntegerProperty();
 
 	public CoordinateFilter(){}
 	public CoordinateFilter(double x, double y, int amount){
-		this.x = x;
-		this.y = y;
-		this.amount = (byte) amount;
+		this.x.set(x);
+		this.y.set(y);
+		this.amount.set(amount);
 	}
 	
-	public double getX(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the x coordinate to filter around.
+	 * @return the property
+	 */
+	public DoubleProperty xProperty(){
 		return x;
 	}
-	public double getY(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the y coordinate to filter around.
+	 * @return the property
+	 */
+	public DoubleProperty yProperty(){
 		return y;
 	}
-	public void setX(double x){
-		this.x = x;
-	}
-	public void setY(double y){
-		this.y = y;
-	}
-	public int getAmount(){
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public IntegerProperty amountProperty(){
 		return amount;
-	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.closestToCoordinate(x, y, amount);
-	}
-	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
-		x = FilterParam.getDoubleValue(parameters.get("x"));
-		y = FilterParam.getDoubleValue(parameters.get("y"));
-	}
-	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount),
-				new FilterParam.DoubleParam("x", x),
-				new FilterParam.DoubleParam("y", y)
-		};
+		source.closestToCoordinate(x.get(), y.get(), amount.get());
 	}
 }

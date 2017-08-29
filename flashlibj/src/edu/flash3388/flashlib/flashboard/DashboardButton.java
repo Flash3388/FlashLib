@@ -34,9 +34,9 @@ public class DashboardButton extends Sendable{
 			running = true;
 			button.setPressed(true);
 		}else if(data[0] == UP){
-			running = false;
 			button.setPressed(false);
 			button.stopAll();
+			running = false;
 		}
 	}
 	@Override
@@ -45,15 +45,16 @@ public class DashboardButton extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return running && button.actionsStilRunning();
+		return running && !button.actionsStillRunning();
 	}
 	@Override
 	public void onConnection() {
-		running = false;
-		button.setPressed(false);
+		
 	}
 	@Override
-	public void onConnectionLost() {
+	public void onConnectionLost(){
+		button.setPressed(false);
 		button.stopAll();
+		running = false;
 	}
 }

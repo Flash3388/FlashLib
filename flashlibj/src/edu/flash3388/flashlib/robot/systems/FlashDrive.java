@@ -1,86 +1,47 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
-import edu.flash3388.flashlib.robot.System;
-import edu.flash3388.flashlib.robot.SystemAction;
+import edu.flash3388.flashlib.robot.SubSystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.hid.HID;
 import edu.flash3388.flashlib.robot.hid.Stick;
 
 /**
- * This class offers a wide range of both joystick-based driving solutions and autonomous drives.
- * The instance allows for an unlimited amount of motors on four sides of the robot.
- * The class contains the following drive methods:
- * 			Tank Drive
- * 			Arcade Drive
- * 			Squared Omni Drive
- * 
- * The autonomous methods allow for all-direction joystick-free movement.
- * 
+ * This class offers a wide range of motion algorithms for drive trains. There
+ * are several popular control methods available:
+ * <ul>
+ * 	<li>Tank Drive</li>
+ * 	<li>Arcade Drive</li>
+ * 	<li>Omni Drive</li>
+ * </ul>
+ * Those are in addition to any new control algorithms added for possible use. This class
+ * implements both {@link TankDriveSystem} and {@link HolonomicDriveSystem}. To allow for dynamic
+ * use, it is the drive train is divided to four sides: front, rear, right and left. Each side
+ * can hold any amount of motors.
+ *
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashDrive extends System implements TankDriveSystem, HolonomicDriveSystem{
+public class FlashDrive extends SubSystem implements TankDriveSystem, HolonomicDriveSystem{
 
+	/**
+	 * Represents sides of the drive system.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
 	public static enum MotorSide{
 		Front, Rear, Right, Left
 	}
-	
-	public final Action FORWARD = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {forward();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action BACKWARD = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {backward();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action RIGHT = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {right();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action LEFT = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {left();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action ROTATE_RIGHT = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {rotateRight();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action ROTATE_LEFT = new SystemAction(this, new Action(){
-		@Override
-		public void execute() {rotateLeft();}
-		@Override
-		public void end() { stop();}
-	});
-	public final Action STOP = new SystemAction(this, new Action(){
-		@Override
-		public void initialize() { stop();}
-		@Override
-		public void execute() {}
-		@Override
-		public void end() {}
-		@Override
-		public boolean isFinished() {return true;}
-	});
 	
 	private FlashSpeedController right_controllers;
 	private FlashSpeedController left_controllers;
 	private FlashSpeedController front_controllers;
 	private FlashSpeedController rear_controllers;
 	
-	private double speed_limit = 1;
+	private double speed_limit = 1.0;
 	private double minSpeed = 0.0;
 	private double default_speed = 0.5;
 	private boolean voltageScaling = false;
@@ -107,7 +68,7 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	 * @throws IllegalArgumentException If all parameters are null.
 	 */
 	public FlashDrive(FlashSpeedController right, FlashSpeedController left, FlashSpeedController front, FlashSpeedController back){
-		super(null);
+		super("FlashDrive");
 		if(right == null && left == null && front == null && back == null) 
 			throw new IllegalArgumentException("At least one side must have wheels");
 		
@@ -277,8 +238,8 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	}
 	
 	/**
-	 * Arcade drive implements a single joystick drive. Given move and rotate speed values, the code sets the values 
-	 * to move the robot. The move value is responsible for moving the robot forward and backward while the 
+	 * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values 
+	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
 	 * rotate value is responsible for the robot rotation. 
 	 * 
 	 * @param moveValue The value to move forward or backward 1 to -1.
@@ -310,8 +271,8 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	}
 	
 	/**
-	 * Arcade drive implements a single joystick drive. Given move and rotate speed values, the code sets the values 
-	 * to move each side separately. The move value is responsible for moving the robot forward and backward while the 
+	 * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values 
+	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
 	 * rotate value is responsible for the robot rotation. When both values are not zero then the value taken is the
 	 * absolute bigger. Allows to decrease the values of the speeds by choosing to square them. Given a value SPEED 
 	 * when squared is true, the resulting value is SPEED * SPEED.
@@ -537,11 +498,14 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	 * 
 	 * <p>
 	 * Vectored tank drive is an experimental omni control which uses a motion vector just like Mecanum drive.
+	 * The control algorithm derives from arcade drive.
 	 * </p>
 	 * 
 	 * @param y y-axis value of the vector
 	 * @param x x-axis value of the vector
 	 * @param rotate rotation value
+	 * 
+	 * @see #arcadeDrive(double, double)
 	 */
 	public void vectoredOmniDrive_Cartesian(double y, double x, double rotate){
 		double right = 0, left = 0, front = 0, rear = 0;
@@ -731,17 +695,27 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * Moves the drive system as an omni drive system.
+	 * </p>
+	 * @see #vectoredOmniDrive_Cartesian(double, double, double)
 	 */
 	@Override
 	public void holonomicCartesian(double x, double y, double rotation) {
 		//implement for omni drive
+		vectoredOmniDrive_Cartesian(y, x, rotation);
 	}
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * Moves the drive system as an omni drive system. Converts data to cartesian format
+	 * and calls {@link #holonomicCartesian(double, double, double)}.
+	 * </p>
 	 */
 	@Override
 	public void holonomicPolar(double magnitude, double direction, double rotation) {
 		//implement for omni drive
+		holonomicCartesian(Mathf.vecX(magnitude, direction), Mathf.vecY(magnitude, direction), rotation);
 	}
 	
 	/**
@@ -789,9 +763,8 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
 			
-		speed *= speed_limit;
-		if(speed > speed_limit) speed = speed_limit;
-		else if(speed < -speed_limit) speed = -speed_limit;
+		if(speed_limit != 1.0)
+			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
 		return speed;
 	}
 
@@ -802,7 +775,7 @@ public class FlashDrive extends System implements TankDriveSystem, HolonomicDriv
 	 * </p>
 	 */
 	@Override
-	public System getSystem() {
+	public SubSystem getSystem() {
 		return this;
 	}
 

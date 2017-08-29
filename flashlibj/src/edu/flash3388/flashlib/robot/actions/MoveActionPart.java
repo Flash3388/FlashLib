@@ -1,13 +1,13 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.SourceAction;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class MoveActionPart extends SourceAction{
 
-	private DoubleDataSource speedSource;
+	private DoubleSource speedSource;
 	
-	public MoveActionPart(DoubleDataSource speed){
+	public MoveActionPart(DoubleSource speed){
 		this.speedSource = speed;
 	}
 

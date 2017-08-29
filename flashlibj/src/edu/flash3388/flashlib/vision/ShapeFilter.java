@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 
 /**
@@ -10,55 +13,52 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#detectShapes(int, int, double)
  */
-public class ShapeFilter extends ProcessingFilter{
-	private byte amount, vertecies;
-	private double accuracy;
+public class ShapeFilter extends VisionFilter{
+	
+	private DoubleProperty accuracy = new SimpleDoubleProperty();
+	private IntegerProperty amount = new SimpleIntegerProperty();
+	private IntegerProperty vertecies = new SimpleIntegerProperty();
 
 	public ShapeFilter(){}
 	public ShapeFilter(int amount, int vertecies, double accuracy){
-		this.amount = (byte) amount;
-		this.vertecies = (byte) vertecies;
-		this.accuracy = accuracy;
+		this.amount.set(amount);
+		this.vertecies.set(vertecies);
+		this.accuracy.set(accuracy);
 	}
 	
-	public int getAmount(){
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public IntegerProperty amountProperty(){
 		return amount;
 	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
-	}
-	public int getVertecies(){
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the amount of vertices and the requested shape to find.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public IntegerProperty verteciesProperty(){
 		return vertecies;
 	}
-	public void setVertecies(int vertecies){
-		this.vertecies = (byte) vertecies;
-	}
-	public double getAccuracy(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the accuracy of the shape approximation. Higher values offer less accurate shapes.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty accuracyProperty(){
 		return accuracy;
-	}
-	public void setAccuracy(double accuracy){
-		this.accuracy = accuracy;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(amount <= 0)
-			source.detectShapes(vertecies, accuracy);
+		if(amount.get() <= 0)
+			source.detectShapes(vertecies.get(), accuracy.get());
 		else
-			source.detectShapes(amount, vertecies, accuracy);
-	}
-	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
-		vertecies = (byte) FilterParam.getIntValue(parameters.get("vertecies"));
-		accuracy = FilterParam.getDoubleValue(parameters.get("accuracy"));
-	}
-	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount),
-				new FilterParam.IntParam("vertecies", vertecies),
-				new FilterParam.DoubleParam("accuracy", accuracy)
-		};
+			source.detectShapes(amount.get(), vertecies.get(), accuracy.get());
 	}
 }

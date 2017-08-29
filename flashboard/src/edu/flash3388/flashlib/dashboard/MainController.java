@@ -6,18 +6,18 @@ import java.util.Enumeration;
 import java.util.ResourceBundle;
 
 import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
+import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
+import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
-import edu.flash3388.flashlib.gui.Dialog;
-import edu.flash3388.flashlib.gui.FileDialog;
+import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
-import edu.flash3388.flashlib.gui.ShellWindow;
-import edu.flash3388.flashlib.gui.ShellWindow.ChannelType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
-import edu.flash3388.flashlib.vision.CvRunner;
-import edu.flash3388.flashlib.vision.ProcessingFilter;
+import edu.flash3388.flashlib.vision.Vision;
+import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -38,6 +38,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MainController implements Initializable{
 
@@ -46,23 +48,20 @@ public class MainController implements Initializable{
 		boolean lastconnectionC = false, lastconnectionS = false;
 		int lastProcCount = 0, lastProc = -1;
 		Runnable dxUpdate = ()->{
-			if(Dashboard.communicationsConnected())
+			if(Dashboard.communicationsConnected() || Dashboard.camConnected())
 				controller.update(); 
-			CvRunner vision = Dashboard.getVision();
+			Vision vision = Dashboard.getVision();
 			if(vision != null){
 				if(vision.getProcessingCount() != lastProcCount){
-					for (int i = lastProcCount; i < vision.getProcessingCount(); i++)
-						controller.addParamToBox(vision.getProcessing(i).getName());
+					controller.updateParamBox();
 					lastProcCount = vision.getProcessingCount();
 				}
-				if(vision.getProcessing() == null)
-					Dashboard.loadDefaultParameters();
-				else 
+				if(vision.getProcessing() != null)
 					controller.updateParam();
+					
 				if(lastProc != Dashboard.getVision().getSelectedProcessingIndex()){
 					lastProc = Dashboard.getVision().getSelectedProcessingIndex();
 					controller.updateParamBoxSelection();
-					System.out.println("Selection changed");
 				}
 				controller.updateVisionRun();
 			}
@@ -70,8 +69,16 @@ public class MainController implements Initializable{
 				lastconnectionC = !lastconnectionC;
 				controller.connectionRect.setFill(lastconnectionC ? Color.GREEN : Color.RED);
 				
-				if(!lastconnectionC)
+				if(!lastconnectionC){
 					controller.resetDisplay();
+					PDPWindow.reset();
+					PDP.resetBoards();
+					TesterWindow.closeTester();
+					VisionEditorWindow.closeEditor();
+					PidTunerWindow.reset();
+					FlashboardTester.resetTesters();
+					DashboardPidTuner.resetTuners();
+				}
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
 				lastconnectionS = !lastconnectionS;
@@ -112,7 +119,7 @@ public class MainController implements Initializable{
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
 	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, sbc_update, sbc_load,
-				   sbc_ssh, sbc_sftp, sbc_controller;
+				   sbc_ssh, sbc_sftp, sbc_controller, pidtuner, vision_editor;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -136,17 +143,16 @@ public class MainController implements Initializable{
 	public void initialize(URL location, ResourceBundle resources) {
 		threadTask = new UpdateTask();
 		threadTask.controller = this;
-		Dashboard.addRunnableForUpdate(threadTask);
+		Dashboard.getUpdater().addTask(threadTask);
 		
 		sbc_ssh.setOnAction((e)->{
-			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
+			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
 		});
 		sbc_sftp.setOnAction((e)->{
-			ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
+			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
 		});
 		sbc_update.setOnAction((e)->{
 			//TODO: IMPLEMENT
-			//File folder = FileDialog.showDirectoryChooser(Dashboard.getPrimary());
 		});
 		load_params.setOnAction((e)->{
 			loadParams();
@@ -154,7 +160,11 @@ public class MainController implements Initializable{
 		save_params.setOnAction((e)->{
 			saveParams();
 		});
+		vision_editor.setOnAction(e ->{
+			showVisionEditor();
+		});
 		motorTester.setOnAction((e)->showTester());
+		pidtuner.setOnAction((e)->showPidTuner());
 		show_log.setOnAction((e)->showLog());
 		showpdp.setOnAction((e)->showPDP());
 		prop_viewer.setOnAction((e)->showPropViewer());
@@ -181,7 +191,7 @@ public class MainController implements Initializable{
 		hsv_check.setOnAction((e)->{
 			if(!checkVision()) return;
 			
-			colorFilter.setHsv(hsv_check.isSelected());
+			colorFilter.hsvProperty().set(hsv_check.isSelected());
 			setForHSV(hsv_check.isSelected());
 		});
 		h_min.setMin(0);
@@ -194,7 +204,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val) {
 				if(!checkVision()) return;
 				
-				colorFilter.setMin1(new_val.intValue());
+				colorFilter.min1Property().set(new_val.intValue());
 				h_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -226,7 +236,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax1(new_val.intValue());
+				colorFilter.max1Property().set(new_val.intValue());
 				h_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -258,7 +268,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMin2(new_val.intValue());
+				colorFilter.min2Property().set(new_val.intValue());
 				s_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -290,7 +300,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax2(new_val.intValue());
+				colorFilter.max2Property().set(new_val.intValue());
 				s_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -322,7 +332,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMin3(new_val.intValue());
+				colorFilter.min3Property().set(new_val.intValue());
 				v_min_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -354,7 +364,7 @@ public class MainController implements Initializable{
 	                Number old_val, Number new_val){
 				if(!checkVision()) return;
 				
-				colorFilter.setMax3(new_val.intValue());
+				colorFilter.max3Property().set(new_val.intValue());
 				v_max_val.setText(String.valueOf(new_val.intValue()));
 			}
 		});
@@ -379,12 +389,14 @@ public class MainController implements Initializable{
 	
 	private void saveParams(){
 		if(Dashboard.getVision() == null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
 			return;
 		}
 		if(Dashboard.getVision().getProcessing() != null){
-			File file = FileDialog.showSaveDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, "param",
-					"xml");
+			FileChooser chooser = new FileChooser();
+			chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+			chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
+			File file = chooser.showSaveDialog(Dashboard.getPrimary());
 			if(file == null) return;
 			String path = file.getAbsolutePath();
 			FlashUtil.getLog().log("Saving parameters: "+path);
@@ -393,47 +405,59 @@ public class MainController implements Initializable{
 	}
 	private void loadParams(){
 		if(Dashboard.getVision() == null){
-			Dialog.show(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
 			return;
 		}
-		File file = FileDialog.showLoadDialog(Dashboard.getPrimary(), Dashboard.FOLDER_SAVES, 
-				"xml");
+		FileChooser chooser = new FileChooser();
+		chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+		chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
+		File file = chooser.showOpenDialog(Dashboard.getPrimary());
 		if(file == null) return;
 		String path = file.getAbsolutePath();
-		loadParam(path);
+		loadParam(path, true);
 	}
-	public boolean loadParam(String path){
+	public boolean loadParam(String path, boolean show){
 		FlashUtil.getLog().log("Loading file: "+path);
-		VisionProcessing proc = VisionProcessing.createFromXml(path);
+		VisionProcessing proc = null;
+		try {
+			proc = VisionProcessing.createFromXml(path);
+		} catch (Throwable e) {
+			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "XML Parsing Error", e.getMessage());
+			
+			FlashUtil.getLog().reportError(e.getMessage());
+			FlashUtil.getLog().log("Loading failed");
+			return false;
+		}
+		
 		if(proc != null){
 			FlashUtil.getLog().log("Parameters loaded");
 			Dashboard.getVision().addProcessing(proc);
-			updateParam();
-			addParamToBox(proc.getName());
+			Platform.runLater(()->updateParam());
+			updateParamBox();
 			return true;
 		}else {
 			FlashUtil.getLog().log("Loading failed");
 			return false;
 		}
 	}
-	private void addParamToBox(String name){
-		for (String str : mode_box.getItems()) {
-			if(name.equals(str)){
-				return;
-			}
-		}
-		mode_box.getItems().add(name);
-		mode_box.getSelectionModel().select(name);
+	private void updateParamBox(){
+		Platform.runLater(()->{
+			mode_box.getItems().clear();
+			for (int i = 0; i < Dashboard.getVision().getProcessingCount(); i++)
+				mode_box.getItems().add(Dashboard.getVision().getProcessing(i).getName());
+		});
 	}
-	private void updateParamBoxSelection(){
-		local = true;
-		mode_box.getSelectionModel().select(Dashboard.getVision().getSelectedProcessingIndex());
-		local = false;
+	public void updateParamBoxSelection(){
+		Platform.runLater(()->{
+			local = true;
+			mode_box.getSelectionModel().select(Dashboard.getVision().getSelectedProcessingIndex());
+			local = false;
+		});
 	}
 	private boolean checkVision(){
 		if(local) 
 			return false;
-		CvRunner vision = Dashboard.getVision();
+		Vision vision = Dashboard.getVision();
 		if(vision == null) 
 			return false;
 		if(vision.getProcessing() == null)
@@ -461,36 +485,52 @@ public class MainController implements Initializable{
 	private void showTester(){
 		TesterWindow.showTester();
 	}
+	private void showPidTuner(){
+		PidTunerWindow.showTuner();
+	}
+	private void showVisionEditor(){
+		if(Dashboard.visionInitialized()){
+			VisionEditorWindow.showEditor(Dashboard.getVision());
+			updateParam();
+		}
+		else FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Vision Missing", "No Vision Runner was found");
+	}
 	public void stop(){
 		
 	}
 	public void updateParam(){
 		if(Dashboard.getVision() == null || Dashboard.getVision().getProcessing() == null) return;
-		ProcessingFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
-		for (ProcessingFilter filter : filters) {
-			if(FlashUtil.instanceOf(filter, ColorFilter.class)){
+		VisionFilter[] filters = Dashboard.getVision().getProcessing().getFilters();
+		for (VisionFilter filter : filters) {
+			if(filter instanceof ColorFilter){
 				colorFilter = (ColorFilter) filter;
 				break;
 			}
 		}
 		if(colorFilter == null) return;
 		local = true;
-		h_max.setValue(colorFilter.getMax1());  h_max_val.setText(String.valueOf(colorFilter.getMax1()));
-		h_min.setValue(colorFilter.getMin1());  h_min_val.setText(String.valueOf(colorFilter.getMin1()));
-		s_max.setValue(colorFilter.getMax2());  s_max_val.setText(String.valueOf(colorFilter.getMax2()));
-		s_min.setValue(colorFilter.getMin2());  s_min_val.setText(String.valueOf(colorFilter.getMin2()));
-		v_max.setValue(colorFilter.getMax3());  v_max_val.setText(String.valueOf(colorFilter.getMax3()));
-		v_min.setValue(colorFilter.getMin3());  v_min_val.setText(String.valueOf(colorFilter.getMin3()));
-		if(hsv_check.isSelected() != colorFilter.isHsv()){
-			hsv_check.setSelected(colorFilter.isHsv());
-			setForHSV(colorFilter.isHsv());
+		h_max.setValue(colorFilter.max1Property().get());  
+		h_max_val.setText(String.valueOf(colorFilter.max1Property().get()));
+		h_min.setValue(colorFilter.min1Property().get()); 
+		h_min_val.setText(String.valueOf(colorFilter.min1Property().get()));
+		s_max.setValue(colorFilter.max2Property().get());  
+		s_max_val.setText(String.valueOf(colorFilter.max2Property().get()));
+		s_min.setValue(colorFilter.min2Property().get());  
+		s_min_val.setText(String.valueOf(colorFilter.min2Property().get()));
+		v_max.setValue(colorFilter.max3Property().get());  
+		v_max_val.setText(String.valueOf(colorFilter.max3Property().get()));
+		v_min.setValue(colorFilter.min3Property().get());  
+		v_min_val.setText(String.valueOf(colorFilter.min3Property().get()));
+		if(hsv_check.isSelected() != colorFilter.hsvProperty().get()){
+			hsv_check.setSelected(colorFilter.hsvProperty().get());
+			setForHSV(colorFilter.hsvProperty().get());
 		}
 		local = false;
 	}
 	public void setParam(){
 		if(Dashboard.getVision() == null) return;
 		colorFilter = new ColorFilter();
-		colorFilter.setHsv(hsv_check.isSelected());
+		colorFilter.hsvProperty().set(hsv_check.isSelected());
 		colorFilter.set((int) h_min.getValue(), (int)h_max.getValue(), 
 				(int) s_min.getValue(), (int)s_max.getValue(), 
 				(int) v_min.getValue(), (int)v_max.getValue());

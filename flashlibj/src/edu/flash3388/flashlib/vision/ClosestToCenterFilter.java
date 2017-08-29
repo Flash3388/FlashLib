@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
 
 /**
  * Filers out contours by their proximity to the center of the frame. 
@@ -9,33 +10,27 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToCenterFrame(int)
  */
-public class ClosestToCenterFilter extends ProcessingFilter{
-	private byte amount = 0;
+public class ClosestToCenterFilter extends VisionFilter{
+	
+	private IntegerProperty amount = new SimpleIntegerProperty();
 	
 	public ClosestToCenterFilter(){}
 	public ClosestToCenterFilter(int amount){
-		this.amount = (byte) amount;
+		this.amount.set(amount);
 	}
 	
-	public int getAmount(){
+	/**
+	 * An {@link IntegerProperty}.
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public IntegerProperty amountProperty(){
 		return amount;
-	}
-	public void setAmount(int amount){
-		this.amount = (byte) amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.closestToCenterFrame(amount);
-	}
-	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		amount = (byte) FilterParam.getIntValue(parameters.get("amount"));
-	}
-	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.IntParam("amount", amount)
-		};
+		source.closestToCenterFrame(amount.get());
 	}
 }

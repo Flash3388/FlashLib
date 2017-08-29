@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -13,15 +15,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import edu.flash3388.flashlib.util.Log.LoggingType;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * FlashUtil contains utility functions used throughout flashLib.
@@ -45,12 +42,17 @@ public final class FlashUtil {
 	/**
 	 * The current version of FlashLib.
 	 */
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.0.1";
 	
 	private FlashUtil(){}
+	
 	private static long startTime = 0;
 	private static Log mainLog;
-	private static ExecutorService executor;
+	private static Log.LoggingType defaultCreatingMode = Log.LoggingType.Stream;
+	
+	private static final String os = System.getProperty("os.name").toLowerCase();
+	private static final String architecture = System.getProperty("os.arch");
+	private static final String version = System.getProperty("os.version");
 	
 	static{
 		setStartTime(System.currentTimeMillis());
@@ -59,20 +61,6 @@ public final class FlashUtil {
 	//--------------------------------------------------------------------
 	//-----------------------General--------------------------------------
 	//--------------------------------------------------------------------
-	
-	/**
-	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
-	 * nanoseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
-	 * lose ownership of any monitors. This is done by calling {@link Thread#sleep(long, int)}.
-	 * 
-	 * @param nanos the length of time to sleep in nanoseconds.
-	 */
-	public static void delayns(int nanos){
-		if(nanos <= 0) return;
-		try {
-			Thread.sleep(0, nanos);
-		} catch (InterruptedException e) {}
-	}
 	
 	/**
 	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
@@ -97,6 +85,46 @@ public final class FlashUtil {
 	public static void delay(double secs){
 		delay((long)(secs * 1000));
 	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) until a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time given as a parameter.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @param delayTime the sleep period length in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayUntil(BooleanSource source, long timeout, long delayTime){
+		if(timeout < 0)
+			throw new IllegalArgumentException("Timeout cannot be negative");
+		if(delayTime < 0)
+			throw new IllegalArgumentException("Delay time cannot be negative");
+		
+		if(timeout < 1)
+			timeout = 10000;
+		if(delayTime < 1)
+			delayTime = 1;
+		long start = millis();
+		
+		while(!source.get() && millis() - start < timeout)
+			delay(delayTime);
+		return source.get();
+	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) until a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time calculated depending on the timeout.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayUntil(BooleanSource source, long timeout){
+		return delayUntil(source, timeout, timeout >> 4);
+	}
 	
 	/**
 	 * Returns the time since the program was started in milliseconds.
@@ -120,7 +148,7 @@ public final class FlashUtil {
 	 * @return the difference, measured in seconds, between the current time and the time when the program was started.
 	 */
 	public static double secs(){
-		return millis() / 1000.0;
+		return millis() * 0.001;
 	}
 	/**
 	 * Returns the current value of the running Java Virtual Machine's high-resolution time source, in seconds. 
@@ -140,19 +168,26 @@ public final class FlashUtil {
 	 * Initialized the main log of flashlib. Many features throughout the library log data to this log.
 	 * 
 	 * @param logType The {@link LoggingType} of the created log
-	 * @param overrideLog If true and previous files of the main log exist, they will be deleted.
 	 */
-	public static void setStart(Log.LoggingType logType, boolean overrideLog){
-		if(mainLog == null)
-			mainLog = new Log("flashlib", logType, overrideLog);
+	public static void setStart(LoggingType logType){
+		if(mainLog == null){
+			switch(logType){
+				case Buffered: 
+					mainLog = Log.createBufferedLog("flashlib");
+					break;
+				case Stream:
+					mainLog = Log.createStreamLog("flashlib");
+					break;
+			}
+		}
 	}
 	/**
 	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
-	 * The main log uses {@link LoggingType#Stream} as the logs {@link LoggingType}, and does not override any 
-	 * existing files.
+	 * The main log uses a default mode as the logs {@link LoggingType} which can be set in 
+	 * {@link #setLogCreatingType(LoggingType)} sting files.
 	 */
 	public static void setStart(){
-		setStart(Log.LoggingType.Stream, false);
+		setStart(defaultCreatingMode);
 	}
 	/**
 	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized by calling
@@ -166,79 +201,22 @@ public final class FlashUtil {
 		return mainLog;
 	}
 
-	
 	/**
-	 * Sorts a given array using bubble sort. The rest of the given arrays are
-	 * sorted by the change of indexes in the first array. Used to make sure data stays the same.
+	 * Sets the default logging type for created log through FlashUtil. Used when creating log through 
+	 * {@link #createLog(String)}.
 	 * 
-	 * @param as the arrays to sort.
+	 * @param mode the default logging type.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void sort(Object[]...as){
-		if(as == null)
-			throw new NullPointerException("Array is null");
-		if(as.length < 1) 
-			throw new IllegalArgumentException("Less than 1 array was passed");
-		
-		Object[] main = as[0];
-		for (int i = 0; i < main.length; i++) {
-			for (int j = 0; j < main.length-1; j++) {
-				if(((Comparable)main[j]).compareTo(main[j+1]) > 0){
-					for (int j2 = 0; j2 < as.length; j2++) {
-						Object t = as[j2][j];
-						as[j2][j] = as[j2][j+1];
-						as[j2][j+1] = t;
-					}
-				}
-			}
-		}
-	}
-	//--------------------------------------------------------------------
-	//-----------------------Executor-------------------------------------
-	//--------------------------------------------------------------------
-
-	private static void initExecutor(){
-		if (executor == null)
-			executor = Executors.newCachedThreadPool();
-	}
-	private static boolean isExecutorInit(){
-		return executor != null;
-	}
-	
-	public static void awaitExecutorTermination(){
-		if(!isExecutorInit()) return;
-		executor.shutdown();
-	}
-	public static void terminateExecutor(){
-		if(!isExecutorInit()) return;
-		executor.shutdownNow();
-	}
-	public static boolean isExecutorShutdown(){
-		return isExecutorInit() && executor.isShutdown();
-	}
-	
-	public static void execute(Runnable r){
-		initExecutor();
-		executor.execute(r);
+	public static void setLogCreatingType(LoggingType mode){
+		defaultCreatingMode = mode;
 	}
 	/**
-	 * Executes a {@link java.util.concurrent.Callable} object for a given time in milliseconds. Uses a cached thread pool executor.
-	 * 
-	 * @param callable object to execute
-	 * @param ms time in milliseconds to execute the {@link java.util.concurrent.Callable} object
-	 * @param <T> the result type of method call
-	 * @return the result of the {@link java.util.concurrent.Callable} object after execution, 
-	 * or null if the execution was interrupted or has timedout
+	 * Creates a new log using the default logging type set using {@link #setLogCreatingType(LoggingType)}.
+	 * @param name the name of the log
+	 * @return created log.
 	 */
-	public static <T> T executeForTime(Callable<T> callable, long ms){
-		initExecutor();
-		
-		Future<T> future = executor.submit(callable); 
-		try {
-			return future.get(ms, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			return null;
-		}
+	public static Log createLog(String name){
+		return Log.createLogByType(name, defaultCreatingMode);
 	}
 
 	//--------------------------------------------------------------------
@@ -338,6 +316,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(byte[] data, int start, int end, byte ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -353,6 +332,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(short[] data, int start, int end, short ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -368,6 +348,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(int[] data, int start, int end, int ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -383,6 +364,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(long[] data, int start, int end, long ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -398,6 +380,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(double[] data, int start, int end, double ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -413,6 +396,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(float[] data, int start, int end, float ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -428,6 +412,7 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(char[] data, int start, int end, char ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
 			if(data[i] == ch) return i;
@@ -443,9 +428,10 @@ public final class FlashUtil {
      * @return the index of the value, or -1 if the value was not found
      */
 	public static int indexOf(Object[] data, int start, int end, Object ch){
+		end = Math.min(data.length - 1, end);
 		checkIndexes(data.length, start, end);
 		for (int i = start; i <= end; i++) 
-			if(data[i].equals(ch)) return i;
+			if(data[i] != null && data[i].equals(ch)) return i;
 		return -1;
 	}
 	
@@ -557,7 +543,7 @@ public final class FlashUtil {
 	 */
 	public static void printArray(byte[] s){
 		for(int i = 0; i < s.length; i++)
-			System.out.println((int)s[i]);
+			System.out.print((char)s[i]);
 	}
 	/**
 	 * Prints the array values.
@@ -633,9 +619,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(byte[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -645,9 +633,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(short[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -657,9 +647,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(int[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -669,9 +661,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(long[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -681,9 +675,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(double[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -693,9 +689,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(float[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -705,9 +703,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(char[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	/**
 	 * Shifts all array value between the given indexes to the left
@@ -717,9 +717,11 @@ public final class FlashUtil {
 	 * @param end the index where the shift ends
 	 */
 	public static void shiftArrayL(Object[] arr, int start, int end){
-		checkIndexes(arr.length, start, end);
-		for (int i = start; i < end; i++) 
-			arr[i] = arr[i+1];
+		end = Math.min(arr.length - 1, end);
+		checkIndexes(arr.length, start-1, end);
+		/*for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];*/
+		System.arraycopy(arr, start, arr, start-1, end-start);
 	}
 	
 	
@@ -1344,6 +1346,58 @@ public final class FlashUtil {
         	supers.addAll(Arrays.asList(interfaces));
         return supers;
     }
+    /**
+     * Gets the generic types defined for a super type of a given class. The method searches
+     * all the super types of the given class and finds along the inheritance hierarchy a type which
+     * corresponds to the given super type to find. If that type is a generic type, the types used are returned. 
+     * Otherwise null is returned.
+     * 
+     * @param child the subclass 
+     * @param supertype the generic super type to find
+     * @return an array of the generic types defined, or null if not found.
+     */
+    public static Type[] findGenericArgumentsOfSuperType(Class<?> child, Class<?> supertype){
+		if(!supertype.isAssignableFrom(child))
+			return null;
+		
+		Class<?> interclass = null;
+		ParameterizedType paramType = null;
+		Type rawType = null;
+		
+		rawType = child.getGenericSuperclass();
+		if(rawType instanceof ParameterizedType){
+			paramType = (ParameterizedType)rawType;
+			rawType = paramType.getRawType();
+		}
+		interclass = (Class<?>)rawType;
+		
+		if(interclass != null){
+			if(paramType != null && interclass.equals(supertype))
+				return paramType.getActualTypeArguments();
+			
+			Type[] types = findGenericArgumentsOfSuperType(interclass, supertype);
+			if(types != null)
+				return types;
+		}
+		
+		Type[] superinterfaces = child.getGenericInterfaces();
+		for (int i = 0; i < superinterfaces.length; i++) {
+			rawType = superinterfaces[i];
+			if(rawType instanceof ParameterizedType){
+				paramType = (ParameterizedType)rawType;
+				rawType = paramType.getRawType();
+			}
+			interclass = (Class<?>)rawType;
+			
+			if(paramType != null && interclass.equals(supertype))
+				return paramType.getActualTypeArguments();
+			
+			Type[] types = findGenericArgumentsOfSuperType(interclass, supertype);
+			if(types != null)
+				return types;
+		}
+		return null;
+	}
     
     /**
      * Gets whether an object related to a class type.
@@ -1354,6 +1408,19 @@ public final class FlashUtil {
      */
     public static boolean instanceOf(Object obj, Class<?> cl){
     	return obj.getClass() == cl || isAssignable(obj.getClass(), cl);
+    }
+    /**
+     * Creates a new instance of a class by a given name if possible. 
+     * 
+     * @param name class name including packages
+     * @return a new instance of that class, or null if could not be created or was not found.
+     */
+    public static Object createInstance(String name){
+    	try {
+			return Class.forName(name).newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			return null;
+		}
     }
 	
 	//--------------------------------------------------------------------
@@ -1395,4 +1462,72 @@ public final class FlashUtil {
 		return null;
 	}
 	
+	//--------------------------------------------------------------------
+	//------------------------------OS------------------------------------
+	//--------------------------------------------------------------------
+	
+	/**
+	 * Gets whether or not the current operating system is windows.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isWindows(){
+		return os.indexOf("win") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is osx.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isMac(){
+		return os.indexOf("mac") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is unix or linux.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isUnix(){
+		return os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is solaris.
+	 * @return true if the current OS is windows.
+	 */
+	public static boolean isSolaris(){
+		return os.indexOf("sunos") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system is windows 7 or later.
+	 * @return true if the current OS is windows 7 or later.
+	 */
+	public static boolean isWin7OrLater(){
+		try{
+			return isWindows() && Float.parseFloat(version) >= 6.1f;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+	/**
+	 * Gets whether or not the current operating system is windows vista or later.
+	 * @return true if the current OS is windows vista or later.
+	 */
+	public static boolean isWinVistaOrLater(){
+		try{
+			return isWindows() && Float.parseFloat(version) >= 6.0f;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
+	/**
+	 * Gets whether or not the current operating system architecture is 64bit.
+	 * @return true if the current OS architecture is 64bit.
+	 */
+	public static boolean isArchitectureX64(){
+		return architecture.indexOf("64") >= 0;
+	}
+	/**
+	 * Gets whether or not the current operating system architecture is 32bit.
+	 * @return true if the current OS architecture is 32bit.
+	 */
+	public static boolean isArchitectureX86(){
+		return architecture.indexOf("86") >= 0;
+	}
 }

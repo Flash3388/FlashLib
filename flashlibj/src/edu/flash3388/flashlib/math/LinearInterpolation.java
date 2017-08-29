@@ -6,7 +6,9 @@ package edu.flash3388.flashlib.math;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class LinearInterpolation extends Interpolation{
+public class LinearInterpolation extends Interpolation implements MarginInterpolation{
+	
+	private double keyMargin;
 	
 	/**
 	 * Creates an interpolation object for linear functions. Sets the key margin to a given value.
@@ -18,7 +20,21 @@ public class LinearInterpolation extends Interpolation{
 	 * @see <a href="https://en.wikipedia.org/wiki/Linear_interpolation">https://en.wikipedia.org/wiki/Linear_interpolation</a>
 	 */
 	public LinearInterpolation(double keyMargin){
-		super(keyMargin);
+		this.keyMargin = keyMargin;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setKeyMargin(double keyMargin){
+		this.keyMargin = keyMargin;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public double getKeyMargin(){
+		return keyMargin;
 	}
 	
 	/**
@@ -33,6 +49,6 @@ public class LinearInterpolation extends Interpolation{
 		double x3 = Mathf.roundToMultiplier(x2, getKeyMargin(), true);
 		double y1 = getValue(x1);
 		double y3 = getValue(x3);
-		return (((x2 - x1)*(y3-y1))/(x3-x1))+y1;
+		return (((x2 - x1) * (y3 - y1)) / (x3 - x1)) + y1;
 	}
 }

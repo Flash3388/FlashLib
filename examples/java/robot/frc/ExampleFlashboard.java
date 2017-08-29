@@ -2,20 +2,16 @@ package examples.robot.frc;
 
 import com.ctre.CANTalon;
 
-import edu.flash3388.flashlib.flashboard.DashboardInput;
-import edu.flash3388.flashlib.flashboard.DoubleProperty;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.flashboard.InputType;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.SystemAction;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.rio.FlashRio;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.util.ConstantsHandler;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.wpi.first.wpilibj.Ultrasonic;
 
 /*
@@ -32,8 +28,48 @@ public class ExampleFlashboard extends FlashRio{
 	Ultrasonic sonic1;
 	Ultrasonic sonic2;
 	
-	DoubleDataSource driveFilterSpeed = ConstantsHandler.putNumber("filterSpeed", 1.0);
+	DoubleProperty driveFilterSpeed = ConstantsHandler.putNumber("filterSpeed", 1.0);
 	
+	@Override
+	protected void preInit(RobotInitializer initializer) {
+		/*
+		 * Sets the flashboard to use UDP protocol and not TCP (which is the default). You must make sure
+		 * the flashboard software is set to use UDP or they won't be able to connect to each other.
+		 */
+		 //Flashboard.setProtocolUdp();
+		
+		/*
+		 * Sets the initialization mode of the Flashboard control. There are 2 initialization parameters:
+		 * camera server and communications. Camera server initialization initializes the Flashboard camera server, 
+		 * allowing users to send data to the Flashboard. Communications initialization initializes the Flashboard
+		 * standard data communications, allowing users to show and receive information from the Flashboard including
+		 * vision data.
+		 * 
+		 * The init mode is an integer holding initialization bits. Each bit represents whether to initialize
+		 * a certain feature. 
+		 * For only camera server, use Flashboard.INIT_CAM.
+		 * For only communications, use Flashboard.INIT_COMM.
+		 * For both, use Flashboard.INIT_FULL.
+		 * 
+		 * By default, the initCode is Flashboard.INIT_FULL
+		 */
+		//Flashboard.setInitMode(mode);
+		
+		/*
+		 * Sets the local communications server port. If the initialization mode when Flashboard initializes
+		 * does not initialize the communications server, this will have no effect. The default port
+		 * is described by Flashboard.PORT_ROBOT. It is necessary to make sure the flashboard software
+		 * is also updated to this port in its configuration, otherwise connection will not be successful.
+		 */
+		//Flashboard.setCommPort(port);
+		/*
+		 * Sets the local camera server port. If the initialization mode when Flashboard initializes
+		 * does not initialize the camera server, this will have no effect. The default port
+		 * is described by Flashboard.CAMERA_PORT_ROBOT. It is necessary to make sure the flashboard software
+		 * is also updated to this port in its configuration, otherwise connection will not be successful.
+		 */
+		//Flashboard.setCamPort(port);
+	}
 	@Override
 	protected void initRobot() {
 		/*
@@ -57,7 +93,7 @@ public class ExampleFlashboard extends FlashRio{
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
 		 */
-		driveTrain.setDefaultAction(new SystemAction(driveTrain, new Action(){
+		driveTrain.setDefaultAction(new SystemAction(new Action(){
 			@Override
 			protected void execute() {
 				/*
@@ -78,7 +114,7 @@ public class ExampleFlashboard extends FlashRio{
 				 */
 				driveTrain.stop();
 			}
-		}));
+		}, driveTrain));
 		
 		/*
 		 * Creating an xbox controller at index 0
@@ -107,20 +143,18 @@ public class ExampleFlashboard extends FlashRio{
 		sonic1.setAutomaticMode(true);
 		
 		/*
-		 * Creates flashboard double properties. Creates double data sources pointing to the ultrasonics.
+		 * Creates and attaches flashboard double properties. Creates double data sources pointing to the ultrasonics.
 		 */
-		DoubleProperty propSonic1 = new DoubleProperty("sonic1", ()->sonic1.getRangeMM());
-		DoubleProperty propSonic2 = new DoubleProperty("sonic2", ()->sonic2.getRangeMM());
-		/*
-		 * Creates an input from flashboard to update our filterSpeed. It updates it directly through
-		 * ConstantsHandler.
-		 */
-		DashboardInput inputFilter = new DashboardInput("filterSpeed", InputType.Double);
+		Flashboard.putData("sonic1", ()->sonic1.getRangeMM());
+		Flashboard.putData("sonic1", ()->sonic2.getRangeMM());
 		
 		/*
-		 * Attaches the properties to the flashboard.
+		 * Creates a slider infput from flashboard to update our filterSpeed. It updates our property directly.
+		 * The slider as a minimum value of 0.0, a maximum value of 1.0 and the default change of values is
+		 * 0.1 ((1.0 - 0.0) / 10).
 		 */
-		Flashboard.attach(propSonic1, propSonic2, inputFilter);
+		Flashboard.putSlider("Drive Filter", driveFilterSpeed, 0.0, 1.0, 10);
+		
 		/*
 		 * Starts the flashboard
 		 */
@@ -132,11 +166,6 @@ public class ExampleFlashboard extends FlashRio{
 	}
 	@Override
 	protected void teleopPeriodic() {
-		/*
-		 * Updates the controllers. Used to refresh the buttons on controllers so that actions attached to
-		 * them will be executed when needed.
-		 */
-		FlashRoboUtil.updateHID();
 	}
 
 	@Override

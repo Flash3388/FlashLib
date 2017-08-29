@@ -22,8 +22,8 @@ public class EmergencyStopControl extends Displayble{
 	private VBox root;
 	private Runnable updater;
 	
-	public EmergencyStopControl(int id) {
-		super("Emergency Stop", id, FlashboardSendableType.ESTOP);
+	public EmergencyStopControl() {
+		super("Emergency Stop", FlashboardSendableType.ESTOP);
 		
 		statusRect = new Rectangle();
 		statusRect.setWidth(160);

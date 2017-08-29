@@ -96,7 +96,7 @@ public class RemoteControlStation extends Sendable{
 	private Listener listener;
 	
 	public RemoteControlStation(String name) {
-		super(name, -1, SbcSendableType.CONSTROL_STATION);
+		super(name, SbcSendableType.CONSTROL_STATION);
 		
 		upTask = new UpdateTask(this);
 		csThread = new Thread(upTask, "CS-Update");

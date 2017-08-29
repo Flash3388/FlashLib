@@ -19,8 +19,8 @@ public class BooleanProperty extends Displayble{
 	private VBox node;
 	private Runnable updater;
 	
-	public BooleanProperty(String name, int id) {
-		super(name, id, FlashboardSendableType.BOOLEAN);
+	public BooleanProperty(String name) {
+		super(name, FlashboardSendableType.BOOLEAN);
 		node = new VBox();
 		label = new Label(name + ": " + value);
 		label.setTextFill(Color.RED);

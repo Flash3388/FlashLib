@@ -39,9 +39,9 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see Scheduler
- * @see System
+ * @see SubSystem
  */
-public abstract class Action {
+public abstract class Action{
 	
 	/**
 	 * An action which does nothing
@@ -53,7 +53,7 @@ public abstract class Action {
 		protected void end() {}
 	};
 
-	private Vector<System> requirements = new Vector<System>(2);
+	private Vector<SubSystem> requirements = new Vector<SubSystem>(2);
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
@@ -75,24 +75,12 @@ public abstract class Action {
 		this("");
 	}
 	
-	public Action addRequirement(System sys){
-		requires(sys);
-		return this;
-	}
-	public Action setTimeout(double sec){
-		return setTimeout((long)(sec * 1000));
-	}
-	public Action setTimeout(long millis){
-		setTimeOut(millis);
-		return this;
-	}
-	
 	/**
 	 * Starts the action. If the Scheduler was initialized, than the action is added to the
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && Scheduler.schedulerHasInstance() && Scheduler.getInstance().add(this)){
+		if(!running && RobotFactory.hasSchedulerInstance() && RobotFactory.getScheduler().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;
@@ -117,7 +105,7 @@ public abstract class Action {
 		start_time = -1;
 	}
 	boolean run(){
-		if((RobotState.isRobotDisabled() && removeOnDisabled()) || isTimedOut())
+		if(isTimedOut())
 			cancel();
 		if(canceled)
 			return false;
@@ -159,7 +147,7 @@ public abstract class Action {
 	public boolean isRunning(){
 		return running;
 	}
-	public Enumeration<System> getRequirements(){
+	public Enumeration<SubSystem> getRequirements(){
 		return requirements.elements();
 	}
 	/**
@@ -174,15 +162,15 @@ public abstract class Action {
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
 	 */
-	protected void requires(System subsystem){
+	protected void requires(SubSystem subsystem){
 		requirements.addElement(subsystem);
 	}
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
 	 */
-	protected void requires(System... subsystems){
-		for(System s : subsystems)
+	protected void requires(SubSystem... subsystems){
+		for(SubSystem s : subsystems)
 			requirements.add(s);
 	}
 	/**
@@ -190,7 +178,7 @@ public abstract class Action {
 	 * @param action action to copy requirements from
 	 */
 	protected void copyRequirements(Action action){
-		for (Enumeration<System> sys = action.getRequirements(); sys.hasMoreElements(); )
+		for (Enumeration<SubSystem> sys = action.getRequirements(); sys.hasMoreElements(); )
 			requires(sys.nextElement());
 	}
 	/**

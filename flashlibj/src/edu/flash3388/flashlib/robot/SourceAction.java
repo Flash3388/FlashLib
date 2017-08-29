@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 /**
  * Source action is mainly used for combined actions. It contains a double data source
@@ -11,13 +13,13 @@ import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
  */
 public abstract class SourceAction extends Action{
 	
-	protected final DoubleDataSource.VarDataSource dataSource;
+	protected final DoubleProperty dataSource;
 	
 	public SourceAction(){
-		dataSource = new DoubleDataSource.VarDataSource(0);
+		dataSource = new SimpleDoubleProperty(0);
 	}
 	
-	public DoubleDataSource getSource(){
+	public DoubleSource getSource(){
 		return dataSource;
 	}
 }

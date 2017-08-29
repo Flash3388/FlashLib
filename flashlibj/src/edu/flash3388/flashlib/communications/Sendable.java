@@ -15,7 +15,7 @@ package edu.flash3388.flashlib.communications;
  */
 public abstract class Sendable {
 	
-	private static int nextID = 0;
+	//private static int nextID = 0;
 	private int id;
 	private String name;
 	private byte type;
@@ -27,7 +27,7 @@ public abstract class Sendable {
 	 * @param type the type of the sendable
 	 */
 	protected Sendable(byte type){
-		this("", nextID++, type);
+		this("", type);
 	}
 	/**
 	 * Creates a sendable object with a name, automatically defined ID and a type.
@@ -36,7 +36,7 @@ public abstract class Sendable {
 	 * @param type the type of the sendable
 	 */
 	protected Sendable(String name, byte type){
-		this(name, nextID++, type);
+		this(name, 0, type);
 	}
 	/**
 	 * Creates a sendable object with a name, manually defined ID and type.
@@ -46,7 +46,7 @@ public abstract class Sendable {
 	 * @param id the ID of the sendable
 	 * @param type the type of the sendable
 	 */
-	protected Sendable(String name, int id, byte type){
+	private Sendable(String name, int id, byte type){
 		this.id = id;
 		this.type = type;
 		this.name = name;

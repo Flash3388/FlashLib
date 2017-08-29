@@ -14,15 +14,16 @@ import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayble;
-import edu.flash3388.flashlib.communications.DataListener;
-import edu.flash3388.flashlib.vision.CvPipeline;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.communications.DataListener;
+import edu.flash3388.flashlib.vision.ImagePipeline;
+import edu.flash3388.flashlib.vision.cv.CvProcessing;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 
-public class CameraViewer extends Displayble implements DataListener, CvPipeline{
+public class CameraViewer extends Displayble implements DataListener, ImagePipeline{
 	
 	public static enum DisplayMode{
 		Normal, PostProcess, Threshold
@@ -33,8 +34,8 @@ public class CameraViewer extends Displayble implements DataListener, CvPipeline
 	private Runnable updater;
 	private DisplayMode mode = DisplayMode.Normal;
 	
-	public CameraViewer(String name, int id) {
-		super(name, id, (byte)-1);
+	public CameraViewer(String name) {
+		super(name, (byte)-1);
 		view = new ImageView();
 		view.setFitHeight(420);
 		view.setFitWidth(640);
@@ -70,22 +71,27 @@ public class CameraViewer extends Displayble implements DataListener, CvPipeline
 	}
 	@Override
 	public void newData(byte[] bytes) {
-		Dashboard.setForVision(bytes);
-		
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
- 
-        ImageReader reader = (ImageReader) readers.next();
-        Object source = bis; 
-       
-		try {
-			ImageInputStream iis = ImageIO.createImageInputStream(source); 
-		    reader.setInput(iis, true);
-		    ImageReadParam param = reader.getDefaultReadParam();
-		    BufferedImage image = reader.read(0, param); 
-		    setImage(image);
-		} catch (IOException e) {
+		if(Dashboard.visionInitialized()){
+			Mat m = CvProcessing.byteArray2Mat(bytes);
+			Dashboard.setForVision(m);
 		}
+		if(mode == DisplayMode.Normal){
+			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+	        Iterator<?> readers = ImageIO.getImageReadersByFormatName("jpeg");
+	 
+	        ImageReader reader = (ImageReader) readers.next();
+	        Object source = bis; 
+	       
+			try {
+				ImageInputStream iis = ImageIO.createImageInputStream(source); 
+			    reader.setInput(iis, true);
+			    ImageReadParam param = reader.getDefaultReadParam();
+			    BufferedImage image = reader.read(0, param); 
+			    setImage(image);
+			} catch (IOException e) {
+			}
+		}
+
 	}
 	@Override
 	public byte[] dataForTransmition() {return null;}
@@ -112,9 +118,9 @@ public class CameraViewer extends Displayble implements DataListener, CvPipeline
 		mode = m;
 	}
 	@Override
-	public void newImage(Mat mat, byte type) {
-		if((mode == DisplayMode.Threshold && type == CvPipeline.TYPE_THRESHOLD) ||
-				(mode == DisplayMode.PostProcess && type == CvPipeline.TYPE_POST_PROCESS))
-			setMatImage(mat);
+	public void newImage(Object frame, byte type) {
+		if((mode == DisplayMode.Threshold && type == ImagePipeline.TYPE_THRESHOLD) ||
+				(mode == DisplayMode.PostProcess && type == ImagePipeline.TYPE_POST_PROCESS))
+			setMatImage((Mat)frame);
 	}
 }

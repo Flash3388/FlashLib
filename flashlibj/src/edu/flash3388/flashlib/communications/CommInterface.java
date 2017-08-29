@@ -27,24 +27,6 @@ public interface CommInterface {
 	public static final int READ_TIMEOUT = 20;
 	
 	/**
-	 * An handshake byte array. Used by {@link UdpCommInterface} and {@link PortCommInterface}
-	 */
-	public static final byte[] HANDSHAKE = {0x01, 0xe, 0x07};
-	/**
-	 * A server connection handshake. Used by {@link UdpCommInterface} and {@link PortCommInterface}
-	 */
-	public static final byte[] HANDSHAKE_CONNECT_SERVER = {0xb, 0x02, 0xa};
-	/**
-	 * A client connection handshake. Used by {@link UdpCommInterface} and {@link PortCommInterface}
-	 */
-	public static final byte[] HANDSHAKE_CONNECT_CLIENT = {0xc, 0x10, 0x06};
-	
-	/**
-	 * A default connection timeout for protocols which need to manually check for connection, like: UDP.
-	 */
-	public static final int CONNECTION_TIMEOUT = 1500;
-	
-	/**
 	 * Opens the communications port for usage. Must be done before the port can be used.
 	 */
 	void open();
@@ -130,93 +112,4 @@ public interface CommInterface {
 	 * @param millis the current time in milliseconds
 	 */
 	void update(int millis);
-	
-	
-	/**
-	 * Attempts a manual server connection using {@link #HANDSHAKE_CONNECT_SERVER} and {@link #HANDSHAKE_CONNECT_CLIENT}.
-	 * Waits for data to be received first. If the data is {@link #HANDSHAKE_CONNECT_CLIENT} than {@link #HANDSHAKE_CONNECT_SERVER}
-	 * is sent and than waits for another {@link #HANDSHAKE_CONNECT_CLIENT} to be received.
-	 * 
-	 * @param commInterface interface for the communications
-	 * @param packet packet for data storage
-	 * @return true if connection was successful, false otherwise
-	 */
-	public static boolean handshakeServer(CommInterface commInterface, Packet packet){
-		commInterface.setReadTimeout(READ_TIMEOUT * 4);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
-			return false;
-		
-		commInterface.write(HANDSHAKE_CONNECT_SERVER);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
-			return false;
-		return true;
-	}
-	/**
-	 * Attempts a manual client connection using {@link #HANDSHAKE_CONNECT_SERVER} and {@link #HANDSHAKE_CONNECT_CLIENT}.
-	 * Sends {@link #HANDSHAKE_CONNECT_CLIENT} and waits to receive data. If the data is {@link #HANDSHAKE_CONNECT_SERVER}
-	 * than {@link #HANDSHAKE_CONNECT_CLIENT} is sent again.
-	 * 
-	 * @param commInterface interface for the communications
-	 * @param packet packet for data storage
-	 * @return true if connection was successful, false otherwise
-	 */
-	public static boolean handshakeClient(CommInterface commInterface, Packet packet){
-		commInterface.setReadTimeout(READ_TIMEOUT);
-		commInterface.write(HANDSHAKE_CONNECT_CLIENT);
-		
-		commInterface.read(packet);
-		if(!isHandshakeServer(packet.data, packet.length))
-			return false;
-		
-		commInterface.write(HANDSHAKE_CONNECT_CLIENT);
-		return true;
-	}
-	
-	/**
-	 * Checks if an array matches {@link #HANDSHAKE}
-	 * 
-	 * @param bytes a byte array
-	 * @param length length of data to check
-	 * @return true if the array is equal to {@link #HANDSHAKE}
-	 */
-	public static boolean isHandshake(byte[] bytes, int length){
-		if(length != HANDSHAKE.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != HANDSHAKE[i])
-				return false;
-		}
-		return true;
-	}
-	/**
-	 * Checks if an array matches {@link #HANDSHAKE_CONNECT_SERVER}
-	 * 
-	 * @param bytes a byte array
-	 * @param length length of data to check
-	 * @return true if the array is equal to {@link #HANDSHAKE_CONNECT_SERVER}
-	 */
-	public static boolean isHandshakeServer(byte[] bytes, int length){
-		if(length != HANDSHAKE_CONNECT_SERVER.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != HANDSHAKE_CONNECT_SERVER[i])
-				return false;
-		}
-		return true;
-	}
-	/**
-	 * Checks if an array matches {@link #HANDSHAKE_CONNECT_CLIENT}
-	 * 
-	 * @param bytes a byte array
-	 * @param length length of data to check
-	 * @return true if the array is equal to {@link #HANDSHAKE_CONNECT_CLIENT}
-	 */
-	public static boolean isHandshakeClient(byte[] bytes, int length){
-		if(length != HANDSHAKE_CONNECT_CLIENT.length) return false;
-		for(int i = 0; i < length; i++){
-			if(bytes[i] != HANDSHAKE_CONNECT_CLIENT[i])
-				return false;
-		}
-		return true;
-	}
 }

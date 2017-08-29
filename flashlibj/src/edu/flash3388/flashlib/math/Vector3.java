@@ -53,18 +53,32 @@ public class Vector3 {
 	}
 	/**
 	 * Gets the inclination of the vector. Inclination is the angle between the vector and the z-axis.
-	 * @return the inclination of the vector
+	 * @return the inclination of the vector in degrees
 	 */
 	public double inclination(){
-		double angle = Math.toDegrees(Math.acos(z / length())); 
+		return Math.toDegrees(inclinationRad());
+	}
+	/**
+	 * Gets the inclination of the vector. Inclination is the angle between the vector and the z-axis.
+	 * @return the inclination of the vector in radians
+	 */
+	public double inclinationRad(){
+		double angle = Math.acos(z / length()); 
 		return (z < 0)? -angle : angle;
 	}
 	/**
 	 * Gets the azimuth of the vector. Azimuth is the angle between the vector and the x-axis.
-	 * @return the azimuth of the vector
+	 * @return the azimuth of the vector in degrees
 	 */
 	public double azimuth(){
-		return Math.toDegrees(Math.atan2(y, x));
+		return Math.toDegrees(azimuthRad());
+	}
+	/**
+	 * Gets the azimuth of the vector. Azimuth is the angle between the vector and the x-axis.
+	 * @return the azimuth of the vector in radians
+	 */
+	public double azimuthRad(){
+		return Math.atan2(y, x);
 	}
 	/**
 	 * Normalizes the vector size. Done by dividing its dimensions by its length.
@@ -175,6 +189,131 @@ public class Vector3 {
 		this.x = vec.x;
 		this.y = vec.y;
 		this.z = vec.z;
+		return this;
+	}
+	
+	/**
+	 * Adds the given coordinates to this vector.
+	 * 
+	 * @param x x coordinate to add
+	 * @param y y coordinate to add
+	 * @param z z coordinate to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(double x, double y, double z){
+		this.x += x;
+		this.y += y;
+		this.z += z;
+		return this;
+	}
+	/**
+	 * Adds the given scalar to all coordinates this vector.
+	 * 
+	 * @param scalar value to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(double scalar){
+		this.x += scalar;
+		this.y += scalar;
+		this.z += scalar;
+		return this;
+	}
+	/**
+	 * Adds the given vector to each coordinate to this vector.
+	 * 
+	 * @param vec vector to add
+	 * @return this vector
+	 */
+	public Vector3 addSelf(Vector3 vec){
+		this.x += vec.x;
+		this.y += vec.y;
+		this.z += vec.z;
+		return this;
+	}
+	/**
+	 * Subtracts the given coordinates from this vector.
+	 * 
+	 * @param x x coordinate to subtract
+	 * @param y y coordinate to subtract
+	 * @param z z coordinate to subtract
+	 * @return this vector
+	 */
+	public Vector3 subSelf(double x, double y, double z){
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+		return this;
+	}
+	/**
+	 * Subtracts the given scalar from all coordinates this vector.
+	 * 
+	 * @param scalar value to subtracts
+	 * @return this vector
+	 */
+	public Vector3 subSelf(double scalar){
+		this.x -= scalar;
+		this.y -= scalar;
+		this.z -= scalar;
+		return this;
+	}
+	/**
+	 * Subtracts the given vector from each coordinate to this vector.
+	 * 
+	 * @param vec vector to subtracts
+	 * @return this vector
+	 */
+	public Vector3 subSelf(Vector3 vec){
+		this.x -= vec.x;
+		this.y -= vec.y;
+		this.z -= vec.z;
+		return this;
+	}
+	/**
+	 * Multiplies each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to multiply by
+	 * @return this vector
+	 */
+	public Vector3 multiplySelf(double scalar){
+		this.x *= scalar;
+		this.y *= scalar;
+		this.z *= scalar;
+		return this;
+	}
+	/**
+	 * Multiplies this vector by the given vector.
+	 * 
+	 * @param vec vector to multiply by.
+	 * @return this vector
+	 */
+	public Vector3 multiplySelf(Vector3 vec){
+		this.x *= vec.x;
+		this.y *= vec.y;
+		this.z *= vec.z;
+		return this;
+	}
+	/**
+	 * Divides each coordinate of this vector by given scalar.
+	 * 
+	 * @param scalar value to divide by.
+	 * @return this vector
+	 */
+	public Vector3 divSelf(double scalar){
+		this.x /= scalar;
+		this.y /= scalar;
+		this.z /= scalar;
+		return this;
+	}
+	/**
+	 * Divides this vector by the given vector.
+	 * 
+	 * @param vec vector to divide by.
+	 * @return this vector
+	 */
+	public Vector3 divSelf(Vector3 vec){
+		this.x /= vec.x;
+		this.y /= vec.y;
+		this.z /= vec.z;
 		return this;
 	}
 	
@@ -302,6 +441,14 @@ public class Vector3 {
 	public double dot(Vector3 vec){
 		return x * vec.x + y * vec.y + z * vec.z;
 	}
+	/**
+	 * Returns the angle between this vector and another vector.
+	 * @param vec the other vector
+	 * @return angle in radians
+	 */
+	public double angleTo(Vector3 vec){
+		return angleBetween(this, vec);
+	}
 	
 	/**
 	 * Returns a copy of this vector.
@@ -342,10 +489,10 @@ public class Vector3 {
 	 * 
 	 * @param u vector 1
 	 * @param v vector 2
-	 * @return the angle in degrees between the vectors
+	 * @return the angle in radians between the vectors
 	 */
 	public static double angleBetween(Vector3 u, Vector3 v){
-		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
+		return Math.acos(u.dot(v) / (u.length() + v.length()));
 	}
 	/**
 	 * Creates a new vector from polar coordinates. The coordinates are converted into Cartesian coordinates.

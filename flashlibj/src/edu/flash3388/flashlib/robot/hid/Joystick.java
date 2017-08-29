@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.ScheduledTask;
 
 /**
  * A simple joystick device used for robot control. 
@@ -10,7 +9,7 @@ import edu.flash3388.flashlib.robot.ScheduledTask;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Joystick extends HIDSendable implements HID, ScheduledTask{
+public class Joystick extends HIDSendable implements HID, Runnable{
 
 	private static Joystick head;
 	private Joystick next;
@@ -37,7 +36,7 @@ public class Joystick extends HIDSendable implements HID, ScheduledTask{
 		buttons = new Button[buttonCount];
 		for(int i = 0; i < buttons.length; i++)
 			buttons[i] = new Button(stick, i+1);
-		pov = new DPad(stick);
+		pov = new DPad(stick, 0);
 		
 		next = head;
 		head = this;
@@ -71,14 +70,14 @@ public class Joystick extends HIDSendable implements HID, ScheduledTask{
 	 * @return the z axis value
 	 */
 	public double getZ(){
-		return RobotFactory.getStickAxis(stick_num, Z);
+		return RobotFactory.getHidInterface().getHIDAxis(stick_num, Z);
 	}
 	/**
 	 * Gets the throttle axis value of the joystick
 	 * @return the throttle axis value
 	 */
 	public double getThrottle(){
-		return RobotFactory.getStickAxis(stick_num, THROTTLE);
+		return RobotFactory.getHidInterface().getHIDAxis(stick_num, THROTTLE);
 	}
 	
 	/**
@@ -86,14 +85,14 @@ public class Joystick extends HIDSendable implements HID, ScheduledTask{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getStickAxis(stick_num, axis);
+		return RobotFactory.getHidInterface().getHIDAxis(stick_num, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getStickButton(stick_num, (byte)button);
+		return RobotFactory.getHidInterface().getHIDButton(stick_num, button);
 	}
 	/**
 	 * {@inheritDoc}
@@ -150,9 +149,8 @@ public class Joystick extends HIDSendable implements HID, ScheduledTask{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean run() {
+	public void run() {
 		refresh();
-		return true;
 	}
 	
 	/**

@@ -1,31 +1,22 @@
 package edu.flash3388.flashlib.math;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-
-public class PolynomialInterpolation extends Interpolation{
+/**
+ * Represents a base for polynomial interpolation. 
+ * <p>
+ * In numerical analysis, polynomial interpolation is the interpolation of a given data set by a 
+ * polynomial: given some points, find a polynomial which goes exactly through these points.
+ * </p>
+ * @author Tom Tzook
+ * @since FlashLib 1.0.1
+ * @see <a href="https://en.wikipedia.org/wiki/Polynomial_interpolation">https://en.wikipedia.org/wiki/Polynomial_interpolation</a>
+ */
+public abstract class PolynomialInterpolation extends Interpolation {
 	
 	private Double[] values, keys;
 	private boolean valueUpdated = false;
 	
-	/**
-	 * Creates an interpolation object for polynomial functions. Sets the key margin to a given value.
-	 * Uses Newton's formula for Polynomial interpolation.
-	 * <p>
-	 * In numerical analysis, polynomial interpolation is the interpolation of a given data set by a 
-	 * polynomial: given some points, find a polynomial which goes exactly through these points.
-	 * </p>
-	 * <p>
-	 * n the mathematical field of numerical analysis, a Newton polynomial, named after its inventor 
-	 * Isaac Newton, is the interpolation polynomial for a given set of data points in the Newton form. 
-	 * The Newton polynomial is sometimes called Newton's divided differences interpolation polynomial 
-	 * because the coefficients of the polynomial are calculated using divided differences.
-	 * </p>
-	 * @param keyMargin the key margin
-	 * @see <a href="https://en.wikipedia.org/wiki/Newton_polynomial">https://en.wikipedia.org/wiki/Newton_polynomial</a>
-	 * @see <a href="https://en.wikipedia.org/wiki/Polynomial_interpolation">https://en.wikipedia.org/wiki/Polynomial_interpolation</a>
-	 */
-	public PolynomialInterpolation(double keyMargin){
-		super(keyMargin);
+	
+	public PolynomialInterpolation(){
 		values = new Double[0];
 		keys = new Double[0];
 	}
@@ -44,7 +35,7 @@ public class PolynomialInterpolation extends Interpolation{
 	 * by {@link #interpolate(double)}
 	 */
 	public void updateValues(){
-		if(valuesUpdated()){
+		if(updateRequired()){
 			if(values.length != getMap().size()){
 				values = new Double[getMap().size()];
 				keys = new Double[getMap().size()];
@@ -52,34 +43,50 @@ public class PolynomialInterpolation extends Interpolation{
 			getMap().values().toArray(values);
 			getMap().keySet().toArray(keys);
 			
-			FlashUtil.sort(keys, values);
+			sort(keys, values);
 			valueUpdated = true;
 		}
 	}
-	private boolean valuesUpdated(){
+	private boolean updateRequired(){
 		return values == null || !valueUpdated;
 	}
-	private double firstOrderDifference(int k){
-		return values[k+1] - values[k];
-	}
-	private double orderDifference(int k, int order){
-		if(order == 0) return firstOrderDifference(k);
-		return orderDifference(k+1, order-1) - orderDifference(k, order-1);
+	
+	/**
+	 * Gets the function value stored at a given index. This represents the y variable and is
+	 * ordered in respect to the x variable.
+	 * 
+	 * @param idx index of the value
+	 * @return the mapped value
+	 */
+	protected double getValue(int idx){
+		return values[idx];
 	}
 	
-	@Override
-	public double interpolate(double x){
-		if(x % getKeyMargin() == 0)
-			return getValue(x);
-		updateValues();
-		
-		double factorial = 1, numerator = 1, denumerator = 1, result = values[0];
-		for (int i = 0; i < values.length-2; i++) {
-			factorial *= (i+1);
-			denumerator *= getKeyMargin();
-			numerator *= (x - keys[i]);
-			result += (orderDifference(0, i) / factorial) * (numerator / denumerator);
+	/**
+	 * Gets the function value stored at a given index. This represents the x variable and is
+	 * ordered from smallest to largest.
+	 * 
+	 * @param idx index of the value
+	 * @return the mapped value
+	 */
+	protected double getKey(int idx){
+		return keys[idx];
+	}
+	
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void sort(Object[]...as){
+		Object[] main = as[0];
+		for (int i = 0; i < main.length; i++) {
+			for (int j = 0; j < main.length-1; j++) {
+				if(((Comparable)main[j]).compareTo(main[j+1]) > 0){
+					for (int j2 = 0; j2 < as.length; j2++) {
+						Object t = as[j2][j];
+						as[j2][j] = as[j2][j+1];
+						as[j2][j+1] = t;
+					}
+				}
+			}
 		}
-		return result;
 	}
 }

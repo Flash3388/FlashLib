@@ -36,11 +36,11 @@ public class PropertyViewer extends Stage{
 		public String getValue(){
 			switch(type){
 				case Boolean: 
-					return String.valueOf(ConstantsHandler.getBooleanNative(name));
+					return String.valueOf(ConstantsHandler.getBooleanValue(name));
 				case Number: 
-					return String.valueOf(ConstantsHandler.getNumberNative(name));
+					return String.valueOf(ConstantsHandler.getNumberValue(name));
 				case String: 
-					return ConstantsHandler.getStringNative(name);
+					return ConstantsHandler.getStringValue(name);
 				default: return "";
 			}
 		}
@@ -161,7 +161,7 @@ public class PropertyViewer extends Stage{
 		save.setOnAction((e)->{
 			String newVal = valField.getText();
 			if(!newProp(cProp, newVal))
-				Dialog.show(this, "Error", "Value is incompatible with property type");
+				FlashFxUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
 			save.setDisable(true);
 		});
 		newProp.setOnAction((e)->{
@@ -217,7 +217,7 @@ public class PropertyViewer extends Stage{
 			
 			cProp = new Property(keyName, t);
 			if(!newProp(cProp, newVal))
-				Dialog.show(this, "Error", "Value is incompatible with property type");
+				FlashFxUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
 			else close();
 		});
 		cancel.setOnAction((e)->{

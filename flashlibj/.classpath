@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="libs/bulldog-board-beagleboneblack-0.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libs/bulldog-board-raspberrypi-0.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libs/bulldog-core-0.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libs/bulldog-devices-0.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libs/bulldog-linux-0.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libs/CANJaguar.jar"/>
-	<classpathentry kind="lib" path="libs/cscore.jar"/>
-	<classpathentry kind="lib" path="libs/navx_frc.jar"/>
-	<classpathentry kind="lib" path="libs/NetworkTables.jar"/>
-	<classpathentry kind="lib" path="libs/niVisionWPI.jar"/>
-	<classpathentry kind="lib" path="libs/opencv.jar"/>
-	<classpathentry kind="lib" path="libs/TalonSRXLibJava.jar"/>
-	<classpathentry kind="lib" path="libs/WPILib.jar"/>
-	<classpathentry kind="lib" path="libs/jinput-2.0.5.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="libs/bulldog-board-beagleboneblack-0.3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/bulldog-board-raspberrypi-0.3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/bulldog-core-0.3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/bulldog-devices-0.3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/bulldog-linux-0.3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/CANJaguar.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/cscore.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/navx_frc.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/NetworkTables.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/niVisionWPI.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/opencv.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Flashboard/libs/natives/linux"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="libs/TalonSRXLibJava.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/WPILib.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jinput-2.0.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="FlashLibj/libs/natives"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

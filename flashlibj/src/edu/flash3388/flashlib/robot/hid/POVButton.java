@@ -64,12 +64,13 @@ public class POVButton extends Button {
 	 * 
 	 * @param name The name of the button, just for representation.
 	 * @param stick The joystick the button belongs to.
+	 * @param num the pov number
 	 * @param t The type of the POVButton.
 	 */
-	public POVButton(String name, int stick, Type t) {
-		super(name, stick, t.value);
+	public POVButton(String name, int stick, int num, Type t) {
+		super(name, stick, num);
 		type = t;
-		eventPov = new POVEvent(name, stick, t);
+		eventPov = new POVEvent(name, stick, num, t);
 		super.event = eventPov;
 	}
 	

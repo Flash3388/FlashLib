@@ -29,6 +29,12 @@ public interface Vision {
 	 */
 	boolean hasNewAnalysis();
 	/**
+	 * Gets whether or not an analysis is available. Unlike {@link #hasNewAnalysis()},
+	 * this method does not care how long has passed since the analysis was received.
+	 * @return true if an analysis is available
+	 */
+	boolean hasAnalysis();
+	/**
 	 * Gets the latest vision analysis. 
 	 * <p>
 	 * It is usually recommended to make sure the analysis is up to date by calling {@link #hasNewAnalysis()}.

@@ -1,11 +1,11 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * Represents a tracking wrapper for motors on the Flashboard.
@@ -20,8 +20,8 @@ public class TesterMotor extends Sendable{
 	private String testerName;
 	private boolean sendData = false, updateTesterName = false;
 	private FlashSpeedController controller;
-	private DoubleDataSource voltSource, ampSource;
-	private BooleanDataSource brakeModeSource;
+	private DoubleSource voltSource, ampSource;
+	private BooleanSource brakeModeSource;
 	
 	private double speed = 0.0, voltage = 0.0, current = 0.0;
 	private boolean brakemode = false;
@@ -47,7 +47,7 @@ public class TesterMotor extends Sendable{
 	 * @param source voltage source
 	 * @return this instance
 	 */
-	public TesterMotor setVoltageSource(DoubleDataSource source){
+	public TesterMotor setVoltageSource(DoubleSource source){
 		voltSource = source;
 		return this;
 	}
@@ -56,7 +56,7 @@ public class TesterMotor extends Sendable{
 	 * @param source current source
 	 * @return this instance
 	 */
-	public TesterMotor setCurrentSource(DoubleDataSource source){
+	public TesterMotor setCurrentSource(DoubleSource source){
 		ampSource = source;
 		return this;
 	}
@@ -65,7 +65,7 @@ public class TesterMotor extends Sendable{
 	 * @param source brake mode source
 	 * @return this instance
 	 */
-	public TesterMotor setBrakeModeSource(BooleanDataSource source){
+	public TesterMotor setBrakeModeSource(BooleanSource source){
 		brakeModeSource = source;
 		return this;
 	}

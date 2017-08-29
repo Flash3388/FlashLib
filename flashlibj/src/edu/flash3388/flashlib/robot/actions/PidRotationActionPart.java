@@ -3,18 +3,18 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
 import edu.flash3388.flashlib.robot.SourceAction;
-import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class PidRotationActionPart extends SourceAction implements PidAction{
 
 	private PidController pidcontroller;
 	private double rotationMargin;
 	
-	public PidRotationActionPart(PidSource source, double kp, double ki, double kd, DoubleDataSource rotationThreshold, 
+	public PidRotationActionPart(PidSource source, double kp, double ki, double kd, DoubleSource rotationThreshold, 
 			double rotationMargin){
 		this.rotationMargin = rotationMargin;
 		
-		pidcontroller = new PidController(kp, ki, kd);
+		pidcontroller = new PidController(kp, ki, kd, 0);
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(rotationThreshold);
 	}
@@ -26,6 +26,7 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 	protected void initialize() {
 		dataSource.set(0);
 		pidcontroller.setEnabled(true);
+		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {

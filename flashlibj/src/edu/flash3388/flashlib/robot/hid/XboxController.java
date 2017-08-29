@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.ScheduledTask;
 
 /**
  * Represents an Xbox 360 controller for use for robot control.
@@ -10,7 +9,7 @@ import edu.flash3388.flashlib.robot.ScheduledTask;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class XboxController extends HIDSendable implements HID, ScheduledTask{
+public class XboxController extends HIDSendable implements HID, Runnable{
 	
 	private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
 	
@@ -60,7 +59,7 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 		LeftStick = new Stick(channel, 0, 1);
 		RightStick = new Stick(channel, 4, 5);
 		
-		DPad = new DPad(channel);
+		DPad = new DPad(channel, 0);
 		Triggers = new Triggers(channel, 2, 3);
 		
 		for(int i = 0; i < buttons.length; i++)
@@ -110,14 +109,14 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getStickAxis(channel, axis);
+		return RobotFactory.getHidInterface().getHIDAxis(channel, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getStickButton(channel, (byte)button);
+		return RobotFactory.getHidInterface().getHIDButton(channel, button);
 	}
 	/**
 	 * {@inheritDoc}
@@ -179,9 +178,8 @@ public class XboxController extends HIDSendable implements HID, ScheduledTask{
 	}
 	
 	@Override
-	public boolean run() {
+	public void run() {
 		refresh();
-		return true;
 	}
 	@Override
 	protected HID getHID() {

@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.rio;
 
-import edu.flash3388.flashlib.robot.ScheduledTask;
-import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -14,7 +13,7 @@ import edu.wpi.first.wpilibj.PIDSourceType;
  * @since FlashLib 1.0.0
  * @see <a href="http://www.cui.com/product/components/encoders/incremental/modular/amt10-series">http://www.cui.com/product/components/encoders/incremental/modular/amt10-series</a>
  */
-public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
+public class AMT10Encoder implements Runnable, PIDSource, Encoder{
 	
 	private static enum CounterMode{
 		Quadrutate, Revolution
@@ -104,10 +103,14 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 	 */
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
-		if(Scheduler.schedulerHasInstance() && auto)
-			Scheduler.getInstance().add(this);
-		else if(auto) return false;
-		return true;
+		if(RobotFactory.hasSchedulerInstance() && auto){
+			RobotFactory.getScheduler().addTask(this);
+			return true;
+		}else if(RobotFactory.hasSchedulerInstance() && !auto){
+			RobotFactory.getScheduler().remove(this);
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -238,9 +241,8 @@ public class AMT10Encoder implements ScheduledTask, PIDSource, Encoder{
 	}
 
 	@Override
-	public boolean run() {
+	public void run() {
 		update();
-		return !manualUpdate;
 	}
 	@Override
 	public void setPIDSourceType(PIDSourceType pidSource) {

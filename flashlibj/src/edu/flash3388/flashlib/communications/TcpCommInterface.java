@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import edu.flash3388.flashlib.util.FlashUtil;
+
 /**
  * {@link CommInterface} using the TCP/IP model communications. Extends {@link StreamCommInterface} because TCP is a
  * stream-based communications protocol, but does not used the checksum corruption detection implemented in {@link StreamCommInterface}.
@@ -19,7 +21,9 @@ import java.net.UnknownHostException;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class TcpCommInterface extends StreamCommInterface{
+public class TcpCommInterface extends StreamCommInterface implements IpCommInterface{
+	
+	public static final int RECONNECTION_DELAY = 5000;
 	
 	private ServerSocket serverSocket;
 	private Socket socket;
@@ -27,6 +31,7 @@ public class TcpCommInterface extends StreamCommInterface{
 	private InetAddress outInet, localInet;
 	
 	private boolean closed = false, reset = false;
+	private int readTimeout = 0;
 	
 	private OutputStream out;
 	private InputStream in;
@@ -64,7 +69,13 @@ public class TcpCommInterface extends StreamCommInterface{
 		portOut = remoteport;
 		localPort = localport;
 		localInet = local;
-		createSocket();
+		
+		try {
+			createSocket();
+		} catch (IOException e) {
+			closeSocket();
+			throw e;
+		}
 	}
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a server TCP interface at a local
@@ -99,6 +110,12 @@ public class TcpCommInterface extends StreamCommInterface{
 		socket = new Socket();
 		socket.bind(new InetSocketAddress(localInet, localPort));
 	}
+	private void closeSocket() throws IOException{
+		if(socket != null && !socket.isClosed()){
+			socket.close();
+			socket = null;
+		}
+	}
 	
 	/**
 	 * Does nothing
@@ -107,16 +124,18 @@ public class TcpCommInterface extends StreamCommInterface{
 	public void open() {
 	}
 	/**
+	 * {@inheritDoc}
+	 * <p>
 	 * Closes the sockets. If bound as server, than the listening socket is terminated as well.
 	 * Once executed, this interface cannot be used again for communications.
+	 * </p>
 	 */
 	@Override
 	public void close(){
 		try {
 			if(isBoundAsServer()) 
 				serverSocket.close();
-			if(socket != null)
-				socket.close();
+			closeSocket();
 		} catch (IOException e) {
 		}
 		closed = true;
@@ -132,25 +151,32 @@ public class TcpCommInterface extends StreamCommInterface{
 	public void connect(Packet packet){
 		try {
 			if(reset){
-				resetBuffers();
-				
-				if(socket != null && !socket.isClosed())
-					socket.close();
-				if (!isBoundAsServer())
+				closeSocket();
+				if (!isBoundAsServer()){
+					FlashUtil.delay(RECONNECTION_DELAY);
 					createSocket();
+				}
 				
 				reset = false;
 			}
 			
-			if(isBoundAsServer())
+			if(isBoundAsServer()){
 				socket = serverSocket.accept();
+				outInet = socket.getInetAddress();
+			}
 			else
 				socket.connect(new InetSocketAddress(outInet, portOut));
 			
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
-			reset = true;
+			
+			setReadTimeout(readTimeout);
+			resetBuffers();
+			resetData();
 		} catch (IOException e) {	
+			FlashUtil.getLog().reportError(e.getMessage());
+		}finally{
+			reset = true;
 		}
 	}
 	/**
@@ -161,15 +187,13 @@ public class TcpCommInterface extends StreamCommInterface{
 	 */
 	@Override
 	public void disconnect() {
-		if(!isConnected()) return;
-		
-		if(socket != null){
-			try {
-				socket.close();
-			} catch (IOException e) {
-			}
-			socket = null;
+		try {
+			closeSocket();
+		} catch (IOException e) {
+			FlashUtil.getLog().reportError(e.getMessage());
 		}
+		if(isBoundAsServer())
+			outInet = null;
 	}
 	
 	/**
@@ -179,7 +203,8 @@ public class TcpCommInterface extends StreamCommInterface{
 	public void setReadTimeout(int millis) {
 		try {
 			if(socket != null)
-				socket.setSoTimeout((int)millis);
+				socket.setSoTimeout(millis);
+			readTimeout = millis;
 		} catch (IOException e) {}
 	}
 	/**
@@ -188,7 +213,7 @@ public class TcpCommInterface extends StreamCommInterface{
 	@Override
 	public int getTimeout() {
 		try {
-			return socket != null? socket.getSoTimeout() : 0;
+			return socket != null? socket.getSoTimeout() : readTimeout;
 		} catch (IOException e) {}
 		return -1;
 	}
@@ -205,43 +230,8 @@ public class TcpCommInterface extends StreamCommInterface{
 	 */
 	@Override
 	public boolean isConnected() {
-		return socket != null? socket.isConnected() : false;
+		return (socket != null? socket.isConnected() && !socket.isClosed() : false);
 	}
-	
-	/**
-	 * Gets the local port for socket binding.
-	 * @return port for local data listening
-	 */
-	public int getLocalPort(){
-		return localPort;
-	}
-	/**
-	 * Gets the remote data port.
-	 * @return remote data port
-	 */
-	public int getRemotePort(){
-		return portOut;
-	}
-	/**
-	 * Gets the remote side address.
-	 * @return address of remote size
-	 */
-	public InetAddress getRemoteAddress(){
-		return outInet;
-	}
-	/**
-	 * Gets the local bound address
-	 * @return address for local bind
-	 */
-	public InetAddress getLocalAddress(){
-		return localInet;
-	}
-	
-	/**
-	 * Does nothing
-	 */
-	@Override
-	public void update(int millis){}
 	
 	/**
 	 * {@inheritDoc}
@@ -250,9 +240,9 @@ public class TcpCommInterface extends StreamCommInterface{
 	 * </p>
 	 */
 	@Override
-	protected void writeData(byte[] data) {
+	protected void writeData(byte[] data, int start, int length) {
 		try {
-			out.write(data);
+			out.write(data, start, length);
 		} catch (IOException e) {
 			disconnect();
 		}
@@ -273,5 +263,86 @@ public class TcpCommInterface extends StreamCommInterface{
 			disconnect();
 			return 0;
 		} 
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getLocalAddress() {
+		return localInet;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getRemoteAddress() {
+		return outInet;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getLocalPort() {
+		return localPort;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRemotePort() {
+		return portOut;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalAddress(InetAddress addr) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			localInet = addr;
+			if(isBoundAsServer())
+				serverSocket = new ServerSocket(localPort, 1, addr);
+			else 
+				createSocket();
+		} catch (IOException e) {
+		}
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemoteAddress(InetAddress addr) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		outInet = addr;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalPort(int port) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			localPort = port;
+			if(isBoundAsServer())
+				serverSocket = new ServerSocket(localPort, 1, localInet);
+			else 
+				createSocket();
+		} catch (IOException e) {
+		}
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemotePort(int port) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		portOut = port;
 	}
 }

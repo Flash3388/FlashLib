@@ -17,8 +17,8 @@ public class PDP extends Displayble{
 	private boolean minimumSend = false, maximumSend = false, updatesend = false;
 	private byte[] sendBytes = new byte[1];
 	
-	public PDP(String name, int id) {
-		super(name, id, FlashboardSendableType.PDP);
+	public PDP(String name) {
+		super(name, FlashboardSendableType.PDP);
 		pdps.addElement(this);
 	}
 
@@ -100,5 +100,10 @@ public class PDP extends Displayble{
 	}
 	public static PDP get(int i){
 		return pdps.get(i);
+	}
+	public static void resetBoards(){
+		for(Enumeration<PDP> pdpEnum = pdps.elements(); pdpEnum.hasMoreElements();)
+			pdpEnum.nextElement().disableSend();
+		pdps.clear();
 	}
 }

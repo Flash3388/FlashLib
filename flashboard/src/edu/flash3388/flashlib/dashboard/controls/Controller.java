@@ -33,8 +33,8 @@ public class Controller extends Displayble{
 	private ProgressBar[] axesBars;
 	private Runnable updateRunnable;
 	
-	public Controller(String name, int id) {
-		super(name, id, FlashboardSendableType.JOYSTICK);
+	public Controller(String name) {
+		super(name, FlashboardSendableType.JOYSTICK);
 		
 		VBox all = new VBox();
 		HBox[] axesControls = new HBox[6];

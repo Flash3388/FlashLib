@@ -12,7 +12,7 @@ public abstract class RobotState {
 
 	private static RobotState impl;
 	
-	static void setImplementation(RobotState impl){
+	public static void setImplementation(RobotState impl){
 		RobotState.impl = impl;
 	}
 	

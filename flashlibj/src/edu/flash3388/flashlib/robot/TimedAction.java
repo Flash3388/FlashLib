@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.Enumeration;
-
 /**
  * A wrapper for an action which adds a timeout. When the timed action is executed it will run the
  * methods of the wrapped action.
@@ -21,10 +19,7 @@ public class TimedAction extends Action {
 		
 		setTimeOut(milliseconds);
 		
-		Enumeration<System> enumS = action.getRequirements();
-		while(enumS.hasMoreElements()){
-			requires(enumS.nextElement());
-		}
+		copyRequirements(action);
 	}
 
 	@Override

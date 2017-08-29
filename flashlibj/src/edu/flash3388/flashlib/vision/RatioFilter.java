@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Map;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 
 /**
@@ -10,119 +11,140 @@ import java.util.Map;
  * @since FlashLib 1.0.0
  * @see VisionSource#contourRatio(double, double, double, double, double, double, double, double, double, double)
  */
-public class RatioFilter extends ProcessingFilter{
-	private double heightRatio, widthRatio, dy, dx, maxScore, minScore, 
-			maxHeight, minHeight, maxWidth, minWidth;
+public class RatioFilter extends VisionFilter{
+	
+	private DoubleProperty heightRatio = new SimpleDoubleProperty();
+	private DoubleProperty widthRatio = new SimpleDoubleProperty();
+	private DoubleProperty dy = new SimpleDoubleProperty();
+	private DoubleProperty dx = new SimpleDoubleProperty();
+	private DoubleProperty maxScore = new SimpleDoubleProperty();
+	private DoubleProperty minScore = new SimpleDoubleProperty();
+	private DoubleProperty maxHeight = new SimpleDoubleProperty();
+	private DoubleProperty minHeight = new SimpleDoubleProperty();
+	private DoubleProperty maxWidth = new SimpleDoubleProperty();
+	private DoubleProperty minWidth = new SimpleDoubleProperty();
 
 	public RatioFilter(){}
 	public RatioFilter(double heightRatio, double widthRatio, double dy, double dx, double maxScore, double minScore, 
 			double maxHeight, double minHeight, double maxWidth, double minWidth){
-		this.maxScore = maxScore;
-		this.dx = dx;
-		this.dy = dy; 
-		this.heightRatio = heightRatio;
-		this.maxHeight = maxHeight;
-		this.maxWidth = maxWidth;
-		this.minHeight = minHeight;
-		this.minScore = minScore;
-		this.minWidth = minWidth;
-		this.widthRatio = widthRatio;
+		this.maxScore.set(maxScore);
+		this.dx.set(dx);
+		this.dy.set(dy);
+		this.heightRatio.set(heightRatio);
+		this.maxHeight.set(maxHeight);
+		this.maxWidth.set(maxWidth);
+		this.minHeight.set(minHeight);
+		this.minScore.set(minScore);
+		this.minWidth.set(minWidth);
+		this.widthRatio.set(widthRatio);
 	}
 	
-	public double getHeightRatio(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the height ratio between the first contour and the second contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty heightRatioProperty(){
 		return heightRatio;
 	}
-	public void setHeightRatio(double heightRatio){
-		this.heightRatio = heightRatio;
-	}
-	public double getWidthRatio(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the width ratio between the first contour and the second contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty widthRatioProperty(){
 		return widthRatio;
 	}
-	public void setWidthRatio(double widthRatio){
-		this.widthRatio = widthRatio;
-	}
-	public double getXRatio(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the x axis positioning ratio between the first contour and the second contour. This indicates the
+	 * ratio between the x distance of the right edge of the second contour and the left edge of the first to the
+	 * width of the first contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty dxProperty(){
 		return dx;
 	}
-	public void setXRatio(double dx){
-		this.dx = dx;
-	}
-	public double getYRatio(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the y axis positioning ratio between the first contour and the second contour. This indicates the
+	 * ratio between the y distance of the bottom edge of the second contour and the top edge of the first to the
+	 * width of the first contour.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty dyProperty(){
 		return dy;
 	}
-	public void setYRatio(double dy){
-		this.dy = dy;
-	}
 	
-	public double getMaxScore(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the worst possible value of a ratio result. When the best result is larger than the worst, it will be 
+	 * discarded.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty maxScoreProperty(){
 		return maxScore;
 	}
-	public void setMaxScore(double maxScore){
-		this.maxScore = maxScore;
-	}
-	public double getMinScore(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the best possible value of a ratio result. When a result is smaller than the best, it will be 
+	 * Immediately regarded as the best.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty minScoreProperty(){
 		return minScore;
 	}
-	public void setMinScore(double minScore){
-		this.minScore = minScore;
-	}
 	
-	public double getMaxHeight(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the maximum possible height of a contour. Contours whose height is bigger than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty maxHeightProperty(){
 		return maxHeight;
 	}
-	public void setMaxHeight(double maxHeight){
-		this.maxHeight = maxHeight;
-	}
-	public double getMinHeight(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the minimum possible height of a contour. Contours whose height is smaller than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty minHeightProperty(){
 		return minHeight;
 	}
-	public void setMinHeight(double minHeight){
-		this.minHeight = minHeight;
-	}
-	public double getMaxWidth(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the maximum possible width of a contour. Contours whose width is bigger than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty maxWidthProperty(){
 		return maxWidth;
 	}
-	public void setMaxWidth(double maxWidth){
-		this.maxWidth = maxWidth;
-	}
-	public double getMinWidth(){
+	/**
+	 * A {@link DoubleProperty}.
+	 * Indicates the minimum possible width of a contour. Contours whose width is smaller than this value will be
+	 * ignored.
+	 * Must be non-negative
+	 * @return the property
+	 */
+	public DoubleProperty minWidthProperty(){
 		return minWidth;
-	}
-	public void setMinWidth(double minWidth){
-		this.minWidth = minWidth;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.contourRatio(heightRatio, widthRatio, dy, dx, maxScore, minScore, 
-				maxHeight, minHeight, maxWidth, minWidth);
-	}
-	@Override
-	public void parseParameters(Map<String, FilterParam> parameters) {
-		heightRatio = FilterParam.getDoubleValue(parameters.get("heightRatio"));
-		widthRatio = FilterParam.getDoubleValue(parameters.get("widthRatio"));
-		dx = FilterParam.getDoubleValue(parameters.get("dx"));
-		dy = FilterParam.getDoubleValue(parameters.get("dy"));
-		minScore = FilterParam.getDoubleValue(parameters.get("minScore"));
-		maxScore = FilterParam.getDoubleValue(parameters.get("maxScore"));
-		minHeight = FilterParam.getDoubleValue(parameters.get("minHeight"));
-		maxHeight = FilterParam.getDoubleValue(parameters.get("maxHeight"));
-		minWidth = FilterParam.getDoubleValue(parameters.get("minWidth"));
-		maxWidth = FilterParam.getDoubleValue(parameters.get("maxWidth"));
-	}
-	@Override
-	public FilterParam[] getParameters() {
-		return new FilterParam[]{
-				new FilterParam.DoubleParam("heightRatio", heightRatio),
-				new FilterParam.DoubleParam("widthRatio", widthRatio),
-				new FilterParam.DoubleParam("dx", dx),
-				new FilterParam.DoubleParam("dy", dy),
-				new FilterParam.DoubleParam("minScore", minScore),
-				new FilterParam.DoubleParam("maxScore", maxScore),
-				new FilterParam.DoubleParam("minHeight", minHeight),
-				new FilterParam.DoubleParam("maxHeight", maxHeight),
-				new FilterParam.DoubleParam("minWidth", minWidth),
-				new FilterParam.DoubleParam("maxWidth", maxWidth)
-		};
+		source.contourRatio(heightRatio.get(), widthRatio.get(), dy.get(), dx.get(), maxScore.get(), minScore.get(), 
+				maxHeight.get(), minHeight.get(), maxWidth.get(), minWidth.get());
 	}
 }

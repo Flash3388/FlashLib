@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot;
 
 import java.util.Enumeration;
 
-import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * Conditional action uses a BooleanDataSource to select which action to use when {@link Action#start()} is
@@ -14,7 +14,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class ConditionalAction extends Action {
 
-	private BooleanDataSource condition;
+	private BooleanSource condition;
 	private Action actionTrue, actionFalse, runAction;
 	
 	/**
@@ -23,22 +23,22 @@ public class ConditionalAction extends Action {
 	 * @param aTrue action to run when condition is true
 	 * @param aFalse action to run when condition is false
 	 */
-	public ConditionalAction(BooleanDataSource condition, Action aTrue, Action aFalse){
+	public ConditionalAction(BooleanSource condition, Action aTrue, Action aFalse){
 		this.condition = condition;
 		this.actionTrue = aTrue;
 		this.actionFalse = aFalse;
 	}
 	
-	private void validateRequirements(Enumeration<System> systems){
+	private void validateRequirements(Enumeration<SubSystem> systems){
 		resetRequirements();
 		for (; systems.hasMoreElements();) {
-			System s = systems.nextElement();
+			SubSystem s = systems.nextElement();
 			if(s != null)
 				requires(s);
 		}
 	}
 	
-	public void setConditionSource(BooleanDataSource source){
+	public void setConditionSource(BooleanSource source){
 		this.condition = source;
 	}
 	public void setActionOnTrue(Action action){

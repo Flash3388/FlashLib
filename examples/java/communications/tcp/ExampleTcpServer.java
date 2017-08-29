@@ -3,19 +3,20 @@ package examples.communications.tcp;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.Packet;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/*
+ * Example tcp server 
+ */
 public class ExampleTcpServer {
-
-	public static void main(String[] args) throws IOException {
-		FlashUtil.setStart();//Initializes the main flashlib log
-		
+	
+	public static void main(String[] args) throws IOException{
 		/*
-		 * Gets the IP address of a computer with the hostname "hostname". This should be the local address.
+		 * Gets the local IP address
 		 */
-		InetAddress address = InetAddress.getByName("hostname");
+		InetAddress address = InetAddress.getLocalHost();
 		/*
 		 * Local port to listen to for connection
 		 */
@@ -25,37 +26,44 @@ public class ExampleTcpServer {
 		 * Creates a TCP server communications interface for the address and ports we got earlier.
 		 */
 		TcpCommInterface serverInterface = new TcpCommInterface(address, localPort);
+		/*
+		 * Sets the maximum amount of milliseconds to wait while reading. If data was not received during this
+		 * time frame, reading is stopped.
+		 */
+		serverInterface.setReadTimeout(20);
 		
 		/*
-		 * Creates a communications manager for the TCP communications interface 
+		 * Creates a new packet instance. Packets is used to store read data from a CommInterface.
 		 */
-		Communications server = new Communications("testing-server", serverInterface);
+		Packet packet = new Packet();
+		/*
+		 * We put the server into connection acceptance mode which blocks our code until a connection was established 
+		 * or was interrupted 
+		 */
+		serverInterface.connect(packet);
 		
 		/*
-		 * Starts the communications manager
+		 * While connected, lets check for new data and print if received
 		 */
-		server.start();
+		while(serverInterface.isConnected()){
+			/*
+			 * Reading data from the server. If received, we print it
+			 */
+			if(serverInterface.read(packet)){
+				String data = new String(packet.data, 0, packet.length);
+				System.out.println(data);
+			}
+			
+			/*
+			 * A small delay of 10 milliseconds to not strain the current thread
+			 */
+			FlashUtil.delay(10);
+		}
+		
 		
 		/*
-		 * While the communications manager is not connected
+		 * Disconnecting and closing the server
 		 */
-		while(!server.isConnected()) 
-			FlashUtil.delay(1000);// delay for 1000 milliseconds, i.e. 1 second
-		
-		System.out.println("Connection");
-		
-		/*
-		 * While the communications manager is connected
-		 */
-		while(server.isConnected())
-			FlashUtil.delay(1000);// delay for 1000 milliseconds, i.e. 1 second
-		
-		System.out.println("Not Connected");
-		
-		/*
-		 * Terminates the communications manager
-		 */
-		server.close();
+		serverInterface.close();
 	}
-
 }

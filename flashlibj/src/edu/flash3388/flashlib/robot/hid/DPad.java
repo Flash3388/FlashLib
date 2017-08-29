@@ -29,24 +29,27 @@ public class DPad {
 	public final POVButton POV;
 	
 	private int stick;
+	private int num;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
 	 * 
 	 * @param stick The Joystick the D-Pad is on.
+	 * @param num the number of the D-Pad on the controller.
 	 */
-	public DPad(int stick){
+	public DPad(int stick, int num){
 		this.stick = stick;
+		this.num = num;
 		
-		POV = new POVButton("POV", stick, POVButton.Type.ALL);
-		Up = new POVButton("POV Up", stick, POVButton.Type.UP);
-		Down = new POVButton("POV Down", stick, POVButton.Type.DOWN);
-		Right = new POVButton("POV Right", stick, POVButton.Type.RIGHT);
-		Left = new POVButton("POV Left", stick, POVButton.Type.LEFT);
+		POV = new POVButton("POV", stick, num, POVButton.Type.ALL);
+		Up = new POVButton("POV Up", stick, num, POVButton.Type.UP);
+		Down = new POVButton("POV Down", stick, num, POVButton.Type.DOWN);
+		Right = new POVButton("POV Right", stick, num, POVButton.Type.RIGHT);
+		Left = new POVButton("POV Left", stick, num, POVButton.Type.LEFT);
 	}
 	
 	public int get(){
-		return RobotFactory.getStickPov(stick);
+		return RobotFactory.getHidInterface().getHIDPOV(stick, num);
 	}
 	
 	public void refresh(){

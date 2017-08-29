@@ -4,13 +4,14 @@ import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.rio.FlashRio;
 import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
+import edu.flash3388.flashlib.robot.systems.Systems;
+
 import edu.wpi.first.wpilibj.VictorSP;
 
 /*
@@ -27,6 +28,44 @@ public class ExampleRobot2017 extends FlashRio{
 	
 	XboxController controller;
 	
+	/*
+	 * preInit allows control of initialization settings for FlashRio. It is not mandatory to implement
+	 * it, but possible.
+	 */
+	@Override
+	protected void preInit(RobotInitializer initializer) {
+		/*
+		 * Enables the robot logs to be used. The robot logs are both the default flashlib test which is used
+		 * by several features throughout flashlib. In addition to the default log, there is the robot
+		 * power log which tracks data issues with the power supply of the robot.
+		 * By default, this feature is disabled.
+		 */
+		//initializer.logsEnabled = true;
+		
+		/*
+		 * Sets whether or not to enable the power log. This can be used when the use of the main flashlib
+		 * log is wanted but not the use of the power log. If the powerlog was not enabled through 'enableLogs()'
+		 * this will do nothing.
+		 */
+		//setPowerLogging(log);
+		//initializer.logPower = true;
+		
+		/*
+		 * Sets the total current draw from the PDP which will warrant a log into the power log.
+		 * As soon as the PDP total current draw exceeds this value, a warning will be logged.
+	     * The default is 80 Ampere.
+		 */
+		//setPowerDrawWarning(current);
+		//initializer.warningPowerDraw = 100.0;
+		
+		/*
+		 * Sets the PDP voltage level which will warrant logging into the power log. As soon
+		 * as the PDP voltage drops below this value, a warning will be logged.
+		 * The default is 8.0 volts.
+		 */
+		//setVoltageDropWarning(volts);
+		//initializer.warningVoltage = 6.0;
+	}
 	@Override
 	protected void initRobot() {
 		/*
@@ -57,7 +96,7 @@ public class ExampleRobot2017 extends FlashRio{
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
 		 */
-		driveTrain.setDefaultAction(new SystemAction(driveTrain, new Action(){
+		driveTrain.setDefaultAction(new SystemAction(new Action(){
 			@Override
 			protected void execute() {
 				/*
@@ -73,7 +112,7 @@ public class ExampleRobot2017 extends FlashRio{
 				 */
 				driveTrain.stop();
 			}
-		}));
+		}, driveTrain));
 		
 		/*
 		 * Creates the firing system. Wraps the speed controller in a RioControllers object
@@ -84,7 +123,7 @@ public class ExampleRobot2017 extends FlashRio{
 		/*
 		 * Sets the default action of the firing system. 
 		 */
-		firingSystem.setDefaultAction(new SystemAction(firingSystem, new Action(){
+		firingSystem.setDefaultAction(new SystemAction(new Action(){
 			@Override
 			protected void execute() {
 				/*
@@ -100,7 +139,7 @@ public class ExampleRobot2017 extends FlashRio{
 				 */
 				firingSystem.stop();
 			}
-		}));
+		}, firingSystem));
 		
 		/*
 		 * Creates the climbing system, Wraps the speed controller into a RioControllers object.
@@ -130,7 +169,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * When B is pressed on the controller, an action is executed which rotates the motor controlled
 		 * by the climbing system, basically causes the robot to climb.
 		 */
-		controller.B.whenPressed(climbingSystem.FORWARD_ACTION);
+		controller.B.whenPressed(Systems.forwardAction(climbingSystem, 0.8));
 	}
 
 	@Override
@@ -138,11 +177,6 @@ public class ExampleRobot2017 extends FlashRio{
 	}
 	@Override
 	protected void teleopPeriodic() {
-		/*
-		 * Updates the controllers. Used to refresh the buttons on controllers so that actions attached to
-		 * them will be executed when needed.
-		 */
-		FlashRoboUtil.updateHID();
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.gui.Dialog;
+import edu.flash3388.flashlib.gui.FlashFxUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -26,8 +26,8 @@ public class LogWindow extends Stage{
 		private ArrayList<String> logs = new ArrayList<String>();
 		private LogWindow window;
 		
-		public RemoteLog(String name, int id) {
-			super(name, id, FlashboardSendableType.LOG);
+		public RemoteLog(String name) {
+			super(name, FlashboardSendableType.LOG);
 			LogWindow.newLog(this);
 		}
 
@@ -141,6 +141,6 @@ public class LogWindow extends Stage{
 		currentInstance = new LogWindow();
 		currentInstance.show();
 		if(logs.size() < 1)
-			Dialog.show(currentInstance, "Error", "No logs located");
+			FlashFxUtils.showErrorDialog(currentInstance, "Error", "No logs located");
 	}
 }

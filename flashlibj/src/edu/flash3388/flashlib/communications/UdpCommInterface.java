@@ -5,14 +5,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * {@link CommInterface} using the UDP model communications. Uses a {@link DatagramSocket} for communications. Client-Server
- * relationship is used to determine who initiates communications. 
- *  <p>
+ * relationship is used to determine who initiates communications. To insure connection, this comm interface extends the abstract
+ * {@link ManualConnectionVerifier}.
+ * <p>
  * Connection is insured by checking the traffic going through the port. If data was not sent in a while, an handshake will
  * be sent instead. If data was not received for a while a timeout will occur. Once a defined amount of timeouts have occurred,
  * the connection will be considered lost.
@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class UdpCommInterface implements CommInterface{
+public class UdpCommInterface extends ManualConnectionVerifier implements IpCommInterface{
 	
 	private DatagramSocket socket;
 	private int portOut = -1;
@@ -30,8 +30,6 @@ public class UdpCommInterface implements CommInterface{
 	private boolean closed = false;
 	private byte[] data = new byte[BUFFER_SIZE];
 	private boolean server = false, replace = false, isConnected = false;
-	private int lastRead = -1, timeLastTimeout = -1, lastSend = -1;
-	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
 	
 	/**
 	 * Constructs a client-type UDP interface. A {@link DatagramSocket} is created and bound to a provided port and
@@ -97,13 +95,11 @@ public class UdpCommInterface implements CommInterface{
 	 */
 	@Override
 	public void connect(Packet packet) {
-		timeouts = 0;
-		lastSend = -1;
-		lastRead = -1;
 		allowReplacingOfRemote(true);
-		isConnected = server? CommInterface.handshakeServer(this, packet) : 
-			CommInterface.handshakeClient(this, packet);
+		isConnected = server? handshakeServer(this, packet) : 
+			handshakeClient(this, packet);
 		allowReplacingOfRemote(false);
+		resetData();
 	}
 	
 	/**
@@ -136,13 +132,11 @@ public class UdpCommInterface implements CommInterface{
 				FlashUtil.getLog().log("Unknow sender!!");
 			}
 			
-			lastRead = FlashUtil.millisInt();
-			packet.senderAddress = outInet;
-			packet.senderPort = portOut;
+			newDataRead();
 			packet.data = recp.getData();
 			packet.length = recp.getLength();
 			
-			if(CommInterface.isHandshake(packet.data, packet.length)){
+			if(isHandshake(packet.data, packet.length)){
 				packet.length = 1;
 				return true;
 			}
@@ -190,7 +184,7 @@ public class UdpCommInterface implements CommInterface{
 	 */
 	@Override
 	public void write(byte[] data) {
-		write(data, outInet, portOut);
+		write(data, 0, data.length);
 	}
 	/**
 	 * {@inheritDoc}
@@ -198,48 +192,24 @@ public class UdpCommInterface implements CommInterface{
 	@Override
 	public void write(byte[] data, int start, int length) {
 		if(!isOpened()) return;
-		write(Arrays.copyOfRange(data, start, length + start));
+		write(data, start, length, outInet, portOut);
 	}
 	
 	/**
 	 * Writes data to a specific address and port instead of the saved address and port.
 	 * 
 	 * @param data byte array to send
+	 * @param start data offset in the byte array
+	 * @param length amount of bytes to send
 	 * @param outInet remote address
 	 * @param portOut remote port
 	 */
-	public void write(byte[] data, InetAddress outInet, int portOut){
+	public void write(byte[] data, int start, int length, InetAddress outInet, int portOut){
 		if(!isOpened()) return;
 		try {
-			lastSend = FlashUtil.millisInt();
-			socket.send(new DatagramPacket(data, data.length, outInet, portOut));
+			newDataSent();
+			socket.send(new DatagramPacket(data, start, length, outInet, portOut));
 		} catch (IOException e) {}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * Checks for timeouts in connection. If such events occur than connection is declared as lost.
-	 */
-	@Override
-	public void update(int millis){
-		if(millis - lastRead >= connectionTimeout){
-			timeouts++;
-			lastRead = millis;
-			timeLastTimeout = millis;
-			FlashUtil.getLog().log("Timeout");
-		}
-		if(timeouts >= maxTimeouts){
-			FlashUtil.getLog().log("Max timeouts");
-			isConnected = false;
-		}
-		if(timeouts > 0 && timeLastTimeout != -1 && 
-				millis - timeLastTimeout > (connectionTimeout*3)){
-			timeouts = 0;
-			timeLastTimeout = -1;
-			FlashUtil.getLog().log("Timeout reset");
-		}
-		if(millis - lastSend >= connectionTimeout / 2)
-			writeHandshake();
 	}
 
 	/**
@@ -258,71 +228,13 @@ public class UdpCommInterface implements CommInterface{
 	}
 	
 	/**
-	 * Sets the amount of timeout events to occur before declaring loss of connection.
-	 * 
-	 * @param timeouts amount of timeout events for connection lost
+	 * {@inheritDoc}
 	 */
-	public void setMaxTimeoutsCount(int timeouts){
-		maxTimeouts = timeouts;
-	}
-	/**
-	 * Gets the amount of timeout events needed for declaration of connection loss.
-	 * @return amount of timeout events for connection lost
-	 */
-	public int getMaxTimeoutsCount(){
-		return maxTimeouts;
-	}
-	
-	/**
-	 * Sets the time in milliseconds to pass without any data received for a timeout event to occur.
-	 * 
-	 * @param timeout time in milliseconds of lack of data for a timeout event to occur.
-	 */
-	public void setConnectionTimeout(int timeout){
-		connectionTimeout = timeout;
-	}
-	/**
-	 * Gets the time in milliseconds to pass without any data received for a timeout event to occur.
-	 * @return time in milliseconds of lack of data for a timeout event to occur.
-	 */
-	public int getConnectionTimeout(){
-		return connectionTimeout;
-	}
-	
-	/**
-	 * Gets whether or not this interface acts like as a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
-	 * 
-	 * @return true - server, false - client
-	 */
-	public boolean boundAsServer(){
+	@Override
+	public boolean isBoundAsServer(){
 		return server;
 	}
 	
-	/**
-	 * Gets the local port for socket binding.
-	 * @return port for local data listening
-	 */
-	public int getLocalPort(){
-		return socket.getLocalPort();
-	}
-	/**
-	 * Gets the remote data port.
-	 * @return remote data port
-	 */
-	public int getRemotePort(){
-		return portOut;
-	}
-	/**
-	 * Gets the remote side address.
-	 * @return address of remote size
-	 */
-	public InetAddress getRemoteAddress(){
-		return outInet;
-	}
 	
 	/**
 	 * Sets whether or not replacing of remote connection is allowed.
@@ -351,7 +263,79 @@ public class UdpCommInterface implements CommInterface{
 	}
 
 	
-	private void writeHandshake(){
-		write(HANDSHAKE);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getLocalAddress() {
+		return socket.getLocalAddress();
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InetAddress getRemoteAddress() {
+		return outInet;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getLocalPort() {
+		return socket.getLocalPort();
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRemotePort() {
+		return portOut;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalAddress(InetAddress addr) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			socket = new DatagramSocket(socket.getLocalPort(), addr);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemoteAddress(InetAddress addr) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		outInet = addr;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setLocalPort(int port) {
+		if (isConnected() || !isOpened()) return;
+		
+		disconnect();
+		
+		try {
+			socket = new DatagramSocket(port, socket.getLocalAddress());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setRemotePort(int port) {
+		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		portOut = port;
 	}
 }

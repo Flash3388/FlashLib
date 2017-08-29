@@ -91,6 +91,13 @@ public class PDPWindowController implements Initializable{
 		
 		reset = true;
 	}
+	public void resetTotal(){
+		selectedPDP = null;
+		reset();
+		pdpBox.getItems().clear();
+		pdpBox.getItems().add("--Choose PDP--");
+		pdpBox.getSelectionModel().select(0);
+	}
 	public void deselect(){
 		if(selectedPDP != null){
 			selectedPDP.disableSend();

@@ -19,8 +19,8 @@ public class Chooser extends Displayble{
 	private SimpleIntegerProperty selected = new SimpleIntegerProperty(-1);
 	private boolean changed = false, manual = false;
 	
-	public Chooser(String name, int id) {
-		super(name, id, FlashboardSendableType.CHOOSER);
+	public Chooser(String name) {
+		super(name, FlashboardSendableType.CHOOSER);
 		
 		box = new ComboBox<String>();
 		container.getChildren().addAll(new Label(name), box);

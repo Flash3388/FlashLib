@@ -18,8 +18,8 @@ public class StringProperty extends Displayble{
 	private Runnable updater;
 	private boolean changed = true;
 	
-	public StringProperty(String name, int id) {
-		super(name, id, FlashboardSendableType.STRING);
+	public StringProperty(String name) {
+		super(name, FlashboardSendableType.STRING);
 		node = new VBox();
 		label = new Label(name + ": " + value);
 		label.setPrefSize(LABEL_WIDTH, LABEL_HEIGHT);

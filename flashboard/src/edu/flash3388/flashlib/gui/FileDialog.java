@@ -84,7 +84,10 @@ public class FileDialog extends Stage{
 		if(!path.endsWith("/")) path += "/";
 		this.extension = extension;
 		
-		view.getItems().addAll(files);
+		if(files == null)
+			new File(savePath).mkdirs();
+		else
+			view.getItems().addAll(files);
 		view.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			selectFile(newValue.intValue());
 		});
@@ -126,7 +129,10 @@ public class FileDialog extends Stage{
 		if(!path.endsWith("/")) path += "/";
 		this.extension = extension;
 		
-		view.getItems().addAll(files);
+		if(files == null)
+			new File(loadPath).mkdirs();
+		else
+			view.getItems().addAll(files);
 		view.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			selectFile(newValue.intValue());
 		});

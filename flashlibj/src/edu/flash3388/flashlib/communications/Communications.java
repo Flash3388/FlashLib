@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * Provides a communications management system between to sides. The communications is split into mini communication part
- * between to {@link Sendable} objects, each pair having its own conversion without caring about other sendables. This method
+ * between to {@link Sendable} objects, each pair having its own conversation without caring about other sendables. This method
  * allows for managing of multiple information types through a single communications port, resulting in a concurrent data 
  * communication system. To allow for flexible communications system, this classes uses a {@link CommInterface} object for 
  * reading and sending data.
@@ -46,13 +46,14 @@ public class Communications {
 		public void run() {
 			while(!stop){
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-				while(!comm.connect() && !stop);
+				while(!comm.connect() && !stop)
+					FlashUtil.delay(1000);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
 				comm.resetAll();
 				
-				while(comm.isConnected()){
+				while(comm.isConnected() && !stop){
 					comm.sendAll();
 					comm.read();
 					
@@ -75,6 +76,8 @@ public class Communications {
 	
 	private long currentMillis = -1, readStart = -1;
 	private int readTimeout;
+	private boolean allowConnection = true;
+	private int nextId, minIdAlloc = 0;
 	private Packet packet = new Packet();
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
@@ -146,18 +149,22 @@ public class Communications {
 	private void createSendable(String name, int id, byte type){
 		if(sendableCreator == null) return;
 		
-		Sendable s = sendableCreator.create(name, id, type);
+		Sendable s = sendableCreator.create(name, type);
 		if(s != null){
+			s.setId(id);
 			s.setAttached(true);
 			s.setRemoteInit(true);
-			sendables.put(s.getID(), s);
+			s.onConnection();
+			sendables.put(id, s);
 		}
 	}
 	private void resetAll(){
+		nextId = minIdAlloc;
 		sendables.clear();
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements()) {
 			Sendable sendable = sendablesEnum.nextElement();
+			sendable.setId(nextId++);
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
@@ -259,12 +266,13 @@ public class Communications {
 	public void attach(Sendable sendable){
 		if(sendable.attached())
 			throw new IllegalStateException("Sendable is already attached to communications");
-		if(getFromAllAttachedByID(sendable.getID()) != null)
-			throw new RuntimeException("Id taken");
+		/*if(getFromAllAttachedByID(sendable.getID()) != null)
+			throw new RuntimeException("Id taken");*/
 			
 		attachedSendables.add(sendable);
 		sendable.setAttached(true);
 		if(isConnected()){
+			sendable.setId(nextId++);
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
@@ -349,12 +357,33 @@ public class Communications {
 	}
 	
 	/**
+	 * Sets whether to allow connection or not. If connection is not allowed, when connection is attempted it will be
+	 * aborted.
+	 * @param allow true to allow, false otherwise.
+	 * @see #connect()
+	 */
+	public void setAllowConnection(boolean allow){
+		allowConnection = allow;
+	}
+	/**
+	 * Gets whether to allow connection or not. If connection is not allowed, when connection is attempted it will be
+	 * aborted.
+	 * @return true if connection is allowed, false otherwise.
+	 * @see #connect()
+	 */
+	public boolean isConnectionAllowed(){
+		return allowConnection;
+	}
+	
+	/**
 	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect(Packet)}.
-	 * 
+	 * If connection is not allowed, the method will simply return false.
 	 * @return true if connection was established, false otherwise
 	 */
 	public boolean connect(){
 		if(isConnected()) return true;
+		if(!allowConnection) return false;
+		
 		updateClock();
 		commInterface.connect(packet);
 		if(isConnected()){
@@ -438,6 +467,31 @@ public class Communications {
 	}
 
 	/**
+	 * Sets the minimum ID to be used when allocating IDs for attached sendables.
+	 * It is a good idea to set this value when both communication sides might attach
+	 * sendables, thus allowing to avoid id collisions between sendables.
+	 * <p>
+	 * The default is 0.
+	 * 
+	 * @param minId min id value
+	 */
+	public void setMinIDValue(int minId){
+		this.minIdAlloc = minId;
+	}
+	/**
+	 * Gets the minimum ID to be used when allocating IDs for attached sendables.
+	 * It is a good idea to set this value when both communication sides might attach
+	 * sendables, thus allowing to avoid id collisions between sendables.
+	 * <p>
+	 * The default is 0.
+	 * 
+	 * @return min id value
+	 */
+	public int getMinIDValue(){
+		return minIdAlloc;
+	}
+	
+	/**
 	 * Starts the communications thread if it has not started.
 	 */
 	public void start(){
@@ -450,6 +504,7 @@ public class Communications {
 	 */
 	public void close() {
 		disconnect();
+		commTask.stop();
 		commInterface.close();
 		detachAll();
 		
