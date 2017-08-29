@@ -58,13 +58,11 @@ public class CvTemplateMatcher implements TemplateMatcher{
 		}
 		
 		MatchResult best = findBestMatch(t);
-		if(best != null){
-			
+		/*if(best != null){
 			Imgproc.circle(scene, new Point(best.centerx +best.scaleFactor,best.centery +best.scaleFactor) ,3,new Scalar(51,51,51));
 			//Imgproc.circle(scene, new Point(best.center.x ,best.center.y ) ,3,new Scalar(50,203,122));
 			Imgcodecs.imwrite("/home/klein/dev/frc/test.png", scene);
-			
-		}
+		}*/
 		return best;
 	}
 	

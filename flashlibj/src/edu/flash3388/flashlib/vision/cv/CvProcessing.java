@@ -194,7 +194,7 @@ public class CvProcessing {
 	    //MatOfPoint mpoints = new MatOfPoint(threshold);
 	   // MatOfPoint2f threshold2f = new MatOfPoint2f(mpoints.toArray());
 	    
-		System.out.println("circles Found - " + circles.rows());
+		//System.out.println("circles Found - " + circles.rows());
 	    for (int i = 0; i < contours.size(); i++){
 			
 			boolean foundMatch = false;

@@ -100,7 +100,7 @@ public class CvMultiCamera extends CameraView{
 	public Camera currentCamera() {
 		int index = getSelector() != null? getSelector().getCameraIndex() : 0;
 		if(index < 0 || index >= cams.length){
-			FlashUtil.getLog().reportError("Camera selector index is out of bounds "+index);
+			//FlashUtil.getLog().reportError("Camera selector index is out of bounds "+index);
 			return null;
 		}
 		if(camIndex != index){
@@ -195,7 +195,7 @@ public class CvMultiCamera extends CameraView{
 		if(!capture.isOpened()) return null;
 		capture.read(image); 
 		if(image.empty()) {
-			FlashUtil.getLog().log("CvMultiCamera image empty "+camIndex);
+			//FlashUtil.getLog().log("CvMultiCamera image empty "+camIndex);
 			return null;
 		}
 		return image;

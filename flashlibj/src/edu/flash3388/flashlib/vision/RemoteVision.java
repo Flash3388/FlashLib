@@ -213,12 +213,12 @@ public class RemoteVision extends Sendable implements Vision{
 		}
 		if(stopRemote){
 			stopRemote = false;
-			FlashUtil.getLog().log("Vision: Stop");
+			//FlashUtil.getLog().log("Vision: Stop");
 			return new byte[]{REMOTE_RUN_MODE,REMOTE_STOP};
 		}
 		if(startRemote){
 			startRemote = false;
-			FlashUtil.getLog().log("Vision: Start");
+			//FlashUtil.getLog().log("Vision: Start");
 			return new byte[]{REMOTE_RUN_MODE,REMOTE_START};
 		}
 		
