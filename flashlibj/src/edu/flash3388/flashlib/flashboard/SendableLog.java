@@ -4,7 +4,7 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.util.LoggingInterface;
+import edu.flash3388.flashlib.util.LogListener;
 
 /**
  * Sends log data to a remote source.
@@ -21,15 +21,23 @@ public class SendableLog extends Sendable{
 		super(log.getName(), FlashboardSendableType.LOG);
 		if(!log.isLoggingMode(Log.MODE_INTERFACES))
 			log.setLoggingMode(log.getLoggingMode() | Log.MODE_INTERFACES);
-		log.addLoggingInterface(new LoggingInterface(){
+		log.addListener(new LogListener(){
 			@Override
-			public void log(String log) {
-				feed(log);
+			public void log(String log, String caller) {
+				feed("("+caller+") : "+log);
 			}
 			@Override
-			public void reportError(String err) {}
+			public void logTime(String log, String caller, double time) {
+				feed("("+caller+") : "+"["+time+"] "+log);
+			}
 			@Override
-			public void reportWarning(String war) {}
+			public void reportError(String err, double time) {
+				logTime(err, "ERROR", time);
+			}
+			@Override
+			public void reportWarning(String war, double time) {
+				logTime(war, "WARNING", time);
+			}
 		});
 	}
 	

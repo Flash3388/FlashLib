@@ -1,29 +1,16 @@
 package edu.flash3388.flashlib.util;
 
-import java.io.FileWriter;
-import java.io.IOException;
-
 /**
- * A simple stream log using {@link FileWriter}s to write data to the log files.
- * <p>
- * Data is printed and saved as simple formated strings.
- * </p>
- * <p>
- * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
- * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
- * who do not require logs for emergency situations like power outs, where the log data might be lost.
- * </p>
+ * An abstract logic for logs which use simple string lines when logging. Data is printed and
+ * saved as simple formated strings.
  * 
  * @author Tom Tzook
- * @since FlashLib 1.0.1
+ * @since FlashLib 1.0.2
  */
-public class SimpleStreamLog extends SimpleLog{
+public abstract class SimpleLog extends Log{
 
-	private FileWriter stdWriter;
-	private FileWriter errWriter;
-	
 	/**
-	 * Creates a new simple stream log.
+	 * Creates a new simple log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -43,10 +30,8 @@ public class SimpleStreamLog extends SimpleLog{
 	 * 
 	 * @see Log#Log(String, String, boolean, int)
 	 */
-	public SimpleStreamLog(String directory, String name, boolean override, int logMode) {
+	public SimpleLog(String directory, String name, boolean override, int logMode) {
 		super(directory, name, override, logMode);
-		
-		init();
 	}
 	/**
 	 * Creates a new simple stream log.
@@ -68,13 +53,11 @@ public class SimpleStreamLog extends SimpleLog{
 	 * 
 	 * @see Log#Log(String, boolean, int)
 	 */
-	public SimpleStreamLog(String name, boolean override, int logMode) {
+	public SimpleLog(String name, boolean override, int logMode) {
 		super(name, override, logMode);
-		
-		init();
 	}
 	/**
-	 * Creates a new simple stream log.
+	 * Creates a new simple log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -92,13 +75,11 @@ public class SimpleStreamLog extends SimpleLog{
 	 * 
 	 * @see Log#Log(String, boolean)
 	 */
-	public SimpleStreamLog(String name, boolean override) {
+	public SimpleLog(String name, boolean override) {
 		super(name, override);
-		
-		init();
 	}
 	/**
-	 * Creates a new simple stream log.
+	 * Creates a new simple log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -115,91 +96,103 @@ public class SimpleStreamLog extends SimpleLog{
 	 * 
 	 * @see Log#Log(String)
 	 */
-	public SimpleStreamLog(String name) {
+	public SimpleLog(String name) {
 		super(name);
-		
-		init();
 	}
-
-	private void init(){
-		try {
-			stdWriter = new FileWriter(getStandardLogFile(), false);
-			errWriter = new FileWriter(getErrorLogFile(), false);
-		} catch (IOException e) {
-			e.printStackTrace();
-			close();
-		}
+	
+	/**
+	 * Writes data to the standard log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 */
+	protected abstract void writeToStandardLog(String log);
+	/**
+	 * Writes data to the error log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 */
+	protected abstract void writeToErrorLog(String log);
+	/**
+	 * Writes data to the error log file. Implementation of writing is user-dependent.
+	 * @param log data to write.
+	 * @param stacktrace the stacktrace data
+	 */
+	protected abstract void writeToErrorLog(String log, String stacktrace);
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void printWarning(String warning, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(getName()+"> ["+time+"] <WARNING> : "+warning);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void printError(String error, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(getName()+"> ["+time+"] <ERROR> : "+error);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void print(String log, String caller){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(getName()+"> "+"("+caller+") : "+log);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void print(String log, String caller, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(getName()+"> "+"("+caller+") : "+"["+time+"] "+log);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void writeToStandardLog(String log) {
-		try {
-			stdWriter.write(log + "\n");
-		} catch (IOException e) {
-			close();
-		}
+	public synchronized void write(String mess, String caller){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		writeToStandardLog(mess);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void writeToErrorLog(String log) {
-		try {
-			errWriter.write(log+"\n");
-		} catch (IOException e) {
-			close();
-		}
+	public synchronized void write(String mess, String caller, double time){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		writeToStandardLog("("+caller+") : "+"["+time+"] "+mess);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void writeToErrorLog(String log, String stacktrace) {
-		try {
-			errWriter.write(log + "\n");
-			errWriter.write(stacktrace + "\n");
-		} catch (IOException e) {
-			close();
-		}
+	public synchronized void writeError(String mess, double time){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		mess = "["+time+"] : " + mess;
+		writeToErrorLog(mess);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void closeInternal() {
-		try {
-			if(stdWriter != null)
-				stdWriter.close();
-			stdWriter = null;
-			if(errWriter != null)
-				errWriter.close();
-			errWriter = null;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public synchronized void writeError(String mess, String stacktrace, double time){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		write(mess, "ERROR");
+		mess = "["+time+"] <ERROR> : " + mess;
+		writeToErrorLog(mess, stacktrace);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void saveInternal() {
-		try {
-			if(stdWriter != null)
-				stdWriter.flush();
-			if(errWriter != null)
-				errWriter.flush();
-		} catch (IOException e) {
-			close();
-		}
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public LoggingType getLoggingType() {
-		return LoggingType.Stream;
+	public synchronized void writeWarning(String mess, double time){
+		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
+		write(mess, "WARNING");
+		mess = "["+time+"] <WARNING> : " + mess;
+		writeToErrorLog(mess);
 	}
 }

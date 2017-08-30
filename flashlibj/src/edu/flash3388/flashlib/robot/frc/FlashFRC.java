@@ -13,7 +13,6 @@ import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.util.SimpleBufferedLog;
 
 /**
  * The base for FRC robots wanting to use FlashLib in its fullest. Provides a control loop with power
@@ -78,7 +77,7 @@ public abstract class FlashFRC extends SampleRobot {
 		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
 		if(logPower)
-			powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), powerLogTime());
+			powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), "Robot", powerLogTime());
 		
 		while(true){
 			if(inEmergencyStop()){
@@ -161,15 +160,15 @@ public abstract class FlashFRC extends SampleRobot {
 		double powerDraw = FlashFRCUtil.getPDP().getTotalCurrent();
 		boolean emergencySave = false;
 		if(volts < warningVoltage){
-			powerLog.logTime("Low Voltage: "+volts, matchTime);
+			powerLog.logTime("Low Voltage: "+volts, "Robot", matchTime);
 			emergencySave = true;
 		}
 		if(m_ds.isBrownedOut()){
-			powerLog.logTime("Browned Out", matchTime);
+			powerLog.logTime("Browned Out", "Robot", matchTime);
 			emergencySave = true;
 		}
 		if(powerDraw >= warningPowerDraw){
-			powerLog.logTime("High Draw: "+powerDraw, matchTime);
+			powerLog.logTime("High Draw: "+powerDraw, "Robot", matchTime);
 		}
 		if(emergencySave){
 			powerLog.save();
@@ -180,7 +179,7 @@ public abstract class FlashFRC extends SampleRobot {
 		if(!logsEnabled)
 			return;
 		log.logTime("NEW STATE - "+state);
-		powerLog.logTime("New State: "+state+" >> Voltage: "+m_ds.getBatteryVoltage(),
+		powerLog.logTime("New State: "+state+" >> Voltage: "+m_ds.getBatteryVoltage(), "Robot",
 				powerLogTime());
 		log.save();
 		powerLog.save();

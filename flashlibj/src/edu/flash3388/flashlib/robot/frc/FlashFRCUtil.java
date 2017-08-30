@@ -41,7 +41,7 @@ public class FlashFRCUtil {
 		Log.setParentDirectory("/home/lvuser");
 		Robot robot = RobotFactory.createFRCImplementation();
 		FlashRobotUtil.initFlashLib(robot, flashboardInitData);
-		FlashUtil.getLog().addLoggingInterface(new FRCLoggingInterface());
+		FlashUtil.getLog().addListener(new DriverStationLogListener());
 		pdp = new PDP();
 	}
 }

@@ -8,6 +8,9 @@ import java.io.IOException;
  * A simple buffered log. Uses buffers to gather data which is then saved into the log files manually or when
  * the buffer is full.
  * <p>
+ * Data is printed and saved as simple formated strings.
+ * </p>
+ * <p>
  * Buffer log stores logging data in a buffer and flushes the data into a file manually, on a time base or when the buffer 
  * is full. The buffer allows us to avoid data loss in a case of power loss thanks to the file being closed when the buffer
  * is not flushing the data. Recommended for robot software tracking.
@@ -16,7 +19,7 @@ import java.io.IOException;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class SimpleBufferedLog extends Log{
+public class SimpleBufferedLog extends SimpleLog{
 
 	private String[] stdBuffer;
 	private String[] errBuffer;
