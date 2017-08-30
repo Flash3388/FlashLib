@@ -36,6 +36,8 @@ public class FlashFRCUtil {
 	 * Initializes FlashLib for FRC. Sets the parent directory for logs to "/home/lvuser", creates 
 	 * a {@link Robot} implementation for FRC robots and uses given {@link FlashboardInitData} to initialize
 	 * {@link Flashboard}.
+	 * 
+	 * @param flashboardInitData initialization data for flashboard, or null to no init
 	 */
 	public static void initFlashLib(FlashboardInitData flashboardInitData){
 		Log.setParentDirectory("/home/lvuser");

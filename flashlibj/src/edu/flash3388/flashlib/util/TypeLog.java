@@ -1,16 +1,49 @@
 package edu.flash3388.flashlib.util;
 
 /**
- * An abstract logic for logs which use simple string lines when logging. Data is printed and
- * saved as simple formated strings.
+ * 
+ * Abstract logic for logs organizing data into class objects. Such logs offer extreme organization
+ * and should be used with XML when saving.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class SimpleLog extends Log{
+public abstract class TypeLog extends Log{
 
+	protected static class LogData{
+		public String log;
+		public String caller;
+		
+		public LogData(String log, String caller){
+			this.log = log;
+			this.caller = caller;
+		}
+	}
+	protected static class TimedLogData extends LogData{
+		public double time;
+		
+		public TimedLogData(String log, String caller, double time){
+			super(log, caller);
+			this.time = time;
+		}
+	}
+	protected static class ErrorLogData extends TimedLogData{
+		
+		public ErrorLogData(String log, double time, boolean error){
+			super(log, error? "ERROR" : "WARNING", time);
+		}
+	}
+	protected static class TracedErrorLogData extends ErrorLogData{
+		public String stacktrace;
+		
+		public TracedErrorLogData(String log, double time, String stacktrace){
+			super(log, time, true);
+			this.stacktrace = stacktrace;
+		}
+	}
+	
 	/**
-	 * Creates a new simple log.
+	 * Creates a new type log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -30,11 +63,11 @@ public abstract class SimpleLog extends Log{
 	 * 
 	 * @see Log#Log(String, String, boolean, int)
 	 */
-	public SimpleLog(String directory, String name, boolean override, int logMode) {
+	public TypeLog(String directory, String name, boolean override, int logMode) {
 		super(directory, name, override, logMode);
 	}
 	/**
-	 * Creates a new simple log.
+	 * Creates a new type log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -53,11 +86,11 @@ public abstract class SimpleLog extends Log{
 	 * 
 	 * @see Log#Log(String, boolean, int)
 	 */
-	public SimpleLog(String name, boolean override, int logMode) {
+	public TypeLog(String name, boolean override, int logMode) {
 		super(name, override, logMode);
 	}
 	/**
-	 * Creates a new simple log.
+	 * Creates a new type log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -75,11 +108,11 @@ public abstract class SimpleLog extends Log{
 	 * 
 	 * @see Log#Log(String, boolean)
 	 */
-	public SimpleLog(String name, boolean override) {
+	public TypeLog(String name, boolean override) {
 		super(name, override);
 	}
 	/**
-	 * Creates a new simple log.
+	 * Creates a new type log.
 	 * 
 	 * <p>
 	 * Two log files will be created: Standard log and Error log. The former saves normal data logs through the {@link #log(String)}
@@ -96,26 +129,30 @@ public abstract class SimpleLog extends Log{
 	 * 
 	 * @see Log#Log(String)
 	 */
-	public SimpleLog(String name) {
+	public TypeLog(String name) {
 		super(name);
 	}
 	
 	/**
 	 * Writes data to the standard log file. Implementation of writing is user-dependent.
-	 * @param log data to write.
+	 * @param data data to write.
 	 */
-	protected abstract void writeToStandardLog(String log);
+	protected abstract void writeToStandardLog(LogData data);
+	/**
+	 * Writes data to the standard log file. Implementation of writing is user-dependent.
+	 * @param data data to write.
+	 */
+	protected abstract void writeToStandardLog(TimedLogData data);
 	/**
 	 * Writes data to the error log file. Implementation of writing is user-dependent.
-	 * @param log data to write.
+	 * @param data data to write.
 	 */
-	protected abstract void writeToErrorLog(String log);
+	protected abstract void writeToErrorLog(ErrorLogData data);
 	/**
 	 * Writes data to the error log file. Implementation of writing is user-dependent.
-	 * @param log data to write.
-	 * @param stacktrace the stacktrace data
+	 * @param data data to write.
 	 */
-	protected abstract void writeToErrorLog(String log, String stacktrace);
+	protected abstract void writeToErrorLog(TracedErrorLogData data);
 	
 	/**
 	 * {@inheritDoc}
@@ -156,7 +193,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String mess, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(mess);
+		writeToStandardLog(new LogData(mess, caller));
 	}
 	/**
 	 * {@inheritDoc}
@@ -164,7 +201,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String mess, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("("+caller+") : "+"["+time+"] "+mess);
+		writeToStandardLog(new TimedLogData(mess, caller, time));
 	}
 	/**
 	 * {@inheritDoc}
@@ -172,8 +209,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void writeError(String mess, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		mess = "["+time+"] : " + mess;
-		writeToErrorLog(mess);
+		writeToErrorLog(new ErrorLogData(mess, time, true));
 	}
 	/**
 	 * {@inheritDoc}
@@ -181,9 +217,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void writeError(String mess, String stacktrace, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "ERROR");
-		mess = "["+time+"] <ERROR> : " + mess;
-		writeToErrorLog(mess, stacktrace);
+		writeToErrorLog(new TracedErrorLogData(mess, time, stacktrace));
 	}
 	/**
 	 * {@inheritDoc}
@@ -191,8 +225,6 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void writeWarning(String mess, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "WARNING");
-		mess = "["+time+"] <WARNING> : " + mess;
-		writeToErrorLog(mess);
+		writeToErrorLog(new ErrorLogData(mess, time, false));
 	}
 }

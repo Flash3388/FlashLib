@@ -643,6 +643,7 @@ public abstract class Log{
 	 * the timestamp from the time interface used by this log.
 	 * 
 	 * @param msg The log data.
+	 * @param caller the logger
 	 */
 	public void logTime(String msg, String caller){
 		logTime(msg, caller, getTime());
