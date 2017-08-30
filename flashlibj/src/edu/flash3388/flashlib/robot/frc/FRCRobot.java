@@ -11,10 +11,6 @@ public class FRCRobot implements Robot{
 	private HIDInterface hidImpl = new FRCHidInterface();
 	private DriverStation ds = DriverStation.getInstance();
 	
-	public FRCRobot(){
-		
-	}
-	
 	@Override
 	public Scheduler scheduler() {
 		return schedulerImpl;

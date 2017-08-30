@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Victor;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FRCControllers implements FlashSpeedController, ModableMotor{
+public class FRCSpeedControllers implements FlashSpeedController, ModableMotor{
 
 	/**
 	 * Enumeration for types of speed controllers available.
@@ -36,7 +36,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * @param c the port 
 	 * @param t the type
 	 */
-	public FRCControllers(int c, ControllerType t){
+	public FRCSpeedControllers(int c, ControllerType t){
 		this(controllerFromType(t, c));
 	}
 	/**
@@ -46,7 +46,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * @param back the second port
 	 * @param t the type
 	 */
-	public FRCControllers(int front, int back, ControllerType t){
+	public FRCSpeedControllers(int front, int back, ControllerType t){
 		this(controllerFromType(t, front), controllerFromType(t, back));
 	}
 	/**
@@ -56,7 +56,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * @param back second port
 	 * @param tb second type
 	 */
-	public FRCControllers(int front, ControllerType tf, int back, ControllerType tb){
+	public FRCSpeedControllers(int front, ControllerType tf, int back, ControllerType tb){
 		this(controllerFromType(tf, front), controllerFromType(tb, back));
 	}
 	/**
@@ -65,7 +65,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * @param front the first port 
 	 * @param back the second port
 	 */
-	public FRCControllers(int front, int back){
+	public FRCSpeedControllers(int front, int back){
 		this(controllerFromType(ControllerType.Talon, front), controllerFromType(ControllerType.Talon, back));
 	}
 	/**
@@ -73,7 +73,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * 
 	 * @param controllers array of WPILib {@link SpeedController}
 	 */
-	public FRCControllers(SpeedController...controllers) {
+	public FRCSpeedControllers(SpeedController...controllers) {
 		motor_controllers = new SpeedController[controllers.length];
 		for (int i = 0; i < controllers.length; i++)
 			motor_controllers[i] = controllers[i];
@@ -86,7 +86,7 @@ public class FRCControllers implements FlashSpeedController, ModableMotor{
 	 * @param t the type of controllers
 	 * @param controllers array of ports.
 	 */
-	public FRCControllers(ControllerType t, int...controllers){
+	public FRCSpeedControllers(ControllerType t, int...controllers){
 		motor_controllers = new SpeedController[controllers.length];
 		for (int i = 0; i < controllers.length; i++)
 			motor_controllers[i] = controllerFromType(t, controllers[i]);

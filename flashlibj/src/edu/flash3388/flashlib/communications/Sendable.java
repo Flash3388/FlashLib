@@ -5,8 +5,8 @@ package edu.flash3388.flashlib.communications;
  * system provided by {@link Communications}.
  *  
  * <p>
- * A sendable is described by its ID - a manually defined value or automatically generated value that allows
- * to diffrentiate between different sendables and connect only the matching ones and type - 
+ * A sendable is described by its ID - an automatically assigned value that allows
+ * to differentiate between different sendables and connect only the matching ones, and its type - 
  * a byte which tells the remote communications object what object to create as a counterpart.
  * </p>
  * 
@@ -19,7 +19,8 @@ public abstract class Sendable {
 	private int id;
 	private String name;
 	private byte type;
-	private boolean init = false, attached = false;
+	private boolean remoteAttached = false, communicationsAttached = false;
+	private boolean remoteInit = false;
 	
 	/**
 	 * Creates a sendable object with an empty name, automatically defined ID and a type.
@@ -56,13 +57,16 @@ public abstract class Sendable {
 		this.id = id;
 	}
 	boolean remoteInit(){
-		return init;
+		return remoteInit;
 	}
 	void setRemoteInit(boolean b){
-		init = b;
+		remoteInit = b;
+	}
+	void setRemoteAttached(boolean attached){
+		remoteAttached = attached;
 	}
 	void setAttached(boolean attached){
-		this.attached = attached;
+		communicationsAttached = attached;
 	}
 	
 	/**
@@ -99,7 +103,14 @@ public abstract class Sendable {
 	 * @return true if attached, false otherwise
 	 */
 	public boolean attached(){
-		return attached;
+		return communicationsAttached;
+	}
+	/**
+	 * Gets whether or not this sendable is connected with a remote sendable
+	 * @return true if connected, false otherwise
+	 */
+	public boolean remoteAttached(){
+		return remoteAttached;
 	}
 	
 	/**
@@ -122,12 +133,12 @@ public abstract class Sendable {
 	 */
 	public abstract boolean hasChanged();
 	/**
-	 * Called when the communications system has connected to a remote system. If this object was attached when connection
-	 * was already established, this method will be called as well.
+	 * Called when the communications system has connected to a remote system and confirmed connection with a remote sendable
+	 * matching the ID of this on. 
 	 */
 	public abstract void onConnection();
 	/**
-	 * Called when the communications system has lost connection with a remote system.
+	 * Called when the communications system has lost connection with the remote sendable communicating with this one.
 	 */
 	public abstract void onConnectionLost();
 }

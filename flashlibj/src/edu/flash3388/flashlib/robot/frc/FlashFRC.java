@@ -6,8 +6,10 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.HidUpdateTask;
-import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.robot.Robot;
+import edu.flash3388.flashlib.robot.Scheduler;
 
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
@@ -22,7 +24,7 @@ import edu.flash3388.flashlib.util.Log;
  * @since FlashLib 1.0.0
  * @see SampleRobot
  */
-public abstract class FlashFRC extends SampleRobot {
+public abstract class FlashFRC extends SampleRobot implements Robot{
 	
 	protected static class RobotInitializer{
 		public boolean logsEnabled = false;
@@ -44,11 +46,18 @@ public abstract class FlashFRC extends SampleRobot {
 	private double warningPowerDraw;
 	private boolean logPower, logsEnabled;
 	
+	private Scheduler schedulerImpl;
+	private HIDInterface hidImpl;
+	
 	@Override
 	protected final void robotInit(){
 		RobotInitializer initializer = new RobotInitializer();
 		preInit(initializer);
-		FlashFRCUtil.initFlashLib(initializer.initFlashboard? initializer.flashboardInitData : null);
+		
+		schedulerImpl = new Scheduler();
+		hidImpl = new FRCHidInterface();
+		
+		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
 		
 		log = FlashUtil.getLog();
 		logPower = initializer.logPower;
@@ -64,7 +73,7 @@ public abstract class FlashFRC extends SampleRobot {
 		}
 		
 		if(initializer.autoUpdateHid)
-			RobotFactory.getImplementation().scheduler().addTask(new HidUpdateTask());
+			schedulerImpl.addTask(new HidUpdateTask());
 		
 		warningPowerDraw = initializer.warningPowerDraw;
 		warningVoltage = initializer.warningVoltage;
@@ -92,7 +101,7 @@ public abstract class FlashFRC extends SampleRobot {
 			if(isDisabled()){
 				logNewState("Disabled");
 				
-				RobotFactory.getImplementation().scheduler().removeAllActions();
+				schedulerImpl.removeAllActions();
 				m_ds.InDisabled(true);
 				disabledInit();
 				
@@ -105,12 +114,12 @@ public abstract class FlashFRC extends SampleRobot {
 			}else if(isAutonomous()){
 				logNewState("Autonomous");
 				
-				RobotFactory.getImplementation().scheduler().removeAllActions();
+				schedulerImpl.removeAllActions();
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
 				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
-					RobotFactory.getImplementation().scheduler().run();
+					schedulerImpl.run();
 					autonomousPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -119,12 +128,12 @@ public abstract class FlashFRC extends SampleRobot {
 			}else if(isTest()){
 				logNewState("Test");
 				
-				RobotFactory.getImplementation().scheduler().removeAllActions();
+				schedulerImpl.removeAllActions();
 				m_ds.InTest(true);
 				testInit();
 				
 				while(isEnabled() && isTest() && !inEmergencyStop()){
-					RobotFactory.getImplementation().scheduler().run();
+					schedulerImpl.run();
 					testPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -133,12 +142,12 @@ public abstract class FlashFRC extends SampleRobot {
 			}else{
 				logNewState("Teleop");
 				
-				RobotFactory.getImplementation().scheduler().removeAllActions();
+				schedulerImpl.removeAllActions();
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				
 				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
-					RobotFactory.getImplementation().scheduler().run();
+					schedulerImpl.run();
 					teleopPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -219,6 +228,21 @@ public abstract class FlashFRC extends SampleRobot {
 	protected Log getPowerLog(){
 		return powerLog;
 	}
+
+	
+	@Override
+	public Scheduler scheduler() {
+		return schedulerImpl;
+	}
+	@Override
+	public HIDInterface hid() {
+		return hidImpl;
+	}
+	@Override
+	public boolean isFRC() {
+		return true;
+	}
+	
 	
 	/**
 	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.
