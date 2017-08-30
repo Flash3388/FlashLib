@@ -39,7 +39,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see Scheduler
- * @see SubSystem
+ * @see Subsystem
  */
 public abstract class Action{
 	
@@ -53,7 +53,7 @@ public abstract class Action{
 		protected void end() {}
 	};
 
-	private Vector<SubSystem> requirements = new Vector<SubSystem>(2);
+	private Vector<Subsystem> requirements = new Vector<Subsystem>(2);
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
@@ -80,7 +80,7 @@ public abstract class Action{
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && RobotFactory.hasSchedulerInstance() && RobotFactory.getScheduler().add(this)){
+		if(!running && RobotFactory.getImplementation().scheduler().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;
@@ -147,7 +147,7 @@ public abstract class Action{
 	public boolean isRunning(){
 		return running;
 	}
-	public Enumeration<SubSystem> getRequirements(){
+	public Enumeration<Subsystem> getRequirements(){
 		return requirements.elements();
 	}
 	/**
@@ -162,15 +162,15 @@ public abstract class Action{
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
 	 */
-	protected void requires(SubSystem subsystem){
+	protected void requires(Subsystem subsystem){
 		requirements.addElement(subsystem);
 	}
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
 	 */
-	protected void requires(SubSystem... subsystems){
-		for(SubSystem s : subsystems)
+	protected void requires(Subsystem... subsystems){
+		for(Subsystem s : subsystems)
 			requirements.add(s);
 	}
 	/**
@@ -178,7 +178,7 @@ public abstract class Action{
 	 * @param action action to copy requirements from
 	 */
 	protected void copyRequirements(Action action){
-		for (Enumeration<SubSystem> sys = action.getRequirements(); sys.hasMoreElements(); )
+		for (Enumeration<Subsystem> sys = action.getRequirements(); sys.hasMoreElements(); )
 			requires(sys.nextElement());
 	}
 	/**

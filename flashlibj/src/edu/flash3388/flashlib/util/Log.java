@@ -107,7 +107,6 @@ public abstract class Log{
 	private DoubleSource timeSourcems;
 	private boolean showTime = false;
 	
-	
 	/**
 	 * Creates a new log. 
 	 * <p>
@@ -706,18 +705,5 @@ public abstract class Log{
 	 */
 	public static Log createStreamLog(String name){
 		return new SimpleStreamLog(name);
-	}
-	/**
-	 * Creates a new log by a given type and name.
-	 * @param name the log name
-	 * @param type the log type
-	 * @return a new log
-	 */
-	public static Log createLogByType(String name, LoggingType type){
-		switch(type){
-			case Buffered: return createBufferedLog(name);
-			case Stream: return createStreamLog(name);
-		}
-		throw new IllegalArgumentException("Unknown logging type");
 	}
 }

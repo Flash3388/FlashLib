@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-public abstract class IterativeFrcBot extends IterativeSbc{
+public abstract class IterativeStateSBC extends IterativeSBC{
 	
 	@Override
 	protected void stateInit(byte state) {
@@ -24,12 +24,7 @@ public abstract class IterativeFrcBot extends IterativeSbc{
 				break;
 		}
 	}
-
-	protected abstract void robotInit();
-	protected abstract void robotShutdown();
-
-	protected abstract void disabledInit();
-	protected abstract void disabledPeriodic();
+	
 	protected abstract void teleopInit();
 	protected abstract void teleopPeriodic();
 	protected abstract void autonomousInit();

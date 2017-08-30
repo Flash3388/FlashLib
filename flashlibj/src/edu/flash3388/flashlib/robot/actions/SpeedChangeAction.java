@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 
 public class SpeedChangeAction extends Action{
@@ -17,7 +17,7 @@ public class SpeedChangeAction extends Action{
 	public SpeedChangeAction(FlashSpeedController controllers, double toSpeed, double changeSpeed){
 		this(controllers, toSpeed, changeSpeed, -1, null);
 	}
-	public SpeedChangeAction(FlashSpeedController controllers, double toSpeed, double changeSpeed, double timeout, SubSystem s){
+	public SpeedChangeAction(FlashSpeedController controllers, double toSpeed, double changeSpeed, double timeout, Subsystem s){
 		this.setTimeOut((long) (timeout * 1000));
 		this.resetRequirements();
 		this.requires(s);

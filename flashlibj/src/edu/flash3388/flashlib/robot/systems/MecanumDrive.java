@@ -1,10 +1,10 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
@@ -36,7 +36,7 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * @see <a href="https://en.wikipedia.org/wiki/Mecanum_wheel">https://en.wikipedia.org/wiki/Mecanum_wheel</a>
  * @see <a href="http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf">http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf</a>
  */
-public class MecanumDrive extends SubSystem implements HolonomicDriveSystem {
+public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 
 	/**
 	 * Because the Mecanum drive is so sensitive to weight distributions and motor output differences, it
@@ -425,7 +425,7 @@ public class MecanumDrive extends SubSystem implements HolonomicDriveSystem {
 	}
 	private double limit(double speed){
 		if(voltageScaling)
-			speed = FlashRoboUtil.scaleVoltageBus(speed);
+			speed = FlashRobotUtil.scaleVoltageBus(speed);
 		
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
@@ -547,7 +547,7 @@ public class MecanumDrive extends SubSystem implements HolonomicDriveSystem {
 	 * </p>
 	 */
 	@Override
-	public SubSystem getSystem() {
+	public Subsystem getSystem() {
 		return this;
 	}
 

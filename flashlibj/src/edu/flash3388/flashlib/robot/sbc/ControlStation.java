@@ -5,13 +5,13 @@ import java.util.Arrays;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public final class SbcControlStation{
+public final class ControlStation{
 	
 	public static class CsStateSelector implements StateSelector{
 
-		private SbcControlStation cs;
+		private ControlStation cs;
 		
-		public CsStateSelector(SbcControlStation cs){
+		public CsStateSelector(ControlStation cs){
 			this.cs = cs;
 		}
 		
@@ -26,9 +26,9 @@ public final class SbcControlStation{
 	}
 	private static class UpdateTask implements Runnable{
 
-		private SbcControlStation cs;
+		private ControlStation cs;
 		
-		public UpdateTask(SbcControlStation cs){
+		public UpdateTask(ControlStation cs){
 			this.cs = cs;
 		}
 		
@@ -39,12 +39,12 @@ public final class SbcControlStation{
 	}
 	private static class CsSendable extends Sendable{
 		
-		private SbcControlStation cs;
+		private ControlStation cs;
 		private boolean confirm = false;
 		private boolean updateData = true;
 		private Object recieveObject = new Object();
 		
-		public CsSendable(SbcControlStation cs){
+		public CsSendable(ControlStation cs){
 			super("ControlStation", SbcSendableType.CONSTROL_STATION);
 			this.cs = cs;
 		}
@@ -86,7 +86,7 @@ public final class SbcControlStation{
 	public static final byte CONTROLLER_AXES = 6;
 	static final byte CONTROLLER_DATA_SIZE = (5 + CONTROLLER_AXES) * MAX_CONTROLLERS + 2;
 	
-	private static SbcControlStation instance;
+	private static ControlStation instance;
 	
 	private byte[][] controllerAxes = new byte[MAX_CONTROLLERS][CONTROLLER_AXES];
 	private short[] controllerPovs = new short[MAX_CONTROLLERS];
@@ -104,7 +104,7 @@ public final class SbcControlStation{
 	private Thread csThread;
 	private CsSendable csSendable;
 	
-	SbcControlStation() {
+	ControlStation() {
 		for (int i = 0; i < controllerButtons.length; i++)
 			controllerButtons[i] = new ControllerButtons();
 		
@@ -248,9 +248,9 @@ public final class SbcControlStation{
 	}
 	
 	static void init(){
-		instance = new SbcControlStation();
+		instance = new ControlStation();
 	}
-	public static SbcControlStation getInstance(){
+	public static ControlStation getInstance(){
 		if(instance == null)
 			throw new IllegalStateException("Sbc control station was not initialized");
 		return instance;

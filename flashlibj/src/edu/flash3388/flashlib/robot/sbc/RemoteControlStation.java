@@ -44,14 +44,14 @@ public class RemoteControlStation extends Sendable{
 		}
 		
 		int getAxesCount(){
-			return axes.length < SbcControlStation.CONTROLLER_AXES? axes.length : SbcControlStation.CONTROLLER_AXES;
+			return axes.length < ControlStation.CONTROLLER_AXES? axes.length : ControlStation.CONTROLLER_AXES;
 		}
 		int getButtonCount(){
 			return buttons.length;
 		}
 		
 		byte[] getAxesData(){
-			byte[] axes = new byte[SbcControlStation.CONTROLLER_AXES];
+			byte[] axes = new byte[ControlStation.CONTROLLER_AXES];
 			int size = getAxesCount();
 			for (int i = 0; i < size; i++) 
 				axes[i] = (byte) (this.axes[i].getPollData() * 127);
@@ -82,8 +82,8 @@ public class RemoteControlStation extends Sendable{
 		}
 	}
 
-	private ControllerData[] controllers = new ControllerData[SbcControlStation.MAX_CONTROLLERS];
-	private byte[] controllersData = new byte[SbcControlStation.CONTROLLER_DATA_SIZE];
+	private ControllerData[] controllers = new ControllerData[ControlStation.MAX_CONTROLLERS];
+	private byte[] controllersData = new byte[ControlStation.CONTROLLER_DATA_SIZE];
 	private byte stateByte = 0;
 	private byte controllerCount = 0;
 	private boolean updateData = true;
@@ -130,7 +130,7 @@ public class RemoteControlStation extends Sendable{
 		int pos = 0;
 		controllersData[pos++] = stateByte;
 		controllersData[pos++] = getControlCountByte();
-		for (int i = 0; i < SbcControlStation.MAX_CONTROLLERS; i++) {
+		for (int i = 0; i < ControlStation.MAX_CONTROLLERS; i++) {
 			if((controllersData[1] & (0x01 << (i + 1))) == 0)
 				continue;
 			
@@ -190,14 +190,14 @@ public class RemoteControlStation extends Sendable{
 		return controllerCount;
 	}
 	public void setController(Controller controller, int i){
-		if(i < 0 || i > SbcControlStation.MAX_CONTROLLERS-1)
+		if(i < 0 || i > ControlStation.MAX_CONTROLLERS-1)
 			throw new IllegalArgumentException("Controller index out of bounds");
 		
 		controllers[i] = new ControllerData(controller);
 		controllerCount++;
 	}
 	public void removeController(int i){
-		if(i < 0 || i > SbcControlStation.MAX_CONTROLLERS-1)
+		if(i < 0 || i > ControlStation.MAX_CONTROLLERS-1)
 			throw new IllegalArgumentException("Controller index out of bounds");
 		
 		controllers[i] = null;

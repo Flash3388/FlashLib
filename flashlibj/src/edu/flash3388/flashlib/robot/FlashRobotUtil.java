@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.flashboard.SendableLog;
-import edu.flash3388.flashlib.robot.RobotFactory.ImplType;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
@@ -16,16 +16,11 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashRoboUtil {
-	private FlashRoboUtil(){}
-	
-	public static final byte UTIL_INIT = 0x0;
-	public static final byte FLASHBOARD_INIT = 0x1;
-	public static final byte SCHEDULER_INIT = 0x1 << 1;
+public class FlashRobotUtil {
+	private FlashRobotUtil(){}
 	
 	private static boolean init = false;
 	private static boolean emergencyStop = false;
-	private static byte initCode = 0;
 	private static DoubleSource voltageSource;
 	private static EmergencyStopControl estopControl;
 	private static double expectedVoltage = 13.3;
@@ -46,8 +41,8 @@ public class FlashRoboUtil {
 		
 		FlashUtil.getLog().logTime("!EMERGENCY STOP!");
 		
-		RobotFactory.disableScheduler(true);
-		if(RobotFactory.isSbcImpl())
+		RobotFactory.getImplementation().scheduler().setDisabled(true);
+		if(!RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.disableAll();
 		
 		estopControl.inEmergencyStop(true);
@@ -61,10 +56,8 @@ public class FlashRoboUtil {
 		
 		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED");
 		
-		if(RobotFactory.hasSchedulerInstance()){
-			RobotFactory.getScheduler().setDisabled(true);
-		}
-		if(RobotFactory.isSbcImpl())
+		RobotFactory.getImplementation().scheduler().setDisabled(false);
+		if(!RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.enableAll();
 		
 		estopControl.inEmergencyStop(false);
@@ -131,68 +124,38 @@ public class FlashRoboUtil {
 	//--------------------------------------------------------------------
 	
 	/**
-	 * Gets whether or not Flashboard was initialized when {@link #initFlashLib(int, RobotFactory.ImplType)}
-	 * was called.
-	 * @return true if flashboard was initialized, false otherwise
-	 */
-	public static boolean flashboardInit(){
-		return (initCode & FLASHBOARD_INIT) != 0;
-	}
-	/**
-	 * Gets whether or not the basis of FlashLib was initialized when {@link #initFlashLib(int, RobotFactory.ImplType)}
-	 * was called.
+	 * Gets whether or not the basis of FlashLib was initialized.
+	 * 
 	 * @return true if FlashLib was initialized, false otherwise
 	 */
-	public static boolean utilInit(){
+	public static boolean robotInitialized(){
 		return init;
 	}
 	/**
-	 * Gets whether or not Scheduler was initialized when {@link #initFlashLib(int, RobotFactory.ImplType)}
-	 * was called.
-	 * @return true if Scheduler was initialized, false otherwise
-	 */
-	public static boolean schedulerInit(){
-		return (initCode & SCHEDULER_INIT) != 0;
-	}
-	/**
-	 * Initializes FlashLib. Depending on the initialization code, the following functionalities will be initialized:
-	 * <ul>
-	 * 	<li> Flashboard: if the init code contains {@link #FLASHBOARD_INIT} </li>
-	 * 	<li> Scheduler: if the init code contains {@link #SCHEDULER_INIT} </li>
-	 * 	<li> Main flashlib log: always </li>
-	 * 	<li> RobotFactory is configured to the given {@link RobotFactory.ImplType}</li>
-	 * </ul>
-	 * @param mode the initialization code
-	 * @param implType the platform used
+	 * Initializes FlashLib for robotics use. Sets the {@link Robot} implementation given to {@link RobotFactory}
+	 * and initializes {@link Flashboard} according to the given initialization data.
+	 * 
+	 * @param robot the robot implementation
+	 * @param flashboardInitData the flashboard initialization data
+	 * 
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(int mode, ImplType implType){
+	public static void initFlashLib(Robot robot, FlashboardInitData flashboardInitData){
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
-		FlashUtil.setStart();
-		RobotFactory.setImplementationType(implType);
+		RobotFactory.setImplementation(robot);
 		estopControl = new EmergencyStopControl();
 		
 		FlashUtil.getLog().logTime("INITIALIZING...");
 		
-		if((mode & (FLASHBOARD_INIT)) != 0){
-			Flashboard.init();
+		if(flashboardInitData != null){
+			Flashboard.init(flashboardInitData);
 			Flashboard.attach(estopControl,
 						      new SendableLog(FlashUtil.getLog()));
 		}
 		
-		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE - " +
-								Integer.toBinaryString(mode) + " - "+implType);
-		
-		initCode = (byte)mode;
+		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE");
 		init = true;
-	}
-	/**
-	 * Starts Flashboard control.
-	 * @see Flashboard#start()
-	 */
-	public static void startFlashboard(){
-		Flashboard.start();
 	}
 }

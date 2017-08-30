@@ -1,19 +1,19 @@
-package edu.flash3388.flashlib.robot.rio;
+package edu.flash3388.flashlib.robot.frc;
 
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
+import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.HidUpdateTask;
 import edu.flash3388.flashlib.robot.RobotFactory;
 
-import static edu.flash3388.flashlib.robot.FlashRoboUtil.inEmergencyStop;
+import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
-
-import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
+import edu.flash3388.flashlib.util.SimpleBufferedLog;
 
 /**
  * The base for FRC robots wanting to use FlashLib in its fullest. Provides a control loop with power
@@ -23,7 +23,7 @@ import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
  * @since FlashLib 1.0.0
  * @see SampleRobot
  */
-public abstract class FlashRio extends SampleRobot {
+public abstract class FlashFRC extends SampleRobot {
 	
 	protected static class RobotInitializer{
 		public boolean logsEnabled = false;
@@ -31,30 +31,31 @@ public abstract class FlashRio extends SampleRobot {
 		public boolean logPower = true;
 		public double warningVoltage = WARNING_VOLTAGE;
 		public double warningPowerDraw = POWER_DRAW_WARNING;
+		
+		public boolean initFlashboard = true;
+		public FlashboardInitData flashboardInitData = new FlashboardInitData();
 	}
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
 	private static final byte ITERATION_DELAY = 10;
 	
-	private Log log;
-	private Log powerLog;
+	private Log log, powerLog;
 	private double warningVoltage;
 	private double warningPowerDraw;
 	private boolean logPower, logsEnabled;
-	
 	
 	@Override
 	protected final void robotInit(){
 		RobotInitializer initializer = new RobotInitializer();
 		preInit(initializer);
-		initFlashLib();
+		FlashFRCUtil.initFlashLib(initializer.initFlashboard? initializer.flashboardInitData : null);
 		
 		log = FlashUtil.getLog();
 		logPower = initializer.logPower;
 		logsEnabled = initializer.logsEnabled;
 		if(initializer.logsEnabled){
-			powerLog = FlashUtil.createLog("powerlog");
+			powerLog = Log.createBufferedLog("power");
 			if(!logPower)
 				powerLog.disable();
 		}else{
@@ -64,7 +65,7 @@ public abstract class FlashRio extends SampleRobot {
 		}
 		
 		if(initializer.autoUpdateHid)
-			RobotFactory.getScheduler().addTask(new HidUpdateTask());
+			RobotFactory.getImplementation().scheduler().addTask(new HidUpdateTask());
 		
 		warningPowerDraw = initializer.warningPowerDraw;
 		warningVoltage = initializer.warningVoltage;
@@ -92,7 +93,7 @@ public abstract class FlashRio extends SampleRobot {
 			if(isDisabled()){
 				logNewState("Disabled");
 				
-				RobotFactory.getScheduler().removeAllActions();
+				RobotFactory.getImplementation().scheduler().removeAllActions();
 				m_ds.InDisabled(true);
 				disabledInit();
 				
@@ -105,12 +106,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isAutonomous()){
 				logNewState("Autonomous");
 				
-				RobotFactory.getScheduler().removeAllActions();
+				RobotFactory.getImplementation().scheduler().removeAllActions();
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
 				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
-					RobotFactory.runScheduler();
+					RobotFactory.getImplementation().scheduler().run();
 					autonomousPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -119,12 +120,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else if(isTest()){
 				logNewState("Test");
 				
-				RobotFactory.getScheduler().removeAllActions();
+				RobotFactory.getImplementation().scheduler().removeAllActions();
 				m_ds.InTest(true);
 				testInit();
 				
 				while(isEnabled() && isTest() && !inEmergencyStop()){
-					RobotFactory.runScheduler();
+					RobotFactory.getImplementation().scheduler().run();
 					testPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -133,12 +134,12 @@ public abstract class FlashRio extends SampleRobot {
 			}else{
 				logNewState("Teleop");
 				
-				RobotFactory.getScheduler().removeAllActions();
+				RobotFactory.getImplementation().scheduler().removeAllActions();
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				
 				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
-					RobotFactory.runScheduler();
+					RobotFactory.getImplementation().scheduler().run();
 					teleopPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -157,7 +158,7 @@ public abstract class FlashRio extends SampleRobot {
 		
 		double volts = m_ds.getBatteryVoltage();
 		double matchTime = powerLogTime();
-		double powerDraw = FlashRioUtil.getPDP().getTotalCurrent();
+		double powerDraw = FlashFRCUtil.getPDP().getTotalCurrent();
 		boolean emergencySave = false;
 		if(volts < warningVoltage){
 			powerLog.logTime("Low Voltage: "+volts, matchTime);

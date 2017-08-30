@@ -8,35 +8,39 @@ import java.util.jar.Manifest;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.TcpCommInterface;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
-import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
+import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class SbcRobot{
+public abstract class SBCRobotBase{
 	
 	protected static class RobotInitializer{
 		public CommInterface commInterface;
+		public boolean initCommunications = true;
 		
 		public StateSelector stateSelector;
 		private boolean useStateSelector = true;
 		
-		public int flashlibInitMode = -1;
-		
 		public boolean logEnabled = true;
 		
 		public boolean initControlStation = true;
+		
+		public boolean initFlashboard = true;
+		public final FlashboardInitData flashboardInitData = new FlashboardInitData();
+		
+		public Robot robot;
 	}
 	
 	protected static final int DEFAULT_COMM_INTERFACE_LOCAL_PORT = 5809;
 	
-	private static LocalShell executor;
+	private static SBCRobotBase userImplement;
+	private static Robot robot;
 	private static Communications communications;
-	private static byte currentState;
+	private static LocalShell shell;
 	private static StateSelector stateSelector;
-	private static SbcRobot userImplement;
 	private static Log log;
-
 	
 	//--------------------------------------------------------------------
 	//----------------------------MAIN------------------------------------
@@ -53,7 +57,7 @@ public abstract class SbcRobot{
 		log.log("Done");
 		
 		log.log("Initializing board...", "RobotBase");
-		executor = new LocalShell();
+		shell = new LocalShell();
 		log.log("Done", "RobotBase");
 		
 		log.log("Loading user class...", "RobotBase");
@@ -63,59 +67,9 @@ public abstract class SbcRobot{
 			shutdown(1);
 		}
 		
-		RobotInitializer initializer = new RobotInitializer();
-		userImplement.preInit(initializer);
+		setupRobot();
 		
-		if(!initializer.logEnabled){
-			log.delete();
-			log.disable();
-		}
-		if(initializer.initControlStation){
-			SbcControlStation.init();
-		}
-		
-		log.log("Initializing FlashLib...");
-		if(initializer.flashlibInitMode < 0)
-			initializer.flashlibInitMode = FlashRoboUtil.FLASHBOARD_INIT | FlashRoboUtil.SCHEDULER_INIT;
-		FlashRoboUtil.initFlashLib(initializer.flashlibInitMode, RobotFactory.ImplType.SBC);
-		
-		log.log("Initializing Communications...", "RobotBase");
-		try {
-			if(initializer.commInterface == null){
-				log.reportWarning("User did not implement comm interface, loading default");
-				initializer.commInterface = setupDefaultCommInterface();
-			}
-			if(initializer.commInterface == null)
-				throw new Exception("Failure to initialize comm interface (null)");
-		} catch (Exception e) {
-			log.reportError(e.getMessage());
-			shutdown(1);
-		}
-		communications = new Communications("Robot", initializer.commInterface);
-		communications.attach(executor);
-		if(initializer.initControlStation)
-			communications.attach(SbcControlStation.getInstance().getSendable());
-		log.log("Done", "RobotBase");
-		
-		log.log("Initialization Done", "RobotBase");
-		log.save();
-		
-		log.logTime("Starting Robot");
-		if(initializer.useStateSelector){
-			if (initializer.stateSelector == null) {
-				log.reportWarning("User did not provide a state selector, using default");
-				if(!initializer.initControlStation){
-					log.reportWarning("Control Station was not enabled, using manual selector");
-					initializer.stateSelector = new ManualStateSelector();
-				}else
-					initializer.stateSelector = new SbcControlStation.CsStateSelector(SbcControlStation.getInstance());
-			}
-			stateSelector = initializer.stateSelector;
-		}
-		
-		currentState = StateSelector.STATE_DISABLED;
-		communications.start();
-		
+		log.log("Starting robot", "RobotBase");
 		try{
 			userImplement.startRobot();
 		}catch(Throwable t){
@@ -123,11 +77,11 @@ public abstract class SbcRobot{
 			shutdown(1);
 		}
 	}
-	private static SbcRobot loadUserClass(){
+	private static SBCRobotBase loadUserClass(){
 		String robotName = null;
 		Enumeration<URL> resources = null;
 	    try {
-	      resources = SbcRobot.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+	      resources = SBCRobotBase.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
 	    } catch (IOException ex) {
 	      ex.printStackTrace();
 	    }
@@ -142,7 +96,7 @@ public abstract class SbcRobot{
 		log.log("User class found: "+robotName, "RobotBase");
 		
 		try {
-			return (SbcRobot) Class.forName(robotName).newInstance();
+			return (SBCRobotBase) Class.forName(robotName).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -150,6 +104,62 @@ public abstract class SbcRobot{
 	}
 	private static CommInterface setupDefaultCommInterface() throws IOException{
 		return new TcpCommInterface(DEFAULT_COMM_INTERFACE_LOCAL_PORT);
+	}
+	private static void setupRobot(){
+		RobotInitializer initializer = new RobotInitializer();
+		userImplement.preInit(initializer);
+		
+		if(!initializer.logEnabled){
+			log.delete();
+			log.disable();
+		}
+		if(initializer.initControlStation){
+			ControlStation.init();
+		}
+		
+		if(initializer.initCommunications){
+			log.log("Initializing Communications...", "RobotBase");
+			try {
+				if(initializer.commInterface == null){
+					log.reportWarning("User did not implement comm interface, loading default");
+					initializer.commInterface = setupDefaultCommInterface();
+				}
+				if(initializer.commInterface == null)
+					throw new Exception("Failure to initialize comm interface (null)");
+			} catch (Exception e) {
+				log.reportError(e.getMessage());
+				shutdown(1);
+			}
+			communications = new Communications("Robot", initializer.commInterface);
+			communications.attach(shell);
+			if(initializer.initControlStation)
+				communications.attach(ControlStation.getInstance().getSendable());
+			log.log("Done", "RobotBase");
+		}
+		
+		if(initializer.robot == null){
+			log.reportWarning("User did not provide a state selector, using default");
+			initializer.robot = new SBCRobot();
+		}
+		robot = initializer.robot;
+		
+		log.log("Initializing FlashLib...");
+		FlashRobotUtil.initFlashLib(robot, initializer.initFlashboard? initializer.flashboardInitData : null);
+		
+		log.log("Initialization Done", "RobotBase");
+		log.save();
+		
+		if(initializer.useStateSelector){
+			if (initializer.stateSelector == null) {
+				log.reportWarning("User did not provide a state selector, using default");
+				if(!initializer.initControlStation){
+					log.reportWarning("Control Station was not enabled, using manual selector");
+					initializer.stateSelector = new ManualStateSelector();
+				}else
+					initializer.stateSelector = new ControlStation.CsStateSelector(ControlStation.getInstance());
+			}
+			stateSelector = initializer.stateSelector;
+		}
 	}
 	private static void onShutdown(){
 		log.logTime("Shuting down...");
@@ -162,9 +172,7 @@ public abstract class SbcRobot{
 				FlashUtil.delay(5);
 			}
 		}
-		if(RobotFactory.hasSchedulerInstance()){
-			RobotFactory.disableScheduler(true);
-		}
+		//robot.scheduler().setDisabled(true);
 		if(communications != null){
 			log.log("Closing communications...");
 			communications.close();
@@ -185,32 +193,18 @@ public abstract class SbcRobot{
 		shutdown(0);
 	}
 	
-	public static byte getCurrentState(){
-		if (stateSelector != null) 
-			currentState = stateSelector.getState();
-		else currentState = StateSelector.STATE_DISABLED;
-		
-		return currentState;
+	public static Communications communications(){
+		return communications;
 	}
-	public static boolean isDisabled(){
-		return getCurrentState() == StateSelector.STATE_DISABLED;
+	public static LocalShell shell(){
+		return shell;
 	}
-	
-	public static Shell shell(){
-		return executor;
+	public static Robot robot(){
+		return robot;
 	}
 	public static StateSelector stateSelector(){
 		return stateSelector;
 	}
-	public static Communications communications(){
-		return communications;
-	}
-	/*public static Board board(){
-		return board;
-	}
-	public static String boardName(){
-		return board.getName();
-	}*/
 	
 	//--------------------------------------------------------------------
 	//----------------------Implementable---------------------------------

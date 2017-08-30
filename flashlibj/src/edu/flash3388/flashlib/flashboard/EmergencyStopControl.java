@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 
 /**
  * Represents emergency stop control on the Flashboard.
@@ -33,11 +33,11 @@ public class EmergencyStopControl extends Sendable{
 		if(data.length < 1)return;
 		
 		if(data[0] == EMERGENCY){
-			FlashRoboUtil.enterEmergencyStop();
+			FlashRobotUtil.enterEmergencyStop();
 			emergency = true;
 		}
 		else if(data[0] == NORMAL){
-			FlashRoboUtil.exitEmergencyStop();
+			FlashRobotUtil.exitEmergencyStop();
 			emergency = false;
 		}
 		
@@ -55,7 +55,7 @@ public class EmergencyStopControl extends Sendable{
 
 	@Override
 	public void onConnection() {
-		emergency = FlashRoboUtil.inEmergencyStop();
+		emergency = FlashRobotUtil.inEmergencyStop();
 		changed = true;
 	}
 	@Override

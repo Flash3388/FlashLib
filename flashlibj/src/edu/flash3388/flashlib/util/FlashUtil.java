@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import edu.flash3388.flashlib.util.Log.LoggingType;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
@@ -42,13 +41,12 @@ public final class FlashUtil {
 	/**
 	 * The current version of FlashLib.
 	 */
-	public static final String VERSION = "1.0.1";
+	public static final String VERSION = "1.0.2";
 	
 	private FlashUtil(){}
 	
 	private static long startTime = 0;
 	private static Log mainLog;
-	private static Log.LoggingType defaultCreatingMode = Log.LoggingType.Stream;
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
 	private static final String architecture = System.getProperty("os.arch");
@@ -163,60 +161,24 @@ public final class FlashUtil {
 		if(startTime == 0)
 			startTime = time;
 	}
-	
 	/**
-	 * Initialized the main log of flashlib. Many features throughout the library log data to this log.
-	 * 
-	 * @param logType The {@link LoggingType} of the created log
-	 */
-	public static void setStart(LoggingType logType){
-		if(mainLog == null){
-			switch(logType){
-				case Buffered: 
-					mainLog = Log.createBufferedLog("flashlib");
-					break;
-				case Stream:
-					mainLog = Log.createStreamLog("flashlib");
-					break;
-			}
-		}
-	}
-	/**
-	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
-	 * The main log uses a default mode as the logs {@link LoggingType} which can be set in 
-	 * {@link #setLogCreatingType(LoggingType)} sting files.
-	 */
-	public static void setStart(){
-		setStart(defaultCreatingMode);
-	}
-	/**
-	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized by calling
-	 * {@link #setStart()}.
+	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized 
+	 * to a new log named "flashlib" and the log implementation is {@link SimpleStreamLog}.
 	 * 
 	 * @return the main {@link Log} used throughout flashlib.
 	 */
 	public static Log getLog(){
 		if(mainLog == null)
-			setStart();
+			mainLog = new SimpleStreamLog("flashlib");
 		return mainLog;
 	}
-
 	/**
-	 * Sets the default logging type for created log through FlashUtil. Used when creating log through 
-	 * {@link #createLog(String)}.
+	 * Sets the implementation of the main log.
 	 * 
-	 * @param mode the default logging type.
+	 * @param log the log to use for the flashlib main log
 	 */
-	public static void setLogCreatingType(LoggingType mode){
-		defaultCreatingMode = mode;
-	}
-	/**
-	 * Creates a new log using the default logging type set using {@link #setLogCreatingType(LoggingType)}.
-	 * @param name the name of the log
-	 * @return created log.
-	 */
-	public static Log createLog(String name){
-		return Log.createLogByType(name, defaultCreatingMode);
+	public static void setLog(Log log){
+		mainLog = log;
 	}
 
 	//--------------------------------------------------------------------

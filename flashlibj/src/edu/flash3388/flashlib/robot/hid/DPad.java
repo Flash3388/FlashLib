@@ -49,7 +49,7 @@ public class DPad {
 	}
 	
 	public int get(){
-		return RobotFactory.getHidInterface().getHIDPOV(stick, num);
+		return RobotFactory.getImplementation().hid().getHIDPOV(stick, num);
 	}
 	
 	public void refresh(){

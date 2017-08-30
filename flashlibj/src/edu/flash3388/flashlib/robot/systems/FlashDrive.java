@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
+import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.hid.HID;
@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.robot.hid.Stick;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashDrive extends SubSystem implements TankDriveSystem, HolonomicDriveSystem{
+public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicDriveSystem{
 
 	/**
 	 * Represents sides of the drive system.
@@ -758,7 +758,7 @@ public class FlashDrive extends SubSystem implements TankDriveSystem, HolonomicD
 	
 	private double limit(double speed){
 		if(voltageScaling)
-			speed = FlashRoboUtil.scaleVoltageBus(speed);
+			speed = FlashRobotUtil.scaleVoltageBus(speed);
 		
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
@@ -775,7 +775,7 @@ public class FlashDrive extends SubSystem implements TankDriveSystem, HolonomicD
 	 * </p>
 	 */
 	@Override
-	public SubSystem getSystem() {
+	public Subsystem getSystem() {
 		return this;
 	}
 

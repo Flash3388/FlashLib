@@ -30,14 +30,14 @@ public class Stick{
 	 * @return the x-axis
 	 */
 	public double getX() {
-		return RobotFactory.getHidInterface().getHIDAxis(stick, axisX);
+		return RobotFactory.getImplementation().hid().getHIDAxis(stick, axisX);
 	}
 	/**
 	 * Gets the value of the y-axis of the controller
 	 * @return the y-axis
 	 */
 	public double getY() {
-		return RobotFactory.getHidInterface().getHIDAxis(stick, axisY);
+		return RobotFactory.getImplementation().hid().getHIDAxis(stick, axisY);
 	}
 	
 	/**

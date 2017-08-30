@@ -1,11 +1,10 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.RobotState;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class IterativeSbc extends SbcRobot{
+public abstract class IterativeSBC extends SBCRobotBase{
 
 	private boolean stop = false;
 	private Log log;
@@ -18,31 +17,31 @@ public abstract class IterativeSbc extends SbcRobot{
 		byte lastObsState = -1;
 		byte state = StateSelector.STATE_DISABLED;
 		while (!stop) {
-			if(RobotState.inEmergencyStop()){
+			if(FlashRobotUtil.inEmergencyStop()){
 				log.save();
 				log.log("NEW STATE - EMERGENCY STOP");
 				disabledInit();
 				
-				while (!stop && RobotState.inEmergencyStop()) {
+				while (!stop && FlashRobotUtil.inEmergencyStop()) {
 					disabledPeriodic();
 					FlashUtil.delay(5);
 				}
 				continue;
 			}
 			
-			state = getCurrentState();
+			state = stateSelector().getState();
 			if(lastObsState < 0 || state != lastObsState){
 				log.save();
 				log.logTime("NEW STATE - "+state);
 				lastObsState = state;
-				if(isDisabled())
+				if(robot().isDisabled())
 					disabledInit();
 				else stateInit(state);
 			}
-			if(isDisabled())
+			if(robot().isDisabled())
 				disabledPeriodic();
 			else {
-				RobotFactory.runScheduler();
+				robot().scheduler().run();
 				statePeriodic(state);
 			}
 			

@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.rio;
+package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
