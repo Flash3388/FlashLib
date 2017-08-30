@@ -13,12 +13,6 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * terms (sometimes denoted P, I, and D respectively) which give their name to the controller type.
  * </p>
  * <p>
- * There are 2 types of control loops: 
- * <ul>
- * 	<li> {@link PidType#Displacement}: calculates PID for displacement input.</li>
- * 	<li> {@link PidType#Rate}: calculates PID for rate input.</li>
- * </ul>
- * <p>
  * 	{@link PidSource} provides feedback data from the feedback sensor.
  * </p>
  * @author Tom Tzook

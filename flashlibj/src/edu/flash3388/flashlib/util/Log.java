@@ -14,7 +14,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * <p>
- * Convenience class for logging states and errors into files, allowing for real-time and post-run code debugging.
+ * Class for logging states and errors into files, allowing for real-time and post-run code debugging.
  * There are two types of log: Stream or Buffered. Each offers different advantages and is useful for a different type of
  * software.
  * </p>
