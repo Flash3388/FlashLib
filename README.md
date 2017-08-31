@@ -1,7 +1,7 @@
 # FlashLib
 FlashLib is a robotics software development library for Java, originaly designed to improve and help FRC teams, but can work on other non-FRC platforms. Although currently available only for Java, we aim to make FlashLib available for C++ as well.
 
-The latest version of FlashLib is 1.0.1
+The latest version of FlashLib is 1.0.2
 
 - [Features](#features)
 - [Dependencies](#dependencies)
@@ -33,18 +33,15 @@ FlashLib depends on several libraries for its functionalities:
 - Robots working with the RoboRio platform require WPILib
 - Flashboard requires openCV 3.0.0 for its vision functionalities
 
-All of those libraries are available in the "libs" folder of their respective parts.
+All of those libraries are available in the "libs" folder.
 
 ## Building
 
-Building the library requires gradle. 
-To build the entire library, run the buildall script (bash for linux systems, batch for windows systems). 
-To build an individual part, run the build script in that part's folder.
+Building the library requires gradle 4.1. If you have it, run ```gradle build```.
+If you don't, run the gradle wrapper added to this project ```gradlew build```.
 
-You can find the binary files in the "build/libs" folder in each part's directory. Flashboard binary files are located under 
-flashboard/build/flashboard
-
-You can get gradle here: https://gradle.org/ (for free of course)
+You can find the binary files in the ```build/libs``` folder. Flashboard distribution folder is in ```build/flashboard``` ready to be
+used. To run flashboard, run ```run.bat``` for windows or ```run``` for linux which are located in the distribution folder.
 
 ## Code Of Conduct
 
