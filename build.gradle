@@ -70,9 +70,6 @@ project(':flashboard'){
 	task createFlashboardBuild{
 		copy {
 			from projectOutputFolder + 'libs/flashlib.jar'
-			into projectOutputFolder + 'flashboard/libs/'
-		}
-		copy {
 			from projectLibsFolder + 'opencv.jar'
 			into projectOutputFolder + 'flashboard/libs/'
 		}
