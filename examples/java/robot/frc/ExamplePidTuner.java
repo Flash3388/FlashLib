@@ -7,7 +7,6 @@ import edu.flash3388.flashlib.flashboard.PidTuner;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.frc.AMT10Encoder;
 import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
 import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -15,6 +14,7 @@ import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.wpi.first.wpilibj.Encoder;
 
 /*
  * An example for using the pid tunning and tracking of the flashboard. We will use pid to set the RPM of a 
@@ -30,7 +30,7 @@ public class ExamplePidTuner extends IterativeFRCRobot{
 	PidTuner pidtuner;
 	PidController pidcontroller;
 	
-	AMT10Encoder encoder;
+	Encoder encoder;
 	
 	DoubleProperty kp = ConstantsHandler.putNumber("kp", 0.0);
 	DoubleProperty ki = ConstantsHandler.putNumber("ki", 0.0);
@@ -53,11 +53,10 @@ public class ExamplePidTuner extends IterativeFRCRobot{
 		);
 		
 		/*
-		 * Creates the encoder which measures the rotation of the wheel. The model used is AMT10 which has a custom 
-		 * class in flashlib. We will create it in an incremental state only, not quadrature.
+		 * Creates the encoder which measures the rotation of the wheel. Creates a double source pointing to
+		 * the encoder rate to be used by the PID controller and pid tuner.
 		 */
-		encoder = new AMT10Encoder(0);
-		encoder.setAutomaticUpdate(true);
+		encoder = new Encoder(0, 1);
 		encoderValue = ()->encoder.getRate();
 		
 		/*

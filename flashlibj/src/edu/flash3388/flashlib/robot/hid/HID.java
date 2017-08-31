@@ -47,8 +47,8 @@ public interface HID {
 	Stick getStick();
 	
 	/**
-	 * Gets the D-Pad object wrapper for the POV on this device
-	 * @return the D-pad wrapper
+	 * Gets the POV object wrapper for the POV on this device
+	 * @return the POV wrapper
 	 */
-	DPad getPOV();
+	POV getPOV();
 }

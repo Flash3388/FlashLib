@@ -18,7 +18,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 
 	private Button[] buttons;
 	private int stick_num;
-	private DPad pov;
+	private POV pov;
 	private Stick stick;
 	
 	/**
@@ -36,7 +36,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 		buttons = new Button[buttonCount];
 		for(int i = 0; i < buttons.length; i++)
 			buttons[i] = new Button(stick, i+1);
-		pov = new DPad(stick, 0);
+		pov = new POV(stick, 0);
 		
 		next = head;
 		head = this;
@@ -132,7 +132,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DPad getPOV(){
+	public POV getPOV(){
 		return pov;
 	}
 	
@@ -143,7 +143,6 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	public void refresh(){
 		for(int i = 0; i < buttons.length; i++)
 			buttons[i].refresh();
-		pov.refresh();
 	}
 	/**
 	 * {@inheritDoc}

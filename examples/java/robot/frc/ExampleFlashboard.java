@@ -69,6 +69,11 @@ public class ExampleFlashboard extends IterativeFRCRobot{
 		 * is also updated to this port in its configuration, otherwise connection will not be successful.
 		 */
 		//initializer.flashboardInitData.camPort = port;
+		
+		/*
+		 * Sets the flashboard initialization data to null. Cancels the initialization of flashboard
+		 */
+		//initializer.flashboardInitData = null;
 	}
 	@Override
 	protected void initRobot() {
@@ -146,7 +151,7 @@ public class ExampleFlashboard extends IterativeFRCRobot{
 		 * Creates and attaches flashboard double properties. Creates double data sources pointing to the ultrasonics.
 		 */
 		Flashboard.putData("sonic1", ()->sonic1.getRangeMM());
-		Flashboard.putData("sonic1", ()->sonic2.getRangeMM());
+		Flashboard.putData("sonic2", ()->sonic2.getRangeMM());
 		
 		/*
 		 * Creates a slider infput from flashboard to update our filterSpeed. It updates our property directly.

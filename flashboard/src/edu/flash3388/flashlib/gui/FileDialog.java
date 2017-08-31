@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.gui;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 
-import edu.flash3388.flashlib.io.FileStream;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 public class FileDialog extends Stage{
 
 	private String filepath, path, extension;
-	private String[] files;
+	private File[] files;
 	private File file;
 	private boolean success;
 	private ListView<String> view;
@@ -35,7 +35,7 @@ public class FileDialog extends Stage{
 	
 	private void selectFile(int i){
 		if(i < 0) return;
-		filepath = path + files[i];
+		filepath = path + files[i].getName();
 		pathField.setText(filepath);
 	}
 	private void fieldPath(){
@@ -77,7 +77,12 @@ public class FileDialog extends Stage{
 	}
 	private void createSaveFileScene(String filename, String savePath, String extension){
 		setTitle("Save File");
-		files = FileStream.filesInFolder(savePath, extension);
+		files = new File(savePath).listFiles(new FilenameFilter(){
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith("."+extension);
+			}
+		});
 		view = new ListView<String>();
 		pathField = new TextField();
 		path = savePath;
@@ -86,8 +91,10 @@ public class FileDialog extends Stage{
 		
 		if(files == null)
 			new File(savePath).mkdirs();
-		else
-			view.getItems().addAll(files);
+		else{
+			for (File file : files)
+				view.getItems().add(file.getName());
+		}
 		view.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			selectFile(newValue.intValue());
 		});
@@ -122,7 +129,12 @@ public class FileDialog extends Stage{
 	}
 	private void createLoadFileScene(String loadPath, String extension){
 		setTitle("Load File");
-		files = FileStream.filesInFolder(loadPath, extension);
+		files = new File(loadPath).listFiles(new FilenameFilter(){
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith("."+extension);
+			}
+		});
 		view = new ListView<String>();
 		pathField = new TextField();
 		path = loadPath;
@@ -131,8 +143,10 @@ public class FileDialog extends Stage{
 		
 		if(files == null)
 			new File(loadPath).mkdirs();
-		else
-			view.getItems().addAll(files);
+		else{
+			for (File file : files)
+				view.getItems().add(file.getName());
+		}
 		view.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue)->{
 			selectFile(newValue.intValue());
 		});
@@ -177,9 +191,15 @@ public class FileDialog extends Stage{
 		browse.setOnAction((e)->{
 			File res = chooser.showDialog(this);
 			filepath = res.getAbsolutePath();
-			files = FileStream.filesInFolder(filepath);
+			files = new File(filepath).listFiles(new FilenameFilter(){
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.endsWith("."+extension);
+				}
+			});
 			view.getItems().clear();
-			view.getItems().addAll(files);
+			for (File file : files)
+				view.getItems().add(file.getName());
 			pathField.setText(filepath);
 		});
 		

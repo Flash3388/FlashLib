@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -1422,6 +1424,33 @@ public final class FlashUtil {
 			}
 		}
 		return null;
+	}
+	
+	//--------------------------------------------------------------------
+	//---------------------------FILE IO----------------------------------
+	//--------------------------------------------------------------------
+	
+	/**
+	 * Gets a {@link File} object for a file path. If any directories in the file
+	 * path do not exist, they are created. If the file does not exist, it is created.
+	 * 
+	 * @param filename the file path
+	 * @return a {@link File} object for a file path
+	 */
+	public static File getFile(String filename){
+        File file = new File(filename);
+        
+        File parent = file.getAbsoluteFile().getParentFile();
+        if (!parent.exists()) 
+            parent.mkdirs();
+        
+        if(!file.exists()){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+        }
+        
+        return file;
 	}
 	
 	//--------------------------------------------------------------------

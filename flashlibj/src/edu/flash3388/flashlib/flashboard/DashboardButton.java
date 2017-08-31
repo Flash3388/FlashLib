@@ -21,7 +21,7 @@ public class DashboardButton extends Sendable{
 	public DashboardButton(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
 		
-		button = new Button(name, -1, -1);
+		button = new Button(-1, -1);
 	}
 
 	public void whenPressed(Action action){
@@ -35,7 +35,6 @@ public class DashboardButton extends Sendable{
 			button.setPressed(true);
 		}else if(data[0] == UP){
 			button.setPressed(false);
-			button.stopAll();
 			running = false;
 		}
 	}
@@ -54,7 +53,6 @@ public class DashboardButton extends Sendable{
 	@Override
 	public void onConnectionLost(){
 		button.setPressed(false);
-		button.stopAll();
 		running = false;
 	}
 }

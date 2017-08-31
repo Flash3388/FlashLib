@@ -1,14 +1,12 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 /**
  * This represents a D-Pad from and XBox controller.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad {
+public class DPad extends POV{
 	/**
 	 * The Up button on the D-Pad
 	 */
@@ -26,11 +24,6 @@ public class DPad {
 	 */
 	public final POVButton Left;
 	
-	public final POVButton POV;
-	
-	private int stick;
-	private int num;
-	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
 	 * 
@@ -38,18 +31,12 @@ public class DPad {
 	 * @param num the number of the D-Pad on the controller.
 	 */
 	public DPad(int stick, int num){
-		this.stick = stick;
-		this.num = num;
+		super(stick, num);
 		
-		POV = new POVButton("POV", stick, num, POVButton.Type.ALL);
-		Up = new POVButton("POV Up", stick, num, POVButton.Type.UP);
-		Down = new POVButton("POV Down", stick, num, POVButton.Type.DOWN);
-		Right = new POVButton("POV Right", stick, num, POVButton.Type.RIGHT);
-		Left = new POVButton("POV Left", stick, num, POVButton.Type.LEFT);
-	}
-	
-	public int get(){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDPOV(stick, num);
+		Up = new POVButton(stick, num, POVButton.Type.UP);
+		Down = new POVButton(stick, num, POVButton.Type.DOWN);
+		Right = new POVButton(stick, num, POVButton.Type.RIGHT);
+		Left = new POVButton(stick, num, POVButton.Type.LEFT);
 	}
 	
 	public void refresh(){
@@ -58,6 +45,5 @@ public class DPad {
 		Down.set(degrees);
 		Left.set(degrees);
 		Right.set(degrees);
-		POV.set(degrees);
 	}
 }

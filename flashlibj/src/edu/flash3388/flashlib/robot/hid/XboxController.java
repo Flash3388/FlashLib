@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  */
 public class XboxController extends HIDSendable implements HID, Runnable{
 	
-	private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
+	//private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
 	
 	private int channel;
 	private Button[] buttons = new Button[10];
@@ -32,7 +32,8 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	
 	public final DPad DPad;
 	
-	public final Triggers Triggers;
+	public final Trigger RightTrigger;
+	public final Trigger LeftTrigger;
 	
 	private XboxController next;
 	
@@ -60,10 +61,11 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 		RightStick = new Stick(channel, 4, 5);
 		
 		DPad = new DPad(channel, 0);
-		Triggers = new Triggers(channel, 2, 3);
+		RightTrigger = new Trigger(channel, 3);
+		LeftTrigger = new Trigger(channel, 2);
 		
 		for(int i = 0; i < buttons.length; i++)
-    		buttons[i] = new Button(buttonNames[i], channel, i+1);
+    		buttons[i] = new Button(channel, i+1);//buttonNames[i]
 		
 		A = buttons[0];
 	    B = buttons[1];
@@ -99,10 +101,16 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	public DPad getDPad() { return DPad; }
 	
 	/**
-	 * Gets the triggers represented in a class (RT, LT)
-	 * @return The triggers on the controller
+	 * Gets the trigger representing the Xbox left trigger (LT)
+	 * @return left trigger
 	 */
-	public Triggers getTriggers() { return Triggers; }
+	public Trigger getLeftTrigger() { return LeftTrigger; }
+	
+	/**
+	 * Gets the trigger representing the Xbox right trigger (RT)
+	 * @return right trigger
+	 */
+	public Trigger getRightTrigger() { return RightTrigger; }
 	
 	/**
 	 * {@inheritDoc}
@@ -154,7 +162,7 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DPad getPOV() {
+	public POV getPOV() {
 		return getDPad();
 	}
 	
@@ -166,7 +174,6 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 		for(int i = 0; i < buttons.length; i++)
 			buttons[i].refresh();
 		DPad.refresh();
-		Triggers.refresh();
 	}
 	
 	/**

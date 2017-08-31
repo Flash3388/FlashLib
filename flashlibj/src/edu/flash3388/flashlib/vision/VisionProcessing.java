@@ -20,8 +20,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.flash3388.flashlib.io.FileStream;
-
 /**
  * VisionProcessing is the basis for the dynamic vision system. It provides you with the ability to load different
  * vision filters that will be used when running the vision runner. It is possible to use different libraries for vision.
@@ -253,7 +251,7 @@ public final class VisionProcessing {
 			throw new RuntimeException("Missing base tag: vision");
 		name = ((Element)base.item(0)).getAttribute("name");
 		if(name == null)
-			name = FileStream.fileName(file);
+			name = infile.getName();
 		
 		NodeList filterList = doc.getElementsByTagName("filter");
 		for (int i = 0; i < filterList.getLength(); i++) {

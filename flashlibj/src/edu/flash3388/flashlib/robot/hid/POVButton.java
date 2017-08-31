@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.robot.RobotFactory;
 
 /**
  * Representing a button of a POV such as a D-Pad.
@@ -52,30 +53,27 @@ public class POVButton extends Button {
 		 * The Left button on a D-Pad.
 		 */
 		public static final Type LEFT = new Type(-4, 255, 315);
-		
-		public static final Type ALL = new Type(-5, 0, 360);
 	}
 	
 	private Type type;
-	private POVEvent eventPov;
 	
 	/**
 	 * Creates a new instance of POVButton. The created button is configured to the given type.
 	 * 
-	 * @param name The name of the button, just for representation.
 	 * @param stick The joystick the button belongs to.
 	 * @param num the pov number
 	 * @param t The type of the POVButton.
 	 */
-	public POVButton(String name, int stick, int num, Type t) {
-		super(name, stick, num);
+	public POVButton(int stick, int num, Type t) {
+		super(stick, num);
 		type = t;
-		eventPov = new POVEvent(name, stick, num, t);
-		super.event = eventPov;
 	}
 	
-	public void set(int degrees){
-		eventPov.degrees = degrees;
+	void set(int degrees){
 		super.set(type.get(degrees));
+	}
+	
+	public void refresh(){
+		set(RobotFactory.getImplementation().getHIDInterface().getHIDPOV(getChannel(), getButtonNumber()));
 	}
 }

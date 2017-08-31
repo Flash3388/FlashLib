@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 /**
  * Represents a simple 2-axis stick from a controller: X-Axis, Y-Axis.
  * 
@@ -10,7 +8,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  */
 public class Stick{
 
-	private int stick, axisX, axisY;
+	private Trigger trigX, trigY;
 	
 	/**
 	 * Creates a new stick for a controller.
@@ -20,9 +18,23 @@ public class Stick{
 	 * @param axisY the index of the y-axis
 	 */
 	public Stick(int stick, int axisX, int axisY){
-		this.axisX = axisX;
-		this.stick = stick;
-		this.axisY = axisY;
+		trigX = new Trigger(stick, axisX);
+		trigY = new Trigger(stick, axisY);
+	}
+	
+	/**
+	 * Gets the x axis {@link Trigger} object.
+	 * @return x axis
+	 */
+	public Trigger getXTrigger(){
+		return trigX;
+	}
+	/**
+	 * Gets the y axis {@link Trigger} object.
+	 * @return y axis
+	 */
+	public Trigger getYTrigger(){
+		return trigY;
 	}
 	
 	/**
@@ -30,14 +42,14 @@ public class Stick{
 	 * @return the x-axis
 	 */
 	public double getX() {
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick, axisX);
+		return trigX.get();
 	}
 	/**
 	 * Gets the value of the y-axis of the controller
 	 * @return the y-axis
 	 */
 	public double getY() {
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick, axisY);
+		return trigY.get();
 	}
 	
 	/**
