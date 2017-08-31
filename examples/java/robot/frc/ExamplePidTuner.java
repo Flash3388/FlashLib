@@ -7,10 +7,10 @@ import edu.flash3388.flashlib.flashboard.PidTuner;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.frc.AMT10Encoder;
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
+import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.AMT10Encoder;
-import edu.flash3388.flashlib.robot.rio.FlashRio;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * rotating shooting system with one motor. Although it is possible to use any PID controller you wish, we 
  * will use the one provided by flashlib.
  */
-public class ExamplePidTuner extends FlashRio{
+public class ExamplePidTuner extends IterativeFRCRobot{
 
 	SingleMotorSystem shooter;
 	
@@ -29,6 +29,8 @@ public class ExamplePidTuner extends FlashRio{
 	
 	PidTuner pidtuner;
 	PidController pidcontroller;
+	
+	AMT10Encoder encoder;
 	
 	DoubleProperty kp = ConstantsHandler.putNumber("kp", 0.0);
 	DoubleProperty ki = ConstantsHandler.putNumber("ki", 0.0);
@@ -47,14 +49,14 @@ public class ExamplePidTuner extends FlashRio{
 		 * Creating the shooter system. Wraps the speed controller in a RioControllers object. 
 		 */
 		shooter = new SingleMotorSystem(
-				new RioControllers(motor)
+				new FRCSpeedControllers(motor)
 		);
 		
 		/*
 		 * Creates the encoder which measures the rotation of the wheel. The model used is AMT10 which has a custom 
 		 * class in flashlib. We will create it in an incremental state only, not quadrature.
 		 */
-		AMT10Encoder encoder = new AMT10Encoder(0);
+		encoder = new AMT10Encoder(0);
 		encoder.setAutomaticUpdate(true);
 		encoderValue = ()->encoder.getRate();
 		

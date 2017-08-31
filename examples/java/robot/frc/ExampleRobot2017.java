@@ -5,9 +5,9 @@ import com.ctre.CANTalon;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.SystemAction;
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
+import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.FlashRio;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import edu.flash3388.flashlib.robot.systems.Systems;
@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.VictorSP;
  * 
  * This time we use the FlashRio base, meaning that the FlashLib scheduler is operational.
  */
-public class ExampleRobot2017 extends FlashRio{
+public class ExampleRobot2017 extends IterativeFRCRobot{
 
 	MecanumDrive driveTrain;
 	SingleMotorSystem firingSystem;
@@ -88,10 +88,10 @@ public class ExampleRobot2017 extends FlashRio{
 		 * Creating the mecanum drive. Wrapping each controller into a RioControllers object.
 		 */
 		driveTrain = new MecanumDrive(
-				new RioControllers(frontRight), 
-				new RioControllers(rearRight), 
-				new RioControllers(frontLeft), 
-				new RioControllers(rearLeft)
+				new FRCSpeedControllers(frontRight), 
+				new FRCSpeedControllers(rearRight), 
+				new FRCSpeedControllers(frontLeft), 
+				new FRCSpeedControllers(rearLeft)
 		);
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
@@ -118,7 +118,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * Creates the firing system. Wraps the speed controller in a RioControllers object
 		 */
 		firingSystem = new SingleMotorSystem(
-				new RioControllers(firingController)
+				new FRCSpeedControllers(firingController)
 		);
 		/*
 		 * Sets the default action of the firing system. 
@@ -145,7 +145,7 @@ public class ExampleRobot2017 extends FlashRio{
 		 * Creates the climbing system, Wraps the speed controller into a RioControllers object.
 		 */
 		climbingSystem = new SingleMotorSystem(
-				new RioControllers(climbingController)
+				new FRCSpeedControllers(climbingController)
 		);
 		
 		/*

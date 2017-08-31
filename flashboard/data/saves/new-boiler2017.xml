@@ -10,9 +10,9 @@
 		<param name="max3" type="Int">255</param>
 	</filter>
 	<analysis-creator name="edu.flash3388.flashlib.vision.TemplateAnalysisCreator">
+		<param name="camFov" type="Double">0.0</param>
 		<param name="targetWidth" type="Double">0.0</param>
 		<param name="targetHeight" type="Double">0.0</param>
-		<param name="camFov" type="Double">0.0</param>
 		<param name="distanceHeight" type="Boolean">false</param>
 		<param name="scaleFactor" type="Double">0.9</param>
 		<param name="method" type="Int">3</param>

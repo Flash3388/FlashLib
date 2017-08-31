@@ -25,9 +25,9 @@
 		<param name="minScore" type="Double">0.1</param>
 	</filter>
 	<analysis-creator name="edu.flash3388.flashlib.vision.GroupedAnalysisCreator">
+		<param name="camFov" type="Double">32.0</param>
 		<param name="targetWidth" type="Double">20.0</param>
 		<param name="targetHeight" type="Double">20.0</param>
-		<param name="camFov" type="Double">32.0</param>
 		<param name="distanceHeight" type="Boolean">false</param>
 	</analysis-creator>
 </vision>

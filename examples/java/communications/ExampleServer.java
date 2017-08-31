@@ -43,7 +43,11 @@ public class ExampleServer {
 			@Override
 			public Sendable create(String name, byte type) {
 				if(type == 0)// when the type is '0' we expect to use an echo sendable.
-					return new EchoSendable(name, type, false);
+					/*
+					 * The first boolean variable indicates that this sendable waits for data first and then sends. The second indicates we
+				 	 * want to print received data.
+					 */
+					return new EchoSendable(name, type, false, true);
 				return null;
 			}
 		});

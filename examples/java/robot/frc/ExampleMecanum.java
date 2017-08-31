@@ -2,8 +2,8 @@ package examples.robot.frc;
 
 import com.ctre.CANTalon;
 
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -31,10 +31,10 @@ public class ExampleMecanum extends SampleRobot{
 		 * Creating the mecanum drive. Wrapping each controller into a RioControllers object.
 		 */
 		driveTrain = new MecanumDrive(
-				new RioControllers(frontRight), 
-				new RioControllers(rearRight), 
-				new RioControllers(frontLeft), 
-				new RioControllers(rearLeft)
+				new FRCSpeedControllers(frontRight), 
+				new FRCSpeedControllers(rearRight), 
+				new FRCSpeedControllers(frontLeft), 
+				new FRCSpeedControllers(rearLeft)
 		);
 		
 		/*

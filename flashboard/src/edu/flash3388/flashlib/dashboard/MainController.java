@@ -394,7 +394,9 @@ public class MainController implements Initializable{
 		}
 		if(Dashboard.getVision().getProcessing() != null){
 			FileChooser chooser = new FileChooser();
-			chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+			ExtensionFilter extFilter = new ExtensionFilter("Vision File", ".xml");
+			chooser.getExtensionFilters().add(extFilter);
+			chooser.setSelectedExtensionFilter(extFilter);
 			chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
 			File file = chooser.showSaveDialog(Dashboard.getPrimary());
 			if(file == null) return;
@@ -409,7 +411,9 @@ public class MainController implements Initializable{
 			return;
 		}
 		FileChooser chooser = new FileChooser();
-		chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+		ExtensionFilter extFilter = new ExtensionFilter("Vision File", ".xml");
+		chooser.getExtensionFilters().add(extFilter);
+		chooser.setSelectedExtensionFilter(extFilter);
 		chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
 		File file = chooser.showOpenDialog(Dashboard.getPrimary());
 		if(file == null) return;

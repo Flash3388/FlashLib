@@ -6,9 +6,9 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.SystemAction;
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
+import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.FlashRio;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.MecanumDrive;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Ultrasonic;
  * Shows the ultasonic data on the flashboard. Uses input from flashboard to change a filter for our
  * drive system.
  */
-public class ExampleFlashboard extends FlashRio{
+public class ExampleFlashboard extends IterativeFRCRobot{
 
 	MecanumDrive driveTrain;
 	
@@ -36,7 +36,7 @@ public class ExampleFlashboard extends FlashRio{
 		 * Sets the flashboard to use UDP protocol and not TCP (which is the default). You must make sure
 		 * the flashboard software is set to use UDP or they won't be able to connect to each other.
 		 */
-		 //Flashboard.setProtocolUdp();
+		//initializer.flashboardInitData.tcp = false;
 		
 		/*
 		 * Sets the initialization mode of the Flashboard control. There are 2 initialization parameters:
@@ -53,7 +53,7 @@ public class ExampleFlashboard extends FlashRio{
 		 * 
 		 * By default, the initCode is Flashboard.INIT_FULL
 		 */
-		//Flashboard.setInitMode(mode);
+		//initializer.flashboardInitData.initMode = Flashboard.INIT_COMM;
 		
 		/*
 		 * Sets the local communications server port. If the initialization mode when Flashboard initializes
@@ -61,14 +61,14 @@ public class ExampleFlashboard extends FlashRio{
 		 * is described by Flashboard.PORT_ROBOT. It is necessary to make sure the flashboard software
 		 * is also updated to this port in its configuration, otherwise connection will not be successful.
 		 */
-		//Flashboard.setCommPort(port);
+		//initializer.flashboardInitData.commPort = port;
 		/*
 		 * Sets the local camera server port. If the initialization mode when Flashboard initializes
 		 * does not initialize the camera server, this will have no effect. The default port
 		 * is described by Flashboard.CAMERA_PORT_ROBOT. It is necessary to make sure the flashboard software
 		 * is also updated to this port in its configuration, otherwise connection will not be successful.
 		 */
-		//Flashboard.setCamPort(port);
+		//initializer.flashboardInitData.camPort = port;
 	}
 	@Override
 	protected void initRobot() {
@@ -85,10 +85,10 @@ public class ExampleFlashboard extends FlashRio{
 		 * Creating the mecanum drive. Wrapping each controller into a RioControllers object.
 		 */
 		driveTrain = new MecanumDrive(
-				new RioControllers(frontRight), 
-				new RioControllers(rearRight), 
-				new RioControllers(frontLeft), 
-				new RioControllers(rearLeft)
+				new FRCSpeedControllers(frontRight), 
+				new FRCSpeedControllers(rearRight), 
+				new FRCSpeedControllers(frontLeft), 
+				new FRCSpeedControllers(rearLeft)
 		);
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
