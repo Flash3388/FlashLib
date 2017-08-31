@@ -1,0 +1,3 @@
+include 'flashlibj', 'flashboard'
+
+rootProject.name = 'flashlib'

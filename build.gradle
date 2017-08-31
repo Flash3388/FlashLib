@@ -1,0 +1,109 @@
+subprojects {
+    apply plugin: 'java'
+	
+	buildDir = projectOutputFolder
+	
+	repositories {
+		flatDir {
+			dirs projectLibsFolder
+		}
+	}
+}
+project(':flashlibj'){
+	sourceSets{
+		main{
+			java{
+				srcDir 'src'
+			}
+			
+		}
+	}
+	dependencies {
+        compile name: 'WPILib'
+		compile name: 'opencv'
+		compile name: 'bulldog-core-0.3.0-SNAPSHOT'
+		compile name: 'bulldog-devices-0.3.0-SNAPSHOT'
+		compile name: 'RXTXcomm'
+		compile name: 'jinput-2.0.5'
+		compile name: 'niVisionWPI'
+		compile name: 'CANJaguar'
+		compile name: 'TalonSRXLibJava'
+    }
+	jar {
+		baseName 'flashlib'
+		//destinationDir project.file('../build')
+	}
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
+	task javadocJar(type: Jar, dependsOn: javadoc) {
+		classifier = 'javadoc'
+		from javadoc.destinationDir
+	}
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
+}
+
+project(':flashboard'){
+	sourceSets{
+		main{
+			java{
+				srcDir 'src'
+			}
+			resources {
+				srcDirs 'src'
+				includes = ["**/*.fxml"]
+			}
+		}
+	}
+	dependencies {
+        compile project(':flashlibj')
+		compile name: 'jsch-0154'
+		compile name: 'opencv'
+    }
+	jar {
+		manifest {
+			attributes (
+					'Main-Class': flashboardMainClass,
+					'Class-Path': '. libs/flashlib.jar libs/jsch-0154.jar libs/opencv.jar'
+			)
+		}
+	}
+	task createFlashboardBuild{
+		copy {
+			from projectOutputFolder + 'libs/flashlib.jar'
+			into projectOutputFolder + 'flashboard/libs/'
+		}
+		copy {
+			from projectLibsFolder + 'jsch-0154.jar'
+			into projectOutputFolder + 'flashboard/libs/'
+		}
+		copy {
+			from projectLibsFolder + 'opencv.jar'
+			into projectOutputFolder + 'flashboard/libs/'
+		}
+		copy {
+			from flashboardNativesFolder
+			into projectOutputFolder + 'flashboard/libs/'
+		}
+		copy {
+			from fileTree(flashboardDistributionFolder)
+			into projectOutputFolder + 'flashboard/'
+		}
+		
+		doLast{
+			copy {
+				from projectOutputFolder + 'libs/flashboard.jar'
+				into projectOutputFolder + 'flashboard/'
+			}
+			delete projectOutputFolder + 'libs/flashboard.jar'
+			println ('created flashboard build')
+		}
+	}
+	
+	build.finalizedBy(createFlashboardBuild)
+}
+

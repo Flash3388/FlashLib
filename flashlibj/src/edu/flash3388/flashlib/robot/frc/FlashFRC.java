@@ -246,6 +246,7 @@ public abstract class FlashFRC extends SampleRobot implements Robot{
 	
 	/**
 	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.
+	 * @param initializer the initialization data
 	 */
 	protected void preInit(RobotInitializer initializer){}
 	/**
