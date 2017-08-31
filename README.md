@@ -28,10 +28,10 @@ The library provides several different tools that can be both used for a robot d
 ## Dependencies
 
 FlashLib depends on several libraries for its functionalities:
-- The openCV implementation of the vision system uses openCV 3.0.0
-- The openCV implementation for camera interfacing uses openCV 3.0.0
-- Robots working with the RoboRio platform require WPILib
-- Flashboard requires openCV 3.0.0 for its vision functionalities
+- The openCV implementation of the vision system uses openCV
+- The openCV implementation for camera interfacing uses openCV
+- FRC robots using FlashLib require WPILib
+- Flashboard requires openCV for its vision functionalities
 
 All of those libraries are available in the "libs" folder.
 
