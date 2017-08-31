@@ -215,7 +215,6 @@ public class Dashboard extends Application {
 	public static final String FOLDER_LIBS_NATIVES = "libs/natives/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
-	private static final String REMOTE_HOSTS_FILE = FOLDER_DATA+"hosts.ini";
 	
 	
 	private static boolean emptyProperty(String prop){
@@ -244,7 +243,6 @@ public class Dashboard extends Application {
 	private static void loadSettings(){
 		try {
 			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
-			Remote.loadHosts(REMOTE_HOSTS_FILE);
 		} catch (Exception e) {
 			log.reportError(e.getMessage());
 		}
@@ -254,7 +252,6 @@ public class Dashboard extends Application {
 	}
 	private static void saveSettings(){
 		ConstantsHandler.saveConstantsToXml(SETTINGS_FILE);
-		Remote.saveHosts(REMOTE_HOSTS_FILE);
 	}
 
 	//--------------------------------------------------------------------
@@ -457,7 +454,6 @@ public class Dashboard extends Application {
 		
 		setupValuePath();
 		log.log("FlashLib version: "+FlashUtil.VERSION);
-		Remote.initializeJSCH();
 		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
@@ -541,7 +537,6 @@ public class Dashboard extends Application {
 			log.log("Stopping communications...");
 			communications.close();
 		}
-		Remote.closeSessions();
 		if(updateThread.isAlive()){
 			try {
 				updateThread.join();

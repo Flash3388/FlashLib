@@ -70,14 +70,14 @@ public class Button implements ButtonListener, BooleanSource{
 		@Override
 		void start() {
 			if(!running){
-				RobotFactory.getImplementation().scheduler().addTask(task);
+				RobotFactory.getImplementation().getScheduler().addTask(task);
 				running = true;
 			}
 		}
 		@Override
 		void cancel() {
 			if(running){
-				RobotFactory.getImplementation().scheduler().remove(task);
+				RobotFactory.getImplementation().getScheduler().remove(task);
 				running = false;
 			}
 		}
@@ -352,6 +352,6 @@ public class Button implements ButtonListener, BooleanSource{
 	}
 	
 	public void refresh(){
-		set(RobotFactory.getImplementation().hid().getHIDButton(stick, number));
+		set(RobotFactory.getImplementation().getHIDInterface().getHIDButton(stick, number));
 	}
 }

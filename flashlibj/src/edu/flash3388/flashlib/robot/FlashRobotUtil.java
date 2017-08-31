@@ -41,7 +41,7 @@ public class FlashRobotUtil {
 		
 		FlashUtil.getLog().logTime("!EMERGENCY STOP!");
 		
-		RobotFactory.getImplementation().scheduler().setDisabled(true);
+		RobotFactory.getImplementation().getScheduler().setDisabled(true);
 		if(!RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.disableAll();
 		
@@ -56,7 +56,7 @@ public class FlashRobotUtil {
 		
 		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED");
 		
-		RobotFactory.getImplementation().scheduler().setDisabled(false);
+		RobotFactory.getImplementation().getScheduler().setDisabled(false);
 		if(!RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.enableAll();
 		

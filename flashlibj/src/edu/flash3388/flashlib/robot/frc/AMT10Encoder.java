@@ -104,10 +104,10 @@ public class AMT10Encoder implements Runnable, PIDSource, Encoder{
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
 		if(auto){
-			RobotFactory.getImplementation().scheduler().addTask(this);
+			RobotFactory.getImplementation().getScheduler().addTask(this);
 			return true;
 		}else if(!auto){
-			RobotFactory.getImplementation().scheduler().remove(this);
+			RobotFactory.getImplementation().getScheduler().remove(this);
 			return true;
 		}
 		return false;

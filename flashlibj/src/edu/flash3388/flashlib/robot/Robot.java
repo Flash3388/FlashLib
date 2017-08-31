@@ -8,9 +8,9 @@ package edu.flash3388.flashlib.robot;
  */
 public interface Robot {
 	
-	Scheduler scheduler();
+	Scheduler getScheduler();
 	
-	HIDInterface hid();
+	HIDInterface getHIDInterface();
 	
 	boolean isDisabled();
 	

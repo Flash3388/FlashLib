@@ -1,14 +1,13 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import com.ctre.CANTalon;
-
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
-import edu.wpi.first.wpilibj.Jaguar;
+import edu.flash3388.flashlib.util.FlashUtil;
+
 import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Victor;
+
+import com.ctre.CANTalon;
 
 /**
  * Wrapper for speed controllers in WPILib to use in FlashLib.
@@ -17,79 +16,17 @@ import edu.wpi.first.wpilibj.Victor;
  * @since FlashLib 1.0.0
  */
 public class FRCSpeedControllers implements FlashSpeedController, ModableMotor{
-
-	/**
-	 * Enumeration for types of speed controllers available.
-	 * @author Tom Tzook
-	 * @since FlashLib 1.0.0
-	 */
-	public static enum ControllerType {
-		Talon, Jaguar, Victor, CANTalon, CANJaguar
-	}
 	
 	private SpeedController[] motor_controllers;
 	private boolean brakeMode = false, inverted = false;
 	
-	/**
-	 * Creates a new wrapper for a speed controller of a given type.
-	 * 
-	 * @param c the port 
-	 * @param t the type
-	 */
-	public FRCSpeedControllers(int c, ControllerType t){
-		this(controllerFromType(t, c));
-	}
-	/**
-	 * Creates a new wrapper for 2 speed controllers of the same type.
-	 * 
-	 * @param front the first port 
-	 * @param back the second port
-	 * @param t the type
-	 */
-	public FRCSpeedControllers(int front, int back, ControllerType t){
-		this(controllerFromType(t, front), controllerFromType(t, back));
-	}
-	/**
-	 * Creates a new wrapper for 2 speed controllers of given types.
-	 * @param front first port
-	 * @param tf first type
-	 * @param back second port
-	 * @param tb second type
-	 */
-	public FRCSpeedControllers(int front, ControllerType tf, int back, ControllerType tb){
-		this(controllerFromType(tf, front), controllerFromType(tb, back));
-	}
-	/**
-	 * Creates a new wrapper for 2 speed controllers of type {@link ControllerType#Talon}.
-	 * 
-	 * @param front the first port 
-	 * @param back the second port
-	 */
-	public FRCSpeedControllers(int front, int back){
-		this(controllerFromType(ControllerType.Talon, front), controllerFromType(ControllerType.Talon, back));
-	}
 	/**
 	 * Creates a new wrapper for speed controllers.
 	 * 
 	 * @param controllers array of WPILib {@link SpeedController}
 	 */
 	public FRCSpeedControllers(SpeedController...controllers) {
-		motor_controllers = new SpeedController[controllers.length];
-		for (int i = 0; i < controllers.length; i++)
-			motor_controllers[i] = controllers[i];
-		enableBrakeMode(false);
-		setInverted(false);
-	}
-	/**
-	 * Creates a new wrapper for speed controllers of the same type.
-	 * 
-	 * @param t the type of controllers
-	 * @param controllers array of ports.
-	 */
-	public FRCSpeedControllers(ControllerType t, int...controllers){
-		motor_controllers = new SpeedController[controllers.length];
-		for (int i = 0; i < controllers.length; i++)
-			motor_controllers[i] = controllerFromType(t, controllers[i]);
+		motor_controllers = FlashUtil.copy(controllers);
 		enableBrakeMode(false);
 		setInverted(false);
 	}
@@ -217,27 +154,5 @@ public class FRCSpeedControllers implements FlashSpeedController, ModableMotor{
 	@Override
 	public boolean inBrakeMode() {
 		return brakeMode;
-	}
-	
-	/**
-	 * Creates a WPILib speed controller by type and port.
-	 * 
-	 * @param t the type
-	 * @param channel the port
-	 * @return a new speed controller
-	 */
-	public static SpeedController controllerFromType(ControllerType t, int channel){
-		switch(t){
-			case CANTalon:
-				return new CANTalon(channel);
-			case Jaguar:
-				return new Jaguar(channel);
-			case Talon:
-				return new Talon(channel);
-			case Victor:
-				return new Victor(channel);
-			default:
-				return null;
-		}
 	}
 }

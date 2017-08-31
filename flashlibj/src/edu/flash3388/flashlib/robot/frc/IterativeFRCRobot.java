@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.util.Log;
  * @since FlashLib 1.0.0
  * @see SampleRobot
  */
-public abstract class FlashFRC extends SampleRobot implements Robot{
+public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	
 	protected static class RobotInitializer{
 		public boolean logsEnabled = false;
@@ -79,7 +79,7 @@ public abstract class FlashFRC extends SampleRobot implements Robot{
 		warningVoltage = initializer.warningVoltage;
 		
 		initRobot();
-		log.logTime("Robot initialized");
+		log.logTime("Robot initialized", "Robot");
 	}
 	@Override
 	public final void robotMain() {
@@ -106,6 +106,7 @@ public abstract class FlashFRC extends SampleRobot implements Robot{
 				disabledInit();
 				
 				while(isDisabled() && !inEmergencyStop()){
+					schedulerImpl.run();
 					disabledPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -187,7 +188,7 @@ public abstract class FlashFRC extends SampleRobot implements Robot{
 	private void logNewState(String state){
 		if(!logsEnabled)
 			return;
-		log.logTime("NEW STATE - "+state);
+		log.logTime("NEW STATE - "+state, "Robot");
 		powerLog.logTime("New State: "+state+" >> Voltage: "+m_ds.getBatteryVoltage(), "Robot",
 				powerLogTime());
 		log.save();
@@ -231,11 +232,11 @@ public abstract class FlashFRC extends SampleRobot implements Robot{
 
 	
 	@Override
-	public Scheduler scheduler() {
+	public Scheduler getScheduler() {
 		return schedulerImpl;
 	}
 	@Override
-	public HIDInterface hid() {
+	public HIDInterface getHIDInterface() {
 		return hidImpl;
 	}
 	@Override

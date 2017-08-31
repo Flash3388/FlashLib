@@ -70,14 +70,14 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * @return the z axis value
 	 */
 	public double getZ(){
-		return RobotFactory.getImplementation().hid().getHIDAxis(stick_num, Z);
+		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, Z);
 	}
 	/**
 	 * Gets the throttle axis value of the joystick
 	 * @return the throttle axis value
 	 */
 	public double getThrottle(){
-		return RobotFactory.getImplementation().hid().getHIDAxis(stick_num, THROTTLE);
+		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, THROTTLE);
 	}
 	
 	/**
@@ -85,14 +85,14 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getImplementation().hid().getHIDAxis(stick_num, axis);
+		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getImplementation().hid().getHIDButton(stick_num, button);
+		return RobotFactory.getImplementation().getHIDInterface().getHIDButton(stick_num, button);
 	}
 	/**
 	 * {@inheritDoc}

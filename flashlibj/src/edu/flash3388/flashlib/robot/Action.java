@@ -24,7 +24,6 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * There are many different types of wrapper for action. Those wrapper allows for the modification of an action
  * for externally without changing the defined parameters of it:
  * <ul>
- *  <li> {@link ActionCommand}: wraps an action inside a WPILib command</li>
  * 	<li> {@link TimedAction}: wraps an action and sets a timeout for it</li>
  *  <li> {@link SystemAction}: wraps an action and sets a system requirement for it</li>
  *  <li> {@link ActionGroup}: a series of actions to be executed at a specified order</li>
@@ -80,7 +79,7 @@ public abstract class Action{
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && RobotFactory.getImplementation().scheduler().add(this)){
+		if(!running && RobotFactory.getImplementation().getScheduler().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;
