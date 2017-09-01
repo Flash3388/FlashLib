@@ -8,32 +8,32 @@ package edu.flash3388.flashlib.robot.hid;
  */
 public class Stick{
 
-	private Trigger trigX, trigY;
+	private Axis trigX, trigY;
 	
 	/**
 	 * Creates a new stick for a controller.
 	 * 
-	 * @param stick the stick index
+	 * @param hid the HID
 	 * @param axisX the index of the x-axis
 	 * @param axisY the index of the y-axis
 	 */
-	public Stick(int stick, int axisX, int axisY){
-		trigX = new Trigger(stick, axisX);
-		trigY = new Trigger(stick, axisY);
+	public Stick(HID hid, int axisX, int axisY){
+		trigX = new Axis(hid, axisX);
+		trigY = new Axis(hid, axisY);
 	}
 	
 	/**
-	 * Gets the x axis {@link Trigger} object.
+	 * Gets the x axis {@link Axis} object.
 	 * @return x axis
 	 */
-	public Trigger getXTrigger(){
+	public Axis getXTrigger(){
 		return trigX;
 	}
 	/**
-	 * Gets the y axis {@link Trigger} object.
+	 * Gets the y axis {@link Axis} object.
 	 * @return y axis
 	 */
-	public Trigger getYTrigger(){
+	public Axis getYTrigger(){
 		return trigY;
 	}
 	

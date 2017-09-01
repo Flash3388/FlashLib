@@ -1,30 +1,29 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.util.beans.IntegerSource;
 
 public class POV implements IntegerSource{
 
-	private int stick;
+	private HID hid;
 	private int num;
 	
 	/**
 	 * Creates a POV wrapper object
 	 * 
-	 * @param stick The Joystick the D-Pad is on.
-	 * @param num the number of the D-Pad on the controller.
+	 * @param hid The hid
+	 * @param num the number of the POV on the controller.
 	 */
-	public POV(int stick, int num){
-		this.stick = stick;
+	public POV(HID hid, int num){
+		this.hid = hid;
 		this.num = num;
 	}
 	
 	/**
-	 * Get the HID channel
-	 * @return hid channel
+	 * Get the HID
+	 * @return hid
 	 */
-	public final int getChannel(){
-		return stick;
+	public final HID getHID(){
+		return hid;
 	}
 	/**
 	 * Get the POV number
@@ -36,6 +35,6 @@ public class POV implements IntegerSource{
 	
 	@Override
 	public int get(){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDPOV(stick, num);
+		return hid.getRawPOV(num);
 	}
 }

@@ -6,44 +6,49 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad extends POV{
+public class DPad extends POV implements Runnable{
 	/**
 	 * The Up button on the D-Pad
 	 */
-	public final POVButton Up;
+	public final DPadButton Up;
 	/**
 	 * The Down button on the D-Pad
 	 */
-	public final POVButton Down;
+	public final DPadButton Down;
 	/**
 	 * The Right button on the D-Pad
 	 */
-	public final POVButton Right;
+	public final DPadButton Right;
 	/**
 	 * The Left button on the D-Pad
 	 */
-	public final POVButton Left;
+	public final DPadButton Left;
+	/**
+	 * The entire POV as a button
+	 */
+	public final DPadButton POV;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
 	 * 
-	 * @param stick The Joystick the D-Pad is on.
+	 * @param hid The hid the D-Pad is on.
 	 * @param num the number of the D-Pad on the controller.
 	 */
-	public DPad(int stick, int num){
-		super(stick, num);
+	public DPad(HID hid, int num){
+		super(hid, num);
 		
-		Up = new POVButton(stick, num, POVButton.Type.UP);
-		Down = new POVButton(stick, num, POVButton.Type.DOWN);
-		Right = new POVButton(stick, num, POVButton.Type.RIGHT);
-		Left = new POVButton(stick, num, POVButton.Type.LEFT);
+		Up = new DPadButton(hid, num, DPadButton.Type.UP);
+		Down = new DPadButton(hid, num, DPadButton.Type.DOWN);
+		Right = new DPadButton(hid, num, DPadButton.Type.RIGHT);
+		Left = new DPadButton(hid, num, DPadButton.Type.LEFT);
+		POV = new DPadButton(hid, num, DPadButton.Type.POV);
 	}
-	
-	public void refresh(){
-		int degrees = get();
-		Up.set(degrees);
-		Down.set(degrees);
-		Left.set(degrees);
-		Right.set(degrees);
+
+	@Override
+	public void run() {
+		Up.run();
+		Down.run();
+		Left.run();
+		Right.run();
 	}
 }

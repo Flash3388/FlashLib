@@ -1,14 +1,12 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 /**
  * Representing a button of a POV such as a D-Pad.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class POVButton extends Button {
+public class DPadButton extends HIDButton {
 	/**
 	 * Represents the type of the button. If the POV is a D-Pad, This could be useful.
 	 * 
@@ -34,6 +32,8 @@ public class POVButton extends Button {
 		public boolean get(int degrees){
 			if(value == UP.value) 
 				return (degrees >= minDegree || degrees <= maxDegree) && degrees >= 0 && degrees <= 360;
+			if(value == POV.value)
+				return degrees != -1;
 			return degrees >= minDegree && degrees <= maxDegree && degrees >= 0 && degrees <= 360;
 		}
 		
@@ -53,6 +53,10 @@ public class POVButton extends Button {
 		 * The Left button on a D-Pad.
 		 */
 		public static final Type LEFT = new Type(-4, 255, 315);
+		/**
+		 * Represents the entire POV
+		 */
+		public static final Type POV = new Type(-5, 0, 360);
 	}
 	
 	private Type type;
@@ -60,20 +64,20 @@ public class POVButton extends Button {
 	/**
 	 * Creates a new instance of POVButton. The created button is configured to the given type.
 	 * 
-	 * @param stick The joystick the button belongs to.
+	 * @param hid the HID
 	 * @param num the pov number
 	 * @param t The type of the POVButton.
 	 */
-	public POVButton(int stick, int num, Type t) {
-		super(stick, num);
+	public DPadButton(HID hid, int num, Type t) {
+		super(hid, num);
 		type = t;
 	}
 	
-	void set(int degrees){
-		super.set(type.get(degrees));
-	}
-	
-	public void refresh(){
-		set(RobotFactory.getImplementation().getHIDInterface().getHIDPOV(getChannel(), getButtonNumber()));
+	/**
+	 * Gets the current button state
+	 */
+	@Override
+	public boolean get() {
+		return type.get(getHID().getRawPOV(getButtonNumber()));
 	}
 }

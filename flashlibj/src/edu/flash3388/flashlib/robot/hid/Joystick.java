@@ -32,11 +32,11 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 		super(name);
 		stick_num = stick;
 		
-		this.stick = new Stick(stick, X, Y);
+		this.stick = new Stick(this, X, Y);
 		buttons = new Button[buttonCount];
 		for(int i = 0; i < buttons.length; i++)
-			buttons[i] = new Button(stick, i+1);
-		pov = new POV(stick, 0);
+			buttons[i] = new HIDButton(this, i+1);
+		pov = new POV(this, 0);
 		
 		next = head;
 		head = this;
@@ -70,16 +70,23 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * @return the z axis value
 	 */
 	public double getZ(){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, Z);
+		return getRawAxis(Z);
 	}
 	/**
 	 * Gets the throttle axis value of the joystick
 	 * @return the throttle axis value
 	 */
 	public double getThrottle(){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, THROTTLE);
+		return getRawAxis(THROTTLE);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getChannel(){
+		return stick_num;
+	}
 	/**
 	 * {@inheritDoc}
 	 */
@@ -93,6 +100,13 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	@Override
 	public boolean getRawButton(int button){
 		return RobotFactory.getImplementation().getHIDInterface().getHIDButton(stick_num, button);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRawPOV(int pov){
+		return RobotFactory.getImplementation().getHIDInterface().getHIDPOV(stick_num, pov);
 	}
 	/**
 	 * {@inheritDoc}
@@ -140,16 +154,10 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
 	 * actions attached to those wrapped. 
 	 */
-	public void refresh(){
-		for(int i = 0; i < buttons.length; i++)
-			buttons[i].refresh();
-	}
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
-		refresh();
+		for(int i = 0; i < buttons.length; i++)
+			buttons[i].run();
 	}
 	
 	/**
@@ -157,7 +165,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 */
 	public static void refreshAll(){
 		for(Joystick c = head; c != null; c = c.next)
-			c.refresh();
+			c.run();
 	}
 	
 	@Override
