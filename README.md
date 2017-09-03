@@ -35,13 +35,19 @@ FlashLib depends on several libraries for its functionalities:
 
 All of those libraries are available in the "libs" folder.
 
+### Versions
+
+The versions used for dependencies by FlashLib are:
+- OpenCV: 3.0.0
+- WPILib: 2017.3.1
+
 ## Building
 
-Building the library requires gradle 4.1. If you have it, run ```gradle build```.
-If you don't, run the gradle wrapper added to this project ```gradlew build```.
+Building the library requires gradle 4.1. If you have it, run `gradle build`.
+If you don't, run the gradle wrapper added to this project `gradlew build`.
 
-You can find the binary files in the ```build/libs``` folder. Flashboard distribution folder is in ```build/flashboard``` ready to be
-used. To run flashboard, run ```run.bat``` for windows or ```run``` for linux which are located in the distribution folder.
+You can find the binary files in the `build/libs` folder. Flashboard distribution folder is in `build/flashboard` ready to be
+used. To run flashboard, run `run.bat` for windows or `run` for linux which are located in the distribution folder.
 
 ## Code Of Conduct
 
