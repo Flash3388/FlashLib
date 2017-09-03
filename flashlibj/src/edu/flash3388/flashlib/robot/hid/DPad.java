@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.hid;
 
 /**
- * This represents a D-Pad from and XBox controller.
+ * Represents a D-Pad from and XBox controller.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0

@@ -7,7 +7,7 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.HIDInterface;
-import edu.flash3388.flashlib.robot.HidUpdateTask;
+import edu.flash3388.flashlib.robot.HIDUpdateTask;
 import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.Scheduler;
 
@@ -39,11 +39,10 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final byte ITERATION_DELAY = 10;
+	private static final int ITERATION_DELAY = 10;
 	
 	private Log log, powerLog;
-	private double warningVoltage;
-	private double warningPowerDraw;
+	private double warningVoltage, warningPowerDraw;
 	private boolean logPower, logsEnabled;
 	
 	private Scheduler schedulerImpl;
@@ -73,7 +72,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		}
 		
 		if(initializer.autoUpdateHid)
-			schedulerImpl.addTask(new HidUpdateTask());
+			schedulerImpl.addTask(new HIDUpdateTask());
 		
 		warningPowerDraw = initializer.warningPowerDraw;
 		warningVoltage = initializer.warningVoltage;
@@ -102,6 +101,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				logNewState("Disabled");
 				
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_TASKS);
 				m_ds.InDisabled(true);
 				disabledInit();
 				
@@ -116,6 +116,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				logNewState("Autonomous");
 				
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_FULL);
 				m_ds.InAutonomous(true);
 				autonomousInit();
 				
@@ -130,6 +131,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				logNewState("Test");
 				
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_FULL);
 				m_ds.InTest(true);
 				testInit();
 				
@@ -144,6 +146,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				logNewState("Teleop");
 				
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_FULL);
 				m_ds.InOperatorControl(true);
 				teleopInit();
 				
@@ -199,7 +202,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	 * Sets whether or not to log data about power usage into a log.
 	 * @param log true to log data, false otherwise
 	 */
-	protected void setPowerLogging(boolean log) {
+	protected final void setPowerLogging(boolean log) {
 		logPower = log;
 		if(powerLog != null){
 			if(!log)
@@ -212,21 +215,21 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	 * Sets the total power draw which should prompt a warning from the power log.
 	 * @param current total current in Ampere
 	 */
-	protected void setPowerDrawWarning(double current){
+	protected final void setPowerDrawWarning(double current){
 		warningPowerDraw = current;
 	}
 	/**
 	 * Sets the voltage level which should prompt a warning from the power log.
 	 * @param volts voltage in Volts
 	 */
-	protected void setVoltageDropWarning(double volts){
+	protected final void setVoltageDropWarning(double volts){
 		warningVoltage = volts;
 	}
 	/**
 	 * Gets the log used to log power data. If logs were not enabled, this will return null.
 	 * @return the power log
 	 */
-	protected Log getPowerLog(){
+	protected final Log getPowerLog(){
 		return powerLog;
 	}
 

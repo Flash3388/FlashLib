@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
@@ -30,7 +29,6 @@ import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 import edu.flash3388.flashlib.vision.VisionRunner;
-import edu.flash3388.flashlib.vision.cv.CvProcessing;
 import edu.flash3388.flashlib.vision.cv.CvSource;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -177,21 +175,6 @@ public class Dashboard extends Application {
 						}
 					}
 				}
-			}
-		}
-	}
-	
-	@SuppressWarnings("unused")
-	private static class VisionRunnerDataTask implements Runnable{
-
-		@Override
-		public void run() {
-			byte[] img = visionImageNext[visionImageIndex];
-			visionImageNext[visionImageIndex] = null;
-			visionImageIndex ^= 1;
-			if(vision != null && img != null){
-				Mat m = CvProcessing.byteArray2Mat(img);
-				vision.frameProperty().setValue(m);
 			}
 		}
 	}
@@ -376,8 +359,6 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	private static VisionRunner vision;
-	private static byte[][] visionImageNext = new byte[2][2];
-	private static int visionImageIndex = 0;
 	
 	public static Vision getVision(){
 		return vision;
@@ -417,22 +398,16 @@ public class Dashboard extends Application {
 	public static boolean visionInitialized(){
 		return vision != null;
 	}
-	public static void setForVision(byte[] image){
-		if(vision != null)
-			visionImageNext[1-visionImageIndex] = image;
-	}
 	public static void setForVision(Object frame){
-		vision.frameProperty().setValue(frame);
+		vision.setFrame(frame);
 	}
 	protected static void setVision(VisionRunner vision){
 		Dashboard.vision = vision;
 		vision.setVisionSource(new CvSource());
 		vision.getVisionSource().setImagePipeline(camViewer);
-		if(vision != null){
-			updater.execute(()->{
-				loadVisionSaves();
-			});
-		}
+		updater.execute(()->{
+			loadVisionSaves();
+		});
 	}
 	
 	//--------------------------------------------------------------------

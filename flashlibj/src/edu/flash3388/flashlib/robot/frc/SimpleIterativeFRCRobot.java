@@ -45,6 +45,7 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 					testInitialized = false;
 					teleopInitialized = false;
 					
+					schedulerImpl.setMode(Scheduler.MODE_TASKS);
 					schedulerImpl.removeAllActions();
 					
 					disabledInit();
@@ -58,6 +59,7 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 					testInitialized = false;
 					teleopInitialized = false;
 					
+					schedulerImpl.setMode(Scheduler.MODE_FULL);
 					schedulerImpl.removeAllActions();
 					
 					autonomousInit();
@@ -71,6 +73,7 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 					testInitialized = true;
 					teleopInitialized = false;
 					
+					schedulerImpl.setMode(Scheduler.MODE_FULL);
 					schedulerImpl.removeAllActions();
 					
 					testPeriodic();
@@ -84,6 +87,7 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 					testInitialized = false;
 					teleopInitialized = true;
 					
+					schedulerImpl.setMode(Scheduler.MODE_FULL);
 					schedulerImpl.removeAllActions();
 					
 					teleopInit();

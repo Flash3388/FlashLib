@@ -1,7 +1,9 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -23,8 +25,9 @@ public class PidController {
 	
 	private PidSource source;
 	private DoubleSource setPoint;
+	private DoubleProperty kp, ki, kd, kf;
+	
 	private double minimumOutput = -1, maximumOutput = 1;
-	private double kp, ki, kd, kf;
 	private double lastVal, lastOut;
 	private double maxIOutput = 0, setpointRange = 0, outRampRate = 0;
 	private double totalError, error, maxError = 0;
@@ -40,10 +43,40 @@ public class PidController {
 	 * @param setPoint the set point
 	 * @param source the feedback source
 	 */
-	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PidSource source){
-		setPID(kp, ki, kd, kf);
+	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint, PidSource source){
+		this.kp = kp;
+		this.ki = ki;
+		this.kd = kd;
+		this.kf = kf;
 		this.setPoint = setPoint;
 		this.source = source;
+	}
+	/**
+	 * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid source
+	 * for the feedback data.
+	 * @param kp the proportional constant
+	 * @param ki the integral constant
+	 * @param kd the differential constant
+	 * @param kf the feed forward constant
+	 * @param setPoint the set point
+	 * @param source the feedback source
+	 */
+	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PidSource source){
+		this(new SimpleDoubleProperty(), new SimpleDoubleProperty(), new SimpleDoubleProperty(), new SimpleDoubleProperty(),
+				setPoint, source);
+		setPID(kp, ki, kd, kf);
+	}
+	/**
+	 * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and without
+	 * a pid source.
+	 * @param kp the proportional constant
+	 * @param ki the integral constant
+	 * @param kd the differential constant
+	 * @param kf the feed forward constant
+	 * @param setPoint the set point
+	 */
+	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint){
+		this(kp, ki, kd, kf, setPoint, null);
 	}
 	/**
 	 * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and without
@@ -56,6 +89,16 @@ public class PidController {
 	 */
 	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint){
 		this(kp, ki, kd, kf, setPoint, null);
+	}
+	/**
+	 * Creates a new PID controller. Uses given constant for the control loop, without a set point and a pid source
+	 * @param kp the proportional constant
+	 * @param ki the integral constant
+	 * @param kd the differential constant
+	 * @param kf the feed forward constant
+	 */
+	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
+		this(kp, ki, kd, kf, null);
 	}
 	/**
 	 * Creates a new PID controller. Uses given constant for the control loop, without a set point and a pid source
@@ -89,8 +132,8 @@ public class PidController {
 		double result = 0;
 		error = setPoint.get() - currentVal;
 		
-		double pOut = kp * error;
-		double fOut = kf * setPoint.get();
+		double pOut = kp.get() * error;
+		double fOut = kf.get() * setPoint.get();
 		
 		if(firstRun){
 			firstRun = false;
@@ -98,8 +141,8 @@ public class PidController {
 			lastVal = currentVal;
 		}
 		
-		double iOut = ki * totalError;
-		double dOut = -kd * (currentVal - lastVal);
+		double iOut = ki.get() * totalError;
+		double dOut = -kd.get() * (currentVal - lastVal);
 		
 		if(maxIOutput != 0)
 			iOut = Mathf.constrain(iOut, -maxIOutput, maxIOutput);
@@ -135,6 +178,100 @@ public class PidController {
 	}
 
 	/**
+	 * The proportional constant property
+	 * @return the proportional property
+	 */
+	public DoubleProperty kpProperty(){
+		return kp;
+	}
+	/**
+	 * Gets the proportional constant of the loop.
+	 * @return proportional constant
+	 */
+	public double getP(){
+		return kp.get();
+	}
+	/**
+	 * Sets the value of the proportional constant
+	 * @param p proportional constant
+	 */
+	public void setP(double p){
+		this.kp.set(p);
+	}
+	
+	/**
+	 * The integral constant property
+	 * @return the integral property
+	 */
+	public DoubleProperty kiProperty(){
+		return ki;
+	}
+	/**
+	 * Gets the integral constant of the loop.
+	 * @return integral constant
+	 */
+	public double getI(){
+		return ki.get();
+	}
+	/**
+	 * Sets the value of the integral constant
+	 * @param i integral constant
+	 */
+	public void setI(double i){
+		if(ki.get() != 0)
+			totalError = totalError * ki.get() / i;
+		if
+		(maxIOutput != 0)
+			maxError = maxIOutput / i;
+		
+		this.ki.set(i);
+	}
+	
+	/**
+	 * The differential constant property
+	 * @return the differential property
+	 */
+	public DoubleProperty kdProperty(){
+		return kd;
+	}
+	/**
+	 * Gets the differential constant of the loop.
+	 * @return differential constant
+	 */
+	public double getD(){
+		return kd.get();
+	}
+	/**
+	 * Sets the value of the differential constant
+	 * @param d differential constant
+	 */
+	public void setD(double d){
+		this.kd.set(d);
+	}
+	
+	/**
+	 * The feed forward constant property
+	 * @return the feed forward property
+	 */
+	public DoubleProperty kfProperty(){
+		return kf;
+	}
+	/**
+	 * Gets the feed forward constant of the loop.
+	 * @return differential constant
+	 */
+	public double getF(){
+		return kf.get();
+	}
+	/**
+	 * Sets the feed forward gain value
+	 * @param f feed forward gain
+	 */
+	public void setF(double f){
+		this.kf.set(f);
+	}
+	
+	/**
      * Set the maximum rate the output can increase per cycle.
      * 
 	 * @param rate rate of output change per cycle
@@ -165,27 +302,7 @@ public class PidController {
 	public double getMinimumOutput(){
 		return minimumOutput;
 	}
-	/**
-	 * Gets the proportional constant of the loop.
-	 * @return proportional constant
-	 */
-	public double getP(){
-		return kp;
-	}
-	/**
-	 * Gets the integral constant of the loop.
-	 * @return integral constant
-	 */
-	public double getI(){
-		return ki;
-	}
-	/**
-	 * Gets the differential constant of the loop.
-	 * @return differential constant
-	 */
-	public double getD(){
-		return kd;
-	}
+
 	/**
 	 * Gets the set point data source used by this loop.
 	 * @return set point
@@ -197,14 +314,14 @@ public class PidController {
 	 * Gets the pid source used by this loop.
 	 * @return pid source
 	 */
-	public PidSource getSource(){
+	public PidSource getPIDSource(){
 		return source;
 	}
 	
 	public void setMaxIOutput(double maximum){
 		maxIOutput=maximum;
-		if(ki != 0)
-			maxError=maxIOutput / ki;
+		if(ki.get() != 0)
+			maxError=maxIOutput / ki.get();
 	}
 	
 	/**
@@ -230,39 +347,7 @@ public class PidController {
 		this.maximumOutput = l;
 		this.minimumOutput = -l;
 	}
-	/**
-	 * Sets the value of the proportional constant
-	 * @param p proportional constant
-	 */
-	public void setP(double p){
-		this.kp = p;
-	}
-	/**
-	 * Sets the value of the integral constant
-	 * @param i integral constant
-	 */
-	public void setI(double i){
-		if(ki != 0)
-			totalError = totalError * ki/i;
-		if(maxIOutput != 0)
-			maxError = maxIOutput / i;
-		
-		this.ki = i;
-	}
-	/**
-	 * Sets the value of the differential constant
-	 * @param d differential constant
-	 */
-	public void setD(double d){
-		this.kd = d;
-	}
-	/**
-	 * Sets the feed forward gain value
-	 * @param f feed forward gain
-	 */
-	public void setF(double f){
-		this.kf = f;
-	}
+
 	/**
 	 * Sets the PID constants: proportional, integral and differential used by this loop.
 	 * @param p proportional constant
@@ -270,9 +355,9 @@ public class PidController {
 	 * @param d differential constant
 	 */
 	public void setPID(double p, double i, double d){
-		this.kp = p;
+		setP(p);
 		setI(i);
-		this.kd = d;
+		setD(d);
 	}
 	/**
 	 * Sets the PID constants: proportional, integral and differential used by this loop.
@@ -282,10 +367,10 @@ public class PidController {
 	 * @param f feed forward gain
 	 */
 	public void setPID(double p, double i, double d, double f){
-		this.kp = p;
+		setP(p);
 		setI(i);
-		this.kd = d;
-		this.kf = f;
+		setD(d);
+		setF(f);
 	}
 	
 	/**

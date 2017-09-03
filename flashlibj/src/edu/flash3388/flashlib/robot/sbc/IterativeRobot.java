@@ -42,6 +42,7 @@ public abstract class IterativeRobot extends RobotBase implements Robot{
 			}
 			else if(isDisabled()){
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_TASKS);
 				disabledInit();
 				
 				while(FlashRobotUtil.inEmergencyStop()){
@@ -51,6 +52,7 @@ public abstract class IterativeRobot extends RobotBase implements Robot{
 			}else{
 				lastState = getState();
 				schedulerImpl.removeAllActions();
+				schedulerImpl.setMode(Scheduler.MODE_FULL);
 				stateInit(lastState);
 				
 				while(lastState == getState()){

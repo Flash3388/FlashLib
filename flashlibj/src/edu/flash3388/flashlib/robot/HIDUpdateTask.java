@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class HidUpdateTask implements Runnable{
+public class HIDUpdateTask implements Runnable{
 	
 	@Override
 	public void run() {

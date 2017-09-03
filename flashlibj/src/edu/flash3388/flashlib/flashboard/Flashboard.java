@@ -21,6 +21,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.RemoteVision;
+import edu.flash3388.flashlib.vision.Vision;
 
 /**
  * Control class for the Flashboard. Can be used to attach controls to the Flashboard, cameras, control
@@ -29,7 +30,7 @@ import edu.flash3388.flashlib.vision.RemoteVision;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Flashboard {
+public final class Flashboard {
 	
 	private Flashboard(){}
 	
@@ -76,7 +77,7 @@ public class Flashboard {
 	
 	private static CameraView camViewer;
 	private static CameraServer camServer;
-	private static RemoteVision vision;
+	private static Vision vision;
 	private static Communications communications;
 	private static Map<String, Sendable> sendables;
 	
@@ -184,7 +185,7 @@ public class Flashboard {
 	 * to work.
 	 * @return the vision control to the flashboard. Null if not initialized. 
 	 */
-	public static RemoteVision getVision(){
+	public static Vision getVision(){
 		return vision;
 	}
 	/**
@@ -231,7 +232,8 @@ public class Flashboard {
 					else readi = new UdpCommInterface(port);
 					
 					communications = new Communications("Flashboard", readi);
-					communications.attach(vision);
+					if(vision instanceof Sendable)
+						communications.attach((Sendable)vision);
 				}
 				
 				if(camServer == null && (initMode & INIT_CAM) != 0)

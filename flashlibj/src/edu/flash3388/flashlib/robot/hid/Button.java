@@ -6,53 +6,135 @@ import java.util.Vector;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
+/**
+ * The base logic for a button. Allows attaching {@link Action} objects which will be executed 
+ * according to different parameters. To allow execution of actions, it is required to call {@link #run()}
+ * periodically, so that the activation parameters will be checked.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
 public abstract class Button implements BooleanSource, Runnable{
 	
-	private static enum ActivateType {
+	/**
+	 * Enumeration of activation types for {@link Action} associated with a {@link Button}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
+	public static enum ActivateType {
 		Press, Hold, Release
 	}
-	private static class ButtonAction{
-		final ActivateType type;
-		final Action action;
+	
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will start
+	 * the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
+	public static class ButtonAction{
+		protected final ActivateType type;
+		protected final Action action;
 		
 		ButtonAction(ActivateType t, Action action){
 			type = t;
 			this.action = action;
 		}
 		
-		void start(){
+		public final Action getAction(){
+			return action;
+		}
+		public final ActivateType getActivateType(){
+			return type;
+		}
+		
+		public void start(){
 			if(!action.isRunning())
 				action.start();
 		}
-		void stop(){
+		public void stop(){
 			if(action.isRunning())
 				action.cancel();
 		}
 	}
-	private static class CancelAction extends ButtonAction{
-		CancelAction(ActivateType t, Action action){
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will cancel
+	 * the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class CancelAction extends ButtonAction{
+		
+		public CancelAction(ActivateType t, Action action){
 			super(t, action);
 		}
 		
-		void start(){
+		public void start(){
 			if(action.isRunning())
 				action.cancel();
 		}
-		void stop(){
+		public void stop(){
 		}
 	}
-	private static class ToggleAction extends ButtonAction{
-		ToggleAction(ActivateType t, Action action){
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will toggle the
+	 * {@link Action} between start and stop.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class ToggleAction extends ButtonAction{
+		
+		public ToggleAction(ActivateType t, Action action){
 			super(t, action);
 		}
 		
-		void start(){
+		public void start(){
 			if(!action.isRunning())
 				action.start();
 			else 
 				action.cancel();
 		}
-		void stop(){
+		public void stop(){
+		}
+	}
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When {@link ActivateType#Press} has occurred a given amount of time, this will 
+	 * start the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class MultiPressAction extends ButtonAction{
+		
+		private int presses = 0;
+		private int pressesStart;
+		
+		public MultiPressAction(Action action, int presses){
+			super(ActivateType.Press, action);
+			this.pressesStart = presses;
+		}
+		
+		public void start(){
+			if(!action.isRunning()){
+				if((presses++) == pressesStart){
+					action.start();
+					presses = 0;
+				}
+			}
+			else if(presses != 0)
+				presses = 0;
+		}
+		public void stop(){
+			presses = 0;
+			if(action.isRunning())
+				action.cancel();
 		}
 	}
 	
@@ -70,6 +152,14 @@ public abstract class Button implements BooleanSource, Runnable{
 		}
 	}
 	
+	/**
+	 * Adds a new {@link ButtonAction} to this button. Will be update to check for activation
+	 * when {@link #run()} is called.
+	 * @param action button action to add
+	 */
+	public final void addButtonAction(ButtonAction action){
+		actions.add(action);
+	}
 	/**
 	 * Adds an {@link Action} which will be started when the button is pressed
 	 * @param action an action to add
@@ -105,6 +195,13 @@ public abstract class Button implements BooleanSource, Runnable{
 	 */
 	public final void toggleWhenPressed(Action action){
 		actions.add(new ToggleAction(ActivateType.Press, action));
+	}
+	/**
+	 * Adds an {@link Action} which will run when the button was pressed twice.
+	 * @param action an action to add
+	 */
+	public final void whenDoublePress(Action action){
+		actions.add(new MultiPressAction(action, 2));
 	}
 	
 	/**

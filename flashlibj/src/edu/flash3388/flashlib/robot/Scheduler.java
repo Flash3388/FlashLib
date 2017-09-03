@@ -47,7 +47,12 @@ public final class Scheduler {
 		}
 	}
 	
-	private boolean disabled = false;
+	public static final byte MODE_DISABLED = 0x0;
+	public static final byte MODE_TASKS = 0x1;
+	public static final byte MODE_ACTIONS = 0x2;
+	public static final byte MODE_FULL = MODE_ACTIONS | MODE_TASKS;
+	
+	private byte mode = MODE_FULL;
 	
 	private Vector<Action> actions = new Vector<Action>();
 	private Vector<Subsystem> systems = new Vector<Subsystem>();
@@ -57,9 +62,9 @@ public final class Scheduler {
 	 * Runs the scheduler. 
 	 */
 	public void run(){
-		if(disabled) return;
+		if(isDisabled()) return;
 		
-		if(tasks.size() > 0){
+		if(isMode(MODE_TASKS) && tasks.size() > 0){
 			TaskWrapper taskWrapper = null;
 			for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
 				taskWrapper = taskEnum.nextElement();
@@ -68,7 +73,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(actions.size() > 0){
+		if(isMode(MODE_ACTIONS) && actions.size() > 0){
 			Action action = null;
 			for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
 				action = actionEnum.nextElement();
@@ -77,11 +82,11 @@ public final class Scheduler {
 			}
 		}
 		
-		if(systems.size() > 0){
+		if(isMode(MODE_ACTIONS) && systems.size() > 0){
 			Subsystem system = null;
 			for(Enumeration<Subsystem> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
 				system = systemEnum.nextElement();
-				if(!system.hasCurrentAction() && !RobotFactory.getImplementation().isDisabled())
+				if(!system.hasCurrentAction())
 					system.startDefaultAction();
 			}
 		}
@@ -120,7 +125,12 @@ public final class Scheduler {
 		return tasks.remove(runnable);
 	}
 	
-	void registerSystem(Subsystem system){
+	/**
+	 * Registers a {@link Subsystem} to this {@link Scheduler}. Allows for activation of
+	 * default {@link Action} for this system.
+	 * @param system system to register
+	 */
+	public void registerSystem(Subsystem system){
 		systems.add(system);
 	}
 	
@@ -133,7 +143,7 @@ public final class Scheduler {
 	 * @return true if the action was successfully added
 	 */
 	public boolean add(Action action){
-		if(disabled) return false;
+		if(isDisabled()) return false;
 		
 		Enumeration<Subsystem> requirements = action.getRequirements();
 		while(requirements.hasMoreElements()){
@@ -170,17 +180,47 @@ public final class Scheduler {
 	}
 	
 	/**
+	 * Gets whether or not the given mode is active. This can be used to check if mode parts 
+	 * ({@link #MODE_ACTIONS} or {@link #MODE_TASKS}) are applied.
+	 * 
+	 * @param mode the mode to check
+	 * @return true id the mode is appliec
+	 */
+	public boolean isMode(byte mode){
+		return (this.mode & mode) != 0;
+	}
+	/**
+	 * Sets the current mode of this scheduler. The mode dictates the opeation of this scheduler when 
+	 * {@link #run()} is called.
+	 * @param mode the mode
+	 */
+	public void setMode(byte mode){
+		this.mode = mode;
+	}
+	/**
+	 * Gets the current mode of this scheduler. The mode dictates the opeation of this scheduler when 
+	 * {@link #run()} is called.
+	 * @return the mode
+	 */
+	public byte getMode(){
+		return mode;
+	}
+	
+	/**
 	 * Sets whether or not the scheduler is disabled. If the scheduler is disabled, it cannot be run.
 	 * @param disable true to disable, false otherwise
 	 */
 	public void setDisabled(boolean disable){
-		this.disabled = disable;
+		if(disable)
+			mode = MODE_DISABLED;
+		else
+			mode = MODE_FULL;
 	}
 	/**
 	 * Gets whether or not the scheduler is disabled
 	 * @return true if the scheduler is disabled, false otherwise
 	 */
 	public boolean isDisabled(){
-		return disabled;
+		return mode == MODE_DISABLED;
 	}
 }

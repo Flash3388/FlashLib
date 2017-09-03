@@ -2,6 +2,12 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.util.beans.IntegerSource;
 
+/**
+ * A wrapper for POVs on human interface devices.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.2
+ */
 public class POV implements IntegerSource{
 
 	private HID hid;

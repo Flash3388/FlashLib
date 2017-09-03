@@ -3,9 +3,15 @@ package edu.flash3388.flashlib.robot.hid;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * An extension of {@link Button} for human interface devices. Provides time buffering for activation types.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.2
+ */
 public class HIDButton extends Button{
 
-	private static final int MAX_MILLIS_PRESS = 500;
+	public static final int MAX_MILLIS_PRESS = 500;
 	
 	private HID hid;
 	private int num;

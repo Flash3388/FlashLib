@@ -174,7 +174,7 @@ public class Communications {
 		
 		Sendable s = sendableCreator.create(name, type);
 		if(s != null){
-			s.setId(id);
+			s.setID(id);
 			s.setAttached(true);
 			s.setRemoteInit(true);
 			sendables.put(id, s);
@@ -188,11 +188,18 @@ public class Communications {
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements()) {
 			Sendable sendable = sendablesEnum.nextElement();
-			sendable.setId(nextId++);
+			if(!sendable.userID()){
+				calculateNextID();
+				sendable.setID(nextId++);
+			}
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
 	} 
+	private void calculateNextID(){
+		while(getLocalyAttachedByID(nextId) != null || getFromAllAttachedByID(nextId) != null)
+			++nextId;
+	}
 	private void resetSendable(Sendable sen){
 		sen.setRemoteInit(false);
 		sen.setRemoteAttached(false);
@@ -208,6 +215,8 @@ public class Communications {
 			sen.onConnectionLost();
 			confirmRemoteDetached(sen.getID());
 		}
+		if(!sen.userID())
+			sen.setID(-1);
 	}
 	private void onRemoteAttached(Sendable sendable, boolean confirmRemote){
 		if(sendable.remoteAttached()) return;
@@ -294,6 +303,7 @@ public class Communications {
 		send(data, sendable, SENDABLE_DATA);
 	}
 	
+	
 	/**
 	 * Attaches an array of sendables. Passes them one by one to {@link #attach(Sendable)}.
 	 * @param sendables array of sendables to attach
@@ -308,25 +318,53 @@ public class Communications {
 	 * 
 	 * <p>
 	 * If the sendable is already attached to a communications system, an 
-	 * {@link IllegalStateException} is thrown. If a sendable with the same ID is already attached, a 
-	 * {@link RuntimeException}.
+	 * {@link IllegalStateException} is thrown. 
 	 * </p>
 	 * 
 	 * @param sendable sendable to attach
 	 * 
 	 * @throws IllegalStateException if the sendable is already attached
-	 * @throws RuntimeException if a sendable with the same id is attached
 	 */
 	public void attach(Sendable sendable){
 		if(sendable.attached())
 			throw new IllegalStateException("Sendable is already attached to communications");
-		if(getFromAllAttachedByID(sendable.getID()) != null)
-			throw new RuntimeException("Id taken");
 			
 		attachedSendables.add(sendable);
 		sendable.setAttached(true);
+		sendable.setUserID(false);
 		if(isConnected()){
-			sendable.setId(nextId++);
+			calculateNextID();
+			sendable.setID(nextId++);
+			sendables.put(sendable.getID(), sendable);
+			resetSendable(sendable);
+		}else
+			sendable.setID(-1);
+	}
+	/**
+	 * Attaches a {@link Sendable} object to this communications manager and forces an ID for it instead
+	 * of an automatically allocated ID. If the object is already attached to a communications manager (i.e.
+	 * {@link Sendable#attached()} returns true) this will fail. If the ID is already allocated to a different object,
+	 * this will fail.
+	 * 
+	 * 
+	 * @param sendable the object
+	 * @param id the id to allocate
+	 * 
+	 * @throws IllegalStateException if the sendable is attached already or the ID requested is already allocated
+	 */
+	public void attachForID(Sendable sendable, int id){
+		if(sendable.attached())
+			throw new IllegalStateException("Sendable is already attached to communications");
+		if(getLocalyAttachedByID(id) != null)
+			throw new IllegalStateException("Sendable with such ID already exists");
+		if(getFromAllAttachedByID(id) != null)
+			throw new IllegalStateException("Sendable with such ID was dynamically created");
+		
+		sendable.setID(id);
+		attachedSendables.add(sendable);
+		sendable.setAttached(true);
+		sendable.setUserID(true);
+		if(isConnected()){
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
@@ -341,12 +379,14 @@ public class Communications {
 	 */
 	public boolean detach(Sendable sendable){
 		if(attachedSendables.remove(sendable)){
-			sendables.remove(sendable.getID());
 			sendable.setAttached(false);
-			if(isConnected())
+			if(isConnected()){
 				handleDisconnection(sendable);
+				sendables.remove(sendable.getID());
+			}
+			return true;
 		}
-		return !sendable.attached();
+		return false;
 	}
 	/**
 	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
@@ -530,6 +570,8 @@ public class Communications {
 	 * @param minId min id value
 	 */
 	public void setMinIDValue(int minId){
+		if(minId < 0)
+			throw new IllegalArgumentException("ID must be non-negative");
 		this.minIdAlloc = minId;
 	}
 	/**

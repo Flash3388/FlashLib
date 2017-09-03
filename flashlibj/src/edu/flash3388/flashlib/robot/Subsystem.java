@@ -12,10 +12,11 @@ public abstract class Subsystem{
 	private Action default_action;
 	private Action current_action;
 	
-	private String name = null;
+	private String name = "";
 	
 	protected Subsystem(String name){
-		RobotFactory.getImplementation().getScheduler().registerSystem(this);
+		if(RobotFactory.hasImplementation())
+			RobotFactory.getImplementation().getScheduler().registerSystem(this);
 		this.name = name;
 	}
 	

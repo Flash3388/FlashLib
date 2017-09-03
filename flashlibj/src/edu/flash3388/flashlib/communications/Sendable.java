@@ -20,7 +20,7 @@ public abstract class Sendable {
 	private String name;
 	private byte type;
 	private boolean remoteAttached = false, communicationsAttached = false;
-	private boolean remoteInit = false;
+	private boolean remoteInit = false, userId = false;
 	
 	/**
 	 * Creates a sendable object with an empty name, automatically defined ID and a type.
@@ -37,7 +37,7 @@ public abstract class Sendable {
 	 * @param type the type of the sendable
 	 */
 	protected Sendable(String name, byte type){
-		this(name, 0, type);
+		this(name, -1, type);
 	}
 	/**
 	 * Creates a sendable object with a name, manually defined ID and type.
@@ -53,7 +53,7 @@ public abstract class Sendable {
 		this.name = name;
 	}
 	
-	void setId(int id){
+	void setID(int id){
 		this.id = id;
 	}
 	boolean remoteInit(){
@@ -67,6 +67,12 @@ public abstract class Sendable {
 	}
 	void setAttached(boolean attached){
 		communicationsAttached = attached;
+	}
+	void setUserID(boolean userid){
+		this.userId = userid;
+	}
+	boolean userID(){
+		return userId;
 	}
 	
 	/**

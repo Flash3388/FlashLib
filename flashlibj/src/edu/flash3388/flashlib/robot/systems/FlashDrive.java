@@ -107,7 +107,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param s side of the motors
 	 * @return the speed controller object for that side.
 	 */
-	public FlashSpeedController getControllers(MotorSide s){
+	public FlashSpeedController getController(MotorSide s){
 		switch(s){
 			case Left:
 				return left_controllers;
