@@ -45,9 +45,14 @@ public class Communications {
 		@Override
 		public void run() {
 			while(!stop){
+				FlashUtil.getLog().log("Openning CommInterface", comm.logName);
+				while(!comm.open() && !stop)
+					FlashUtil.delay(500);
+				if(stop) break;
+				
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
 				while(!comm.connect() && !stop)
-					FlashUtil.delay(1000);
+					FlashUtil.delay(500);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
@@ -107,7 +112,6 @@ public class Communications {
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
-		commInterface.open();
 	}	
 	/**
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
@@ -278,6 +282,13 @@ public class Communications {
 		write(bytes);
 		
 		//System.out.println(logName+"DATA FROM: "+sendable.getID());
+	}
+	
+	private boolean open(){
+		if(commInterface.isOpened())
+			return true;
+		commInterface.open();
+		return commInterface.isOpened();
 	}
 	
 	/**
@@ -569,7 +580,7 @@ public class Communications {
 	 * 
 	 * @param minId min id value
 	 */
-	public void setMinIDValue(int minId){
+	public void setMinAllocationID(int minId){
 		if(minId < 0)
 			throw new IllegalArgumentException("ID must be non-negative");
 		this.minIdAlloc = minId;
@@ -583,7 +594,7 @@ public class Communications {
 	 * 
 	 * @return min id value
 	 */
-	public int getMinIDValue(){
+	public int getMinAllocationID(){
 		return minIdAlloc;
 	}
 	

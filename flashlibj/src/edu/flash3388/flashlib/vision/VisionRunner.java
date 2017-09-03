@@ -255,8 +255,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				}
 				
 				newAnalysis(an);
-				if(an != null)
-					lastRec = FlashUtil.millisInt();
+				lastRec = FlashUtil.millisInt();
 				return true;
 			}
 		}
