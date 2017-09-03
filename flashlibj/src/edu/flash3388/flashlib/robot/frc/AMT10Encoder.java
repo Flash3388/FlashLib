@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.devices.Encoder;
+
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
@@ -104,10 +105,10 @@ public class AMT10Encoder implements Runnable, PIDSource, Encoder{
 	public boolean setAutomaticUpdate(boolean auto){
 		manualUpdate = !auto;
 		if(auto){
-			RobotFactory.getImplementation().getScheduler().addTask(this);
+			Scheduler.getInstance().addTask(this);
 			return true;
 		}else if(!auto){
-			RobotFactory.getImplementation().getScheduler().remove(this);
+			Scheduler.getInstance().remove(this);
 			return true;
 		}
 		return false;

@@ -56,8 +56,8 @@ public abstract class Action{
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
-	private long timeout = -1;
-	private long start_time = -1;
+	private int timeout = -1;
+	private int start_time = -1;
 	private String name;
 	
 	/**
@@ -79,7 +79,7 @@ public abstract class Action{
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && RobotFactory.getImplementation().getScheduler().add(this)){
+		if(!running && Scheduler.getInstance().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;
@@ -92,6 +92,7 @@ public abstract class Action{
 		if(running)
 			canceled = true;
 	}
+	
 	void removed(){
 		if(initialized){
 			if(canceled)
@@ -104,13 +105,13 @@ public abstract class Action{
 		start_time = -1;
 	}
 	boolean run(){
-		if(isTimedOut())
+		if(isTimedout())
 			cancel();
 		if(canceled)
 			return false;
 		if(!initialized){
 			initialized = true;
-			start_time = FlashUtil.millis();
+			start_time = FlashUtil.millisInt();
 			initialize();
 		}
 		execute();
@@ -146,6 +147,10 @@ public abstract class Action{
 	public boolean isRunning(){
 		return running;
 	}
+	/**
+	 * Gets the {@link Subsystem}s which are used by this action.
+	 * @return {@link Enumeration} of the used {@link Subsystem}s.
+	 */
 	public Enumeration<Subsystem> getRequirements(){
 		return requirements.elements();
 	}
@@ -153,9 +158,24 @@ public abstract class Action{
 	 * Gets the running timeout of the action in milliseconds. 
 	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
 	 */
-	public long getTimeOut(){
+	public int getTimeout(){
 		return timeout;
 	}
+	/**
+	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param milliseconds timeout in milliseconds
+	 */
+	public void setTimeout(int milliseconds){
+		timeout = milliseconds;
+	}
+	/**
+	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
+	 */
+	public void cancelTimeout(){
+		setTimeout(-1);
+	}
+	
 	
 	/**
 	 * Adds a System that is used by this action.
@@ -187,27 +207,12 @@ public abstract class Action{
 		requirements.clear();
 	}
 	/**
-	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param milliseconds timeout in milliseconds
-	 */
-	protected void setTimeOut(long milliseconds){
-		timeout = milliseconds;
-	}
-	/**
-	 * Gets whether or not the Scheduler should remove this action when the robot is disabled. Should be true.
-	 * @return true if this action is to be removed
-	 */
-	protected boolean removeOnDisabled(){
-		return true;
-	}
-	/**
 	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout
 	 * is defined. 
 	 * @return true if the action timeout, false otherwise
 	 */
-	protected boolean isTimedOut(){
-		return start_time != -1 && timeout != -1 && (FlashUtil.millis() - start_time) 
+	protected boolean isTimedout(){
+		return start_time > 0 && timeout > 0 && (FlashUtil.millisInt() - start_time) 
 				>= timeout;
 	}
 	
@@ -238,7 +243,8 @@ public abstract class Action{
 	protected abstract void end();
 	
 	/**
-	 * Creates a canceling action for an action.
+	 * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link #cancel()}
+	 * for a given action when started.
 	 * 
 	 * @param action action to cancel
 	 * @return canceling action

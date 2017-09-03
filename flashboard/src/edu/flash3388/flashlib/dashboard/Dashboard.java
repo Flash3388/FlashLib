@@ -13,7 +13,6 @@ import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
-import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
@@ -30,6 +29,7 @@ import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -45,15 +45,17 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	public static class Updater{
-		private Scheduler scheduler = new Scheduler();
+		private Scheduler scheduler = Scheduler.getInstance();
 		private boolean stop = false;
 		private Runnable task;
 		
 		public Updater() {
 			task = ()->{
-				while(!fxInitialized() && !stop) 
-					FlashUtil.delay(100);
 				while (!stop) {
+					if(!fxInitialized()){
+						FlashUtil.delay(100);
+						continue;
+					}
 					scheduler.run();
 					FlashUtil.delay(5);
 				}
@@ -68,10 +70,6 @@ public class Dashboard extends Application {
 		}
 		public boolean removeTask(Runnable runnable){
 			return scheduler.remove(runnable);
-		}
-		
-		public void addAction(Action action){
-			scheduler.add(action);
 		}
 		
 		public void stop(){

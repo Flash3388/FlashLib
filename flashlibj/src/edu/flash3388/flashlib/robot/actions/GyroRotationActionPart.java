@@ -16,15 +16,15 @@ public class GyroRotationActionPart extends PidRotationActionPart{
 	public GyroRotationActionPart(Gyro gyro,DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, DoubleSource rotationThreshold,
 			double rotationMargin) {
-		super(new PidSource.DoubleDataPidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
-		((PidSource.DoubleDataPidSource)getPIDController().getPIDSource()).setSource(()->getValue());
+		super(new PidSource.DoubleSourcePidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
+		((PidSource.DoubleSourcePidSource)getPIDController().getPIDSource()).setSource(()->getValue());
 		this.gyro = gyro;
 		this.rotationThreshold = rotationThreshold;
 	}
 	public GyroRotationActionPart(Gyro gyro, double kp, double ki, double kd, double kf, DoubleSource rotationThreshold,
 			double rotationMargin) {
-		super(new PidSource.DoubleDataPidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
-		((PidSource.DoubleDataPidSource)getPIDController().getPIDSource()).setSource(()->getValue());
+		super(new PidSource.DoubleSourcePidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
+		((PidSource.DoubleSourcePidSource)getPIDController().getPIDSource()).setSource(()->getValue());
 		this.gyro = gyro;
 		this.rotationThreshold = rotationThreshold;
 	}

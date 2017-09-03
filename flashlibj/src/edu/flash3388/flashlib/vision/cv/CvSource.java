@@ -9,8 +9,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import edu.flash3388.flashlib.util.beans.SimpleProperty;
-import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
 import edu.flash3388.flashlib.vision.ImagePipeline;
@@ -328,7 +326,7 @@ public class CvSource implements VisionSource{
 		if(matcher == null)
 			throw new NullPointerException("Template matcher is null");
 		if(!(matcher instanceof CvTemplateMatcher))
-			throw new IllegalArgumentException("Template Matcher is not compatible with this vision source");
+			throw new IllegalArgumentException("Template Matcher is not compatible with this implementation: cv");
 		
 		checkReady(false, true);
 		
@@ -338,7 +336,10 @@ public class CvSource implements VisionSource{
 		return result;
 	}
 	
-	public TemplateMatcher createTemplateMatcher(ValueSource<Object>[] imgs, int method) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public TemplateMatcher createTemplateMatcher(Object[] imgs, int method) {
 		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
 			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
 					+method + ":" + CvTemplateMatcher.Method.values().length);
@@ -346,7 +347,7 @@ public class CvSource implements VisionSource{
 		Mat[] templates = new Mat[imgs.length];
 		Object imgData = null;
 		for (int i = 0; i < templates.length; i++) {
-			imgData = imgs[i].getValue();
+			imgData = imgs[i];
 			if(imgData == null)
 				throw new NullPointerException("template image cannot be null: "+i);
 			if(!(imgData instanceof Mat))
@@ -361,10 +362,7 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ValueSource<Object> loadImage(String imgPath, boolean binary) {
-		Mat mat = Imgcodecs.imread(imgPath,binary ? CvType.CV_8UC1 : CvType.CV_8UC3);
-		if(mat == null)
-			return null;
-		return new SimpleProperty<Object>(mat);
+	public Object loadImage(String imgPath, boolean binary) {
+		return Imgcodecs.imread(imgPath,binary ? CvType.CV_8UC1 : CvType.CV_8UC3);
 	}
 }

@@ -73,13 +73,13 @@ public class ExampleMotorTester extends IterativeFRCRobot{
 		/*
 		 * Adds both right side motors which are wrapped in one speed controller container to the tester
 		 */
-		driveTester.addMotor("Right", driveTrain.getControllers(MotorSide.Right))
+		driveTester.addMotor("Right", driveTrain.getController(MotorSide.Right))
 				.setCurrentSource(()->frontRight.getOutputCurrent())//uses the front one as a source of current data used
 				.setVoltageSource(()->frontRight.getOutputVoltage());//uses the front one as a source of voltage data used
 		/*
 		 * Adds both left side motors which are wrapped in one speed controller container to the tester
 		 */
-		driveTester.addMotor("Right", driveTrain.getControllers(MotorSide.Left))
+		driveTester.addMotor("Left", driveTrain.getController(MotorSide.Left))
 				.setCurrentSource(()->frontLeft.getOutputCurrent())//uses the front one as a source of current data used
 				.setVoltageSource(()->frontLeft.getOutputVoltage());//uses the front one as a source of voltage data used
 		

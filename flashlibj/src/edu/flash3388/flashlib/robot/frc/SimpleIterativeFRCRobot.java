@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Robot{
 
-	private Scheduler schedulerImpl = new Scheduler();
+	private Scheduler schedulerImpl = Scheduler.getInstance();
 	private HIDInterface hidImpl = new FRCHidInterface();
 	
 	private boolean disabledInitialized = false, autonomousInitialized = false, teleopInitialized = false,
@@ -98,10 +98,6 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 		}
 	}
 	
-	@Override
-	public Scheduler getScheduler() {
-		return schedulerImpl;
-	}
 	@Override
 	public HIDInterface getHIDInterface() {
 		return hidImpl;

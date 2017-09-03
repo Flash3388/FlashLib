@@ -21,7 +21,7 @@ public abstract class IterativeRobot extends RobotBase implements Robot{
 	private StateSelector stateSelector;
 	
 	private void initialize(){
-		schedulerImpl = new Scheduler();
+		schedulerImpl = Scheduler.getInstance();
 		
 		RobotInitializer initializer = new RobotInitializer();
 		preInit(initializer);
@@ -82,10 +82,7 @@ public abstract class IterativeRobot extends RobotBase implements Robot{
 	public byte getState(){
 		return stateSelector == null? StateSelector.STATE_DISABLED : stateSelector.getState();
 	}
-	@Override
-	public Scheduler getScheduler(){
-		return schedulerImpl;
-	}
+
 	@Override
 	public HIDInterface getHIDInterface(){
 		return hidImpl;

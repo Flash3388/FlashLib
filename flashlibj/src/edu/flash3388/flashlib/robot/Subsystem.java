@@ -15,8 +15,7 @@ public abstract class Subsystem{
 	private String name = "";
 	
 	protected Subsystem(String name){
-		if(RobotFactory.hasImplementation())
-			RobotFactory.getImplementation().getScheduler().registerSystem(this);
+		Scheduler.getInstance().registerSystem(this);
 		this.name = name;
 	}
 	

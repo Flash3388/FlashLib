@@ -130,7 +130,7 @@ public class ExampleRobot2017 extends IterativeFRCRobot{
 				 * Activates the firing system depending on the value of the right trigger 
 				 * of the controller.
 				 */
-				firingSystem.set(controller.RightTrigger.get());
+				firingSystem.set(controller.RT.get());
 			}
 			@Override
 			protected void end() {

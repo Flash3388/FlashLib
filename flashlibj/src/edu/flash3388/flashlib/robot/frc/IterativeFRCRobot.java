@@ -27,6 +27,7 @@ import edu.flash3388.flashlib.util.Log;
 public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	
 	protected static class RobotInitializer{
+		public boolean runScheduler = true;
 		public boolean logsEnabled = false;
 		public boolean autoUpdateHid = true;
 		public boolean logPower = true;
@@ -43,9 +44,9 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	
 	private Log log, powerLog;
 	private double warningVoltage, warningPowerDraw;
-	private boolean logPower, logsEnabled;
+	private boolean logPower, logsEnabled, runScheduler;
 	
-	private Scheduler schedulerImpl;
+	private Scheduler schedulerImpl = Scheduler.getInstance();
 	private HIDInterface hidImpl;
 	
 	@Override
@@ -53,7 +54,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		RobotInitializer initializer = new RobotInitializer();
 		preInit(initializer);
 		
-		schedulerImpl = new Scheduler();
+		schedulerImpl = Scheduler.getInstance();
 		hidImpl = new FRCHidInterface();
 		
 		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
@@ -74,6 +75,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		if(initializer.autoUpdateHid)
 			schedulerImpl.addTask(new HIDUpdateTask());
 		
+		runScheduler = initializer.runScheduler;
 		warningPowerDraw = initializer.warningPowerDraw;
 		warningVoltage = initializer.warningVoltage;
 		
@@ -106,7 +108,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				disabledInit();
 				
 				while(isDisabled() && !inEmergencyStop()){
-					schedulerImpl.run();
+					runScheduler();
 					disabledPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -121,7 +123,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				autonomousInit();
 				
 				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
-					schedulerImpl.run();
+					runScheduler();
 					autonomousPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -136,7 +138,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				testInit();
 				
 				while(isEnabled() && isTest() && !inEmergencyStop()){
-					schedulerImpl.run();
+					runScheduler();
 					testPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -151,7 +153,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				teleopInit();
 				
 				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
-					schedulerImpl.run();
+					runScheduler();
 					teleopPeriodic();
 					logLowVoltage();
 					delay(ITERATION_DELAY);
@@ -161,6 +163,10 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		}
 	}
 	
+	private void runScheduler(){
+		if(runScheduler)
+			schedulerImpl.run();
+	}
 	private double powerLogTime(){
 		double matchTime = m_ds.getMatchTime();
 		return matchTime > 0? matchTime : FlashUtil.secs();
@@ -234,10 +240,6 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	}
 
 	
-	@Override
-	public Scheduler getScheduler() {
-		return schedulerImpl;
-	}
 	@Override
 	public HIDInterface getHIDInterface() {
 		return hidImpl;

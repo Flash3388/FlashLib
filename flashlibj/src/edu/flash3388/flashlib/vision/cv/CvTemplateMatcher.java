@@ -39,6 +39,34 @@ public class CvTemplateMatcher implements TemplateMatcher{
 	public MatchResult match(Mat scene, double scaleFactor){
 		return match(scene, templates, method, scaleFactor);
 	}
+	@Override
+	public MatchResult match(Object frame, double scaleFactor){
+		if(!(frame instanceof Mat))
+			throw new IllegalArgumentException("frame incompatible with this implementation: cv");
+		return match((Mat)frame, scaleFactor);
+	}
+	
+	@Override
+	public MatchResult match(Object frame, int method, double scaleFactor, Object... templates){
+		if(!(frame instanceof Mat))
+			throw new IllegalArgumentException("frame incompatible with this implementation: cv");
+		if(method < 0 || method >= Method.values().length)
+			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
+					+method + ":" + Method.values().length);
+		this.templates = new Mat[templates.length];
+		Object imgData = null;
+		for (int i = 0; i < templates.length; i++) {
+			imgData = templates[i];
+			if(imgData == null)
+				throw new NullPointerException("template image cannot be null: "+i);
+			if(!(imgData instanceof Mat))
+				throw new IllegalArgumentException("Image format does not match implementation: cv, "+i);
+			this.templates[i] = (Mat)imgData;
+		}
+		this.method = Method.values()[method];
+		
+		return match((Mat)frame, scaleFactor);
+	}
 	
 	public static MatchResult match(Mat scene, Mat[] templs, Method method, double scaleFactor){
 			

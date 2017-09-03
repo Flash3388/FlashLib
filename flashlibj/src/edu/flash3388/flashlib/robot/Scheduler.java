@@ -52,11 +52,15 @@ public final class Scheduler {
 	public static final byte MODE_ACTIONS = 0x2;
 	public static final byte MODE_FULL = MODE_ACTIONS | MODE_TASKS;
 	
+	private static Scheduler instance;
+	
 	private byte mode = MODE_FULL;
 	
 	private Vector<Action> actions = new Vector<Action>();
 	private Vector<Subsystem> systems = new Vector<Subsystem>();
 	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
+	
+	private Scheduler(){}
 	
 	/**
 	 * Runs the scheduler. 
@@ -222,5 +226,17 @@ public final class Scheduler {
 	 */
 	public boolean isDisabled(){
 		return mode == MODE_DISABLED;
+	}
+	
+	/**
+	 * Gets the instance of the {@link Scheduler} class. If the instance was not
+	 * create yet, it is created on the spot.
+	 * 
+	 * @return the instance of the scheduler
+	 */
+	public static Scheduler getInstance(){
+		if(instance == null)
+			instance = new Scheduler();
+		return instance;
 	}
 }

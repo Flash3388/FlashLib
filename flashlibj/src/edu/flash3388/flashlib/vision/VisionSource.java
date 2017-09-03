@@ -3,8 +3,6 @@ package edu.flash3388.flashlib.vision;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.flash3388.flashlib.util.beans.ValueSource;
-
 /**
  * Vision source provides a base for vision operations. To use a library for vision processing, it needs to implement this
  * class and than can be used by the vision system. 
@@ -246,24 +244,23 @@ public interface VisionSource {
 	 */
 	MatchResult matchTemplate(TemplateMatcher matcher, double scaleFactor);
 	
-	TemplateMatcher createTemplateMatcher(ValueSource<Object>[] imgs, int method);
+	/**
+	 * Creates a {@link TemplateMatcher} object for this implementation. Can be used to perform
+	 * vision template matching afterwards by calling {@link #matchTemplate(TemplateMatcher, double)}.
+	 * 
+	 * @param templates the template images
+	 * @param method the template matching method
+	 * @return a template matcher object
+	 */
+	TemplateMatcher createTemplateMatcher(Object[] templates, int method);
 	
 	/**
-	 * Loads an image and wraps it in a reference to the image type used by the implementation.
+	 * Loads an image from a file and returns it. The loaded class depends on the implementation
 	 * 
 	 * @param imgPath path to the image
 	 * @param binary true to load the image as a binary image
 	 * @return the loaded image, or null if unable to load
 	 */
-	ValueSource<Object> loadImage(String imgPath, boolean binary);
+	Object loadImage(String imgPath, boolean binary);
 }
-
-/*
- * 
-	/**
-	 * Gets an analysis object for a given list of contours. 
-	 * @param contours list of contours
-	 * @return an {@link Analysis} object for the given contours
-	 */
-	//Analysis getAnalysisForContours(List<Contour> contours);
 

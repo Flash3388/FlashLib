@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
@@ -79,11 +81,11 @@ public interface PidSource {
 			return previous;
 		}
 	}
-	public static class DoubleDataPidSource implements PidSource{
+	public static class DoubleSourcePidSource implements PidSource{
 
 		private DoubleSource source;
 		
-		public DoubleDataPidSource(DoubleSource source){
+		public DoubleSourcePidSource(DoubleSource source){
 			this.source = source;
 		}
 		
@@ -99,6 +101,56 @@ public interface PidSource {
 			return source.get();
 		}
 		
+	}
+	public static class EncoderPidSource implements PidSource{
+
+		private Encoder encoder;
+		private boolean useDistance = false;
+		
+		public EncoderPidSource(Encoder encoder, boolean useDistance) {
+			this.encoder = encoder;
+			this.useDistance = useDistance;
+		}
+		
+		public void setUsingDistance(boolean useDistance){
+			this.useDistance = useDistance;
+		}
+		public boolean isUsingDistance(){
+			return useDistance;
+		}
+		
+		public void setEncoder(Encoder encoder){
+			this.encoder = encoder;
+		}
+		public Encoder getEncoder(){
+			return encoder;
+		}
+		
+		@Override
+		public double pidGet() {
+			return useDistance? encoder.getDistance() : encoder.getRate();
+		}
+		
+	}
+	public static class RangeFinderPidSource implements PidSource{
+
+		private RangeFinder rangeFinder;
+		
+		public RangeFinderPidSource(RangeFinder rangeFinder) {
+			this.rangeFinder = rangeFinder;
+		}
+		
+		public RangeFinder getRangeFinder(){
+			return rangeFinder;
+		}
+		public void setRangeFinder(RangeFinder rangeFinder){
+			this.rangeFinder = rangeFinder;
+		}
+		
+		@Override
+		public double pidGet() {
+			return rangeFinder.getRangeCM();
+		}
 	}
 	
 	/**

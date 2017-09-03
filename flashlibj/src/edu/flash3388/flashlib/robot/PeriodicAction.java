@@ -12,7 +12,7 @@ public class PeriodicAction extends Action{
 		this.action = action;
 		this.time = time;
 		
-		setTimeOut(action.getTimeOut());
+		setTimeout(action.getTimeout());
 		copyRequirements(action);
 	}
 	public PeriodicAction(Action action, double time){

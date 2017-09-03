@@ -97,7 +97,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * We will use an ultrasonic sensor to define the distance from a target to approach or back from. The action will
 		 * attempt to reach a certain distance from the target an remain within the given margin.
 		 */
-		PidSource sonicSource = new PidSource.DoubleDataPidSource(sonicData);
+		PidSource sonicSource = new PidSource.DoubleSourcePidSource(sonicData);
 		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp.get(), ki.get(), kd.get(), dsetpoint, 15.0);
 		
 		/*

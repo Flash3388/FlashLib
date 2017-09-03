@@ -71,13 +71,7 @@ public class MainController implements Initializable{
 				
 				if(!lastconnectionC){
 					controller.resetDisplay();
-					PDPWindow.reset();
-					PDP.resetBoards();
-					TesterWindow.closeTester();
-					VisionEditorWindow.closeEditor();
-					PidTunerWindow.reset();
-					FlashboardTester.resetTesters();
-					DashboardPidTuner.resetTuners();
+					resetAllControls();
 				}
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
@@ -85,7 +79,7 @@ public class MainController implements Initializable{
 				controller.camserverRect.setFill(lastconnectionS ? Color.GREEN : Color.RED);
 			}
 			if(PDPWindow.onScreen())
-				PDPWindow.getInstance().getController().update();
+				PDPWindow.getInstance().update();
 		};
 		@Override
 		public void run() {
@@ -621,5 +615,15 @@ public class MainController implements Initializable{
 			Runnable r = d.updateDisplay();
 			if(r != null) r.run();
 		}
+	}
+	
+	public static void resetAllControls(){
+		PDPWindow.reset();
+		PDP.resetBoards();
+		TesterWindow.closeTester();
+		VisionEditorWindow.closeEditor();
+		PidTunerWindow.reset();
+		FlashboardTester.resetTesters();
+		DashboardPidTuner.resetTuners();
 	}
 }

@@ -18,7 +18,7 @@ public class SpeedChangeAction extends Action{
 		this(controllers, toSpeed, changeSpeed, -1, null);
 	}
 	public SpeedChangeAction(FlashSpeedController controllers, double toSpeed, double changeSpeed, double timeout, Subsystem s){
-		this.setTimeOut((long) (timeout * 1000));
+		this.setTimeout((int) (timeout * 1000));
 		this.resetRequirements();
 		this.requires(s);
 		this.controllers = controllers;
