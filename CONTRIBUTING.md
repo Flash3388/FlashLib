@@ -9,9 +9,6 @@ and behave professionally.
 
 - Code must be maintainable, even if you are no longer working on the project.
 - Code should be well documented.
-- Excluding bug fixes, changes in one language generally need to have changes in other languages.
-  - Some changes are specific to that version of FlashLib alone.
-  - If you find yourself unable to make the same changes in the other language, you can always ask for help!
  - Changes should be tested before being submited.
  - Since FlashLib is a library, code should be generally written in a general format, meaning:
    - It should be able to handle most situations related to it.
@@ -26,7 +23,6 @@ and behave professionally.
   - Bug reports are definitely welcome! Please submit them to the GitHub issue tracket, and remember to mark them with
     fitting labels.
 - While we do welcome any changes and additions, there are several rules to consider:
-  - Features must be added to both flashlibc and flashlibj, with rare exceptions.
   - Ask about large changes before spending a bunch of time on them! You can create a new issue on our GitHub tracker for 
     feature request/discussion and talk about it with us there.
   - As a rule, we are happy with the general structure of FlashLib. We are not interested in major rewrites of all of FlashLib. 
