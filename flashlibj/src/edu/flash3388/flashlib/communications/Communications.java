@@ -84,8 +84,7 @@ public class Communications {
 	private Vector<Sendable> attachedSendables;
 	private Map<Integer, Sendable> sendables;
 	
-	private long currentMillis = -1, readStart = -1;
-	private int readTimeout;
+	private int readStart = -1;
 	private boolean allowConnection = true;
 	private int nextId, minIdAlloc = 0;
 	private Packet packet = new Packet();
@@ -134,13 +133,11 @@ public class Communications {
 	}
 	private void read(){//ID|VALUE
 		if(!isConnected()) return;
-		updateClock();
-		readStart = currentMillis;
+		readStart = FlashUtil.millisInt();
 		while(!readTimedout()){
 			Packet packet = receivePacket();
 			if(packet == null || packet.length < 1)
 				return;
-			//System.out.println(logName+": BYTES! "+packet.length);
 			if(packet.length < MINIMUM_DATA_BYTES)
 				continue;
 			
@@ -149,11 +146,8 @@ public class Communications {
 			Sendable sen = getFromAllAttachedByID(id);
 			if(dataType == SENDABLE_DATA && sen != null && sen.remoteAttached() && 
 					packet.length - 6 > 0){
-				//System.out.println(logName+": DATA "+id);
-				
 				sen.newData(Arrays.copyOfRange(packet.data, 6, packet.length));
 			}else if(dataType == SENDABLE_INIT){
-				//System.out.println(logName+": INIT "+id);
 				if(sen == null){
 					String str = new String(packet.data, 6, packet.length - 6);
 					createSendable(str, id, packet.data[5]);
@@ -161,14 +155,10 @@ public class Communications {
 					onRemoteAttached(sen, true);
 				}
 			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sen != null){
-				//System.out.println(logName+": CONFIRM ATTACH "+id);
 				onRemoteAttached(sen, false);
 			}else if(dataType == SENDABLE_CONFIRM_DETACH && sen != null && sen.remoteAttached()){
-				//System.out.println(logName+": CONFIRM DETACH "+id);
 				sen.setRemoteAttached(false);
 				sen.onConnectionLost();
-			}else{
-				//System.out.println(logName+": BYTES IN ELSE: ID="+id+" DTYPE="+dataType+" LEN="+packet.length);
 			}
 		}
 	}
@@ -260,16 +250,11 @@ public class Communications {
 			return;
 		send(dataB, sen, SENDABLE_DATA);
 	}
-	private void updateClock(){
-		currentMillis = FlashUtil.millis();
-	}
 	private boolean readTimedout(){
-		updateClock();
-		return readStart != -1 && currentMillis - readStart > readTimeout;
+		return readStart != -1 && FlashUtil.millisInt() - readStart > CommInterface.READ_TIMEOUT;
 	}
 	private void write(byte[] bytes){
 		if(!isConnected()) return;
-		//System.out.println(logName+" WRITING: "+bytes.length+" "+FlashUtil.toInt(bytes, 1));
 		commInterface.write(bytes);
 	}
 	
@@ -280,8 +265,6 @@ public class Communications {
 		bytes[5] = sendable.getType();
 		System.arraycopy(data, 0, bytes, 6, data.length);
 		write(bytes);
-		
-		//System.out.println(logName+"DATA FROM: "+sendable.getID());
 	}
 	
 	private boolean open(){
@@ -489,7 +472,6 @@ public class Communications {
 		if(isConnected()) return true;
 		if(!allowConnection) return false;
 		
-		updateClock();
 		commInterface.connect(packet);
 		if(isConnected()){
 			setReadTimeout(CommInterface.READ_TIMEOUT);

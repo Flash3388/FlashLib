@@ -123,7 +123,7 @@ public abstract class Button implements BooleanSource, Runnable{
 		
 		public void start(){
 			if(!action.isRunning()){
-				if((presses++) == pressesStart){
+				if((++presses) == pressesStart){
 					action.start();
 					presses = 0;
 				}
@@ -157,51 +157,52 @@ public abstract class Button implements BooleanSource, Runnable{
 	 * when {@link #run()} is called.
 	 * @param action button action to add
 	 */
-	public final void addButtonAction(ButtonAction action){
+	public void addButtonAction(ButtonAction action){
 		actions.add(action);
 	}
 	/**
 	 * Adds an {@link Action} which will be started when the button is pressed
 	 * @param action an action to add
 	 */
-	public final void whenPressed(Action action){
+	public void whenPressed(Action action){
 		actions.add(new ButtonAction(ActivateType.Press, action));
 	}
 	/**
 	 * Adds an {@link Action} which will be started when the button is released
 	 * @param action an action to add
 	 */
-	public final void whenReleased(Action action){
+	public void whenReleased(Action action){
 		actions.add(new ButtonAction(ActivateType.Release, action));
 	}
 	/**
 	 * Adds an {@link Action} which will be started when the button is held
 	 * @param action an action to add
 	 */
-	public final void whileHeld(Action action){
+	public void whileHeld(Action action){
 		actions.add(new ButtonAction(ActivateType.Hold, action));
 	}
 	/**
 	 * Adds an {@link Action} which will be canceled when the button is pressed
 	 * @param action an action to add
 	 */
-	public final void cancelWhenPressed(Action action){
+	public void cancelWhenPressed(Action action){
 		actions.add(new CancelAction(ActivateType.Press, action));
 	}
 	/**
 	 * Adds an {@link Action} which when pressed and if not running will start, and if
-	 * not running will be canceled.
+	 * running will be canceled.
 	 * @param action an action to add
 	 */
-	public final void toggleWhenPressed(Action action){
+	public void toggleWhenPressed(Action action){
 		actions.add(new ToggleAction(ActivateType.Press, action));
 	}
 	/**
-	 * Adds an {@link Action} which will run when the button was pressed twice.
+	 * Adds an {@link Action} which will run when the button was pressed multiple times continuously
 	 * @param action an action to add
+	 * @param presses amount of presses
 	 */
-	public final void whenDoublePress(Action action){
-		actions.add(new MultiPressAction(action, 2));
+	public void whenMultiPressed(Action action, int presses){
+		actions.add(new MultiPressAction(action, presses));
 	}
 	
 	/**

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
+import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
@@ -84,8 +85,12 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	}
 	@Override
 	public final void robotMain() {
-		log.logTime("STARTING");
+		log.logTime("STARTING", "Robot");
+		
+		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
+			Flashboard.start();
 		LiveWindow.setEnabled(false);
+		
 		if(logPower)
 			powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), "Robot", powerLogTime());
 		

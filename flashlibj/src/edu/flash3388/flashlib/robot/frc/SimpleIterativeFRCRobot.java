@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.frc;
 
+import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.Robot;
@@ -24,6 +25,8 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 	}
 	@Override
 	public final void robotMain() {
+		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
+			Flashboard.start();
 		LiveWindow.setEnabled(false);
 		
 		while(true){

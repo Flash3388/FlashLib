@@ -36,11 +36,6 @@ public class ExampleFlashboardCamServer extends IterativeFRCRobot {
 		 */
 		camSelector = new ManualViewSelector();
 		Flashboard.getCameraView().setSelector(camSelector);
-		
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 	
 	@Override

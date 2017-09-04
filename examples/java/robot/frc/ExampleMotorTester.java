@@ -87,10 +87,6 @@ public class ExampleMotorTester extends IterativeFRCRobot{
 		 * Attaches the tester to the flashboard
 		 */
 		Flashboard.attach(driveTester);
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 
 	@Override

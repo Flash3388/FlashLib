@@ -73,10 +73,6 @@ public class ExamplePidTuner extends IterativeFRCRobot{
 		 * Attaches the pidtuner to the flashboard
 		 */
 		Flashboard.attach(pidtuner);
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 
 	@Override

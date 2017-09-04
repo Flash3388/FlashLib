@@ -46,11 +46,6 @@ public class ExampleFlashboardVision extends IterativeFRCRobot{
 		 * hasNewAnalysis(). We gave it the value of 500ms.
 		 */
 		vision.setNewAnalysisTimeout(500);
-		
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 
 	@Override

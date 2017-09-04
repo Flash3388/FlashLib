@@ -241,7 +241,7 @@ public final class Flashboard {
 				
 				initMode = mode;
 				instance = true;
-				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode));
+				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
 			} catch (IOException e) {
 				FlashUtil.getLog().reportError(e.getMessage());
 			}

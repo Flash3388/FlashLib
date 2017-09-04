@@ -176,7 +176,7 @@ public abstract class TypeLog extends Log{
 	@Override
 	public void print(String log, String caller){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> "+"("+caller+") : "+log);
+		getPrintStream().println(getName()+"> ("+caller+") : "+log);
 	}
 	/**
 	 * {@inheritDoc}
@@ -184,7 +184,7 @@ public abstract class TypeLog extends Log{
 	@Override
 	public void print(String log, String caller, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> "+"("+caller+") : "+"["+time+"] "+log);
+		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
 	}
 	
 	/**

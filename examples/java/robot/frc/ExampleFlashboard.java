@@ -88,11 +88,6 @@ public class ExampleFlashboard extends IterativeFRCRobot{
 		 * 0.1 ((1.0 - 0.0) / 10).
 		 */
 		Flashboard.putSlider("Some Slider", filterSpeed, 0.0, 1.0, 10);
-		
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 	
 	@Override

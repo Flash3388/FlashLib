@@ -131,7 +131,7 @@ public abstract class Log{
 	public Log(String directory, String name, boolean override, int logMode){
 		this.name = name;
 		this.logMode = (byte) logMode;
-		this.timeSource = ()->FlashUtil.millis();
+		this.timeSource = ()->FlashUtil.secs();
 		
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");

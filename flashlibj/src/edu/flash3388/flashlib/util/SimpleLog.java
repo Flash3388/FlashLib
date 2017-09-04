@@ -139,7 +139,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void print(String log, String caller){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> "+"("+caller+") : "+log);
+		getPrintStream().println(getName()+"> ("+caller+") : "+log);
 	}
 	/**
 	 * {@inheritDoc}
@@ -147,7 +147,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void print(String log, String caller, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> "+"("+caller+") : "+"["+time+"] "+log);
+		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
 	}
 	
 	/**
@@ -156,7 +156,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String mess, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(mess);
+		writeToStandardLog("("+caller+") : "+mess);
 	}
 	/**
 	 * {@inheritDoc}
@@ -164,7 +164,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String mess, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("("+caller+") : "+"["+time+"] "+mess);
+		writeToStandardLog("["+time+"] ("+caller+") : "+mess);
 	}
 	/**
 	 * {@inheritDoc}

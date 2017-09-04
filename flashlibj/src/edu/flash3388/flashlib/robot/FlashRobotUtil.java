@@ -39,10 +39,10 @@ public class FlashRobotUtil {
 	public static void enterEmergencyStop(){
 		if(emergencyStop) return;
 		
-		FlashUtil.getLog().logTime("!EMERGENCY STOP!");
+		FlashUtil.getLog().logTime("!EMERGENCY STOP!", "Robot");
 		
 		Scheduler.getInstance().setDisabled(true);
-		if(!RobotFactory.getImplementation().isFRC())
+		if(!RobotFactory.hasImplementation() || !RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.disableAll();
 		
 		estopControl.inEmergencyStop(true);
@@ -54,10 +54,10 @@ public class FlashRobotUtil {
 	public static void exitEmergencyStop(){
 		if(!emergencyStop) return;
 		
-		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED");
+		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED", "Robot");
 		
 		Scheduler.getInstance().setDisabled(false);
-		if(!RobotFactory.getImplementation().isFRC())
+		if(!RobotFactory.hasImplementation() || !RobotFactory.getImplementation().isFRC())
 			MotorSafetyHelper.enableAll();
 		
 		estopControl.inEmergencyStop(false);
@@ -147,15 +147,13 @@ public class FlashRobotUtil {
 		RobotFactory.setImplementation(robot);
 		estopControl = new EmergencyStopControl();
 		
-		FlashUtil.getLog().logTime("INITIALIZING...");
-		
 		if(flashboardInitData != null){
 			Flashboard.init(flashboardInitData);
 			Flashboard.attach(estopControl,
 						      new SendableLog(FlashUtil.getLog()));
 		}
 		
-		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE");
+		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE", "Robot");
 		init = true;
 	}
 }

@@ -11,6 +11,49 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class HIDButton extends Button{
 
+	private static class TimedMultiPress extends ButtonAction{
+		
+		private static final int PRESS_TIMEOUT = MAX_MILLIS_PRESS * 4;
+		
+		private int lastPress = -1;
+		private int presses = 0;
+		private int pressesStart;
+		
+		public TimedMultiPress(Action action, int presses){
+			super(ActivateType.Press, action);
+			this.pressesStart = presses;
+		}
+		
+		public void start(){
+			if(!action.isRunning()){
+				if(lastPress < 0)
+					 lastPress = FlashUtil.millisInt();
+				
+				if(FlashUtil.millisInt() - lastPress > PRESS_TIMEOUT)
+					presses = 0;
+				
+				if((++presses) == pressesStart){
+					action.start();
+					presses = 0;
+					lastPress = -1;
+				}
+				
+				lastPress = FlashUtil.millisInt();
+			}
+			else if(presses != 0){
+				presses = 0;
+				lastPress = -1;
+			}
+		}
+		public void stop(){
+			lastPress = -1;
+			presses = 0;
+			if(action.isRunning())
+				action.cancel();
+		}
+		
+	}
+	
 	public static final int MAX_MILLIS_PRESS = 500;
 	
 	private HID hid;
@@ -46,6 +89,14 @@ public class HIDButton extends Button{
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void whenMultiPressed(Action action, int presses) {
+		super.addButtonAction(new TimedMultiPress(action, presses));
+	}
+	
+	/**
 	 * Gets the current button state
 	 */
 	@Override
@@ -60,8 +111,9 @@ public class HIDButton extends Button{
 	public void run(){
 		boolean down = get();
 		
-		if(last && down && holdStart <= 0)
+		if(last && down && holdStart <= 0){
 			holdStart = FlashUtil.millisInt();
+		}
 		
 		int timepassed = holdStart > 0? FlashUtil.millisInt() - holdStart : 0;
 		if(last && !down){
