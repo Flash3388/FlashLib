@@ -43,10 +43,8 @@ public class CvSource implements VisionSource{
 		if(insureContours && contours == null)
 			detectContours();
 		
-		if(threshold != null){
-			if(pipeline != null)
-				pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
-		}
+		if(threshold != null && pipeline != null)
+			pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
 	}
 	private void detectContours(){		
 		if(contours == null)
@@ -130,7 +128,7 @@ public class CvSource implements VisionSource{
 	public Analysis getResult() {
 		if(analysis != null)
 			return analysis;
-		if(contours.size() != 1)
+		if(contours == null || contours.size() != 1)
 			return null;
 		
 		MatOfPoint contour = contours.get(0);
@@ -144,6 +142,8 @@ public class CvSource implements VisionSource{
 	 */
 	@Override
 	public Analysis[] getResults() {
+		if(contours == null)
+			return null;
 		Analysis[] ans = new Analysis[contours.size()];
 		
 		for (int i = 0; i < ans.length; i++) {
@@ -189,6 +189,7 @@ public class CvSource implements VisionSource{
 		
 		threshold = new Mat();
 		CvProcessing.filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
+		checkReady(false, true);
 	}
 	/**
 	 * {@inheritDoc}
@@ -198,6 +199,7 @@ public class CvSource implements VisionSource{
 		checkReady(false, false);
 		
 		CvProcessing.filterMatColors(mat, threshold, min, max, min, max, min, max);
+		checkReady(false, true);
 	}
 	
 	/**
