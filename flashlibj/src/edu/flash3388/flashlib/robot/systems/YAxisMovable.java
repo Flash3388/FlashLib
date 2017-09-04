@@ -12,9 +12,9 @@ public interface YAxisMovable {
 	/**
 	 * Moves the system at a speed to a given direction along the y-axis.
 	 * @param speed speed [0...1]
-	 * @param direction forward - 1, backward - -1
+	 * @param direction forward - true, backward - false
 	 */
-	void driveY(double speed, boolean direction);
+	void moveY(double speed, boolean direction);
 	/**
 	 * Moves the system at a speed forwards.
 	 * @param speed speed [0...1]

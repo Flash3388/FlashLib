@@ -167,7 +167,7 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	 */
 	@Override
 	public void rotate(double speed, boolean direction) {
-		driveY(speed, direction);
+		moveY(speed, direction);
 	}
 	/**
 	 * {@inheritDoc}
@@ -187,8 +187,8 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveX(double speed, boolean direction) {
-		driveY(speed, direction);
+	public void moveX(double speed, boolean direction) {
+		moveY(speed, direction);
 	}
 	/**
 	 * {@inheritDoc}
@@ -208,7 +208,7 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveY(double speed, boolean direction) {
+	public void moveY(double speed, boolean direction) {
 		if(direction) forward(speed);
 		else backward(speed);
 	}

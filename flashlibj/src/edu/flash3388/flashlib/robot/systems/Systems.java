@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.InstantAction;
 
 /**
- * Systems provides assistance methods for creation of system-related objects and instances wih ease.
+ * Systems provides assistance methods for creation of system-related objects and instances with ease.
  * This is just a convenience class, and not necessary for use.
  * 
  * @author Tom Tzook'

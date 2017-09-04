@@ -12,9 +12,9 @@ public interface XAxisMovable {
 	/**
 	 * Moves the system at a speed to a given direction along the x-axis.
 	 * @param speed speed [0...1]
-	 * @param direction right - 1, left - -1
+	 * @param direction right - true, left - false
 	 */
-	void driveX(double speed, boolean direction);
+	void moveX(double speed, boolean direction);
 	/**
 	 * Moves the system at a speed to the right.
 	 * @param speed speed [0...1]

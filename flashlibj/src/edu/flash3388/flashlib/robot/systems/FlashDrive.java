@@ -554,7 +554,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveY(double speed, boolean direction){
+	public void moveY(double speed, boolean direction){
 		if(direction) forward(speed);
 		else backward(speed);
 	}
@@ -607,7 +607,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveX(double speed, boolean direction){
+	public void moveX(double speed, boolean direction){
 		if(direction) right(speed);
 		else left(speed);
 	}

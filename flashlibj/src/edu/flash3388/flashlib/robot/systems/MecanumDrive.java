@@ -472,7 +472,7 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveY(double speed, boolean direction) {
+	public void moveY(double speed, boolean direction) {
 		if (direction)
 			forward(speed);
 		else if (direction)
@@ -496,7 +496,7 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveX(double speed, boolean direction) {
+	public void moveX(double speed, boolean direction) {
 		if (direction)
 			right(speed);
 		else if (direction)

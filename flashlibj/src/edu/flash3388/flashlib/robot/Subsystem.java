@@ -12,11 +12,14 @@ public abstract class Subsystem{
 	private Action default_action;
 	private Action current_action;
 	
-	private String name = "";
+	private String name;
 	
 	protected Subsystem(String name){
 		Scheduler.getInstance().registerSystem(this);
 		this.name = name;
+	}
+	protected Subsystem() {
+		this("");
 	}
 	
 	/**
