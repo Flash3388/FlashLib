@@ -52,7 +52,7 @@ public class FlashFRCUtil {
 	 */
 	public static void initFlashLib(Robot robot, FlashboardInitData flashboardInitData){
 		Log.setParentDirectory("/home/lvuser");
-		FlashRobotUtil.initFlashLib(robot, flashboardInitData);
+		FlashRobotUtil.initFlashLib(robot, RobotFactory.createFRCHIDInterface(), flashboardInitData);
 		FlashUtil.getLog().addListener(new DriverStationLogListener());
 		pdp = new PDP();
 	}

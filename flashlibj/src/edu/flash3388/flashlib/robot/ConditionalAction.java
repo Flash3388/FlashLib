@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.Enumeration;
-
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -29,13 +27,9 @@ public class ConditionalAction extends Action {
 		this.actionFalse = aFalse;
 	}
 	
-	private void validateRequirements(Enumeration<Subsystem> systems){
+	private void validateRequirements(Action action){
 		resetRequirements();
-		for (; systems.hasMoreElements();) {
-			Subsystem s = systems.nextElement();
-			if(s != null)
-				requires(s);
-		}
+		copyRequirements(action);
 	}
 	
 	public void setConditionSource(BooleanSource source){
@@ -55,7 +49,7 @@ public class ConditionalAction extends Action {
 			return;
 		}
 		runAction = condition.get()? actionTrue : actionFalse;
-		validateRequirements(runAction.getRequirements());
+		validateRequirements(runAction);
 		super.start();
 	}
 	

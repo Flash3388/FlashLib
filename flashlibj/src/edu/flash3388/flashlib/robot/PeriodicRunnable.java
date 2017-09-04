@@ -2,6 +2,12 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * A {@link Runnable} wrapper which calls {@link #run()} once during a period of time defined by the user.
+ * 
+ * @author TomTzook
+ * @since FlashLib 1.0.1
+ */
 public class PeriodicRunnable implements Runnable{
 
 	private Runnable runnable;

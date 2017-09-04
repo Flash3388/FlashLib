@@ -92,21 +92,21 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(stick_num, axis);
+		return RobotFactory.getHIDInterface().getHIDAxis(stick_num, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDButton(stick_num, button);
+		return RobotFactory.getHIDInterface().getHIDButton(stick_num, button);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public int getRawPOV(int pov){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDPOV(stick_num, pov);
+		return RobotFactory.getHIDInterface().getHIDPOV(stick_num, pov);
 	}
 	/**
 	 * {@inheritDoc}

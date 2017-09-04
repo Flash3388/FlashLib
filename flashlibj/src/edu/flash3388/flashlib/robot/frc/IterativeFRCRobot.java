@@ -7,7 +7,6 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
 import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -48,7 +47,6 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	private boolean logPower, logsEnabled, runScheduler;
 	
 	private Scheduler schedulerImpl = Scheduler.getInstance();
-	private HIDInterface hidImpl;
 	
 	@Override
 	protected final void robotInit(){
@@ -56,7 +54,6 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		preInit(initializer);
 		
 		schedulerImpl = Scheduler.getInstance();
-		hidImpl = new FRCHidInterface();
 		
 		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
 		
@@ -244,11 +241,6 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		return powerLog;
 	}
 
-	
-	@Override
-	public HIDInterface getHIDInterface() {
-		return hidImpl;
-	}
 	@Override
 	public boolean isFRC() {
 		return true;

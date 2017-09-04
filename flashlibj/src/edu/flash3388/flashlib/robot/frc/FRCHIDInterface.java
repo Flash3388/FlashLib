@@ -5,7 +5,7 @@ import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 
-public class FRCHidInterface implements HIDInterface{
+public class FRCHIDInterface implements HIDInterface{
 
 	private DriverStation ds = DriverStation.getInstance();
 	

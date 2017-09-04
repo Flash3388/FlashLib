@@ -124,21 +124,21 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDAxis(channel, axis);
+		return RobotFactory.getHIDInterface().getHIDAxis(channel, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDButton(channel, button);
+		return RobotFactory.getHIDInterface().getHIDButton(channel, button);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public int getRawPOV(int pov){
-		return RobotFactory.getImplementation().getHIDInterface().getHIDPOV(channel, pov);
+		return RobotFactory.getHIDInterface().getHIDPOV(channel, pov);
 	}
 	/**
 	 * {@inheritDoc}

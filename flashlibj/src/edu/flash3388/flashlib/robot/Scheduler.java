@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.robot;
 
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -57,7 +60,7 @@ public final class Scheduler {
 	private byte mode = MODE_FULL;
 	
 	private Vector<Action> actions = new Vector<Action>();
-	private Vector<Subsystem> systems = new Vector<Subsystem>();
+	private Set<Subsystem> systems = new HashSet<Subsystem>();
 	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
 	
 	private Scheduler(){}
@@ -88,8 +91,8 @@ public final class Scheduler {
 		
 		if(isMode(MODE_ACTIONS) && systems.size() > 0){
 			Subsystem system = null;
-			for(Enumeration<Subsystem> systemEnum = systems.elements(); systemEnum.hasMoreElements();){
-				system = systemEnum.nextElement();
+			for(Iterator<Subsystem> systemEnum = systems.iterator(); systemEnum.hasNext();){
+				system = systemEnum.next();
 				if(!system.hasCurrentAction())
 					system.startDefaultAction();
 			}
@@ -149,9 +152,9 @@ public final class Scheduler {
 	public boolean add(Action action){
 		if(isDisabled()) return false;
 		
-		Enumeration<Subsystem> requirements = action.getRequirements();
-		while(requirements.hasMoreElements()){
-			Subsystem system = requirements.nextElement();
+		Iterator<Subsystem> requirements = action.getRequirements();
+		while(requirements.hasNext()){
+			Subsystem system = requirements.next();
 			if(system.hasCurrentAction())
 				remove(system.getCurrentAction());
 			system.setCurrentAction(action);
@@ -167,9 +170,9 @@ public final class Scheduler {
 	 */
 	public void remove(Action action){
 		if(actions.removeElement(action)){
-			Enumeration<Subsystem> requirements = action.getRequirements();
-			while(requirements.hasMoreElements())
-				requirements.nextElement().setCurrentAction(null);
+			Iterator<Subsystem> requirements = action.getRequirements();
+			while(requirements.hasNext())
+				requirements.next().setCurrentAction(null);
 			
 			action.removed();
 		}

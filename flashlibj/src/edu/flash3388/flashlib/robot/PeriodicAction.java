@@ -2,6 +2,12 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
+/**
+ * An {@link Action} wrapper which calls {@link #execute()} once during a period of time defined by the user.
+ * 
+ * @author TomTzook
+ * @since FlashLib 1.0.1
+ */
 public class PeriodicAction extends Action{
 
 	private Action action;

@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.robot.hid;
  */
 public class Stick{
 
-	private Axis trigX, trigY;
+	private Axis axisX, axisY;
 	
 	/**
 	 * Creates a new stick for a controller.
@@ -18,23 +18,23 @@ public class Stick{
 	 * @param axisY the index of the y-axis
 	 */
 	public Stick(HID hid, int axisX, int axisY){
-		trigX = new Axis(hid, axisX);
-		trigY = new Axis(hid, axisY);
+		this.axisX = new Axis(hid, axisX);
+		this.axisY = new Axis(hid, axisY);
 	}
 	
 	/**
 	 * Gets the x axis {@link Axis} object.
 	 * @return x axis
 	 */
-	public Axis getXTrigger(){
-		return trigX;
+	public Axis getXAxis(){
+		return axisX;
 	}
 	/**
 	 * Gets the y axis {@link Axis} object.
 	 * @return y axis
 	 */
-	public Axis getYTrigger(){
-		return trigY;
+	public Axis getYAxis(){
+		return axisY;
 	}
 	
 	/**
@@ -42,14 +42,14 @@ public class Stick{
 	 * @return the x-axis
 	 */
 	public double getX() {
-		return trigX.get();
+		return axisX.get();
 	}
 	/**
 	 * Gets the value of the y-axis of the controller
 	 * @return the y-axis
 	 */
 	public double getY() {
-		return trigY.get();
+		return axisY.get();
 	}
 	
 	/**

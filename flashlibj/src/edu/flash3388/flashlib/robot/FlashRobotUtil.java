@@ -136,15 +136,17 @@ public class FlashRobotUtil {
 	 * and initializes {@link Flashboard} according to the given initialization data.
 	 * 
 	 * @param robot the robot implementation
+	 * @param hidInterface the hid implementation
 	 * @param flashboardInitData the flashboard initialization data
 	 * 
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(Robot robot, FlashboardInitData flashboardInitData){
+	public static void initFlashLib(Robot robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
 		RobotFactory.setImplementation(robot);
+		RobotFactory.setHIDInterface(hidInterface);
 		estopControl = new EmergencyStopControl();
 		
 		if(flashboardInitData != null){

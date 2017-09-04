@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -52,7 +53,7 @@ public abstract class Action{
 		protected void end() {}
 	};
 
-	private Vector<Subsystem> requirements = new Vector<Subsystem>(2);
+	private Set<Subsystem> requirements = new HashSet<Subsystem>(2);
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
@@ -148,13 +149,6 @@ public abstract class Action{
 		return running;
 	}
 	/**
-	 * Gets the {@link Subsystem}s which are used by this action.
-	 * @return {@link Enumeration} of the used {@link Subsystem}s.
-	 */
-	public Enumeration<Subsystem> getRequirements(){
-		return requirements.elements();
-	}
-	/**
 	 * Gets the running timeout of the action in milliseconds. 
 	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
 	 */
@@ -164,10 +158,18 @@ public abstract class Action{
 	/**
 	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
 	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param milliseconds timeout in milliseconds
+	 * @param timeout timeout in milliseconds
 	 */
-	public void setTimeout(int milliseconds){
-		timeout = milliseconds;
+	public void setTimeout(int timeout){
+		this.timeout = timeout;
+	}
+	/**
+	 * Sets the running timeout for this action in seconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param timeout timeout in seconds
+	 */
+	public void setTimeout(double timeout){
+		setTimeout((int)(timeout * 0.001));
 	}
 	/**
 	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
@@ -175,36 +177,43 @@ public abstract class Action{
 	public void cancelTimeout(){
 		setTimeout(-1);
 	}
-	
-	
 	/**
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
 	 */
-	protected void requires(Subsystem subsystem){
-		requirements.addElement(subsystem);
+	public void requires(Subsystem subsystem){
+		requirements.add(subsystem);
 	}
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
 	 */
-	protected void requires(Subsystem... subsystems){
+	public void requires(Subsystem... subsystems){
 		for(Subsystem s : subsystems)
-			requirements.add(s);
+			requires(s);
 	}
+	/**
+	 * Resets the requirements of this action
+	 */
+	public void resetRequirements(){
+		requirements.clear();
+	}	
+	/**
+	 * Gets the {@link Subsystem}s which are used by this action.
+	 * @return {@link Iterator} of the used {@link Subsystem}s.
+	 */
+	public Iterator<Subsystem> getRequirements(){
+		return requirements.iterator();
+	}
+	
+	
 	/**
 	 * Copies the requirements used by another action to this one.
 	 * @param action action to copy requirements from
 	 */
 	protected void copyRequirements(Action action){
-		for (Enumeration<Subsystem> sys = action.getRequirements(); sys.hasMoreElements(); )
-			requires(sys.nextElement());
-	}
-	/**
-	 * Resets the requirements of this action
-	 */
-	protected void resetRequirements(){
-		requirements.clear();
+		for (Iterator<Subsystem> sys = action.getRequirements(); sys.hasNext(); )
+			requires(sys.next());
 	}
 	/**
 	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout

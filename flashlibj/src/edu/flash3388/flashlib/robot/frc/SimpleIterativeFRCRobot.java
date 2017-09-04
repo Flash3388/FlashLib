@@ -1,19 +1,15 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Robot{
 
 	private Scheduler schedulerImpl = Scheduler.getInstance();
-	private HIDInterface hidImpl = new FRCHidInterface();
 	
 	private boolean disabledInitialized = false, autonomousInitialized = false, teleopInitialized = false,
 			testInitialized = false;
@@ -21,12 +17,9 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 	@Override
 	protected final void robotInit(){
 		FlashFRCUtil.initFlashLib(this, null);
-		Log.deleteLogFolder();
 	}
 	@Override
 	public final void robotMain() {
-		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
-			Flashboard.start();
 		LiveWindow.setEnabled(false);
 		
 		while(true){
@@ -101,10 +94,6 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 		}
 	}
 	
-	@Override
-	public HIDInterface getHIDInterface() {
-		return hidImpl;
-	}
 	@Override
 	public boolean isFRC() {
 		return true;

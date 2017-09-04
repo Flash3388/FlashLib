@@ -49,7 +49,6 @@ public class Chooser extends Displayble{
 			return;
 		}
 		String s = new String(bytes, 1, bytes.length - 1);
-		System.out.println(s);
 		String[] str = s.split(":");
 		FlashFxUtils.onFxThread(()->{
 			box.getItems().clear();

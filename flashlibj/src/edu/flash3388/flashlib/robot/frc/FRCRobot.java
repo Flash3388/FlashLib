@@ -1,19 +1,12 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.robot.HIDInterface;
 import edu.flash3388.flashlib.robot.Robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class FRCRobot implements Robot{
 	
-	private HIDInterface hidImpl = new FRCHidInterface();
 	private DriverStation ds = DriverStation.getInstance();
-	
-	@Override
-	public HIDInterface getHIDInterface() {
-		return hidImpl;
-	}
 
 	@Override
 	public boolean isDisabled() {

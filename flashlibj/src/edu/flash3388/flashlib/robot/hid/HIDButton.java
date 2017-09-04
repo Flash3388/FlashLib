@@ -11,9 +11,9 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class HIDButton extends Button{
 
-	private static class TimedMultiPress extends ButtonAction{
+	public static class TimedMultiPress extends ButtonAction{
 		
-		private static final int PRESS_TIMEOUT = MAX_MILLIS_PRESS * 4;
+		private static final int PRESS_TIMEOUT = 2000;
 		
 		private int lastPress = -1;
 		private int presses = 0;
@@ -53,14 +53,43 @@ public class HIDButton extends Button{
 		}
 		
 	}
+	public static class HIDRunnable implements Runnable{
+
+		private static final int MAX_MILLIS_PRESS = 500;
+		
+		private boolean last = false;
+		private int holdStart = -1;
+		private Button button;
+		
+		public HIDRunnable(Button button){
+			this.button = button;
+		}
+		
+		@Override
+		public void run() {
+			boolean down = button.get();
+			
+			if(last && down && holdStart <= 0){
+				holdStart = FlashUtil.millisInt();
+			}
+			
+			int timepassed = holdStart > 0? FlashUtil.millisInt() - holdStart : 0;
+			if(last && !down){
+				holdStart = -1;
+				if(timepassed < MAX_MILLIS_PRESS)
+					button.setPressed();
+				else
+					button.setReleased();
+			}else if(last && down && timepassed > MAX_MILLIS_PRESS)
+				button.setHeld();
+			
+			last = down;
+		}
+	}
 	
-	public static final int MAX_MILLIS_PRESS = 500;
-	
+	private HIDRunnable updateRunnable;
 	private HID hid;
 	private int num;
-	
-	private boolean last = false;
-	private int holdStart = -1;
 	
 	/**
 	 * Creates a button wrapper object
@@ -71,6 +100,7 @@ public class HIDButton extends Button{
 	public HIDButton(HID hid, int num){
 		this.hid = hid;
 		this.num = num;
+		updateRunnable = new HIDRunnable(this);
 	}
 	
 	/**
@@ -109,22 +139,6 @@ public class HIDButton extends Button{
 	 */
 	@Override
 	public void run(){
-		boolean down = get();
-		
-		if(last && down && holdStart <= 0){
-			holdStart = FlashUtil.millisInt();
-		}
-		
-		int timepassed = holdStart > 0? FlashUtil.millisInt() - holdStart : 0;
-		if(last && !down){
-			holdStart = -1;
-			if(timepassed < MAX_MILLIS_PRESS)
-				setPressed();
-			else
-				setReleased();
-		}else if(last && down && timepassed > MAX_MILLIS_PRESS)
-			setHeld();
-		
-		last = down;
+		updateRunnable.run();
 	}
 }

@@ -18,8 +18,8 @@ import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
-import edu.flash3388.flashlib.util.beans.Property;
-import edu.flash3388.flashlib.util.beans.ValueSource;
+import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.StringSource;
 import edu.flash3388.flashlib.vision.RemoteVision;
 import edu.flash3388.flashlib.vision.Vision;
 
@@ -264,15 +264,15 @@ public final class Flashboard {
 	}
 	
 	
-	public static DashboardNumberInput putInputField(String name, DoubleProperty prop){
+	public static DashboardDoubleInput putInputField(String name, DoubleProperty prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
-			if(!(sen instanceof DashboardNumberInput))
+			if(!(sen instanceof DashboardDoubleInput))
 				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardNumberInput) sen;
+			return (DashboardDoubleInput) sen;
 		}
-		DashboardNumberInput input = new DashboardNumberInput(name, prop);
+		DashboardDoubleInput input = new DashboardDoubleInput(name, prop);
 		sendables.put(name, input);
 		Flashboard.attach(input);
 		return input;
@@ -290,7 +290,7 @@ public final class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringInput putInputField(String name, Property<String> prop){
+	public static DashboardStringInput putInputField(String name, StringProperty prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
@@ -298,7 +298,7 @@ public final class Flashboard {
 				throw new IllegalArgumentException("The name is already used for a different sendable");
 			return (DashboardStringInput) sen;
 		}
-		DashboardStringInput input = new DashboardStringInput(name, prop, InputType.String);
+		DashboardStringInput input = new DashboardStringInput(name, prop);
 		sendables.put(name, input);
 		Flashboard.attach(input);
 		return input;
@@ -376,7 +376,7 @@ public final class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringProperty putData(String name, ValueSource<String> prop){
+	public static DashboardStringProperty putData(String name, StringSource prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){

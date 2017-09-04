@@ -49,6 +49,10 @@ public class InputField extends Displayble{
 				receiveInput();
 			}
 		});
+		field.focusedProperty().addListener((obs, o, n)->{
+			if(o.booleanValue() && !n.booleanValue())
+				receiveInput();
+		});
 	}
 
 	private void receiveInput(){
@@ -87,7 +91,7 @@ public class InputField extends Displayble{
 	@Override
 	public void newData(byte[] bytes) {
 		if(bytes[0] == 0){
-			value = new String(bytes, 0, bytes.length);
+			value = new String(bytes, 1, bytes.length - 1);
 			FlashFxUtils.onFxThread(()->{
 				field.setText(value);
 			});
