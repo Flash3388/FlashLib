@@ -17,14 +17,22 @@ public interface XAxisMovable {
 	void moveX(double speed, boolean direction);
 	/**
 	 * Moves the system at a speed to the right.
+	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void right(double speed);
+	default void right(double speed){
+		moveX(speed, true);
+	}
 	/**
 	 * Moves the system at a speed to the left.
+	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void left(double speed);
+	default void left(double speed){
+		moveX(speed, false);
+	}
 	/**
 	 * Stops the system.
 	 */
