@@ -7,5 +7,7 @@ package edu.flash3388.flashlib.robot.systems;
  * @since FlashLib 1.0.0
  */
 public interface TankDriveSystem extends RobotDriveSystem{
+	
+	void tankDrive(double right, double left);
 	void arcadeDrive(double moveValue, double rotateValue);
 }
