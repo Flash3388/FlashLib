@@ -156,8 +156,10 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 */
 	@Override
 	public void run() {
-		for(int i = 0; i < buttons.length; i++)
-			buttons[i].run();
+		for(int i = 0; i < buttons.length; i++){
+			if(buttons[i].getActionsCount() > 0)
+				buttons[i].run();
+		}
 	}
 	
 	/**

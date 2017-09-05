@@ -58,6 +58,13 @@ public abstract class Button implements BooleanSource, Runnable{
 			if(action.isRunning())
 				action.cancel();
 		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Action)
+				return action.equals(obj);
+			return super.equals(obj);
+		}
 	}
 	/**
 	 * Wrapper for {@link Action} objects associated with a {@link Button}.
@@ -161,6 +168,23 @@ public abstract class Button implements BooleanSource, Runnable{
 		actions.add(action);
 	}
 	/**
+	 * Removes a given {@link ButtonAction} if it is attached to this object.
+	 * @param action the action to remove
+	 * @return true if remove, false otherwise
+	 */
+	public boolean removeButtonAction(ButtonAction action){
+		return actions.remove(action);
+	}
+	/**
+	 * Removes a given {@link Action} if it is attached to this button.
+	 * @param action action to remove
+	 * @return true if removed, false otherwise
+	 */
+	public boolean removeAction(Action action){
+		return actions.remove(action);
+	}
+	
+	/**
 	 * Adds an {@link Action} which will be started when the button is pressed
 	 * @param action an action to add
 	 */
@@ -206,16 +230,36 @@ public abstract class Button implements BooleanSource, Runnable{
 	}
 	
 	/**
+	 * Gets the amount of actions attached to this object. 
+	 * @return action count
+	 */
+	public int getActionsCount(){
+		return actions.size();
+	}
+	
+	/**
 	 * Gets whether or not at least one attached {@link Action} is running.
 	 * @return true if at least one is running, false otherwise
 	 */
-	public final boolean actionsRunning(){
+	public boolean actionsRunning(){
 		Enumeration<ButtonAction> commEnum = actions.elements();
 		while(commEnum.hasMoreElements()){
-			if(commEnum.nextElement().action.isRunning())
+			if(commEnum.nextElement().getAction().isRunning())
 				return true;
 		}
 		return false;
+	}
+	/**
+	 * Stops all running actions attached to this button. Done by calling {@link Action#cancel()}.
+	 */
+	public void stopAll(){
+		Enumeration<ButtonAction> commEnum = actions.elements();
+		while(commEnum.hasMoreElements()){
+			ButtonAction ex = commEnum.nextElement();
+			
+			if(ex.getAction().isRunning())
+				ex.getAction().cancel();
+		}
 	}
 	
 	/**

@@ -35,7 +35,7 @@ public class DashboardButton extends Sendable{
 			running = true;
 			button.setPressed();
 		}else if(data[0] == UP){
-			button.setReleased();
+			button.stopAll();
 			running = false;
 		}
 	}
@@ -53,7 +53,7 @@ public class DashboardButton extends Sendable{
 	}
 	@Override
 	public void onConnectionLost(){
-		button.setReleased();
+		button.stopAll();
 		running = false;
 	}
 }

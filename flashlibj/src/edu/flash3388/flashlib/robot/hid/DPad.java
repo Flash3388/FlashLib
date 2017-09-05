@@ -10,23 +10,23 @@ public class DPad extends POV implements Runnable{
 	/**
 	 * The Up button on the D-Pad
 	 */
-	public final DPadButton Up;
+	public final Button Up;
 	/**
 	 * The Down button on the D-Pad
 	 */
-	public final DPadButton Down;
+	public final Button Down;
 	/**
 	 * The Right button on the D-Pad
 	 */
-	public final DPadButton Right;
+	public final Button Right;
 	/**
 	 * The Left button on the D-Pad
 	 */
-	public final DPadButton Left;
+	public final Button Left;
 	/**
 	 * The entire POV as a button
 	 */
-	public final DPadButton POV;
+	public final Button POV;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
@@ -44,11 +44,46 @@ public class DPad extends POV implements Runnable{
 		POV = new DPadButton(hid, num, DPadButton.Type.POV);
 	}
 
+	/**
+	 * Gets the up DPad button object
+	 * @return up button
+	 */
+	public Button getUp(){
+		return Up;
+	}
+	/**
+	 * Gets the down DPad button object
+	 * @return down button
+	 */
+	public Button getDown(){
+		return Down;
+	}
+	/**
+	 * Gets the right DPad button object
+	 * @return right button
+	 */
+	public Button getRight(){
+		return Right;
+	}
+	/**
+	 * Gets the left DPad button object
+	 * @return left button
+	 */
+	public Button getLeft(){
+		return Left;
+	}
+	
 	@Override
 	public void run() {
-		Up.run();
-		Down.run();
-		Left.run();
-		Right.run();
+		if(Up.getActionsCount() > 0)
+			Up.run();
+		if(Down.getActionsCount() > 0)
+			Down.run();
+		if(Left.getActionsCount() > 0)
+			Left.run();
+		if(Right.getActionsCount() > 0)
+			Right.run();
+		if(POV.getActionsCount() > 0)
+			POV.run();
 	}
 }

@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -17,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -907,32 +905,6 @@ public final class FlashUtil {
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
-	
-	/**
-	 * Converts the given String array into a double array. All values are converted from String to double. If a String value
-	 * cannot be converted, 0.0 is placed instead.
-	 * 
-	 * @param str the string array to convert
-	 * @return a double array converted from the given string array
-	 */
-	public static double[] toDoubleArray(String[] str){
-		double[] d = new double[str.length];
-		for (int i = 0; i < d.length; i++) 
-			d[i] = FlashUtil.toDouble(str[i]);
-		return d;
-	}
-	/**
-	 * Converts the given double array into a string array. All values are converted from double to string.
-	 * 
-	 * @param d the double array to convert
-	 * @return a string array converted from the given double array
-	 */
-	public static String[] toStringArray(double[] d){
-		String[] str = new String[d.length];
-		for (int i = 0; i < d.length; i++) 
-			str[i] = String.valueOf(d[i]);
-		return str;
-	}
 
 	//--------------------------------------------------------------------
 	//--------------------------Conversion--------------------------------
@@ -960,9 +932,31 @@ public final class FlashUtil {
 		if(bytes.length  - start < 8) 
 			throw new IllegalArgumentException("double requires 8 bytes to be placed in the array");
 		
-		long lng = Double.doubleToLongBits(value);
-		for(int i = 0; i < 8; i++) 
-			bytes[start + i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);
+		fillByteArray(Double.doubleToLongBits(value), start, bytes);
+	}
+	/**
+	 * Converts a float to bytes and fills a given array with those values from the first index of the array. Requires 4 bytes
+	 * to place the float in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param bytes the byte array to place the float in
+	 */
+	public static void fillByteArray(float value, byte[] bytes){
+		fillByteArray(value, 0, bytes);
+	}
+	/**
+	 * Converts a float to bytes and fills a given array with those values from the first index of the array. Requires 4 bytes
+	 * to place the float in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param start start index for byte placement
+	 * @param bytes the byte array to place the float in
+	 */
+	public static void fillByteArray(float value, int start, byte[] bytes){
+		if(bytes.length  - start < 4) 
+			throw new IllegalArgumentException("float requires 4 bytes to be placed in the array");
+		
+		fillByteArray(Float.floatToIntBits(value), start, bytes);
 	}
 
 	/**
@@ -990,7 +984,7 @@ public final class FlashUtil {
 		bytes[start + 3] = (byte) (value & 0xff);   
 		bytes[start + 2] = (byte) ((value >> 8) & 0xff);   
 		bytes[start + 1] = (byte) ((value >> 16) & 0xff);   
-		bytes[start] = (byte) ((value >> 24) & 0xff);
+		bytes[start]     = (byte) ((value >> 24) & 0xff);
 	}
 	
 	/**
@@ -1052,7 +1046,7 @@ public final class FlashUtil {
 		if(b.length - s < 8) 
 			throw new IllegalArgumentException("long requires 8 bytes");
 	    long result = 0;
-	    int e = s+8;
+	    int e = s + 8;
 	    for (int i = s; i < e; i++) {
 	        result <<= 8;
 	        result |= (b[i] & 0xFF);
@@ -1093,7 +1087,7 @@ public final class FlashUtil {
 	    return   b[s + 3] & 0xff |
 	            (b[s + 2] & 0xff) << 8 |
 	            (b[s + 1] & 0xff) << 16 |
-	            (b[s + 0] & 0xff) << 24;
+	            (b[s] & 0xff) << 24;
 	}
 	
 	/**
@@ -1114,7 +1108,7 @@ public final class FlashUtil {
 	 * @return a double
 	 */
 	public static double toDouble(byte[] b) {
-	    return ByteBuffer.wrap(b).getDouble();
+	    return toDouble(b, 0);
 	}
 	/**
 	 * Converts the bytes from an index of a byte array to a double. Requires 8 bytes for conversion.
@@ -1124,7 +1118,42 @@ public final class FlashUtil {
 	 * @return a double
 	 */
 	public static double toDouble(byte[] b, int s) {
-	    return toDouble(Arrays.copyOfRange(b, s, s + 8));
+		if(b.length - s < 8) 
+			throw new IllegalArgumentException("double requires 8 bytes");
+		return Double.longBitsToDouble(toLong(b, s));
+	}
+	
+	/**
+	 * Converts a float to a byte array 
+	 * 
+	 * @param value value to convert
+	 * @return a byte array containing the float value as bytes
+	 */
+	public static byte[] toByteArray(float value) {
+	    byte[] bytes = new byte[4];
+	    fillByteArray(value, bytes);
+	    return bytes;
+	}
+	/**
+	 * Converts the bytes from a byte array to a float. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @return a float
+	 */
+	public static float toFloat(byte[] b) {
+	    return toFloat(b, 0);
+	}
+	/**
+	 * Converts the bytes from an index of a byte array to a float. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @param s the start index of the float value
+	 * @return a float
+	 */
+	public static float toFloat(byte[] b, int s) {
+		if(b.length - s < 4) 
+			throw new IllegalArgumentException("float requires 4 bytes");
+		return Float.intBitsToFloat(toInt(b, s));
 	}
 	
 	/**
