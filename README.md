@@ -38,8 +38,8 @@ All of those libraries are available in the "libs" folder.
 ### Versions
 
 The versions used for dependencies by FlashLib are:
-- OpenCV: 3.1.0
-- WPILib: 2017.3.1
+- [OpenCV](https://github.com/opencv/opencv): 3.1.0
+- [WPILib](https://github.com/wpilibsuite/allwpilib): 2017.3.1
 
 ## Building
 
