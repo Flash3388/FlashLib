@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -7,7 +9,6 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -15,9 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
-import edu.flash3388.flashlib.util.Log.LoggingType;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
@@ -26,7 +25,6 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  * The utilities are divided into types:
  * <ul>
  * 		<li> Time utilities: Provides time stamp data and delay</li>
- * 		<li> Executor utilities: Provides {@link ExecutorService} utils for time based execution</li>
  * 		<li> Array utilities: Array shifting, copying, enlarging, printing, etc</li>
  * 		<li> Type conversion utilities: Converting between bytes, Strings and other data types </li>
  * 		<li> Parsing utilities: Parsing lines of String for data </li>
@@ -42,13 +40,12 @@ public final class FlashUtil {
 	/**
 	 * The current version of FlashLib.
 	 */
-	public static final String VERSION = "1.0.1";
+	public static final String VERSION = "1.0.2";
 	
 	private FlashUtil(){}
 	
 	private static long startTime = 0;
 	private static Log mainLog;
-	private static Log.LoggingType defaultCreatingMode = Log.LoggingType.Stream;
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
 	private static final String architecture = System.getProperty("os.arch");
@@ -125,6 +122,46 @@ public final class FlashUtil {
 	public static boolean delayUntil(BooleanSource source, long timeout){
 		return delayUntil(source, timeout, timeout >> 4);
 	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) while a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or until a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time given as a parameter.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @param delayTime the sleep period length in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayWhile(BooleanSource source, long timeout, long delayTime){
+		if(timeout < 0)
+			throw new IllegalArgumentException("Timeout cannot be negative");
+		if(delayTime < 0)
+			throw new IllegalArgumentException("Delay time cannot be negative");
+		
+		if(timeout < 1)
+			timeout = 10000;
+		if(delayTime < 1)
+			delayTime = 1;
+		long start = millis();
+		
+		while(source.get() && millis() - start < timeout)
+			delay(delayTime);
+		return !source.get();
+	}
+	/**
+	 * Causes the currently executing thread to sleep (temporarily cease execution) while a given {@link BooleanSource}
+	 * returns true when {@link BooleanSource#get()} is called or until a timeout has been reached. While waiting, the current
+	 * thread will be placed into sleep for periods of time calculated depending on the timeout.
+	 * If the timeout is smaller than 1 ms then it is set to 10000 ms. 
+	 * 
+	 * @param source the boolean source condition
+	 * @param timeout delay timeout in milliseconds
+	 * @return true if the given source has returned true, false if the timeout has been reached.
+	 */
+	public static boolean delayWhile(BooleanSource source, long timeout){
+		return delayUntil(source, timeout, timeout >> 4);
+	}
 	
 	/**
 	 * Returns the time since the program was started in milliseconds.
@@ -163,60 +200,24 @@ public final class FlashUtil {
 		if(startTime == 0)
 			startTime = time;
 	}
-	
 	/**
-	 * Initialized the main log of flashlib. Many features throughout the library log data to this log.
-	 * 
-	 * @param logType The {@link LoggingType} of the created log
-	 */
-	public static void setStart(LoggingType logType){
-		if(mainLog == null){
-			switch(logType){
-				case Buffered: 
-					mainLog = Log.createBufferedLog("flashlib");
-					break;
-				case Stream:
-					mainLog = Log.createStreamLog("flashlib");
-					break;
-			}
-		}
-	}
-	/**
-	 * Initialized the main {@link Log} of flashlib. Many features throughout the library log data to this log.
-	 * The main log uses a default mode as the logs {@link LoggingType} which can be set in 
-	 * {@link #setLogCreatingType(LoggingType)} sting files.
-	 */
-	public static void setStart(){
-		setStart(defaultCreatingMode);
-	}
-	/**
-	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized by calling
-	 * {@link #setStart()}.
+	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized 
+	 * to a new log named "flashlib" and the log implementation is {@link SimpleStreamLog}.
 	 * 
 	 * @return the main {@link Log} used throughout flashlib.
 	 */
 	public static Log getLog(){
 		if(mainLog == null)
-			setStart();
+			mainLog = new SimpleStreamLog("flashlib");
 		return mainLog;
 	}
-
 	/**
-	 * Sets the default logging type for created log through FlashUtil. Used when creating log through 
-	 * {@link #createLog(String)}.
+	 * Sets the implementation of the main log.
 	 * 
-	 * @param mode the default logging type.
+	 * @param log the log to use for the flashlib main log
 	 */
-	public static void setLogCreatingType(LoggingType mode){
-		defaultCreatingMode = mode;
-	}
-	/**
-	 * Creates a new log using the default logging type set using {@link #setLogCreatingType(LoggingType)}.
-	 * @param name the name of the log
-	 * @return created log.
-	 */
-	public static Log createLog(String name){
-		return Log.createLogByType(name, defaultCreatingMode);
+	public static void setLog(Log log){
+		mainLog = log;
 	}
 
 	//--------------------------------------------------------------------
@@ -904,32 +905,6 @@ public final class FlashUtil {
 		System.arraycopy(arr, 0, nArr, 0, arr.length);
 		return nArr;
 	}
-	
-	/**
-	 * Converts the given String array into a double array. All values are converted from String to double. If a String value
-	 * cannot be converted, 0.0 is placed instead.
-	 * 
-	 * @param str the string array to convert
-	 * @return a double array converted from the given string array
-	 */
-	public static double[] toDoubleArray(String[] str){
-		double[] d = new double[str.length];
-		for (int i = 0; i < d.length; i++) 
-			d[i] = FlashUtil.toDouble(str[i]);
-		return d;
-	}
-	/**
-	 * Converts the given double array into a string array. All values are converted from double to string.
-	 * 
-	 * @param d the double array to convert
-	 * @return a string array converted from the given double array
-	 */
-	public static String[] toStringArray(double[] d){
-		String[] str = new String[d.length];
-		for (int i = 0; i < d.length; i++) 
-			str[i] = String.valueOf(d[i]);
-		return str;
-	}
 
 	//--------------------------------------------------------------------
 	//--------------------------Conversion--------------------------------
@@ -957,9 +932,31 @@ public final class FlashUtil {
 		if(bytes.length  - start < 8) 
 			throw new IllegalArgumentException("double requires 8 bytes to be placed in the array");
 		
-		long lng = Double.doubleToLongBits(value);
-		for(int i = 0; i < 8; i++) 
-			bytes[start + i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);
+		fillByteArray(Double.doubleToLongBits(value), start, bytes);
+	}
+	/**
+	 * Converts a float to bytes and fills a given array with those values from the first index of the array. Requires 4 bytes
+	 * to place the float in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param bytes the byte array to place the float in
+	 */
+	public static void fillByteArray(float value, byte[] bytes){
+		fillByteArray(value, 0, bytes);
+	}
+	/**
+	 * Converts a float to bytes and fills a given array with those values from the first index of the array. Requires 4 bytes
+	 * to place the float in the byte array.
+	 * 
+	 * @param value value to convert
+	 * @param start start index for byte placement
+	 * @param bytes the byte array to place the float in
+	 */
+	public static void fillByteArray(float value, int start, byte[] bytes){
+		if(bytes.length  - start < 4) 
+			throw new IllegalArgumentException("float requires 4 bytes to be placed in the array");
+		
+		fillByteArray(Float.floatToIntBits(value), start, bytes);
 	}
 
 	/**
@@ -987,7 +984,7 @@ public final class FlashUtil {
 		bytes[start + 3] = (byte) (value & 0xff);   
 		bytes[start + 2] = (byte) ((value >> 8) & 0xff);   
 		bytes[start + 1] = (byte) ((value >> 16) & 0xff);   
-		bytes[start] = (byte) ((value >> 24) & 0xff);
+		bytes[start]     = (byte) ((value >> 24) & 0xff);
 	}
 	
 	/**
@@ -1049,7 +1046,7 @@ public final class FlashUtil {
 		if(b.length - s < 8) 
 			throw new IllegalArgumentException("long requires 8 bytes");
 	    long result = 0;
-	    int e = s+8;
+	    int e = s + 8;
 	    for (int i = s; i < e; i++) {
 	        result <<= 8;
 	        result |= (b[i] & 0xFF);
@@ -1090,7 +1087,7 @@ public final class FlashUtil {
 	    return   b[s + 3] & 0xff |
 	            (b[s + 2] & 0xff) << 8 |
 	            (b[s + 1] & 0xff) << 16 |
-	            (b[s + 0] & 0xff) << 24;
+	            (b[s] & 0xff) << 24;
 	}
 	
 	/**
@@ -1111,7 +1108,7 @@ public final class FlashUtil {
 	 * @return a double
 	 */
 	public static double toDouble(byte[] b) {
-	    return ByteBuffer.wrap(b).getDouble();
+	    return toDouble(b, 0);
 	}
 	/**
 	 * Converts the bytes from an index of a byte array to a double. Requires 8 bytes for conversion.
@@ -1121,7 +1118,42 @@ public final class FlashUtil {
 	 * @return a double
 	 */
 	public static double toDouble(byte[] b, int s) {
-	    return toDouble(Arrays.copyOfRange(b, s, s + 8));
+		if(b.length - s < 8) 
+			throw new IllegalArgumentException("double requires 8 bytes");
+		return Double.longBitsToDouble(toLong(b, s));
+	}
+	
+	/**
+	 * Converts a float to a byte array 
+	 * 
+	 * @param value value to convert
+	 * @return a byte array containing the float value as bytes
+	 */
+	public static byte[] toByteArray(float value) {
+	    byte[] bytes = new byte[4];
+	    fillByteArray(value, bytes);
+	    return bytes;
+	}
+	/**
+	 * Converts the bytes from a byte array to a float. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @return a float
+	 */
+	public static float toFloat(byte[] b) {
+	    return toFloat(b, 0);
+	}
+	/**
+	 * Converts the bytes from an index of a byte array to a float. Requires 4 bytes for conversion.
+	 * 
+	 * @param b the byte array
+	 * @param s the start index of the float value
+	 * @return a float
+	 */
+	public static float toFloat(byte[] b, int s) {
+		if(b.length - s < 4) 
+			throw new IllegalArgumentException("float requires 4 bytes");
+		return Float.intBitsToFloat(toInt(b, s));
 	}
 	
 	/**
@@ -1460,6 +1492,33 @@ public final class FlashUtil {
 			}
 		}
 		return null;
+	}
+	
+	//--------------------------------------------------------------------
+	//---------------------------FILE IO----------------------------------
+	//--------------------------------------------------------------------
+	
+	/**
+	 * Gets a {@link File} object for a file path. If any directories in the file
+	 * path do not exist, they are created. If the file does not exist, it is created.
+	 * 
+	 * @param filename the file path
+	 * @return a {@link File} object for a file path
+	 */
+	public static File getFile(String filename){
+        File file = new File(filename);
+        
+        File parent = file.getAbsoluteFile().getParentFile();
+        if (!parent.exists()) 
+            parent.mkdirs();
+        
+        if(!file.exists()){
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+        }
+        
+        return file;
 	}
 	
 	//--------------------------------------------------------------------

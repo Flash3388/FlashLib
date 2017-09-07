@@ -9,8 +9,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import edu.flash3388.flashlib.util.beans.SimpleProperty;
-import edu.flash3388.flashlib.util.beans.ValueSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Contour;
 import edu.flash3388.flashlib.vision.ImagePipeline;
@@ -45,10 +43,8 @@ public class CvSource implements VisionSource{
 		if(insureContours && contours == null)
 			detectContours();
 		
-		if(threshold != null){
-			if(pipeline != null)
-				pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
-		}
+		if(threshold != null && pipeline != null)
+			pipeline.newImage(threshold, ImagePipeline.TYPE_THRESHOLD);
 	}
 	private void detectContours(){		
 		if(contours == null)
@@ -132,7 +128,7 @@ public class CvSource implements VisionSource{
 	public Analysis getResult() {
 		if(analysis != null)
 			return analysis;
-		if(contours.size() != 1)
+		if(contours == null || contours.size() != 1)
 			return null;
 		
 		MatOfPoint contour = contours.get(0);
@@ -146,6 +142,8 @@ public class CvSource implements VisionSource{
 	 */
 	@Override
 	public Analysis[] getResults() {
+		if(contours == null)
+			return null;
 		Analysis[] ans = new Analysis[contours.size()];
 		
 		for (int i = 0; i < ans.length; i++) {
@@ -191,6 +189,7 @@ public class CvSource implements VisionSource{
 		
 		threshold = new Mat();
 		CvProcessing.filterMatColors(mat, threshold, min1, max1, min2, max2, min3, max3);
+		checkReady(false, true);
 	}
 	/**
 	 * {@inheritDoc}
@@ -200,6 +199,7 @@ public class CvSource implements VisionSource{
 		checkReady(false, false);
 		
 		CvProcessing.filterMatColors(mat, threshold, min, max, min, max, min, max);
+		checkReady(false, true);
 	}
 	
 	/**
@@ -328,7 +328,7 @@ public class CvSource implements VisionSource{
 		if(matcher == null)
 			throw new NullPointerException("Template matcher is null");
 		if(!(matcher instanceof CvTemplateMatcher))
-			throw new IllegalArgumentException("Template Matcher is not compatible with this vision source");
+			throw new IllegalArgumentException("Template Matcher is not compatible with this implementation: cv");
 		
 		checkReady(false, true);
 		
@@ -338,7 +338,10 @@ public class CvSource implements VisionSource{
 		return result;
 	}
 	
-	public TemplateMatcher createTemplateMatcher(ValueSource<Object>[] imgs, int method) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public TemplateMatcher createTemplateMatcher(Object[] imgs, int method) {
 		if(method < 0 || method >= CvTemplateMatcher.Method.values().length)
 			throw new ArrayIndexOutOfBoundsException("Method type is out of bounds of available types: "
 					+method + ":" + CvTemplateMatcher.Method.values().length);
@@ -346,7 +349,7 @@ public class CvSource implements VisionSource{
 		Mat[] templates = new Mat[imgs.length];
 		Object imgData = null;
 		for (int i = 0; i < templates.length; i++) {
-			imgData = imgs[i].getValue();
+			imgData = imgs[i];
 			if(imgData == null)
 				throw new NullPointerException("template image cannot be null: "+i);
 			if(!(imgData instanceof Mat))
@@ -361,10 +364,7 @@ public class CvSource implements VisionSource{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ValueSource<Object> loadImage(String imgPath, boolean binary) {
-		Mat mat = Imgcodecs.imread(imgPath,binary ? CvType.CV_8UC1 : CvType.CV_8UC3);
-		if(mat == null)
-			return null;
-		return new SimpleProperty<Object>(mat);
+	public Object loadImage(String imgPath, boolean binary) {
+		return Imgcodecs.imread(imgPath,binary ? CvType.CV_8UC1 : CvType.CV_8UC3);
 	}
 }

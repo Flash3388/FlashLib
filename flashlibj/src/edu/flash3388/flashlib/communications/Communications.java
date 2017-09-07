@@ -27,7 +27,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * 
  * <p>
  * Communication is managed in a thread, which starts when {@link #start()} is called, and terminated when {@link #close()} is
- * called. The thread will handle continuos connection to the remote system.
+ * called. The thread will handle continuous connection to the remote system.
  * </p>
  * 
  * @author Tom Tzook
@@ -45,9 +45,14 @@ public class Communications {
 		@Override
 		public void run() {
 			while(!stop){
+				FlashUtil.getLog().log("Openning CommInterface", comm.logName);
+				while(!comm.open() && !stop)
+					FlashUtil.delay(500);
+				if(stop) break;
+				
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
 				while(!comm.connect() && !stop)
-					FlashUtil.delay(1000);
+					FlashUtil.delay(500);
 				if(stop) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
@@ -69,13 +74,17 @@ public class Communications {
 		}
 	}
 	
-	private static byte instances = 0;
+	private static final int MINIMUM_DATA_BYTES = 5;
+	
+	private static final byte SENDABLE_INIT = 0x0;
+	private static final byte SENDABLE_DATA = 0x1;
+	private static final byte SENDABLE_CONFIRM_ATTACH = 0x7;
+	private static final byte SENDABLE_CONFIRM_DETACH = 0x8;
 	
 	private Vector<Sendable> attachedSendables;
 	private Map<Integer, Sendable> sendables;
 	
-	private long currentMillis = -1, readStart = -1;
-	private int readTimeout;
+	private int readStart = -1;
 	private boolean allowConnection = true;
 	private int nextId, minIdAlloc = 0;
 	private Packet packet = new Packet();
@@ -102,7 +111,6 @@ public class Communications {
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
-		commInterface.open();
 	}	
 	/**
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
@@ -111,7 +119,7 @@ public class Communications {
 	 * @param readIn communications interface
 	 */
 	public Communications(CommInterface readIn){
-		this(""+(++instances), readIn);
+		this("Communications", readIn);
 	}
 	
 	private void initializeConcurrency(String name){
@@ -125,23 +133,32 @@ public class Communications {
 	}
 	private void read(){//ID|VALUE
 		if(!isConnected()) return;
-		updateClock();
-		readStart = currentMillis;
+		readStart = FlashUtil.millisInt();
 		while(!readTimedout()){
 			Packet packet = receivePacket();
 			if(packet == null || packet.length < 1)
 				return;
-			if(packet.length < 5)
+			if(packet.length < MINIMUM_DATA_BYTES)
 				continue;
 			
-			int id = FlashUtil.toInt(packet.data);
+			byte dataType = packet.data[0];
+			int id = FlashUtil.toInt(packet.data, 1);
 			Sendable sen = getFromAllAttachedByID(id);
-			if(sen != null && packet.length - 5 > 0){
-				sen.newData(Arrays.copyOfRange(packet.data, 5, packet.length));
-			}
-			else{
-				String str = new String(packet.data, 5, packet.length - 5);
-				createSendable(str, id, packet.data[4]);
+			if(dataType == SENDABLE_DATA && sen != null && sen.remoteAttached() && 
+					packet.length - 6 > 0){
+				sen.newData(Arrays.copyOfRange(packet.data, 6, packet.length));
+			}else if(dataType == SENDABLE_INIT){
+				if(sen == null){
+					String str = new String(packet.data, 6, packet.length - 6);
+					createSendable(str, id, packet.data[5]);
+				}else{
+					onRemoteAttached(sen, true);
+				}
+			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sen != null){
+				onRemoteAttached(sen, false);
+			}else if(dataType == SENDABLE_CONFIRM_DETACH && sen != null && sen.remoteAttached()){
+				sen.setRemoteAttached(false);
+				sen.onConnectionLost();
 			}
 		}
 	}
@@ -151,11 +168,12 @@ public class Communications {
 		
 		Sendable s = sendableCreator.create(name, type);
 		if(s != null){
-			s.setId(id);
+			s.setID(id);
 			s.setAttached(true);
 			s.setRemoteInit(true);
-			s.onConnection();
 			sendables.put(id, s);
+			
+			onRemoteAttached(s, true);
 		}
 	}
 	private void resetAll(){
@@ -164,14 +182,21 @@ public class Communications {
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements()) {
 			Sendable sendable = sendablesEnum.nextElement();
-			sendable.setId(nextId++);
+			if(!sendable.userID()){
+				calculateNextID();
+				sendable.setID(nextId++);
+			}
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
 	} 
+	private void calculateNextID(){
+		while(getLocalyAttachedByID(nextId) != null || getFromAllAttachedByID(nextId) != null)
+			++nextId;
+	}
 	private void resetSendable(Sendable sen){
 		sen.setRemoteInit(false);
-		sen.onConnection();
+		sen.setRemoteAttached(false);
 	}
 	private void onDisconnect(){
 		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
@@ -179,7 +204,33 @@ public class Communications {
 			handleDisconnection(sendablesEnum.next());
 	} 
 	private void handleDisconnection(Sendable sen){
-		sen.onConnectionLost();
+		if(sen.remoteAttached()){
+			sen.setRemoteAttached(false);
+			sen.onConnectionLost();
+			confirmRemoteDetached(sen.getID());
+		}
+		if(!sen.userID())
+			sen.setID(-1);
+	}
+	private void onRemoteAttached(Sendable sendable, boolean confirmRemote){
+		if(sendable.remoteAttached()) return;
+		
+		sendable.setRemoteAttached(true);
+		sendable.onConnection();
+		if(confirmRemote)
+			confirmRemoteAttached(sendable.getID());
+	}
+	private void confirmRemoteAttached(int id){
+		byte[] data = new byte[5];
+		data[0] = SENDABLE_CONFIRM_ATTACH;
+		FlashUtil.fillByteArray(id, 1, data);
+		write(data);
+	}
+	private void confirmRemoteDetached(int id){
+		byte[] data = new byte[5];
+		data[0] = SENDABLE_CONFIRM_DETACH;
+		FlashUtil.fillByteArray(id, 1, data);
+		write(data);
 	}
 	private void sendAll(){
 		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
@@ -189,7 +240,7 @@ public class Communications {
 	private void sendFromSendable(Sendable sen){
 		if(!sen.remoteInit()){
 			byte[] bytes = sen.getName().getBytes();
-			send(bytes, sen);
+			send(bytes, sen, SENDABLE_INIT);
 			sen.setRemoteInit(true);
 			return;
 		}
@@ -197,26 +248,30 @@ public class Communications {
 		byte[] dataB;
 		if(!sen.hasChanged() || (dataB = sen.dataForTransmition()) == null) 
 			return;
-		send(dataB, sen);
-	}
-	private void updateClock(){
-		currentMillis = FlashUtil.millis();
+		send(dataB, sen, SENDABLE_DATA);
 	}
 	private boolean readTimedout(){
-		updateClock();
-		return readStart != -1 && currentMillis - readStart > readTimeout;
+		return readStart != -1 && FlashUtil.millisInt() - readStart > CommInterface.READ_TIMEOUT;
 	}
 	private void write(byte[] bytes){
 		if(!isConnected()) return;
 		commInterface.write(bytes);
 	}
 	
-	private void send(byte[] data, Sendable sendable){
-		byte[] bytes = new byte[data.length + 5];
-		FlashUtil.fillByteArray(sendable.getID(), bytes);
-		bytes[4] = sendable.getType();
-		System.arraycopy(data, 0, bytes, 5, data.length);
+	private void send(byte[] data, Sendable sendable, byte type){
+		byte[] bytes = new byte[data.length + 6];
+		bytes[0] = type;
+		FlashUtil.fillByteArray(sendable.getID(), 1, bytes);
+		bytes[5] = sendable.getType();
+		System.arraycopy(data, 0, bytes, 6, data.length);
 		write(bytes);
+	}
+	
+	private boolean open(){
+		if(commInterface.isOpened())
+			return true;
+		commInterface.open();
+		return commInterface.isOpened();
 	}
 	
 	/**
@@ -236,9 +291,12 @@ public class Communications {
 			throw new RuntimeException("No such id attached");
 		if(!sendable.remoteInit())
 			throw new RuntimeException("Sendable was not initialized for remote connection");
+		if(!sendable.remoteAttached())
+			throw new RuntimeException("Sendable is not connected to a remote sendable");
 		
-		send(data, sendable);
+		send(data, sendable, SENDABLE_DATA);
 	}
+	
 	
 	/**
 	 * Attaches an array of sendables. Passes them one by one to {@link #attach(Sendable)}.
@@ -254,25 +312,53 @@ public class Communications {
 	 * 
 	 * <p>
 	 * If the sendable is already attached to a communications system, an 
-	 * {@link IllegalStateException} is thrown. If a sendable with the same ID is already attached, a 
-	 * {@link RuntimeException}.
+	 * {@link IllegalStateException} is thrown. 
 	 * </p>
 	 * 
 	 * @param sendable sendable to attach
 	 * 
 	 * @throws IllegalStateException if the sendable is already attached
-	 * @throws RuntimeException if a sendable with the same id is attached
 	 */
 	public void attach(Sendable sendable){
 		if(sendable.attached())
 			throw new IllegalStateException("Sendable is already attached to communications");
-		/*if(getFromAllAttachedByID(sendable.getID()) != null)
-			throw new RuntimeException("Id taken");*/
 			
 		attachedSendables.add(sendable);
 		sendable.setAttached(true);
+		sendable.setUserID(false);
 		if(isConnected()){
-			sendable.setId(nextId++);
+			calculateNextID();
+			sendable.setID(nextId++);
+			sendables.put(sendable.getID(), sendable);
+			resetSendable(sendable);
+		}else
+			sendable.setID(-1);
+	}
+	/**
+	 * Attaches a {@link Sendable} object to this communications manager and forces an ID for it instead
+	 * of an automatically allocated ID. If the object is already attached to a communications manager (i.e.
+	 * {@link Sendable#attached()} returns true) this will fail. If the ID is already allocated to a different object,
+	 * this will fail.
+	 * 
+	 * 
+	 * @param sendable the object
+	 * @param id the id to allocate
+	 * 
+	 * @throws IllegalStateException if the sendable is attached already or the ID requested is already allocated
+	 */
+	public void attachForID(Sendable sendable, int id){
+		if(sendable.attached())
+			throw new IllegalStateException("Sendable is already attached to communications");
+		if(getLocalyAttachedByID(id) != null)
+			throw new IllegalStateException("Sendable with such ID already exists");
+		if(getFromAllAttachedByID(id) != null)
+			throw new IllegalStateException("Sendable with such ID was dynamically created");
+		
+		sendable.setID(id);
+		attachedSendables.add(sendable);
+		sendable.setAttached(true);
+		sendable.setUserID(true);
+		if(isConnected()){
 			sendables.put(sendable.getID(), sendable);
 			resetSendable(sendable);
 		}
@@ -287,12 +373,14 @@ public class Communications {
 	 */
 	public boolean detach(Sendable sendable){
 		if(attachedSendables.remove(sendable)){
-			sendables.remove(sendable.getID());
 			sendable.setAttached(false);
-			if(isConnected())
+			if(isConnected()){
 				handleDisconnection(sendable);
+				sendables.remove(sendable.getID());
+			}
+			return true;
 		}
-		return !sendable.attached();
+		return false;
 	}
 	/**
 	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
@@ -384,7 +472,6 @@ public class Communications {
 		if(isConnected()) return true;
 		if(!allowConnection) return false;
 		
-		updateClock();
 		commInterface.connect(packet);
 		if(isConnected()){
 			setReadTimeout(CommInterface.READ_TIMEOUT);
@@ -475,7 +562,9 @@ public class Communications {
 	 * 
 	 * @param minId min id value
 	 */
-	public void setMinIDValue(int minId){
+	public void setMinAllocationID(int minId){
+		if(minId < 0)
+			throw new IllegalArgumentException("ID must be non-negative");
 		this.minIdAlloc = minId;
 	}
 	/**
@@ -487,7 +576,7 @@ public class Communications {
 	 * 
 	 * @return min id value
 	 */
-	public int getMinIDValue(){
+	public int getMinAllocationID(){
 		return minIdAlloc;
 	}
 	

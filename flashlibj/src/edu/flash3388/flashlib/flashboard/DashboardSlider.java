@@ -15,7 +15,7 @@ public class DashboardSlider extends Sendable{
 	private DoubleProperty valData;
 	private double max, min, lastValue;
 	private int ticks;
-	private boolean changed = false;
+	private boolean changed = false, updateValue = false;
 	private byte[] data = new byte[20];
 	
 	public DashboardSlider(String name, DoubleProperty data, double min, double max, int ticks) {
@@ -68,19 +68,19 @@ public class DashboardSlider extends Sendable{
 			FlashUtil.fillByteArray(maxValue(), 8, data);
 			FlashUtil.fillByteArray(getTicks(), 16, data);
 			return data;
-		}else{
-			lastValue = valData.get();
-			return FlashUtil.toByteArray(lastValue);
 		}
+		updateValue = false;
+		lastValue = valData.get();
+		return FlashUtil.toByteArray(lastValue);
 	}
 	@Override
 	public boolean hasChanged() {
-		return changed || valData.get() != lastValue;
+		return changed || updateValue || valData.get() != lastValue;
 	}
 	@Override
 	public void onConnection() {
 		changed = true;
-		lastValue = valData.get() - 1;
+		updateValue = true;
 	}
 	@Override
 	public void onConnectionLost() {

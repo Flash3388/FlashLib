@@ -47,7 +47,7 @@ public class ExampleTemplateMatching {
 		
 		
 		//path to the templates to use for the template matching
-		String path = "~/frc/templates"; 
+		String path = "/templates"; 
 		//template method - for binary images TM_CCORR_NORMED is recomended
 		int method = CvTemplateMatcher.Method.TM_CCORR_NORMED.ordinal(); 
 		//scale factor to allow different scales

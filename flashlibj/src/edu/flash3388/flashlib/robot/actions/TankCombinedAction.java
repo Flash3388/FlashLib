@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.CombinedAction;
 import edu.flash3388.flashlib.robot.SourceAction;
@@ -25,7 +25,7 @@ public class TankCombinedAction extends CombinedAction{
 		add(rotation);
 		add(positioning);
 		
-		SubSystem s = driveTrain.getSystem();
+		Subsystem s = driveTrain.getSystem();
 		if(s != null)
 			requires(s);
 	}

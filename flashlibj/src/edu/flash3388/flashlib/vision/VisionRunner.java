@@ -255,8 +255,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				}
 				
 				newAnalysis(an);
-				if(an != null)
-					lastRec = FlashUtil.millisInt();
+				lastRec = FlashUtil.millisInt();
 				return true;
 			}
 		}
@@ -264,7 +263,15 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	}
 	
 	/**
-	 * Gets the property used to hold the newest frame to be received.
+	 * Sets the value of {@link #frameProperty()}.
+	 * 
+	 * @param frame the frame
+	 */
+	public void setFrame(Object frame){
+		frameProperty().setValue(frame);
+	}
+	/**
+	 * The property used to hold the newest frame to be received.
 	 * The frame type depends on the vision library used.
 	 * This is an {@link ObservableProperty} and can be bound.
 	 * 

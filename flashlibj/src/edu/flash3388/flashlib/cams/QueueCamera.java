@@ -7,7 +7,7 @@ import edu.flash3388.flashlib.util.Queue;
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.1
- * @param <T>
+ * @param <T> the type of frame to store
  */
 public abstract class QueueCamera<T> implements Camera{
 	

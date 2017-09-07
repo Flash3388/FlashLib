@@ -1,11 +1,11 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.devices.MultiSpeedController;
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 
 /**
  * A generic single motor system. Implements XAxisMovable, YAxisMovable, Rotatable, ModableMotor, and VoltageScalable.
@@ -13,7 +13,7 @@ import edu.flash3388.flashlib.robot.SubSystem;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable, ModableMotor{
+public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisMovable, Rotatable, VoltageScalable, ModableMotor{
 	
 	private FlashSpeedController controller;
 	private double default_speed_forward = 0.5, default_speed_backward = 0.5;
@@ -121,7 +121,7 @@ public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisM
 	 */
 	public void set(double speed){
 		if(scaleVoltage)
-			speed = FlashRoboUtil.scaleVoltageBus(speed);
+			speed = FlashRobotUtil.scaleVoltageBus(speed);
 		
 		controller.set(speed);
 	}
@@ -167,7 +167,7 @@ public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisM
 	 */
 	@Override
 	public void rotate(double speed, boolean direction) {
-		driveY(speed, direction);
+		moveY(speed, direction);
 	}
 	/**
 	 * {@inheritDoc}
@@ -187,8 +187,8 @@ public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisM
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveX(double speed, boolean direction) {
-		driveY(speed, direction);
+	public void moveX(double speed, boolean direction) {
+		moveY(speed, direction);
 	}
 	/**
 	 * {@inheritDoc}
@@ -208,7 +208,7 @@ public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisM
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void driveY(double speed, boolean direction) {
+	public void moveY(double speed, boolean direction) {
 		if(direction) forward(speed);
 		else backward(speed);
 	}
@@ -219,7 +219,7 @@ public class SingleMotorSystem extends SubSystem implements XAxisMovable, YAxisM
 	 * </p>
 	 */
 	@Override
-	public SubSystem getSystem() {
+	public Subsystem getSystem() {
 		return this;
 	}
 	/**

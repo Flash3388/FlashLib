@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.robot.FlashRoboUtil;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * Represents emergency stop control on the Flashboard.
@@ -9,7 +10,7 @@ import edu.flash3388.flashlib.robot.FlashRoboUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class EmergencyStopControl extends Sendable{
+public class EmergencyStopControl extends Sendable implements BooleanSource{
 
 	private static final byte EMERGENCY = 0xe;
 	private static final byte NORMAL = 0x5;
@@ -33,11 +34,11 @@ public class EmergencyStopControl extends Sendable{
 		if(data.length < 1)return;
 		
 		if(data[0] == EMERGENCY){
-			FlashRoboUtil.enterEmergencyStop();
+			FlashRobotUtil.enterEmergencyStop();
 			emergency = true;
 		}
 		else if(data[0] == NORMAL){
-			FlashRoboUtil.exitEmergencyStop();
+			FlashRobotUtil.exitEmergencyStop();
 			emergency = false;
 		}
 		
@@ -55,10 +56,15 @@ public class EmergencyStopControl extends Sendable{
 
 	@Override
 	public void onConnection() {
-		emergency = FlashRoboUtil.inEmergencyStop();
+		emergency = FlashRobotUtil.inEmergencyStop();
 		changed = true;
 	}
 	@Override
 	public void onConnectionLost() {
+	}
+
+	@Override
+	public boolean get() {
+		return emergency;
 	}
 }

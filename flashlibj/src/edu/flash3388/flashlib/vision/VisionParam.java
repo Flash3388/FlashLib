@@ -52,7 +52,7 @@ public abstract class VisionParam {
 		}
 		@Override
 		public String getType() {
-			return "String";
+			return "string";
 		}
 		
 	}
@@ -79,7 +79,7 @@ public abstract class VisionParam {
 		}
 		@Override
 		public String getType() {
-			return "Double";
+			return "double";
 		}
 		
 	}
@@ -105,7 +105,7 @@ public abstract class VisionParam {
 		}
 		@Override
 		public String getType() {
-			return "Int";
+			return "int";
 		}
 		
 	}
@@ -132,7 +132,7 @@ public abstract class VisionParam {
 		}
 		@Override
 		public String getType() {
-			return "Boolean";
+			return "boolean";
 		}
 		
 	}

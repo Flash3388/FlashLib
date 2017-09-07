@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
 import edu.flash3388.flashlib.robot.SourceAction;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class PidDistanceActionPart extends SourceAction implements PidAction{
@@ -10,16 +11,36 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 	private PidController pidcontroller;
 	private double distanceMargin;
 	
-	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd, DoubleSource distanceThreshold, 
+	public PidDistanceActionPart(PidController controller, double distanceMargin){
+		this.distanceMargin = distanceMargin;
+		this.pidcontroller = controller;
+	}
+	public PidDistanceActionPart(PidController controller){
+		this(controller, 15.0);
+	}
+	public PidDistanceActionPart(PidSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+			DoubleProperty kf, DoubleSource distanceThreshold, 
 			double distanceMargin){
 		this.distanceMargin = distanceMargin;
 		
-		pidcontroller = new PidController(kp, ki, kd, 0);
+		pidcontroller = new PidController(kp, ki, kd, kf);
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(distanceThreshold);
 	}
-	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd){
-		this(source, kp, ki, kd, ()->100.0, 15.0);
+	public PidDistanceActionPart(PidSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+			DoubleProperty kf, DoubleSource distanceThreshold){
+		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
+	}
+	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold, 
+			double distanceMargin){
+		this.distanceMargin = distanceMargin;
+		
+		pidcontroller = new PidController(kp, ki, kd, kf);
+		pidcontroller.setPIDSource(source);
+		pidcontroller.setSetPoint(distanceThreshold);
+	}
+	public PidDistanceActionPart(PidSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold){
+		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
 	}
 	
 	@Override
@@ -45,7 +66,7 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 	}
 	
 	public boolean inDistanceThreshold(){
-		double current = pidcontroller.getSource().pidGet();
+		double current = pidcontroller.getPIDSource().pidGet();
 		return (current >= getDistanceThreshold() - distanceMargin && current <= getDistanceThreshold() + distanceMargin);
 	}
 	
@@ -60,7 +81,7 @@ public class PidDistanceActionPart extends SourceAction implements PidAction{
 	}
 
 	@Override
-	public PidController getPidController(){
+	public PidController getPIDController(){
 		return pidcontroller;
 	}
 }

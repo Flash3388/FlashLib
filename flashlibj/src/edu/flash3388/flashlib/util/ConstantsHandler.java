@@ -18,7 +18,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.flash3388.flashlib.io.FileStream;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.Property;
@@ -570,7 +569,7 @@ public class ConstantsHandler {
 	 * @param file the path of the xml file
 	 */
 	public static void saveConstantsToXml(String file){
-		File wfile = FileStream.getFile(file);
+		File wfile = FlashUtil.getFile(file);
 		if(!wfile.isFile())
 			throw new IllegalArgumentException("Given path is not a file");
 		saveXml(wfile);

@@ -58,9 +58,10 @@ public class Slider extends Displayble{
 				slider.setMajorTickUnit(max - min);
 			}
 			if(ticks != slider.getMinorTickCount()){
-				slider.setMinorTickCount(ticks);
+				slider.setMinorTickCount(ticks - 1);
 				slider.setBlockIncrement((max - min) / ticks);
 				slider.setMajorTickUnit(max - min);
+				System.out.println(ticks);
 			}
 			if(valChanged){
 				valChanged = false;
@@ -112,7 +113,7 @@ public class Slider extends Displayble{
 	}
 	@Override
 	public void onConnection() {
-		changed = true;
+		changed = false;
 	}
 	@Override
 	public void onConnectionLost() {}

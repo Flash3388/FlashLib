@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 
 /**
  * Interface for object with the capability to rotate.
@@ -17,21 +17,29 @@ public interface Rotatable {
 	void rotate(double speed, boolean direction);
 	/**
 	 * Rotates the system at a speed to the right.
+	 * <p>Default implementation calls {@link #rotate(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void rotateRight(double speed);
+	default void rotateRight(double speed){
+		rotate(speed, true);
+	}
 	/**
 	 * Rotates the system at a speed to the left.
+	 * <p>Default implementation calls {@link #rotate(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void rotateLeft(double speed);
+	default void rotateLeft(double speed){
+		rotate(speed, false);
+	}
 	/**
 	 * Stops the system.
 	 */
 	void stop();
 	/**
-	 * Gets the {@link SubSystem} object for this system to use with actions.
+	 * Gets the {@link Subsystem} object for this system to use with actions.
 	 * @return the system object
 	 */
-	SubSystem getSystem();
+	Subsystem getSystem();
 }

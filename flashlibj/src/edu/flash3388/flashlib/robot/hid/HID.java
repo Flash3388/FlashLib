@@ -7,6 +7,12 @@ package edu.flash3388.flashlib.robot.hid;
  * @since FlashLib 1.0.0
  */
 public interface HID {
+	
+	/**
+	 * Gets the HID channel number.
+	 * @return channel
+	 */
+	int getChannel();
 	/**
 	 * Gets the value of an axis from the human interface device.
 	 * 
@@ -47,8 +53,15 @@ public interface HID {
 	Stick getStick();
 	
 	/**
-	 * Gets the D-Pad object wrapper for the POV on this device
-	 * @return the D-pad wrapper
+	 * Gets the value of a POV from the device
+	 * 
+	 * @param pov the pov index
+	 * @return the value of the pov in degrees
 	 */
-	DPad getPOV();
+	int getRawPOV(int pov);
+	/**
+	 * Gets the POV object wrapper for the POV on this device
+	 * @return the POV wrapper
+	 */
+	POV getPOV();
 }

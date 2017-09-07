@@ -18,7 +18,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 
 	private Button[] buttons;
 	private int stick_num;
-	private DPad pov;
+	private POV pov;
 	private Stick stick;
 	
 	/**
@@ -32,11 +32,11 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 		super(name);
 		stick_num = stick;
 		
-		this.stick = new Stick(stick, X, Y);
+		this.stick = new Stick(this, X, Y);
 		buttons = new Button[buttonCount];
 		for(int i = 0; i < buttons.length; i++)
-			buttons[i] = new Button(stick, i+1);
-		pov = new DPad(stick, 0);
+			buttons[i] = new HIDButton(this, i+1);
+		pov = new POV(this, 0);
 		
 		next = head;
 		head = this;
@@ -70,29 +70,43 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * @return the z axis value
 	 */
 	public double getZ(){
-		return RobotFactory.getHidInterface().getHIDAxis(stick_num, Z);
+		return getRawAxis(Z);
 	}
 	/**
 	 * Gets the throttle axis value of the joystick
 	 * @return the throttle axis value
 	 */
 	public double getThrottle(){
-		return RobotFactory.getHidInterface().getHIDAxis(stick_num, THROTTLE);
+		return getRawAxis(THROTTLE);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	public int getChannel(){
+		return stick_num;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getHidInterface().getHIDAxis(stick_num, axis);
+		return RobotFactory.getHIDInterface().getHIDAxis(stick_num, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getHidInterface().getHIDButton(stick_num, button);
+		return RobotFactory.getHIDInterface().getHIDButton(stick_num, button);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRawPOV(int pov){
+		return RobotFactory.getHIDInterface().getHIDPOV(stick_num, pov);
 	}
 	/**
 	 * {@inheritDoc}
@@ -132,7 +146,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DPad getPOV(){
+	public POV getPOV(){
 		return pov;
 	}
 	
@@ -140,17 +154,12 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
 	 * actions attached to those wrapped. 
 	 */
-	public void refresh(){
-		for(int i = 0; i < buttons.length; i++)
-			buttons[i].refresh();
-		pov.refresh();
-	}
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
-		refresh();
+		for(int i = 0; i < buttons.length; i++){
+			if(buttons[i].getActionsCount() > 0)
+				buttons[i].run();
+		}
 	}
 	
 	/**
@@ -158,7 +167,7 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	 */
 	public static void refreshAll(){
 		for(Joystick c = head; c != null; c = c.next)
-			c.refresh();
+			c.run();
 	}
 	
 	@Override

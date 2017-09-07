@@ -9,9 +9,9 @@ import edu.flash3388.flashlib.robot.actions.PidDistanceActionPart;
 import edu.flash3388.flashlib.robot.actions.PidRotationActionPart;
 import edu.flash3388.flashlib.robot.actions.TankCombinedAction;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
+import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.FlashRio;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.FlashDrive;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -19,7 +19,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Ultrasonic;
 
-public class ExampleCombinedAction  extends FlashRio{
+public class ExampleCombinedAction extends IterativeFRCRobot{
 
 	FlashDrive driveTrain;
 	
@@ -50,8 +50,8 @@ public class ExampleCombinedAction  extends FlashRio{
 		 * Creating the drive. Wrapping controllers from the same side into a RioControllers object.
 		 */
 		driveTrain = new FlashDrive(
-				new RioControllers(frontRight, rearRight), 
-				new RioControllers(frontLeft, rearLeft)
+				new FRCSpeedControllers(frontRight, rearRight), 
+				new FRCSpeedControllers(frontLeft, rearLeft)
 		);
 		
 		/*
@@ -97,7 +97,7 @@ public class ExampleCombinedAction  extends FlashRio{
 		 * We will use an ultrasonic sensor to define the distance from a target to approach or back from. The action will
 		 * attempt to reach a certain distance from the target an remain within the given margin.
 		 */
-		PidSource sonicSource = new PidSource.DoubleDataPidSource(sonicData);
+		PidSource sonicSource = new PidSource.DoubleSourcePidSource(sonicData);
 		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp.get(), ki.get(), kd.get(), dsetpoint, 15.0);
 		
 		/*

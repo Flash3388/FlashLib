@@ -1,12 +1,12 @@
 package edu.flash3388.flashlib.robot.systems;
 
 /**
- * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link DriveSystem}.
+ * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link RobotDriveSystem}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface HolonomicDriveSystem extends DriveSystem{
+public interface HolonomicDriveSystem extends RobotDriveSystem, XAxisMovable{
 	/**
 	 * Moves the drive system using a given Cartesian vector.
 	 * 

@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.Enumeration;
-
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
@@ -54,18 +52,14 @@ public class SelectableAction extends Action{
 		this(5);
 	}
 	
-	private void validateRequirements(Enumeration<SubSystem> systems){
+	private void validateRequirements(Action action){
 		resetRequirements();
-		for (; systems.hasMoreElements();) {
-			SubSystem s = systems.nextElement();
-			if(s != null)
-				requires(s);
-		}
+		copyRequirements(action);
 	}
 	private void checkRange(){
 		if(nextActionIndex >= actions.length){
 			Action[] newActions = new Action[actions.length + 5];
-			java.lang.System.arraycopy(actions, 0, newActions, 0, actions.length);
+			System.arraycopy(actions, 0, newActions, 0, actions.length);
 			actions = newActions;
 		}
 	}
@@ -157,7 +151,7 @@ public class SelectableAction extends Action{
 			return;
 		}
 		runningAction = actions[index];
-		validateRequirements(runningAction.getRequirements());
+		validateRequirements(runningAction);
 		super.start();
 	}
 	@Override

@@ -56,7 +56,7 @@ public class ActionGroup extends Action{
 	 */
 	public ActionGroup addSequential(Action action, double timeout){
 		addSequential(action);
-		action.setTimeOut((long) (timeout * 1000));
+		action.setTimeout((int) (timeout * 1000));
 		return this;
 	}
 	/**
@@ -103,7 +103,7 @@ public class ActionGroup extends Action{
 	 */
 	public ActionGroup addParallel(Action action, double timeout){
 		addParallel(action);
-		action.setTimeOut((long) (timeout * 1000));
+		action.setTimeout((int) (timeout * 1000));
 		return this;
 	}
 	/**

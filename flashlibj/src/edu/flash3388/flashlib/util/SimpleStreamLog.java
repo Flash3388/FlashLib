@@ -6,6 +6,9 @@ import java.io.IOException;
 /**
  * A simple stream log using {@link FileWriter}s to write data to the log files.
  * <p>
+ * Data is printed and saved as simple formated strings.
+ * </p>
+ * <p>
  * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
  * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
  * who do not require logs for emergency situations like power outs, where the log data might be lost.
@@ -14,7 +17,7 @@ import java.io.IOException;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class SimpleStreamLog extends Log{
+public class SimpleStreamLog extends SimpleLog{
 
 	private FileWriter stdWriter;
 	private FileWriter errWriter;

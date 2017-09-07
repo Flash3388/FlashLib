@@ -1,0 +1,93 @@
+subprojects {
+    apply plugin: 'java'
+	
+	buildDir = projectOutputFolder
+	
+	repositories {
+		flatDir {
+			dirs projectLibsFolder
+		}
+	}
+}
+project(':flashlibj'){
+	sourceSets{
+		main{
+			java{
+				srcDir 'src'
+			}
+			
+		}
+	}
+	dependencies {
+        compile name: 'WPILib'
+		compile name: 'opencv'
+		compile name: 'RXTXcomm'
+		compile name: 'niVisionWPI'
+		compile name: 'TalonSRXLibJava'
+    }
+	jar {
+		baseName 'flashlib'
+		//destinationDir project.file('../build')
+	}
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
+	task javadocJar(type: Jar, dependsOn: javadoc) {
+		classifier = 'javadoc'
+		from javadoc.destinationDir
+	}
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
+}
+
+project(':flashboard'){
+	sourceSets{
+		main{
+			java{
+				srcDir 'src'
+			}
+			resources {
+				srcDirs 'src'
+				includes = ["**/*.fxml"]
+			}
+		}
+	}
+	dependencies {
+        compile project(':flashlibj')
+		compile name: 'opencv'
+    }
+	jar {
+		manifest {
+			attributes (
+					'Main-Class': flashboardMainClass,
+					'Class-Path': '. libs/flashlib.jar libs/opencv.jar'
+			)
+		}
+	}
+	task createFlashboardBuild{
+		copy {
+			from projectOutputFolder + 'libs/flashlib.jar'
+			from projectLibsFolder + 'opencv.jar'
+			into projectOutputFolder + 'flashboard/libs/'
+		}
+		copy {
+			from fileTree(flashboardDistributionFolder)
+			into projectOutputFolder + 'flashboard/'
+		}
+		
+		doLast{
+			copy {
+				from projectOutputFolder + 'libs/flashboard.jar'
+				into projectOutputFolder + 'flashboard/'
+			}
+			delete projectOutputFolder + 'libs/flashboard.jar'
+			println ('created flashboard build')
+		}
+	}
+	
+	build.finalizedBy(createFlashboardBuild)
+}
+

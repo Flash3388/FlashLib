@@ -32,10 +32,11 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 			targetHeight = new SimpleDoubleProperty(),
 			camFov = new SimpleDoubleProperty();
 	private BooleanProperty distanceHeight = new SimpleBooleanProperty();
+	private BooleanProperty loadBinary = new SimpleBooleanProperty(true);
 	
 	public TemplateAnalysisCreator(){}
 	public TemplateAnalysisCreator(String imgDirPath, int method, double scaleFactor, 
-			double targetWidth, double targetHeight, double camFov, boolean distanceHeight){
+			double targetWidth, double targetHeight, double camFov, boolean distanceHeight, boolean loadBinary){
 		this.imgDirPath.setValue(imgDirPath);
 		this.scaleFactor.set(scaleFactor);
 		this.method.set(method);
@@ -44,6 +45,7 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 		this.targetWidth.set(targetWidth);
 		this.camFov.set(camFov);
 		this.distanceHeight.set(distanceHeight);
+		this.loadBinary.set(loadBinary);
 	}
 	
 	/**
@@ -78,6 +80,14 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 	public BooleanProperty distanceHeightProperty(){
 		return distanceHeight;
 	}
+	/**
+	 * An {@link BooleanProperty}.
+	 * Indicates whether to load template images as binaries or not
+	 * @return the property
+	 */
+	public BooleanProperty loadBinaryProperty(){
+		return loadBinary;
+	}
 	
 	/**
 	 * A {@link DoubleProperty}.
@@ -106,20 +116,19 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 		return imgDirPath;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Analysis createAnalysis(VisionSource source) {
 		if(matcher == null){
-			ValueSource<Object>[] imgs = null;
+			Object[] imgs = null;
 			
 			File dir = new File(imgDirPath.getValue());
 			if(!dir.exists() || !dir.isDirectory())
 				return null;
 			File[] files = dir.listFiles();
-			ArrayList<ValueSource<Object>> imgList = new ArrayList<ValueSource<Object>>();
+			ArrayList<Object> imgList = new ArrayList<Object>();
 			for (int i = 0; i < files.length; i++) {
-				ValueSource<Object> img = source.loadImage(files[i].getAbsolutePath(), true);
-				if(img != null && img.getValue() != null)
+				Object img = source.loadImage(files[i].getAbsolutePath(), loadBinary.get());
+				if(img != null)
 					imgList.add(img);
 			}
 			imgs = new ValueSource[imgList.size()];

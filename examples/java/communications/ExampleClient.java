@@ -44,8 +44,10 @@ public class ExampleClient {
 		/*
 		 * Attaches a new sendable object to the communications manager. This is a pre-made echo sendable. We define
 		 * the sendable type as 0 which the server will use to create a corresponding sendable.
+		 * The first boolean variable indicates that this sendable sends data first. The second indicates we
+		 * want to print received data.
 		 */
-		client.attach(new EchoSendable("Test1", (byte)0, true));
+		client.attach(new EchoSendable("Test1", (byte)0, true, true));
 		
 		/*
 		 * Starts the communications manager

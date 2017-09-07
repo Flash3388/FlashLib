@@ -11,10 +11,10 @@ public class SystemAction extends Action{
 
 	private Action action;
 	
-	public SystemAction(Action action, SubSystem... systems){
+	public SystemAction(Action action, Subsystem... systems){
 		this.action = action;
 		
-		setTimeOut(action.getTimeOut());
+		setTimeout(action.getTimeout());
 		requires(systems);
 		copyRequirements(action);
 	}

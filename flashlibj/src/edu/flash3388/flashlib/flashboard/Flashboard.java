@@ -18,9 +18,10 @@ import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
-import edu.flash3388.flashlib.util.beans.Property;
-import edu.flash3388.flashlib.util.beans.ValueSource;
+import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.beans.StringSource;
 import edu.flash3388.flashlib.vision.RemoteVision;
+import edu.flash3388.flashlib.vision.Vision;
 
 /**
  * Control class for the Flashboard. Can be used to attach controls to the Flashboard, cameras, control
@@ -29,7 +30,7 @@ import edu.flash3388.flashlib.vision.RemoteVision;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Flashboard {
+public final class Flashboard {
 	
 	private Flashboard(){}
 	
@@ -42,20 +43,14 @@ public class Flashboard {
 	
 	/**
 	 * Indicates the initialization to initialize only the flashboard camera server.
-	 * Set this value using {@link #setInitMode(int)}. It will be used when {@link #init()} is
-	 * called.
 	 */
 	public static final byte INIT_CAM = 0x1;
 	/**
 	 * Indicates the initialization to initialize only the flashboard communications server.
-	 * Set this value using {@link #setInitMode(int)}. It will be used when {@link #init()} is
-	 * called.
 	 */
 	public static final byte INIT_COMM = 0x1 << 1;
 	/**
 	 * Indicates the initialization to both the flashboard camera server and communications server.
-	 * Set this value using {@link #setInitMode(int)}. It will be used when {@link #init()} is
-	 * called.
 	 * This is the default initialization value.
 	 */
 	public static final byte INIT_FULL = INIT_CAM | INIT_COMM;
@@ -79,11 +74,10 @@ public class Flashboard {
 	
 	private static boolean instance = false;
 	private static int initMode = INIT_FULL;
-	private static FlashboardInitData initData = null;
 	
 	private static CameraView camViewer;
 	private static CameraServer camServer;
-	private static RemoteVision vision;
+	private static Vision vision;
 	private static Communications communications;
 	private static Map<String, Sendable> sendables;
 	
@@ -92,63 +86,6 @@ public class Flashboard {
 			throw new IllegalStateException("Flashboard was not initialized");
 		if(sendables == null)
 			sendables = new HashMap<String, Sendable>();
-	}
-	
-	/**
-	 * Gets the flashboard initialization data holder. It is an instance of {@link FlashboardInitData}
-	 * which will be used to fill missing initialization data when initializing the Flashboard.
-	 * @return the initialization data holder.
-	 */
-	public static FlashboardInitData getInitData(){
-		if(initData == null)
-			initData = new FlashboardInitData();
-		return initData;
-	}
-	/**
-	 * Sets the Flashboard to use TCP protocol for communications. 
-	 * Works only if Flashboard was not initialized yet.
-	 */
-	public static void setProtocolTcp(){
-		if(!instance)
-			getInitData().tcp = true;
-	}
-	/**
-	 * Sets the Flashboard to use UDP protocol for communications. 
-	 * Works only if Flashboard was not initialized yet.
-	 */
-	public static void setProtocolUdp(){
-		if(!instance)
-			getInitData().tcp = false;
-	}
-	/**
-	 * Sets the initialization mode to be used when {@link #init()} is called. If flashboard was initialized,
-	 * this will do nothing.
-	 * 
-	 * @param mode initialization mode
-	 */
-	public static void setInitMode(int mode){
-		if(!instance)
-			getInitData().initMode = mode;
-	}
-	/**
-	 * Sets the communications port used when initializing flashboard using {@link #init(int, boolean)}.
-	 * If flashboard was already initialized, this will do nothing.
-	 * 
-	 * @param port the local communications port
-	 */
-	public static void setCommPort(int port){
-		if(!instance)
-			getInitData().commPort = port;
-	}
-	/**
-	 * Sets the camera server port used when initializing flashboard using {@link #init(int, boolean)}.
-	 * If flashboard was already initialized, this will do nothing.
-	 * 
-	 * @param port the local camera server port
-	 */
-	public static void setCamPort(int port){
-		if(!instance)
-			getInitData().camPort = port;
 	}
 	
 	/**
@@ -248,7 +185,7 @@ public class Flashboard {
 	 * to work.
 	 * @return the vision control to the flashboard. Null if not initialized. 
 	 */
-	public static RemoteVision getVision(){
+	public static Vision getVision(){
 		return vision;
 	}
 	/**
@@ -261,34 +198,13 @@ public class Flashboard {
 	}
 	
 	/**
-	 * Initializes Flashboard control. Uses protocol set before initialization 
-	 * ({@link #setProtocolTcp()} or {@link #setProtocolUdp()}) where the default is TCP. Uses the 
-	 * default ports for communications: {@link #PORT_ROBOT} and {@link #CAMERA_PORT_ROBOT}.
-	 *  
-	 * Uses a value set by {@link #setInitMode(int mode)} for initialization. Default is {@link #INIT_FULL}.
-	 */
-	public static void init(){
-		init(getInitData().initMode);
-	}
-	/**
-	 * Initializes Flashboard control. Uses protocol set before initialization 
-	 * ({@link #setProtocolTcp()} or {@link #setProtocolUdp()}) where the default is TCP. Uses the 
-	 * default ports for communications: {@link #PORT_ROBOT} and {@link #CAMERA_PORT_ROBOT}.
+	 * Initializes Flashboard control with parameters set in {@link FlashboardInitData} and passes them to
+	 * {@link #init(int, int, int, boolean)}.
 	 * 
-	 * @param mode indicates how to initialize the flashboard control mode
+	 * @param initData initialization data
 	 */
-	public static void init(int mode){
-		init(mode, getInitData().tcp);
-	}
-	/**
-	 * Initializes Flashboard control. Uses a given protocol for communications. Uses the 
-	 * default ports for communications: {@link #PORT_ROBOT} and {@link #CAMERA_PORT_ROBOT}.
-	 * 
-	 * @param mode indicates how to initialize the flashboard control mode
-	 * @param tcp protocol to use: True for TCP, false for UDP.
-	 */
-	public static void init(int mode, boolean tcp){
-		init(mode, getInitData().commPort, getInitData().camPort, tcp);
+	public static void init(FlashboardInitData initData){
+		init(initData.initMode, initData.commPort, initData.camPort, initData.tcp);
 	}
 	/**
 	 * Intializes Flashboard control for a given mode. Uses given parameters for ports and protocol in initialization.
@@ -316,7 +232,8 @@ public class Flashboard {
 					else readi = new UdpCommInterface(port);
 					
 					communications = new Communications("Flashboard", readi);
-					communications.attach(vision);
+					if(vision instanceof Sendable)
+						communications.attach((Sendable)vision);
 				}
 				
 				if(camServer == null && (initMode & INIT_CAM) != 0)
@@ -324,7 +241,7 @@ public class Flashboard {
 				
 				initMode = mode;
 				instance = true;
-				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode));
+				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
 			} catch (IOException e) {
 				FlashUtil.getLog().reportError(e.getMessage());
 			}
@@ -347,15 +264,15 @@ public class Flashboard {
 	}
 	
 	
-	public static DashboardNumberInput putInputField(String name, DoubleProperty prop){
+	public static DashboardDoubleInput putInputField(String name, DoubleProperty prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
-			if(!(sen instanceof DashboardNumberInput))
+			if(!(sen instanceof DashboardDoubleInput))
 				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardNumberInput) sen;
+			return (DashboardDoubleInput) sen;
 		}
-		DashboardNumberInput input = new DashboardNumberInput(name, prop);
+		DashboardDoubleInput input = new DashboardDoubleInput(name, prop);
 		sendables.put(name, input);
 		Flashboard.attach(input);
 		return input;
@@ -373,7 +290,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringInput putInputField(String name, Property<String> prop){
+	public static DashboardStringInput putInputField(String name, StringProperty prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){
@@ -381,7 +298,7 @@ public class Flashboard {
 				throw new IllegalArgumentException("The name is already used for a different sendable");
 			return (DashboardStringInput) sen;
 		}
-		DashboardStringInput input = new DashboardStringInput(name, prop, InputType.String);
+		DashboardStringInput input = new DashboardStringInput(name, prop);
 		sendables.put(name, input);
 		Flashboard.attach(input);
 		return input;
@@ -459,7 +376,7 @@ public class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringProperty putData(String name, ValueSource<String> prop){
+	public static DashboardStringProperty putData(String name, StringSource prop){
 		checkInit();
 		Sendable sen = sendables.get(name);
 		if(sen != null){

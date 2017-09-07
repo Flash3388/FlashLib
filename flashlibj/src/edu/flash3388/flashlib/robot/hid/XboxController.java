@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  */
 public class XboxController extends HIDSendable implements HID, Runnable{
 	
-	private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
+	//private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
 	
 	private int channel;
 	private Button[] buttons = new Button[10];
@@ -32,7 +32,8 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	
 	public final DPad DPad;
 	
-	public final Triggers Triggers;
+	public final Axis RT;
+	public final Axis LT;
 	
 	private XboxController next;
 	
@@ -56,14 +57,15 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 		super(name);
 		this.channel = channel;
 		
-		LeftStick = new Stick(channel, 0, 1);
-		RightStick = new Stick(channel, 4, 5);
+		LeftStick = new Stick(this, 0, 1);
+		RightStick = new Stick(this, 4, 5);
 		
-		DPad = new DPad(channel, 0);
-		Triggers = new Triggers(channel, 2, 3);
+		DPad = new DPad(this, 0);
+		RT = new Axis(this, 3);
+		LT = new Axis(this, 2);
 		
 		for(int i = 0; i < buttons.length; i++)
-    		buttons[i] = new Button(buttonNames[i], channel, i+1);
+    		buttons[i] = new HIDButton(this, i+1);//buttonNames[i]
 		
 		A = buttons[0];
 	    B = buttons[1];
@@ -99,24 +101,44 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	public DPad getDPad() { return DPad; }
 	
 	/**
-	 * Gets the triggers represented in a class (RT, LT)
-	 * @return The triggers on the controller
+	 * Gets the trigger representing the Xbox left trigger (LT)
+	 * @return left trigger
 	 */
-	public Triggers getTriggers() { return Triggers; }
+	public Axis getLeftTrigger() { return LT; }
+	
+	/**
+	 * Gets the trigger representing the Xbox right trigger (RT)
+	 * @return right trigger
+	 */
+	public Axis getRightTrigger() { return RT; }
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	public int getChannel(){
+		return channel;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getHidInterface().getHIDAxis(channel, axis);
+		return RobotFactory.getHIDInterface().getHIDAxis(channel, axis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getHidInterface().getHIDButton(channel, button);
+		return RobotFactory.getHIDInterface().getHIDButton(channel, button);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getRawPOV(int pov){
+		return RobotFactory.getHIDInterface().getHIDPOV(channel, pov);
 	}
 	/**
 	 * {@inheritDoc}
@@ -154,19 +176,8 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DPad getPOV() {
+	public POV getPOV() {
 		return getDPad();
-	}
-	
-	/**
-	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
-	 * actions attached to those wrapped. 
-	 */
-	public void refresh(){
-		for(int i = 0; i < buttons.length; i++)
-			buttons[i].refresh();
-		DPad.refresh();
-		Triggers.refresh();
 	}
 	
 	/**
@@ -174,12 +185,20 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	 */
 	public static void refreshAll(){
 		for(XboxController c = head; c != null; c = c.next)
-			c.refresh();
+			c.run();
 	}
 	
+	/**
+	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
+	 * actions attached to those wrapped. 
+	 */
 	@Override
 	public void run() {
-		refresh();
+		for(int i = 0; i < buttons.length; i++){
+			if(buttons[i].getActionsCount() > 0)
+				buttons[i].run();
+		}
+		DPad.run();
 	}
 	@Override
 	protected HID getHID() {

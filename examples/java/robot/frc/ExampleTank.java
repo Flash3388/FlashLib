@@ -2,8 +2,8 @@ package examples.robot.frc;
 
 import com.ctre.CANTalon;
 
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.FlashDrive;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -31,8 +31,8 @@ public class ExampleTank extends SampleRobot{
 		 * Creating the drive. Wrapping controllers from the same side into a RioControllers object.
 		 */
 		driveTrain = new FlashDrive(
-				new RioControllers(frontRight, rearRight), 
-				new RioControllers(frontLeft, rearLeft)
+				new FRCSpeedControllers(frontRight, rearRight), 
+				new FRCSpeedControllers(frontLeft, rearLeft)
 		);
 		
 		/*

@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.hid.Button;
+import edu.flash3388.flashlib.robot.hid.ManualButton;
 
 /**
  * Represents a button on the Flashboard.
@@ -21,7 +22,7 @@ public class DashboardButton extends Sendable{
 	public DashboardButton(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
 		
-		button = new Button(name, -1, -1);
+		button = new ManualButton();
 	}
 
 	public void whenPressed(Action action){
@@ -32,9 +33,8 @@ public class DashboardButton extends Sendable{
 	public void newData(byte[] data) {
 		if(data[0] == DOWN && !running){
 			running = true;
-			button.setPressed(true);
+			button.setPressed();
 		}else if(data[0] == UP){
-			button.setPressed(false);
 			button.stopAll();
 			running = false;
 		}
@@ -45,7 +45,7 @@ public class DashboardButton extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return running && !button.actionsStillRunning();
+		return running && !button.actionsRunning();
 	}
 	@Override
 	public void onConnection() {
@@ -53,7 +53,6 @@ public class DashboardButton extends Sendable{
 	}
 	@Override
 	public void onConnectionLost(){
-		button.setPressed(false);
 		button.stopAll();
 		running = false;
 	}

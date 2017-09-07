@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.SubSystem;
+import edu.flash3388.flashlib.robot.Subsystem;
 
 /**
  * Interface for object with the capability to move along the x-axis.
@@ -12,26 +12,34 @@ public interface XAxisMovable {
 	/**
 	 * Moves the system at a speed to a given direction along the x-axis.
 	 * @param speed speed [0...1]
-	 * @param direction right - 1, left - -1
+	 * @param direction right - true, left - false
 	 */
-	void driveX(double speed, boolean direction);
+	void moveX(double speed, boolean direction);
 	/**
 	 * Moves the system at a speed to the right.
+	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void right(double speed);
+	default void right(double speed){
+		moveX(speed, true);
+	}
 	/**
 	 * Moves the system at a speed to the left.
+	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
+	 * and true for direction.
 	 * @param speed speed [0...1]
 	 */
-	void left(double speed);
+	default void left(double speed){
+		moveX(speed, false);
+	}
 	/**
 	 * Stops the system.
 	 */
 	void stop();
 	/**
-	 * Gets the {@link SubSystem} object for this system to use with actions.
+	 * Gets the {@link Subsystem} object for this system to use with actions.
 	 * @return the system object
 	 */
-	SubSystem getSystem();
+	Subsystem getSystem();
 }

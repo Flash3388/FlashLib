@@ -18,6 +18,6 @@ public interface SBC {
 		CommInterface comm = data.createCommInterface();
 		if(comm == null)
 			return null;
-		return new RemoteSbc(data.getName(), comm);
+		return new RemoteSBC(data.getName(), comm);
 	}
 }

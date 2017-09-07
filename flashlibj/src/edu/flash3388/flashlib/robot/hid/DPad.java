@@ -1,63 +1,89 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 /**
- * This represents a D-Pad from and XBox controller.
+ * Represents a D-Pad from and XBox controller.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad {
+public class DPad extends POV implements Runnable{
 	/**
 	 * The Up button on the D-Pad
 	 */
-	public final POVButton Up;
+	public final Button Up;
 	/**
 	 * The Down button on the D-Pad
 	 */
-	public final POVButton Down;
+	public final Button Down;
 	/**
 	 * The Right button on the D-Pad
 	 */
-	public final POVButton Right;
+	public final Button Right;
 	/**
 	 * The Left button on the D-Pad
 	 */
-	public final POVButton Left;
-	
-	public final POVButton POV;
-	
-	private int stick;
-	private int num;
+	public final Button Left;
+	/**
+	 * The entire POV as a button
+	 */
+	public final Button POV;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
 	 * 
-	 * @param stick The Joystick the D-Pad is on.
+	 * @param hid The hid the D-Pad is on.
 	 * @param num the number of the D-Pad on the controller.
 	 */
-	public DPad(int stick, int num){
-		this.stick = stick;
-		this.num = num;
+	public DPad(HID hid, int num){
+		super(hid, num);
 		
-		POV = new POVButton("POV", stick, num, POVButton.Type.ALL);
-		Up = new POVButton("POV Up", stick, num, POVButton.Type.UP);
-		Down = new POVButton("POV Down", stick, num, POVButton.Type.DOWN);
-		Right = new POVButton("POV Right", stick, num, POVButton.Type.RIGHT);
-		Left = new POVButton("POV Left", stick, num, POVButton.Type.LEFT);
+		Up = new DPadButton(hid, num, DPadButton.Type.UP);
+		Down = new DPadButton(hid, num, DPadButton.Type.DOWN);
+		Right = new DPadButton(hid, num, DPadButton.Type.RIGHT);
+		Left = new DPadButton(hid, num, DPadButton.Type.LEFT);
+		POV = new DPadButton(hid, num, DPadButton.Type.POV);
+	}
+
+	/**
+	 * Gets the up DPad button object
+	 * @return up button
+	 */
+	public Button getUp(){
+		return Up;
+	}
+	/**
+	 * Gets the down DPad button object
+	 * @return down button
+	 */
+	public Button getDown(){
+		return Down;
+	}
+	/**
+	 * Gets the right DPad button object
+	 * @return right button
+	 */
+	public Button getRight(){
+		return Right;
+	}
+	/**
+	 * Gets the left DPad button object
+	 * @return left button
+	 */
+	public Button getLeft(){
+		return Left;
 	}
 	
-	public int get(){
-		return RobotFactory.getHidInterface().getHIDPOV(stick, num);
-	}
-	
-	public void refresh(){
-		int degrees = get();
-		Up.set(degrees);
-		Down.set(degrees);
-		Left.set(degrees);
-		Right.set(degrees);
-		POV.set(degrees);
+	@Override
+	public void run() {
+		if(Up.getActionsCount() > 0)
+			Up.run();
+		if(Down.getActionsCount() > 0)
+			Down.run();
+		if(Left.getActionsCount() > 0)
+			Left.run();
+		if(Right.getActionsCount() > 0)
+			Right.run();
+		if(POV.getActionsCount() > 0)
+			POV.run();
 	}
 }

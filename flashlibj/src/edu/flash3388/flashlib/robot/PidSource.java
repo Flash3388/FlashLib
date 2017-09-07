@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.flash3388.flashlib.robot.devices.Gyro;
+import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
@@ -8,13 +10,6 @@ import edu.flash3388.flashlib.vision.Vision;
 /**
  * PID source is an interface for feedback data to the PID control loop. It is used to determine the current error
  * to be fixed by the loop.
- * 
- * <p>
- * There are 2 types of feedback data: 
- * <ul>
- * 	<li> {@link PidType#Displacement}: position or rotation</li>
- * 	<li> {@link PidType#Rate}: speed of position or rotation</li>
- * </ul>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -24,15 +19,10 @@ public interface PidSource {
 	
 	public static class GyroPidSource implements PidSource{
 
-		private PidType type;
 		private Gyro gyro;
 		
-		public GyroPidSource(Gyro gyro, PidType t){
-			this.gyro = gyro;
-			this.type = t;
-		}
 		public GyroPidSource(Gyro gyro){
-			this(gyro, PidType.Displacement);
+			this.gyro = gyro;
 		}
 		
 		public void setGyro(Gyro gyro){
@@ -41,34 +31,22 @@ public interface PidSource {
 		public Gyro getGyro(){
 			return gyro;
 		}
-		public void setType(PidType type){
-			this.type = type;
-		}
 		
 		@Override
 		public double pidGet() {
 			return gyro.getAngle();
 		}
-		@Override
-		public PidType getType() {
-			return type;
-		}
 	}
 	public static class VisionPidSource implements PidSource{
 
-		private PidType type;
 		private Vision vision;
 		private double previous = 0.0;
 		private boolean horizontal, distance;
 		
-		public VisionPidSource(Vision vision, PidType t, boolean horizontal, boolean distance){
+		public VisionPidSource(Vision vision, boolean horizontal, boolean distance){
 			this.vision = vision;
 			this.horizontal = horizontal;
 			this.distance = distance;
-			this.type = t;
-		}
-		public VisionPidSource(Vision vision, boolean horizontal, boolean distance){
-			this(vision, PidType.Displacement, horizontal, distance);
 		}
 		
 		public void setVision(Vision vision){
@@ -102,22 +80,13 @@ public interface PidSource {
 							vision.getAnalysis().getDouble(Analysis.PROP_VERTICAL_DISTANCE);
 			return previous;
 		}
-		@Override
-		public PidType getType() {
-			return type;
-		}
 	}
-	public static class DoubleDataPidSource implements PidSource{
+	public static class DoubleSourcePidSource implements PidSource{
 
-		private PidType type;
 		private DoubleSource source;
 		
-		public DoubleDataPidSource(DoubleSource source, PidType t){
+		public DoubleSourcePidSource(DoubleSource source){
 			this.source = source;
-			this.type = t;
-		}
-		public DoubleDataPidSource(DoubleSource source){
-			this(source, PidType.Displacement);
 		}
 		
 		public void setSource(DoubleSource source){
@@ -126,19 +95,62 @@ public interface PidSource {
 		public DoubleSource getSource(){
 			return source;
 		}
-		public void setType(PidType type){
-			this.type = type;
-		}
 		
 		@Override
 		public double pidGet() {
 			return source.get();
 		}
-		@Override
-		public PidType getType() {
-			return type;
+		
+	}
+	public static class EncoderPidSource implements PidSource{
+
+		private Encoder encoder;
+		private boolean useDistance = false;
+		
+		public EncoderPidSource(Encoder encoder, boolean useDistance) {
+			this.encoder = encoder;
+			this.useDistance = useDistance;
 		}
 		
+		public void setUsingDistance(boolean useDistance){
+			this.useDistance = useDistance;
+		}
+		public boolean isUsingDistance(){
+			return useDistance;
+		}
+		
+		public void setEncoder(Encoder encoder){
+			this.encoder = encoder;
+		}
+		public Encoder getEncoder(){
+			return encoder;
+		}
+		
+		@Override
+		public double pidGet() {
+			return useDistance? encoder.getDistance() : encoder.getRate();
+		}
+		
+	}
+	public static class RangeFinderPidSource implements PidSource{
+
+		private RangeFinder rangeFinder;
+		
+		public RangeFinderPidSource(RangeFinder rangeFinder) {
+			this.rangeFinder = rangeFinder;
+		}
+		
+		public RangeFinder getRangeFinder(){
+			return rangeFinder;
+		}
+		public void setRangeFinder(RangeFinder rangeFinder){
+			this.rangeFinder = rangeFinder;
+		}
+		
+		@Override
+		public double pidGet() {
+			return rangeFinder.getRangeCM();
+		}
 	}
 	
 	/**
@@ -146,15 +158,4 @@ public interface PidSource {
 	 * @return the feedback data from the sensor.
 	 */
 	public double pidGet();
-	/**
-	 * Gets the type of data returned by the sensor.
-	 * <p>
-	 * There are 2 types of feedback data: 
-	 * <ul>
-	 * 	<li> {@link PidType#Displacement}: position or rotation</li>
-	 * 	<li> {@link PidType#Rate}: speed of position or rotation</li>
-	 * </ul>
-	 * @return the sensor data type
-	 */
-	public PidType getType();
 }

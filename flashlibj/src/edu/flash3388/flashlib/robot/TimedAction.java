@@ -12,12 +12,12 @@ public class TimedAction extends Action {
 	private Action action;
 	
 	public TimedAction(Action action, double seconds){
-		this(action, (long) (seconds * 1000));
+		this(action, (int) (seconds * 1000));
 	}
-	public TimedAction(Action action, long milliseconds){
+	public TimedAction(Action action, int milliseconds){
 		this.action = action;
 		
-		setTimeOut(milliseconds);
+		setTimeout(milliseconds);
 		
 		copyRequirements(action);
 	}

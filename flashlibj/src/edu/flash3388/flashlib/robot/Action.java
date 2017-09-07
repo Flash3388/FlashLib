@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -24,7 +25,6 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * There are many different types of wrapper for action. Those wrapper allows for the modification of an action
  * for externally without changing the defined parameters of it:
  * <ul>
- *  <li> {@link ActionCommand}: wraps an action inside a WPILib command</li>
  * 	<li> {@link TimedAction}: wraps an action and sets a timeout for it</li>
  *  <li> {@link SystemAction}: wraps an action and sets a system requirement for it</li>
  *  <li> {@link ActionGroup}: a series of actions to be executed at a specified order</li>
@@ -39,7 +39,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see Scheduler
- * @see SubSystem
+ * @see Subsystem
  */
 public abstract class Action{
 	
@@ -53,12 +53,12 @@ public abstract class Action{
 		protected void end() {}
 	};
 
-	private Vector<SubSystem> requirements = new Vector<SubSystem>(2);
+	private Set<Subsystem> requirements = new HashSet<Subsystem>(2);
 	private boolean initialized = false;
 	private boolean canceled = false;
 	private boolean running = false;
-	private long timeout = -1;
-	private long start_time = -1;
+	private int timeout = -1;
+	private int start_time = -1;
 	private String name;
 	
 	/**
@@ -80,7 +80,7 @@ public abstract class Action{
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!running && RobotFactory.hasSchedulerInstance() && RobotFactory.getScheduler().add(this)){
+		if(!running && Scheduler.getInstance().add(this)){
 			initialized = false;
 			canceled = false;
 			running = true;
@@ -93,6 +93,7 @@ public abstract class Action{
 		if(running)
 			canceled = true;
 	}
+	
 	void removed(){
 		if(initialized){
 			if(canceled)
@@ -105,13 +106,13 @@ public abstract class Action{
 		start_time = -1;
 	}
 	boolean run(){
-		if(isTimedOut())
+		if(isTimedout())
 			cancel();
 		if(canceled)
 			return false;
 		if(!initialized){
 			initialized = true;
-			start_time = FlashUtil.millis();
+			start_time = FlashUtil.millisInt();
 			initialize();
 		}
 		execute();
@@ -147,68 +148,80 @@ public abstract class Action{
 	public boolean isRunning(){
 		return running;
 	}
-	public Enumeration<SubSystem> getRequirements(){
-		return requirements.elements();
-	}
 	/**
 	 * Gets the running timeout of the action in milliseconds. 
 	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
 	 */
-	public long getTimeOut(){
+	public int getTimeout(){
 		return timeout;
 	}
-	
+	/**
+	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param timeout timeout in milliseconds
+	 */
+	public void setTimeout(int timeout){
+		this.timeout = timeout;
+	}
+	/**
+	 * Sets the running timeout for this action in seconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param timeout timeout in seconds
+	 */
+	public void setTimeout(double timeout){
+		setTimeout((int)(timeout * 0.001));
+	}
+	/**
+	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
+	 */
+	public void cancelTimeout(){
+		setTimeout(-1);
+	}
 	/**
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
 	 */
-	protected void requires(SubSystem subsystem){
-		requirements.addElement(subsystem);
+	public void requires(Subsystem subsystem){
+		requirements.add(subsystem);
 	}
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
 	 */
-	protected void requires(SubSystem... subsystems){
-		for(SubSystem s : subsystems)
-			requirements.add(s);
+	public void requires(Subsystem... subsystems){
+		for(Subsystem s : subsystems)
+			requires(s);
 	}
+	/**
+	 * Resets the requirements of this action
+	 */
+	public void resetRequirements(){
+		requirements.clear();
+	}	
+	/**
+	 * Gets the {@link Subsystem}s which are used by this action.
+	 * @return {@link Iterator} of the used {@link Subsystem}s.
+	 */
+	public Iterator<Subsystem> getRequirements(){
+		return requirements.iterator();
+	}
+	
+	
 	/**
 	 * Copies the requirements used by another action to this one.
 	 * @param action action to copy requirements from
 	 */
 	protected void copyRequirements(Action action){
-		for (Enumeration<SubSystem> sys = action.getRequirements(); sys.hasMoreElements(); )
-			requires(sys.nextElement());
-	}
-	/**
-	 * Resets the requirements of this action
-	 */
-	protected void resetRequirements(){
-		requirements.clear();
-	}
-	/**
-	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param milliseconds timeout in milliseconds
-	 */
-	protected void setTimeOut(long milliseconds){
-		timeout = milliseconds;
-	}
-	/**
-	 * Gets whether or not the Scheduler should remove this action when the robot is disabled. Should be true.
-	 * @return true if this action is to be removed
-	 */
-	protected boolean removeOnDisabled(){
-		return true;
+		for (Iterator<Subsystem> sys = action.getRequirements(); sys.hasNext(); )
+			requires(sys.next());
 	}
 	/**
 	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout
 	 * is defined. 
 	 * @return true if the action timeout, false otherwise
 	 */
-	protected boolean isTimedOut(){
-		return start_time != -1 && timeout != -1 && (FlashUtil.millis() - start_time) 
+	protected boolean isTimedout(){
+		return start_time > 0 && timeout > 0 && (FlashUtil.millisInt() - start_time) 
 				>= timeout;
 	}
 	
@@ -239,7 +252,8 @@ public abstract class Action{
 	protected abstract void end();
 	
 	/**
-	 * Creates a canceling action for an action.
+	 * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link #cancel()}
+	 * for a given action when started.
 	 * 
 	 * @param action action to cancel
 	 * @return canceling action

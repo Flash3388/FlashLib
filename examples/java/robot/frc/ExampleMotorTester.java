@@ -6,9 +6,9 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Tester;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.SystemAction;
+import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
+import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.rio.FlashRio;
-import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.robot.systems.FlashDrive;
 import edu.flash3388.flashlib.robot.systems.FlashDrive.MotorSide;
 
@@ -17,7 +17,7 @@ import edu.flash3388.flashlib.robot.systems.FlashDrive.MotorSide;
  * and see their current draw and voltage drop in real-time. Instead of tracking all 4 motors, we will track each
  * side as a single motor just as an example. Usually it's preferable to track all motors.
  */
-public class ExampleMotorTester extends FlashRio{
+public class ExampleMotorTester extends IterativeFRCRobot{
 
 	FlashDrive driveTrain;
 	
@@ -37,8 +37,8 @@ public class ExampleMotorTester extends FlashRio{
 		 * Creating the drive. Wrapping controllers from the same side into a RioControllers object.
 		 */
 		driveTrain = new FlashDrive(
-				new RioControllers(frontRight, rearRight), 
-				new RioControllers(frontLeft, rearLeft)
+				new FRCSpeedControllers(frontRight, rearRight), 
+				new FRCSpeedControllers(frontLeft, rearLeft)
 		);
 		/*
 		 * Sets the default action of the drive train. Executes when the drive train has no other action.
@@ -73,13 +73,13 @@ public class ExampleMotorTester extends FlashRio{
 		/*
 		 * Adds both right side motors which are wrapped in one speed controller container to the tester
 		 */
-		driveTester.addMotor("Right", driveTrain.getControllers(MotorSide.Right))
+		driveTester.addMotor("Right", driveTrain.getController(MotorSide.Right))
 				.setCurrentSource(()->frontRight.getOutputCurrent())//uses the front one as a source of current data used
 				.setVoltageSource(()->frontRight.getOutputVoltage());//uses the front one as a source of voltage data used
 		/*
 		 * Adds both left side motors which are wrapped in one speed controller container to the tester
 		 */
-		driveTester.addMotor("Right", driveTrain.getControllers(MotorSide.Left))
+		driveTester.addMotor("Left", driveTrain.getController(MotorSide.Left))
 				.setCurrentSource(()->frontLeft.getOutputCurrent())//uses the front one as a source of current data used
 				.setVoltageSource(()->frontLeft.getOutputVoltage());//uses the front one as a source of voltage data used
 		
@@ -87,10 +87,6 @@ public class ExampleMotorTester extends FlashRio{
 		 * Attaches the tester to the flashboard
 		 */
 		Flashboard.attach(driveTester);
-		/*
-		 * Starts the flashboard
-		 */
-		Flashboard.start();
 	}
 
 	@Override

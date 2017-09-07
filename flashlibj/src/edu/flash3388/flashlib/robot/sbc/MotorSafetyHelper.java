@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import edu.flash3388.flashlib.robot.RobotState;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class MotorSafetyHelper {
@@ -46,7 +45,7 @@ public class MotorSafetyHelper {
 	}
 	
 	public void check(){
-		if(!enabled || RobotState.isRobotDisabled())
+		if(!enabled)
 			return;
 		if (stopTime <= FlashUtil.millisInt()) {
 			safeMotor.disable();

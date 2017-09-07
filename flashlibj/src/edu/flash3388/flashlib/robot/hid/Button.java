@@ -4,354 +4,280 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
- * Represents a button on a Human Interface Device. Can activate actions depending on the state of 
- * the button.
+ * The base logic for a button. Allows attaching {@link Action} objects which will be executed 
+ * according to different parameters. To allow execution of actions, it is required to call {@link #run()}
+ * periodically, so that the activation parameters will be checked.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Button implements ButtonListener, BooleanSource{
+public abstract class Button implements BooleanSource, Runnable{
 	
-	protected static enum ActivateType {
+	/**
+	 * Enumeration of activation types for {@link Action} associated with a {@link Button}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
+	public static enum ActivateType {
 		Press, Hold, Release
 	}
-	private static abstract class ButtonCommand{
-		final ActivateType type;
+	
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will start
+	 * the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.0
+	 */
+	public static class ButtonAction{
+		protected final ActivateType type;
+		protected final Action action;
 		
-		ButtonCommand(ActivateType t){
+		ButtonAction(ActivateType t, Action action){
 			type = t;
-		}
-		
-		abstract boolean isRunning();
-		abstract void start();
-		abstract void cancel();
-	}
-	private static class ButtonAction extends ButtonCommand{
-
-		final Action action;
-		
-		ButtonAction(ActivateType t, Action action) {
-			super(t);
 			this.action = action;
 		}
-
-		@Override
-		boolean isRunning() {
-			return action.isRunning();
-		}
-		@Override
-		void start() {
-			action.start();
-		}
-		@Override
-		void cancel() {
-			action.cancel();
-		}
-	}
-	private static class ButtonTask extends ButtonCommand{
-
-		final Runnable task;
-		private boolean running = false;
 		
-		ButtonTask(ActivateType t, Runnable task) {
-			super(t);
-			this.task = task;
+		public final Action getAction(){
+			return action;
 		}
-
-		@Override
-		boolean isRunning() {
-			return running;
+		public final ActivateType getActivateType(){
+			return type;
 		}
-		@Override
-		void start() {
-			if(!running){
-				RobotFactory.getScheduler().addTask(task);
-				running = true;
-			}
-		}
-		@Override
-		void cancel() {
-			if(running){
-				RobotFactory.getScheduler().remove(task);
-				running = false;
-			}
-		}
-	}
-
-	private static final int MAX_MILLIS_PRESS = 500;
-	
-	private boolean current = false, last = false, changedDown = false, changedUp = false;
-	private String name;
-	private int number;
-	private int stick; 
-	protected ButtonEvent event;
-	private int holdStart = -1;
-	
-	private Vector<ButtonListener> listeners = new Vector<ButtonListener>();
-	private Vector<ButtonCommand> commands = new Vector<ButtonCommand>();
-	
-	/**
-	 * Creates a new instance of Button class for a button in a given joystick. 
-	 * A name is generated for the given joystick.
-	 * 
-	 * @param stick An instance of Joystick representing the joystick the button belongs to.
-	 * @param number The number of the button on the joystick.
-	 */
-	public Button(int stick, int number){
-		this(stick+"-"+number, stick, number);
-	}
-	
-	/**
-	 * Creates a new instance of Button class for a button in a given joystick. 
-	 * 
-	 * @param name A name to represent the Button.
-	 * @param stick An instance of Joystick representing the joystick the button belongs to.
-	 * @param number The number of the button on the joystick.
-	 */
-	public Button(String name, int stick, int number){
-		this.name = name;
-		this.stick = stick;
-		this.number = number;
-		this.event = new ButtonEvent(name, stick, number);
 		
-		addListener(this);
+		public void start(){
+			if(!action.isRunning())
+				action.start();
+		}
+		public void stop(){
+			if(action.isRunning())
+				action.cancel();
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Action)
+				return action.equals(obj);
+			return super.equals(obj);
+		}
+	}
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will cancel
+	 * the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class CancelAction extends ButtonAction{
+		
+		public CancelAction(ActivateType t, Action action){
+			super(t, action);
+		}
+		
+		public void start(){
+			if(action.isRunning())
+				action.cancel();
+		}
+		public void stop(){
+		}
+	}
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When the {@link ActivateType} for the {@link Action} was met, this will toggle the
+	 * {@link Action} between start and stop.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class ToggleAction extends ButtonAction{
+		
+		public ToggleAction(ActivateType t, Action action){
+			super(t, action);
+		}
+		
+		public void start(){
+			if(!action.isRunning())
+				action.start();
+			else 
+				action.cancel();
+		}
+		public void stop(){
+		}
+	}
+	/**
+	 * Wrapper for {@link Action} objects associated with a {@link Button}.
+	 * When {@link ActivateType#Press} has occurred a given amount of time, this will 
+	 * start the {@link Action}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.2
+	 */
+	public static class MultiPressAction extends ButtonAction{
+		
+		private int presses = 0;
+		private int pressesStart;
+		
+		public MultiPressAction(Action action, int presses){
+			super(ActivateType.Press, action);
+			this.pressesStart = presses;
+		}
+		
+		public void start(){
+			if(!action.isRunning()){
+				if((++presses) == pressesStart){
+					action.start();
+					presses = 0;
+				}
+			}
+			else if(presses != 0)
+				presses = 0;
+		}
+		public void stop(){
+			presses = 0;
+			if(action.isRunning())
+				action.cancel();
+		}
 	}
 	
-	/**
-	 * Gets if the button state was changed and is now held down.
-	 * 
-	 * @return True if the button has changed down.
-	 */
-	public final boolean changedDown() { return changedDown;}
+	private Vector<ButtonAction> actions = new Vector<ButtonAction>();
 	
-	/**
-	 * Gets if the button state was changed and is now released.
-	 * 
-	 * @return True if the button has changed up.
-	 */
-	public final boolean changedUp() { return changedUp;}
-	
-	/**
-	 * Gets if the button is now held.
-	 * 
-	 * @return True if the button is held down.
-	 */
-	public final boolean isHeld() { return current && last;}
-	
-	/**
-	 * Gets if the button state was changed in any way (up or down).
-	 * 
-	 * @return True if the button state was changed.
-	 */
-	public final boolean hasChanged() { return changedDown || changedUp;}
-	
-	/**
-	 * Gets the name representing the button. Either auto-generated or manually given.
-	 * 
-	 * @return A String representing the name.
-	 */
-	public String getName() {return name;}
-	
-	/**
-	 * Gets the Joystick the button is on.
-	 * 
-	 * @return An instance of Joystick.
-	 */
-	public final int getJoystick() {return stick;}
-	
-	/**
-	 * Gets the number of the button on its joystick.
-	 * 
-	 * @return An Integer representing the number of the button on its joystick.
-	 */
-	public final int getNumber() {return number;}
-	
-	/**
-	 * Gets whether the button is pressed currently
-	 * @return True if the button is pressed currently.
-	 */
-	public final boolean get(){ return current;}
-	
-	/**
-	 * Add an event listener to listen to button events. 
-	 * 
-	 * @param listener An instance of an object implementing ButtonHold.
-	 */
-	public final void addListener(ButtonListener listener){ 
-		listeners.add(listener);
-	}
-	
-	/**
-	 * Adds a Command/Action to automatically start when the button is pressed.
-	 * 
-	 * @param c The Command/Action to activate on press.
-	 */
-	public final void whenPressed(Action c){
-		commands.add(new ButtonAction(ActivateType.Press, c));
-	}
-	public final void whenPressed(Action... actions){
-		for(Action a : actions)
-			commands.add(new ButtonAction(ActivateType.Press, a));
-	}
-	
-	/**
-	 * Adds a Command/Action to automatically run while the button is held, stops on release.
-	 * 
-	 * @param c The Command/Action to activate on hold.
-	 */
-	public void whileHeld(Action c){
-		commands.add(new ButtonAction(ActivateType.Hold, c));
-	}
-	public void whileHeld(Action... actions){
-		for(Action a : actions)
-			commands.add(new ButtonAction(ActivateType.Hold, a));
-	}
-	
-	/**
-	 * Adds a Command/Action to automatically start when the button is released.
-	 * 
-	 * @param c The Command/Action to activate on release.
-	 */
-	public void whenReleased(Action c){
-		commands.add(new ButtonAction(ActivateType.Release, c));
-	}
-	public void whenReleased(Action... actions){
-		for(Action a : actions)
-			commands.add(new ButtonAction(ActivateType.Release, a));
-	}
-	
-	/**
-	 * Adds a task to automatically start when the button is pressed.
-	 * 
-	 * @param c The task to activate on press.
-	 */
-	public final void whenPressed(Runnable c){
-		commands.add(new ButtonTask(ActivateType.Press, c));
-	}
-	public final void whenPressed(Runnable... ts){
-		for(Runnable a : ts)
-			commands.add(new ButtonTask(ActivateType.Press, a));
-	}
-	
-	/**
-	 * Adds a task to automatically run while the button is held, stops on release.
-	 * 
-	 * @param c The task to activate on hold.
-	 */
-	public void whileHeld(Runnable c){
-		commands.add(new ButtonTask(ActivateType.Hold, c));
-	}
-	public void whileHeld(Runnable... ts){
-		for(Runnable a : ts)
-			commands.add(new ButtonTask(ActivateType.Hold, a));
-	}
-	
-	/**
-	 * Adds a task to automatically start when the button is released.
-	 * 
-	 * @param c The task to activate on release.
-	 */
-	public void whenReleased(Runnable c){
-		commands.add(new ButtonTask(ActivateType.Release, c));
-	}
-	public void whenReleased(Runnable... ts){
-		for(Runnable a : ts)
-			commands.add(new ButtonTask(ActivateType.Release, a));
-	}
-	
-	public void stopAll(){
-		Enumeration<ButtonCommand> commEnum = commands.elements();
+	private void setActions(ActivateType type){
+		Enumeration<ButtonAction> commEnum = actions.elements();
 		while(commEnum.hasMoreElements()){
-			ButtonCommand com = commEnum.nextElement();
-			if(com.isRunning())
-				com.cancel();
-		}
-	}
-	public boolean actionsStillRunning(){
-		boolean run = false;
-		Enumeration<ButtonCommand> commEnum = commands.elements();
-		while(commEnum.hasMoreElements()){
-			ButtonCommand com = commEnum.nextElement();
-			if(com.isRunning()){
-				run = true;
-				break;
-			}
-		}
-		return run;
-	}
-	
-	public void set(boolean down){
-		last = current;
-		current = down;
-		changedDown = !last && current;
-    	changedUp = last && !current;
-    	
-    	if(changedDown)
-    		holdStart = FlashUtil.millisInt();
-    	
-    	setCommands(changedUp && (holdStart > 0 && FlashUtil.millisInt() - holdStart < MAX_MILLIS_PRESS));
-	}
-	public void setPressed(boolean press){
-		changedUp = press;
-		last = press;
-		current = !press;
-		changedDown = !press;
-		
-		setCommands(press);
-	}
-	protected void setCommands(boolean press){
-		if(press) holdStart = -1;
-		Enumeration<ButtonListener> listenersEnum = listeners.elements();
-		while(listenersEnum.hasMoreElements()){
-			ButtonListener listener = listenersEnum.nextElement();
+			ButtonAction ex = commEnum.nextElement();
 			
-			if(press)
-				listener.onPress(event);
-			else if(last && current)
-				listener.onHold(event);
-			else if(changedUp)
-				listener.onRelease(event);
+			if(type == ex.type)
+				ex.start();
+			else
+				ex.stop();
 		}
 	}
 	
-	@Override
-	public void onPress(ButtonEvent e) {
-		Enumeration<ButtonCommand> commEnum = commands.elements();
-		while(commEnum.hasMoreElements()){
-			ButtonCommand ex = commEnum.nextElement();
-			if(ex.type == ActivateType.Press)
-				ex.start();
-		}
+	/**
+	 * Adds a new {@link ButtonAction} to this button. Will be update to check for activation
+	 * when {@link #run()} is called.
+	 * @param action button action to add
+	 */
+	public void addButtonAction(ButtonAction action){
+		actions.add(action);
 	}
-	@Override
-	public void onRelease(ButtonEvent e) {
-		Enumeration<ButtonCommand> commEnum = commands.elements();
-		while(commEnum.hasMoreElements()){
-			ButtonCommand ex = commEnum.nextElement();
-			if(ex.type == ActivateType.Hold)
-				ex.cancel();
-			else if(ex.type == ActivateType.Release)
-				ex.start();
-		}
+	/**
+	 * Removes a given {@link ButtonAction} if it is attached to this object.
+	 * @param action the action to remove
+	 * @return true if remove, false otherwise
+	 */
+	public boolean removeButtonAction(ButtonAction action){
+		return actions.remove(action);
 	}
-	@Override
-	public void onHold(ButtonEvent e) {
-		Enumeration<ButtonCommand> commEnum = commands.elements();
+	/**
+	 * Removes a given {@link Action} if it is attached to this button.
+	 * @param action action to remove
+	 * @return true if removed, false otherwise
+	 */
+	public boolean removeAction(Action action){
+		return actions.remove(action);
+	}
+	
+	/**
+	 * Adds an {@link Action} which will be started when the button is pressed
+	 * @param action an action to add
+	 */
+	public void whenPressed(Action action){
+		actions.add(new ButtonAction(ActivateType.Press, action));
+	}
+	/**
+	 * Adds an {@link Action} which will be started when the button is released
+	 * @param action an action to add
+	 */
+	public void whenReleased(Action action){
+		actions.add(new ButtonAction(ActivateType.Release, action));
+	}
+	/**
+	 * Adds an {@link Action} which will be started when the button is held
+	 * @param action an action to add
+	 */
+	public void whileHeld(Action action){
+		actions.add(new ButtonAction(ActivateType.Hold, action));
+	}
+	/**
+	 * Adds an {@link Action} which will be canceled when the button is pressed
+	 * @param action an action to add
+	 */
+	public void cancelWhenPressed(Action action){
+		actions.add(new CancelAction(ActivateType.Press, action));
+	}
+	/**
+	 * Adds an {@link Action} which when pressed and if not running will start, and if
+	 * running will be canceled.
+	 * @param action an action to add
+	 */
+	public void toggleWhenPressed(Action action){
+		actions.add(new ToggleAction(ActivateType.Press, action));
+	}
+	/**
+	 * Adds an {@link Action} which will run when the button was pressed multiple times continuously
+	 * @param action an action to add
+	 * @param presses amount of presses
+	 */
+	public void whenMultiPressed(Action action, int presses){
+		actions.add(new MultiPressAction(action, presses));
+	}
+	
+	/**
+	 * Gets the amount of actions attached to this object. 
+	 * @return action count
+	 */
+	public int getActionsCount(){
+		return actions.size();
+	}
+	
+	/**
+	 * Gets whether or not at least one attached {@link Action} is running.
+	 * @return true if at least one is running, false otherwise
+	 */
+	public boolean actionsRunning(){
+		Enumeration<ButtonAction> commEnum = actions.elements();
 		while(commEnum.hasMoreElements()){
-			ButtonCommand ex = commEnum.nextElement();
-			if(ex.type == ActivateType.Hold)
-				ex.start();
-			else if(ex.type == ActivateType.Release)
-				ex.cancel();
+			if(commEnum.nextElement().getAction().isRunning())
+				return true;
+		}
+		return false;
+	}
+	/**
+	 * Stops all running actions attached to this button. Done by calling {@link Action#cancel()}.
+	 */
+	public void stopAll(){
+		Enumeration<ButtonAction> commEnum = actions.elements();
+		while(commEnum.hasMoreElements()){
+			ButtonAction ex = commEnum.nextElement();
+			
+			if(ex.getAction().isRunning())
+				ex.getAction().cancel();
 		}
 	}
 	
-	public void refresh(){
-		set(RobotFactory.getHidInterface().getHIDButton(stick, number));
+	/**
+	 * Sets the current activation mode for this button as pressed. Will update attached {@link Action}s.
+	 */
+	public void setPressed(){
+		setActions(ActivateType.Press);
+	}
+	/**
+	 * Sets the current activation mode for this button as held. Will update attached {@link Action}s.
+	 */
+	public void setHeld(){
+		setActions(ActivateType.Hold);
+	}
+	/**
+	 * Sets the current activation mode for this button as released. Will update attached {@link Action}s.
+	 */
+	public void setReleased(){
+		setActions(ActivateType.Release);
 	}
 }

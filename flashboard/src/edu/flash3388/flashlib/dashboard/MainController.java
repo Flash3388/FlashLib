@@ -71,13 +71,7 @@ public class MainController implements Initializable{
 				
 				if(!lastconnectionC){
 					controller.resetDisplay();
-					PDPWindow.reset();
-					PDP.resetBoards();
-					TesterWindow.closeTester();
-					VisionEditorWindow.closeEditor();
-					PidTunerWindow.reset();
-					FlashboardTester.resetTesters();
-					DashboardPidTuner.resetTuners();
+					resetAllControls();
 				}
 			}
 			if(Dashboard.camConnected() != lastconnectionS){
@@ -85,7 +79,7 @@ public class MainController implements Initializable{
 				controller.camserverRect.setFill(lastconnectionS ? Color.GREEN : Color.RED);
 			}
 			if(PDPWindow.onScreen())
-				PDPWindow.getInstance().getController().update();
+				PDPWindow.getInstance().update();
 		};
 		@Override
 		public void run() {
@@ -394,7 +388,9 @@ public class MainController implements Initializable{
 		}
 		if(Dashboard.getVision().getProcessing() != null){
 			FileChooser chooser = new FileChooser();
-			chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+			ExtensionFilter extFilter = new ExtensionFilter("Vision File", ".xml");
+			chooser.getExtensionFilters().add(extFilter);
+			chooser.setSelectedExtensionFilter(extFilter);
 			chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
 			File file = chooser.showSaveDialog(Dashboard.getPrimary());
 			if(file == null) return;
@@ -409,7 +405,9 @@ public class MainController implements Initializable{
 			return;
 		}
 		FileChooser chooser = new FileChooser();
-		chooser.setSelectedExtensionFilter(new ExtensionFilter("Filter File", ".xml"));
+		ExtensionFilter extFilter = new ExtensionFilter("Vision File", ".xml");
+		chooser.getExtensionFilters().add(extFilter);
+		chooser.setSelectedExtensionFilter(extFilter);
 		chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
 		File file = chooser.showOpenDialog(Dashboard.getPrimary());
 		if(file == null) return;
@@ -617,5 +615,15 @@ public class MainController implements Initializable{
 			Runnable r = d.updateDisplay();
 			if(r != null) r.run();
 		}
+	}
+	
+	public static void resetAllControls(){
+		PDPWindow.reset();
+		PDP.resetBoards();
+		TesterWindow.closeTester();
+		VisionEditorWindow.closeEditor();
+		PidTunerWindow.reset();
+		FlashboardTester.resetTesters();
+		DashboardPidTuner.resetTuners();
 	}
 }
