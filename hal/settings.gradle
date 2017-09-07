@@ -1,0 +1,3 @@
+include 'platforms/beagleboneblack'
+
+rootProject.name = 'hal'

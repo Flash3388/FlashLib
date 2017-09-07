@@ -1,4 +1,4 @@
-subprojects {
+subprojects{
     apply plugin: 'java'
 	
 	buildDir = projectOutputFolder
@@ -10,6 +10,8 @@ subprojects {
 	}
 }
 project(':flashlibj'){
+	apply plugin: 'java'
+
 	sourceSets{
 		main{
 			java{
@@ -44,6 +46,8 @@ project(':flashlibj'){
 }
 
 project(':flashboard'){
+	apply plugin: 'java'
+
 	sourceSets{
 		main{
 			java{
