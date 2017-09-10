@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef HAL_H_
-#define HAL_H_
+#ifndef BBB_HAL_H_
+#define BBB_HAL_H_
 
 #include <stdint.h>
 #include <haltypes.h>
@@ -58,4 +58,4 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty);
 
 } /* namespace flashlib */
 
-#endif /* HAL_H_ */
+#endif /* BBB_HAL_H_ */

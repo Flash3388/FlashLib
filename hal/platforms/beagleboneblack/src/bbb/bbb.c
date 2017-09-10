@@ -10,7 +10,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <bbb.h>
+#include <bbb_defines.h>
+
+#include "bbb.h"
 #include "defines.h"
 
 const unsigned int gpio_addr_offset[] = {BBB_GPIO0_ADDR, BBB_GPIO1_ADDR, BBB_GPIO2_ADDR, BBB_GPIO3_ADDR};

@@ -19,16 +19,23 @@ void bbb_pwm_free(){
 
 }
 
-void bbb_pwm_setduty(uint8_t id, uint8_t port, float duty){
+void bbb_pwm_setduty(unsigned char module, unsigned char pin, float duty){
 
 }
-float bbb_pwm_getduty(uint8_t id, uint8_t port){
-	return 0;
+float bbb_pwm_getduty(unsigned char module, unsigned char pin){
+	return 0.0;
 }
 
-void bbb_pwm_enable(uint8_t id){
+void bbb_pwm_setfrequency(unsigned char module, float frequency){
 
 }
-void bbb_pwm_disable(uint8_t id){
+float bbb_pwm_getfrequency(unsigned char module){
+	return 0.0;
+}
+
+void bbb_pwm_enable(unsigned char module){
+
+}
+void bbb_pwm_disable(unsigned char module){
 
 }

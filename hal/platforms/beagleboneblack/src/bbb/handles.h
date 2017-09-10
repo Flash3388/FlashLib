@@ -21,8 +21,12 @@ typedef struct dio_pulse{
 } dio_pulse_t;
 
 typedef struct pwm_port{
-	uint8_t module;
-	uint8_t port;
+	int8_t module = -1;
+	int8_t port = -1;
 } pwm_port_t;
+
+typedef struct adc_port{
+
+} adc_port_t;
 
 #endif /* BBB_HANDLES_H_ */

@@ -5,18 +5,27 @@
  *      Author: root
  */
 
-#include <hal.h>
-#include <bbb.h>
 #include <unordered_map>
 #include <pthread.h>
 #include <chrono>
 
+#include <bbb_defines.h>
+
+#include "hal.h"
+#include "bbb.h"
 #include "handles.h"
+
+#define PWMSS_PORTS_COUNT       (BBB_PWMSS_MODULE_COUNT * BBB_PWMSS_PORT_COUNT)
+#define PWMSS_MAX_VALUE         (255)
+#define PWMSS_VALUE_TO_DUTY(d)  (d / PWMSS_MAX_VALUE)
+#define PWMSS_DUTY_TO_VALUE(d)  (d * PWMSS_MAX_VALUE)
 
 std::unordered_map<hal_handle_t, dio_pulse_t&> pulse_map;
 std::unordered_map<hal_handle_t, dio_port_t&> dio_map;
 
-std::unordered_map<hal_handle_t, pwm_port_t&> pwm_map;
+pwm_port_t pwm_map[PWMSS_PORTS_COUNT];
+
+std::unordered_map<hal_handle_t, adc_port_t&> adc_map;
 
 typedef struct thread_data{
 	bool run = true;
@@ -43,7 +52,7 @@ void* io_thread_function(void* param){
 	while(data.run){
 
 		//run pulses
-		pthread_mutex_lock(&thread_param_mutex);
+		pthread_mutex_lock(&pulse_map_mutex);
 
 		auto elapsed = std::chrono::high_resolution_clock::now() - start;
 		us_passed = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -58,7 +67,7 @@ void* io_thread_function(void* param){
 		}
 		start = std::chrono::high_resolution_clock::now();
 
-		pthread_mutex_unlock(&thread_param_mutex);
+		pthread_mutex_unlock(&pulse_map_mutex);
 
 		//get thread data
 		pthread_mutex_lock(&thread_param_mutex);
@@ -122,14 +131,16 @@ hal_handle_t BBB_initializeDIOPort(uint8_t port, uint8_t dir){
 		}
 	}else{
 		//TODO: CREATE DIO HANDLE AND ADD TO MAP. ALSO CHECK IF PORT MATCHES
-		dio_port_t port;
-		port.header = BBB_PORT_TO_HEADER(port);
-		port.pin = BBB_PORT_TO_PIN(port);
+		dio_port_t dio;
+		dio.header = BBB_GPIO_PORT_TO_HEADER(port);
+		dio.pin = BBB_GPIO_PORT_TO_PIN(port);
 
-		if(bbb_getportgpio(port.header, port.pin) < 0)
+		if(bbb_getportgpio(dio.header, dio.pin) < 0)
 			handle = HAL_INVALID_HANDLE;
-		else
-			dio_map.insert({handle, port});
+		else{
+			bbb_setdir(dio.header, dio.pin, dir);
+			dio_map.insert({handle, dio});
+		}
 	}
 	return handle;
 }
@@ -202,22 +213,56 @@ float BBB_getAnalogVoltage(hal_handle_t portHandle){
 \***********************************************************************/
 
 hal_handle_t BBB_initializePWMPort(uint8_t port){
-	return 0;
+	hal_handle_t portHandle = (hal_handle_t)port;
+
+	if(port >= PWMSS_PORTS_COUNT)
+		portHandle = HAL_INVALID_HANDLE;
+	else{
+		pwm_port_t pwm = pwm_map[port];
+		pwm.module = BBB_PWMSS_PORT_TO_MODULE(port);
+		pwm.port = BBB_PWMSS_PORT_TO_PIN(port);
+
+		bbb_pwm_enable(pwm.module);
+	}
+
+	return portHandle;
 }
 void BBB_freePWMPort(hal_handle_t portHandle){
 
 }
 
 uint8_t BBB_getPWMValue(hal_handle_t portHandle){
-	return 0;
+	float duty = BBB_getPWMDuty(portHandle);
+	return (uint8_t)PWMSS_DUTY_TO_VALUE(duty);
 }
 float BBB_getPWMDuty(hal_handle_t portHandle){
-	return 0;
+	if(portHandle < PWMSS_PORTS_COUNT){
+		pwm_port_t pwm = pwm_map[portHandle];
+		if(pwm.module >= 0 || pwm.port >= 0){
+			return bbb_pwm_getduty(pwm.module, pwm.port);
+		}
+	}
+	return 0.0f;
 }
 
 void BBB_setPWMValue(hal_handle_t portHandle, uint8_t value){
-
+	float duty = PWMSS_VALUE_TO_DUTY(value);
+	BBB_limitPWMDuty(&duty);
+	BBB_setPWMDuty(portHandle, duty);
 }
 void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
+	if(portHandle < PWMSS_PORTS_COUNT){
+		pwm_port_t pwm = pwm_map[portHandle];
+		if(pwm.module >= 0 || pwm.port >= 0){
+			BBB_limitPWMDuty(&duty);
+			bbb_pwm_setduty(pwm.module, pwm.port, duty);
+		}
+	}
+}
 
+void BBB_limitPWMDuty(float* duty){
+	if(*duty > 1.0f)
+		*duty = 1.0f;
+	else if(*duty < 0.0f)
+		*duty = 0.0f;
 }

@@ -10,16 +10,6 @@
 
 #include <stdint.h>
 
-#define BBB_HEADER_PIN_COUNT    (46)
-#define BBB_PORT_TO_HEADER(p)   (p / BBB_HEADER_PIN_COUNT) //port / HEADER_PIN_COUNT
-#define BBB_PORT_TO_PIN(p)      (p % BBB_HEADER_PIN_COUNT) //port % HEADER_PIN_COUNT
-
-#define BBB_P8_HEADER           (0)
-#define BBB_P9_HEADER           (1)
-
-#define BBB_DIR_OUTPUT          (1)
-#define BBB_DIR_INPUT           (0)
-
 #ifdef __cplusplus
 extern "C"{
 #endif
