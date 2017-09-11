@@ -6,7 +6,7 @@
  */
 
 #include <PWM.h>
-#include <hal.h>
+#include "../bbb/hal.h"
 
 namespace flashlib{
 

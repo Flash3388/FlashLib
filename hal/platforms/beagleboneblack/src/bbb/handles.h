@@ -9,24 +9,35 @@
 #define BBB_HANDLES_H_
 
 #include <stdint.h>
+#include "hal_defines.h"
 
 typedef struct dio_port{
 	uint8_t header;
 	uint8_t pin;
+
+	uint8_t dir;
+	uint8_t val;
 } dio_port_t;
 
 typedef struct dio_pulse{
-	dio_port_t dio_handle;
+	dio_port_t* dio_handle;
 	int32_t remaining_time;
 } dio_pulse_t;
 
 typedef struct pwm_port{
-	int8_t module = -1;
-	int8_t port = -1;
+	uint8_t enabledA = 0;
+	uint8_t enabledB = 0;
+
+	float frequency = 0.0f;
+	float dutyA = 0.0f;
+	float dutyB = 0.0f;
 } pwm_port_t;
 
 typedef struct adc_port{
+	uint8_t enabled = 0;
+	uint32_t value = 0;
 
+	unsigned int sample_buffer[HAL_AIN_SAMPLING_SIZE];
 } adc_port_t;
 
 #endif /* BBB_HANDLES_H_ */

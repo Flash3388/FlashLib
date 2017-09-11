@@ -14,10 +14,8 @@ namespace flashlib{
 
 namespace hal{
 
-void HAL_initialize(int* status);
+int HAL_initialize(int mode);
 void HAL_shutdown();
-
-uint32_t HAL_clockMS();
 
 char* HAL_boardName();
 

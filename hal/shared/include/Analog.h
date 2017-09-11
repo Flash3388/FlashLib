@@ -29,11 +29,11 @@ void HAL_freeAnalogOutputPort(hal_handle_t portHandle);
  * Analog data io
 \***********************************************************************/
 
-void HAL_setAnalogOutputValue(hal_handle_t portHandle, uint32_t value);
-void HAL_setAnalogOutputVoltage(hal_handle_t portHandle, float volts);
+void HAL_setAnalogValue(hal_handle_t portHandle, uint32_t value);
+void HAL_setAnalogVoltage(hal_handle_t portHandle, float volts);
 
-float HAL_getAnalogInputVoltage(hal_handle_t portHandle);
-uint32_t HAL_getAnalogInputValue(hal_handle_t portHandle);
+float HAL_getAnalogVoltage(hal_handle_t portHandle);
+uint32_t HAL_getAnalogValue(hal_handle_t portHandle);
 
 } /* namespace hal */
 

@@ -23,4 +23,4 @@ public:
 
 } /* namespace flashlib */
 
-#endif /* INCLUDE_PLATFORMEXCEPTION_H_ */
+#endif /* PLATFORMEXCEPTION_H_ */

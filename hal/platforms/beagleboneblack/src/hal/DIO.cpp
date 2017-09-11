@@ -6,8 +6,8 @@
  */
 
 #include <DIO.h>
-#include <hal.h>
-
+#include <bbb_defines.h>
+#include "../bbb/hal.h"
 
 namespace flashlib{
 
@@ -17,10 +17,17 @@ namespace hal{
  * DIO initialization
 \***********************************************************************/
 
-hal_handle_t HAL_initializeDIOPort(uint8_t port, uint8_t dir){
-	return BBB_initializeDIOPort(port, dir);
+hal_handle_t HAL_initializeDigitalInputPort(uint8_t port){
+	return BBB_initializeDIOPort(port, BBB_DIR_INPUT);
 }
-void HAL_freeDIOPort(hal_handle_t portHandle){
+void HAL_freeDigitalInputPort(hal_handle_t portHandle){
+	BBB_freeDIOPort(portHandle);
+}
+
+hal_handle_t HAL_initializeDigitalOutputPort(uint8_t port){
+	return BBB_initializeDIOPort(port, BBB_DIR_OUTPUT);
+}
+void HAL_freeDigitalOutputPort(hal_handle_t portHandle){
 	BBB_freeDIOPort(portHandle);
 }
 
@@ -28,11 +35,17 @@ void HAL_freeDIOPort(hal_handle_t portHandle){
  * DIO data io
 \***********************************************************************/
 
-uint8_t HAL_getDIO(hal_handle_t portHandle){
-	return BBB_getDIO(portHandle);
+uint8_t HAL_getDIOHigh(hal_handle_t portHandle){
+	return BBB_getDIO(portHandle) == BBB_GPIO_HIGH;
 }
-void HAL_setDIO(hal_handle_t portHandle, uint8_t value){
-	BBB_setDIO(portHandle, value);
+uint8_t HAL_getDIOLow(hal_handle_t portHandle){
+	return BBB_getDIO(portHandle) == BBB_GPIO_LOW;
+}
+void HAL_setDIOHigh(hal_handle_t portHandle){
+	BBB_setDIO(portHandle, BBB_GPIO_HIGH);
+}
+void HAL_setDIOLow(hal_handle_t portHandle){
+	BBB_setDIO(portHandle, BBB_GPIO_LOW);
 }
 void HAL_pulseOutDIO(hal_handle_t portHandle, float pulseLength){
 	BBB_pulseDIO(portHandle, pulseLength);

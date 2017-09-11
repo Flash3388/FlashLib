@@ -16,7 +16,7 @@ namespace flashlib{
 namespace hal{
 
 
-void BBB_initialize(int* status);
+int BBB_initialize(int mode);
 void BBB_shutdown();
 
 /***********************************************************************\
@@ -38,7 +38,7 @@ uint8_t BBB_getDIO(hal_handle_t portHandle);
 hal_handle_t BBB_initializeAnalogInput(uint8_t port);
 void BBB_freeAnalogInput(hal_handle_t portHandle);
 
-uint8_t BBB_getAnalogValue(hal_handle_t portHandle);
+uint32_t BBB_getAnalogValue(hal_handle_t portHandle);
 float BBB_getAnalogVoltage(hal_handle_t portHandle);
 
 /***********************************************************************\

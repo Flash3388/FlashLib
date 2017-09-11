@@ -7,53 +7,52 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    initializePwm
+ * Method:    initializePWMPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_initializePWM
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_initializePWMPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    freePwm
+ * Method:    freePWMPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_freePWM
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_freePWMPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    setRaw
+ * Method:    setPWMRaw
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setRaw
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMRaw
   (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    setDuty
+ * Method:    setPWMDuty
  * Signature: (IF)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setDuty
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMDuty
   (JNIEnv *, jclass, jint, jfloat);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    getRaw
+ * Method:    getPWMRaw
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getRaw
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMRaw
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    getDuty
+ * Method:    getPWMDuty
  * Signature: (I)F
  */
-JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getDuty
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMDuty
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

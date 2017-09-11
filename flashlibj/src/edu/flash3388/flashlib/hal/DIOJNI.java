@@ -2,14 +2,14 @@ package edu.flash3388.flashlib.hal;
 
 public final class DIOJNI {
 	
-	public static native int initializeDigitalInput(int port);
-	public static native int initializeDigitalOutput(int port);
+	public static native int initializeDigitalInputPort(int port);
+	public static native int initializeDigitalOutputPort(int port);
 	
-	public static native void freeDigitalInput(int handle);
-	public static native void freeDigitalOutput(int handle);
+	public static native void freeDigitalInputPort(int handle);
+	public static native void freeDigitalOutputPort(int handle);
 	
-	public static native boolean get(int handle);
-	public static native void set(int handle, boolean high);
+	public static native boolean getDIO(int handle);
+	public static native void setDIO(int handle, boolean high);
 	
-	public static native void pulseOut(int handle, float length);
+	public static native void pulseOutDIO(int handle, float length);
 }

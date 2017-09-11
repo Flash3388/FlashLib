@@ -1,15 +1,20 @@
 /*
  * edu_flash3388_flashlib_hal_PWMJNI.cpp
  *
- *  Created on: Aug 27, 2017
+ *  Created on: Sep 11, 2017
  *      Author: root
  */
 
+
 #include <jni.h>
 #include <PWM.h>
+#include <haltypes.h>
+
 #include "edu_flash3388_flashlib_hal_PWMJNI.h"
 
-using namespace flashlib::hal;
+namespace flashlib{
+
+namespace hal{
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,66 +22,70 @@ extern "C" {
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    initializePWM
+ * Method:    initializePWMPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_initializePWM
-  (JNIEnv *env, jclass thisObj, jint port){
-	return HAL_initializePWMPort(port);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_initializePWMPort
+ 	 (JNIEnv *env, jclass obj, jint port){
+	hal_handle_t handle = HAL_initializePWMPort((uint8_t)port);
+	return (jint)handle;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    freePWM
+ * Method:    freePWMPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_freePWM
-  (JNIEnv *env, jclass thisObj, jint handle){
-	HAL_freePWMPort(handle);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_freePWMPort
+	(JNIEnv *env, jclass obj, jint handle){
+	HAL_freePWMPort((hal_handle_t)handle);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    setRaw
+ * Method:    setPWMRaw
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setRaw
-  (JNIEnv *env, jclass thisObj, jint handle, jint value){
-	HAL_setPWMValue(handle, value);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMRaw
+	(JNIEnv *env, jclass obj, jint handle, jint raw){
+	HAL_setPWMValue((hal_handle_t)handle, (uint8_t)raw);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    setDuty
+ * Method:    setPWMDuty
  * Signature: (IF)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setDuty
-  (JNIEnv *env, jclass thisObj, jint handle, jfloat duty){
-	HAL_setPWMDuty(handle, duty);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMDuty
+	(JNIEnv *env, jclass obj, jint handle, jfloat duty){
+	HAL_setPWMDuty((hal_handle_t)handle, duty);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    getRaw
+ * Method:    getPWMRaw
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getRaw
-  (JNIEnv *env, jclass thisObj, jint handle){
-	return HAL_getPWMValue(handle);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMRaw
+	(JNIEnv *env, jclass obj, jint handle){
+	uint8_t value = HAL_getPWMValue((hal_handle_t)handle);
+	return (jint)value;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
- * Method:    getDuty
+ * Method:    getPWMDuty
  * Signature: (I)F
  */
-JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getDuty
-  (JNIEnv *env, jclass thisObj, jint handle){
-	return HAL_getPWMDuty(handle);
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMDuty
+	(JNIEnv *env, jclass obj, jint handle){
+	return HAL_getPWMDuty((hal_handle_t)handle);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
+} /* namespace hal */
 
+} /* namespace flashlib */

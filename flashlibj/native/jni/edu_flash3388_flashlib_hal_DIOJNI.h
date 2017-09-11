@@ -9,74 +9,58 @@ extern "C" {
 #endif
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    checkPortDigitalInput
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_checkPortDigitalInput
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    checkPortDigitalOutput
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_checkPortDigitalOutput
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    initializeDigitalInput
+ * Method:    initializeDigitalInputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalInput
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalInputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    initializeDigitalOutput
+ * Method:    initializeDigitalOutputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalOutput
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalOutputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    freeDigitalInput
+ * Method:    freeDigitalInputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalInput
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalInputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    freeDigitalOutput
+ * Method:    freeDigitalOutputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalOutput
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalOutputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    get
+ * Method:    getDIO
  * Signature: (I)Z
  */
-JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_get
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_getDIO
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    set
+ * Method:    setDIO
  * Signature: (IZ)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_set
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_setDIO
   (JNIEnv *, jclass, jint, jboolean);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    pulseOut
- * Signature: (ID)V
+ * Method:    pulseOutDIO
+ * Signature: (IF)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_pulseOut
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_pulseOutDIO
   (JNIEnv *, jclass, jint, jfloat);
 
 #ifdef __cplusplus

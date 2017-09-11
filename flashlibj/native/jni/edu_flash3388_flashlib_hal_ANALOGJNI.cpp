@@ -1,58 +1,65 @@
 /*
- * edu.flash3388.flashlib.hal.ANALOGJNI.h
+ * edu_flash3388_flashlib_hal_ANALOGJNI.cpp
  *
- *  Created on: Aug 27, 2017
+ *  Created on: Sep 11, 2017
  *      Author: root
  */
 
 #include <jni.h>
 #include <Analog.h>
+#include <haltypes.h>
+
 #include "edu_flash3388_flashlib_hal_ANALOGJNI.h"
 
-using namespace flashlib::hal;
+namespace flashlib{
+
+namespace hal{
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    initializeAnalogInput
+ * Method:    initializeAnalogInputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogInput
-  (JNIEnv *env, jclass thisobj , jint port){
-	return HAL_initializeAnalogInputPort(port);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogInputPort
+  (JNIEnv *env, jclass obj, jint port){
+	hal_handle_t handle = HAL_initializeAnalogInputPort((uint8_t)port);
+	return (jint)handle;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    initializeAnalogOutput
+ * Method:    initializeAnalogOutputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogOutput
-  (JNIEnv *env, jclass thisobj , jint port){
-	return HAL_initializeAnalogOutputPort(port);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogOutputPort
+  (JNIEnv *env, jclass obj, jint port){
+	hal_handle_t handle = HAL_initializeAnalogOutputPort((uint8_t)port);
+	return (jint)handle;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    freeAnalogInput
+ * Method:    freeAnalogInputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogInput
-  (JNIEnv *env, jclass thisobj , jint handle){
-	HAL_freeAnalogInputPort(handle);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogInputPort
+  (JNIEnv *env, jclass obj, jint handle){
+	HAL_freeAnalogInputPort((hal_handle_t)handle);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    freeAnalogOutput
+ * Method:    freeAnalogOutputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogOutput
-  (JNIEnv *env, jclass thisobj , jint handle){
-	HAL_freeAnalogOutputPort(handle);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogOutputPort
+  (JNIEnv *env, jclass obj, jint handle){
+	HAL_freeAnalogOutputPort((hal_handle_t)handle);
 }
 
 /*
@@ -61,8 +68,9 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogOutpu
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_getAnalogValue
-  (JNIEnv *env, jclass thisobj , jint handle){
-	return HAL_getAnalogInputValue(handle);
+  (JNIEnv *env, jclass obj, jint handle){
+	uint32_t value = HAL_getAnalogVoltage((hal_handle_t)handle);
+	return (jint)value;
 }
 
 /*
@@ -71,8 +79,8 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_getAnalogValue
  * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_getAnalogVoltage
-  (JNIEnv *env, jclass thisobj , jint handle){
-	return HAL_getAnalogInputVoltage(handle);
+  (JNIEnv *env, jclass obj, jint handle){
+	return HAL_getAnalogVoltage((hal_handle_t)handle);
 }
 
 /*
@@ -81,8 +89,8 @@ JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_getAnalogVolt
  * Signature: (IF)V
  */
 JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_setAnalogVoltage
-  (JNIEnv *env, jclass thisobj , jint handle, jfloat voltage){
-	HAL_setAnalogOutputVoltage(handle, voltage);
+  (JNIEnv *env, jclass obj, jint handle, jfloat voltage){
+	HAL_setAnalogVoltage((hal_handle_t)handle, voltage);
 }
 
 /*
@@ -91,10 +99,15 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_setAnalogVoltag
  * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_setAnalogValue
-  (JNIEnv *env, jclass thisobj , jint handle, jint value){
-	HAL_setAnalogOutputValue(handle, value);
+  (JNIEnv *env, jclass obj, jint handle, jint value){
+	HAL_setAnalogValue((hal_handle_t)handle, (uint32_t)value);
 }
+
 
 #ifdef __cplusplus
 }
 #endif
+
+} /* namespace hal */
+
+} /* namespace flashlib */

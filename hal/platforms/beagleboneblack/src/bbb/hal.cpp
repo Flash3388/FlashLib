@@ -12,20 +12,20 @@
 #include <bbb_defines.h>
 
 #include "hal.h"
-#include "bbb.h"
+#include "iolib/BBBiolib.h"
+#include "iolib/BBBiolib_ADCTSC.h"
+#include "iolib/BBBiolib_PWMSS.h"
 #include "handles.h"
 
-#define PWMSS_PORTS_COUNT       (BBB_PWMSS_MODULE_COUNT * BBB_PWMSS_PORT_COUNT)
-#define PWMSS_MAX_VALUE         (255)
-#define PWMSS_VALUE_TO_DUTY(d)  (d / PWMSS_MAX_VALUE)
-#define PWMSS_DUTY_TO_VALUE(d)  (d * PWMSS_MAX_VALUE)
+namespace flashlib{
 
-std::unordered_map<hal_handle_t, dio_pulse_t&> pulse_map;
-std::unordered_map<hal_handle_t, dio_port_t&> dio_map;
+namespace hal{
 
-pwm_port_t pwm_map[PWMSS_PORTS_COUNT];
+std::unordered_map<hal_handle_t, dio_pulse_t*> pulse_map;
+std::unordered_map<hal_handle_t, dio_port_t*> dio_map;
 
-std::unordered_map<hal_handle_t, adc_port_t&> adc_map;
+pwm_port_t pwm_map[BBB_PWMSS_MODULE_COUNT];
+adc_port_t adc_map[BBB_ADC_CHANNEL_COUNT];
 
 typedef struct thread_data{
 	bool run = true;
@@ -33,8 +33,11 @@ typedef struct thread_data{
 
 pthread_t io_thread;
 thread_data_t io_thread_data;
+
 pthread_mutex_t pulse_map_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t thread_param_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t io_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t adc_sampling_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 bool init = false;
 
@@ -42,38 +45,70 @@ bool init = false;
  * INTERNAL METHODS
 \***********************************************************************/
 
+void limitPWMDuty(float* duty){
+	if(*duty > 1.0f)
+		*duty = 1.0f;
+	else if(*duty < 0.0f)
+		*duty = 0.0f;
+}
+
 void* io_thread_function(void* param){
 
 	thread_data_t data;
 
-	long long us_passed;
-	auto start = std::chrono::high_resolution_clock::now();
+
+	int adc_idx, adc_smpl_idx;
+	uint32_t adc_smpl_val;
+
+	auto adc_start = std::chrono::high_resolution_clock::now();
+	long long adc_ms_passed;
+
+	long long pulse_us_passed;
+	auto pulse_start = std::chrono::high_resolution_clock::now();
 
 	while(data.run){
 
 		//run pulses
 		pthread_mutex_lock(&pulse_map_mutex);
-
-		auto elapsed = std::chrono::high_resolution_clock::now() - start;
-		us_passed = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+		auto pulse_elapsed = std::chrono::high_resolution_clock::now() - pulse_start;
+		pulse_us_passed = std::chrono::duration_cast<std::chrono::microseconds>(pulse_elapsed).count();
 		for(auto it = pulse_map.begin(); it != pulse_map.end(); ){
-			dio_pulse_t pulse = it->second;
-			pulse.remaining_time -= us_passed;
-			if(pulse.remaining_time <= 0){
-				bbb_setlow(pulse.dio_handle.header, pulse.dio_handle.pin);
+			dio_pulse_t* pulse = it->second;
+			pulse->remaining_time -= pulse_us_passed;
+			if(pulse->remaining_time <= 0){
+				pthread_mutex_lock(&io_mutex);
+				pin_low(pulse->dio_handle->header, pulse->dio_handle->pin);
+				pthread_mutex_unlock(&io_mutex);
 				it = pulse_map.erase(it);
 			}else
 				++it;
 		}
-		start = std::chrono::high_resolution_clock::now();
-
+		pulse_start = std::chrono::high_resolution_clock::now();
 		pthread_mutex_unlock(&pulse_map_mutex);
+
+		//sample adc channels
+		auto adc_elapsed = std::chrono::high_resolution_clock::now() - adc_start;
+		adc_ms_passed = std::chrono::duration_cast<std::chrono::milliseconds>(adc_elapsed).count();
+		if(adc_ms_passed >= HAL_AIN_SMAPLING_RATE){
+			pthread_mutex_lock(&adc_sampling_mutex);
+			for(adc_idx = 0; adc_idx < BBB_ADC_CHANNEL_COUNT; ++adc_idx){
+				adc_port_t adc = adc_map[adc_idx];
+				if(adc.enabled){
+					BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
+					adc_smpl_val = 0;
+					for(adc_smpl_idx = 0; adc_smpl_idx < HAL_AIN_SAMPLING_SIZE; ++adc_smpl_idx){
+						adc_smpl_val += adc.sample_buffer[adc_smpl_idx];
+					}
+					adc_smpl_val /= HAL_AIN_SAMPLING_SIZE;
+				}
+			}
+			pthread_mutex_unlock(&adc_sampling_mutex);
+			adc_start = std::chrono::high_resolution_clock::now();
+		}
 
 		//get thread data
 		pthread_mutex_lock(&thread_param_mutex);
-
 		data.run = io_thread_data.run;
-
 		pthread_mutex_unlock(&thread_param_mutex);
 	}
 
@@ -84,21 +119,24 @@ void* io_thread_function(void* param){
  * EXTERNAL METHODS
 \***********************************************************************/
 
-void BBB_initialize(int* status){
+int BBB_initialize(int mode){
 	if(init){
-		*status = -1;
 		//TODO: ALREADY INITIALIZED
-		return;
+		return -1;
 	}
 
-	*status = bbb_init();
-	if(*status == 0){
-		*status = pthread_create(&io_thread, NULL, &io_thread_function, NULL);
+	int status = iolib_init();
+	if(status){
+		//TODO: ERROR
+		return -1;
 	}
 
-	if(*status != 0){
-		//TODO: HANDLE INIT ERROR
+	status = pthread_create(&io_thread, NULL, &io_thread_function, NULL);
+	if(status){
+		//TODO: ERROR
+		return -1;
 	}
+	return 0;
 }
 void BBB_shutdown(){
 	if(!init){
@@ -111,10 +149,15 @@ void BBB_shutdown(){
 	pthread_mutex_unlock(&thread_param_mutex);
 	pthread_join(io_thread, NULL);
 
+	pthread_mutex_destroy(&pulse_map_mutex);
+	pthread_mutex_destroy(&io_mutex);
+	pthread_mutex_destroy(&adc_sampling_mutex);
+	pthread_mutex_destroy(&thread_param_mutex);
+
 	dio_map.clear();
 	pulse_map.clear();
 
-	bbb_free();
+	iolib_free();
 }
 
 /***********************************************************************\
@@ -122,72 +165,96 @@ void BBB_shutdown(){
 \***********************************************************************/
 
 hal_handle_t BBB_initializeDIOPort(uint8_t port, uint8_t dir){
+	pthread_mutex_lock(&io_mutex);
 	hal_handle_t handle = (hal_handle_t)port;
 	if(dio_map.count(handle)){
-		dio_port_t dio = dio_map[handle];
-		uint8_t cdir = bbb_getdir(dio.header, dio.pin);
-		if(cdir != dir){
+		dio_port_t* dio = dio_map[handle];
+		if(dir != dio->dir)
 			handle = HAL_INVALID_HANDLE;
-		}
 	}else{
 		//TODO: CREATE DIO HANDLE AND ADD TO MAP. ALSO CHECK IF PORT MATCHES
 		dio_port_t dio;
 		dio.header = BBB_GPIO_PORT_TO_HEADER(port);
 		dio.pin = BBB_GPIO_PORT_TO_PIN(port);
+		dio.dir = dir;
 
-		if(bbb_getportgpio(dio.header, dio.pin) < 0)
+		if(iolib_setdir(dio.header, dio.pin, dir) == 0)
+			dio_map.insert({handle, &dio});
+		else
 			handle = HAL_INVALID_HANDLE;
-		else{
-			bbb_setdir(dio.header, dio.pin, dir);
-			dio_map.insert({handle, dio});
-		}
 	}
+	pthread_mutex_unlock(&io_mutex);
+
 	return handle;
 }
 void BBB_freeDIOPort(hal_handle_t portHandle){
+	pthread_mutex_lock(&io_mutex);
 	if(dio_map.count(portHandle)){
-		dio_port_t dio = dio_map[portHandle];
-		if(bbb_ishigh(dio.header, dio.pin))
-			bbb_setlow(dio.header, dio.pin);
+		dio_port_t* dio = dio_map[portHandle];
+		pin_low(dio->header, dio->pin);
 		//TODO: REMOVE DIO FROM MAP AND DESTROY OBJECT...
 		dio_map.erase(portHandle);
 	}
+	pthread_mutex_unlock(&io_mutex);
 }
 
 void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
+	pthread_mutex_lock(&io_mutex);
 	if(dio_map.count(portHandle)){
-		dio_port_t dio = dio_map[portHandle];
-		if(high)
-			bbb_sethigh(dio.header, dio.pin);
-		else
-			bbb_setlow(dio.header, dio.pin);
+		dio_port_t* dio = dio_map[portHandle];
+		if(dio->dir == BBB_DIR_OUTPUT){
+			dio->val = high;
+			if(high == BBB_GPIO_HIGH){
+				pin_high(dio->header, dio->pin);
+				dio->val = BBB_GPIO_HIGH;
+			}else if(high == BBB_GPIO_LOW){
+				pin_low(dio->header, dio->pin);
+				dio->val = BBB_GPIO_LOW;
+			}
+		}
 	}
+	pthread_mutex_unlock(&io_mutex);
 }
 void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
+	pthread_mutex_lock(&io_mutex);
 	if(dio_map.count(portHandle)){
 		//TODO: use mutex here because of thread
 		pthread_mutex_lock(&pulse_map_mutex);
 
 		if(pulse_map.count(portHandle)){
-			dio_pulse_t pulse = pulse_map[portHandle];
-			pulse.remaining_time += length;
+			dio_pulse_t* pulse = pulse_map[portHandle];
+			pulse->remaining_time += length;
 		}else{
-			dio_pulse_t pulse;
-			pulse.dio_handle = dio_map[portHandle];
-			pulse.remaining_time = length;
-			pulse_map[portHandle] = pulse;
+			dio_port_t* dio = dio_map[portHandle];
+			if(dio->dir == BBB_DIR_OUTPUT){
+				dio->val = BBB_GPIO_HIGH;
+				pin_high(dio->header, dio->pin);
+
+				dio_pulse_t pulse;
+				pulse.dio_handle = dio;
+				pulse.remaining_time = length;
+				pulse_map.insert({portHandle, &pulse});
+			}
 		}
 
 		pthread_mutex_unlock(&pulse_map_mutex);
 	}
+	pthread_mutex_unlock(&io_mutex);
 }
 
 uint8_t BBB_getDIO(hal_handle_t portHandle){
+	pthread_mutex_lock(&io_mutex);
+	uint8_t val = 0;
 	if(dio_map.count(portHandle)){
-		dio_port_t dio = dio_map[portHandle];
-		return bbb_ishigh(dio.header, dio.pin);
+		dio_port_t* dio = dio_map[portHandle];
+		if(dio->dir == BBB_DIR_OUTPUT){
+			val = dio->val;
+		}else{
+			val = is_high(dio->header, dio->pin);
+		}
 	}
-	return 0;
+	pthread_mutex_unlock(&io_mutex);
+	return val;
 }
 
 /***********************************************************************\
@@ -195,17 +262,53 @@ uint8_t BBB_getDIO(hal_handle_t portHandle){
 \***********************************************************************/
 
 hal_handle_t BBB_initializeAnalogInput(uint8_t port){
-	return 0;
+	hal_handle_t portHandle = (hal_handle_t)port;
+	if(port >= BBB_ADC_CHANNEL_COUNT){
+		portHandle = HAL_INVALID_HANDLE;
+	}
+	else{
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t adc = adc_map[port];
+		if(adc.enabled == 0){
+			//TODO: INITIALIZE ADC PORT
+			BBBIO_ADCTSC_channel_ctrl(port, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS, HAL_AIN_OPEN_DELAY,
+					HAL_AIN_SMAPLING_RATE, BBBIO_ADC_STEP_AVG_1, adc.sample_buffer, HAL_AIN_SAMPLING_SIZE);
+			BBBIO_ADCTSC_channel_enable(port);
+
+			adc.enabled = 1;
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+	}
+	return portHandle;
 }
 void BBB_freeAnalogInput(hal_handle_t portHandle){
-
+	if(portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t adc = adc_map[portHandle];
+		if(adc.enabled){
+			adc.enabled = 0;
+			//TODO: STOP ADC CHANNEL
+			BBBIO_ADCTSC_channel_disable(portHandle);
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+	}
 }
 
-uint8_t BBB_getAnalogValue(hal_handle_t portHandle){
-	return 0;
+uint32_t BBB_getAnalogValue(hal_handle_t portHandle){
+	int32_t val = 0;
+	if(portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t adc = adc_map[portHandle];
+		if(adc.enabled){
+			val = adc.value;
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+	}
+	return val;
 }
 float BBB_getAnalogVoltage(hal_handle_t portHandle){
-	return 0;
+	uint32_t value = BBB_getAnalogValue(portHandle);
+	return HAL_AIN_VALUE_TO_VOLTAGE(value);
 }
 
 /***********************************************************************\
@@ -213,56 +316,95 @@ float BBB_getAnalogVoltage(hal_handle_t portHandle){
 \***********************************************************************/
 
 hal_handle_t BBB_initializePWMPort(uint8_t port){
+	pthread_mutex_lock(&io_mutex);
 	hal_handle_t portHandle = (hal_handle_t)port;
-
-	if(port >= PWMSS_PORTS_COUNT)
+	if(port >= HAL_PWMSS_PORTS_COUNT){
 		portHandle = HAL_INVALID_HANDLE;
-	else{
-		pwm_port_t pwm = pwm_map[port];
-		pwm.module = BBB_PWMSS_PORT_TO_MODULE(port);
-		pwm.port = BBB_PWMSS_PORT_TO_PIN(port);
-
-		bbb_pwm_enable(pwm.module);
 	}
+	else{
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(port);
+		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(port);
+		pwm_port_t pwm = pwm_map[module];
 
+		if(pwm.enabledA == 0 && pwm.enabledB == 0)
+			BBBIO_ehrPWM_Enable(module);
+
+		if(pin == BBB_PWMSSA)
+			pwm.enabledA = 1;
+		else if(pin == BBB_PWMSSB)
+			pwm.enabledB = 1;
+	}
+	pthread_mutex_unlock(&io_mutex);
 	return portHandle;
 }
 void BBB_freePWMPort(hal_handle_t portHandle){
+	pthread_mutex_lock(&io_mutex);
+	if(portHandle < HAL_PWMSS_PORTS_COUNT){
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
+		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(portHandle);
+		pwm_port_t pwm = pwm_map[module];
 
-}
+		if(pin == BBB_PWMSSA){
+			pwm.enabledA = 0;
+			pwm.dutyA = 0.0f;
+		}
+		else if(pin == BBB_PWMSSB){
+			pwm.enabledB = 0;
+			pwm.dutyB = 0.0f;
+		}
 
-uint8_t BBB_getPWMValue(hal_handle_t portHandle){
-	float duty = BBB_getPWMDuty(portHandle);
-	return (uint8_t)PWMSS_DUTY_TO_VALUE(duty);
+		BBBIO_PWMSS_Setting(module, pwm.frequency, pwm.dutyA, pwm.dutyB);
+		if(pwm.enabledA == 0 && pwm.enabledB == 0)
+			BBBIO_ehrPWM_Disable(module);
+	}
+	pthread_mutex_unlock(&io_mutex);
 }
 float BBB_getPWMDuty(hal_handle_t portHandle){
-	if(portHandle < PWMSS_PORTS_COUNT){
-		pwm_port_t pwm = pwm_map[portHandle];
-		if(pwm.module >= 0 || pwm.port >= 0){
-			return bbb_pwm_getduty(pwm.module, pwm.port);
-		}
+	pthread_mutex_lock(&io_mutex);
+	float val = 0.0f;
+	if(portHandle < HAL_PWMSS_PORTS_COUNT){
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
+		uint8_t port = BBB_PWMSS_PORT_TO_PIN(portHandle);
+		pwm_port_t pwm = pwm_map[module];
+
+		if(port == BBB_PWMSSA && pwm.enabledA)
+			val = pwm.dutyA;
+		else if(port == BBB_PWMSSB && pwm.enabledB)
+			val = pwm.dutyB;
 	}
-	return 0.0f;
+	pthread_mutex_unlock(&io_mutex);
+	return val;
+}
+uint8_t BBB_getPWMValue(hal_handle_t portHandle){
+	float duty = BBB_getPWMDuty(portHandle);
+	return (uint8_t)HAL_PWMSS_DUTY_TO_VALUE(duty);
 }
 
 void BBB_setPWMValue(hal_handle_t portHandle, uint8_t value){
-	float duty = PWMSS_VALUE_TO_DUTY(value);
-	BBB_limitPWMDuty(&duty);
+	float duty = HAL_PWMSS_VALUE_TO_DUTY(value);
+	limitPWMDuty(&duty);
 	BBB_setPWMDuty(portHandle, duty);
 }
 void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
-	if(portHandle < PWMSS_PORTS_COUNT){
-		pwm_port_t pwm = pwm_map[portHandle];
-		if(pwm.module >= 0 || pwm.port >= 0){
-			BBB_limitPWMDuty(&duty);
-			bbb_pwm_setduty(pwm.module, pwm.port, duty);
+	pthread_mutex_lock(&io_mutex);
+	if(portHandle < HAL_PWMSS_PORTS_COUNT){
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
+		pwm_port_t pwm = pwm_map[module];
+		if(pwm.enabledA || pwm.enabledB){
+			limitPWMDuty(&duty);
+
+			uint8_t port = BBB_PWMSS_PORT_TO_PIN(portHandle);
+			if(port == BBB_PWMSSA && pwm.enabledA)
+				pwm.dutyA = duty;
+			else if(port == BBB_PWMSSB && pwm.enabledB)
+				pwm.dutyB = duty;
+
+			BBBIO_PWMSS_Setting(module, pwm.frequency, pwm.dutyA, pwm.dutyB);
 		}
 	}
+	pthread_mutex_unlock(&io_mutex);
 }
 
-void BBB_limitPWMDuty(float* duty){
-	if(*duty > 1.0f)
-		*duty = 1.0f;
-	else if(*duty < 0.0f)
-		*duty = 0.0f;
-}
+} /* namespace hal */
+
+} /* namespace flashlib */

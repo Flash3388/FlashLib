@@ -1,15 +1,20 @@
 /*
  * edu_flash3388_flashlib_hal_DIOJNI.cpp
  *
- *  Created on: Aug 27, 2017
+ *  Created on: Sep 11, 2017
  *      Author: root
  */
 
+
 #include <jni.h>
 #include <DIO.h>
+#include <haltypes.h>
+
 #include "edu_flash3388_flashlib_hal_DIOJNI.h"
 
-using namespace flashlib::hal;
+namespace flashlib{
+
+namespace hal{
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,75 +22,85 @@ extern "C" {
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    initializeDigitalInput
+ * Method:    initializeDigitalInputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalInput
-  (JNIEnv *enc, jclass thisObj, jint port){
-	return HAL_initializeDIOPort(port, DIO_INPUT);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalInputPort
+	(JNIEnv *env, jclass obj, jint port){
+	hal_handle_t handle = HAL_initializeDigitalInputPort((uint8_t)port);
+	return (jint)handle;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    initializeDigitalOutput
+ * Method:    initializeDigitalOutputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalOutput
-  (JNIEnv *enc, jclass thisObj, jint port){
-	return HAL_initializeDIOPort(port, DIO_OUTPUT);
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_initializeDigitalOutputPort
+	(JNIEnv *env, jclass obj, jint port){
+	hal_handle_t handle = HAL_initializeDigitalOutputPort((uint8_t)port);
+	return (jint)handle;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    freeDigitalInput
+ * Method:    freeDigitalInputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalInput
-  (JNIEnv *enc, jclass thisObj, jint handle){
-	HAL_freeDIOPort(handle);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalInputPort
+	(JNIEnv *env, jclass obj, jint handle){
+	HAL_freeDigitalInputPort((hal_handle_t)handle);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    freeDigitalOutput
+ * Method:    freeDigitalOutputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalOutput
-  (JNIEnv *enc, jclass thisObj, jint handle){
-	HAL_freeDIOPort(handle);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_freeDigitalOutputPort
+	(JNIEnv *env, jclass obj, jint handle){
+	HAL_freeDigitalOutputPort((hal_handle_t)handle);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    get
+ * Method:    getDIO
  * Signature: (I)Z
  */
-JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_get
-  (JNIEnv *enc, jclass thisObj, jint handle){
-	return HAL_getDIO(handle);
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_getDIO
+	(JNIEnv *env, jclass obj, jint handle){
+	if(HAL_getDIOHigh((hal_handle_t)handle))
+		return 1;
+	return 0;
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    set
+ * Method:    setDIO
  * Signature: (IZ)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_set
-  (JNIEnv *enc, jclass thisObj, jint handle, jboolean high){
-	HAL_setDIO(handle, high);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_setDIO
+	(JNIEnv *env, jclass obj, jint handle, jboolean high){
+	if(high)
+		HAL_setDIOHigh((hal_handle_t)handle);
+	else
+		HAL_setDIOLow((hal_handle_t)handle);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_DIOJNI
- * Method:    pulseOut
- * Signature: (ID)V
+ * Method:    pulseOutDIO
+ * Signature: (IF)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_pulseOut
-  (JNIEnv *enc, jclass thisObj, jint handle, jfloat pulseLength){
-	HAL_pulseOutDIO(handle, pulseLength);
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_DIOJNI_pulseOutDIO
+	(JNIEnv *env, jclass obj, jint handle, jfloat length){
+	HAL_pulseOutDIO((hal_handle_t)handle, length);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
+} /* namespace hal */
+
+} /* namespace flashlib */

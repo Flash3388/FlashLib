@@ -1,15 +1,20 @@
 /*
  * edu_flash3388_flashlib_hal_HAL.cpp
  *
- *  Created on: Aug 27, 2017
+ *  Created on: Sep 11, 2017
  *      Author: root
  */
 
+
 #include <jni.h>
 #include <HAL.h>
+#include <haltypes.h>
+
 #include "edu_flash3388_flashlib_hal_HAL.h"
 
-using namespace flashlib::hal;
+namespace flashlib{
+
+namespace hal{
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,24 +23,21 @@ extern "C" {
 /*
  * Class:     edu_flash3388_flashlib_hal_HAL
  * Method:    initialize
- * Signature: ()I
+ * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_initialize
-  (JNIEnv *env, jclass thisObj){
-	int status = 0;
-	HAL_initialize(&status);
-	return status;
+	(JNIEnv *env, jclass obj, jint mode){
+	return HAL_initialize(mode);
 }
 
 /*
  * Class:     edu_flash3388_flashlib_hal_HAL
  * Method:    shutdown
- * Signature: ()I
+ * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
-  (JNIEnv *env, jclass thisObj){
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
+	(JNIEnv *env, jclass obj){
 	HAL_shutdown();
-	return 0;
 }
 
 /*
@@ -44,22 +46,15 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_edu_flash3388_flashlib_hal_HAL_boardName
-  (JNIEnv *env, jclass thisObj){
-	return env->NewStringUTF(HAL_boardName());
-}
-
-/*
- * Class:     edu_flash3388_flashlib_hal_HAL
- * Method:    getClockTime
- * Signature: ()J
- */
-JNIEXPORT jlong JNICALL Java_edu_flash3388_flashlib_hal_HAL_getClockTime
-  (JNIEnv *env, jclass thisObj){
-	return HAL_clockMS();
+	(JNIEnv *env, jclass obj){
+	char* name = HAL_boardName();
+	return env->NewStringUTF(name);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
+} /* namespace hal */
 
+} /* namespace flashlib */

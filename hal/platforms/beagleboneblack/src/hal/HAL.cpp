@@ -6,21 +6,17 @@
  */
 
 #include <HAL.h>
-#include <hal.h>
+#include "../bbb/hal.h"
 
 namespace flashlib{
 
 namespace hal{
 
-void HAL_initialize(int* status){
-	BBB_initialize(status);
+int HAL_initialize(int mode){
+	return BBB_initialize(mode);
 }
 void HAL_shutdown(){
 	BBB_shutdown();
-}
-
-uint32_t HAL_clockMS(){
-	return 0;
 }
 
 char* HAL_boardName(){

@@ -4,15 +4,13 @@ public final class HAL {
 
 	public static final String NATIVE_LIBRARY_NAME = "flashlib_hal";
 	
-	public static void initializeHal(){
+	public static void initializeHAL(int mode){
 		System.loadLibrary(NATIVE_LIBRARY_NAME);
-		initialize();
+		initialize(mode);
 	}
 	
-	public static native int initialize();
-	public static native int shutdown();
+	public static native int initialize(int mode);
+	public static native void shutdown();
 	
 	public static native String boardName();
-	
-	public static native long getClockTime();
 }

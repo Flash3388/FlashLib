@@ -32,8 +32,8 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.115288180" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.include.paths.1548879277" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-8-oracle/include/linux"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/hal/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-8-oracle/include/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/hal/include}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.1655268318" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.1292078005" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
@@ -46,6 +46,7 @@
 								<option id="gnu.c.compiler.option.include.paths.897821571" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-8-oracle/include/linux"/>
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-8-oracle/include"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/hal/include}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.dialect.std.1288220682" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1090293526" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>

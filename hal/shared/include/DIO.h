@@ -11,12 +11,6 @@
 #include <stdint.h>
 #include "haltypes.h"
 
-#define DIO_OUTPUT    (0x0)
-#define DIO_INPUT     (0x1)
-
-#define DIO_HIGH      (0x1)
-#define DIO_LOW       (0x0)
-
 namespace flashlib{
 
 namespace hal{
@@ -25,15 +19,21 @@ namespace hal{
  * DIO initialization
 \***********************************************************************/
 
-hal_handle_t HAL_initializeDIOPort(uint8_t port, uint8_t output);
-void HAL_freeDIOPort(hal_handle_t portHandle);
+hal_handle_t HAL_initializeDigitalInputPort(uint8_t port);
+void HAL_freeDigitalInputPort(hal_handle_t portHandle);
+
+hal_handle_t HAL_initializeDigitalOutputPort(uint8_t port);
+void HAL_freeDigitalOutputPort(hal_handle_t portHandle);
 
 /***********************************************************************\
  * DIO data io
 \***********************************************************************/
 
-uint8_t HAL_getDIO(hal_handle_t portHandle);
-void HAL_setDIO(hal_handle_t portHandle, uint8_t value);
+uint8_t HAL_getDIOHigh(hal_handle_t portHandle);
+uint8_t HAL_getDIOLow(hal_handle_t portHandle);
+
+void HAL_setDIOHigh(hal_handle_t portHandle);
+void HAL_setDIOLow(hal_handle_t portHandle);
 void HAL_pulseOutDIO(hal_handle_t portHandle, float pulseLength);
 
 } /* namespace hal */

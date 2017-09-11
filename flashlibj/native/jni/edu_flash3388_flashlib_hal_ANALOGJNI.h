@@ -7,37 +7,36 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    initializeAnalogInput
+ * Method:    initializeAnalogInputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogInput
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogInputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    initializeAnalogOutput
+ * Method:    initializeAnalogOutputPort
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogOutput
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_initializeAnalogOutputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    freeAnalogInput
+ * Method:    freeAnalogInputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogInput
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogInputPort
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_ANALOGJNI
- * Method:    freeAnalogOutput
+ * Method:    freeAnalogOutputPort
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogOutput
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_ANALOGJNI_freeAnalogOutputPort
   (JNIEnv *, jclass, jint);
 
 /*

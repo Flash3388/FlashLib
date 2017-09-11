@@ -10,17 +10,17 @@ extern "C" {
 /*
  * Class:     edu_flash3388_flashlib_hal_HAL
  * Method:    initialize
- * Signature: ()I
+ * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_initialize
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_hal_HAL
  * Method:    shutdown
- * Signature: ()I
+ * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
   (JNIEnv *, jclass);
 
 /*
@@ -29,14 +29,6 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_edu_flash3388_flashlib_hal_HAL_boardName
-  (JNIEnv *, jclass);
-
-/*
- * Class:     edu_flash3388_flashlib_hal_HAL
- * Method:    getClockTime
- * Signature: ()J
- */
-JNIEXPORT jlong JNICALL Java_edu_flash3388_flashlib_hal_HAL_getClockTime
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus
