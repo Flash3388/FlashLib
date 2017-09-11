@@ -12,6 +12,8 @@ namespace flashlib{
 
 namespace hal{
 
+static constexpr char* name = "beagleboneblack";
+
 int HAL_initialize(int mode){
 	return BBB_initialize(mode);
 }
@@ -20,7 +22,7 @@ void HAL_shutdown(){
 }
 
 char* HAL_boardName(){
-	return "beagleboneblack";
+	return name;
 }
 
 } /* namespace hal */

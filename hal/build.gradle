@@ -4,7 +4,7 @@ subprojects {
 	model{
 		repositories {
 			libs(PrebuiltLibraries) {
-				jdk {
+				jni {
 					headers.srcDirs "${System.properties['java.home']}/../include",
 						"${System.properties['java.home']}/../include/win32",
 						"${System.properties['java.home']}/../include/darwin",
@@ -17,23 +17,23 @@ subprojects {
 				sources {
 					cpp {
 						source {
-							srcDirs = ["src", "${rootProject.projectDir}/shared/src"]
+							srcDirs = ["src", "../shared/src"]
 							include "**/*.*"
-							lib library: 'jdk', linkage: 'api'
 						}
 						exportedHeaders {
-							srcDir "${rootProject.projectDir}/shared/include"
+							srcDirs = ["include", "../shared/include"]
 						}
+						lib library: 'jni', linkage: 'api'
 					}
 				}
 				binaries.all {
-					cppCompiler.args "-std=c++11"
+					cppCompiler.args "-std=c++11", "-fPIC", "-Wno-narrowing"
 				}
 			}
 		}
 	}
 }
 
-project(':platforms/beagleboneblack'){
+project(':hal:beagleboneblack'){
 	buildDir = halOutputFolder + 'beagleboneblack/'
 }

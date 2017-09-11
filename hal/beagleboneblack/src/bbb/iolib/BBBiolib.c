@@ -46,12 +46,12 @@ const signed char p8_PortSet[] = {-1, -1, 1, 1, 1, 1, 2, 2,
 /* GPIO Port ID set of Beaglebone Black P8  ,
  * 0 as GND , offset X as GPIO ID m this value must combine with GPIO number
  */
-const unsigned int p8_PortIDSet[] = {0,	0,	1<<6,	1<<7,	1<<2,	1<<3,	1<<2,	1<<3,	
-				1<<5,	1<<4,	1<<13,	1<<12,	1<<23,	1<<26,	1<<15,	
-				1<<14,	1<<27,	1<<1,	1<<22,	1<<31,	1<<30,	1<<5,	
-				1<<4,	1<<1,	1<<0,	1<<29,	1<<22,	1<<24,	1<<23,	
-				1<<25,	1<<10,	1<<11,	1<<9,	1<<17,	1<<8,	1<<16,	
-				1<<14,	1<<15,	1<<12,	1<<13,	1<<10,	1<<11,	1<<8,	
+const unsigned int p8_PortIDSet[] = {0,	0,	1<<6,	1<<7,	1<<2,	1<<3,	1<<2,	1<<3,
+				1<<5,	1<<4,	1<<13,	1<<12,	1<<23,	1<<26,	1<<15,
+				1<<14,	1<<27,	1<<1,	1<<22,	1<<31,	1<<30,	1<<5,
+				1<<4,	1<<1,	1<<0,	1<<29,	1<<22,	1<<24,	1<<23,
+				1<<25,	1<<10,	1<<11,	1<<9,	1<<17,	1<<8,	1<<16,
+				1<<14,	1<<15,	1<<12,	1<<13,	1<<10,	1<<11,	1<<8,
 				1<<9,	1<<6,	1<<7};
 
 /* GPIO Port number set of Beaglebone Black P9  ,
@@ -101,8 +101,8 @@ int iolib_init(void)
 		return -1;
 	}
 
-	PortSet_ptr[0]=(char*)p8_PortSet;
-	PortSet_ptr[1]=(char*)p9_PortSet;
+	PortSet_ptr[0]=(signed char*)p8_PortSet;
+	PortSet_ptr[1]=(signed char*)p9_PortSet;
 	PortIDSet_ptr[0]=(unsigned int*)p8_PortIDSet;
 	PortIDSet_ptr[1]=(unsigned int*)p9_PortIDSet;
 
@@ -110,7 +110,7 @@ int iolib_init(void)
 	memh=open("/dev/mem", O_RDWR);
 
 	/* mapping Clock Module Peripheral Registers */
-	cm_per_addr = mmap(0, BBBIO_CM_PER_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, BBBIO_CM_PER_ADDR);
+	cm_per_addr = (volatile unsigned int*)mmap(0, BBBIO_CM_PER_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, BBBIO_CM_PER_ADDR);
 	if(cm_per_addr == MAP_FAILED)
     	{
 #ifdef BBBIO_LIB_DBG
@@ -125,12 +125,12 @@ int iolib_init(void)
 	 * 	   if using mmap directlly (like CM_PER ), it will cause an error about EINVAL (invalid argument) .
 	 *	   because the address of CM_WKUP is 0x44E00400 , it doesn't align the page (4K).
 	 */
-	cm_wkup_addr =(void *)cm_per_addr + BBBIO_CM_WKUP_OFFSET_FROM_CM_PER ;
+	cm_wkup_addr =cm_per_addr + BBBIO_CM_WKUP_OFFSET_FROM_CM_PER ;
 
 
 	/* mapping Address of GPIO 0~4 */
 	for (i=0; i<4; i++) {
-		gpio_addr[i] = mmap(0 ,BBBIO_GPIOX_LEN ,PROT_READ | PROT_WRITE ,MAP_SHARED ,memh ,GPIO_AddressOffset[i]);
+		gpio_addr[i] = (volatile unsigned int*)mmap(0 ,BBBIO_GPIOX_LEN ,PROT_READ | PROT_WRITE ,MAP_SHARED ,memh ,GPIO_AddressOffset[i]);
 		if(gpio_addr[i] == MAP_FAILED) {
 #ifdef BBBIO_LIB_DBG
 			printf("iolib_init: gpio mmap failure!\n");
@@ -144,7 +144,7 @@ int iolib_init(void)
 	 *
 	 * Useless now , this register must be privigle mode .
 	 */
-	CM_ptr = mmap(0, BBBIO_CONTROL_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, BBBIO_CONTROL_MODULE);
+	CM_ptr = (volatile unsigned int*)mmap(0, BBBIO_CONTROL_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, BBBIO_CONTROL_MODULE);
 	if(CM_ptr == MAP_FAILED) {
 #ifdef BBBIO_LIB_DBG
 		printf("iolib_init: control module mmap failure!\n");
@@ -153,7 +153,6 @@ int iolib_init(void)
 	}
 
 	BBBIO_PWM_Init();
-	BBBIO_McSPI_Init();
 	BBBIO_ADCTSC_Init();
 
 	return 0;
@@ -200,7 +199,7 @@ int iolib_setdir(char port, char pin, char dir)
 #ifdef BBBIO_LIB_DBG
 	printf("iolib_setdir: PortSet_ptr P%d.%d , %X\n",port ,pin , PortSet_ptr[port-8][pin-1]);
 #endif
-	reg=(void*)gpio_addr[PortSet_ptr[port-8][pin-1]] +BBBIO_GPIO_OE;
+	reg= (volatile unsigned int*)gpio_addr[PortSet_ptr[port-8][pin-1]] +BBBIO_GPIO_OE;
 
 	if (dir == BBBIO_DIR_OUT) {
 		*reg &= ~(PortIDSet_ptr[port-8][pin-1]);
@@ -214,22 +213,22 @@ int iolib_setdir(char port, char pin, char dir)
 /* ----------------------------------------------------------------------------------------------- */
 void pin_high(char port, char pin)
 {
-	*((unsigned int *)((void *)gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_SETDATAOUT)) = PortIDSet_ptr[port-8][pin-1];
+	*((unsigned int *)(gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_SETDATAOUT)) = PortIDSet_ptr[port-8][pin-1];
 }
 /* ----------------------------------------------------------------------------------------------- */
 void pin_low(char port, char pin)
 {
-	*((unsigned int *)((void *)gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_CLEARDATAOUT)) = PortIDSet_ptr[port-8][pin-1];
+	*((unsigned int *)(gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_CLEARDATAOUT)) = PortIDSet_ptr[port-8][pin-1];
 }
 /* ----------------------------------------------------------------------------------------------- */
 char is_high(char port, char pin)
 {
-	return ((*((unsigned int *)((void *)gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_DATAIN)) & PortIDSet_ptr[port-8][pin-1])!=0);
+	return ((*((unsigned int *)(gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_DATAIN)) & PortIDSet_ptr[port-8][pin-1])!=0);
 }
 /* ----------------------------------------------------------------------------------------------- */
 char is_low(char port, char pin)
 {
-	return ((*((unsigned int *)((void *)gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_DATAIN)) & PortIDSet_ptr[port-8][pin-1])==0);
+	return ((*((unsigned int *)(gpio_addr[PortSet_ptr[port-8][pin-1]]+BBBIO_GPIO_DATAIN)) & PortIDSet_ptr[port-8][pin-1])==0);
 }
 /* ----------------------------------------------------------------------------------------------- */
 int iolib_delay_ms(unsigned int msec)
@@ -277,11 +276,11 @@ void BBBIO_sys_GPIO_CLK_status()
 	printf("\n******************************************************\n");
 	printf("************ GPIO Clock module Information ***********\n");
 	printf("******************************************************\n");
-	reg =(void*)cm_per_addr + BBBIO_CM_PER_L4LS_CLKSTCTRL;
+	reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_L4LS_CLKSTCTRL;
 	reg_value = *reg ;
 	printf("CM_PER CM_PER_L4LS_CLKSTCTRL : %X\n\n", reg_value );
 
-	reg =(void*)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL ;
+	reg = (volatile unsigned int*)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL ;
         reg_value = *reg ;
 	v_GDBLCK = (reg_value >> 18) & 0x01 ;
 	v_IDLEST = (reg_value >> 16) & 0x02 ;
@@ -292,7 +291,7 @@ void BBBIO_sys_GPIO_CLK_status()
         printf("\t[17-18] IDLEST                  : %X (%s)\n", v_IDLEST ,s_IDLEST[v_IDLEST]);
         printf("\t[0-1]   MODULEMODE              : %X (%s)\n\n", v_MODULEMODE ,s_MODULEMODE[v_MODULEMODE]);
 
-	reg =(void*)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
+	reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
 	reg_value = *reg ;
         v_GDBLCK = (reg_value >> 18) & 0x01 ;
         v_IDLEST = (reg_value >> 16) & 0x02 ;
@@ -303,7 +302,7 @@ void BBBIO_sys_GPIO_CLK_status()
         printf("\t[17-18] IDLEST                  : %X (%s)\n", v_IDLEST ,s_IDLEST[v_IDLEST]);
         printf("\t[0-1]   MODULEMODE              : %X (%s)\n\n", v_MODULEMODE ,s_MODULEMODE[v_MODULEMODE]);
 
-	reg =(void*)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
+	reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
 	reg_value = *reg ;
         v_GDBLCK = (reg_value >>18) & 0x01 ;
         v_IDLEST = (reg_value >>16) & 0x02 ;
@@ -314,7 +313,7 @@ void BBBIO_sys_GPIO_CLK_status()
         printf("\t[17-18] IDLEST                  : %X (%s)\n", v_IDLEST ,s_IDLEST[v_IDLEST]);
         printf("\t[0-1]   MODULEMODE              : %X (%s)\n\n", v_MODULEMODE ,s_MODULEMODE[v_MODULEMODE]);
 
-	reg =(void*)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
+	reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
 	reg_value = *reg ;
         v_GDBLCK = (reg_value >> 18) & 0x01 ;
         v_IDLEST = (reg_value >> 16) & 0x02 ;
@@ -483,7 +482,7 @@ void BBBIO_sys_Expansion_Header_status(unsigned int port)
 	    }
 	    else					// functional pins
 	    {
-	    	reg =(void*)CM_ptr + ExpHeader_MODE0[port][i] ;
+	    	reg = (volatile unsigned int*)CM_ptr + ExpHeader_MODE0[port][i] ;
             	reg_value = *reg ;
 
 		v_SLEWCTRL = reg_value>>6 ;
@@ -556,7 +555,7 @@ int BBBIO_sys_pinmux_check(unsigned int port, unsigned int pin, unsigned int Cfl
 	port -= 8;
 	pin -= 1;
 
-	reg =(void *)CM_ptr + ExpHeader_MODE0[port][pin] ;
+	reg = (volatile unsigned int*)CM_ptr + ExpHeader_MODE0[port][pin] ;
 	reg_value = *reg ;
 
 	if(Cflag & BBBIO_PINMUX_SLEWCTRL && (ret == 0)) {
@@ -645,19 +644,19 @@ int  BBBIO_sys_Enable_Debouncing(unsigned int port ,unsigned int pin ,unsigned i
 
         /* Enable GPIO1 GDBCLK */
 	if(PortSet_ptr[port][pin]==0) {	/* CLKCTRL of  GPIO 0 is in CM_WKUP register */
-	    reg =(void *)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
+	    reg = (volatile unsigned int*)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
             *reg |= 1 << 18;
 	}
 	else {
-	    reg =(void *)cm_per_addr + GPIO_CLKCTRL[PortSet_ptr[port][pin] - 1] ;
+	    reg = (volatile unsigned int*)cm_per_addr + GPIO_CLKCTRL[PortSet_ptr[port][pin] - 1] ;
 	    *reg |= 1 << 18;
 	}
 
 	// Enable Debouncing
-        reg = (void *)gpio_addr[PortSet_ptr[port][pin]] + BBBIO_GPIO_DEBOUNCENABLE ;
+        reg = (volatile unsigned int*)gpio_addr[PortSet_ptr[port][pin]] + BBBIO_GPIO_DEBOUNCENABLE ;
 	*reg |= PortIDSet_ptr[port][pin] ;
 
-	reg = (void *)gpio_addr[PortSet_ptr[port][pin]] + BBBIO_GPIO_DEBOUNCINGTIME ;
+	reg = (volatile unsigned int*)gpio_addr[PortSet_ptr[port][pin]] + BBBIO_GPIO_DEBOUNCINGTIME ;
 	*reg = GDB_time ;
 
 	return 0;
@@ -710,7 +709,7 @@ int  BBBIO_sys_Disable_Debouncing(unsigned int port ,unsigned int pin ,unsigned 
         pin -= 1;
 
 	/* Disable Debouncing */
-	reg = (void*)gpio_addr[PortSet_ptr[port][pin]] +BBBIO_GPIO_DEBOUNCENABLE ;
+	reg =  (volatile unsigned int*)gpio_addr[PortSet_ptr[port][pin]] +BBBIO_GPIO_DEBOUNCENABLE ;
 	*reg &= ~PortIDSet_ptr[port][pin] ;
 
 	return 0;
@@ -749,19 +748,19 @@ int BBBIO_sys_Enable_GPIO(unsigned int gpio)		// Enable GPIOx's clock
 
 	switch(gpio) {
 	case BBBIO_GPIO0 :
-		reg =(void *)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
+		reg = (volatile unsigned int*)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
 		*reg |= 0x2 ;
 		break ;
 	case BBBIO_GPIO1 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
 		*reg |= 0x2 ;
 		break ;
 	case BBBIO_GPIO2 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
 		*reg |= 0x2 ;
 		break ;
 	case BBBIO_GPIO3 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
 		*reg |= 0x2 ;
 		break ;
 	default :
@@ -803,19 +802,19 @@ int BBBIO_sys_Disable_GPIO(unsigned int gpio)		// Disable GPIOx's clock
 
 	switch(gpio) {
 	case BBBIO_GPIO0 :
-		reg =(void *)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
+		reg = (volatile unsigned int*)cm_wkup_addr + BBBIO_CM_WKUP_GPIO0_CLKCTRL;
 		*reg &= 0x2 ;
 		break ;
 	case BBBIO_GPIO1 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO1_CLKCTRL;
 		*reg &= ~0x2 ;
 		break ;
 	case BBBIO_GPIO2 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO2_CLKCTRL;
 		*reg &= ~0x2 ;
 		break ;
 	case BBBIO_GPIO3 :
-		reg =(void *)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
+		reg = (volatile unsigned int*)cm_per_addr + BBBIO_CM_PER_GPIO3_CLKCTRL;
 		*reg &= ~0x2 ;
 		break ;
 	default :
@@ -930,7 +929,7 @@ int BBBIO_GPIO_set_dir(unsigned int  gpio, unsigned int inset , unsigned int out
                 return -1;
         }
 
-        reg=(void *)gpio_addr[gpio] + BBBIO_GPIO_OE;
+        reg= (volatile unsigned int*)gpio_addr[gpio] + BBBIO_GPIO_OE;
         *reg &= ~outset ;
         *reg |= inset ;
 
@@ -966,15 +965,15 @@ const unsigned int BBBIO_GPIO_SAFE_MASK [] ={
 
 void BBBIO_GPIO_high(unsigned int gpio ,unsigned int pinset)
 {
-	*((unsigned int *)((void *)gpio_addr[gpio]+BBBIO_GPIO_SETDATAOUT)) = pinset & BBBIO_GPIO_SAFE_MASK[gpio] ;
+	*((unsigned int *)(gpio_addr[gpio]+BBBIO_GPIO_SETDATAOUT)) = pinset & BBBIO_GPIO_SAFE_MASK[gpio] ;
 }
 
 void BBBIO_GPIO_low(unsigned int gpio ,unsigned int pinset)
 {
-	*((unsigned int *)((void *)gpio_addr[gpio]+BBBIO_GPIO_CLEARDATAOUT)) = pinset &  BBBIO_GPIO_SAFE_MASK[gpio];
+	*((unsigned int *)(gpio_addr[gpio]+BBBIO_GPIO_CLEARDATAOUT)) = pinset &  BBBIO_GPIO_SAFE_MASK[gpio];
 }
 
 int BBBIO_GPIO_get(char gpio, unsigned int pinset)
 {
-	 return *((unsigned int *)((void *)gpio_addr[gpio]+BBBIO_GPIO_DATAIN)) & pinset;
+	 return *((unsigned int *)(gpio_addr[gpio]+BBBIO_GPIO_DATAIN)) & pinset;
 }

@@ -171,7 +171,7 @@ static int BBBIO_ADCTSC_set_range(int L_range, int H_range)
 		return 0 ;
 	}
 
-	reg = (void *)adctsc_ptr + ADCTSC_ADCRANGE;
+	reg = (unsigned int*)adctsc_ptr + ADCTSC_ADCRANGE;
 	*reg |= (L_range | H_range << 16) ;
 	return 1 ;
 }
@@ -196,12 +196,12 @@ int BBBIO_ADCTSC_channel_status(int chn_ID ,int enable)
 		/* step enable */
 		if(enable) {
 			ADCTSC.channel[chn_ID].enable = 1;
-			reg = (void *)adctsc_ptr + ADCTSC_STEPENABLE;
+			reg = (unsigned int*)adctsc_ptr + ADCTSC_STEPENABLE;
 			*reg |= 0x0001 << (chn_ID+1);
 		}
 		else {
 			ADCTSC.channel[chn_ID].enable = 0;
-			reg = (void *)adctsc_ptr + ADCTSC_STEPENABLE;
+			reg = (unsigned int*)adctsc_ptr + ADCTSC_STEPENABLE;
 			*reg &= ~(0x0001 << (chn_ID+1));
 		}
 
@@ -232,7 +232,7 @@ void BBBIO_ADCTSC_module_ctrl(unsigned int work_type, unsigned int clkdiv)
 		clkdiv = 1;
 	}
 	else {
-		reg = (void *)adctsc_ptr + ADCTSC_ADC_CLKDIV;
+		reg = (unsigned int*)adctsc_ptr + ADCTSC_ADC_CLKDIV;
 		*reg = (clkdiv -1) ;
 	}
 
@@ -316,11 +316,11 @@ int BBBIO_ADCTSC_channel_ctrl(unsigned int chn_ID, int mode, int open_dly, int s
 	BBBIO_ADCTSC_channel_disable(chn_ID);
 
 	/* cancel step config register protection*/
-	reg = (void *)adctsc_ptr + ADCTSC_CTRL;
+	reg = (unsigned int*)adctsc_ptr + ADCTSC_CTRL;
 	*reg |= 0x4 ;
 
 	/* set step config */
-	reg = (void *)adctsc_ptr + (ADCTSC_STEPCONFIG1 + chn_ID * 0x8);
+	reg = (unsigned int*)adctsc_ptr + (ADCTSC_STEPCONFIG1 + chn_ID * 0x8);
 	*reg &= ~(0x1F) ;	/* pre-maks Mode filed */
 	*reg |= (mode | (sample_avg << 2) | (chn_ID << 19) | (chn_ID << 15) | ((chn_ID % 2) << 26) );
 
@@ -328,12 +328,12 @@ int BBBIO_ADCTSC_channel_ctrl(unsigned int chn_ID, int mode, int open_dly, int s
 	if(open_dly <0 || open_dly >262143) {
 		open_dly = 0;
 	}
-	reg = (void *)adctsc_ptr + (ADCTSC_STEPDELAY1 + chn_ID * 0x8);
+	reg = (unsigned int*)adctsc_ptr + (ADCTSC_STEPDELAY1 + chn_ID * 0x8);
 	*reg =0;
 	*reg |= ((sample_dly - 1) << 24 | open_dly);
 
 	/* resume step config register protection*/
-	reg = (void *)adctsc_ptr + ADCTSC_CTRL;
+	reg = (unsigned int*)adctsc_ptr + ADCTSC_CTRL;
 	*reg &= ~0x4 ;
 
 	return 1;
@@ -410,7 +410,7 @@ unsigned int BBBIO_ADCTSC_work(unsigned int fetch_size)
 	}
 
 	/* Enable module and tag channel ID in FIFO data*/
-	reg_ctrl = (void *)adctsc_ptr + ADCTSC_CTRL;
+	reg_ctrl = (unsigned int*)adctsc_ptr + ADCTSC_CTRL;
 	*reg_ctrl |= (CTRL_ENABLE | CTRL_STEP_ID_TAG);
 
 	ADCTSC.fetch_size = fetch_size;
@@ -477,7 +477,7 @@ unsigned int BBBIO_ADCTSC_work(unsigned int fetch_size)
 		}
         }
 
-	reg_ctrl = (void *)adctsc_ptr + ADCTSC_CTRL;
+	reg_ctrl = (unsigned int*)adctsc_ptr + ADCTSC_CTRL;
         *reg_ctrl &= ~(CTRL_ENABLE | CTRL_STEP_ID_TAG);
 
 	return 0 ;
@@ -507,7 +507,7 @@ int BBBIO_ADCTSC_Init()
 		return 0;
 	}
 
-	adctsc_ptr = mmap(0, ADCTSC_MMAP_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, ADCTSC_MMAP_ADDR);
+	adctsc_ptr = (volatile unsigned int*)mmap(0, ADCTSC_MMAP_LEN, PROT_READ | PROT_WRITE, MAP_SHARED, memh, ADCTSC_MMAP_ADDR);
 	if(adctsc_ptr == MAP_FAILED) {
 #ifdef BBBIO_LIB_DBG
 		fprintf(stderr, "BBBIO_ADCTSC_Init: ADCTSC mmap failure!\n");
@@ -516,11 +516,11 @@ int BBBIO_ADCTSC_Init()
 	}
 
 	/* Enable module Clock  */
-	reg = (void *)cm_wkup_addr + BBBIO_CM_WKUP_ADC_TSC_CLKCTRL;
+	reg = (unsigned int*)cm_wkup_addr + BBBIO_CM_WKUP_ADC_TSC_CLKCTRL;
 	*reg = 0x2 ;
 
 	/* Pre-disable module work */
-	reg = (void *)adctsc_ptr + ADCTSC_CTRL;
+	reg = (unsigned int*)adctsc_ptr + ADCTSC_CTRL;
 	*reg &= ~0x1 ;
 
 	/* Default ADC module configure*/
@@ -538,22 +538,22 @@ int BBBIO_ADCTSC_Init()
 	BBBIO_ADCTSC_channel_ctrl(BBBIO_ADC_AIN6, BBBIO_ADC_STEP_MODE_SW_ONE_SHOOT, 0, 1, BBBIO_ADC_STEP_AVG_1, NULL, 0);
 
 	/* Clear FIFO  */
-	FIFO_count = *((unsigned int*)((void *)adctsc_ptr + ADCTSC_FIFO0COUNT));
+	FIFO_count = *((unsigned int*)(adctsc_ptr + ADCTSC_FIFO0COUNT));
 	for(i = 0 ; i < FIFO_count ; i++) {
-		FIFO_data = *((unsigned int*)((void *)adctsc_ptr + ADCTSC_FIFO0DATA));
+		FIFO_data = *((unsigned int*)(adctsc_ptr + ADCTSC_FIFO0DATA));
 	}
 
-	FIFO_count = *((unsigned int*)((void *)adctsc_ptr + ADCTSC_FIFO1COUNT));
+	FIFO_count = *((unsigned int*)(adctsc_ptr + ADCTSC_FIFO1COUNT));
         for(i = 0 ; i < FIFO_count ; i++) {
-		FIFO_data = *((unsigned int*)((void *)adctsc_ptr + ADCTSC_FIFO1DATA));
+		FIFO_data = *((unsigned int*)(adctsc_ptr + ADCTSC_FIFO1DATA));
         }
 
 	/* init work struct */
-	ADCTSC.FIFO[0].reg_count = (void *)adctsc_ptr + ADCTSC_FIFO0COUNT;
-	ADCTSC.FIFO[0].reg_data = (void *)adctsc_ptr + ADCTSC_FIFO0DATA;
+	ADCTSC.FIFO[0].reg_count = (unsigned int*)adctsc_ptr + ADCTSC_FIFO0COUNT;
+	ADCTSC.FIFO[0].reg_data = (unsigned int*)adctsc_ptr + ADCTSC_FIFO0DATA;
 	ADCTSC.FIFO[0].next = &ADCTSC.FIFO[1];
-	ADCTSC.FIFO[1].reg_count = (void *)adctsc_ptr + ADCTSC_FIFO1COUNT;
-	ADCTSC.FIFO[1].reg_data = (void *)adctsc_ptr + ADCTSC_FIFO1DATA;
+	ADCTSC.FIFO[1].reg_count = (unsigned int*)adctsc_ptr + ADCTSC_FIFO1COUNT;
+	ADCTSC.FIFO[1].reg_data = (unsigned int*)adctsc_ptr + ADCTSC_FIFO1DATA;
 	ADCTSC.FIFO[1].next = &ADCTSC.FIFO[0];
 	ADCTSC.channel_en = 0;
 
