@@ -1,0 +1,534 @@
+<html>
+    <head>
+    <style>
+    table {border-collapse:collapse; table-layout:fixed; width:310px;}
+    table td {border: none solid black; width:100px; word-wrap:break-word;}
+    th {  background: #eee; }
+    </style>
+    </head>
+    <body>
+    <table style="text-align:left; width: 100%; border:1px solid #CCC;border:none;">
+    <tr>
+    
+    <td align="left">
+    <a href="http://www.ti.com/">
+    <img alt="" src="data:image/gif;base64,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"/>
+    </a>
+    </td>
+    </tr>
+    <tr><td align="center"><h1>Closed Defects in Release</td></tr>
+    </table>
+    <table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2">
+    <thead>
+    <tr>
+    <th align="center">ID</th>
+    <th align="center">Summary</th>
+    <th align="center">State</th>
+    <th align="center">Reported In Release</th>
+    <th align="center">Target Release</th>
+    <th align="center">Workaround</th>
+    <th align="center">Release Notes</th>
+    </tr>
+    </thead><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2225?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2225</a></td>
+        <td>PRU linker not generating warning for out of range conditional jump instruction</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td> </td>
+        <td>For some code relocations (typically branches), the linker would fail to notice a relocation overflow.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2214?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2214</a></td>
+        <td>Compiler optimizes away function which calls assert</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td>Make sure there is some other visible effect in the function -- a call, a use of a volatile variable, something like that.</td>
+        <td>A function whose only visible effect is to call assert() may be optimised away at --opt_level=0 or higher.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2210?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2210</a></td>
+        <td>PRU assembler rejects valid LBBO instruction</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td>Use formats of LBBO and SBBO instructions that specify immediate values in the 3rd or 4th operands.</td>
+        <td>The PRU assembler rejected valid LBBO and SBBO instructions that specified registers for the 3rd and 4th operands, for example, LBBO &r3, r1, r2.w0, b0
+
+The PRU assembler is now updated to accept this format for LBBO and SBBO instructions.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2098?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2098</a></td>
+        <td>Temp filename collisions on Windows with many parallel invocations</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td> </td>
+        <td>In some cases with a large number of compilations in parallel on Windows, the compiler could create temporary files with colliding names, resulting in strange compilation failures.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2053?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2053</a></td>
+        <td>Compiler incorrectly reorders struct assign for small, volatile structs with bit-fields</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td>Use optimization level 0 or off (option --opt_level)</td>
+        <td>For a very specific optimization, the optimizer may drop a volatile qualifier from a struct assignment.  In some cases, the compiler may later perform an incorrect optimization, most commonly incorrectly reordering volatile assignments.
+
+This bug can only happen in a function compiled with optimization level 1 or higher which contains both of the following: 1) A struct assign where the destination is volatile, and the source is a known constant, and the struct contains a bit-field, and the struct is of size "int" or smaller.  2) Any bit-field access (read or write) other than as part of a struct assign or initialization expression.  That is, the name of the bit-field is present in the access expression.  Note that the optimizer can create this situation by inlining functions, so 1 and 2 might be in different functions in the source code.
+
+Consider a tree x = y where x and y are of type struct S. If the value of y is known at compile time (e.g. a const value), the optimizer will try to turn the struct constant into an integer constant (possibly combining bit-fields) and rewrite the tree to look like this: "(unsigned *)x = 32;" However, if y is volatile, that should be "*(volatile unsigned *)x = 32;" Because the access is not volatile, instruction scheduling could cause this instruction to drift past nearby volatile accesses.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-2025?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-2025</a></td>
+        <td>Linker crash message incorrectly suggests submitting a preprocessed file</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td> </td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-1976?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-1976</a></td>
+        <td>Value of __cplusplus is wrong</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td>If possible, use the -ps or --strict_ansi options. This mode will use the strict definition of __cplusplus, which is 199711L.</td>
+        <td>Our parser mimicked G++ behavior for the value of this macro in relaxed ANSI mode.  This reproduced a bug in G++ versions v.4.7 and v.4.3 that has since been fixed.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-1718?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-1718</a></td>
+        <td>The __xin and __xchg intrinsics do not store the result correctly if remapping is used</td>
+        <td>Planned</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td> </td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-1703?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-1703</a></td>
+        <td>Designated initializer plus struct hack hangs compiler</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.5</td>
+        <td>Avoiding using string constants to initialize objects with flexible array members. Instead, use a brace-initialized array. For example:
+
+struct { int a; char b[]; } mystruct = {0, {'h', 'e', 'l', 'l', 'o'} };</td>
+        <td>Fixed a compiler hang caused by initializing flexible array members with string constants.
+
+struct {int a; char b[]; } mystruct = {0, "hello"} /* Would cause the compiler to hang and/or crash */</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052791?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052791</a></td>
+        <td>A combination of volatile accesses of __R30 and function calls is incorrectly scheduled</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.1</td>
+        <td>PRU_2.1.5</td>
+        <td>Introduce a dummy volatile variable into the calculations involving volatile register variables. Performance will be impacted, but order will be maintained.
+
+For example, to fix the code attached to the issue:
+
+volatile uint32_t dummy = 0;
+volatile register uint32_t __R30;
+extern void timer_delay(uint32_t  cycles);
+
+void main()
+{
+        timer_delay((58000 / 5) - 1);
+
+        do { REGNAME &= ~((0x00000002)+dummy); } while (0);
+        do { REGNAME |= ((0x00000008)+dummy); } while (0);
+
+        timer_delay((58000 / 5) - 1);
+
+        do { REGNAME &= ~((0x00000008)+dummy); } while (0);
+        do { REGNAME |= ((0x00000002)+dummy); } while (0);
+
+        ... /* Repeat */
+}</td>
+        <td>Fixed an issue where operations on volatile register variables such as __R30 and __R31 were reordered.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-1444?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-1444</a></td>
+        <td>The PRU 2.1.x compiler is TSPA, but includes a LICENSE.txt file with the old non-TSPA license.</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.2, PRU_2.1.0, PRU_2.1.1</td>
+        <td>PRU_2.1.3</td>
+        <td>The PRU 2.1.x compiler stream is TSPA. The file PRU_Code_Generation_Tools_2.1.x_manifest.html contains the TSPA license information. The LICENSE.txt file contains the old license used by other compiler products and does not apply to the PRU 2.1.x compiler tools. The LICENSE.txt file should be ignored.</td>
+        <td>The PRU 2.1.x compiler stream is TSPA. The file PRU_Code_Generation_Tools_2.1.x_manifest.html contains the TSPA license information. The LICENSE.txt file contains the old license used by other compiler products and does not apply to the PRU 2.1.x compiler tools. The LICENSE.txt file should be ignored.</td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/CODEGEN-1333?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>CODEGEN-1333</a></td>
+        <td>Structure assignment causes compiler to fail with INTERNAL ERROR: Decomposition error</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.2</td>
+        <td>PRU_2.1.3</td>
+        <td>Replace struct assignments involving packed structures with a memcpy() call to copy the contents of the RHS of the struct assign to the LHS.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052833?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052833</a></td>
+        <td>Linker INTERNAL ERROR with object files with DWARF information compiled by IAR compiler</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td>Add option --compress_dwarf=off</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052723?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052723</a></td>
+        <td>Compiler seg faults with use of --opt_level=4</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td>Use optimization level 3 or below.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052699?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052699</a></td>
+        <td>Compiler discards write to a volatile local struct member</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td>No workaround.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052529?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052529</a></td>
+        <td>Optimizer assumes enum variable can only have value of enumeration constants</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td>Don't make enumerated types with constants only for 0 and 1 if other values may be used.  Either add a third value, or use values different than 0 and 1, or avoid using values that aren't the enumeration constants.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052468?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052468</a></td>
+        <td>Inline assembly may cause codegen to segmentation fault</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052397?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052397</a></td>
+        <td>Optimizer crashes on unreachable integer divide-by-zero</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052375?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052375</a></td>
+        <td>In some instances, compiler computes 64-bit add incorrectly</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>If more than 32 bits of precision are needed, there is no workaround.  Otherwise, using 32 bit integers will avoid this issue.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052339?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052339</a></td>
+        <td>demangler --output option does not work at all</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>armdem file.asm > file.dis</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052301?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052301</a></td>
+        <td>Linker crashes when --ecc:ecc_error is used</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052281?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052281</a></td>
+        <td>ARM Parser Segfaults on OSX at Template Class</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052265?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052265</a></td>
+        <td>Flexible array with initializer not handle correctly</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052257?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052257</a></td>
+        <td>Use of --opt_level=4 causes link to fail with message symbol "name" redeclared with incompatible type</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Change all anonymous members of the types involved to have an explicit name.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052238?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052238</a></td>
+        <td>Strong function symbol removed from linked ICODE with -o4</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Use --opt_level=3 or below.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052212?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052212</a></td>
+        <td>PRU does not issue a NOP between writing the source registers of the MAC unit and reading the result</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>The workaround is to use the --silicon_version=2 option. This option will prevent the compiler from using the hardware loop instruction.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052144?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052144</a></td>
+        <td>RTS libraries do not get automatically built if the library is missing (Mac OS X)</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Copy the libraries from a Windows/Linux machine.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052114?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052114</a></td>
+        <td>Windows Stack Size for Parser Should be Raised</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>There are at least two options:
+1. On Windows, if you have Visual Studio available, the stack for an executable may be raised with editbin. For example, to raise the stack to 8MB for the acpia6x parser, you would use:
+editbin /stack:8388608 acpia6x.exe
+2. Use the linux toolchain. The default stack is much higher. Even if that limit is reached, the soft limit for the stack size of user applications may be raised with ulimit. For example, to raise the stack to 16MB, you would use:
+ulimit -S -s 16384
+(This could be placed in the startup script, such as .bashrc)</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00052014?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00052014</a></td>
+        <td>Cannot read files with inode > 4B</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051809?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051809</a></td>
+        <td>"if (P) X=A; else X=B;" may compile incorrectly when A and B are 0/1 and P is 0/1 with a side effect</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Typically such an IF is equivalent to "X=P" or "X=!P";  write it that way 
+to avoid the problem.  Adding statements to either arm of the IF can also 
+help.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051762?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051762</a></td>
+        <td>Dot expression adding align(64) computes hugely incorrect size</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051740?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051740</a></td>
+        <td>AP modified before V4 saved, potentially corrupting the stack pointer</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051708?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051708</a></td>
+        <td>Loop downcounter may be mistakenly typed too small</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Lower the level of optimization.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051668?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051668</a></td>
+        <td>Using -o4 with cout or cin will cause an incompatible types error</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Don't use link time optimization with iostream.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051629?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051629</a></td>
+        <td>Compiler seg faults in C++ copy constructor call</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>In some cases, using a different ABI option may avoid this error.  
+However, the most safe option is to avoid the use of a copy constructor.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051621?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051621</a></td>
+        <td>Redeclaring extern "C" function as static causes parser to hang</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Use consistent function declarations.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051602?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051602</a></td>
+        <td>Parser may seg fault on template arguments with ! operator</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Using the --strict_ansi option will avoid this behavior.  If this is not 
+possible, changing template arguments of the form !foo to 0==foo will 
+also avoid this behavior.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051555?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051555</a></td>
+        <td>The instruction LDI R3, ((0x4<<8) | (0x2<<1))</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Removing the parenthesis around the shift operations allows the instruction to assemble.
+
+ LDI R3, (0x4<<8 | 0x2<<1)</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051472?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051472</a></td>
+        <td>Conditionals that use shift operator may be optimized out</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>This behavior may be avoided by lowering the optimization level to -o1 or 
+-o0.  Moving the conditional check result to a variable so that the shift 
+is not in the conditional may in some cases also avoid this behavior.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051464?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051464</a></td>
+        <td>If a host image file is the first object file on the command line, the linker will issue an ABI incompatibility error</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Reorder the inputs to armcl so that a host image file is not the first 
+input.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051312?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051312</a></td>
+        <td>Linker mistakenly issues output section warning diagnostic for sections pre-bound to hard coded addresses</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Ignore the warning</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051261?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051261</a></td>
+        <td>The exception handling (_eh) version of runtime library is not automatically built when --exceptions option is enabled</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>You can build the library manually. In a command terminal, browse to the lib dir of the code gen folder (ex. C:\ti\ccsv6\tools\compiler\c2000_6.2.7\lib) and run the following command:
+
+> set PATH=%PATH%;C:\ti\ccsv6\tools\compiler\c2000_6.2.7\bin
+> mklib --pattern=rts2800_eh.lib --index=libc.a --install_to=C:/ti/ccsv6/tools/compiler/c2000_6.2.7/lib
+
+Update the paths to the CGT folder to match your install.
+
+Change the library name that is passed to the --patter option to build 
+the other libraries for floating point (rts2800_fpu32_eh.lib) or large memory model (rts2800_ml_eh.lib). </td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051241?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051241</a></td>
+        <td>Output section splitting creates a zero-length section</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>1) Do not split the section in question.  2) Change the zero-length 
+section so that it has at least one more byte.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051212?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051212</a></td>
+        <td>MSP 4.4.0 changes to _lock.h declaration of _nop(void) instead of _nop() breaking driverlib</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Update _lock.h in the rts source folder, rename the library you are using, and it will automatically be rebuilt during next compile.
+
+To find compiler install location, click on project properties and click on:
+   Resource->Linked Resources
+The "Path Variable" will have an entry for:
+   CG_TOOL_ROOT  c:\install_location\ccsv6\tools\compiler\msp430_4.3.4
+Within above folder look for:
+   .\lib\src\_lock.h
+   .\include\_lock.h
+
+Edit both of above files and change below line 47:
+ _CODE_ACCESS void _nop(void);
+to remove void argument and instead be:
+ _CODE_ACCESS void _nop();
+
+Rename the library you are using with suffix .old:
+ .\lib\rtsx_lc_sd_eabi.lib
+change to a temp name
+ .\lib\rtsx_lc_sd_eabi.lib.old
+
+Rebuild your project and the rts should automatically rebuild.
+</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051128?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051128</a></td>
+        <td>Alias missed on address of local passed as function argument</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Use the -ma (--aliased_variables) option.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051097?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051097</a></td>
+        <td>Output section splitting creates a zero-length section</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>1) Do not split the section in question.  2) Change the zero-length 
+section so that it has at least one more byte.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00051004?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00051004</a></td>
+        <td>Compiler emits a reference to a symbol without declaring it in assembly.</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>None.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00050992?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00050992</a></td>
+        <td>The optimizer should not make a symbol an alias if it has either the location or code_section pragmas applied.</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Available workarounds are to:
+
+1. Reduce the optimization level to -o2.
+2. If using a COFF abi, you can move the functions into separate files.
+3. Add an __asm("NOP") to the function which will prevent an alias from being created.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00050959?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00050959</a></td>
+        <td>SIGSSEGV when using % in an option argument</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Don't use any printf-special characters like % in a compiler argument</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00050834?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00050834</a></td>
+        <td>Assembler doesn't generate relocation entry for weak symbol</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.2</td>
+        <td>Use --gen_func_subsections.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00050764?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00050764</a></td>
+        <td>Bound function has incorrect address in DWARF debug info</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.1</td>
+        <td>Set a breakpoint at the bound function and run to it, rather than 
+attempting to step into it.</td>
+        <td> </td>
+        </tr><tr>
+        <td><a href=https://cqweb.ext.ti.com/cqweb/restapi/SDO-Web/SDOWP/RECORD/SDSCM00050005?format=HTML&noframes=true&recordType=IncidentReport&loginId=readonly&password=readonly>SDSCM00050005</a></td>
+        <td>Compiler mistakenly issues MISRA diagnostic 12.9 for a float point type</td>
+        <td>Fixed</td>
+        <td>PRU_2.1.0</td>
+        <td>PRU_2.1.3</td>
+        <td> </td>
+        <td> </td>
+        </tr></table>
+    <br>
+    <b>Generated on Mon May 15 10:32:28 2017 </b>
+    </body>
+    </html>

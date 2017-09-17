@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./ti-cgt-pru_2.1.5/bin/clpru --include_path=ti-cgt-pru_2.1.5/include/ src/*.c src/*.h --run_linker --search_path=ti-cgt-pru_2.1.5/lib/ --library=lnk.cmd --output_file=pru.out
+rm *.obj;

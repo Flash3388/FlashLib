@@ -447,7 +447,6 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 		return HAL_INVALID_HANDLE;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	hal_handle_t portHandle = (hal_handle_t)port;
 	if(port < 0 || port >= BBB_ADC_CHANNEL_COUNT){
 		portHandle = HAL_INVALID_HANDLE;
@@ -457,6 +456,7 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 #endif
 	}
 	else{
+		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
 		adc_port_t* adc = &adc_map[port];
 		if(adc->enabled == 0){
@@ -479,8 +479,9 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 #endif
 		}
 		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
 	}
-	pthread_mutex_unlock(&io_mutex);
+
 	return portHandle;
 }
 void BBB_freeAnalogInput(hal_handle_t portHandle){
@@ -488,8 +489,8 @@ void BBB_freeAnalogInput(hal_handle_t portHandle){
 		return;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
 		adc_port_t* adc = &adc_map[portHandle];
 		if(adc->enabled){
@@ -508,13 +509,13 @@ void BBB_freeAnalogInput(hal_handle_t portHandle){
 #endif
 		}
 		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
 
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("ADC port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
-	pthread_mutex_unlock(&io_mutex);
 }
 
 uint32_t BBB_getAnalogValue(hal_handle_t portHandle){
@@ -522,9 +523,9 @@ uint32_t BBB_getAnalogValue(hal_handle_t portHandle){
 		return 0;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	int32_t val = 0;
 	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
 		adc_port_t* adc = &adc_map[portHandle];
 		if(adc->enabled){
@@ -539,12 +540,12 @@ uint32_t BBB_getAnalogValue(hal_handle_t portHandle){
 #endif
 		}
 		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("ADC port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
-	pthread_mutex_unlock(&io_mutex);
 	return val;
 }
 float BBB_getAnalogVoltage(hal_handle_t portHandle){
@@ -565,7 +566,6 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 		return HAL_INVALID_HANDLE;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	hal_handle_t portHandle = (hal_handle_t)port;
 	if(port < 0 || port >= HAL_PWMSS_PORTS_COUNT){
 		portHandle = HAL_INVALID_HANDLE;
@@ -575,6 +575,7 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 #endif
 	}
 	else{
+		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(port);
 		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(port);
 		pwm_port_t* pwm = &pwm_map[module];
@@ -590,20 +591,20 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 		}
 #endif
 
-		bool init = false;
+		bool initmodule = false;
 
 		if(pin == BBB_PWMSSA && pwm->enabledA == 0){
 			pwm->enabledA = 1;
 			pwm->dutyA = 0.0f;
-			init = true;
+			initmodule = true;
 		}
 		else if(pin == BBB_PWMSSB && pwm->enabledB == 0){
 			pwm->enabledB = 1;
 			pwm->dutyB = 0.0f;
-			init = true;
+			initmodule = true;
 		}
 
-		if(init){
+		if(initmodule){
 #ifdef HAL_USE_IO
 			BBBIO_PWMSS_Setting(module, pwm->frequency, pwm->dutyA, pwm->dutyB);
 #endif
@@ -616,8 +617,8 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 			printf("PWM port was already: MODULE= %d, PIN= %d \n", module, pin);
 #endif
 		}
+		pthread_mutex_unlock(&io_mutex);
 	}
-	pthread_mutex_unlock(&io_mutex);
 	return portHandle;
 }
 void BBB_freePWMPort(hal_handle_t portHandle){
@@ -625,8 +626,8 @@ void BBB_freePWMPort(hal_handle_t portHandle){
 		return;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
 		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(portHandle);
 		pwm_port_t* pwm = &pwm_map[module];
@@ -665,22 +666,22 @@ void BBB_freePWMPort(hal_handle_t portHandle){
 			printf("PWM port was already disabled: MODULE= %d, PIN= %d \n", module, pin);
 #endif
 		}
+		pthread_mutex_unlock(&io_mutex);
 
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("PWM port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
-	pthread_mutex_unlock(&io_mutex);
 }
 float BBB_getPWMDuty(hal_handle_t portHandle){
 	if(!init){
 		return 0.0f;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	float val = 0.0f;
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
 		uint8_t port = BBB_PWMSS_PORT_TO_PIN(portHandle);
 		pwm_port_t* pwm = &pwm_map[module];
@@ -694,12 +695,12 @@ float BBB_getPWMDuty(hal_handle_t portHandle){
 		printf("PWM value get: MODULE= %d, PIN= %d \n", module, port);
 #endif
 
+		pthread_mutex_unlock(&io_mutex);
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("PWM port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
-	pthread_mutex_unlock(&io_mutex);
 	return val;
 }
 uint8_t BBB_getPWMValue(hal_handle_t portHandle){
@@ -725,8 +726,8 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 		return;
 	}
 
-	pthread_mutex_lock(&io_mutex);
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
 		pwm_port_t* pwm = &pwm_map[module];
 		if(pwm->enabledA || pwm->enabledB){
@@ -750,12 +751,12 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 			printf("PWM ports are not enabled:  MODULE= %d \n", module);
 #endif
 		}
+		pthread_mutex_unlock(&io_mutex);
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("PWM port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
-	pthread_mutex_unlock(&io_mutex);
 }
 
 } /* namespace hal */

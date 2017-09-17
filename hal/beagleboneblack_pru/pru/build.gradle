@@ -1,0 +1,5 @@
+
+
+task pru_build(type:Exec){
+	commandLine './pru_build'
+}
