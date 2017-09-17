@@ -47,7 +47,7 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_HAL_shutdown
  */
 JNIEXPORT jstring JNICALL Java_edu_flash3388_flashlib_hal_HAL_boardName
 	(JNIEnv *env, jclass obj){
-	char* name = HAL_boardName();
+	const char* name = HAL_boardName();
 	return env->NewStringUTF(name);
 }
 

@@ -6,13 +6,13 @@
  */
 
 #include <HAL.h>
-#include "../bbb/hal.h"
+#include "../../include/hal.h"
 
 namespace flashlib{
 
 namespace hal{
 
-static constexpr char* name = "beagleboneblack";
+const char* name = "beagleboneblack";
 
 int HAL_initialize(int mode){
 	return BBB_initialize(mode);
@@ -21,7 +21,7 @@ void HAL_shutdown(){
 	BBB_shutdown();
 }
 
-char* HAL_boardName(){
+const char* HAL_boardName(){
 	return name;
 }
 

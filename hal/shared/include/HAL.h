@@ -17,7 +17,7 @@ namespace hal{
 int HAL_initialize(int mode);
 void HAL_shutdown();
 
-char* HAL_boardName();
+const char* HAL_boardName();
 
 } /* namespace hal */
 

@@ -24,6 +24,9 @@ float HAL_getPWMDuty(hal_handle_t portHandle);
 void HAL_setPWMValue(hal_handle_t portHandle, uint8_t value);
 uint8_t HAL_getPWMValue(hal_handle_t portHandle);
 
+void HAL_setPWMFrequency(hal_handle_t portHandle, float frequency);
+float HAL_getPWMFrequency(hal_handle_t portHandle);
+
 } /* namespace hal */
 
 } /* namespace flashlib */

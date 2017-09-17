@@ -8,19 +8,17 @@
 #ifndef BBB_PRU_H_
 #define BBB_PRU_H_
 
-#include <stdint.h>
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
 typedef struct pru_data{
-	uint8_t prunum;
+	int prunum;
 	unsigned int* shared_memory;
 } pru_data_t;
 
-int pru_initialize(pru_data_t* prudata, uint8_t prunum, char* progfile);
-void pru_shutdown(pru_data_t* prudata);
+int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile);
+void pru_shutdown(pru_data_t* pru_data);
 
 void pru_interrupt_wait(pru_data_t* pru_data);
 void pru_interrupt_send(pru_data_t* pru_data);

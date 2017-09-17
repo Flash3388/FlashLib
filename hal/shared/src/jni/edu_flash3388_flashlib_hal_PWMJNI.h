@@ -41,6 +41,14 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMDuty
 
 /*
  * Class:     edu_flash3388_flashlib_hal_PWMJNI
+ * Method:    setPWMFrequency
+ * Signature: (I)F
+ */
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_setPWMFrequency
+  (JNIEnv *, jclass, jint, jfloat);
+
+/*
+ * Class:     edu_flash3388_flashlib_hal_PWMJNI
  * Method:    getPWMRaw
  * Signature: (I)I
  */
@@ -53,6 +61,14 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMRaw
  * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMDuty
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_hal_PWMJNI
+ * Method:    getPWMFrequency
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_hal_PWMJNI_getPWMFrequency
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

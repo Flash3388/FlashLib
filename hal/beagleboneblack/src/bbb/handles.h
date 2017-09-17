@@ -20,7 +20,6 @@ typedef struct dio_port{
 } dio_port_t;
 
 typedef struct dio_pulse{
-	dio_port_t* dio_handle;
 	int32_t remaining_time;
 } dio_pulse_t;
 

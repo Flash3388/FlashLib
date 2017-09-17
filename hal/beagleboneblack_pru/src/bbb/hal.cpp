@@ -10,8 +10,8 @@
 #include <memory>
 
 #include "../../include/bbb_defines.h"
+#include "../../include/hal.h"
 
-#include "hal.h"
 #include "hal_defines.h"
 #include "pru_defines.h"
 #include "handles.h"
@@ -36,13 +36,25 @@ pru_data_t pru_data;
 
 bool init = false;
 
-char* pru_program_name = HAL_PRU_PROGRAM;
+const char* pru_program_name = HAL_PRU_PROGRAM;
 
 /***********************************************************************\
  * INTERNAL METHOD
 \***********************************************************************/
 
 #ifdef HAL_USE_IO
+int pru_initialize(){
+	return pru_initialize(&pru_data, HAL_PRU_NUM, pru_program_name);
+}
+void pru_shutdown(){
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_SYS_FREE;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait(&pru_data);
+
+	pru_shutdown(&pru_data);
+}
+
 hal_handle_t pru_dio_initialize(uint16_t port, uint8_t dir, dio_port_t* dio){
 	uint8_t handle_type = dir == BBB_DIR_OUTPUT? PRU_HANDLE_DO : PRU_HANDLE_DI;
 
@@ -70,9 +82,12 @@ void pru_dio_free(hal_handle_t handle, uint8_t dir){
 	pru_interrupt_send(&pru_data);
 	pru_interrupt_wait(&pru_data);
 }
-void pru_dio_pulse(hal_handle_t handle, uint32_t length){
+void pru_dio_pulse(hal_handle_t handle, float length){
+	//TODO: CONVERT PULSE
+	uint32_t pulselength = 0;
+
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_DIO_PULSE;
-	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = length;
+	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = pulselength;
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
@@ -149,6 +164,30 @@ void pru_pwm_set(pwm_port_t* pwm, uint8_t val){
 uint8_t pru_pwm_get(pwm_port_t* pwm){
 	return (uint8_t)pru_data.shared_memory[pwm->val_addr_offset];
 }
+void pru_pwm_frequency_set(hal_handle_t handle, float frequency){
+	//TODO: CONVERT FREQUENCY
+	uint32_t cfreq = 0;
+
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PWM_FREQ_S;
+	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = cfreq;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait(&pru_data);
+}
+float pru_pwm_frequency_get(hal_handle_t handle){
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PWM_FREQ_G;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait(&pru_data);
+
+	uint32_t freq = pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG];
+	//TODO: CONVERT FREQUENCY VALUE
+	float cfreq = 0.0f;
+	return cfreq;
+}
+
 #endif
 
 void bbb_pwm_limit(uint8_t* val){
@@ -174,7 +213,7 @@ int BBB_initialize(int mode){
 
 	int status = 0;
 #ifdef HAL_USE_IO
-	status = pru_initialize(&pru_data, HAL_PRU_NUM, pru_program_name);
+	status = pru_initialize();
 #endif
 	if(status){
 		//TODO: init error
@@ -202,7 +241,7 @@ void BBB_shutdown(){
 
 #ifdef HAL_USE_IO
 	pthread_mutex_lock(&io_mutex);
-	pru_shutdown(&pru_data);
+	pru_shutdown();
 	pthread_mutex_unlock(&io_mutex);
 #endif
 
@@ -226,7 +265,7 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 #endif
 		return HAL_INVALID_HANDLE;
 	}
-	if(dir == BBB_DIR_INPUT || dir == BBB_DIR_OUTPUT){
+	if(dir != BBB_DIR_INPUT && dir != BBB_DIR_OUTPUT){
 
 #ifdef HAL_BBB_DEBUG
 		printf("DIO direction value is invalid: %d \n", dir);
@@ -328,13 +367,20 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 	if(dio_ports.count(portHandle)){
 		dio_port_t* dio = dio_ports[portHandle].get();
 
+		if(dio->dir == BBB_DIR_OUTPUT){
 #ifdef HAL_USE_IO
-		pru_dio_set(dio, high);
+			pru_dio_set(dio, high);
 #endif
 
 #ifdef HAL_BBB_DEBUG
-		printf("DIO value set: %d -> %d \n", portHandle, high);
+			printf("DIO value set: %d -> %d \n", portHandle, high);
 #endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("DIO handle is INPUT, cannot set value: %d \n", portHandle);
+#endif
+		}
+
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("DIO handle not initialized: %d \n", portHandle);
@@ -342,7 +388,7 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 	}
 	pthread_mutex_unlock(&io_mutex);
 }
-void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
+void BBB_pulseDIO(hal_handle_t portHandle, float length){
 	if(!init){
 		return;
 	}
@@ -351,13 +397,19 @@ void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
 	if(dio_ports.count(portHandle)){
 		dio_port_t* dio = dio_ports[portHandle].get();
 
+		if(dio->dir == BBB_DIR_OUTPUT){
 #ifdef HAL_USE_IO
-		pru_dio_pulse(portHandle, length);
+			pru_dio_pulse(portHandle, length);
 #endif
 
 #ifdef HAL_BBB_DEBUG
-		printf("DIO pulse started: %d -> %d \n", portHandle, length);
+			printf("DIO pulse started: %d -> %d \n", portHandle, length);
 #endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("DIO handle direction is INPUT, cannot pulse: %d \n", portHandle);
+#endif
+		}
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("DIO handle not initialized: %d \n", portHandle);
@@ -711,6 +763,78 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 	}
 
 	BBB_setPWMValue(portHandle, (uint8_t)HAL_PWMSS_VALUE_TO_DUTY(duty));
+}
+
+void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return;
+	}
+
+	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
+
+		pwm_port_t* pwm = &pwm_ports[portHandle];
+		if(pwm->enabled){
+#ifdef HAL_USE_IO
+			pru_pwm_frequency_set(portHandle, frequency);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port set: %d -> %d \n", portHandle, value);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port not initialized: %d \n", portHandle);
+#endif
+		}
+
+		pthread_mutex_unlock(&io_mutex);
+	}
+	else{
+#ifdef HAL_BBB_DEBUG
+		printf("PWM port invalid: %d \n", portHandle);
+#endif
+	}
+}
+float BBB_getPWMFrequency(hal_handle_t portHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return 0.0f;
+	}
+
+	float val = 0;
+	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
+
+		pwm_port_t* pwm = &pwm_ports[portHandle];
+		if(pwm->enabled){
+#ifdef HAL_USE_IO
+			val = pru_pwm_frequency_get(portHandle);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port read: %d -> %d \n", portHandle, val);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port not initialized: %d \n", portHandle);
+#endif
+		}
+
+		pthread_mutex_unlock(&io_mutex);
+	}
+	else{
+#ifdef HAL_BBB_DEBUG
+		printf("PWM port invalid: %d \n", portHandle);
+#endif
+	}
+
+	return val;
 }
 
 } /* namespace hal */

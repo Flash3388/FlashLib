@@ -7,7 +7,7 @@
 
 #include <Analog.h>
 #include <platformexception.h>
-#include "../bbb/hal.h"
+#include "../../include/hal.h"
 
 namespace flashlib{
 

@@ -6,7 +6,7 @@
  */
 
 #include <PWM.h>
-#include "../bbb/hal.h"
+#include <hal.h>
 
 namespace flashlib{
 
@@ -31,6 +31,13 @@ void HAL_setPWMValue(hal_handle_t portHandle, uint8_t value){
 }
 uint8_t HAL_getPWMValue(hal_handle_t portHandle){
 	return BBB_getPWMValue(portHandle);
+}
+
+void HAL_setPWMFrequency(hal_handle_t portHandle, float frequency){
+	BBB_setPWMFrequency(portHandle, frequency);
+}
+float HAL_getPWMFrequency(hal_handle_t portHandle){
+	return BBB_getPWMFrequency(portHandle);
 }
 
 

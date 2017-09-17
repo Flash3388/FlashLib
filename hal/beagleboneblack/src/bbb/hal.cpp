@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 #include <bbb_defines.h>
+#include <hal.h>
 
-#include "hal.h"
 #include "iolib/BBBiolib.h"
 #include "iolib/BBBiolib_ADCTSC.h"
 #include "iolib/BBBiolib_PWMSS.h"
@@ -84,7 +84,11 @@ void* io_thread_function(void* param){
 			if(pulse->remaining_time <= 0){
 #ifdef HAL_USE_IO
 				pthread_mutex_lock(&io_mutex);
-				pin_low(pulse->dio_handle->header + 8, pulse->dio_handle->pin);
+				if(dio_map.count(it->first)){
+					dio_port_t* dio = dio_map[it->first].get();
+					if(dio->dir == BBB_DIR_OUTPUT)
+						pin_low(dio->header + 8, dio->pin);
+				}
 				pthread_mutex_unlock(&io_mutex);
 #endif
 				it = pulse_map.erase(it);
@@ -300,6 +304,13 @@ void BBB_freeDIOPort(hal_handle_t portHandle){
 
 	pthread_mutex_lock(&io_mutex);
 	if(dio_map.count(portHandle)){
+		pthread_mutex_lock(&pulse_map_mutex);
+		if(pulse_map.count(portHandle)){
+			dio_pulse_t* pulse = pulse_map[portHandle].get();
+			pulse->remaining_time = 0;
+		}
+		pthread_mutex_unlock(&pulse_map_mutex);
+
 		dio_port_t* dio = dio_map[portHandle].get();
 #ifdef HAL_USE_IO
 		pin_low(dio->header + 8, dio->pin);
@@ -355,10 +366,13 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 	}
 	pthread_mutex_unlock(&io_mutex);
 }
-void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
+void BBB_pulseDIO(hal_handle_t portHandle, float length){
 	if(!init){
 		return;
 	}
+
+	//TODO: CONVERT PULSE FROM SECONDS TO MICROSECONDS
+	uint32_t pulseus = (uint32_t)(length * 1000000);
 
 	pthread_mutex_lock(&io_mutex);
 	if(dio_map.count(portHandle)){
@@ -367,10 +381,11 @@ void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
 
 		if(pulse_map.count(portHandle)){
 			dio_pulse_t* pulse = pulse_map[portHandle].get();
-			pulse->remaining_time += length;
+			pulse->remaining_time += pulseus;
 #ifdef HAL_BBB_DEBUG
+			dio_port_t* dio = dio_map[portHandle].get();
 			printf("Pulse handle already in use, adding time: LEN= %d, HEADER= %d, PIN= %d \n",
-					pulse->remaining_time, pulse->dio_handle->header, pulse->dio_handle->pin);
+					pulse->remaining_time,dio->header, dio->pin);
 #endif
 		}else{
 			dio_port_t* dio = dio_map[portHandle].get();
@@ -382,8 +397,7 @@ void BBB_pulseDIO(hal_handle_t portHandle, uint32_t length){
 #endif
 
 				dio_pulse_t pulse;
-				pulse.dio_handle = dio;
-				pulse.remaining_time = length;
+				pulse.remaining_time = pulseus;
 				pulse_map.emplace(portHandle, std::make_shared<dio_pulse_t>(pulse));
 
 #ifdef HAL_BBB_DEBUG
@@ -757,6 +771,70 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 		printf("PWM port is invalid, out of range: %d \n", portHandle);
 #endif
 	}
+}
+
+void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency){
+	if(!init){
+		return;
+	}
+
+	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
+		pwm_port_t* pwm = &pwm_map[module];
+		if(pwm->enabledA || pwm->enabledB){
+			//TODO: LIMIT FREQUENCY
+			pwm->frequency = frequency;
+
+#ifdef HAL_USE_IO
+			BBBIO_PWMSS_Setting(module, pwm->frequency, pwm->dutyA, pwm->dutyB);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port set frequency: %f - MODULE= %d, PIN= %d \n", frequency, module, port);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("PWM ports are not enabled:  MODULE= %d \n", module);
+#endif
+		}
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("PWM port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+}
+float BBB_getPWMFrequency(hal_handle_t portHandle){
+	if(!init){
+		return 0.0f;
+	}
+
+	float frequency = 0.0f;
+	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
+		pwm_port_t* pwm = &pwm_map[module];
+		if(pwm->enabledA || pwm->enabledB){
+
+			frequency = pwm->frequency;
+
+#ifdef HAL_BBB_DEBUG
+			printf("PWM port get frequency: MODULE= %d, PIN= %d \n", frequency, module, port);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("PWM ports are not enabled:  MODULE= %d \n", module);
+#endif
+		}
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("PWM port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+
+	return frequency;
 }
 
 } /* namespace hal */

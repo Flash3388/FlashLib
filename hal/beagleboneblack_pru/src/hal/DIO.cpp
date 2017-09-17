@@ -7,7 +7,7 @@
 
 #include <DIO.h>
 #include "../../include/bbb_defines.h"
-#include "../bbb/hal.h"
+#include "../../include/hal.h"
 
 namespace flashlib{
 

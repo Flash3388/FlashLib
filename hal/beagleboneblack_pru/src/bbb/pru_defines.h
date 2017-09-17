@@ -20,9 +20,13 @@
 #define PRU_MEM_DIO_OFFSET      (0x30)
 
 
-#define PRU_ACTION_PORT_INIT    (0x1)
-#define PRU_ACTION_PORT_FREE    (0x2)
-#define PRU_ACTION_DIO_PULSE    (0x3)
+#define PRU_ACTION_SYS_FREE     (0x1)
+
+#define PRU_ACTION_PORT_INIT    (0x5)
+#define PRU_ACTION_PORT_FREE    (0x6)
+#define PRU_ACTION_DIO_PULSE    (0x7)
+#define PRU_ACTION_PWM_FREQ_S   (0x8)
+#define PRU_ACTION_PWM_FREQ_G   (0x9)
 
 #define PRU_HANDLE_DI           (0x1)
 #define PRU_HANDLE_DO           (0x2)
