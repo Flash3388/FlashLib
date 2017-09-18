@@ -45,16 +45,16 @@ public class PidDistanceActionPart extends PropertyAction implements PidAction{
 	
 	@Override
 	protected void initialize() {
-		valueProperty().set(0);
+		set(0);
 		pidcontroller.setEnabled(true);
 		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {
 		if(!pidcontroller.isEnabled() || inDistanceThreshold())
-			valueProperty().set(0);
+			set(0);
 		else {
-			valueProperty().set(-pidcontroller.calculate());
+			set(-pidcontroller.calculate());
 		}
 	}
 	@Override
@@ -63,7 +63,7 @@ public class PidDistanceActionPart extends PropertyAction implements PidAction{
 	}
 	@Override
 	protected void end() {
-		valueProperty().set(0);
+		set(0);
 	}
 	
 	public boolean inDistanceThreshold(){

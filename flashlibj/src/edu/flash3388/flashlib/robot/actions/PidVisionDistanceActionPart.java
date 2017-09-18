@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
@@ -28,8 +27,7 @@ public class PidVisionDistanceActionPart extends PidDistanceActionPart implement
 	@Override
 	public void execute() {
 		if(!getVision().hasNewAnalysis()){
-			valueProperty().set(0.0);
-			FlashUtil.getLog().log("Vision analysis timed out");
+			set(0.0);
 		}else super.execute();
 	}
 	

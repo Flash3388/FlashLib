@@ -45,15 +45,15 @@ public class PidRotationActionPart extends PropertyAction implements PidAction{
 	
 	@Override
 	protected void initialize() {
-		valueProperty().set(0);
+		set(0);
 		pidcontroller.setEnabled(true);
 		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {
 		if(!pidcontroller.isEnabled() || inRotationThreshold())
-			valueProperty().set(0);
-		else valueProperty().set(pidcontroller.calculate());
+			set(0);
+		else set(pidcontroller.calculate());
 	}
 	@Override
 	protected boolean isFinished() {
@@ -61,7 +61,7 @@ public class PidRotationActionPart extends PropertyAction implements PidAction{
 	}
 	@Override
 	protected void end() {
-		valueProperty().set(0);
+		set(0);
 	}
 	
 	public boolean inRotationThreshold(){

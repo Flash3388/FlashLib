@@ -61,7 +61,7 @@ public class ExampleTemplateMatching {
 		 * creating the template analysis creator with our parameters
 		 */
 		AnalysisCreator templateAnalisysCreator = new TemplateAnalysisCreator(path, method, scaleFactor
-				,realHeight, 0.0, fieldOfView, true);
+				,realHeight, 0.0, fieldOfView, true, true);
 		/*
 		 * Setting the processing's analysis creator the our template analysis creator
 		 */

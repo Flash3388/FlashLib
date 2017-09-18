@@ -29,4 +29,7 @@ public abstract class PropertyAction extends SourceAction {
 	public double get() {
 		return property.get();
 	}
+	public void set(double value){
+		property.set(value);
+	}
 }

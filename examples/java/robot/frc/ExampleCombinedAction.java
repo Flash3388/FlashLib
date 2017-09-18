@@ -33,6 +33,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 	DoubleProperty kp = ConstantsHandler.putNumber("kp", 0.0);
 	DoubleProperty ki = ConstantsHandler.putNumber("ki", 0.0);
 	DoubleProperty kd = ConstantsHandler.putNumber("kd", 0.0);
+	DoubleProperty kf = ConstantsHandler.putNumber("kf", 0.0);
 	DoubleProperty rsetpoint = ConstantsHandler.putNumber("rsetpoint", 0.0);
 	DoubleProperty dsetpoint = ConstantsHandler.putNumber("dsetpoint", 0.0);
 	
@@ -83,13 +84,13 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * from the Analysis class. We also used the vision built into flashboard.
 		 */
 		PidSource visionRotation = new PidSource.VisionPidSource(Flashboard.getVision(), true, false);
-		PidRotationActionPart ractionpart = new PidRotationActionPart(visionRotation, kp.get(), ki.get(), kd.get(), rsetpoint, 5.0);
+		PidRotationActionPart ractionpart = new PidRotationActionPart(visionRotation, kp, ki, kd, kf, rsetpoint, 5.0);
 		/*
 		 * Rotation to an angle using a gyro. This class allows 2 angle rotation types:
 		 * - Relative: rotates a given angle relative to the current one. i.e the current angle is considered as 0.
 		 * - Absolute: rotates to a given angle relative to the gyro-defined 0 angle. 
 		 */
-		GyroRotationActionPart gyroRotation = new GyroRotationActionPart(gyro, kp.get(), ki.get(), kd.get(), rsetpoint, 5.0);
+		GyroRotationActionPart gyroRotation = new GyroRotationActionPart(gyro, kp, ki, kd, kf, rsetpoint, 5.0);
 		
 		/*
 		 * Create a general class which uses a PID loop to perform the distance part. By using different PidSource we
@@ -98,7 +99,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * attempt to reach a certain distance from the target an remain within the given margin.
 		 */
 		PidSource sonicSource = new PidSource.DoubleSourcePidSource(sonicData);
-		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp.get(), ki.get(), kd.get(), dsetpoint, 15.0);
+		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp, ki, kd, kf, dsetpoint, 15.0);
 		
 		/*
 		 * We can create a combined action for tankdrives and use the action parts we have created. Just use this like
