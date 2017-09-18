@@ -247,29 +247,9 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 */
 	@Override
 	public void arcadeDrive(double moveValue, double rotateValue){
-		double rSpeed = 0, lSpeed = 0;
-		
-		if (moveValue > 0.0) {
-  	      if (rotateValue > 0.0) {
-  	    	  lSpeed = moveValue - rotateValue;
-  	    	  rSpeed = Math.max(moveValue, rotateValue);
-  	      } else {
-  	    	  lSpeed = Math.max(moveValue, -rotateValue);
-  	    	  rSpeed = moveValue + rotateValue;
-  	      }
-  	    } else {
-  	      if (rotateValue > 0.0) {
-  	    	  lSpeed = -Math.max(-moveValue, rotateValue);
-  	    	  rSpeed = moveValue + rotateValue;
-  	      } else {
-  	    	  lSpeed = moveValue - rotateValue;
-  	    	  rSpeed = -Math.max(-moveValue, -rotateValue);
-  	      }
-  	    }
-		
-		setMotors(0, rSpeed, lSpeed, 0);
+		double[] values = calculate_arcadeDrive(moveValue, rotateValue);
+		setMotors(0, values[0], values[1], 0);
 	}
-	
 	/**
 	 * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values 
 	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
@@ -380,23 +360,6 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		arcadeDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(rotate_axis), squared);
 	}
 	
-	public void vectoredTankDrive(double moveValue, double rotateValue){
-		double right = moveValue, left = moveValue;
-		
-		if(rotateValue > 0){
-			rotateValue = Math.abs(rotateValue);
-			right -= rotateValue;
-			left += rotateValue;
-		}
-		else if(rotateValue < 0){
-			rotateValue = Math.abs(rotateValue);
-			right += rotateValue;
-			left -= rotateValue;
-		}
-		
-		setMotors(0, right, left, 0);
-	}
-	
 	/**
 	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
 	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
@@ -503,51 +466,13 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * 
 	 * @param y y-axis value of the vector
 	 * @param x x-axis value of the vector
-	 * @param rotate rotation value
+	 * @param rotation rotation value
 	 * 
 	 * @see #arcadeDrive(double, double)
 	 */
-	public void vectoredOmniDrive_Cartesian(double y, double x, double rotate){
-		double right = 0, left = 0, front = 0, rear = 0;
-		
-		if (y > 0.0) {
-  	      	if (rotate > 0.0) {
-  	    	  left = y - rotate;
-  	    	  right = Math.max(y, rotate);
-  	      	} else {
-  	    	  left = Math.max(y, -rotate);
-  	    	  right = y + rotate;
-  	      	}
-  	    } else {
-  	    	if (rotate > 0.0) {
-  	    	    left = -Math.max(-y, rotate);
-  	    	    right = y + rotate;
-  	    	} else {
-  	    		left = y - rotate;
-  	    		right = -Math.max(-y, -rotate);
-  	    	}
-  	    }
-			
-		
-		if (x > 0.0) {
-			if (rotate > 0.0) {
-  	    	  rear = x - rotate;
-  	    	  front = Math.max(x, rotate);
-  	      	} else {
-  	    	  rear = Math.max(x, -rotate);
-  	    	  front = x + rotate;
-  	      	}
-  	    }else{
-	    	if (rotate > 0.0) {
-	    		rear = -Math.max(-x, rotate);
-  	    	    front = x + rotate;
-  	    	} else {
-  	    		rear = x - rotate;
-  	    		front = -Math.max(-x, -rotate);
-  	    	}
-  	    }
-		
-		setMotors(front, right, left, rear);
+	public void vectoredOmniDrive_cartesian(double y, double x, double rotation){
+		double[] values = calculate_vectoredOmniDrive_cartesian(y, x, rotation);
+		setMotors(values[0], values[1], values[2], values[3]);
 	}
 	
 	/**
@@ -647,12 +572,12 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * <p>
 	 * Moves the drive system as an omni drive system.
 	 * </p>
-	 * @see #vectoredOmniDrive_Cartesian(double, double, double)
+	 * @see #vectoredOmniDrive_cartesian(double, double, double)
 	 */
 	@Override
 	public void holonomicCartesian(double x, double y, double rotation) {
 		//implement for omni drive
-		vectoredOmniDrive_Cartesian(y, x, rotation);
+		vectoredOmniDrive_cartesian(y, x, rotation);
 	}
 	/**
 	 * {@inheritDoc}
@@ -759,5 +684,110 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	@Override
 	public boolean isVoltageScaling() {
 		return voltageScaling;
+	}
+	
+	/**
+	 * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values 
+	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
+	 * rotate value is responsible for the robot rotation. 
+	 * 
+	 * 	 * <p>
+	 * This method calculates the outputs to the motors and returns them as an array. They array will contain
+	 * values for 2 sides in the following order: right, left.
+	 * </p>
+	 * 
+	 * @param moveValue The value to move forward or backward 1 to -1.
+	 * @param rotateValue The value to rotate right or left 1 to -1.
+	 * 
+	 * @return returns an array of 4 with the motor output values in this order: right, left.
+	 */
+	public static double[] calculate_arcadeDrive(double moveValue, double rotateValue){
+		double rSpeed = 0, lSpeed = 0;
+		
+		if (moveValue > 0.0) {
+			if (rotateValue > 0.0) {
+				lSpeed = moveValue - rotateValue;
+				rSpeed = Math.max(moveValue, rotateValue);
+			} else {
+				lSpeed = Math.max(moveValue, -rotateValue);
+				rSpeed = moveValue + rotateValue;
+			}
+	    } else {
+			if (rotateValue > 0.0) {
+				lSpeed = -Math.max(-moveValue, rotateValue);
+				rSpeed = moveValue + rotateValue;
+			} else {
+				lSpeed = moveValue - rotateValue;
+				rSpeed = -Math.max(-moveValue, -rotateValue);
+			}
+	    }
+		
+		return new double[] {rSpeed, lSpeed};
+	}
+	/**
+	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
+	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
+	 * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
+	 * the X value to move the wheels in the front and back.
+	 * 
+	 * <p>
+	 * Vectored tank drive is an experimental omni control which uses a motion vector just like Mecanum drive.
+	 * The control algorithm derives from arcade drive.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method calculates the outputs to the motors and returns them as an array. They array will contain
+	 * values for 4 sides in the following order: front, right, left, back.
+	 * </p>
+	 * 
+	 * @param y y-axis value of the vector
+	 * @param x x-axis value of the vector
+	 * @param rotation rotation value
+	 * 
+	 * @return returns an array of 4 with the motor output values in this order: front, right, left, back.
+	 * 
+	 * @see #arcadeDrive(double, double)
+	 */
+	public static double[] calculate_vectoredOmniDrive_cartesian(double y, double x, double rotation){
+		double right = 0, left = 0, front = 0, rear = 0;
+		
+		if (y > 0.0) {
+  	      	if (rotation > 0.0) {
+  	    	  left = y - rotation;
+  	    	  right = Math.max(y, rotation);
+  	      	} else {
+  	    	  left = Math.max(y, -rotation);
+  	    	  right = y + rotation;
+  	      	}
+  	    } else {
+  	    	if (rotation > 0.0) {
+  	    	    left = -Math.max(-y, rotation);
+  	    	    right = y + rotation;
+  	    	} else {
+  	    		left = y - rotation;
+  	    		right = -Math.max(-y, -rotation);
+  	    	}
+  	    }
+			
+		
+		if (x > 0.0) {
+			if (rotation > 0.0) {
+  	    	  rear = x - rotation;
+  	    	  front = Math.max(x, rotation);
+  	      	} else {
+  	    	  rear = Math.max(x, -rotation);
+  	    	  front = x + rotation;
+  	      	}
+  	    }else{
+	    	if (rotation > 0.0) {
+	    		rear = -Math.max(-x, rotation);
+  	    	    front = x + rotation;
+  	    	} else {
+  	    		rear = x - rotation;
+  	    		front = -Math.max(-x, -rotation);
+  	    	}
+  	    }
+		
+		return new double[] {front, right, left, rear};
 	}
 }

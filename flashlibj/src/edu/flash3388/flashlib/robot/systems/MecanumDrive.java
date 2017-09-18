@@ -284,20 +284,8 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 			}
 		}
 		
-		double dirInRad = Math.toRadians(direction + 45.0);
-		double cosD = Math.cos(dirInRad);
-		double sinD = Math.sin(dirInRad);
-		
-		double wheelSpeeds[] = { 
-				(sinD * magnitude + rotation), // front left
-				(cosD * magnitude - rotation), // front right
-				(cosD * magnitude + rotation), // rear left
-				(sinD * magnitude - rotation),// rear right
-		};
-
-		normalize(wheelSpeeds);
-
-		setMotors(-wheelSpeeds[1], -wheelSpeeds[3], wheelSpeeds[0], wheelSpeeds[2]);
+		double[] wheelSpeeds = calculate_mecanumDrive_Polar(magnitude, direction, rotation);
+		setMotors(-wheelSpeeds[0], -wheelSpeeds[2], wheelSpeeds[1], wheelSpeeds[3]);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -434,18 +422,6 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
 		return speed;
 	}
-	private void normalize(double wheelSpeeds[]) {
-		double maxMagnitude = Math.abs(wheelSpeeds[0]);
-		for (int i = 1; i < 4; i++) {
-			double temp = Math.abs(wheelSpeeds[i]);
-			if (maxMagnitude < temp)
-				maxMagnitude = temp;
-		}
-		if (maxMagnitude > 1.0) {
-			for (int i = 0; i < 4; i++)
-				wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
-		}
-	}
 	
 	/**
 	 * {@inheritDoc}
@@ -580,5 +556,56 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	@Override
 	public void enableVoltageScaling(boolean en) {
 		voltageScaling = en;
+	}
+	
+	
+	private static void normalize(double wheelSpeeds[]) {
+		double maxMagnitude = Math.abs(wheelSpeeds[0]);
+		for (int i = 1; i < 4; i++) {
+			double temp = Math.abs(wheelSpeeds[i]);
+			if (maxMagnitude < temp)
+				maxMagnitude = temp;
+		}
+		if (maxMagnitude > 1.0) {
+			for (int i = 0; i < 4; i++)
+				wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
+		}
+	}
+	
+	/**
+	 * Mecanum drive is a type of holonomic drive base; meaning that it applies the force of the wheel at
+	 * a 45 angle to the robot instead of on one of its axes. By applying the force at an angle to the robot, you
+	 * can vary the magnitude of the force vectors to gain translational control of the robot; aka, the robot can
+	 * move in any direction while keeping the front of the robot in a constant compass direction. This differs
+	 * from the basic robot drive systems like arcade drive, tank drive, or shopping cart drive require you to
+	 * turn the front of the robot to travel in another direction.
+	 * 
+	 * <p>
+	 * This method calculates the outputs to the motors and returns them as an array. They array will contain
+	 * values for 4 sides in the following order: front right, front left, rear right, rear left.
+	 * </p>
+	 *
+	 * @param magnitude the magnitude of the vector [0...1]
+	 * @param direction the direction of the vector in degrees [0...360]
+	 * @param rotation rotation value [-1...1], -1 for left, 1 for right
+	 * 
+	 * @return returns an array of 4 with the motor output values in this order: front right, front left, rear right, rear left.
+	 */
+	public static double[] calculate_mecanumDrive_Polar(double magnitude, double direction, double rotation){
+		
+		double dirInRad = Math.toRadians(direction + 45.0);
+		double cosD = Math.cos(dirInRad);
+		double sinD = Math.sin(dirInRad);
+
+		double wheelSpeeds[] = { 
+				(cosD * magnitude - rotation), // front right
+				(sinD * magnitude + rotation), // front left
+				(sinD * magnitude - rotation),// rear right
+				(cosD * magnitude + rotation), // rear left
+		};
+
+		normalize(wheelSpeeds);
+		
+		return wheelSpeeds;
 	}
 }
