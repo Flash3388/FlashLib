@@ -25,9 +25,8 @@ public class TankCombinedAction extends CombinedAction{
 		add(rotation);
 		add(positioning);
 		
-		Subsystem s = driveTrain.getSystem();
-		if(s != null)
-			requires(s);
+		if(driveTrain instanceof Subsystem)
+			requires((Subsystem)driveTrain);
 	}
 	public TankCombinedAction(TankDriveSystem driveTrain, 
 			SourceAction positioning, SourceAction rotation){

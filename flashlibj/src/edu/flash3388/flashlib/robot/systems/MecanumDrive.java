@@ -36,7 +36,7 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * @see <a href="https://en.wikipedia.org/wiki/Mecanum_wheel">https://en.wikipedia.org/wiki/Mecanum_wheel</a>
  * @see <a href="http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf">http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf</a>
  */
-public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
+public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, ModableMotor, VoltageScalable {
 
 	/**
 	 * Because the Mecanum drive is so sensitive to weight distributions and motor output differences, it
@@ -541,16 +541,6 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 		front_right.set(0);
 		rear_right.set(0);
 		rear_left.set(0);
-	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns this instance.
-	 * </p>
-	 */
-	@Override
-	public Subsystem getSystem() {
-		return this;
 	}
 
 	/**

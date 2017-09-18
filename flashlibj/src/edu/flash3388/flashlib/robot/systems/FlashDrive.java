@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.robot.hid.Stick;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicDriveSystem{
+public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicDriveSystem, ModableMotor, VoltageScalable{
 
 	/**
 	 * Represents sides of the drive system.
@@ -715,17 +715,6 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		if(speed_limit != 1.0)
 			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
 		return speed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns this instance.
-	 * </p>
-	 */
-	@Override
-	public Subsystem getSystem() {
-		return this;
 	}
 
 	/**

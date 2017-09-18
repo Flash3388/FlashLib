@@ -27,9 +27,8 @@ public class HolonomicCombinedAction extends CombinedAction{
 		add(rotation);
 		add(positioning);
 		
-		Subsystem s = driveTrain.getSystem();
-		if(s != null)
-			requires(s);
+		if(driveTrain instanceof Subsystem)
+			requires((Subsystem)driveTrain);
 	}
 	public HolonomicCombinedAction(HolonomicDriveSystem driveTrain, 
 			SourceAction positioning, SourceAction rotation, boolean rotate){

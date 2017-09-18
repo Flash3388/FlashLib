@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.Subsystem;
-
 /**
  * Interface for object with the capability to move along the x-axis.
  * 
@@ -45,9 +43,4 @@ public interface XAxisMovable {
 	 * Stops the system.
 	 */
 	void stop();
-	/**
-	 * Gets the {@link Subsystem} object for this system to use with actions.
-	 * @return the system object
-	 */
-	Subsystem getSystem();
 }

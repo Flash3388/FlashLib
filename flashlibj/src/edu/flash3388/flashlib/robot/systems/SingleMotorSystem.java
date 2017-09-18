@@ -173,16 +173,6 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * Returns this instance.
-	 * </p>
-	 */
-	@Override
-	public Subsystem getSystem() {
-		return this;
-	}
-	/**
-	 * {@inheritDoc}
 	 */
 	@Override
 	public void enableVoltageScaling(boolean en) {
