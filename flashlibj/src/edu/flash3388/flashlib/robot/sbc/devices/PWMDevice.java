@@ -13,6 +13,8 @@ public class PWMDevice {
 		this(new PWM(port));
 	}
 	public PWMDevice(PWM port) {
+		if(port == null)
+			throw new NullPointerException("PWM port is null");
 		this.port = port;
 	}
 	
