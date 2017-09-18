@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <pthread.h>
 #include <memory>
+#include <unistd.h>
 
 #include "../../include/bbb_defines.h"
 #include "../../include/hal.h"
@@ -31,8 +32,17 @@ pwm_port_t pwm_ports[HAL_PWMSS_PORTS_COUNT];
 adc_port_t adc_ports[BBB_ADC_CHANNEL_COUNT];
 
 pthread_mutex_t io_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t watchdog_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct thread_data{
+	bool run = true;
+} thread_data_t;
+
+thread_data_t watchdog_thread_data;
+pthread_t watchdog_thread;
 
 pru_data_t pru_data;
+int pru_watchdog_error;
 
 bool init = false;
 
@@ -43,6 +53,86 @@ const char* pru_program_name = HAL_PRU_PROGRAM;
 \***********************************************************************/
 
 #ifdef HAL_USE_IO
+void* pru_watchdog_function(void* param){
+
+	thread_data_t data;
+	unsigned int last_value = 0;
+	unsigned int new_value;
+
+	int errors = 0;
+
+	while(data.run){
+
+
+		pthread_mutex_lock(&io_mutex);
+
+		new_value = pru_data.shared_memory[PRU_MEM_STATUS_REG];
+		if(new_value <= last_value && (++errors) >= 3){
+
+			//TODO: HANDLE PRU_UPDATE_ERROR
+			pru_watchdog_error = WATCHDOG_PRU_UPDATE_ERROR;
+
+			pthread_mutex_lock(&watchdog_mutex);
+			data.run = false;
+			watchdog_thread_data.run = false;
+			pthread_mutex_unlock(&watchdog_mutex);
+
+		}else{
+			last_value = new_value;
+			errors = 0;
+		}
+
+		pthread_mutex_unlock(&io_mutex);
+
+		usleep(PRU_WATCHDOG_UPDATE);
+
+		pthread_mutex_lock(&watchdog_mutex);
+		data.run = watchdog_thread_data.run;
+		pthread_mutex_unlock(&watchdog_mutex);
+	}
+
+	return NULL;
+}
+
+void pru_interrupt_wait(){
+	int res = pru_interrupt_wait(&pru_data, PRU_EVT_WAIT_TIMEOUT);
+	if(res == 0){
+#ifdef HAL_BBB_DEBUG
+		printf("PRU EVENT WAIT TIMEDOUT!!! \n");
+#endif
+
+		//TODO: HANDLE PRU_NOT_RESPONSIVE
+		pru_watchdog_error = WATCHDOG_PRU_NOT_RESPONSIVE;
+	}
+}
+
+void pru_pwm_calc_divisors(float hz, unsigned char* clkdiv, unsigned char* hspclkdiv){
+	const float CLKDIV[] = {1.0f ,2.0f ,4.0f ,8.0f ,16.0f ,32.0f , 64.0f , 128.0f};
+	const float HSPCLKDIV[] = {1.0f ,2.0f ,4.0f ,6.0f ,8.0f ,10.0f , 12.0f , 14.0f};
+
+	float cyclens = 0.0f;
+	float divisor = 0.0f;
+	int i, j;
+
+	unsigned char closest_clkdiv = 7, closest_hspclkdiv = 7;
+
+	cyclens = 1000000000.0f / hz ;
+	divisor =  cyclens / 655350.0f;
+
+	for(i = 0 ; i < 8 ; ++i) {
+		for(j = 0 ; j < 8 ; ++j) {
+			if((CLKDIV[i] * HSPCLKDIV[j]) < (CLKDIV[closest_clkdiv] * HSPCLKDIV[closest_hspclkdiv]) &&
+			  ((CLKDIV[i] * HSPCLKDIV[j]) > divisor)){
+				closest_clkdiv = i;
+				closest_hspclkdiv = j;
+			}
+		}
+	}
+
+	*clkdiv = closest_clkdiv;
+	*hspclkdiv = closest_hspclkdiv;
+}
+
 int pru_initialize(){
 	return pru_initialize(&pru_data, HAL_PRU_NUM, pru_program_name);
 }
@@ -50,7 +140,7 @@ void pru_shutdown(){
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_SYS_FREE;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 
 	pru_shutdown(&pru_data);
 }
@@ -63,7 +153,7 @@ hal_handle_t pru_dio_initialize(uint16_t port, uint8_t dir, dio_port_t* dio){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = port;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 
 	hal_handle_t handle = (hal_handle_t)pru_data.shared_memory[PRU_MEM_HANDLE_RES_REG];
 
@@ -80,7 +170,7 @@ void pru_dio_free(hal_handle_t handle, uint8_t dir){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 }
 void pru_dio_pulse(hal_handle_t handle, float length){
 	//TODO: CONVERT PULSE
@@ -91,7 +181,7 @@ void pru_dio_pulse(hal_handle_t handle, float length){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 }
 void pru_dio_set(dio_port_t* port, uint8_t value){
 	pru_data.shared_memory[port->val_addr_offset] = value;
@@ -108,7 +198,7 @@ hal_handle_t pru_adc_initialize(uint8_t channel, adc_port_t* adc){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = channel;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait(&pru_data, PRU_EVT_WAIT_TIMEOUT);
 
 	hal_handle_t handle = (hal_handle_t)pru_data.shared_memory[PRU_MEM_HANDLE_RES_REG];
 
@@ -125,7 +215,7 @@ void pru_adc_free(hal_handle_t handle){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 }
 uint32_t pru_adc_get(adc_port_t* adc){
 	return (uint32_t)pru_data.shared_memory[adc->val_addr_offset];
@@ -139,7 +229,7 @@ hal_handle_t pru_pwm_initialize(uint8_t channel, pwm_port_t* pwm){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = channel;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 
 	hal_handle_t handle = (hal_handle_t)pru_data.shared_memory[PRU_MEM_HANDLE_RES_REG];
 
@@ -156,7 +246,7 @@ void pru_pwm_free(hal_handle_t handle){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
+	pru_interrupt_wait();
 }
 void pru_pwm_set(pwm_port_t* pwm, uint8_t val){
 	pru_data.shared_memory[pwm->val_addr_offset] = val;
@@ -165,27 +255,17 @@ uint8_t pru_pwm_get(pwm_port_t* pwm){
 	return (uint8_t)pru_data.shared_memory[pwm->val_addr_offset];
 }
 void pru_pwm_frequency_set(hal_handle_t handle, float frequency){
-	//TODO: CONVERT FREQUENCY
-	uint32_t cfreq = 0;
+	unsigned char clkdiv;
+	unsigned char hspclkdiv;
+
+	pru_pwm_calc_divisors(frequency, &clkdiv, &hspclkdiv);
 
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PWM_FREQ_S;
-	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = cfreq;
+	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = clkdiv | (hspclkdiv << 8);
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
-}
-float pru_pwm_frequency_get(hal_handle_t handle){
-	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PWM_FREQ_G;
-	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
-
-	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data);
-
-	uint32_t freq = pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG];
-	//TODO: CONVERT FREQUENCY VALUE
-	float cfreq = 0.0f;
-	return cfreq;
+	pru_interrupt_wait();
 }
 
 #endif
@@ -223,6 +303,19 @@ int BBB_initialize(int mode){
 		return -1;
 	}
 
+#ifdef HAL_USE_IO
+	status = pthread_create(&watchdog_thread, NULL, &pru_watchdog_function, NULL);
+	if(status){
+		//TODO: ERROR
+#ifdef HAL_BBB_DEBUG
+		printf("Failed to initializing IO thread \n");
+#endif
+		return -1;
+	}
+
+#endif
+	pru_watchdog_error = 0;
+
 	init = true;
 	return 0;
 }
@@ -235,15 +328,52 @@ void BBB_shutdown(){
 		return;
 	}
 
+#ifdef HAL_USE_IO
+#ifdef HAL_BBB_DEBUG
+	printf("Stopping watchdog thread \n");
+#endif
+
+
+	pthread_mutex_lock(&watchdog_mutex);
+	watchdog_thread_data.run = false;
+	pthread_mutex_unlock(&watchdog_mutex);
+
+	pthread_join(watchdog_thread, NULL);
+
+	pthread_mutex_destroy(&watchdog_mutex);
+#endif
+
+#ifdef HAL_USE_IO
 #ifdef HAL_BBB_DEBUG
 	printf("HAL shutting down \n");
 #endif
 
-#ifdef HAL_USE_IO
 	pthread_mutex_lock(&io_mutex);
 	pru_shutdown();
 	pthread_mutex_unlock(&io_mutex);
 #endif
+
+
+#ifdef HAL_BBB_DEBUG
+	printf("Clearing handles \n");
+#endif
+
+	pthread_mutex_lock(&io_mutex);
+	//clear pwm handles
+	for(int i = 0; i < HAL_PWMSS_PORTS_COUNT; ++i){
+		pwm_port_t* pwm = &pwm_ports[i];
+		pwm->enabled = false;
+		pwm->val_addr_offset = PRU_MEM_PWM_EMPTY;
+	}
+	//clear adc handles
+	for(int i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
+		adc_port_t* adc = &adc_ports[i];
+		adc->enabled = false;
+		adc->val_addr_offset = PRU_MEM_ADC_EMPTY;
+	}
+	//clear dio handles
+	dio_ports.clear();
+	pthread_mutex_unlock(&io_mutex);
 
 	pthread_mutex_destroy(&io_mutex);
 
@@ -290,7 +420,7 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 			printf("DIO direction does not match initialized direction: %d != %d \n", dir, dio->dir);
 #endif
 		}
-	}else if(port >= 0){
+	}else if(port > 0){
 		dio_port_t dio;
 		dio.dir = dir;
 
@@ -399,6 +529,7 @@ void BBB_pulseDIO(hal_handle_t portHandle, float length){
 
 		if(dio->dir == BBB_DIR_OUTPUT){
 #ifdef HAL_USE_IO
+			pru_dio_set(dio, BBB_GPIO_HIGH);
 			pru_dio_pulse(portHandle, length);
 #endif
 
@@ -781,6 +912,7 @@ void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency){
 #ifdef HAL_USE_IO
 			pru_pwm_frequency_set(portHandle, frequency);
 #endif
+			pwm->frequency = frequency;
 
 #ifdef HAL_BBB_DEBUG
 			printf("PWM port set: %d -> %d \n", portHandle, value);
@@ -813,9 +945,7 @@ float BBB_getPWMFrequency(hal_handle_t portHandle){
 
 		pwm_port_t* pwm = &pwm_ports[portHandle];
 		if(pwm->enabled){
-#ifdef HAL_USE_IO
-			val = pru_pwm_frequency_get(portHandle);
-#endif
+			val = pwm->frequency;
 
 #ifdef HAL_BBB_DEBUG
 			printf("PWM port read: %d -> %d \n", portHandle, val);

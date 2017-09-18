@@ -103,11 +103,13 @@ void* io_thread_function(void* param){
 		adc_ms_passed = std::chrono::duration_cast<std::chrono::milliseconds>(adc_elapsed).count();
 		if(adc_ms_passed >= HAL_AIN_SMAPLING_RATE){
 			pthread_mutex_lock(&adc_sampling_mutex);
+#ifdef HAL_USE_IO
+			BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
+#endif
 			for(adc_idx = 0; adc_idx < BBB_ADC_CHANNEL_COUNT; ++adc_idx){
 				adc_port_t adc = adc_map[adc_idx];
 				if(adc.enabled){
 #ifdef HAL_USE_IO
-					BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
 					adc_smpl_val = 0;
 					for(adc_smpl_idx = 0; adc_smpl_idx < HAL_AIN_SAMPLING_SIZE; ++adc_smpl_idx){
 						adc_smpl_val += adc.sample_buffer[adc_smpl_idx];
@@ -191,24 +193,63 @@ void BBB_shutdown(){
 	printf("Shutting down IO thread \n");
 #endif
 
-	pthread_mutex_lock(&io_mutex);
-
 	//TODO: KILL THREAD IF IO INIT WAS SUCCESSFUL
 	pthread_mutex_lock(&thread_param_mutex);
 	io_thread_data.run = false;
 	pthread_mutex_unlock(&thread_param_mutex);
 
 #ifdef HAL_USE_THREAD
+	pthread_mutex_lock(&io_mutex);
 	pthread_join(io_thread, NULL);
+	pthread_mutex_unlock(&io_mutex);
 #endif
+
+	pulse_map.clear();
+
+#ifdef HAL_BBB_DEBUG
+	printf("Clearing PWM handles \n");
+#endif
+
+	//clear pwm handles
+	for(int i = 0; i < BBB_PWMSS_MODULE_COUNT; ++i){
+		pwm_port_t* pwm = &pwm_map[i];
+
+		BBB_freePWMPort(BBB_PWMSS_PORT(i, 0));
+		BBB_freePWMPort(BBB_PWMSS_PORT(i, 1));
+
+		pwm->frequency = 0.0f;
+	}
+
+#ifdef HAL_BBB_DEBUG
+	printf("Clearing ADC handles \n");
+#endif
+
+	//clear adc handles
+	for(int i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
+		adc_port_t* adc = &adc_map[i];
+
+		BBB_freeAnalogInput(i);
+	}
+
+#ifdef HAL_BBB_DEBUG
+	printf("Clearing DIO handles \n");
+#endif
+
+	//clear dio handles
+	for(auto it = dio_map.begin(); it != dio_map.end();){
+		dio_port_t* dio = it->second.get();
+
+#ifdef HAL_USE_IO
+		pin_low(dio->header + 8, dio->pin);
+#endif
+
+		it = dio_map.erase(it);
+	}
+	dio_map.clear();
 
 	pthread_mutex_destroy(&pulse_map_mutex);
 	pthread_mutex_destroy(&adc_sampling_mutex);
 	pthread_mutex_destroy(&thread_param_mutex);
-
-	dio_map.clear();
-	pulse_map.clear();
-
 
 #ifdef HAL_USE_IO
 
@@ -216,11 +257,12 @@ void BBB_shutdown(){
 	printf("Shutting down BBBIOLib \n");
 #endif
 
+	pthread_mutex_lock(&io_mutex);
 	iolib_free();
-
+	pthread_mutex_unlock(&io_mutex);
 #endif
 
-	pthread_mutex_unlock(&io_mutex);
+
 	pthread_mutex_destroy(&io_mutex);
 
 	init = false;
@@ -255,7 +297,7 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 			printf("Wanted direction doesn't match already used direction: %d != %d \n", dir, dio->dir);
 #endif
 		}
-	}else if(port >= 0){
+	}else if(port > 0){
 		//TODO: CREATE DIO HANDLE AND ADD TO MAP. ALSO CHECK IF PORT MATCHES
 		dio_port_t dio;
 		dio.header = BBB_GPIO_PORT_TO_HEADER(port);
@@ -510,6 +552,8 @@ void BBB_freeAnalogInput(hal_handle_t portHandle){
 		if(adc->enabled){
 			adc->enabled = 0;
 			//TODO: STOP ADC CHANNEL
+			adc->value = 0;
+
 #ifdef HAL_USE_IO
 			BBBIO_ADCTSC_channel_disable(portHandle);
 #endif

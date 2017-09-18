@@ -511,7 +511,7 @@ unsigned int prussdrv_pru_wait_event_timeout(unsigned int host_interrupt, int ti
 
     rv = select(prussdrv.fd[host_interrupt] + 1, &set, NULL, NULL, &timeout);
     if (rv == -1)
-        return -1;
+        return 0;
 
     else if(rv == 0)
         return 0;

@@ -554,9 +554,8 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void moveY(double speed, boolean direction){
-		if(direction) forward(speed);
-		else backward(speed);
+	public void moveY(double speed) {
+		setMotors(0.0, speed, speed, 0.0);
 	}
 	
 	/**
@@ -566,14 +565,6 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 */
 	public void forward(double r, double l){
 		setMotors(0, r, l, 0);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void forward(double speed){
-		forward(speed, speed);
 	}
 	/**
 	 * Moves the system forward at the default speed.
@@ -590,28 +581,16 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		setMotors(0, -r, -l, 0);
 	}
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void backward(double speed){
-		backward(speed, speed);
-	}
-	/**
 	 * Moves the system backwards at the default speed.
 	 */
 	public void backward(){
 		backward(default_speed);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public void moveX(double speed, boolean direction){
-		if(direction) right(speed);
-		else left(speed);
+	public void moveX(double speed) {
+		setMotors(speed, 0.0, 0.0, speed);
 	}
-	
 	/**
 	 * Sets the front and rear motors with speeds to move right.
 	 * @param r value for rear [0...1]
@@ -619,13 +598,6 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 */
 	public void right(double f, double r){
 		setMotors(f, 0, 0, r);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void right(double speed){
-		right(speed, speed);
 	}
 	/**
 	 * Moves the system right at the default speed.
@@ -643,48 +615,25 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		setMotors(-f, 0, 0, -r);
 	}
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void left(double speed){
-		left(speed, speed);
-	}
-	/**
 	 * Moves the system left at the default speed.
 	 */
 	public void left(){
 		left(default_speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void rotate(double speed, boolean direction){
-		if(!direction) 
-			speed = -speed;
-		
-		setMotors(-speed, -speed, speed, speed);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override 
-	public void rotateRight(double speed){
-		rotate(speed, true);
+	public void rotate(double speed){
+		setMotors(-speed, -speed, speed, speed);
 	}
+
 	/**
 	 * Rotates the system right at the default speed.
 	 */
 	public void rotateRight(){
 		rotateRight(default_speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override 
-	public void rotateLeft(double speed){
-		rotate(speed, false); 
 	}
 	/**
 	 * Rotates the system left at the default speed.

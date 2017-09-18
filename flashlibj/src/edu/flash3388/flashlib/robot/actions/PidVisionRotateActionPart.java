@@ -39,7 +39,7 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	@Override
 	public void execute() {
 		if(!getVision().hasNewAnalysis()){
-			dataSource.set(0.0);
+			valueProperty().set(0.0);
 			FlashUtil.getLog().log("Vision analysis timedout");
 		}else super.execute();
 	}

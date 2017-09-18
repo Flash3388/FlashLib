@@ -15,6 +15,9 @@ namespace flashlib{
 
 namespace hal{
 
+#define WATCHDOG_PRU_NOT_RESPONSIVE   (1)
+#define WATCHDOG_PRU_UPDATE_ERROR     (2)
+
 
 int BBB_initialize(int mode);
 void BBB_shutdown();

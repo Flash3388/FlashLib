@@ -28,7 +28,7 @@ public class PidVisionDistanceActionPart extends PidDistanceActionPart implement
 	@Override
 	public void execute() {
 		if(!getVision().hasNewAnalysis()){
-			dataSource.set(0.0);
+			valueProperty().set(0.0);
 			FlashUtil.getLog().log("Vision analysis timed out");
 		}else super.execute();
 	}

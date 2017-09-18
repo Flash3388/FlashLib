@@ -47,10 +47,14 @@ void pru_shutdown(pru_data_t* pru_data){
 	prussdrv_exit();
 }
 
-void pru_interrupt_wait(pru_data_t* pru_data){
-	prussdrv_pru_wait_event(PRU_EVTOUT_0);
+unsigned int pru_interrupt_wait(pru_data_t* pru_data, int us){
+	unsigned int rv = prussdrv_pru_wait_event_timeout(PRU_EVTOUT_0, us);
+	if(rv == 0)
+		return 0;
+
 	prussdrv_pru_clear_event(PRU_EVTOUT_0,  pru_data->prunum == 0? PRU0_ARM_INTERRUPT : PRU1_ARM_INTERRUPT);
+	return rv;
 }
-void pru_interrupt_send(pru_data_t* pru_data){
-	prussdrv_pru_send_event(pru_data->prunum? ARM_PRU0_INTERRUPT : ARM_PRU1_INTERRUPT);
+int pru_interrupt_send(pru_data_t* pru_data){
+	return prussdrv_pru_send_event(pru_data->prunum? ARM_PRU0_INTERRUPT : ARM_PRU1_INTERRUPT);
 }

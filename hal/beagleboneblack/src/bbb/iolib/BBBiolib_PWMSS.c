@@ -272,7 +272,7 @@ int BBBIO_PWMSS_Setting(unsigned int PWMID , float HZ ,float dutyA ,float dutyB)
             param_error = 0;
 	if (HZ < 0 )
 	    param_error = 0;
-	if(dutyA < 0.0f || dutyA > 100.0f || dutyB < 0.0f || dutyB > 100.0f)
+	if(dutyA < 0.0f || dutyA > 1.0f || dutyB < 0.0f || dutyB > 1.0f)
 	    param_error = 0;
 
         if (param_error == 0) {
@@ -281,9 +281,6 @@ int BBBIO_PWMSS_Setting(unsigned int PWMID , float HZ ,float dutyA ,float dutyB)
 #endif
 		return 0;
         }
-
-	dutyA /= 100.0f ;
-	dutyB /= 100.0f ;
 
 	/* compute neccessary TBPRD */
 	float Cyclens =0.0f ;

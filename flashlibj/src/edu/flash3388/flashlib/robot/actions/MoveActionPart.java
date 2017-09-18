@@ -13,9 +13,13 @@ public class MoveActionPart extends SourceAction{
 
 	@Override
 	protected void execute() {
-		dataSource.set(speedSource.get());
 	}
 	@Override
 	protected void end() {
+	}
+
+	@Override
+	public double get() {
+		return speedSource.get();
 	}
 }

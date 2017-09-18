@@ -43,9 +43,9 @@ public class TankCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathf.constrain2(positioning.getSource().get(), minSpeed, maxSpeed) : 0.0;
+				Mathf.constrain2(positioning.get(), minSpeed, maxSpeed) : 0.0;
 		double speedX = rotation != null? 
-				Mathf.constrain2(rotation.getSource().get(), minSpeed, maxSpeed) : 0.0;
+				Mathf.constrain2(rotation.get(), minSpeed, maxSpeed) : 0.0;
 		
 		driveTrain.arcadeDrive(speedY, speedX);
 	}

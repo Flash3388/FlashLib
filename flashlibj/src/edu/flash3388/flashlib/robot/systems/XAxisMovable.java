@@ -9,12 +9,20 @@ import edu.flash3388.flashlib.robot.Subsystem;
  * @since FlashLib 1.0.0
  */
 public interface XAxisMovable {
+	
+	/**
+	 * Moves the system at a speed to a given direction along the x-axis.
+	 * @param speed speed [-1...1]
+	 */
+	void moveX(double speed);
 	/**
 	 * Moves the system at a speed to a given direction along the x-axis.
 	 * @param speed speed [0...1]
 	 * @param direction right - true, left - false
 	 */
-	void moveX(double speed, boolean direction);
+	default void moveX(double speed, boolean direction){
+		moveX(direction? speed : -speed);
+	}
 	/**
 	 * Moves the system at a speed to the right.
 	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed

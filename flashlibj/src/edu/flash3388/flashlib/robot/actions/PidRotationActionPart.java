@@ -2,11 +2,11 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.PidController;
 import edu.flash3388.flashlib.robot.PidSource;
-import edu.flash3388.flashlib.robot.SourceAction;
+import edu.flash3388.flashlib.robot.PropertyAction;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class PidRotationActionPart extends SourceAction implements PidAction{
+public class PidRotationActionPart extends PropertyAction implements PidAction{
 
 	private PidController pidcontroller;
 	private double rotationMargin;
@@ -45,15 +45,15 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 	
 	@Override
 	protected void initialize() {
-		dataSource.set(0);
+		valueProperty().set(0);
 		pidcontroller.setEnabled(true);
 		pidcontroller.reset();
 	}
 	@Override
 	public void execute() {
 		if(!pidcontroller.isEnabled() || inRotationThreshold())
-			dataSource.set(0);
-		else dataSource.set(pidcontroller.calculate());
+			valueProperty().set(0);
+		else valueProperty().set(pidcontroller.calculate());
 	}
 	@Override
 	protected boolean isFinished() {
@@ -61,6 +61,7 @@ public class PidRotationActionPart extends SourceAction implements PidAction{
 	}
 	@Override
 	protected void end() {
+		valueProperty().set(0);
 	}
 	
 	public boolean inRotationThreshold(){

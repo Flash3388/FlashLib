@@ -451,22 +451,16 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void rotate(double speed, boolean direction) {
-		mecanumDrive_polar(0, 0, direction? speed : -speed);
+	public void rotate(double speed) {
+		mecanumDrive_polar(0.0, 0.0, speed);
 	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void rotateRight(double speed) {
-		mecanumDrive_polar(0, 0, speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void rotateLeft(double speed) {
-		mecanumDrive_polar(0, 0, -speed);
+	public void moveY(double speed) {
+		moveY(Math.abs(speed), speed > 0.0);
 	}
 	/**
 	 * {@inheritDoc}
@@ -491,6 +485,14 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	@Override
 	public void backward(double speed) {
 		mecanumDrive_polar(speed, 180, 0);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void moveX(double speed) {
+		moveX(Math.abs(speed), speed > 0.0);
 	}
 	/**
 	 * {@inheritDoc}

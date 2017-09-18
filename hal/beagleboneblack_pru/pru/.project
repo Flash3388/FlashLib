@@ -25,12 +25,21 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1505660611402</id>
+			<id>1505732746628</id>
 			<name></name>
 			<type>13</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-projectRelativePath-matches-false-false-src</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1505732746644</id>
+			<name></name>
+			<type>13</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-projectRelativePath-matches-false-false-AM335X_StarterWare_02_00_01_01</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

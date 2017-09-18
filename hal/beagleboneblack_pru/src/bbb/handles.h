@@ -19,6 +19,7 @@ typedef struct dio_port{
 typedef struct pwm_port{
 	bool enabled = false;
 
+	float frequency = 0.0f;
 	uint32_t val_addr_offset;
 } pwm_port_t;
 

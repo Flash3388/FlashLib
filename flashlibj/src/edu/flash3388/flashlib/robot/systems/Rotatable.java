@@ -9,12 +9,20 @@ import edu.flash3388.flashlib.robot.Subsystem;
  * @since FlashLib 1.0.0
  */
 public interface Rotatable {
+	
+	/**
+	 * Rotates the system at a speed to a given direction.
+	 * @param speed speed [-1...1]
+	 */
+	void rotate(double speed);
 	/**
 	 * Rotates the system at a speed to a given direction.
 	 * @param speed speed [0...1]
-	 * @param direction right - 1, left - -1
+	 * @param direction right - true, left - false
 	 */
-	void rotate(double speed, boolean direction);
+	default void rotate(double speed, boolean direction){
+		rotate(direction? speed : -speed);
+	}
 	/**
 	 * Rotates the system at a speed to the right.
 	 * <p>Default implementation calls {@link #rotate(double, boolean)} with the given speed

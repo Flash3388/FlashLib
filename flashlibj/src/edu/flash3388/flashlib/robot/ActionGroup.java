@@ -55,8 +55,7 @@ public class ActionGroup extends Action{
 	 * @return this instance
 	 */
 	public ActionGroup addSequential(Action action, double timeout){
-		addSequential(action);
-		action.setTimeout((int) (timeout * 1000));
+		addSequential(new TimedAction(action, timeout));
 		return this;
 	}
 	/**
@@ -102,8 +101,7 @@ public class ActionGroup extends Action{
 	 * @return this instance
 	 */
 	public ActionGroup addParallel(Action action, double timeout){
-		addParallel(action);
-		action.setTimeout((int) (timeout * 1000));
+		addParallel(new TimedAction(action, timeout));
 		return this;
 	}
 	/**
@@ -135,7 +133,6 @@ public class ActionGroup extends Action{
 	protected void initialize(){
 		index = 0;
 		Entry c = actions.elementAt(index);
-		FlashUtil.getLog().log("Stating action-"+c.action.getClass().getName());
 		c.action.start();
 		current.addElement(c);
 	}
@@ -161,7 +158,6 @@ public class ActionGroup extends Action{
 		
 		if(next && index < actions.size()){
 			Entry toRun = actions.elementAt(index);
-			FlashUtil.getLog().log("Starting action-"+toRun.action.getClass().getName());
 			toRun.action.start();
 			current.add(toRun);
 		}
