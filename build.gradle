@@ -10,7 +10,6 @@ subprojects{
 }
 project(':flashlibj'){
 	apply plugin: 'java'
-	apply plugin: 'cpp'
 
 	sourceSets{
 		main{

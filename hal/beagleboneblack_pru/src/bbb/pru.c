@@ -9,7 +9,7 @@
 #include "pru_sw/prussdrv.h"
 #include "pru_sw/pruss_intc_mapping.h"
 
-int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile){
+int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile, const char* datafile){
 	tpruss_intc_initdata pru_initdata = PRUSS_INTC_INITDATA;
 
 	int status = 0;
@@ -27,16 +27,11 @@ int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile){
 		return status;
 	}
 
-	status = prussdrv_exec_program(prunum, progfile);
-	if(status){
-		return status;
-	}
+	prussdrv_load_datafile(prunum, datafile);
+	prussdrv_exec_program(prunum, progfile);
 
 	void* p;
-	status = prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, &p);
-	if(status){
-		return status;
-	}
+	prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, &p);
 
 	pru_data->prunum = prunum;
 	pru_data->shared_memory = (unsigned int*)p;

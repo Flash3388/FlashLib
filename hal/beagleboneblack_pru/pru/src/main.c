@@ -82,9 +82,6 @@ void handle_host_interrupt(){
 			dio_pulse();
 			break;
 
-		case PRU_ACTION_PWM_FREQ_G:
-			pwm_frequency_get();
-			break;
 		case PRU_ACTION_PWM_FREQ_S:
 			pwm_frequency_set();
 			break;
@@ -142,6 +139,6 @@ void pwm_frequency_set(){
 	unsigned char hspclkdiv = ((shared_memory[PRU_MEM_ACTION_VAL_REG] >> 8) & 0xff);
 	short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
 
-	pru_pwm_frequency_set(port, clkdiv);
+	pru_pwm_frequency_set(port, clkdiv, hspclkdiv);
 }
 

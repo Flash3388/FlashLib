@@ -29,7 +29,6 @@ short pru_pwm_initialize(short port);
 void pru_pwm_free(short handle);
 void pru_pwm_set(short handle, char value);
 char pru_pwm_get(short handle);
-void pru_pwm_frequency_set(short handle, unsigned int frequency);
-unsigned int pru_pwm_frequency_get(short handle);
+void pru_pwm_frequency_set(short handle, unsigned char clkdiv, unsigned char hspclkdiv);
 
 #endif /* PRU_H_ */

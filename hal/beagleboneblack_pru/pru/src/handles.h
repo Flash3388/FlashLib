@@ -11,7 +11,7 @@
 #include "hal_defines.h"
 
 typedef struct dio_port{
-	char enabled = 0;
+	char enabled;
 
 	char header;
 	char pin;
@@ -19,12 +19,12 @@ typedef struct dio_port{
 	char dir;
 	char value;
 
-	char pulse_enabled = 0;
-	unsigned int pulse_length = 0;
+	char pulse_enabled;
+	unsigned int pulse_length;
 } dio_port_t;
 
 typedef struct adc_port{
-	char enabled = 0;
+	char enabled;
 
 	unsigned int value_buffer[HAL_AIN_SAMPLING_SIZE];
 	unsigned int value;

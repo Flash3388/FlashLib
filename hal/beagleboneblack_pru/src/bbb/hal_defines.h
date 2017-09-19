@@ -18,7 +18,8 @@
 #define HAL_PWMSS_DUTY_TO_VALUE(d)  (d * HAL_PWMSS_MAX_VALUE)
 
 #define HAL_PRU_NUM                 (0)
-#define HAL_PRU_PROGRAM             ("pru.out")
+#define HAL_PRU_PROGRAM             ("data.bin")
+#define HAL_PRU_DATA                ("text.bin")
 
 //#define HAL_BBB_DEBUG
 #define HAL_USE_IO

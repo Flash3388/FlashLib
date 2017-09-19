@@ -17,7 +17,7 @@ typedef struct pru_data{
 	unsigned int* shared_memory;
 } pru_data_t;
 
-int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile);
+int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile, const char* datafile);
 void pru_shutdown(pru_data_t* pru_data);
 
 unsigned int pru_interrupt_wait(pru_data_t* pru_data, int us);

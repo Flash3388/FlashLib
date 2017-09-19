@@ -12,10 +12,10 @@
 #include "bbb_defines.h"
 #include "hal_defines.h"
 
-const float HSPCLKDIV[] = {1.0 ,2.0 ,4.0 ,8.0 ,16.0 ,32.0 , 64.0 , 128.0};
-const float HSPCLKDIV[] = {1.0 ,2.0 ,4.0 ,6.0 ,8.0 ,10.0 , 12.0 , 14.0};
+const unsigned char CLKDIV[] = {1 ,2 ,4 ,8 ,16 ,32 , 64 , 128};
+const unsigned char HSPCLKDIV[] = {1 ,2 ,4 ,6 ,8 ,10 , 12 , 14};
 
-volatile unsigned int* epwm_ptr[3] = {BBB_PWMSS0_ADDR, BBB_PWMSS1_ADDR, BBB_PWMSS2_ADDR};
+unsigned int epwm_ptr[3] = {BBB_PWMSS0_ADDR, BBB_PWMSS1_ADDR, BBB_PWMSS2_ADDR};
 
 void pwm_initialize(){
 	if(HWREG(BBB_CONTROL_MODULE + BBB_PWMSS_CTRL) & (1 << BBB_PWMSS0)){
@@ -58,13 +58,13 @@ void pwm_module_disable(char module){
 void pwm_module_settings(char module, unsigned char clkdiv, unsigned char hspclkdiv,
 		unsigned char dutyA, unsigned char dutyB){
 
-	int TBPRD = (1000000000.0f / (10.0f * HSPCLKDIV[clkdiv] * HSPCLKDIV[hspclkdiv])) ;
+	unsigned int TBPRD = (unsigned int)(1000000000 / (10 * CLKDIV[clkdiv] * HSPCLKDIV[hspclkdiv]));
 
 	//setting clock diver and freeze time base
 	HWREGH(epwm_ptr[module] + BBB_EPWM_TBCTL) = BBB_TBCTL_CTRMODE_FREEZE | (clkdiv << 10) | (hspclkdiv << 7);
 	//setting duty cycles A and B
-	HWREGH(epwm_ptr[module] + BBB_EPWM_CMPA) = (unsigned short)((float)TBPRD * (dutyA / HAL_PWMSS_MAX_VALUE));
-	HWREGH(epwm_ptr[module] + BBB_EPWM_CMPB) = (unsigned short)((float)TBPRD * (dutyB / HAL_PWMSS_MAX_VALUE));
+	HWREGH(epwm_ptr[module] + BBB_EPWM_CMPA) = (unsigned short)(TBPRD * dutyA / HAL_PWMSS_MAX_VALUE);
+	HWREGH(epwm_ptr[module] + BBB_EPWM_CMPB) = (unsigned short)(TBPRD * dutyB / HAL_PWMSS_MAX_VALUE);
 	HWREGH(epwm_ptr[module] + BBB_EPWM_TBPRD) = TBPRD;
 	//reset time base counter
 	HWREGH(epwm_ptr[module] + BBB_EPWM_TBCNT) = 0;

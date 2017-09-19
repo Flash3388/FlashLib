@@ -37,3 +37,20 @@ subprojects {
 project(':hal:beagleboneblack'){
 	buildDir = halOutputFolder + 'beagleboneblack/'
 }
+project(':hal:beagleboneblack_pru'){
+	buildDir = halOutputFolder + 'beagleboneblack_pru/'
+
+
+	task createPruCode{
+	    exec {
+	    	workingDir 'pru/'
+	        commandLine 'make all'
+		}
+		copy{
+			from 'pru/data.bin'
+			from 'pru/text.bin'
+			into buildDir
+		}
+	}
+	build.finalizedBy(createPruCode);
+}

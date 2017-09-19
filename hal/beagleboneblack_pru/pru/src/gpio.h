@@ -11,7 +11,7 @@
 void gpio_initialize();
 void gpio_free();
 
-char gpio_module_get(char header, char pin);
+signed char gpio_module_get(char header, char pin);
 
 void gpio_setdir(char header, char pin, char dir);
 

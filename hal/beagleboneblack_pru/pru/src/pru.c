@@ -32,11 +32,12 @@ unsigned long pru_clock_us(){
 
 
 int pru_initialize(){
+	int i, j;
 
 	//GPIO initialize
 	gpio_initialize();
 
-	for(int i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
+	for(i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
 		dio_port_t* dio = &dio_ports[i];
 		dio->enabled = 0;
 		dio->value = 0;
@@ -49,7 +50,7 @@ int pru_initialize(){
 	//ADC initialize
 	adc_initialize();
 
-	for(int i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
+	for(i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
 		adc_port_t* adc = &adc_ports[i];
 		adc->enabled = 0;
 		adc->value = 0;
@@ -58,10 +59,10 @@ int pru_initialize(){
 	//PWM initialize
 	pwm_initialize();
 
-	for(int i = 0; i < BBB_PWMSS_MODULE_COUNT; ++i){
+	for(i = 0; i < BBB_PWMSS_MODULE_COUNT; ++i){
 		pwm_port_t* pwm = &pwm_ports[i];
 
-		for(int j = 0; j < BBB_PWMSS_PORT_COUNT; ++j){
+		for(j = 0; j < BBB_PWMSS_PORT_COUNT; ++j){
 			pwm->enabled[j] = 0;
 			pwm->value[j] = 0;
 		}
@@ -82,7 +83,7 @@ void pru_shutdown(){
 }
 
 void pru_handles_update(unsigned int* shared_memory){
-	int i;
+	int i, j;
 	unsigned long timepasssed = 0;
 
 	//update dio
@@ -153,7 +154,7 @@ void pru_handles_update(unsigned int* shared_memory){
 
 		char changed = 0;
 
-		for(int j = 0; j < BBB_PWMSS_PORT_COUNT; ++j){
+		for(j = 0; j < BBB_PWMSS_PORT_COUNT; ++j){
 			if(pwm->enabled[j]){
 				char value = shared_memory[PRU_MEM_PWM_OFFSET + i + j];
 

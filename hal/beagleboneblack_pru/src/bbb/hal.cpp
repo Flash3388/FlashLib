@@ -47,6 +47,7 @@ int pru_watchdog_error;
 bool init = false;
 
 const char* pru_program_name = HAL_PRU_PROGRAM;
+const char* pru_data_file = HAL_PRU_DATA;
 
 /***********************************************************************\
  * INTERNAL METHOD
@@ -134,7 +135,7 @@ void pru_pwm_calc_divisors(float hz, unsigned char* clkdiv, unsigned char* hspcl
 }
 
 int pru_initialize(){
-	return pru_initialize(&pru_data, HAL_PRU_NUM, pru_program_name);
+	return pru_initialize(&pru_data, HAL_PRU_NUM, pru_program_name, pru_data_file);
 }
 void pru_shutdown(){
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_SYS_FREE;
@@ -173,8 +174,8 @@ void pru_dio_free(hal_handle_t handle, uint8_t dir){
 	pru_interrupt_wait();
 }
 void pru_dio_pulse(hal_handle_t handle, float length){
-	//TODO: CONVERT PULSE
-	uint32_t pulselength = 0;
+	//TODO: CONVERT PULSE TO US FROM SEC
+	uint32_t pulselength = (uint32_t)(length * 1000000);
 
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_DIO_PULSE;
 	pru_data.shared_memory[PRU_MEM_ACTION_VAL_REG] = pulselength;
