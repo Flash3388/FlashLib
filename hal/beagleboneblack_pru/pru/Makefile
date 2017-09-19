@@ -3,7 +3,7 @@ PRU_COMPILER := $(PRU_COMPILER_DIR)/bin/clpru
 PRU_HEX := $(PRU_COMPILER_DIR)/bin/hexpru
 PRU_SRC_DIR := src
 PRU_C_FLAGS := -i$(PRU_COMPILER_DIR)/include -i$(PRU_COMPILER_DIR)/lib -i$(PRU_SRC_DIR)
-PRU_FLAGS := --define=am3359 --define=pru0 --endian=little --hardware_mac=on
+PRU_FLAGS := --define=am3359 --define=pru0
 PRU_LD_FLAGS := -l libc.a
 
 C_FILES := $(wildcard $(PRU_SRC_DIR)/*.c)

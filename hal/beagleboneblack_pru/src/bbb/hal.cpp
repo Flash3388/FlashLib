@@ -96,10 +96,10 @@ void* pru_watchdog_function(void* param){
 }
 
 void pru_interrupt_wait(){
-	int res = pru_interrupt_wait(&pru_data, PRU_EVT_WAIT_TIMEOUT);
+	int res = pru_interrupt_wait(&pru_data);
 	if(res == 0){
 #ifdef HAL_BBB_DEBUG
-		printf("PRU EVENT WAIT TIMEDOUT!!! \n");
+		printf("PRU EVENT WAIT ERROR \n");
 #endif
 
 		//TODO: HANDLE PRU_NOT_RESPONSIVE
@@ -199,7 +199,7 @@ hal_handle_t pru_adc_initialize(uint8_t channel, adc_port_t* adc){
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = channel;
 
 	pru_interrupt_send(&pru_data);
-	pru_interrupt_wait(&pru_data, PRU_EVT_WAIT_TIMEOUT);
+	pru_interrupt_wait();
 
 	hal_handle_t handle = (hal_handle_t)pru_data.shared_memory[PRU_MEM_HANDLE_RES_REG];
 

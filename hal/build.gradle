@@ -40,17 +40,23 @@ project(':hal:beagleboneblack'){
 project(':hal:beagleboneblack_pru'){
 	buildDir = halOutputFolder + 'beagleboneblack_pru/'
 
-
-	task createPruCode{
-	    exec {
-	    	workingDir 'pru/'
-	        commandLine 'make all'
-		}
-		copy{
-			from 'pru/data.bin'
-			from 'pru/text.bin'
-			into buildDir
+	task createPRUBuild{
+		doLast{
+		    exec {
+		    	workingDir 'pru/'
+		        commandLine 'make', 'all'
+			}
+			copy{
+				from 'pru/data.bin'
+				from 'pru/text.bin'
+				into halOutputFolder + 'beagleboneblack_pru/pru/'
+			}
+		    exec {
+		    	workingDir 'pru/'
+		        commandLine 'make', 'clean'
+			}
+			println("PRU program built")
 		}
 	}
-	build.finalizedBy(createPruCode);
+	build.finalizedBy(createPRUBuild)
 }

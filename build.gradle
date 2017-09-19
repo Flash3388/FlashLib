@@ -1,3 +1,7 @@
+task clean(type: Delete){
+	delete rootProject.buildDir
+}
+
 subprojects{
 	
 	buildDir = projectOutputFolder
@@ -32,10 +36,12 @@ project(':flashlibj'){
 	}
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
+		baseName 'flashlib'
 		from sourceSets.main.allSource
 	}
 	task javadocJar(type: Jar, dependsOn: javadoc) {
 		classifier = 'javadoc'
+		baseName 'flashlib'
 		from javadoc.destinationDir
 	}
 	artifacts {
@@ -70,18 +76,17 @@ project(':flashboard'){
 			)
 		}
 	}
-	task createFlashboardBuild{
-		copy {
-			from projectOutputFolder + 'libs/flashlib.jar'
-			from projectLibsFolder + 'opencv.jar'
-			into projectOutputFolder + 'flashboard/libs/'
-		}
-		copy {
-			from fileTree(flashboardDistributionFolder)
-			into projectOutputFolder + 'flashboard/'
-		}
-		
+	task createFlashboardBuild{		
 		doLast{
+			copy {
+				from projectOutputFolder + 'libs/flashlib.jar'
+				from projectLibsFolder + 'opencv.jar'
+				into projectOutputFolder + 'flashboard/libs/'
+			}
+			copy {
+				from fileTree(flashboardDistributionFolder)
+				into projectOutputFolder + 'flashboard/'
+			}
 			copy {
 				from projectOutputFolder + 'libs/flashboard.jar'
 				into projectOutputFolder + 'flashboard/'

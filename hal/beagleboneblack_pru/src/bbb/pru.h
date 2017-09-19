@@ -20,7 +20,7 @@ typedef struct pru_data{
 int pru_initialize(pru_data_t* pru_data, int prunum, const char* progfile, const char* datafile);
 void pru_shutdown(pru_data_t* pru_data);
 
-unsigned int pru_interrupt_wait(pru_data_t* pru_data, int us);
+unsigned int pru_interrupt_wait(pru_data_t* pru_data);
 int pru_interrupt_send(pru_data_t* pru_data);
 
 #ifdef  __cplusplus

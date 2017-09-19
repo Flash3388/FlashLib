@@ -42,8 +42,8 @@ void pru_shutdown(pru_data_t* pru_data){
 	prussdrv_exit();
 }
 
-unsigned int pru_interrupt_wait(pru_data_t* pru_data, int us){
-	unsigned int rv = prussdrv_pru_wait_event_timeout(PRU_EVTOUT_0, us);
+unsigned int pru_interrupt_wait(pru_data_t* pru_data){
+	unsigned int rv = prussdrv_pru_wait_event(PRU_EVTOUT_0);
 	if(rv == 0)
 		return 0;
 

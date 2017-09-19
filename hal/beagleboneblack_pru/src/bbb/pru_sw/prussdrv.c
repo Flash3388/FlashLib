@@ -47,14 +47,9 @@
  */
 
 
-#include "../prussdrv.h"
+//#include "prussdrv.h"
 #include "__prussdrv.h"
-
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/select.h>
 
 #ifdef __DEBUG
 #define DEBUG_PRINTF(FORMAT, ...) fprintf(stderr, FORMAT, ## __VA_ARGS__)
@@ -104,7 +99,7 @@ int __prussdrv_memmap_init(void)
         mmap(0, prussdrv.pruss_map_size, PROT_READ | PROT_WRITE,
              MAP_SHARED, prussdrv.mmap_fd, PRUSS_UIO_MAP_OFFSET_PRUSS);
     prussdrv.version =
-        __pruss_detect_hw_version(prussdrv.pru0_dataram_base);
+        __pruss_detect_hw_version((unsigned int*)prussdrv.pru0_dataram_base);
 
     switch (prussdrv.version) {
     case PRUSS_V1:
@@ -494,32 +489,6 @@ unsigned int prussdrv_pru_wait_event(unsigned int host_interrupt)
     return event_count;
 }
 
-unsigned int prussdrv_pru_wait_event_timeout(unsigned int host_interrupt, int time_us)
-{
-    int rv;
-    fd_set set;
-    struct timeval timeout;
-    unsigned int event_count;
-    FD_ZERO(&set);
-    FD_SET(prussdrv.fd[host_interrupt], &set);
-    timeout.tv_sec = 0;
-
-    if (time_us >= 1000000) {
-        timeout.tv_sec = time_us / 1000000;
-    }
-    timeout.tv_usec = time_us % 1000000;;
-
-    rv = select(prussdrv.fd[host_interrupt] + 1, &set, NULL, NULL, &timeout);
-    if (rv == -1)
-        return 0;
-
-    else if(rv == 0)
-        return 0;
-
-    read(prussdrv.fd[host_interrupt], &event_count, sizeof(int));    
-    return event_count;
-}
-
 int prussdrv_pru_event_fd(unsigned int host_interrupt)
 {
     if (host_interrupt < NUM_PRU_HOSTIRQS)
@@ -637,19 +606,19 @@ unsigned int prussdrv_get_phys_addr(const void *address)
         && (address <
             prussdrv.pru0_dataram_base + prussdrv.pruss_map_size)) {
         retaddr =
-            ((unsigned int) (address - prussdrv.pru0_dataram_base) +
+            ((unsigned int) (((unsigned int*)address) - ((unsigned int*)prussdrv.pru0_dataram_base)) +
              prussdrv.pru0_dataram_phy_base);
     } else if ((address >= prussdrv.l3ram_base)
                && (address <
                    prussdrv.l3ram_base + prussdrv.l3ram_map_size)) {
         retaddr =
-            ((unsigned int) (address - prussdrv.l3ram_base) +
+            ((unsigned int) (((unsigned int*)address) - ((unsigned int*)prussdrv.l3ram_base)) +
              prussdrv.l3ram_phys_base);
     } else if ((address >= prussdrv.extram_base)
                && (address <
                    prussdrv.extram_base + prussdrv.extram_map_size)) {
         retaddr =
-            ((unsigned int) (address - prussdrv.extram_base) +
+            ((unsigned int) (((unsigned int*)address) - ((unsigned int*)prussdrv.extram_base)) +
              prussdrv.extram_phys_base);
     }
     return retaddr;
@@ -663,19 +632,19 @@ void *prussdrv_get_virt_addr(unsigned int phyaddr)
         && (phyaddr <
             prussdrv.pru0_dataram_phy_base + prussdrv.pruss_map_size)) {
         address =
-            (void *) ((unsigned int) prussdrv.pru0_dataram_base +
+            (void *) ((unsigned int*) prussdrv.pru0_dataram_base +
                       (phyaddr - prussdrv.pru0_dataram_phy_base));
     } else if ((phyaddr >= prussdrv.l3ram_phys_base)
                && (phyaddr <
                    prussdrv.l3ram_phys_base + prussdrv.l3ram_map_size)) {
         address =
-            (void *) ((unsigned int) prussdrv.l3ram_base +
+            (void *) ((unsigned int*) prussdrv.l3ram_base +
                       (phyaddr - prussdrv.l3ram_phys_base));
     } else if ((phyaddr >= prussdrv.extram_phys_base)
                && (phyaddr <
                    prussdrv.extram_phys_base + prussdrv.extram_map_size)) {
         address =
-            (void *) ((unsigned int) prussdrv.extram_base +
+            (void *) ((unsigned int*) prussdrv.extram_base +
                       (phyaddr - prussdrv.extram_phys_base));
     }
     return address;
