@@ -2,6 +2,12 @@ subprojects {
     apply plugin: 'cpp'
 	
 	model{
+		platforms{
+			linux{
+				operatingSystem 'linux'
+			}
+		}
+
 		repositories {
 			libs(PrebuiltLibraries) {
 				jni {
