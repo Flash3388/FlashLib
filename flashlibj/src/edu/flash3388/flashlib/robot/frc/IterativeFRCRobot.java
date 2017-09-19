@@ -40,7 +40,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final int ITERATION_DELAY = 10;
+	private static final int ITERATION_DELAY = 5;
 	
 	private Log log, powerLog;
 	private double warningVoltage, warningPowerDraw;

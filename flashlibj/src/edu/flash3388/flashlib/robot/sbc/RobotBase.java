@@ -11,6 +11,17 @@ import edu.flash3388.flashlib.util.Log;
 
 public abstract class RobotBase{
 	
+	protected static class BasicInitializer{
+		public int halInitMode = 0;
+		public boolean initHAL = true;
+		
+		
+		public void copy(BasicInitializer initializer){
+			halInitMode = initializer.halInitMode;
+			initHAL = initializer.initHAL;
+		}
+	}
+	
 	private static RobotBase userImplement;
 	
 	private static boolean halInitialized = false;
@@ -42,7 +53,7 @@ public abstract class RobotBase{
 		
 		log.log("Starting robot", "RobotBase");
 		try{
-			userImplement.startRobot();
+			userImplement.robotMain();
 		}catch(Throwable t){
 			log.reportError("Exception occurred in robot thread!!\n"+t.getMessage());
 			shutdown(1);
@@ -74,8 +85,11 @@ public abstract class RobotBase{
 		return null;
 	}
 	private static void setupRobot() throws Exception{
-		int halmode = userImplement.getHALMode();
-		if(halmode > 0){
+		BasicInitializer initializer = new BasicInitializer();
+		userImplement.configInit(initializer);
+		
+		if(initializer.initHAL){
+			int halmode = initializer.halInitMode;
 			log.log("Initializing HAL: "+halmode, "RobotBase");
 			int status = HAL.initializeHAL(halmode);
 			if(status != 0){
@@ -90,7 +104,7 @@ public abstract class RobotBase{
 		if(userImplement != null){
 			log.log("User shutdown...", "RobotBase");
 			try {
-				userImplement.stopRobot();
+				userImplement.robotShutdown();
 			} catch (Throwable e) {
 				log.reportError("Exception occurred during user shutdown!!\n"+e.getMessage());
 			}
@@ -118,18 +132,7 @@ public abstract class RobotBase{
 	//----------------------Implementable---------------------------------
 	//--------------------------------------------------------------------
 	
-	/**
-	 * Gets the initialization mode to use for the Hardware Abstraction Layer when {@link HAL#initializeHAL(int)} is
-	 * called. If the value is negative, the initialization is skipped.
-	 * <p>
-	 * By default, this method returns 0. Users can override this method and return the wanted value.
-	 * 
-	 * @return the init mode for HAL, or a negative value to not initialize
-	 */
-	protected int getHALMode(){
-		return 0;
-	}
-	
-	protected abstract void startRobot();
-	protected abstract void stopRobot();
+	protected void configInit(BasicInitializer initializer){}
+	protected abstract void robotMain();
+	protected abstract void robotShutdown();
 }

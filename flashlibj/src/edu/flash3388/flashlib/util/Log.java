@@ -146,7 +146,7 @@ public abstract class Log{
 		byte counter = 0;
 		logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(name + (++counter) + EXTENSION);
+			logFile = new File(name + "_" + (++counter) + EXTENSION);
 		
 		try {
 			if(isLoggingMode(MODE_PRINT))
