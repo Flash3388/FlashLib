@@ -1,15 +1,9 @@
-package edu.flash3388.flashlib.robot.sbc.devices;
-
-import edu.flash3388.flashlib.hal.PWM;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+package edu.flash3388.flashlib.robot.devices;
 
 public class PWMSpeedController extends SafePWM implements FlashSpeedController{
 
 	private boolean inverted = false;
 	
-	public PWMSpeedController(int port) {
-		super(port);
-	}
 	public PWMSpeedController(PWM port) {
 		super(port);
 	}

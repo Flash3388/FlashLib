@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.hal.bbb;
 
-import edu.flash3388.flashlib.hal.AnalogInput;
-import edu.flash3388.flashlib.hal.DigitalInput;
-import edu.flash3388.flashlib.hal.DigitalOutput;
-import edu.flash3388.flashlib.hal.PWM;
+import edu.flash3388.flashlib.hal.HALAnalogInput;
+import edu.flash3388.flashlib.hal.HALDigitalInput;
+import edu.flash3388.flashlib.hal.HALDigitalOutput;
+import edu.flash3388.flashlib.hal.HALPWM;
 
 public final class BeagleboneBlack {
 	private BeagleboneBlack(){}
@@ -39,26 +39,26 @@ public final class BeagleboneBlack {
 		return header * HEADER_PIN_COUNT + pin;
 	}
 	
-	public static DigitalInput createDigitalInputPort(int header, int pin){
+	public static HALDigitalInput createDigitalInputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
-		return new DigitalInput(convertDIOToHALPort(header, pin));
+		return new HALDigitalInput(convertDIOToHALPort(header, pin));
 	}
-	public static DigitalOutput createDigitalOutputPort(int header, int pin){
+	public static HALDigitalOutput createDigitalOutputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
-		return new DigitalOutput(convertDIOToHALPort(header, pin));
+		return new HALDigitalOutput(convertDIOToHALPort(header, pin));
 	}
 	
-	public static PWM createPWMPort(int module, int port){
+	public static HALPWM createPWMPort(int module, int port){
 		if(!checkValidPWMPort(module, port))
 			return null;
-		return new PWM(convertPWMToHALPort(module, port));
+		return new HALPWM(convertPWMToHALPort(module, port));
 	}
 	
-	public static AnalogInput createAnalogInputPort(int channel){
+	public static HALAnalogInput createAnalogInputPort(int channel){
 		if(!checkValidADCChannel(channel))
 			return null;
-		return new AnalogInput(channel);
+		return new HALAnalogInput(channel);
 	}
 }

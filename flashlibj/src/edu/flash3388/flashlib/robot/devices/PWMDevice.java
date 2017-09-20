@@ -1,6 +1,5 @@
-package edu.flash3388.flashlib.robot.sbc.devices;
+package edu.flash3388.flashlib.robot.devices;
 
-import edu.flash3388.flashlib.hal.PWM;
 import edu.flash3388.flashlib.math.Mathf;
 
 public class PWMDevice {
@@ -9,9 +8,6 @@ public class PWMDevice {
 	private double center, min, max, deadbandMin, deadbandMax;
 	private boolean enableDeadband = false;
 	
-	public PWMDevice(int port) {
-		this(new PWM(port));
-	}
 	public PWMDevice(PWM port) {
 		if(port == null)
 			throw new NullPointerException("PWM port is null");
@@ -48,10 +44,10 @@ public class PWMDevice {
 		this.deadbandMin = deadbandMin / looptime;
 		this.deadbandMax = deadbandMax / looptime;
 	}
-	protected void setFrequency(float frequency){
+	protected void setFrequency(double frequency){
 		port.setFrequency(frequency);
 	}
-	protected float getFrequency(){
+	protected double getFrequency(){
 		return port.getFrequency();
 	}
 	protected void setDeadbandEnabled(boolean enable) {
@@ -62,7 +58,7 @@ public class PWMDevice {
 	}
 	
 	public void setDutyCycle(double duty){
-		port.setDuty((float)duty);
+		port.setDuty(duty);
 	}
 	public double getDutyCycle(){
 		return port.getDuty();

@@ -1,6 +1,5 @@
-package edu.flash3388.flashlib.robot.sbc.devices;
+package edu.flash3388.flashlib.robot.devices;
 
-import edu.flash3388.flashlib.hal.PWM;
 import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.sbc.SafeMotor;
 
@@ -8,9 +7,6 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 
 	private MotorSafetyHelper helper;
 	
-	public SafePWM(int port) {
-		this(new PWM(port));
-	}
 	public SafePWM(PWM port) {
 		super(port);
 		helper = new MotorSafetyHelper(this);

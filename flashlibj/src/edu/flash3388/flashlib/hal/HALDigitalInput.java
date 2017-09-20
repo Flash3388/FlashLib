@@ -1,8 +1,10 @@
 package edu.flash3388.flashlib.hal;
 
-public class DigitalInput extends HALPort{
+import edu.flash3388.flashlib.robot.devices.DigitalInput;
 
-	public DigitalInput(int port) {
+public class HALDigitalInput extends HALPort implements DigitalInput{
+
+	public HALDigitalInput(int port) {
 		handle = DIOJNI.initializeDigitalInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
 			throw new HALException("Unable to initialize DigitalInput: invalid HAL handle");
@@ -18,6 +20,7 @@ public class DigitalInput extends HALPort{
 		handle = HAL_INVALID_HANDLE;
 	}
 	
+	@Override
 	public boolean get(){
 		return DIOJNI.getDIO(handle);
 	}

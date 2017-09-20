@@ -1,8 +1,6 @@
-package edu.flash3388.flashlib.robot.sbc.devices;
+package edu.flash3388.flashlib.robot.devices;
 
-import edu.flash3388.flashlib.hal.PWM;
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 
 public class Servo extends SafePWM implements FlashSpeedController{
 
@@ -18,12 +16,6 @@ public class Servo extends SafePWM implements FlashSpeedController{
 		setFrequency(getFrequency() * 0.25f);
 	}
 	public Servo(PWM port){
-		this(port, 0.0, 180.0);
-	}
-	public Servo(int port, double minAngle, double maxAngle) {
-		this(new PWM(port));
-	}
-	public Servo(int port){
 		this(port, 0.0, 180.0);
 	}
 

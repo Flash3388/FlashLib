@@ -1,8 +1,10 @@
 package edu.flash3388.flashlib.hal;
 
-public class AnalogOutput extends HALPort{
+import edu.flash3388.flashlib.robot.devices.AnalogOutput;
+
+public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	
-	public AnalogOutput(int port) {
+	public HALAnalogOutput(int port) {
 		handle = ANALOGJNI.initializeAnalogOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
 			throw new HALException("Unable to initialize AnalogOutput: invalid HAL handle");
@@ -19,17 +21,19 @@ public class AnalogOutput extends HALPort{
 		handle = HAL_INVALID_HANDLE;
 	}
 	
+	@Override
 	public int getValue(){
 		return ANALOGJNI.getAnalogValue(handle);
 	}
-	public float getVoltage(){
-		return ANALOGJNI.getAnalogVoltage(handle);
+	@Override
+	public double getVoltage(){
+		return (double)ANALOGJNI.getAnalogVoltage(handle);
 	}
 
 	public void setValue(int value){
 		ANALOGJNI.setAnalogValue(handle, value);
 	}
-	public void setVoltage(float voltage){
-		ANALOGJNI.setAnalogVoltage(handle, voltage);
+	public void setVoltage(double voltage){
+		ANALOGJNI.setAnalogVoltage(handle, (float)voltage);
 	}
 }
