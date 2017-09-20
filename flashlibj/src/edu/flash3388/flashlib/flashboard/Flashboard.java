@@ -178,6 +178,8 @@ public final class Flashboard {
 	 * @return the camera view on the flashboard. Null if not initialized.
 	 */
 	public static CameraView getCameraView(){
+		if(!instance)
+			return null;
 		return camViewer;
 	}
 	/**
@@ -186,6 +188,8 @@ public final class Flashboard {
 	 * @return the vision control to the flashboard. Null if not initialized. 
 	 */
 	public static Vision getVision(){
+		if(!instance)
+			return null;
 		return vision;
 	}
 	/**
@@ -194,6 +198,8 @@ public final class Flashboard {
 	 * @return the camera server to the flashboard. Null if not initialized. 
 	 */
 	public static CameraServer getCameraServer(){
+		if(!instance)
+			return null;
 		return camServer;
 	}
 	
@@ -218,33 +224,35 @@ public final class Flashboard {
 	 * @param tcp protocol to use: True for TCP, false for UDP.
 	 */
 	public static void init(int mode, int port, int camport, boolean tcp){
-		if(!instance){
-			try {
-				if(vision == null && (initMode & INIT_COMM) != 0)
-					vision = new RemoteVision("FlashboardVision");
-				if(camViewer == null && (initMode & INIT_CAM) != 0)
-					camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+		if(instance)
+			throw new IllegalStateException("Flashboard control was already initialized");
+		
+		try {
+			if(vision == null && (initMode & INIT_COMM) != 0)
+				vision = new RemoteVision("FlashboardVision");
+			if(camViewer == null && (initMode & INIT_CAM) != 0)
+				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+			
+			if(communications == null && (initMode & INIT_COMM) != 0){
+				CommInterface readi;
+				if(tcp)
+					readi = new TcpCommInterface(port);
+				else readi = new UdpCommInterface(port);
 				
-				if(communications == null && (initMode & INIT_COMM) != 0){
-					CommInterface readi;
-					if(tcp)
-						readi = new TcpCommInterface(port);
-					else readi = new UdpCommInterface(port);
-					
-					communications = new Communications("Flashboard", readi);
-					if(vision instanceof Sendable)
-						communications.attach((Sendable)vision);
-				}
-				
-				if(camServer == null && (initMode & INIT_CAM) != 0)
-					camServer = new CameraServer("Flashboard", camport, camViewer);
-				
-				initMode = mode;
-				instance = true;
-				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
-			} catch (IOException e) {
-				FlashUtil.getLog().reportError(e.getMessage());
+				communications = new Communications("Flashboard", readi);
+				if(vision instanceof Sendable)
+					communications.attach((Sendable)vision);
 			}
+			
+			if(camServer == null && (initMode & INIT_CAM) != 0)
+				camServer = new CameraServer("Flashboard", camport, camViewer);
+			
+			initMode = mode;
+			instance = true;
+			FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
+		} catch (IOException e) {
+			FlashUtil.getLog().reportError(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	/**

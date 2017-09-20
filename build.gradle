@@ -3,7 +3,7 @@ task clean(type: Delete){
 }
 
 subprojects{
-	
+
 	buildDir = projectOutputFolder
 	
 	repositories {
@@ -98,4 +98,3 @@ project(':flashboard'){
 	
 	build.finalizedBy(createFlashboardBuild)
 }
-
