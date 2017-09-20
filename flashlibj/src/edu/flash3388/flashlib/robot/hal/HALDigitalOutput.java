@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.hal;
+package edu.flash3388.flashlib.robot.hal;
 
 import edu.flash3388.flashlib.robot.devices.DigitalOutput;
 

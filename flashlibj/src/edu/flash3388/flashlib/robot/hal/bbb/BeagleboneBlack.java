@@ -1,9 +1,9 @@
-package edu.flash3388.flashlib.hal.bbb;
+package edu.flash3388.flashlib.robot.hal.bbb;
 
-import edu.flash3388.flashlib.hal.HALAnalogInput;
-import edu.flash3388.flashlib.hal.HALDigitalInput;
-import edu.flash3388.flashlib.hal.HALDigitalOutput;
-import edu.flash3388.flashlib.hal.HALPWM;
+import edu.flash3388.flashlib.robot.hal.HALAnalogInput;
+import edu.flash3388.flashlib.robot.hal.HALDigitalInput;
+import edu.flash3388.flashlib.robot.hal.HALDigitalOutput;
+import edu.flash3388.flashlib.robot.hal.HALPWM;
 
 public final class BeagleboneBlack {
 	private BeagleboneBlack(){}

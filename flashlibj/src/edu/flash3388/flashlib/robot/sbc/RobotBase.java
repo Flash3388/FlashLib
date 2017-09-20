@@ -5,29 +5,37 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.Manifest;
 
-import edu.flash3388.flashlib.hal.HAL;
+import edu.flash3388.flashlib.communications.CommInterface;
+import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class RobotBase{
+public abstract class RobotBase implements SBC{
 	
 	protected static class BasicInitializer{
 		public int halInitMode = 0;
 		public boolean initHAL = true;
 		
+		public boolean initCommunications = false;
+		public CommInterface commInterface = null;
 		
 		public void copy(BasicInitializer initializer){
 			halInitMode = initializer.halInitMode;
 			initHAL = initializer.initHAL;
+			
+			initCommunications = initializer.initCommunications;
+			commInterface = initializer.commInterface;
 		}
 	}
 	
+	protected static final Log log = FlashUtil.getLog();
 	private static RobotBase userImplement;
-	
 	private static boolean halInitialized = false;
 	
-	protected static final LocalShell shell = new LocalShell();
-	protected static final Log log = FlashUtil.getLog();
+	private Communications communications;
+	protected final LocalShell shell = new LocalShell();
+	
 	
 	//--------------------------------------------------------------------
 	//----------------------------MAIN------------------------------------
@@ -98,6 +106,16 @@ public abstract class RobotBase{
 			log.log("HAL initialized: "+HAL.boardName(), "RobotBase");
 			halInitialized = true;
 		}
+		
+		if(initializer.initCommunications){
+			if(initializer.commInterface != null){
+				log.log("Initializing robot communications", "RobotBase");
+				userImplement.communications = new Communications("Robot", initializer.commInterface);
+				log.log("Done", "RobotBase");
+			}else{
+				log.reportWarning("CommInterface for robot communications is null");
+			}
+		}
 	}
 	private static void onShutdown(){
 		log.logTime("Shuting down...");
@@ -108,6 +126,12 @@ public abstract class RobotBase{
 			} catch (Throwable e) {
 				log.reportError("Exception occurred during user shutdown!!\n"+e.getMessage());
 			}
+		}
+		
+		if(userImplement.communications != null){
+			log.log("Shutting down robot communications...", "RobotBase");
+			userImplement.communications.close();
+			log.log("Done", "RobotBase");
 		}
 		
 		if(halInitialized){
@@ -131,6 +155,13 @@ public abstract class RobotBase{
 	//--------------------------------------------------------------------
 	//----------------------Implementable---------------------------------
 	//--------------------------------------------------------------------
+	
+	public Shell shell(){
+		return shell;
+	}
+	public Communications communications(){
+		return communications;
+	}
 	
 	protected void configInit(BasicInitializer initializer){}
 	protected abstract void robotMain();
