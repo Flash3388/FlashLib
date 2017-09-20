@@ -7,6 +7,11 @@ import java.util.jar.Manifest;
 
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.robot.EmptyHIDInterface;
+import edu.flash3388.flashlib.robot.HIDInterface;
+import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -14,10 +19,33 @@ import edu.flash3388.flashlib.util.Log;
 public abstract class RobotBase implements SBC{
 	
 	protected static class BasicInitializer{
+		/**
+		 * Indicates the initialization mode for HAL. This value will be used differently 
+		 * depending on the used HAL implementation.
+		 * <p>
+		 * The default value is `0`.
+		 */
 		public int halInitMode = 0;
+		/**
+		 * Indicates whether or not to initialize HAL. 
+		 * <p>
+		 * The default value is `true`.
+		 */
 		public boolean initHAL = true;
 		
+		/**
+		 * Indicates whether or not to initialize robot communications.
+		 * <p>
+		 * The default value is `false`
+		 */
 		public boolean initCommunications = false;
+		/**
+		 * This value contains the {@link CommInterface} to be used for the robot
+		 * communications. If {@link #initCommunications} is false, this value will be ignored.
+		 * If this value is `null`, communications will not be initialized.
+		 * <p>
+		 * The default value is `null`.
+		 */
 		public CommInterface commInterface = null;
 		
 		public void copy(BasicInitializer initializer){
@@ -28,13 +56,53 @@ public abstract class RobotBase implements SBC{
 			commInterface = initializer.commInterface;
 		}
 	}
+	protected static class RobotInitializer extends BasicInitializer{
+		/**
+		 * Contains the {@link HIDInterface} to be used by the HID package.
+		 * If this value is null, then no {@link HIDInterface} will be set to {@link RobotFactory}.
+		 * <p>
+		 * The default value is {@link EmptyHIDInterface}.
+		 */
+		public HIDInterface hidImpl = new EmptyHIDInterface();
+		/**
+		 * Contains the {@link ModeSelector} to be used by the robot for choosing operation modes.
+		 * If this value is null, then the operation mode of the robot will always be 
+		 * {@link ModeSelector#MODE_DISABLED}.
+		 * <p>
+		 * The default value is `null`.
+		 */
+		public ModeSelector modeSelector;
+		/**
+		 * Contains initialization data for Flashboard in the form of {@link FlashboardInitData}.
+		 * If this value is `null`, Flashboard control will not be initialized.
+		 * <p>
+		 * The default value is an instance of {@link FlashboardInitData}.
+		 */
+		public FlashboardInitData flashboardInitData = new FlashboardInitData();
+		
+		/**
+		 * Indicates whether or not to add an auto HID update task to the {@link Scheduler}. This will
+		 * refresh HID data automatically, allowing for HID-activated actions.
+		 * <p>
+		 * The default value is `false`.
+		 */
+		public boolean autoUpdateHid = false;
+		
+		public void copy(RobotInitializer initializer){
+			super.copy(initializer);
+			hidImpl = initializer.hidImpl;
+			modeSelector = initializer.modeSelector;
+			flashboardInitData = initializer.flashboardInitData;
+			autoUpdateHid = initializer.autoUpdateHid;
+		}
+	}
 	
 	protected static final Log log = FlashUtil.getLog();
 	private static RobotBase userImplement;
 	private static boolean halInitialized = false;
 	
 	private Communications communications;
-	protected final LocalShell shell = new LocalShell();
+	private LocalShell shell = new LocalShell();
 	
 	
 	//--------------------------------------------------------------------
@@ -156,10 +224,10 @@ public abstract class RobotBase implements SBC{
 	//----------------------Implementable---------------------------------
 	//--------------------------------------------------------------------
 	
-	public Shell shell(){
+	public Shell getShell(){
 		return shell;
 	}
-	public Communications communications(){
+	public Communications getCommunications(){
 		return communications;
 	}
 	

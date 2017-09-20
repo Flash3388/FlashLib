@@ -63,6 +63,11 @@ public class ExampleFlashboard extends IterativeFRCRobot{
 		 * Sets the flashboard initialization data to null. Cancels the initialization of flashboard
 		 */
 		//initializer.flashboardInitData = null;
+		
+		/*
+		 * Another way to cancel flashboard initialization is to set initFlashboard to false 
+		 */
+		//initializer.initFlashboard = false;
 	}
 	@Override
 	protected void initRobot() {

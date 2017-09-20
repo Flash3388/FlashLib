@@ -16,10 +16,10 @@ public class RemoteSBC implements SBC{
 		communications.start();
 	}
 	
-	public Shell shell(){
+	public Shell getShell(){
 		return shell;
 	}
-	public Communications communications(){
+	public Communications getCommunications(){
 		return communications;
 	}
 }

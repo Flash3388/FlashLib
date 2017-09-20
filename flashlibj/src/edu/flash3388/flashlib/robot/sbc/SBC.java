@@ -5,8 +5,8 @@ import edu.flash3388.flashlib.communications.Communications;
 
 public interface SBC {
 
-	Shell shell();
-	Communications communications();
+	Shell getShell();
+	Communications getCommunications();
 	
 	
 	public static interface SbcData{
