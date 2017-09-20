@@ -226,7 +226,7 @@ void BBB_shutdown(){
 
 	//clear adc handles
 	for(int i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
-		adc_port_t* adc = &adc_map[i];
+		//adc_port_t* adc = &adc_map[i];
 
 		BBB_freeAnalogInput(i);
 	}
@@ -520,7 +520,7 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 
 #ifdef HAL_USE_IO
 			BBBIO_ADCTSC_channel_ctrl(port, BBBIO_ADC_STEP_MODE_SW_CONTINUOUS, HAL_AIN_OPEN_DELAY,
-					HAL_AIN_SMAPLING_RATE, BBBIO_ADC_STEP_AVG_1, adc->sample_buffer, HAL_AIN_SAMPLING_SIZE);
+					HAL_AIN_SAMPLE_DELAY, BBBIO_ADC_STEP_AVG_1, adc->sample_buffer, HAL_AIN_SAMPLING_SIZE);
 			BBBIO_ADCTSC_channel_enable(port);
 #endif
 

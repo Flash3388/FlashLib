@@ -27,6 +27,8 @@ typedef struct adc_port{
 	char enabled;
 
 	unsigned int value_buffer[HAL_AIN_SAMPLING_SIZE];
+	unsigned char buffer_sample_count;
+
 	unsigned int value;
 } adc_port_t;
 

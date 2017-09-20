@@ -10,6 +10,7 @@
 
 #define BBB_CM_PER_ADDR                  (0x44e00000)
 #define BBB_CONTROL_MODULE               (0x44e10000)
+#define BBB_WKUP_OFFSET_FROM_CM          (0x400)
 
 #define BBB_GPIO0_ADDR                   (0x44e07000)
 #define BBB_GPIO1_ADDR                   (0x4804c000)
@@ -68,5 +69,24 @@
 #define BBB_TBCTL_CTRMODE_DOWN           (0x1)
 #define BBB_TBCTL_CTRMODE_UPDOWN         (0x2)
 #define BBB_TBCTL_CTRMODE_FREEZE         (0x3)
+
+
+#define BBB_ADCTSC_0_REGS                (0x44e0d000)
+
+#define BBB_ADCTSC_WKUP_CLKCTRL          (0xbc)
+#define BBB_ADCTSC_STEPENABLE            (0x54)
+#define BBB_ADCTSC_ADCRANGE              (0x48)
+#define BBB_ADCTSC_CTRL                  (0x40)
+#define BBB_ADCTSC_CLKDIV                (0x4c)
+#define BBB_ADCTSC_STEPCONFIG1           (0x64)
+#define BBB_ADCTSC_STEPDELAY1            (0x68)
+
+#define BBB_ADCTSC_FIFO0                 (0)
+#define BBB_ADCTSC_FIFO1                 (1)
+
+#define BBB_ADCTSC_FIFODATA_DATA         (0x00000fffu)
+
+#define BBB_ADCTSC_FIFODATA(n)           (0x100 + (n * 0x100))
+#define BBB_ADCTSC_FIFOCOUNT(n)          (0xe4 + (n * 0xc))
 
 #endif /* SRC_HW_DEFINES_H_ */

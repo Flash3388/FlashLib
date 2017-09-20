@@ -20,6 +20,7 @@ subprojects {
 		}
 		components {
 			flashlib_hal(NativeLibrarySpec) {
+				targetPlatform "linux"
 				sources {
 					cpp {
 						source {
