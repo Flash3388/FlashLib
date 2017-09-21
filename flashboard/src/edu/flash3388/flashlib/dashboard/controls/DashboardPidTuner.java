@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.PidTuner;
+import edu.flash3388.flashlib.flashboard.PIDTuner;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -158,22 +158,22 @@ public class DashboardPidTuner extends Displayble{
 	
 	@Override
 	public void newData(byte[] data) {
-		if(data[0] == PidTuner.K_UPDATE){
+		if(data[0] == PIDTuner.K_UPDATE){
 			lastkp = FlashUtil.toDouble(data, 1);
 			lastki = FlashUtil.toDouble(data, 9);
 			lastkd = FlashUtil.toDouble(data, 17);
 			lastkf = FlashUtil.toDouble(data, 25);
 			newKSet = true;
 		}
-		else if(data[0] == PidTuner.CV_UPDATE){
+		else if(data[0] == PIDTuner.CV_UPDATE){
 			newValue = FlashUtil.toDouble(data, 1);
 			newValueSet = true;
 		}
-		else if(data[0] == PidTuner.SP_UPDATE){
+		else if(data[0] == PIDTuner.SP_UPDATE){
 			lastsetpoint = FlashUtil.toDouble(data, 1);
 			newSetpointSet = true;
 		}
-		else if(data[0] == PidTuner.SLIDER_UPDATE){
+		else if(data[0] == PIDTuner.SLIDER_UPDATE){
 			maxValue = FlashUtil.toDouble(data, 1);
 			ticks = FlashUtil.toInt(data, 9);
 		}
@@ -183,13 +183,13 @@ public class DashboardPidTuner extends Displayble{
 	public byte[] dataForTransmition() {
 		if(setUpdate){
 			setUpdate = false;
-			return new byte[]{PidTuner.RUN_UPDATE, (byte) (update? 1 : 0)};
+			return new byte[]{PIDTuner.RUN_UPDATE, (byte) (update? 1 : 0)};
 		}
 		if(!newSetpointSet && lastsetpoint != setpoint.get()){
 			lastsetpoint = setpoint.get();
 			
 			byte[] data = new byte[9];
-			data[0] = PidTuner.SP_UPDATE;
+			data[0] = PIDTuner.SP_UPDATE;
 			FlashUtil.fillByteArray(lastsetpoint, 1, data);
 			return data;
 		}
@@ -200,7 +200,7 @@ public class DashboardPidTuner extends Displayble{
 			lastkf = kf.get();
 			
 			byte[] data = new byte[33];
-			data[0] = PidTuner.K_UPDATE;
+			data[0] = PIDTuner.K_UPDATE;
 			FlashUtil.fillByteArray(lastkp, 1, data);
 			FlashUtil.fillByteArray(lastki, 9, data);
 			FlashUtil.fillByteArray(lastkd, 17, data);

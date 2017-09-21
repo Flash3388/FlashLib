@@ -1,6 +1,6 @@
 package examples.robot;
 
-import edu.flash3388.flashlib.robot.sbc.SimpleRobot;
+import edu.flash3388.flashlib.robot.SimpleRobot;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /*

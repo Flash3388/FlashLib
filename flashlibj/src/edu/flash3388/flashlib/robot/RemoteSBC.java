@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;

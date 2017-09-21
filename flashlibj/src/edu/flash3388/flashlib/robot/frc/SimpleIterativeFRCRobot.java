@@ -1,13 +1,11 @@
 package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
-public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Robot{
+public abstract class SimpleIterativeFRCRobot extends FRCRobotBase{
 
 	private Scheduler schedulerImpl = Scheduler.getInstance();
 	
@@ -92,11 +90,6 @@ public abstract class SimpleIterativeFRCRobot extends SampleRobot implements Rob
 				teleopPeriodic();
 			}
 		}
-	}
-	
-	@Override
-	public boolean isFRC() {
-		return true;
 	}
 	
 	/**

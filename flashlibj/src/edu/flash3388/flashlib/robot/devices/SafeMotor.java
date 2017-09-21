@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot.devices;
 
 public interface SafeMotor {
 	public static final int DEFAULT_EXPIRATION = 100;

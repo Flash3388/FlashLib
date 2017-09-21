@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot.devices;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 

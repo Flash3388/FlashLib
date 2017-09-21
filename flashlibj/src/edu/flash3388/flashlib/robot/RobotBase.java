@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import java.io.IOException;
 import java.net.URL;
@@ -9,11 +9,6 @@ import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.robot.EmptyHIDInterface;
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.HIDInterface;
-import edu.flash3388.flashlib.robot.Robot;
-import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -343,41 +338,9 @@ public abstract class RobotBase implements SBC, Robot{
 	 * 
 	 * @return robot mode selector, or null if not initialized.
 	 */
+	@Override
 	public ModeSelector getModeSelector(){
 		return modeSelector;
-	}
-	/**
-	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot. If
-	 * no {@link ModeSelector} object was set, then {@link ModeSelector#MODE_DISABLED} will be
-	 * returned.
-	 * 
-	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
-	 */
-	public int getMode(){
-		return modeSelector == null? ModeSelector.MODE_DISABLED : modeSelector.getMode();
-	}
-	/**
-	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
-	 * to a given mode value. If true, this indicates that the current mode is the given mode.
-	 * 
-	 * @param mode the mode to check
-	 * @return true if the given mode is the current operation mode, false otherwise
-	 * 
-	 * @see #getMode()
-	 */
-	public boolean isMode(int mode){
-		return getMode() == mode;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns true if {@link #isMode(int)} for parameter {@link ModeSelector#MODE_DISABLED} returns
-	 * true.
-	 */
-	@Override
-	public boolean isDisabled(){
-		return isMode(ModeSelector.MODE_DISABLED);
 	}
 	/**
 	 * {@inheritDoc}

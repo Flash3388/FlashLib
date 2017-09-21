@@ -9,12 +9,51 @@ package edu.flash3388.flashlib.robot;
 public interface Robot {
 	
 	/**
+	 * Gets the initialized {@link ModeSelector} object for the robot. 
+	 * <p>
+	 * This object will be used by base methods for operation mode data.
+	 * 
+	 * @return robot mode selector, or null if not initialized.
+	 */
+	ModeSelector getModeSelector();
+	/**
+	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot.
+	 * <p>
+	 * The default implementation gets the mode selector by calling {@link #getModeSelector()}. If the
+	 * returned value is null, {@link ModeSelector#MODE_DISABLED} is returned, otherwise {@link ModeSelector#getMode()}
+	 * is returned.
+	 * 
+	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
+	 */
+	default int getMode(){
+		return getModeSelector() == null? ModeSelector.MODE_DISABLED : getModeSelector().getMode();
+	}
+	/**
+	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
+	 * to a given mode value. If true, this indicates that the current mode is the given mode.
+	 * <p>
+	 * The default implementation calls {@link #getMode()} and gets whether the returned value
+	 * is equal to the given value.
+	 * 
+	 * @param mode the mode to check
+	 * @return true if the given mode is the current operation mode, false otherwise
+	 * @see #getMode()
+	 */
+	default boolean isMode(int mode){
+		return getMode() == mode;
+	}
+	
+	/**
 	 * Gets whether or not the robot is currently in disabled mode. Disabled mode
 	 * is a safety mode where the robot does nothing.
+	 * <p>
+	 * The default implementation calls {@link #isMode(int)} and passes it {@link ModeSelector#MODE_DISABLED}.
 	 * 
 	 * @return true if in disabled mode, false otherwise
 	 */
-	boolean isDisabled();
+	default boolean isDisabled(){
+		return isMode(ModeSelector.MODE_DISABLED);
+	}
 	/**
 	 * Gets whether or not the robot is currently in operator control mode. Operator control
 	 * mode is a mode where the robot is controlled by an operator and does not operator autonomously.

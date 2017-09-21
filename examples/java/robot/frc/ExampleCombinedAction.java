@@ -3,7 +3,7 @@ package examples.robot.frc;
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.actions.GyroRotationActionPart;
 import edu.flash3388.flashlib.robot.actions.PidDistanceActionPart;
 import edu.flash3388.flashlib.robot.actions.PidRotationActionPart;
@@ -83,7 +83,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * can provide data for rotation or linear motion. We have configured it to use the value of PROP_HORIZONTAL_DISTANCE
 		 * from the Analysis class. We also used the vision built into flashboard.
 		 */
-		PidSource visionRotation = new PidSource.VisionPidSource(Flashboard.getVision(), true, false);
+		PIDSource visionRotation = new PIDSource.VisionPIDSource(Flashboard.getVision(), true, false);
 		PidRotationActionPart ractionpart = new PidRotationActionPart(visionRotation, kp, ki, kd, kf, rsetpoint, 5.0);
 		/*
 		 * Rotation to an angle using a gyro. This class allows 2 angle rotation types:
@@ -98,7 +98,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * We will use an ultrasonic sensor to define the distance from a target to approach or back from. The action will
 		 * attempt to reach a certain distance from the target an remain within the given margin.
 		 */
-		PidSource sonicSource = new PidSource.DoubleSourcePidSource(sonicData);
+		PIDSource sonicSource = new PIDSource.DoubleSourcePIDSource(sonicData);
 		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp, ki, kd, kf, dsetpoint, 15.0);
 		
 		/*

@@ -8,7 +8,6 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
-import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.Scheduler;
 
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
@@ -24,7 +23,7 @@ import edu.flash3388.flashlib.util.Log;
  * @since FlashLib 1.0.0
  * @see SampleRobot
  */
-public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
+public abstract class IterativeFRCRobot extends FRCRobotBase{
 	
 	protected static class RobotInitializer{
 		public boolean runScheduler = true;
@@ -240,12 +239,6 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 	protected final Log getPowerLog(){
 		return powerLog;
 	}
-
-	@Override
-	public boolean isFRC() {
-		return true;
-	}
-	
 	
 	/**
 	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.

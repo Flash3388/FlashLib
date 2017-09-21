@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.PidController;
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDController;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
@@ -68,19 +68,19 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 */
 	public static class PidMecanumStabilizer implements MecanumStabilizer{
 
-		private PidController pidcontroller;
+		private PIDController pidcontroller;
 		private Gyro gyro;
 		private DoubleProperty setPoint = new SimpleDoubleProperty();
 		private double[] values = new double[3];
 		
 		public PidMecanumStabilizer(double kp, double ki, double kd, double kf, Gyro gyro){
-			this.pidcontroller = new PidController(kp, ki, kd, kf);
-			this.pidcontroller.setPIDSource(new PidSource.GyroPidSource(gyro));
+			this.pidcontroller = new PIDController(kp, ki, kd, kf);
+			this.pidcontroller.setPIDSource(new PIDSource.GyroPIDSource(gyro));
 			this.pidcontroller.setEnabled(true);
 			this.gyro = gyro;
 		}
 		
-		public PidController getPidController(){
+		public PIDController getPidController(){
 			return pidcontroller;
 		}
 		

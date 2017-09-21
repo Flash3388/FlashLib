@@ -13,15 +13,15 @@ import edu.flash3388.flashlib.vision.Vision;
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
- * @see PidController
+ * @see PIDController
  */
-public interface PidSource {
+public interface PIDSource {
 	
-	public static class GyroPidSource implements PidSource{
+	public static class GyroPIDSource implements PIDSource{
 
 		private Gyro gyro;
 		
-		public GyroPidSource(Gyro gyro){
+		public GyroPIDSource(Gyro gyro){
 			this.gyro = gyro;
 		}
 		
@@ -37,13 +37,13 @@ public interface PidSource {
 			return gyro.getAngle();
 		}
 	}
-	public static class VisionPidSource implements PidSource{
+	public static class VisionPIDSource implements PIDSource{
 
 		private Vision vision;
 		private double previous = 0.0;
 		private boolean horizontal, distance;
 		
-		public VisionPidSource(Vision vision, boolean horizontal, boolean distance){
+		public VisionPIDSource(Vision vision, boolean horizontal, boolean distance){
 			this.vision = vision;
 			this.horizontal = horizontal;
 			this.distance = distance;
@@ -81,11 +81,11 @@ public interface PidSource {
 			return previous;
 		}
 	}
-	public static class DoubleSourcePidSource implements PidSource{
+	public static class DoubleSourcePIDSource implements PIDSource{
 
 		private DoubleSource source;
 		
-		public DoubleSourcePidSource(DoubleSource source){
+		public DoubleSourcePIDSource(DoubleSource source){
 			this.source = source;
 		}
 		
@@ -102,12 +102,12 @@ public interface PidSource {
 		}
 		
 	}
-	public static class EncoderPidSource implements PidSource{
+	public static class EncoderPIDSource implements PIDSource{
 
 		private Encoder encoder;
 		private boolean useDistance = false;
 		
-		public EncoderPidSource(Encoder encoder, boolean useDistance) {
+		public EncoderPIDSource(Encoder encoder, boolean useDistance) {
 			this.encoder = encoder;
 			this.useDistance = useDistance;
 		}
@@ -132,11 +132,11 @@ public interface PidSource {
 		}
 		
 	}
-	public static class RangeFinderPidSource implements PidSource{
+	public static class RangeFinderPIDSource implements PIDSource{
 
 		private RangeFinder rangeFinder;
 		
-		public RangeFinderPidSource(RangeFinder rangeFinder) {
+		public RangeFinderPIDSource(RangeFinder rangeFinder) {
 			this.rangeFinder = rangeFinder;
 		}
 		

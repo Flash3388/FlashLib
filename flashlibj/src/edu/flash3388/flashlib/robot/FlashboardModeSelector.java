@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.DashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;

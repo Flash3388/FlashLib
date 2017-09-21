@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.cams.cv.CvQueueCamera;
 import edu.flash3388.flashlib.flashboard.DashboardCamViewSelector;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
+import edu.flash3388.flashlib.robot.IterativeRobot;
 
 /*
  * In this example we will review usage of Flashboard's camera server with robots. We will

@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import java.io.InputStream;
 import java.io.OutputStream;

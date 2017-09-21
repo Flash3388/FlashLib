@@ -3,10 +3,10 @@ package examples.robot.frc;
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.flashboard.PidTuner;
+import edu.flash3388.flashlib.flashboard.PIDTuner;
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.PidController;
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDController;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
 import edu.flash3388.flashlib.robot.frc.IterativeFRCRobot;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
@@ -21,12 +21,12 @@ import edu.wpi.first.wpilibj.Encoder;
  * rotating shooting system with one motor. Although it is possible to use any PID controller you wish, we 
  * will use the one provided by flashlib.
  */
-public class ExamplePidTuner extends IterativeFRCRobot{
+public class ExamplePIDTuner extends IterativeFRCRobot{
 
 	SingleMotorSystem shooter;
 	
-	PidTuner pidtuner;
-	PidController pidcontroller;
+	PIDTuner pidtuner;
+	PIDController pidcontroller;
 	
 	Encoder encoder;
 	
@@ -61,13 +61,13 @@ public class ExamplePidTuner extends IterativeFRCRobot{
 		 * Creates a new pid controller from flashlib. We use our data properties for the constants. The setpoint is double'
 		 * source passed to it and the pid source is created for the encoderValue source we created.
 		 */
-		pidcontroller = new PidController(kp, ki, kd, kf, setpoint, 
-				new PidSource.DoubleSourcePidSource(encoderValue));
+		pidcontroller = new PIDController(kp, ki, kd, kf, setpoint, 
+				new PIDSource.DoubleSourcePIDSource(encoderValue));
 		
 		/*
 		 * Creates a pid tuner for the flashboard using the double properties we created.
 		 */
-		pidtuner = new PidTuner("shooter", kp, ki, kd, kf, setpoint, encoderValue);
+		pidtuner = new PIDTuner("shooter", kp, ki, kd, kf, setpoint, encoderValue);
 		
 		/*
 		 * Attaches the pidtuner to the flashboard

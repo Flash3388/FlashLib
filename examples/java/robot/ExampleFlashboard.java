@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.flashboard.DashboardBooleanProperty;
 import edu.flash3388.flashlib.flashboard.DashboardSlider;
 import edu.flash3388.flashlib.flashboard.DashboardStringInput;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
+import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;

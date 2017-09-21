@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
@@ -10,7 +10,7 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	public PidVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, boolean horizontal,
 			DoubleSource rotationThreshold, double rotationMargin){
-		super(new PidSource.VisionPidSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
+		super(new PIDSource.VisionPIDSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
 	}
 	public PidVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, boolean horizontal,
@@ -24,7 +24,7 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	}
 	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
 			DoubleSource rotationThreshold, double rotationMargin){
-		super(new PidSource.VisionPidSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
+		super(new PIDSource.VisionPIDSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
 	}
 	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
 			DoubleSource rotationThreshold){
@@ -44,15 +44,15 @@ public class PidVisionRotateActionPart extends PidRotationActionPart implements 
 	
 	@Override
 	public void setVision(Vision vision) {
-		PidSource source = getPIDController().getPIDSource();
-		if(source instanceof PidSource.VisionPidSource)
-			((PidSource.VisionPidSource)source).setVision(vision);
+		PIDSource source = getPIDController().getPIDSource();
+		if(source instanceof PIDSource.VisionPIDSource)
+			((PIDSource.VisionPIDSource)source).setVision(vision);
 	}
 	@Override
 	public Vision getVision() {
-		PidSource source = getPIDController().getPIDSource();
-		if(source instanceof PidSource.VisionPidSource)
-			return ((PidSource.VisionPidSource)source).getVision();
+		PIDSource source = getPIDController().getPIDSource();
+		if(source instanceof PIDSource.VisionPIDSource)
+			return ((PIDSource.VisionPIDSource)source).getVision();
 		return null;
 	}
 }

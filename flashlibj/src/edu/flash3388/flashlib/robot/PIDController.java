@@ -15,15 +15,15 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * terms (sometimes denoted P, I, and D respectively) which give their name to the controller type.
  * </p>
  * <p>
- * 	{@link PidSource} provides feedback data from the feedback sensor.
+ * 	{@link PIDSource} provides feedback data from the feedback sensor.
  * </p>
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController {
+public class PIDController {
 	
-	private PidSource source;
+	private PIDSource source;
 	private DoubleSource setPoint;
 	private DoubleProperty kp, ki, kd, kf;
 	
@@ -43,7 +43,7 @@ public class PidController {
 	 * @param setPoint the set point
 	 * @param source the feedback source
 	 */
-	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint, PidSource source){
+	public PIDController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint, PIDSource source){
 		this.kp = kp;
 		this.ki = ki;
 		this.kd = kd;
@@ -61,7 +61,7 @@ public class PidController {
 	 * @param setPoint the set point
 	 * @param source the feedback source
 	 */
-	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PidSource source){
+	public PIDController(double kp, double ki, double kd, double kf, DoubleSource setPoint, PIDSource source){
 		this(new SimpleDoubleProperty(), new SimpleDoubleProperty(), new SimpleDoubleProperty(), new SimpleDoubleProperty(),
 				setPoint, source);
 		setPID(kp, ki, kd, kf);
@@ -75,7 +75,7 @@ public class PidController {
 	 * @param kf the feed forward constant
 	 * @param setPoint the set point
 	 */
-	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint){
+	public PIDController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, DoubleSource setPoint){
 		this(kp, ki, kd, kf, setPoint, null);
 	}
 	/**
@@ -87,7 +87,7 @@ public class PidController {
 	 * @param kf the feed forward constant
 	 * @param setPoint the set point
 	 */
-	public PidController(double kp, double ki, double kd, double kf, DoubleSource setPoint){
+	public PIDController(double kp, double ki, double kd, double kf, DoubleSource setPoint){
 		this(kp, ki, kd, kf, setPoint, null);
 	}
 	/**
@@ -97,7 +97,7 @@ public class PidController {
 	 * @param kd the differential constant
 	 * @param kf the feed forward constant
 	 */
-	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
+	public PIDController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
 		this(kp, ki, kd, kf, null);
 	}
 	/**
@@ -107,7 +107,7 @@ public class PidController {
 	 * @param kd the differential constant
 	 * @param kf the feed forward constant
 	 */
-	public PidController(double kp, double ki, double kd, double kf){
+	public PIDController(double kp, double ki, double kd, double kf){
 		this(kp, ki, kd, kf, null);
 	}
 	
@@ -314,7 +314,7 @@ public class PidController {
 	 * Gets the pid source used by this loop.
 	 * @return pid source
 	 */
-	public PidSource getPIDSource(){
+	public PIDSource getPIDSource(){
 		return source;
 	}
 	
@@ -384,7 +384,7 @@ public class PidController {
 	 * Sets the pid source used by this loop.
 	 * @param source pid source
 	 */
-	public void setPIDSource(PidSource source){
+	public void setPIDSource(PIDSource source){
 		this.source = source;
 	}
 	

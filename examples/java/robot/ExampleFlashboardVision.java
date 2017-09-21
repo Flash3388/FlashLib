@@ -3,7 +3,7 @@ package examples.robot;
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
+import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.GrayFilter;
 import edu.flash3388.flashlib.vision.LargestFilter;

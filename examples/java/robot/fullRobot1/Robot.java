@@ -2,8 +2,8 @@ package examples.robot.fullRobot1;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.sbc.FlashboardModeSelector;
-import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
+import edu.flash3388.flashlib.robot.FlashboardModeSelector;
+import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 

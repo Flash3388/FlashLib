@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,7 +90,7 @@ public class LocalShell extends Sendable implements Shell{
 	private byte[] inputStreamData = null;
 	
 	public LocalShell() {
-		super("", SbcSendableType.SHELL_EXECUTOR);
+		super("", SBCSendableType.SHELL_EXECUTOR);
 		tracker = new ProcessTracker();
 		tracker.shell = this;
 	}

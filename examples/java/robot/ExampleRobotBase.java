@@ -1,6 +1,6 @@
 package examples.robot;
 
-import edu.flash3388.flashlib.robot.sbc.RobotBase;
+import edu.flash3388.flashlib.robot.RobotBase;
 
 /*
  * In this example we will be reviewing the RobotBase base provided by FlashLib 

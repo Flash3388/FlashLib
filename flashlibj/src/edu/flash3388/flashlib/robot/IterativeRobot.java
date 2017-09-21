@@ -1,12 +1,8 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.Robot;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.HIDUpdateTask;
+import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 
 /**
  * An extension of {@link RobotBase}. This class provides extended and easier control over robot

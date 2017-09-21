@@ -6,13 +6,13 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
- * PidTuner provides real-time tracking and tuning of pid controllers and loops. It is possible to 
+ * PIDTuner provides real-time tracking and tuning of pid controllers and loops. It is possible to 
  * edit only specific pid controller values using the tuner window on the flashboard.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class PidTuner extends Sendable{
+public class PIDTuner extends Sendable{
 
 	public static final byte K_UPDATE = 0x1;
 	public static final byte SP_UPDATE = 0x2;
@@ -28,7 +28,7 @@ public class PidTuner extends Sendable{
 	private boolean update = false, sliderValuesUpdated = false;
 	private double lastP, lastI, lastD, lastF, lastSetPoint, lastValue;
 	
-	public PidTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
+	public PIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
 			DoubleProperty setPoint, DoubleSource currentValue,
 			double maxValue, int ticks) {
 		super(name, FlashboardSendableType.PIDTUNER);
@@ -42,7 +42,7 @@ public class PidTuner extends Sendable{
 		this.maxValue = maxValue;
 		this.ticks = ticks;
 	}
-	public PidTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
+	public PIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
 			DoubleProperty setPoint, DoubleSource currentValue){
 		this(name, kp, ki, kd, kf, setPoint, currentValue, 10.0, 1000);
 	}

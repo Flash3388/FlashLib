@@ -1,6 +1,6 @@
 package examples.robot;
 
-import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
+import edu.flash3388.flashlib.robot.IterativeRobot;
 
 /*
  * In this example we will be reviewing the IterativeRobot base provided by FlashLib 

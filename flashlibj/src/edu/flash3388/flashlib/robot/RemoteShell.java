@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.sbc;
+package edu.flash3388.flashlib.robot;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class RemoteShell extends Sendable implements Shell{
 	private RemoteShellOutputStream out = new RemoteShellOutputStream();
 	
 	public RemoteShell() {
-		super("", SbcSendableType.SHELL_EXECUTOR);
+		super("", SBCSendableType.SHELL_EXECUTOR);
 	}
 	
 	@Override
