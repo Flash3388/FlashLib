@@ -21,7 +21,7 @@ public class ExampleIterativeRobot extends IterativeRobot{
 	public static final int OPERATION_MODE_AUTO = 0x2;
 	
 	@Override
-	protected void preInit(RobotInitializer initializer) {
+	protected void preInit(IterativeRobotInitializer initializer) {
 		/*
 		 * preInit is used by IterativeRobot to allow users to customize FlashLib operations.
 		 * The received class contains simple variable, we can edit those to change initialization 

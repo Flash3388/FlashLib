@@ -2,15 +2,46 @@ package edu.flash3388.flashlib.robot.sbc;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public abstract class SimpleRobot extends RobotBase implements Robot{
+/**
+ * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
+ * which is executed by a robot loop.
+ * <p>
+ * The control loop tracks operation mode data and calls user methods accordingly. When in disabled
+ * mode, {@link #disabled()} is called and allows user operations in disabled mode. When in any other mode,
+ * {@link #onMode(int)} is called and the current mode value is passed, allowing user operations for that mode.
+ * Those methods are called only once when in the operation mode. So if they finish execution before the mode is
+ * finished, not further user code will be executed for that mode. If mode was changed and user code did not
+ * finished and the methods did not return, this will disrupt robot operations.
+ * <p>
+ * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY} milliseconds.
+ * <p>
+ * {@link #robotInit()} is called when FlashLib finished initialization. Robot systems should be initialized here.
+ * <p>
+ * This class provides extended custom initialization. When the robot is initializing, {@link #preInit(SimpleRobotInitializer)}
+ * is called for custom initialization. The passed object, {@link SimpleRobotInitializer} is an extension
+ * of {@link RobotInitializer} which adds additional initialization options.
+ * <p>
+ * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
+ * <p>
+ * When the robot enters shutdown mode {@link #robotShutdown()} is called to allow user shutdown operations.
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.2.0
+ */
+public abstract class SimpleRobot extends RobotBase{
+	
+	protected static class SimpleRobotInitializer extends RobotInitializer{
+		
+		public void copy(SimpleRobotInitializer initializer){
+			super.copy(initializer);
+		}
+	}
 	
 	public static final int ITERATION_DELAY = 5; //ms
 	
 	private boolean stop = false;
-	private ModeSelector modeSelector;
 	
 	private void robotLoop(){
 		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
@@ -20,14 +51,14 @@ public abstract class SimpleRobot extends RobotBase implements Robot{
 		while(!stop){
 			if(FlashRobotUtil.inEmergencyStop()){
 				
-				while(FlashRobotUtil.inEmergencyStop()){
+				while(FlashRobotUtil.inEmergencyStop() && !stop){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			}
 			else if(isDisabled()){
 				disabled();
 				
-				while(isDisabled() && !FlashRobotUtil.inEmergencyStop()){
+				while(isDisabled() && !FlashRobotUtil.inEmergencyStop() && !stop){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			}else{
@@ -35,7 +66,7 @@ public abstract class SimpleRobot extends RobotBase implements Robot{
 				
 				onMode(lastState);
 				
-				while(lastState == getMode() && !FlashRobotUtil.inEmergencyStop()){
+				while(isMode(lastState) && !FlashRobotUtil.inEmergencyStop() && !stop){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			}
@@ -43,51 +74,24 @@ public abstract class SimpleRobot extends RobotBase implements Robot{
 	}
 	
 	@Override
-	protected void configInit(BasicInitializer initializer){
-		RobotInitializer ainitializer = new RobotInitializer();
+	protected void configInit(RobotInitializer initializer){
+		SimpleRobotInitializer ainitializer = new SimpleRobotInitializer();
 		preInit(ainitializer);
-		
-		FlashRobotUtil.initFlashLib(this, ainitializer.hidImpl, ainitializer.flashboardInitData);
-		modeSelector = ainitializer.modeSelector;
 		
 		initializer.copy(ainitializer);
 	}
 	@Override
 	protected void robotMain() {
+		robotInit();
 		robotLoop();
 	}
 	@Override
 	protected void robotShutdown(){
 		stop = true;
-		robotShutdown();
+		robotFree();
 	}
 	
-	
-	public ModeSelector getStateSelector(){
-		return modeSelector;
-	}
-	public int getMode(){
-		return modeSelector == null? ModeSelector.MODE_DISABLED : modeSelector.getMode();
-	}
-	public boolean isMode(int mode){
-		return getMode() == mode;
-	}
-	
-	@Override
-	public boolean isDisabled(){
-		return isMode(ModeSelector.MODE_DISABLED);
-	}
-	@Override
-	public boolean isOperatorControl() {
-		return false;
-	}
-	@Override
-	public boolean isFRC(){
-		return false;
-	}
-	
-
-	protected void preInit(RobotInitializer initializer){}
+	protected void preInit(SimpleRobotInitializer initializer){}
 	protected abstract void robotInit();
 	protected void robotFree(){}
 	

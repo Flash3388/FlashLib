@@ -7,18 +7,52 @@ import java.util.jar.Manifest;
 
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.EmptyHIDInterface;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.HIDInterface;
+import edu.flash3388.flashlib.robot.Robot;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class RobotBase implements SBC{
+/**
+ * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
+ * starting the robot software. When the robot is started, the user implementation of this class is initialized,
+ * robot and FlashLib systems are initialized and user robot code is then started by calling {@link #robotMain()}.
+ * When the JVM enters shutdown, this class uses a shutdown hook to perform ordered robot shutdown and will
+ * allow custom user shutdown by calling {@link #robotShutdown()}.
+ * 
+ * <p>
+ * To setup a robot class, insure the software's MANIFEST file contains a {@value #MANIFEST_ROBOT_CLASS} property
+ * and the value should be the user robot classname and package (full package.classname). Remember that the user
+ * robot class should inherit this base or extend a class which already inherited this.
+ * <p>
+ * This class implements the interfaces {@link Robot} and {@link SBC} and provides basic implementations. Those
+ * can be overridden if needed.
+ * <p>
+ * There are 2 abstract method: {@link #robotMain()} and {@link #robotShutdown()}. Those must recieve implementation.
+ * To allow user customization, it is possible to override {@link #configInit(RobotInitializer)} and customize
+ * initialization parameters. 
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.0.0
+ */
+public abstract class RobotBase implements SBC, Robot{
 	
-	protected static class BasicInitializer{
+	/**
+	 * The base class for robot initialization customization. Holds variables with initialization
+	 * values. Change those values according to the variables documentation to customize initialization.
+	 * <p>
+	 * If providing custom robot base which extends {@link RobotBase}, it is possible to create an
+	 * extended initializer class which extends this class, adding new parameters for the initialization.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.1
+	 */
+	protected static class RobotInitializer{
 		/**
 		 * Indicates the initialization mode for HAL. This value will be used differently 
 		 * depending on the used HAL implementation.
@@ -48,22 +82,6 @@ public abstract class RobotBase implements SBC{
 		 */
 		public CommInterface commInterface = null;
 		
-		public void copy(BasicInitializer initializer){
-			halInitMode = initializer.halInitMode;
-			initHAL = initializer.initHAL;
-			
-			initCommunications = initializer.initCommunications;
-			commInterface = initializer.commInterface;
-		}
-	}
-	protected static class RobotInitializer extends BasicInitializer{
-		/**
-		 * Contains the {@link HIDInterface} to be used by the HID package.
-		 * If this value is null, then no {@link HIDInterface} will be set to {@link RobotFactory}.
-		 * <p>
-		 * The default value is {@link EmptyHIDInterface}.
-		 */
-		public HIDInterface hidImpl = new EmptyHIDInterface();
 		/**
 		 * Contains the {@link ModeSelector} to be used by the robot for choosing operation modes.
 		 * If this value is null, then the operation mode of the robot will always be 
@@ -73,6 +91,14 @@ public abstract class RobotBase implements SBC{
 		 */
 		public ModeSelector modeSelector;
 		/**
+		 * Contains the {@link HIDInterface} to be used by the HID package.
+		 * If this value is null, then no {@link HIDInterface} will be set to {@link RobotFactory}.
+		 * <p>
+		 * The default value is {@link EmptyHIDInterface}.
+		 */
+		public HIDInterface hidImpl = new EmptyHIDInterface();
+		
+		/**
 		 * Contains initialization data for Flashboard in the form of {@link FlashboardInitData}.
 		 * If this value is `null`, Flashboard control will not be initialized.
 		 * <p>
@@ -81,26 +107,40 @@ public abstract class RobotBase implements SBC{
 		public FlashboardInitData flashboardInitData = new FlashboardInitData();
 		
 		/**
-		 * Indicates whether or not to add an auto HID update task to the {@link Scheduler}. This will
-		 * refresh HID data automatically, allowing for HID-activated actions.
-		 * <p>
-		 * The default value is `false`.
+		 * Copies initialization data from the given initializer to this one.
+		 * 
+		 * @param initializer initializer to copy.
 		 */
-		public boolean autoUpdateHid = false;
-		
 		public void copy(RobotInitializer initializer){
-			super.copy(initializer);
-			hidImpl = initializer.hidImpl;
+			halInitMode = initializer.halInitMode;
+			initHAL = initializer.initHAL;
+			
+			initCommunications = initializer.initCommunications;
+			commInterface = initializer.commInterface;
+			
 			modeSelector = initializer.modeSelector;
+			hidImpl = initializer.hidImpl;
+			
 			flashboardInitData = initializer.flashboardInitData;
-			autoUpdateHid = initializer.autoUpdateHid;
 		}
 	}
 	
+	/**
+	 * The name of the manifest attribute which holds the name of the user's main
+	 * robot class.
+	 */
+	public static final String MANIFEST_ROBOT_CLASS = "Robot-Class";
+	
+	/**
+	 * FlashLib's main log. Received by calling {@link FlashUtil#getLog()}. Used to log
+	 * initialization and error data for software operation tracking.
+	 */
 	protected static final Log log = FlashUtil.getLog();
+	
 	private static RobotBase userImplement;
 	private static boolean halInitialized = false;
 	
+	private ModeSelector modeSelector;
 	private Communications communications;
 	private LocalShell shell = new LocalShell();
 	
@@ -110,10 +150,13 @@ public abstract class RobotBase implements SBC{
 	//--------------------------------------------------------------------
 
 	public static void main(String[] args){
+		//setting the JVM thread priority for this thread. Should be highest possible.
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		
+		//adding shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
 		
+		//loading user class
 		userImplement = loadUserClass();
 		if(userImplement == null){
 			log.reportError("Failed to initialize user robot implementation");
@@ -121,21 +164,26 @@ public abstract class RobotBase implements SBC{
 		}
 		
 		try{
+			//setting up robot systems
 			setupRobot();
 		}catch(Throwable t){
 			log.reportError("Exception occurred in robot setup!!\n"+t.getMessage());
+			log.reportError(t);
 			shutdown(1);
 		}
 		
 		log.log("Starting robot", "RobotBase");
 		try{
+			//starting robot
 			userImplement.robotMain();
 		}catch(Throwable t){
 			log.reportError("Exception occurred in robot thread!!\n"+t.getMessage());
+			log.reportError(t);
 			shutdown(1);
 		}
 	}
 	private static RobotBase loadUserClass(){
+		//finding user class and instantiating it.
 		String robotName = null;
 		Enumeration<URL> resources = null;
 	    try {
@@ -146,7 +194,7 @@ public abstract class RobotBase implements SBC{
 	    while (resources != null && resources.hasMoreElements()) {
 	      try {
 	        Manifest manifest = new Manifest(resources.nextElement().openStream());
-	        robotName = manifest.getMainAttributes().getValue("Robot-Class");
+	        robotName = manifest.getMainAttributes().getValue(MANIFEST_ROBOT_CLASS);
 	      } catch (IOException ex) {
 	        ex.printStackTrace();
 	      }
@@ -161,9 +209,21 @@ public abstract class RobotBase implements SBC{
 		return null;
 	}
 	private static void setupRobot() throws Exception{
-		BasicInitializer initializer = new BasicInitializer();
+		RobotInitializer initializer = new RobotInitializer();
+		//allowing user to provide custom configuration before init
 		userImplement.configInit(initializer);
 		
+		//initializing FlashLib for robot operation
+		FlashRobotUtil.initFlashLib(userImplement, initializer.hidImpl, initializer.flashboardInitData);
+		
+		//setting up the mode selector for robot operations
+		if(initializer.modeSelector != null){
+			userImplement.modeSelector = initializer.modeSelector;
+		}else{
+			log.reportWarning("Mode selector was not provided");
+		}
+		
+		//initializing HAL if user wants to
 		if(initializer.initHAL){
 			int halmode = initializer.halInitMode;
 			log.log("Initializing HAL: "+halmode, "RobotBase");
@@ -175,6 +235,7 @@ public abstract class RobotBase implements SBC{
 			halInitialized = true;
 		}
 		
+		//initializing communications if the user wants to
 		if(initializer.initCommunications){
 			if(initializer.commInterface != null){
 				log.log("Initializing robot communications", "RobotBase");
@@ -187,21 +248,25 @@ public abstract class RobotBase implements SBC{
 	}
 	private static void onShutdown(){
 		log.logTime("Shuting down...");
+		//user shutdown
 		if(userImplement != null){
 			log.log("User shutdown...", "RobotBase");
 			try {
 				userImplement.robotShutdown();
-			} catch (Throwable e) {
-				log.reportError("Exception occurred during user shutdown!!\n"+e.getMessage());
+			} catch (Throwable t) {
+				log.reportError("Exception occurred during user shutdown!!\n"+t.getMessage());
+				log.reportError(t);
 			}
 		}
 		
+		//communications shutdown
 		if(userImplement.communications != null){
 			log.log("Shutting down robot communications...", "RobotBase");
 			userImplement.communications.close();
 			log.log("Done", "RobotBase");
 		}
 		
+		//hal shutdown
 		if(halInitialized){
 			log.log("Shutting down HAL...", "RobotBase");
 			HAL.shutdown();
@@ -209,29 +274,144 @@ public abstract class RobotBase implements SBC{
 			halInitialized = false;
 		}
 		
+		//done
 		log.logTime("Shutdown successful", "RobotBase");
 		log.close();
 	}
 	
+	/**
+	 * Terminates the currently running Java Virtual Machine. 
+	 * The argument serves as a status code; by convention, a nonzero status code indicates abnormal termination.
+	 * <p>
+	 * Calls {@link System#exit(int)}.
+	 * <p>
+	 * This should be used to terminate the robot software only if necessary. Generally this is not recommended
+	 * for robot operations, but if an error in operations has occurd then this can be used to stop operations.
+	 * 
+	 * @param code the exit mode, used to indicate if the software has terminated with an error or not. Use
+	 * a non-zero value to indicate a termination due to error.
+	 */
 	public static void shutdown(int code){
 		System.exit(code);
-	}
-	public static void shutdown(){
-		shutdown(0);
 	}
 	
 	//--------------------------------------------------------------------
 	//----------------------Implementable---------------------------------
 	//--------------------------------------------------------------------
 	
+	/**
+	 * Gets the local shell object to use for execution of shell commands on this platform.
+	 * This will be an implementation of {@link Shell} for local operations: {@link LocalShell}.
+	 * <p>
+	 * Local shell is a {@link Sendable} object, so it is possible to attach it to a {@link Communications}
+	 * objects to allow remote shell execution. The counterpart of local shell is {@link RemoteShell}.
+	 * 
+	 * @return a shell
+	 */
+	@Override
 	public Shell getShell(){
 		return shell;
 	}
+	/**
+	 * Gets the robot {@link Communications} object if initialized. Can be used to perform communications
+	 * with remote softwares for robot control.
+	 * <p>
+	 * To initialize, insure that {@link RobotInitializer#initCommunications} is `true` and that a {@link CommInterface}
+	 * for communications is provided to {@link RobotInitializer#commInterface} during initialization of the robot.
+	 * 
+	 * @return robot communications, or null if not initialized
+	 */
+	@Override
 	public Communications getCommunications(){
 		return communications;
 	}
 	
-	protected void configInit(BasicInitializer initializer){}
+	/**
+	 * Gets the initialized {@link ModeSelector} object for the robot. Can be set during initialization 
+	 * to {@link RobotInitializer#modeSelector}. 
+	 * <p>
+	 * This object will be used by base methods for operation mode data.
+	 * 
+	 * @return robot mode selector, or null if not initialized.
+	 */
+	public ModeSelector getModeSelector(){
+		return modeSelector;
+	}
+	/**
+	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot. If
+	 * no {@link ModeSelector} object was set, then {@link ModeSelector#MODE_DISABLED} will be
+	 * returned.
+	 * 
+	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
+	 */
+	public int getMode(){
+		return modeSelector == null? ModeSelector.MODE_DISABLED : modeSelector.getMode();
+	}
+	/**
+	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
+	 * to a given mode value. If true, this indicates that the current mode is the given mode.
+	 * 
+	 * @param mode the mode to check
+	 * @return true if the given mode is the current operation mode, false otherwise
+	 * 
+	 * @see #getMode()
+	 */
+	public boolean isMode(int mode){
+		return getMode() == mode;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns true if {@link #isMode(int)} for parameter {@link ModeSelector#MODE_DISABLED} returns
+	 * true.
+	 */
+	@Override
+	public boolean isDisabled(){
+		return isMode(ModeSelector.MODE_DISABLED);
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * returns false always.
+	 * <p>
+	 * It is recommended to override this method and indicate when the robot is controlled by a user.
+	 */
+	@Override
+	public boolean isOperatorControl() {
+		return false;
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * returns false always
+	 */
+	@Override
+	public boolean isFRC(){
+		return false;
+	}
+	
+	/**
+	 * Used by {@link RobotBase} to allow users to perform custom initialization for 
+	 * the robot. This method is called before setting up the robot systems.
+	 * <p>
+	 * {@link RobotInitializer} contains variables which indicate data about robot initialization. Change
+	 * values of those variables in accordance to their documentation to customize initialization.
+	 * <p>
+	 * When providing a custom base for robots, it is recommended to create a new initialization class
+	 * with additional initialization parameters and extend {@link RobotInitializer}.
+	 * 
+	 * @param initializer initializer object
+	 */
+	protected void configInit(RobotInitializer initializer){}
+	/**
+	 * Called when {@link RobotBase} finished initialization and the robot can be started. 
+	 * This is the main method of the robot and all operations should be directed from here.
+	 */
 	protected abstract void robotMain();
+	/**
+	 * Called when the JVM shuts down to perform custom shutdown operations. Should be used
+	 * to free robot systems.
+	 */
 	protected abstract void robotShutdown();
 }
