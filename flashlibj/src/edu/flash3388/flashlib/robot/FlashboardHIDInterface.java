@@ -1,0 +1,46 @@
+package edu.flash3388.flashlib.robot;
+
+import edu.flash3388.flashlib.flashboard.HIDSendable;
+
+public class FlashboardHIDInterface extends HIDSendable implements HIDInterface{
+
+	public FlashboardHIDInterface() {
+		super("HIDInterface");
+	}
+
+	@Override
+	public boolean isHIDConnected(int hid) {
+		return getAxisCount(hid) > 0 && getButtonCount(hid) > 0;
+	}
+	@Override
+	public boolean isAxisConnected(int hid, int axis) {
+		return getAxisCount(hid) > axis;
+	}
+	@Override
+	public boolean isPOVConnected(int hid, int pov) {
+		return getPOVCount(hid) > pov;
+	}
+	@Override
+	public boolean isButtonConnected(int hid, int button) {
+		return getButtonCount(hid) >= button;
+	}
+
+	@Override
+	public double getHIDAxis(int hid, int axis) {
+		if(FlashRobotUtil.inEmergencyStop())
+			return 0.0;
+		return getAxis(hid, axis);
+	}
+	@Override
+	public boolean getHIDButton(int hid, int button) {
+		if(FlashRobotUtil.inEmergencyStop())
+			return false;
+		return getButton(hid, button);
+	}
+	@Override
+	public int getHIDPOV(int hid, int pov) {
+		if(FlashRobotUtil.inEmergencyStop())
+			return -1;
+		return getPOV(hid, pov);
+	}
+}

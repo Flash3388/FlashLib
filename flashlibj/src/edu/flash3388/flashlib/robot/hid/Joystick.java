@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.robot.RobotFactory;
 
 /**
@@ -9,7 +8,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Joystick extends HIDSendable implements HID, Runnable{
+public class Joystick implements HID, Runnable{
 
 	private static Joystick head;
 	private Joystick next;
@@ -24,12 +23,10 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	/**
 	 * Creates a new joystick device at an index with a given amount of buttons.
 	 * 
-	 * @param name the name of the joystick
 	 * @param stick the stick index
 	 * @param buttonCount the amount of buttons
 	 */
-	public Joystick(String name, int stick, int buttonCount){
-		super(name);
+	public Joystick(int stick, int buttonCount){
 		stick_num = stick;
 		
 		this.stick = new Stick(this, X, Y);
@@ -40,15 +37,6 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 		
 		next = head;
 		head = this;
-	}
-	/**
-	 * Creates a new joystick device at an index with a given amount of buttons.
-	 * 
-	 * @param stick the stick index
-	 * @param buttonCount the amount of buttons
-	 */
-	public Joystick(int stick, int buttonCount){
-		this("Joystick"+stick, stick, buttonCount);
 	}
 	
 	/**
@@ -168,10 +156,5 @@ public class Joystick extends HIDSendable implements HID, Runnable{
 	public static void refreshAll(){
 		for(Joystick c = head; c != null; c = c.next)
 			c.run();
-	}
-	
-	@Override
-	protected HID getHID() {
-		return this;
 	}
 }
