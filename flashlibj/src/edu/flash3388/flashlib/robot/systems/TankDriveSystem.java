@@ -8,6 +8,28 @@ package edu.flash3388.flashlib.robot.systems;
  */
 public interface TankDriveSystem extends RobotDriveSystem{
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * A default implementation is provided. It calls {@link #tankDrive(double, double)} and
+	 * passes it the speed parameter for both sides.
+	 */
+	@Override
+	default void moveY(double speed) {
+		tankDrive(speed, speed);
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * A default implementation is provided. It calls {@link #tankDrive(double, double)} and
+	 * passes it the speed parameter for both sides. The left side receives the given speed value
+	 * while right side receives an inverted speed value to cause rotation.
+	 */
+	@Override
+	default void rotate(double speed) {
+		tankDrive(-speed, speed);
+	}
+	
 	 /** Tank drive implements a dual joystick drive. Given right and left speed values, the code sets the values to move 
 	 * each side separately.
 	 * 
