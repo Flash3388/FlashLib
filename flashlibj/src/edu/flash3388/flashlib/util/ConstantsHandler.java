@@ -20,10 +20,10 @@ import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
 import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleProperty;
+import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
+import edu.flash3388.flashlib.util.beans.StringProperty;
 
 /**
  * 
@@ -33,7 +33,7 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
  * Values are wrapped in data source objects which allows updating of values in real time:
  * <ul>
  * 		<li> double: {@link DoubleProperty} </li>
- * 		<li> string: {@link Property} </li>
+ * 		<li> string: {@link StringProperty} </li>
  * 		<li> boolean: {@link BooleanProperty} </li>
  * </ul>
  * <p>
@@ -48,8 +48,8 @@ public class ConstantsHandler {
 	
 	private static final Map<String, DoubleProperty> doubleMap = 
 			new HashMap<String, DoubleProperty>();
-	private static final Map<String, Property<String>> stringMap = 
-			new HashMap<String, Property<String>>();
+	private static final Map<String, StringProperty> stringMap = 
+			new HashMap<String, StringProperty>();
 	private static final Map<String, BooleanProperty> booleanMap = 
 			new HashMap<String, BooleanProperty>();
 	
@@ -239,9 +239,9 @@ public class ConstantsHandler {
 	 * Removes a string value represented by a given key from the strings map.
 	 * 
 	 * @param name the key representing the value in the map
-	 * @return the {@link Property} wrapper of the value
+	 * @return the {@link StringProperty} wrapper of the value
 	 */
-	public static Property<String> removeString(String name){
+	public static StringProperty removeString(String name){
 		return stringMap.remove(name);
 	}
 	/**
@@ -250,12 +250,12 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the new value
 	 * @param iniVal the initial value
-	 * @return a {@link Property} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
+	 * @return a {@link StringProperty} wrapper for the value. If the key exists in the map, an existing wrapper is returned.
 	 */
-	public static Property<String> addString(String name, String iniVal){
-		Property<String> source = stringMap.get(name);
+	public static StringProperty addString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new SimpleProperty<String>(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
@@ -266,41 +266,41 @@ public class ConstantsHandler {
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal the new value
-	 * @return a {@link Property} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
+	 * @return a {@link StringProperty} wrapper for the value represented by the key. If the key does not exists in the map, an new wrapper is created.
 	 */
-	public static Property<String> putString(String name, String iniVal){
-		Property<String> source = stringMap.get(name);
+	public static StringProperty putString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new SimpleProperty<String>(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}else source.setValue(iniVal);
 		
 		return source;
 	}
 	/**
-	 * Gets the {@link Property} wrapper represented by a given key in the map. If such a key does not exist in the map,
+	 * Gets the {@link StringProperty} wrapper represented by a given key in the map. If such a key does not exist in the map,
 	 * a new wrapper is created with a given initial value.
 	 * 
 	 * @param name the key of the wrapper
 	 * @param iniVal a initial value in case the key does not exist
-	 * @return the {@link Property} wrapper represented by a given key in the map
+	 * @return the {@link StringProperty} wrapper represented by a given key in the map
 	 */
-	public static Property<String> getString(String name, String iniVal){
-		Property<String> source = stringMap.get(name);
+	public static StringProperty getString(String name, String iniVal){
+		StringProperty source = stringMap.get(name);
 		if(source == null){
-			source = new SimpleProperty<String>(iniVal);
+			source = new SimpleStringProperty(iniVal);
 			stringMap.put(name, source);
 		}
 		return source;
 	}
 	/**
-	 * Gets the {@link Property} wrapper represented by a given key in the map. If the key does not exist in the map,
+	 * Gets the {@link StringProperty} wrapper represented by a given key in the map. If the key does not exist in the map,
 	 * null is returned.
 	 * 
 	 * @param name the key of the wrapper
-	 * @return the {@link Property} wrapper represented by a given key in the map
+	 * @return the {@link StringProperty} wrapper represented by a given key in the map
 	 */
-	public static Property<String> getString(String name){
+	public static StringProperty getString(String name){
 		return stringMap.get(name);
 	}
 	/**
@@ -329,7 +329,7 @@ public class ConstantsHandler {
 	 * @return string value saved in the wrapper, an initial value if the key does not exist.
 	 */
 	public static String getStringValue(String name, String iniVal){
-		Property<String> source = stringMap.get(name);
+		StringProperty source = stringMap.get(name);
 		if(source == null)
 			return iniVal;
 		return source.getValue();

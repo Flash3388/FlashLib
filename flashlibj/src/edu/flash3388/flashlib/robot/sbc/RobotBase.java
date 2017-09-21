@@ -105,6 +105,13 @@ public abstract class RobotBase implements SBC, Robot{
 		 * The default value is an instance of {@link FlashboardInitData}.
 		 */
 		public FlashboardInitData flashboardInitData = new FlashboardInitData();
+		/**
+		 * Inidicates whether or not to initialize flashboard. If true, flashboard will 
+		 * be initialize. If flase, flashboard will be initialized.
+		 * <p>
+		 * The default value is `false`.
+		 */
+		public boolean initFlashboard = false;
 		
 		/**
 		 * Copies initialization data from the given initializer to this one.
@@ -122,6 +129,7 @@ public abstract class RobotBase implements SBC, Robot{
 			hidImpl = initializer.hidImpl;
 			
 			flashboardInitData = initializer.flashboardInitData;
+			initFlashboard = initializer.initFlashboard;
 		}
 	}
 	
@@ -214,7 +222,8 @@ public abstract class RobotBase implements SBC, Robot{
 		userImplement.configInit(initializer);
 		
 		//initializing FlashLib for robot operation
-		FlashRobotUtil.initFlashLib(userImplement, initializer.hidImpl, initializer.flashboardInitData);
+		FlashRobotUtil.initFlashLib(userImplement, initializer.hidImpl, 
+				initializer.initFlashboard? initializer.flashboardInitData : null);
 		
 		//setting up the mode selector for robot operations
 		if(initializer.modeSelector != null){

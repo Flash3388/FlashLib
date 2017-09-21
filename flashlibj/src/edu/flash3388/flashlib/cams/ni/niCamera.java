@@ -48,6 +48,7 @@ public class niCamera implements Camera{
 	 * Reads a frame from the camera and returns a {@link Image} object.
 	 * @return a new frame
 	 */
+	@Override
 	public Image read(){
 		camera.getImage(image);
 		return image;

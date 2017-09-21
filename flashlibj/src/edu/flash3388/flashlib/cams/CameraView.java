@@ -29,6 +29,7 @@ public class CameraView implements Camera{
 	 * @param selector the selector of the current camera
 	 * @param cameras cameras to add 
 	 */
+	@SafeVarargs
 	public CameraView(String name, CameraViewSelector selector, Camera...cameras) {
 		setSelector(selector);
 		
@@ -44,6 +45,7 @@ public class CameraView implements Camera{
 	 * @param selector the selector of the current camera
 	 * @param cameras cameras to add 
 	 */
+	@SafeVarargs
 	public CameraView(CameraViewSelector selector, Camera...cameras) {
 		this("Camera View" + instances, selector, cameras);
 		instances++;
@@ -57,6 +59,15 @@ public class CameraView implements Camera{
 	public void add(Camera camera){
 		updateSelector(camera, true);
 		cameras.add(camera);
+	}
+	/**
+	 * Adds new cameras to the camera collection and updates the selector.
+	 * @param cameras new cameras to add
+	 * @see #add(Camera)
+	 */
+	public void add(Camera... cameras){
+		for (Camera camera : cameras)
+			add(camera);
 	}
 	/**
 	 * Removes a camera from the camera collection and updates the selector.
@@ -208,5 +219,16 @@ public class CameraView implements Camera{
 		if(c == null) return null;
 		return c.getData();
 	}
-
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Gets the current camera from {@link #currentCamera()} and gets its {@link Camera#read()}.
+	 * </p>
+	 */
+	@Override
+	public Object read() {
+		Camera c = currentCamera();
+		if(c == null) return null;
+		return c.read();
+	}
 }
