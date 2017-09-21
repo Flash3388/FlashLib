@@ -26,7 +26,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	
 	private int currentProcessing = -1;
 	private int recTimeout = 1000, lastRec;
-	private boolean running = false;
+	private boolean running = false, considerNew = true;
 	
 	/**
 	 * Creates a base for running vision. 
@@ -52,7 +52,14 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	 */
 	@Override
 	public boolean hasNewAnalysis() {
-		return hasAnalysis() && FlashUtil.millisInt() - lastRec < recTimeout;
+		return hasAnalysis() && considerNew && FlashUtil.millisInt() - lastRec < recTimeout;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setNewAnalysisAsOld(){
+		considerNew = false;
 	}
 	/**
 	 * {@inheritDoc}
@@ -175,6 +182,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 			return new byte[]{RemoteVision.REMOTE_SELECT_MODE, (byte) currentProcessing};
 		}
 		
+		//considerNew = true;
 		byte[] data = getAnalysis().transmit();
 		byte[] send = new byte[data.length+1];
 		send[0] = RemoteVision.REMOTE_ANALYSIS_MODE;
@@ -255,6 +263,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				}
 				
 				newAnalysis(an);
+				considerNew = true;
 				lastRec = FlashUtil.millisInt();
 				return true;
 			}

@@ -12,18 +12,23 @@ import edu.flash3388.flashlib.robot.sbc.IterativeRobot;
  * In this example we will review usage of Flashboard's camera server with robots. We will
  * use IterativeRobot here, but the principles remain the same for all robot
  * bases.
+ * 
+ * Please make sure you have checked ExampleFlashboard first to learn about Flashboard control 
+ * initialization.
  */
 public class ExampleFlashboardCameraServer extends IterativeRobot{
 	
+	//our first camera
 	Camera cam1;
+	//our second camera
 	Camera cam2;
+	//camera view selector object for flashboard
 	CameraViewSelector camSelector;
 	
 	@Override
 	protected void robotInit() {
 		/*
-		 * Lets see how to use the Flashboard camera server. Please make sure you have checked ExampleFlashboard
-		 * first to learn about Flashboard control initialization.
+		 * Lets see how to use the Flashboard camera server.
 		 * 
 		 * The bellow code will throw an exception if flashboard camera server was not initialized.
 		 */

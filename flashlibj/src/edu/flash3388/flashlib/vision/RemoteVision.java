@@ -31,7 +31,7 @@ public class RemoteVision extends Sendable implements Vision{
 	private int currentProcessing = -1, sendProc = 0, procCount = 0;
 	private Analysis analysis;
 	private boolean running = false, updateProcessing = false,
-			sendProps = false;
+			sendProps = false, considerNew = false;
 	private int lastRec, recTimeout = 1000;
 	
 	/**
@@ -165,7 +165,14 @@ public class RemoteVision extends Sendable implements Vision{
 	 */
 	@Override
 	public boolean hasNewAnalysis(){
-		return analysis != null && FlashUtil.millisInt() - lastRec < recTimeout;
+		return analysis != null && considerNew && FlashUtil.millisInt() - lastRec < recTimeout;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setNewAnalysisAsOld(){
+		considerNew = false;
 	}
 	
 	/**
@@ -192,6 +199,7 @@ public class RemoteVision extends Sendable implements Vision{
 			Analysis an = Analysis.fromBytes(Arrays.copyOfRange(data, 1, data.length));
 			
 			if(an != null) {
+				considerNew = true;
 				lastRec = FlashUtil.millisInt();
 				analysis = an;
 			}
@@ -253,6 +261,7 @@ public class RemoteVision extends Sendable implements Vision{
 	public void onConnectionLost() {
 		procCount = 0;
 		analysis = null;
+		considerNew = false;
 	}
 
 	/**
