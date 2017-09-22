@@ -3,6 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="../libs/opencv.jar"/>
+	<classpathentry kind="lib" path="../libs/jinput.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FlashLibj"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

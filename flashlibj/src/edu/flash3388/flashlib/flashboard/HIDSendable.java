@@ -151,6 +151,7 @@ public class HIDSendable extends Sendable implements Runnable{
 				int pos = 1;
 				int joystick;
 				byte i, value;
+				short vals;
 				
 				while(data.length - pos >= 4){
 					joystick = data[pos++];
@@ -178,8 +179,8 @@ public class HIDSendable extends Sendable implements Runnable{
 					
 					if(data.length - pos >= 1 + value){
 						for (i = 0; i < data.length; i++) {
-							value = data[pos++];
-							joystickPOV_cache[joystick].povs[i] = value;
+							vals = (short) (data[pos++] | (data[pos++] << 8));
+							joystickPOV_cache[joystick].povs[i] = vals;
 						}
 					}
 					
