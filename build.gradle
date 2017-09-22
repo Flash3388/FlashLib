@@ -67,12 +67,13 @@ project(':flashboard'){
 	dependencies {
         compile project(':flashlibj')
 		compile name: 'opencv'
+		compile name: 'jinput'
     }
 	jar {
 		manifest {
 			attributes (
 					'Main-Class': flashboardMainClass,
-					'Class-Path': '. libs/flashlib.jar libs/opencv.jar'
+					'Class-Path': '. libs/flashlib.jar libs/opencv.jar libs/jinput.jar'
 			)
 		}
 	}
@@ -81,6 +82,7 @@ project(':flashboard'){
 			copy {
 				from projectOutputFolder + 'libs/flashlib.jar'
 				from projectLibsFolder + 'opencv.jar'
+				from projectLibsFolder + 'jinput.jar'
 				into projectOutputFolder + 'flashboard/libs/'
 			}
 			copy {
