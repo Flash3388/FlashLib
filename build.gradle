@@ -48,6 +48,18 @@ project(':flashlibj'){
 		archives sourcesJar
 		archives javadocJar
 	}
+
+	task copyManeditor{		
+		doLast{
+			copy {
+				from fileTree("maneditor")
+				into projectOutputFolder + "maneditor"
+			}
+			println ('added maneditor')
+		}
+	}
+	
+	build.finalizedBy(copyManeditor)
 }
 
 project(':flashboard'){

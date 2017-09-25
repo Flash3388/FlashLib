@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.robot;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import edu.flash3388.flashlib.communications.CommInterface;
@@ -60,7 +62,7 @@ public abstract class RobotBase implements SBC, Robot{
 		 * <p>
 		 * The default value is `true`.
 		 */
-		public boolean initHAL = true;
+		public boolean initHAL = false;
 		
 		/**
 		 * Indicates whether or not to initialize robot communications.
@@ -190,25 +192,34 @@ public abstract class RobotBase implements SBC, Robot{
 		String robotName = null;
 		Enumeration<URL> resources = null;
 	    try {
-	      resources = RobotBase.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+	    	resources = RobotBase.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
 	    } catch (IOException ex) {
-	      ex.printStackTrace();
+    		ex.printStackTrace();
 	    }
 	    while (resources != null && resources.hasMoreElements()) {
-	      try {
-	        Manifest manifest = new Manifest(resources.nextElement().openStream());
-	        robotName = manifest.getMainAttributes().getValue(MANIFEST_ROBOT_CLASS);
-	      } catch (IOException ex) {
-	        ex.printStackTrace();
-	      }
+			try {
+				Manifest manifest = new Manifest(resources.nextElement().openStream());
+				Attributes attr = manifest.getMainAttributes();
+				for (Iterator<Object> iterator = attr.keySet().iterator(); iterator.hasNext();) {
+					Object key = iterator.next();
+					if(key.toString().equals(MANIFEST_ROBOT_CLASS)){
+						robotName = attr.get(key).toString().trim();
+						break;
+					}
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 	    }
-		log.log("User class found: "+robotName, "RobotBase");
-		
-		try {
-			return (RobotBase) Class.forName(robotName).newInstance();
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	    if(robotName != null){
+			log.log("User class found: "+robotName, "RobotBase");
+			
+			try {
+				return (RobotBase) Class.forName(robotName).newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+	    }
 		return null;
 	}
 	private static void setupRobot() throws Exception{
@@ -261,13 +272,13 @@ public abstract class RobotBase implements SBC, Robot{
 				log.reportError("Exception occurred during user shutdown!!\n"+t.getMessage());
 				log.reportError(t);
 			}
-		}
-		
-		//communications shutdown
-		if(userImplement.communications != null){
-			log.log("Shutting down robot communications...", "RobotBase");
-			userImplement.communications.close();
-			log.log("Done", "RobotBase");
+			
+			//communications shutdown
+			if(userImplement.communications != null){
+				log.log("Shutting down robot communications...", "RobotBase");
+				userImplement.communications.close();
+				log.log("Done", "RobotBase");
+			}
 		}
 		
 		//hal shutdown
