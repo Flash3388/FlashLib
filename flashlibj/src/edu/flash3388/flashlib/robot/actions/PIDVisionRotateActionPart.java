@@ -5,32 +5,32 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
 
-public class PidVisionRotateActionPart extends PidRotationActionPart implements VisionAction{
+public class PIDVisionRotateActionPart extends PIDRotationActionPart implements VisionAction{
 
-	public PidVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, boolean horizontal,
 			DoubleSource rotationThreshold, double rotationMargin){
 		super(new PIDSource.VisionPIDSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
 	}
-	public PidVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, boolean horizontal,
 			DoubleSource rotationThreshold){
 		this(source, kp, ki, kd, kf, horizontal, rotationThreshold, 15.0);
 	}
-	public PidVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf,
 			DoubleSource rotationThreshold){
 		this(source, kp, ki, kd, kf, true, rotationThreshold);
 	}
-	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
+	public PIDVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
 			DoubleSource rotationThreshold, double rotationMargin){
 		super(new PIDSource.VisionPIDSource(source, horizontal, false), kp, ki, kd, kf, rotationThreshold, rotationMargin);
 	}
-	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
+	public PIDVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf, boolean horizontal,
 			DoubleSource rotationThreshold){
 		this(source, kp, ki, kd, kf, horizontal, rotationThreshold, 15.0);
 	}
-	public PidVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf,
+	public PIDVisionRotateActionPart(Vision source, double kp, double ki, double kd, double kf,
 			DoubleSource rotationThreshold){
 		this(source, kp, ki, kd, kf, true, rotationThreshold);
 	}

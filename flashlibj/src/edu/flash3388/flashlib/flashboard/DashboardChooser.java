@@ -5,6 +5,10 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.beans.IntegerProperty;
+import edu.flash3388.flashlib.util.beans.Property;
+import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
+import edu.flash3388.flashlib.util.beans.SimpleProperty;
 
 /**
  * Represents a combo box for values on the Flashboard.
@@ -32,7 +36,9 @@ public class DashboardChooser<T> extends Sendable{
 	}
 	
 	private Vector<Option<T>> options = new Vector<Option<T>>();
-	private int selected = 0, defaultIndex = -1;
+	private IntegerProperty selected = new SimpleIntegerProperty();
+	private Property<T> selectedValue = new SimpleProperty<T>(null);
+	private int defaultIndex = -1;
 	private boolean changed = false, changedIndex = false;
 	
 	@SafeVarargs
@@ -50,7 +56,7 @@ public class DashboardChooser<T> extends Sendable{
 	
 	public DashboardChooser<T> addDefault(Option<T> option){
 		select(options.size());
-		defaultIndex = selected;
+		defaultIndex = selected.get();
 		this.options.addElement(option);
 		changed = true;
 		return this;
@@ -69,37 +75,62 @@ public class DashboardChooser<T> extends Sendable{
 	public DashboardChooser<T> remove(int index){
 		if(index < 0) 
 			throw new IllegalArgumentException("Index must be non-negative");
+
 		options.remove(index);
+		
+		if(options.size() == 0){
+			if(index == defaultIndex)
+				defaultIndex = -1;
+			if(index == selected.get())
+				select(-1);
+		}
+		
 		changed = true;
 		return this;
 	}
 	public DashboardChooser<T> removeLast(){
 		return remove(options.size()-1);
 	}
+	
+	public IntegerProperty selectedIndexProperty(){
+		return selected;
+	}
+	public Property<T> selectedValueProperty(){
+		return selectedValue;
+	}
+	
 	public T getSelected(){
-		return selected >= 0 && selected < options.size() && options.size() > 0 ? options.get(selected).option : null;
+		return selectedValue.getValue();
 	}
 	public int getSelectedIndex(){
-		return selected >= 0 && selected < options.size() && options.size() > 0 ? selected : -1;
+		return selected.get();
 	}
 	public void select(int index){
-		selected = index;
+		setSelected(index);
 		changedIndex = true;
+	}
+	
+	private void setSelected(int index){
+		selected.set(index);
+		if(index < 0)
+			selectedValue.setValue(null);
+		else
+			selectedValue.setValue(options.get(selected.get()).option);
 	}
 
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 4) return;
 		int sel = FlashUtil.toInt(data);
-		if(sel >= 0 && sel < options.size() && sel != selected)
-			selected = sel;
+		if(sel >= 0 && sel < options.size() && sel != selected.get())
+			setSelected(sel);
 	}
 	@Override
 	public byte[] dataForTransmition() {
 		if(changedIndex && !changed){
 			changedIndex = false;
 			byte[] bytes = {1, 0, 0, 0, 0};
-			FlashUtil.fillByteArray(selected, 1, bytes);
+			FlashUtil.fillByteArray(selected.get(), 1, bytes);
 			return bytes;
 		}
 		changed = false;
@@ -120,10 +151,10 @@ public class DashboardChooser<T> extends Sendable{
 	@Override
 	public void onConnection() {
 		changed = true;
-		selected = defaultIndex >= 0 ? defaultIndex : 0;
 	}
 	@Override
 	public void onConnectionLost() {
 		changed = false;
+		setSelected(defaultIndex);
 	}
 }

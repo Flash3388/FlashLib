@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class UdpCommInterface extends ManualConnectionVerifier implements IpCommInterface{
+public class UDPCommInterface extends ManualConnectionVerifier implements IPCommInterface{
 	
 	private DatagramSocket socket;
 	private int portOut = -1;
@@ -42,7 +42,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 * 
 	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UdpCommInterface(InetAddress remote, int localport, int remoteport) throws SocketException{
+	public UDPCommInterface(InetAddress remote, int localport, int remoteport) throws SocketException{
 		outInet = remote;
 		socket = new DatagramSocket(localport);
 		portOut = remoteport;
@@ -56,7 +56,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 * 
 	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UdpCommInterface(int localPort) throws SocketException{
+	public UDPCommInterface(int localPort) throws SocketException{
 		this(null, localPort);
 	}
 	/**
@@ -68,7 +68,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 * 
 	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UdpCommInterface(InetAddress localAddr, int localPort) throws SocketException{
+	public UDPCommInterface(InetAddress localAddr, int localPort) throws SocketException{
 		socket = new DatagramSocket(localPort, localAddr);
 		server = true;
 	}
@@ -231,7 +231,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean isBoundAsServer(){
+	public boolean isServer(){
 		return server;
 	}
 	
@@ -312,7 +312,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 */
 	@Override
 	public void setRemoteAddress(InetAddress addr) {
-		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		if (isConnected() || !isOpened() || isServer()) return;
 		outInet = addr;
 	}
 	/**
@@ -335,7 +335,7 @@ public class UdpCommInterface extends ManualConnectionVerifier implements IpComm
 	 */
 	@Override
 	public void setRemotePort(int port) {
-		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		if (isConnected() || !isOpened() || isServer()) return;
 		portOut = port;
 	}
 }

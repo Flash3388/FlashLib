@@ -24,6 +24,6 @@ public class FlashboardModeSelector implements ModeSelector{
 	
 	@Override
 	public int getMode() {
-		return chooser.getSelected();
+		return chooser.remoteAttached()? chooser.getSelected() : MODE_DISABLED;
 	}
 }

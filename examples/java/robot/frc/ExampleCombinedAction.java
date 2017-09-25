@@ -5,8 +5,8 @@ import com.ctre.CANTalon;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.actions.GyroRotationActionPart;
-import edu.flash3388.flashlib.robot.actions.PidDistanceActionPart;
-import edu.flash3388.flashlib.robot.actions.PidRotationActionPart;
+import edu.flash3388.flashlib.robot.actions.PIDDistanceActionPart;
+import edu.flash3388.flashlib.robot.actions.PIDRotationActionPart;
 import edu.flash3388.flashlib.robot.actions.TankCombinedAction;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.frc.FRCSpeedControllers;
@@ -84,7 +84,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * from the Analysis class. We also used the vision built into flashboard.
 		 */
 		PIDSource visionRotation = new PIDSource.VisionPIDSource(Flashboard.getVision(), true, false);
-		PidRotationActionPart ractionpart = new PidRotationActionPart(visionRotation, kp, ki, kd, kf, rsetpoint, 5.0);
+		PIDRotationActionPart ractionpart = new PIDRotationActionPart(visionRotation, kp, ki, kd, kf, rsetpoint, 5.0);
 		/*
 		 * Rotation to an angle using a gyro. This class allows 2 angle rotation types:
 		 * - Relative: rotates a given angle relative to the current one. i.e the current angle is considered as 0.
@@ -99,7 +99,7 @@ public class ExampleCombinedAction extends IterativeFRCRobot{
 		 * attempt to reach a certain distance from the target an remain within the given margin.
 		 */
 		PIDSource sonicSource = new PIDSource.DoubleSourcePIDSource(sonicData);
-		PidDistanceActionPart dactionpart = new PidDistanceActionPart(sonicSource, kp, ki, kd, kf, dsetpoint, 15.0);
+		PIDDistanceActionPart dactionpart = new PIDDistanceActionPart(sonicSource, kp, ki, kd, kf, dsetpoint, 15.0);
 		
 		/*
 		 * We can create a combined action for tankdrives and use the action parts we have created. Just use this like

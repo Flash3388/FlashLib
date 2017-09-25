@@ -10,8 +10,8 @@ import edu.flash3388.flashlib.communications.CameraServer;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
-import edu.flash3388.flashlib.communications.UdpCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
+import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
@@ -39,6 +39,33 @@ public final class Flashboard {
 		public int camPort = CAMERA_PORT_ROBOT;
 		public int commPort = PORT_ROBOT;
 		public boolean tcp = true;
+		
+		public void enableCameraServer(boolean enable){
+			if(enable)
+				initMode |= INIT_CAM;
+			else
+				initMode &= ~(INIT_CAM);
+		}
+		public void setCameraServerPort(int port){
+			camPort = port;
+		}
+		
+		public void enableCommunications(boolean enable){
+			if(enable)
+				initMode |= INIT_COMM;
+			else
+				initMode &= ~(INIT_COMM);
+		}
+		public void setCommunicationsPort(int port){
+			commPort = port;
+		}
+		
+		public void setProtocolTCP(){
+			tcp = true;
+		}
+		public void setProtocolUDP(){
+			tcp = false;
+		}
 	}
 	
 	/**
@@ -236,8 +263,8 @@ public final class Flashboard {
 			if(communications == null && (initMode & INIT_COMM) != 0){
 				CommInterface readi;
 				if(tcp)
-					readi = new TcpCommInterface(port);
-				else readi = new UdpCommInterface(port);
+					readi = new TCPCommInterface(port);
+				else readi = new UDPCommInterface(port);
 				
 				communications = new Communications("Flashboard", readi);
 				if(vision instanceof Sendable)

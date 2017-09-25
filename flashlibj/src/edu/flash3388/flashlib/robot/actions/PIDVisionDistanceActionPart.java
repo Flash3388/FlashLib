@@ -5,22 +5,22 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
 
-public class PidVisionDistanceActionPart extends PidDistanceActionPart implements VisionAction{
+public class PIDVisionDistanceActionPart extends PIDDistanceActionPart implements VisionAction{
 	
-	public PidVisionDistanceActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDVisionDistanceActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf,
 			DoubleSource distanceThreshold, double distanceMargin){
 		super(new PIDSource.VisionPIDSource(source, false, true), kp, ki, kd, kf, distanceThreshold, distanceMargin);
 	}
-	public PidVisionDistanceActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDVisionDistanceActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, DoubleSource distanceThreshold){
 		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
 	}
-	public PidVisionDistanceActionPart(Vision source, double kp, double ki, double kd, double kf,
+	public PIDVisionDistanceActionPart(Vision source, double kp, double ki, double kd, double kf,
 			DoubleSource distanceThreshold, double distanceMargin){
 		super(new PIDSource.VisionPIDSource(source, false, true), kp, ki, kd, kf, distanceThreshold, distanceMargin);
 	}
-	public PidVisionDistanceActionPart(Vision source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold){
+	public PIDVisionDistanceActionPart(Vision source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold){
 		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
 	}
 	

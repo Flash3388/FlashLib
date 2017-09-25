@@ -2,18 +2,14 @@ package edu.flash3388.flashlib.communications;
 
 import java.net.InetAddress;
 
-public interface IpCommInterface extends CommInterface{
+public interface IPCommInterface extends CommInterface{
 	
 	/**
-	 * Gets whether or not this interface acts like as a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
+	 * Gets whether or not this interface is a server:
 	 * 
 	 * @return true - server, false - client
 	 */
-	boolean isBoundAsServer();
+	boolean isServer();
 	
 	/**
 	 * Gets the local bound address

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import edu.flash3388.flashlib.communications.Packet;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /*
@@ -33,7 +33,7 @@ public class ExampleTcpClient {
 		/*
 		 * Creates a TCP client communications interface for the address and ports we got earlier.
 		 */
-		TcpCommInterface clientInterface = new TcpCommInterface(localAddress, remoteAddress, localPort, remotePort);
+		TCPCommInterface clientInterface = new TCPCommInterface(localAddress, remoteAddress, localPort, remotePort);
 		/*
 		 * Sets the maximum amount of milliseconds to wait while reading. If data was not received during this
 		 * time frame, reading is stopped.

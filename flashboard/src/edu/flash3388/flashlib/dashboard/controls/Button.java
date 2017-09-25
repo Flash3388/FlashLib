@@ -50,6 +50,13 @@ public class Button extends Displayble{
 			});
 			press[0] = DashboardButton.UP;
 			changed = true;
+		}else if(bytes[0] == DashboardButton.ENABLED){
+			final boolean enabled = bytes[1] == 1;
+			FlashFxUtils.onFxThread(()->{
+				button.setDisable(enabled);
+			});
+			press[0] = DashboardButton.UP;
+			changed = true;
 		}
 	}
 	@Override

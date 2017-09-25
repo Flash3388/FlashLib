@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class TcpCommInterface extends StreamCommInterface implements IpCommInterface{
+public class TCPCommInterface extends StreamCommInterface implements IPCommInterface{
 	
 	public static final int RECONNECTION_DELAY = 5000;
 	
@@ -48,7 +48,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 * @throws UnknownHostException if the local host name could not be resolved into an address.
 	 * @throws IOException if the bind operation fails, or if the socket is already bound.
 	 */
-	public TcpCommInterface(InetAddress remote, int localport, int remoteport) throws UnknownHostException, IOException{
+	public TCPCommInterface(InetAddress remote, int localport, int remoteport) throws UnknownHostException, IOException{
 		this(InetAddress.getLocalHost(), remote, localport, remoteport);
 	}
 	/**
@@ -63,8 +63,8 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 * 
 	 * @throws IOException if the bind operation fails, or if the socket is already bound.
 	 */
-	public TcpCommInterface(InetAddress local, InetAddress remote, int localport, int remoteport) throws IOException{
-		super(false, false);
+	public TCPCommInterface(InetAddress local, InetAddress remote, int localport, int remoteport) throws IOException{
+		super(false);
 		outInet = remote;
 		portOut = remoteport;
 		localPort = localport;
@@ -86,7 +86,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 * 
 	 * @throws IOException if an I/O error occurs when opening the socket.
 	 */
-	public TcpCommInterface(int localPort) throws IOException{
+	public TCPCommInterface(int localPort) throws IOException{
 		this(InetAddress.getLocalHost(), localPort);
 	}
 	/**
@@ -99,8 +99,8 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 * 
 	 * @throws IOException if an I/O error occurs when opening the socket.
 	 */
-	public TcpCommInterface(InetAddress localAddr, int localPort) throws IOException{
-		super(true, false);
+	public TCPCommInterface(InetAddress localAddr, int localPort) throws IOException{
+		super(false);
 		localInet = localAddr;
 		this.localPort = localPort;
 		serverSocket = new ServerSocket(localPort, 1, localAddr);
@@ -133,7 +133,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	@Override
 	public void close(){
 		try {
-			if(isBoundAsServer()) 
+			if(isServer()) 
 				serverSocket.close();
 			closeSocket();
 		} catch (IOException e) {
@@ -152,7 +152,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		try {
 			if(reset){
 				closeSocket();
-				if (!isBoundAsServer()){
+				if (!isServer()){
 					FlashUtil.delay(RECONNECTION_DELAY);
 					createSocket();
 				}
@@ -160,7 +160,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 				reset = false;
 			}
 			
-			if(isBoundAsServer()){
+			if(isServer()){
 				socket = serverSocket.accept();
 				outInet = socket.getInetAddress();
 			}
@@ -192,7 +192,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		} catch (IOException e) {
 			FlashUtil.getLog().reportError(e.getMessage());
 		}
-		if(isBoundAsServer())
+		if(isServer())
 			outInet = null;
 	}
 	
@@ -304,7 +304,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		
 		try {
 			localInet = addr;
-			if(isBoundAsServer())
+			if(isServer())
 				serverSocket = new ServerSocket(localPort, 1, addr);
 			else 
 				createSocket();
@@ -316,7 +316,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 */
 	@Override
 	public void setRemoteAddress(InetAddress addr) {
-		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		if (isConnected() || !isOpened() || isServer()) return;
 		outInet = addr;
 	}
 	/**
@@ -330,7 +330,7 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 		
 		try {
 			localPort = port;
-			if(isBoundAsServer())
+			if(isServer())
 				serverSocket = new ServerSocket(localPort, 1, localInet);
 			else 
 				createSocket();
@@ -342,7 +342,14 @@ public class TcpCommInterface extends StreamCommInterface implements IpCommInter
 	 */
 	@Override
 	public void setRemotePort(int port) {
-		if (isConnected() || !isOpened() || isBoundAsServer()) return;
+		if (isConnected() || !isOpened() || isServer()) return;
 		portOut = port;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isServer() {
+		return serverSocket != null;
 	}
 }

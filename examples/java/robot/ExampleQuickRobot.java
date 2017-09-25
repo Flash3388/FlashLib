@@ -120,7 +120,10 @@ public class ExampleQuickRobot extends IterativeRobot{
 		//adding a dependency of the action on our drive system
 		stickDrive.requires(driveTrain);
 		
-		//setting the action as the systems default action
+		//we set the action as default action for our drive system.
+		//so whenever there is no action running on the system, the scheduler will start
+		//this action. (Will not happen in disabled mode since actions do not run during
+		//that mode)
 		driveTrain.setDefaultAction(stickDrive);
 	}
 

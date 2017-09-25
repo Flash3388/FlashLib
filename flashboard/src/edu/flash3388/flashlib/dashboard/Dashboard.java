@@ -20,9 +20,9 @@ import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
-import edu.flash3388.flashlib.communications.IpCommInterface;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
-import edu.flash3388.flashlib.communications.UdpCommInterface;
+import edu.flash3388.flashlib.communications.IPCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
+import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -122,10 +122,10 @@ public class Dashboard extends Application {
 								InetAddress ad = InetAddress.getByName(host);
 								log.log("Found host: "+host, "Dashboard");
 								if(protocol.equals("udp"))
-									commInterface = new UdpCommInterface(ad, localport, remoteport);
+									commInterface = new UDPCommInterface(ad, localport, remoteport);
 								else if(protocol.equals("tcp")){
 									InetAddress local = FlashUtil.getLocalAddress(ad);
-									commInterface = new TcpCommInterface(local, ad, localport, remoteport);
+									commInterface = new TCPCommInterface(local, ad, localport, remoteport);
 								}
 								
 								communications = new Communications("Robot", commInterface);
@@ -345,7 +345,7 @@ public class Dashboard extends Application {
 	//-----------------------Communications--------------------------------------
 	//--------------------------------------------------------------------
 	
-	private static IpCommInterface commInterface;
+	private static IPCommInterface commInterface;
 	private static Communications communications;
 	private static CameraClient camClient;
 	

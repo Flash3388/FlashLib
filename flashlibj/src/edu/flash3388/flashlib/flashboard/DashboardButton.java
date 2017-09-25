@@ -15,9 +15,12 @@ public class DashboardButton extends Sendable{
 	
 	public static final byte DOWN = 0xe;
 	public static final byte UP = 0x5;
+	public static final byte ENABLED = 0x1;
 	
 	private Button button;
 	private boolean running = false;
+	private boolean updateDisable = true;
+	private boolean enabled = true;
 	
 	public DashboardButton(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
@@ -27,6 +30,17 @@ public class DashboardButton extends Sendable{
 
 	public void whenPressed(Action action){
 		button.whenPressed(action);
+	}
+	public void setEnabled(boolean enable){
+		if(!enable && running){
+			running = false;
+			button.stopAll();
+		}
+		this.enabled = enable;
+		updateDisable = true;
+	}
+	public boolean isEnabled(){
+		return enabled;
 	}
 	
 	@Override
@@ -41,15 +55,19 @@ public class DashboardButton extends Sendable{
 	}
 	@Override
 	public byte[] dataForTransmition() {
+		if(updateDisable){
+			updateDisable = false;
+			return new byte[] {ENABLED, (byte) (enabled? 1 : 0)};
+		}
 		return new byte[] {UP};
 	}
 	@Override
 	public boolean hasChanged() {
-		return running && !button.actionsRunning();
+		return updateDisable || (running && !button.actionsRunning());
 	}
 	@Override
 	public void onConnection() {
-		
+		updateDisable = true;
 	}
 	@Override
 	public void onConnectionLost(){

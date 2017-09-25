@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class GyroRotationActionPart extends PidRotationActionPart{
+public class GyroRotationActionPart extends PIDRotationActionPart{
 
 	private Gyro gyro;
 	private DoubleSource rotationThreshold;

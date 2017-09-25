@@ -10,6 +10,7 @@ package edu.flash3388.flashlib.communications;
 public abstract class SerialCommInterface extends StreamCommInterface{
 	
 	private boolean isConnected = false;
+	private boolean server;
 	
 	/**
 	 * Creates a new CommInterface for IO ports. Data is passed to the super class {@link StreamCommInterface}.
@@ -18,7 +19,8 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	 * @param crcallow if true, data will be processed with CRC32 to dump data corruption
 	 */
 	public SerialCommInterface(boolean server, boolean crcallow){
-		super(server, crcallow);
+		super(crcallow);
+		this.server = server;
 	}
 	/**
 	 * Creates a new CommInterface for IO ports. Data is passed to the super class {@link StreamCommInterface}.
@@ -35,7 +37,7 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	 */
 	@Override
 	public void connect(Packet packet) {
-		isConnected = isBoundAsServer()? handshakeServer(this, packet) : 
+		isConnected = isServer()? handshakeServer(this, packet) : 
 			handshakeClient(this, packet);
 		if(isConnected){
 			resetData();
@@ -55,5 +57,17 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	@Override
 	public boolean isConnected() {
 		return isConnected;
+	}
+	/**
+	 * Gets whether or not this interface acts like as a server:
+	 * <ul>
+	 * 	<li> Server: waits for connection </li>
+	 * 	<li> Client: initiates connection </li>
+	 * </ul>
+	 * 
+	 * @return true - server, false - client
+	 */
+	public boolean isServer(){
+		return server;
 	}
 }

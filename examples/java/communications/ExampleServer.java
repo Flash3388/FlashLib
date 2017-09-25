@@ -7,7 +7,7 @@ import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.EchoSendable;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /*
@@ -28,7 +28,7 @@ public class ExampleServer {
 		/*
 		 * Creates a TCP server communications interface for the address and ports we got earlier.
 		 */
-		TcpCommInterface serverInterface = new TcpCommInterface(address, localPort);
+		TCPCommInterface serverInterface = new TCPCommInterface(address, localPort);
 		
 		/*
 		 * Creates a communications manager for the TCP communications interface 

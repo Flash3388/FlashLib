@@ -30,47 +30,20 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public abstract class StreamCommInterface extends ManualConnectionVerifier{
 
 	private CRC32 crc;
-	private boolean server;
 	private byte[] dataBuffer = new byte[BUFFER_SIZE], leftoverData = new byte[0];
 	private byte crclen = 0;
 	
 	/**
-	 * Creates a new stream-based {@link CommInterface}. For connection management it is necessary to define if
-	 * this communication side must initiate communications or not. This is defined by whether or not it is a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
-	 * <p>
-	 * For data corruption detection it is possible to use a CRC-32 checksum algorithm with this interface.
-	 * </p>
+	 * Creates a new stream-based {@link CommInterface}. 
+	 * corruption detection it is possible to use a CRC-32 checksum algorithm with this interface.
 	 * 
-	 * @param server true - server, false - client
 	 * @param crcallow if true, CRC-32 checksum is used
 	 */
-	public StreamCommInterface(boolean server, boolean crcallow){
-		this.server = server;
+	public StreamCommInterface(boolean crcallow){
 		if(crcallow){
 			crc = new CRC32();
 			crclen = 8;
 		}
-	}
-	/**
-	 * Creates a new stream-based {@link CommInterface}. For connection management it is necessary to define if
-	 * this communication side must initiate communications or not. This is defined by whether or not it is a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
-	 * <p>
-	 * This constructor uses by default a CRC-32 checksum algorithm for data corruption. See {@link #StreamCommInterface(boolean, boolean)}
-	 * for other options.
-	 * </p>
-	 * 
-	 * @param server true - server, false - client
-	 */
-	public StreamCommInterface(boolean server){
-		this(server, true);
 	}
 	
 	private boolean checkCrc(byte[] data, long expected){
@@ -186,19 +159,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	public int getMaxBufferSize() {
 		return dataBuffer.length;
 	}
-	
-	/**
-	 * Gets whether or not this interface acts like as a server:
-	 * <ul>
-	 * 	<li> Server: waits for connection </li>
-	 * 	<li> Client: initiates connection </li>
-	 * </ul>
-	 * 
-	 * @return true - server, false - client
-	 */
-	public boolean isBoundAsServer(){
-		return server;
-	}
+
 	/**
 	 * Resets the data buffers used by this interface for data reading.
 	 */

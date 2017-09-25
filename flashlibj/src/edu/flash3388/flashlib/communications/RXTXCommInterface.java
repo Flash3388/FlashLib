@@ -21,7 +21,7 @@ import gnu.io.UnsupportedCommOperationException;
  * @author Alon Klein
  * @since FlashLib 1.0.1
  */
-public class RxTxCommInterface extends SerialCommInterface {
+public class RXTXCommInterface extends SerialCommInterface {
 
 	private String portName;
 	private int baudrate;
@@ -34,13 +34,13 @@ public class RxTxCommInterface extends SerialCommInterface {
 	
 	private boolean isOpened;
 	
-	public RxTxCommInterface(boolean server, String port) {
+	public RXTXCommInterface(boolean server, String port) {
 		this(server, port, 100);
 	}
-	public RxTxCommInterface(boolean server, String port, int timeout) {
+	public RXTXCommInterface(boolean server, String port, int timeout) {
 		this(server, port, timeout, 57600);
 	}
-	public RxTxCommInterface(boolean server, String port, int timeout, int baudrate) {
+	public RXTXCommInterface(boolean server, String port, int timeout, int baudrate) {
 		super(server, false);
 		portName = port;
 		this.timeout = timeout;

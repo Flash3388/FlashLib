@@ -6,19 +6,19 @@ import edu.flash3388.flashlib.robot.PropertyAction;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class PidRotationActionPart extends PropertyAction implements PidAction{
+public class PIDRotationActionPart extends PropertyAction implements PIDAction{
 
 	private PIDController pidcontroller;
 	private double rotationMargin;
 	
-	public PidRotationActionPart(PIDController controller, double rotationMargin){
+	public PIDRotationActionPart(PIDController controller, double rotationMargin){
 		this.rotationMargin = rotationMargin;
 		this.pidcontroller = controller;
 	}
-	public PidRotationActionPart(PIDController controller){
+	public PIDRotationActionPart(PIDController controller){
 		this(controller, 15.0);
 	}
-	public PidRotationActionPart(PIDSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDRotationActionPart(PIDSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, DoubleSource distanceThreshold, 
 			double rotationMargin){
 		this.rotationMargin = rotationMargin;
@@ -27,11 +27,11 @@ public class PidRotationActionPart extends PropertyAction implements PidAction{
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(distanceThreshold);
 	}
-	public PidRotationActionPart(PIDSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
+	public PIDRotationActionPart(PIDSource source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, DoubleSource distanceThreshold){
 		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
 	}
-	public PidRotationActionPart(PIDSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold, 
+	public PIDRotationActionPart(PIDSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold, 
 			double rotationMargin){
 		this.rotationMargin = rotationMargin;
 		
@@ -39,7 +39,7 @@ public class PidRotationActionPart extends PropertyAction implements PidAction{
 		pidcontroller.setPIDSource(source);
 		pidcontroller.setSetPoint(distanceThreshold);
 	}
-	public PidRotationActionPart(PIDSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold){
+	public PIDRotationActionPart(PIDSource source, double kp, double ki, double kd, double kf, DoubleSource distanceThreshold){
 		this(source, kp, ki, kd, kf, distanceThreshold, 15.0);
 	}
 	
