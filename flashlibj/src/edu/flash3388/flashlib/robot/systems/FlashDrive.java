@@ -369,6 +369,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param y The speed to move the motors on the side of the robot.
 	 * @param x The speed to move the motors on the front and back of the robot.
 	 */
+	@Override
 	public void omniDrive(double y, double x){
 		setMotors(x, y, y, x);
 	}
@@ -575,21 +576,9 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @see #vectoredOmniDrive_cartesian(double, double, double)
 	 */
 	@Override
-	public void holonomicCartesian(double x, double y, double rotation) {
+	public void holonomicCartesian(double y, double x, double rotation) {
 		//implement for omni drive
 		vectoredOmniDrive_cartesian(y, x, rotation);
-	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Moves the drive system as an omni drive system. Converts data to cartesian format
-	 * and calls {@link #holonomicCartesian(double, double, double)}.
-	 * </p>
-	 */
-	@Override
-	public void holonomicPolar(double magnitude, double direction, double rotation) {
-		//implement for omni drive
-		holonomicCartesian(Mathf.vecX(magnitude, direction), Mathf.vecY(magnitude, direction), rotation);
 	}
 	
 	/**

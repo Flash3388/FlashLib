@@ -93,13 +93,7 @@
                   </Menu>
                   <Menu fx:id="sbc_menu" mnemonicParsing="false" text="Tools">
                     <items>
-                    	<MenuItem fx:id="sbc_update" mnemonicParsing="false" text="Update Software" />
-                        <MenuItem fx:id="sbc_load" mnemonicParsing="false" text="Load Code" />
-                        <Menu text="Open">
-                        	<MenuItem fx:id="sbc_ssh" mnemonicParsing="false" text="SSH" />
-                        	<MenuItem fx:id="sbc_sftp" mnemonicParsing="false" text="SFTP" />
-                        	<MenuItem fx:id="sbc_controller" mnemonicParsing="false" text="Controller" />
-                        </Menu>
+                        <MenuItem fx:id="hid_window" mnemonicParsing="false" text="Show HID Window" />
                     </items>
                   </Menu>
                   <Menu fx:id="help_menu" mnemonicParsing="false" text="Help">

@@ -6,23 +6,29 @@ import edu.flash3388.flashlib.dashboard.Displayble;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.util.FlashUtil;
+
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
+import net.java.games.input.Controller.Type;
 import net.java.games.input.ControllerEnvironment;
 
 public class HIDControl extends Displayble{
 
 	private static class HIDData{
 		int port;
+		String name;
+		Controller controller;
+		
 		HIDAxis[] axes;
 		HIDButton[] buttons;
 		HIDPOV[] povs;
 		
-		public HIDData(int port, HIDAxis[] axes, HIDButton[] buttons, HIDPOV[] povs) {
+		public HIDData(int port, String name, HIDAxis[] axes, HIDButton[] buttons, HIDPOV[] povs) {
 			this.axes = axes;
 			this.buttons = buttons;
 			this.povs = povs;
 			this.port = port;
+			this.name = name;
 		}
 	}
 	private static class HIDAxis{
@@ -65,7 +71,7 @@ public class HIDControl extends Displayble{
 	private static final int UPDATE_RATE = 50;
 	
 	private ArrayList<Byte> dataList = new ArrayList<Byte>();
-	private byte[] sendDataBuffer;
+	private byte[] sendDataBuffer = new byte[0];
 	
 	private HIDData[] hidData = new HIDData[HIDSendable.MAX_PORT_COUNT];
 	private int controllerCount = 0;
@@ -75,11 +81,20 @@ public class HIDControl extends Displayble{
 	private boolean updateData = false;
 	private boolean sendData = false;
 	
-	public HIDControl(String name) {
-		super(name, FlashboardSendableType.JOYSTICK);
+	private int times = 0;
+	
+	public HIDControl() {
+		super("hid control", FlashboardSendableType.JOYSTICK);
 	}
 
 	private void updateControllers(){
+		for (int i = 0; i < hidData.length; i++) {
+			if(hidData[i] == null)
+				continue;
+			hidData[i].controller.poll();
+		}
+	}
+	private void loadControllers(){
 		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 		
 		if(controllerCount > 0){
@@ -91,10 +106,13 @@ public class HIDControl extends Displayble{
 				for (int j = 0; j < controllers.length; j++) {
 					if(controllers[j] == null)
 						continue;
+					if(!controllers[j].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK)){
+						controllers[j] = null;
+						continue;
+					}
 					
 					if(controllers[j].getPortNumber() == hidData[i].port){
 						inarray = true;
-						controllers[j].poll();
 						controllers[j] = null;
 						break;
 					}
@@ -110,6 +128,8 @@ public class HIDControl extends Displayble{
 		if(controllerCount < hidData.length){
 			for (int i = 0; i < controllers.length; i++) {
 				if(controllers[i] == null)
+					continue;
+				if(!controllers[i].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK))
 					continue;
 				
 				int index = 0;
@@ -144,16 +164,19 @@ public class HIDControl extends Displayble{
 			}
 		}
 		
-		return new HIDData(controller.getPortNumber(),
+		HIDData data = new HIDData(controller.getPortNumber(), controller.getName(),
 				axes.toArray(new HIDAxis[axes.size()]),
 				buttons.toArray(new HIDButton[buttons.size()]),
 				povs.toArray(new HIDPOV[povs.size()])
 				);
+		data.controller = controller;
+		return data;
 	}
 	private void catchDataForSending(){
 		dataList.clear();
 		byte[] buttonData = new byte[4];
 		
+		dataList.add(HIDSendable.JOYSTICK_DATA);
 		for (int i = 0; i < hidData.length; i++) {
 			if(hidData[i] == null)
 				continue;
@@ -164,7 +187,7 @@ public class HIDControl extends Displayble{
 			dataList.add((byte) hidData[i].axes.length);
 			for (int j = 0; j < hidData[i].axes.length; j++) {
 				float val = hidData[i].axes[j].getValue();
-				dataList.add((byte) (val < 0? val * 128 : 127));
+				dataList.add((byte) (val < 0? val * 128 : val * 127));
 			}
 			
 			//pov data
@@ -198,6 +221,15 @@ public class HIDControl extends Displayble{
 		}
 	}
 	
+	public void setEnabled(boolean enabled){
+		this.updateData = enabled;
+	}
+	
+	public String getHIDName(int channel){
+		if(channel < 0 || channel >= hidData.length)
+			return null;
+		return hidData[channel].name;
+	}
 	
 	public boolean isHIDConnected(int channel){
 		if(channel < 0 || channel >= hidData.length)
@@ -252,13 +284,20 @@ public class HIDControl extends Displayble{
 			return;
 		
 		if(lastUpdate < 1 || FlashUtil.millis() - lastUpdate >= UPDATE_RATE){
+			if(++times >= 4){
+				loadControllers();
+				times = 0;
+			}
 			updateControllers();
+			
 			lastUpdate = FlashUtil.millis();
 			
 			
 			if(remoteAttached()){
 				catchDataForSending();
 				sendData = true;
+				
+				System.out.println("caching for send");
 			}
 		}
 	}
@@ -267,6 +306,8 @@ public class HIDControl extends Displayble{
 	}
 	@Override
 	public byte[] dataForTransmition() {
+		System.out.println("data sent");
+		sendData = false;
 		return sendDataBuffer;
 	}
 	@Override

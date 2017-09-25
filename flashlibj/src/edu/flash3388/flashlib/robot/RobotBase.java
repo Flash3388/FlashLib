@@ -91,7 +91,7 @@ public abstract class RobotBase implements SBC, Robot{
 		 * <p>
 		 * The default value is {@link EmptyHIDInterface}.
 		 */
-		public HIDInterface hidImpl = new EmptyHIDInterface();
+		public HIDInterface hidInterface = new EmptyHIDInterface();
 		
 		/**
 		 * Contains initialization data for Flashboard in the form of {@link FlashboardInitData}.
@@ -121,7 +121,7 @@ public abstract class RobotBase implements SBC, Robot{
 			commInterface = initializer.commInterface;
 			
 			modeSelector = initializer.modeSelector;
-			hidImpl = initializer.hidImpl;
+			hidInterface = initializer.hidInterface;
 			
 			flashboardInitData = initializer.flashboardInitData;
 			initFlashboard = initializer.initFlashboard;
@@ -217,7 +217,7 @@ public abstract class RobotBase implements SBC, Robot{
 		userImplement.configInit(initializer);
 		
 		//initializing FlashLib for robot operation
-		FlashRobotUtil.initFlashLib(userImplement, initializer.hidImpl, 
+		FlashRobotUtil.initFlashLib(userImplement, initializer.hidInterface, 
 				initializer.initFlashboard? initializer.flashboardInitData : null);
 		
 		//setting up the mode selector for robot operations

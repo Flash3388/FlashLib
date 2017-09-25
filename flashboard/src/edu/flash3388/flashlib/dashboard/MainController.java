@@ -112,8 +112,8 @@ public class MainController implements Initializable{
 	@FXML HBox manual_controls;
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
-	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, sbc_update, sbc_load,
-				   sbc_ssh, sbc_sftp, sbc_controller, pidtuner, vision_editor;
+	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, 
+				pidtuner, vision_editor, hid_window;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -139,14 +139,8 @@ public class MainController implements Initializable{
 		threadTask.controller = this;
 		Dashboard.getUpdater().addTask(threadTask);
 		
-		sbc_ssh.setOnAction((e)->{
-			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SSH);
-		});
-		sbc_sftp.setOnAction((e)->{
-			//ShellWindow.showShellWindow(Dashboard.getPrimary(), ChannelType.SFTP);
-		});
-		sbc_update.setOnAction((e)->{
-			//TODO: IMPLEMENT
+		hid_window.setOnAction(e -> {
+			HIDWindow.showHIDWindow();
 		});
 		load_params.setOnAction((e)->{
 			loadParams();

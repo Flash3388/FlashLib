@@ -17,7 +17,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.STRING: return new StringProperty(name);
 			case FlashboardSendableType.INPUT: return new InputField(name);
 			case FlashboardSendableType.SLIDER: return new Slider(name);
-			case FlashboardSendableType.JOYSTICK: return null;
+			case FlashboardSendableType.JOYSTICK: return Dashboard.getHIDControl();
 			case FlashboardSendableType.CHOOSER: return new Chooser(name);
 			case FlashboardSendableType.TESTER: return new FlashboardTester(name);
 			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name);

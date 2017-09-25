@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.HIDSendable;
 
 public class FlashboardHIDInterface extends HIDSendable implements HIDInterface{
@@ -8,6 +9,11 @@ public class FlashboardHIDInterface extends HIDSendable implements HIDInterface{
 		super("HIDInterface");
 	}
 
+	public void attachToFlashboard(){
+		if(!attached())
+			Flashboard.attach(this);
+	}
+	
 	@Override
 	public boolean isHIDConnected(int hid) {
 		return getAxisCount(hid) > 0 && getButtonCount(hid) > 0;

@@ -148,6 +148,8 @@ public class HIDSendable extends Sendable implements Runnable{
 			synchronized (joystickMutex) {
 				updated = false;
 				
+				//System.out.println("DATA: "+data.length);
+				
 				int pos = 1;
 				int joystick;
 				byte i, value;
@@ -164,9 +166,9 @@ public class HIDSendable extends Sendable implements Runnable{
 					}
 					
 					if(data.length - pos >= 2 + value){
-						for (i = 0; i < data.length; i++) {
+						for (i = 0; i < joystickAxes_cache[joystick].count; i++) {
 							value = data[pos++];
-							joystickAxes_cache[joystick].axes[i] = value < 0? value / 128.0f : 127.0f;
+							joystickAxes_cache[joystick].axes[i] = value < 0? value / 128.0f : value / 127.0f;
 						}
 					}
 					
@@ -178,7 +180,7 @@ public class HIDSendable extends Sendable implements Runnable{
 					}
 					
 					if(data.length - pos >= 1 + value){
-						for (i = 0; i < data.length; i++) {
+						for (i = 0; i < joystickPOV_cache[joystick].count; i++) {
 							vals = (short) (data[pos++] | (data[pos++] << 8));
 							joystickPOV_cache[joystick].povs[i] = vals;
 						}

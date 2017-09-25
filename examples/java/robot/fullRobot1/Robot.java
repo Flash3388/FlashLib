@@ -43,6 +43,10 @@ public class Robot extends IterativeRobot{
 		
 		//set our mode selector
 		initializer.modeSelector = modeSelector;
+		
+		//since we use HAL PWM ports for controlling our drive system, we need to allow
+		//initialization of the FlashLib HAL
+		initializer.initHAL = true;
 	}
 	@Override
 	protected void robotInit() {

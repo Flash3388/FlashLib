@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -11,6 +14,7 @@ import org.opencv.core.Core;
 
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
+import edu.flash3388.flashlib.dashboard.controls.HIDControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -194,6 +198,7 @@ public class Dashboard extends Application {
 	public static final String FOLDER_RESOURCE = "data/res/";
 	public static final String FOLDER_DATA = "data/";
 	public static final String FOLDER_LIBS_NATIVES = "libs/natives/";
+	public static final String FOLDER_LIBS_NATIVES_CURRENT = FOLDER_LIBS_NATIVES + "current/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
 	
@@ -243,6 +248,7 @@ public class Dashboard extends Application {
 	private static Stage primaryStage;
 	private static CameraViewer camViewer;
 	private static EmergencyStopControl emergencyStop;
+	private static HIDControl hidcontrol;
 	private static boolean fxready = false;
 	
 	private MainController controller;
@@ -266,6 +272,11 @@ public class Dashboard extends Application {
 		displayables.clear();
 		closeVision();
 		addDisplayable(camViewer);
+		addDisplayable(hidcontrol);
+	}
+	
+	public static HIDControl getHIDControl(){
+		return hidcontrol;
 	}
 	
 	private static void fxReady(){
@@ -414,6 +425,7 @@ public class Dashboard extends Application {
 	
 	private static Dashboard instance;
 	private static Log log;
+	private static String currentNativesFolder = "";
 	
 	public static void main(String[] args) throws Exception{
 		log = FlashUtil.getLog();
@@ -431,6 +443,9 @@ public class Dashboard extends Application {
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		
+		log.log("Loading jinput natives...", "Dashboard");
+		loadJinputNatives();
+		
 		log.log("Creating shutdown hook...", "Dashboard");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->close()));
 		log.log("Done", "Dashboard");
@@ -439,6 +454,33 @@ public class Dashboard extends Application {
 		initStart();
 	    log.log("Launching FX...", "Dashboard");
 	    launch();
+	}
+	private static void loadJinputNatives(){
+		String nativeName = "";
+		String folder = FOLDER_LIBS_NATIVES;
+		if(FlashUtil.isUnix()){
+			folder += "linux/";
+			if(FlashUtil.isArchitectureX64())
+				nativeName = "libjinput-linux64.so";
+			else
+				nativeName = "libjinput-linux.so";
+		}else{
+			if(FlashUtil.isArchitectureX64()){
+				folder += "win64/";
+				nativeName += "jinput-raw_64.dll";
+			}
+			else{
+				folder += "win32/";
+				nativeName += "jinput-raw.dll";
+			}
+		}
+		
+		
+		try {
+			Files.copy(Paths.get(folder + nativeName), Paths.get(FOLDER_LIBS_NATIVES_CURRENT + nativeName), 
+					StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+		}
 	}
 	private static void setupValuePath(){
 		String path = FOLDER_LIBS_NATIVES;
@@ -455,10 +497,10 @@ public class Dashboard extends Application {
 		
 		path = new File(path).getAbsolutePath();
 		log.log("java.library.path="+path, "Dashboard");
-		System.setProperty("java.library.path", path);
+		currentNativesFolder = path;
 	}
 	private static void loadValueLibrary(String libname){
-		String path = System.getProperty("java.library.path")+"/";
+		String path = currentNativesFolder+"/";
 		if(FlashUtil.isWindows())
 			path += libname+".dll";
 		else if(FlashUtil.isUnix())
@@ -472,6 +514,8 @@ public class Dashboard extends Application {
 	    updateThread.start();
 	    camViewer = new CameraViewer("Robot-CamViewer");
 	    addDisplayable(camViewer);
+	    hidcontrol = new HIDControl();
+	    addDisplayable(hidcontrol);
 	    updater.addTask(new ConnectionTask());
 	    //updater.addTask(new VisionRunnerDataTask());
 	}
@@ -487,6 +531,9 @@ public class Dashboard extends Application {
 		if(!file.exists())
 			file.mkdir();
 		file = new File(FOLDER_RESOURCE);
+		if(!file.exists())
+			file.mkdir();
+		file = new File(FOLDER_LIBS_NATIVES_CURRENT);
 		if(!file.exists())
 			file.mkdir();
 	}
@@ -518,6 +565,13 @@ public class Dashboard extends Application {
 				Thread.currentThread().interrupt();
 			}
 		}
+		
+		File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);
+		File[] files = natives.listFiles();
+		for (File file : files) {
+			file.delete();
+		}
+		
 		saveSettings();
 		log.log("Settings saved");
 		log.close();

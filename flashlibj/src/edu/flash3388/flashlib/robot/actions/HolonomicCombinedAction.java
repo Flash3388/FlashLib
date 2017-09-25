@@ -49,8 +49,8 @@ public class HolonomicCombinedAction extends CombinedAction{
 				Mathf.constrain2(rotation.get(), minSpeed, maxSpeed) : 0;
 		
 		if(rotate)
-			driveTrain.holonomicCartesian(0, speedY, speedX);
-		else driveTrain.holonomicCartesian(speedX, speedY, 0);
+			driveTrain.holonomicCartesian(speedY, 0.0, speedX);
+		else driveTrain.holonomicCartesian(speedY, speedX, 0.0);
 	}
 	@Override
 	protected void end() {
