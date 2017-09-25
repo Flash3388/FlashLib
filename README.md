@@ -1,7 +1,7 @@
 # FlashLib
 FlashLib is a robotics software development library for Java, originaly designed to improve and help FRC teams, but can work on other non-FRC platforms. Although currently available only for Java, we aim to make FlashLib available for C++ as well.
 
-The latest version of FlashLib is 1.0.2
+The latest version of FlashLib is 1.2.0
 
 - [Features](#features)
 - [Dependencies](#dependencies)
@@ -21,7 +21,7 @@ The library provides several different tools that can be both used for a robot d
 - Algorithms: Built-In sensor-based motion algorithms and vision-based motion algorithms.
 - Generic Drive Systems: Built-in generic drive systems, including: Tank drive, Mecanum drive and Omni-Directional drive.
 - Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
-- HAL: An Hardware Abstraction Layer with several built-in implementations. (WIP)
+- HAL: An Hardware Abstraction Layer with several built-in implementations.
 - Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors for non-FRC platforms. (WIP)
 - Control Station: Pre-Made control software for non-FRC robots. (WIP)
 
@@ -48,6 +48,8 @@ If you don't, run the gradle wrapper added to this project `gradlew build`.
 
 You can find the binary files in the `build/libs` folder. Flashboard distribution folder is in `build/flashboard` ready to be
 used. To run flashboard, run `run.bat` for windows or `run` for linux which are located in the distribution folder.
+
+The HAL binaries are located under `build/{HAL NAME}/libs`. Each HAL builds a shared library and a static library.
 
 ## Code Of Conduct
 
