@@ -85,13 +85,18 @@ public class HIDControl extends Displayble{
 	
 	public HIDControl() {
 		super("hid control", FlashboardSendableType.JOYSTICK);
+		
+		loadControllers();
 	}
 
 	private void updateControllers(){
 		for (int i = 0; i < hidData.length; i++) {
 			if(hidData[i] == null)
 				continue;
-			hidData[i].controller.poll();
+			if(!hidData[i].controller.poll()){
+				hidData[i] = null;
+				controllerCount--;
+			}
 		}
 	}
 	private void loadControllers(){
@@ -296,8 +301,6 @@ public class HIDControl extends Displayble{
 			if(remoteAttached()){
 				catchDataForSending();
 				sendData = true;
-				
-				System.out.println("caching for send");
 			}
 		}
 	}
@@ -306,7 +309,6 @@ public class HIDControl extends Displayble{
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		System.out.println("data sent");
 		sendData = false;
 		return sendDataBuffer;
 	}

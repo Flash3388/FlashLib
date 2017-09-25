@@ -571,24 +571,11 @@ public abstract class Log{
 	 * @param t a {@link Throwable} object containing the exception.
 	 */
 	public void reportError(Throwable t){
-		
-	}
-	/**
-	 * Reports an error. The data output depends on the logging mode currently set:
-	 * <ul>
-	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to both the standard and error files or buffers. A stack trace of the error is added as well. </li>
-	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
-	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LogListener} to {@link LogListener#reportError(String, double)} </li>
-	 * </ul>
-	 * @param error String containing data about the error.
-	 * @param t a {@link Throwable} object containing the exception.
-	 */
-	public void reportError(String error, Throwable t){
 		if(isDisabled()) return;
 		
 		double time = Mathf.roundDecimal(getTime());
 		
-		writeError(t.getMessage(), getErrorStackTrace(t), time);
+		writeError(t.getClass().getName(), getErrorStackTrace(t), time);
 		printError(t.getMessage(), time);
 		listenersReportError(t.getMessage(), time);
 	}

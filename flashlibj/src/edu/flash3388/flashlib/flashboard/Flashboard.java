@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,9 +37,12 @@ public final class Flashboard {
 	
 	public static class FlashboardInitData{
 		public int initMode = INIT_FULL;
+		
 		public int camPort = CAMERA_PORT_ROBOT;
 		public int commPort = PORT_ROBOT;
+		
 		public boolean tcp = true;
+		public byte[] ipAddress = null;
 		
 		public void enableCameraServer(boolean enable){
 			if(enable)
@@ -58,6 +62,10 @@ public final class Flashboard {
 		}
 		public void setCommunicationsPort(int port){
 			commPort = port;
+		}
+		
+		public void setLocalIPAddress(byte[] ipaddr){
+			this.ipAddress = ipaddr;
 		}
 		
 		public void setProtocolTCP(){
@@ -118,8 +126,12 @@ public final class Flashboard {
 	/**
 	 * Attaches a new control sendable to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param sendable control to attach
+	 * 
 	 * @see Communications#attach(Sendable)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static void attach(Sendable sendable){
 		checkInit();
@@ -128,8 +140,12 @@ public final class Flashboard {
 	/**
 	 * Attaches new control sendables to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param sendables controls to attach
+	 * 
 	 * @see Communications#attach(Sendable...)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static void attach(Sendable... sendables){
 		checkInit();
@@ -139,9 +155,14 @@ public final class Flashboard {
 	/**
 	 * Detaches control sendable from the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param sendable control to detach
+	 * 
 	 * @return true if the control was successfully detached, false otherwise
+	 * 
 	 * @see Communications#detach(Sendable)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static boolean detach(Sendable sendable){
 		checkInit();
@@ -150,9 +171,14 @@ public final class Flashboard {
 	/**
 	 * Detaches control sendable from the Flashboard by its id. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param id id of the control to detach
+	 * 
 	 * @return true if the control was successfully detached, false otherwise
+	 * 
 	 * @see Communications#detach(int)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static boolean detach(int id){
 		checkInit();
@@ -164,6 +190,8 @@ public final class Flashboard {
 	 * @param id the id of the control
 	 * @return the sendable object with the given id, null if not found.
 	 * @see Communications#getLocalyAttachedByID(int)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static Sendable getLocalByID(int id){
 		checkInit();
@@ -173,8 +201,12 @@ public final class Flashboard {
 	/**
 	 * Gets whether or not this controller is connected to the remote Flashboard. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @return true if connected, false otherwise
+	 * 
 	 * @see Communications#isConnected()
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static boolean isConnected(){
 		checkInit();
@@ -183,20 +215,13 @@ public final class Flashboard {
 	/**
 	 * Starts the communications thread. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 * @see Communications#start()
 	 */
 	public static void start(){
 		checkInit();
 		communications.start();
-	}
-	/**
-	 * Closes the communications thread and interface. Flashboard should be initialized first for it 
-	 * to work.
-	 * @see Communications#close()
-	 */
-	public static void close(){
-		checkInit();
-		communications.close();
 	}
 	
 	/**
@@ -232,12 +257,14 @@ public final class Flashboard {
 	
 	/**
 	 * Initializes Flashboard control with parameters set in {@link FlashboardInitData} and passes them to
-	 * {@link #init(int, int, int, boolean)}.
+	 * {@link #init(int, byte[], int, int, boolean)}.
 	 * 
 	 * @param initData initialization data
+	 * 
+	 * @throws IllegalStateException if flashboard was initialized
 	 */
 	public static void init(FlashboardInitData initData){
-		init(initData.initMode, initData.commPort, initData.camPort, initData.tcp);
+		init(initData.initMode, initData.ipAddress, initData.commPort, initData.camPort, initData.tcp);
 	}
 	/**
 	 * Intializes Flashboard control for a given mode. Uses given parameters for ports and protocol in initialization.
@@ -246,11 +273,14 @@ public final class Flashboard {
 	 * software is set to use the same ports instead of the defaults.
 	 * </p>
 	 * @param mode indicates how to initialize the flashboard control.
+	 * @param ipaddress the ipaddress to bind the local socket to (only for TCP), or null for default
 	 * @param port standard communications port
 	 * @param camport camera communications port
 	 * @param tcp protocol to use: True for TCP, false for UDP.
+	 * 
+	 * @throws IllegalStateException if flashboard was initialized
 	 */
-	public static void init(int mode, int port, int camport, boolean tcp){
+	public static void init(int mode, byte[] ipaddress, int port, int camport, boolean tcp){
 		if(instance)
 			throw new IllegalStateException("Flashboard control was already initialized");
 		
@@ -262,8 +292,14 @@ public final class Flashboard {
 			
 			if(communications == null && (initMode & INIT_COMM) != 0){
 				CommInterface readi;
-				if(tcp)
-					readi = new TCPCommInterface(port);
+				if(tcp){
+					if(ipaddress == null)
+						readi = new TCPCommInterface(port);
+					else {
+						InetAddress addr = InetAddress.getByAddress(ipaddress);
+						readi = new TCPCommInterface(addr, port);
+					}
+				}
 				else readi = new UDPCommInterface(port);
 				
 				communications = new Communications("Flashboard", readi);
@@ -281,6 +317,22 @@ public final class Flashboard {
 			FlashUtil.getLog().reportError(e.getMessage());
 			e.printStackTrace();
 		}
+	}
+	/**
+	 * Closes flashboard control. If the camera server was initialized, it is closed by
+	 * calling {@link CameraServer#close()}. If communications was initialized, it is closed
+	 * by calling {@link Communications#close()}.
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
+	 */
+	public static void close(){
+		if(!instance)
+			throw new IllegalStateException("Flashboard control was not initialized");
+		
+		if(camServer != null)
+			camServer.close();
+		if(communications != null)
+			communications.close();
 	}
 	/**
 	 * Gets whether or not Flashboard was initialized. 

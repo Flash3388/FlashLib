@@ -44,9 +44,14 @@ public final class Scheduler {
 			runnable.run();
 			return true;
 		}
+		
 		@Override
 		public boolean equals(Object obj) {
 			return super.equals(obj) || runnable.equals(obj);
+		}
+		@Override
+		public String toString() {
+			return runnable.toString();
 		}
 	}
 	

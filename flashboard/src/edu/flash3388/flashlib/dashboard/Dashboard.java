@@ -60,6 +60,7 @@ public class Dashboard extends Application {
 						FlashUtil.delay(100);
 						continue;
 					}
+					
 					scheduler.run();
 					FlashUtil.delay(5);
 				}
@@ -87,6 +88,8 @@ public class Dashboard extends Application {
 	private static class ConnectionTask implements Runnable{
 
 		private static final int RECONNECTION_RATE = 5000;
+		private static final int REACHABLE_WAIT = 100;
+		
 		private long lastConAttmp = -1;
 		
 		private boolean commInitialized = false;
@@ -94,89 +97,99 @@ public class Dashboard extends Application {
 		private boolean camInitialized = false;
 		private boolean camSettingError = false;
 		
-		@Override
-		public void run() {
-			if(lastConAttmp < 0 || FlashUtil.millis() - lastConAttmp >= RECONNECTION_RATE){
-				lastConAttmp = FlashUtil.millis();
-				if(!commInitialized){
-						String host = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
-						String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
-						int localport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_LOCAL);
-						int remoteport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_REMOTE);
-						if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
-								(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
-							if(!commSettingError){
-								userError("Failed to initialize communications: validate values of "+
-										PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
-								commSettingError = true;
-							}
-						}
-						else if(localport < 100 || remoteport < 100){
-							if(!commSettingError){
-								userError("Failed to initialize communications: validate values of "+
-										PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE);
-								commSettingError = true;
-							}
-						}else{
-							try {
-								InetAddress ad = InetAddress.getByName(host);
-								log.log("Found host: "+host, "Dashboard");
-								if(protocol.equals("udp"))
-									commInterface = new UDPCommInterface(ad, localport, remoteport);
-								else if(protocol.equals("tcp")){
-									InetAddress local = FlashUtil.getLocalAddress(ad);
-									commInterface = new TCPCommInterface(local, ad, localport, remoteport);
-								}
-								
-								communications = new Communications("Robot", commInterface);
-								communications.setSendableCreator(new FlashboardSendableCreator());
-								communications.start();
-								
-								commInitialized = true;
-								commSettingError = false;
-							} catch (IOException e) {
-							}
-						}
-				}else if(commInitialized && !commInterface.isConnected()){
+		private void commUpdate(){
+			if(!commInitialized){
+				String host = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
+				String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
+				int localport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_LOCAL);
+				int remoteport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_REMOTE);
+				if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
+						(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
+					if(!commSettingError){
+						userError("Failed to initialize communications: validate values of "+
+								PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
+						commSettingError = true;
+					}
+				}
+				else if(localport < 100 || remoteport < 100){
+					if(!commSettingError){
+						userError("Failed to initialize communications: validate values of "+
+								PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE);
+						commSettingError = true;
+					}
+				}else{
 					try {
-						if(!commInterface.getRemoteAddress().isReachable(RECONNECTION_RATE)){
-							communications.close();
-							commInitialized = false;
+						InetAddress ad = InetAddress.getByName(host);
+						log.log("Found host: "+host, "Dashboard Comm");
+						log.log("Address: "+ad.getHostAddress(), "Dashboard Comm");
+						if(protocol.equals("udp"))
+							commInterface = new UDPCommInterface(ad, localport, remoteport);
+						else if(protocol.equals("tcp")){
+							InetAddress local = FlashUtil.getLocalAddress(ad);
+							commInterface = new TCPCommInterface(local, ad, localport, remoteport);
 						}
+						
+						communications = new Communications("Robot", commInterface);
+						communications.setSendableCreator(new FlashboardSendableCreator());
+						communications.start();
+						
+						commInitialized = true;
+						commSettingError = false;
 					} catch (IOException e) {
 					}
 				}
-				
-				if(!camInitialized){
-					String host = ConstantsHandler.getStringValue(PROP_HOST_CAM);
-					int localcamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_LOCAL);
-					int remotecamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
-					if(host == null || host.equals("")) {
-						if(!camSettingError){
-							userError("Failed to initialize cam communications: validate values of "+
-									PROP_HOST_CAM);
-							camSettingError = true;
-						}
+			}else if(commInitialized && !commInterface.isConnected()){
+				try {
+					if(!commInterface.getRemoteAddress().isReachable(REACHABLE_WAIT)){
+						communications.close();
+						commInitialized = false;
 					}
-					else if(localcamport < 100 || remotecamport < 100){
-						if(!camSettingError){
-							userError("Failed to initialize cam communications: validate values of "+
-									PROP_CAM_PORT_LOCAL + ", " + PROP_CAM_PORT_REMOTE);
-							camSettingError = true;
-						}
-					}else{
-						try {
-							InetAddress ad = InetAddress.getByName(host);
-							
-							camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
-							camClient.addListener(camViewer);
-							
-							camInitialized = true;
-							camSettingError = false;
-						} catch (IOException e) {
-						}
+				} catch (IOException e) {
+				}
+			}
+		}
+		private void camUpdate(){
+			if(!camInitialized){
+				String host = ConstantsHandler.getStringValue(PROP_HOST_CAM);
+				int localcamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_LOCAL);
+				int remotecamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
+				if(host == null || host.equals("")) {
+					if(!camSettingError){
+						userError("Failed to initialize cam communications: validate values of "+
+								PROP_HOST_CAM);
+						camSettingError = true;
 					}
 				}
+				else if(localcamport < 100 || remotecamport < 100){
+					if(!camSettingError){
+						userError("Failed to initialize cam communications: validate values of "+
+								PROP_CAM_PORT_LOCAL + ", " + PROP_CAM_PORT_REMOTE);
+						camSettingError = true;
+					}
+				}else{
+					try {
+						InetAddress ad = InetAddress.getByName(host);
+						log.log("Found host: "+host, "Dashboard Cam");
+						log.log("Address: "+ad.getHostAddress(), "Dashboard Cam");
+						
+						camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
+						camClient.addListener(camViewer);
+						
+						camInitialized = true;
+						camSettingError = false;
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+		
+		@Override
+		public void run() {
+			if(lastConAttmp < 0 || FlashUtil.millis() - lastConAttmp >= RECONNECTION_RATE){
+				commUpdate();
+				camUpdate();
+				
+				lastConAttmp = FlashUtil.millis();
 			}
 		}
 	}
@@ -551,7 +564,7 @@ public class Dashboard extends Application {
 		}
 		if(camClient != null){
 			log.log("Stopping camera client...");
-			camClient.stop();
+			camClient.close();
 		}
 		if(communications != null){
 			log.log("Stopping communications...");

@@ -55,7 +55,7 @@ public class HIDWindow extends Stage implements Runnable{
         });
         
         updateRunnable = ()->update();
-        task = new PeriodicRunnable(this, 100);
+        task = new PeriodicRunnable(this, 50);
         Dashboard.getUpdater().addTask(task);
 	}
 	
@@ -99,19 +99,16 @@ public class HIDWindow extends Stage implements Runnable{
 		VBox leftB = new VBox(), rightB = new VBox();
 		leftB.setSpacing(5.0);
 		rightB.setSpacing(5.0);
-		for (int i = 0; i < count / 2; i++) {
+		for (int i = 0; i < count; i++) {
 			buttonData[i] = new Ellipse();
 			buttonData[i].setFill(Color.RED);
 			buttonData[i].setRadiusX(ELLIPSE_RADIUS);
 			buttonData[i].setRadiusY(ELLIPSE_RADIUS);
-			leftB.getChildren().add(buttonData[i]);
 			
-			int idx = count / 2 + i;
-			buttonData[idx] = new Ellipse();
-			buttonData[idx].setFill(Color.RED);
-			buttonData[idx].setRadiusX(ELLIPSE_RADIUS);
-			buttonData[idx].setRadiusY(ELLIPSE_RADIUS);
-			rightB.getChildren().add(buttonData[idx]);
+			if(i > count / 2)
+				rightB.getChildren().add(buttonData[i]);
+			else
+				leftB.getChildren().add(buttonData[i]);
 		}
 		buttonDataBox.getChildren().addAll(leftB, rightB);
 		

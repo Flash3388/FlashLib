@@ -55,14 +55,14 @@ public class DashboardChooser<T> extends Sendable{
 	}
 	
 	public DashboardChooser<T> addDefault(Option<T> option){
-		select(options.size());
-		defaultIndex = selected.get();
 		this.options.addElement(option);
+		select(options.size() - 1);
+		defaultIndex = selected.get();
 		changed = true;
 		return this;
 	}
 	public DashboardChooser<T> addDefault(String name, T option){
-		return this.addOption(new Option<T>(name, option));
+		return this.addDefault(new Option<T>(name, option));
 	}
 	public DashboardChooser<T> addOption(Option<T> option){
 		this.options.addElement(option);

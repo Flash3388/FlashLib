@@ -10,6 +10,7 @@ import java.util.jar.Manifest;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -172,7 +173,7 @@ public abstract class RobotBase implements SBC, Robot{
 			//setting up robot systems
 			setupRobot();
 		}catch(Throwable t){
-			log.reportError("Exception occurred in robot setup!!\n"+t.getMessage());
+			log.reportError("Exception occurred in robot setup: "+t.getMessage());
 			log.reportError(t);
 			shutdown(1);
 		}
@@ -182,7 +183,7 @@ public abstract class RobotBase implements SBC, Robot{
 			//starting robot
 			userImplement.robotMain();
 		}catch(Throwable t){
-			log.reportError("Exception occurred in robot thread!!\n"+t.getMessage());
+			log.reportError("Exception occurred in robot thread: "+t.getMessage());
 			log.reportError(t);
 			shutdown(1);
 		}
@@ -279,6 +280,13 @@ public abstract class RobotBase implements SBC, Robot{
 				userImplement.communications.close();
 				log.log("Done", "RobotBase");
 			}
+		}
+		
+		//flashboard shutdown
+		if(Flashboard.flashboardInit()){
+			log.log("Shutting down Flashboard...", "RobotBase");
+			Flashboard.close();
+			log.log("Done", "RobotBase");
 		}
 		
 		//hal shutdown
