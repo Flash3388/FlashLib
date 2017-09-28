@@ -571,8 +571,8 @@ public class Dashboard extends Application {
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		
-		log.log("Loading jinput natives...", "Dashboard");
-		loadJinputNatives();
+		//log.log("Loading jinput natives...", "Dashboard");
+		//loadJinputNatives();
 		
 		log.log("Creating shutdown hook...", "Dashboard");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->close()));
@@ -718,11 +718,11 @@ public class Dashboard extends Application {
 			}
 		}
 		
-		File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);
+		/*File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);
 		File[] files = natives.listFiles();
 		for (File file : files) {
 			file.delete();
-		}
+		}*/
 		
 		saveSettings();
 		log.log("Settings saved", "Dashboard");

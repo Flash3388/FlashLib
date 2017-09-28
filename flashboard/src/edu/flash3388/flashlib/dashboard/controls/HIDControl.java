@@ -17,7 +17,6 @@ import net.java.games.input.ControllerEnvironment;
 public class HIDControl extends Sendable implements Runnable{
 
 	private static class HIDData{
-		int port;
 		String name;
 		Controller controller;
 		
@@ -25,11 +24,10 @@ public class HIDControl extends Sendable implements Runnable{
 		HIDButton[] buttons;
 		HIDPOV[] povs;
 		
-		public HIDData(int port, String name, HIDAxis[] axes, HIDButton[] buttons, HIDPOV[] povs) {
+		public HIDData(String name, HIDAxis[] axes, HIDButton[] buttons, HIDPOV[] povs) {
 			this.axes = axes;
 			this.buttons = buttons;
 			this.povs = povs;
-			this.port = port;
 			this.name = name;
 		}
 	}
@@ -163,7 +161,8 @@ public class HIDControl extends Sendable implements Runnable{
 			}
 		}
 		
-		HIDData data = new HIDData(controller.getPortNumber(), controller.getName(),
+		HIDData data = new HIDData(
+				controller.getName(),
 				axes.toArray(new HIDAxis[axes.size()]),
 				buttons.toArray(new HIDButton[buttons.size()]),
 				povs.toArray(new HIDPOV[povs.size()])
