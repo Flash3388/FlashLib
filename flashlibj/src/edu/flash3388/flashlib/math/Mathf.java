@@ -91,11 +91,13 @@ public class Mathf {
 	 * value bigger than max : value = max
 	 * value smaller than min : value = min
 	 * <p>
-	 * Compensates for negative values.
+	 * Compensates for negative values. This is done by constraining the absolute value. If
+	 * the value was initially negative, a negative value is returned, otherwise a positive number is
+	 * returned.
 	 * </p>
 	 * @param value The value to limit
-	 * @param min The minimum limit
-	 * @param max The maximum limit
+	 * @param min The minimum limit. must be non-negative
+	 * @param max The maximum limit. must be non-negative
 	 * @return The new value after making sure it is within the given limit.
 	 */
 	public static double constrain2(double value, double min, double max){

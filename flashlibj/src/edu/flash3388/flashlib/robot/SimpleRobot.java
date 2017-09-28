@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * <p>
  * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
  * <p>
- * When the robot enters shutdown mode {@link #robotShutdown()} is called to allow user shutdown operations.
+ * When the robot enters shutdown mode {@link #robotFree()} is called to allow user shutdown operations.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
