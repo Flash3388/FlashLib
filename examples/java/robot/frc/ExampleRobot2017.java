@@ -35,36 +35,16 @@ public class ExampleRobot2017 extends IterativeFRCRobot{
 	@Override
 	protected void preInit(RobotInitializer initializer) {
 		/*
-		 * Enables the robot logs to be used. The robot logs are both the default flashlib test which is used
-		 * by several features throughout flashlib. In addition to the default log, there is the robot
-		 * power log which tracks data issues with the power supply of the robot.
-		 * By default, this feature is disabled.
+		 * Enables the robot logs to be used. This allows flashlib operations to log data into
+		 * the main flashlib log.
 		 */
-		//initializer.logsEnabled = true;
+		//initializer.standardLogs = true;
 		
 		/*
-		 * Sets whether or not to enable the power log. This can be used when the use of the main flashlib
-		 * log is wanted but not the use of the power log. If the powerlog was not enabled through 'enableLogs()'
-		 * this will do nothing.
+		 * Sets whether or not to enable the power log. This allows the control loop
+		 * to track power issues in voltage and power draw and log them.
 		 */
-		//setPowerLogging(log);
 		//initializer.logPower = true;
-		
-		/*
-		 * Sets the total current draw from the PDP which will warrant a log into the power log.
-		 * As soon as the PDP total current draw exceeds this value, a warning will be logged.
-	     * The default is 80 Ampere.
-		 */
-		//setPowerDrawWarning(current);
-		//initializer.warningPowerDraw = 100.0;
-		
-		/*
-		 * Sets the PDP voltage level which will warrant logging into the power log. As soon
-		 * as the PDP voltage drops below this value, a warning will be logged.
-		 * The default is 8.0 volts.
-		 */
-		//setVoltageDropWarning(volts);
-		//initializer.warningVoltage = 6.0;
 	}
 	@Override
 	protected void initRobot() {

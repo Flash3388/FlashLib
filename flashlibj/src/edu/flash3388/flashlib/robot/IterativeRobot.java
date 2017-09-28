@@ -68,7 +68,8 @@ public abstract class IterativeRobot extends RobotBase implements Robot{
 	protected static class IterativeRobotInitializer extends RobotInitializer{
 		/**
 		 * Indicates whether or not to add an auto HID update task to the {@link Scheduler}. This will
-		 * refresh HID data automatically, allowing for HID-activated actions.
+		 * refresh HID data automatically, allowing for HID-activated actions. The task updates controllers
+		 * only if {@link Robot#isOperatorControl()} returns true.
 		 * <p>
 		 * The default value is `false`.
 		 */

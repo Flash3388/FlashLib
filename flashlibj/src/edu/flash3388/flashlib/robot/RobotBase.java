@@ -105,7 +105,7 @@ public abstract class RobotBase implements SBC, Robot{
 		public FlashboardInitData flashboardInitData = new FlashboardInitData();
 		/**
 		 * Inidicates whether or not to initialize flashboard. If true, flashboard will 
-		 * be initialize. If flase, flashboard will be initialized.
+		 * be initialize. If false, flashboard will be initialized.
 		 * <p>
 		 * The default value is `false`.
 		 */
