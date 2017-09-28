@@ -20,10 +20,12 @@ public class MotorSafetyHelper {
 		enabled = false;
 		stopTime = FlashUtil.millisInt();
 		expiration = SafeMotor.DEFAULT_EXPIRATION;
+		motorEnabled = true;
 	}
 	
 	public void feed(){
-		stopTime = FlashUtil.millisInt() + expiration;
+		if(enabled)
+			stopTime = FlashUtil.millisInt() + expiration;
 	}
 	
 	public void setExpiration(int expiration){

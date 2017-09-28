@@ -1,8 +1,10 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -12,7 +14,7 @@ import net.java.games.input.Controller;
 import net.java.games.input.Controller.Type;
 import net.java.games.input.ControllerEnvironment;
 
-public class HIDControl extends Displayble{
+public class HIDControl extends Sendable implements Runnable{
 
 	private static class HIDData{
 		int port;
@@ -83,12 +85,37 @@ public class HIDControl extends Displayble{
 	
 	private int times = 0;
 	
+	private Constructor<ControllerEnvironment> controllerEnvironmentConstructor;
+	
 	public HIDControl() {
 		super("hid control", FlashboardSendableType.JOYSTICK);
 		
 		loadControllers();
 	}
 
+	@SuppressWarnings("unchecked")
+	private ControllerEnvironment createDefaultEnvironment(){
+		if(controllerEnvironmentConstructor == null){
+			try {
+				controllerEnvironmentConstructor = (Constructor<ControllerEnvironment>)
+						Class.forName("net.java.games.input.DefaultControllerEnvironment")
+						.getDeclaredConstructors()[0];
+				
+				controllerEnvironmentConstructor.setAccessible(true);
+			} catch (SecurityException | ClassNotFoundException e) {
+			}
+		}
+		
+		
+		
+		try {
+			return controllerEnvironmentConstructor.newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			return null;
+		}
+	}
+	
 	private void updateControllers(){
 		for (int i = 0; i < hidData.length; i++) {
 			if(hidData[i] == null)
@@ -100,7 +127,10 @@ public class HIDControl extends Displayble{
 		}
 	}
 	private void loadControllers(){
-		Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+		
+		
+		Controller[] controllers = createDefaultEnvironment().getControllers();//ControllerEnvironment.getDefaultEnvironment().getControllers();
+		System.out.println("Detected: "+controllers.length);
 		
 		if(controllerCount > 0){
 			for (int i = 0; i < hidData.length; i++) {
@@ -284,12 +314,12 @@ public class HIDControl extends Displayble{
 	}
 	
 	@Override
-	public void update() {
+	public void run() {
 		if(!updateData && !remoteAttached())
 			return;
 		
 		if(lastUpdate < 1 || FlashUtil.millis() - lastUpdate >= UPDATE_RATE){
-			if(++times >= 4){
+			if(++times >= 10){
 				loadControllers();
 				times = 0;
 			}

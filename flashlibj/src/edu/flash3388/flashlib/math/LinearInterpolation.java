@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.math;
 
+import java.util.Map;
+
 /**
  * Represents interpolation for linear functions. Extends {@link Interpolation}
  * 
@@ -16,10 +18,25 @@ public class LinearInterpolation extends Interpolation implements MarginInterpol
 	 * In mathematics, linear interpolation is a method of curve fitting using linear polynomials 
 	 * to construct new data points within the range of a discrete set of known data points.
 	 * </p>
+	 * @param valuesMap map for know function values
+	 * @param keyMargin the key margin
+	 * @see <a href="https://en.wikipedia.org/wiki/Linear_interpolation">https://en.wikipedia.org/wiki/Linear_interpolation</a>
+	 */
+	public LinearInterpolation(Map<Double, Double> valuesMap, double keyMargin){
+		super(valuesMap);
+		this.keyMargin = keyMargin;
+	}
+	/**
+	 * Creates an interpolation object for linear functions. Sets the key margin to a given value.
+	 * <p>
+	 * In mathematics, linear interpolation is a method of curve fitting using linear polynomials 
+	 * to construct new data points within the range of a discrete set of known data points.
+	 * </p>
 	 * @param keyMargin the key margin
 	 * @see <a href="https://en.wikipedia.org/wiki/Linear_interpolation">https://en.wikipedia.org/wiki/Linear_interpolation</a>
 	 */
 	public LinearInterpolation(double keyMargin){
+		super();
 		this.keyMargin = keyMargin;
 	}
 	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -26,6 +27,7 @@ import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.vision.DefaultFilterCreator;
 import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
 import edu.flash3388.flashlib.vision.Vision;
@@ -85,10 +87,85 @@ public class Dashboard extends Application {
 		}
 	}
 	
+	private static class HostRetrieverTask implements Runnable{
+
+		private boolean stop = false;
+		
+		private boolean retreiveComm = false;
+		private boolean retreiveCam = false;
+		private BooleanSource waitSource;
+		
+		private InetAddress commAddress;
+		private InetAddress camAddress;
+		
+		void resetComm(){
+			if(stop)
+				return;
+			commAddress = null;
+			retreiveComm = true;
+		}
+		void resetCam(){
+			if(stop)
+				return;
+			camAddress = null;
+			retreiveCam = true;
+		}
+		void stop(){
+			stop = true;
+			retreiveCam = false;
+			retreiveComm = false;
+		}
+		
+		@Override
+		public void run() {
+			while(!stop){
+				if(!retreiveCam && !retreiveComm){
+					if(waitSource == null)
+						waitSource = ()->{return retreiveCam || retreiveComm || stop;};
+					FlashUtil.delayUntil(waitSource, 10000, 500);
+					
+					if(stop)
+						break;
+				}
+				
+				String commhost = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
+				String camhost = ConstantsHandler.getStringValue(PROP_HOST_CAM);
+				
+				if(retreiveComm && commhost != null && !commhost.isEmpty()){
+					try {
+						commAddress = InetAddress.getByName(commhost);
+						
+						log.log("Found host: "+commhost, "Dashboard Comm");
+						log.log("Address: "+commAddress.getHostAddress(), "Dashboard Comm");
+						
+						retreiveComm = false;
+					} catch (UnknownHostException e) {
+					}
+				}
+				
+				if(retreiveCam && camhost != null && !camhost.isEmpty()){
+					try {
+						if(camhost.equals(commhost) && commAddress != null)
+							camAddress = commAddress;
+						else
+							camAddress = InetAddress.getByName(camhost);
+						
+						log.log("Found host: "+camhost, "Dashboard Cam");
+						log.log("Address: "+camAddress.getHostAddress(), "Dashboard Cam");
+						
+						retreiveCam = false;
+					} catch (UnknownHostException e) {
+					}
+				}
+				
+				FlashUtil.delay(100);
+			}
+		}
+	}
 	private static class ConnectionTask implements Runnable{
 
 		private static final int RECONNECTION_RATE = 5000;
-		private static final int REACHABLE_WAIT = 100;
+		private static final int REACHABLE_WAIT = 500;
 		
 		private long lastConAttmp = -1;
 		
@@ -109,6 +186,8 @@ public class Dashboard extends Application {
 						userError("Failed to initialize communications: validate values of "+
 								PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
 						commSettingError = true;
+						
+						hostRetriever.resetComm();
 					}
 				}
 				else if(localport < 100 || remoteport < 100){
@@ -116,26 +195,29 @@ public class Dashboard extends Application {
 						userError("Failed to initialize communications: validate values of "+
 								PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE);
 						commSettingError = true;
+						
+						hostRetriever.resetComm();
 					}
 				}else{
-					try {
-						InetAddress ad = InetAddress.getByName(host);
-						log.log("Found host: "+host, "Dashboard Comm");
-						log.log("Address: "+ad.getHostAddress(), "Dashboard Comm");
-						if(protocol.equals("udp"))
-							commInterface = new UDPCommInterface(ad, localport, remoteport);
-						else if(protocol.equals("tcp")){
-							InetAddress local = FlashUtil.getLocalAddress(ad);
-							commInterface = new TCPCommInterface(local, ad, localport, remoteport);
+					InetAddress ad = hostRetriever.commAddress;
+					
+					if(ad != null){
+						try {
+							if(protocol.equals("udp"))
+								commInterface = new UDPCommInterface(ad, localport, remoteport);
+							else if(protocol.equals("tcp")){
+								InetAddress local = FlashUtil.getLocalAddress(ad);
+								commInterface = new TCPCommInterface(local, ad, localport, remoteport);
+							}
+							
+							communications = new Communications("Robot", commInterface);
+							communications.setSendableCreator(new FlashboardSendableCreator());
+							communications.start();
+							
+							commInitialized = true;
+							commSettingError = false;
+						} catch (IOException e) {
 						}
-						
-						communications = new Communications("Robot", commInterface);
-						communications.setSendableCreator(new FlashboardSendableCreator());
-						communications.start();
-						
-						commInitialized = true;
-						commSettingError = false;
-					} catch (IOException e) {
 					}
 				}
 			}else if(commInitialized && !commInterface.isConnected()){
@@ -143,6 +225,10 @@ public class Dashboard extends Application {
 					if(!commInterface.getRemoteAddress().isReachable(REACHABLE_WAIT)){
 						communications.close();
 						commInitialized = false;
+						
+						hostRetriever.resetComm();
+						
+						log.log("Comm remote not reachable", "Dashboard Comm");
 					}
 				} catch (IOException e) {
 				}
@@ -158,6 +244,8 @@ public class Dashboard extends Application {
 						userError("Failed to initialize cam communications: validate values of "+
 								PROP_HOST_CAM);
 						camSettingError = true;
+						
+						hostRetriever.resetCam();
 					}
 				}
 				else if(localcamport < 100 || remotecamport < 100){
@@ -165,19 +253,22 @@ public class Dashboard extends Application {
 						userError("Failed to initialize cam communications: validate values of "+
 								PROP_CAM_PORT_LOCAL + ", " + PROP_CAM_PORT_REMOTE);
 						camSettingError = true;
+						
+						hostRetriever.resetCam();
 					}
 				}else{
-					try {
-						InetAddress ad = InetAddress.getByName(host);
-						log.log("Found host: "+host, "Dashboard Cam");
-						log.log("Address: "+ad.getHostAddress(), "Dashboard Cam");
-						
-						camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
-						camClient.addListener(camViewer);
-						
-						camInitialized = true;
-						camSettingError = false;
-					} catch (IOException e) {
+					
+					InetAddress ad = hostRetriever.camAddress;
+					
+					if(ad != null){
+						try {
+							camClient = new CameraClient("Robot", localcamport, ad, remotecamport);
+							camClient.addListener(camViewer);
+							
+							camInitialized = true;
+							camSettingError = false;
+						} catch (IOException e) {
+						}
 					}
 				}
 			}
@@ -285,7 +376,6 @@ public class Dashboard extends Application {
 		displayables.clear();
 		closeVision();
 		addDisplayable(camViewer);
-		addDisplayable(hidcontrol);
 	}
 	
 	public static HIDControl getHIDControl(){
@@ -358,10 +448,35 @@ public class Dashboard extends Application {
 	//-----------------------Communications--------------------------------------
 	//--------------------------------------------------------------------
 	
+	private static ConnectionTask connectionTask;
+	
+	private static HostRetrieverTask hostRetriever;
+	private static Thread hostRetrieverThread;
+	
 	private static IPCommInterface commInterface;
 	private static Communications communications;
 	private static CameraClient camClient;
 	
+	public static void restartCommunications(){
+		if(communications != null){
+			communications.close();
+			communications = null;
+			connectionTask.commInitialized = false;
+			
+			hostRetriever.resetComm();
+			
+			log.log("Communication restart", "Dashboard Comm");
+		}
+		if(camClient != null){
+			camClient.close();
+			camClient = null;
+			connectionTask.camInitialized = false;
+			
+			hostRetriever.resetCam();
+			
+			log.log("Communication restart", "Dashboard Cam");
+		}
+	}
 	public static boolean communicationsConnected(){
 		return communications != null && communications.isConnected();
 	}
@@ -521,16 +636,27 @@ public class Dashboard extends Application {
 		System.load(path);
 	}
 	private static void initStart(){
-		VisionFilter.setFilterCreator(new DefaultFilterCreator());
+		//VisionFilter.setFilterCreator(new DefaultFilterCreator());
+		
+		hostRetriever = new HostRetrieverTask();
+		hostRetriever.resetCam();
+		hostRetriever.resetComm();
+		
+		hostRetrieverThread = new Thread(hostRetriever, "HostRetriever");//retrieve;
+		hostRetrieverThread.start();
+		
 		updater = new Updater();
 		updateThread = new Thread(updater.getThreadTask());
 	    updateThread.start();
+	    
 	    camViewer = new CameraViewer("Robot-CamViewer");
 	    addDisplayable(camViewer);
+	    
 	    hidcontrol = new HIDControl();
-	    addDisplayable(hidcontrol);
-	    updater.addTask(new ConnectionTask());
-	    //updater.addTask(new VisionRunnerDataTask());
+	    updater.addTask(hidcontrol);
+	    
+	    connectionTask = new ConnectionTask();
+	    updater.addTask(connectionTask);
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);
@@ -553,6 +679,8 @@ public class Dashboard extends Application {
 	public static void close(){
 		log.log("Shutting down");
 		updater.stop();
+		hostRetriever.stop();
+		
 		if(visionInitialized()){
 			for (int i = 0; i < vision.getProcessingCount(); i++) {
 				VisionProcessing proc = vision.getProcessing(i);
@@ -571,8 +699,18 @@ public class Dashboard extends Application {
 			communications.close();
 		}
 		if(updateThread.isAlive()){
+			log.log("Stopping update thread...");
 			try {
 				updateThread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				Thread.currentThread().interrupt();
+			}
+		}
+		if(hostRetrieverThread.isAlive()){
+			log.log("Stopping host retriever thread...");
+			try {
+				hostRetrieverThread.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				Thread.currentThread().interrupt();
@@ -585,9 +723,10 @@ public class Dashboard extends Application {
 			file.delete();
 		}
 		
+		Platform.exit();
+		
 		saveSettings();
 		log.log("Settings saved");
 		log.close();
-		Platform.exit();
 	}
 }

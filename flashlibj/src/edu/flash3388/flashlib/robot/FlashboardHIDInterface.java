@@ -10,7 +10,7 @@ public class FlashboardHIDInterface extends HIDSendable implements HIDInterface{
 	}
 
 	public void attachToFlashboard(){
-		if(!attached())
+		if(!attached() && Flashboard.flashboardInit())
 			Flashboard.attach(this);
 	}
 	

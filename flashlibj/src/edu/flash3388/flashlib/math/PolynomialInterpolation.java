@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.math;
 
+import java.util.Map;
+
 /**
  * Represents a base for polynomial interpolation. 
  * <p>
@@ -17,6 +19,15 @@ public abstract class PolynomialInterpolation extends Interpolation {
 	
 	
 	public PolynomialInterpolation(){
+		super();
+		init();
+	}
+	public PolynomialInterpolation(Map<Double, Double> valuesMap){
+		super(valuesMap);
+		init();
+	}
+	
+	private void init(){
 		values = new Double[0];
 		keys = new Double[0];
 	}

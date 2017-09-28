@@ -14,6 +14,9 @@ public class PWMDevice {
 		this.port = port;
 	}
 	
+	private double getCenter(){
+		return center;
+	}
 	private double getPositiveScaleFactor(){
 		return getMaxPositive() - getMinPositive();
 	}
@@ -37,7 +40,7 @@ public class PWMDevice {
 	}
 	
 	protected void setBounds(double max, double deadbandMax, double center, double deadbandMin, double min){
-		double looptime = 1.0 / port.getFrequency();
+		double looptime = 1000.0 / port.getFrequency();
 		this.max = max / looptime;
 		this.min = min / looptime;
 		this.center = center / looptime;
@@ -70,7 +73,7 @@ public class PWMDevice {
 	public void setSpeed(double speed) {
 		speed = Mathf.constrain(speed, -1.0, 1.0);
 		if(speed == 0.0)
-			setDutyCycle(0.0);
+			setDutyCycle(getCenter());
 		else if(speed > 0.0)
 			setDutyCycle(getMinPositive() + speed * getPositiveScaleFactor());
 		else

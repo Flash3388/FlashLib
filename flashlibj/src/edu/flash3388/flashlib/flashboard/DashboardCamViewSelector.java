@@ -16,14 +16,16 @@ public class DashboardCamViewSelector implements CameraViewSelector{
 	
 	public DashboardCamViewSelector(){
 		chooser = new DashboardChooser<Integer>("Cam View Selector");
-		chooser.select(0);
-		
-		if(Flashboard.flashboardInit())
-			Flashboard.attach(chooser);
 	}
 	public DashboardChooser<Integer> getChooser(){
 		return chooser;
 	}
+	
+	public void attachToFlashboard(){
+		if(!chooser.attached() && Flashboard.flashboardInit())
+			Flashboard.attach(chooser);
+	}
+	
 	@Override
 	public int getCameraIndex() {
 		return chooser.getSelectedIndex();

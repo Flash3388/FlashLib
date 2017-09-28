@@ -99,6 +99,7 @@
                   <Menu fx:id="help_menu" mnemonicParsing="false" text="Help">
                     <items>
                         <MenuItem fx:id="prop_viewer" mnemonicParsing="false" text="Show Properties" />
+                        <MenuItem fx:id="comm_restart" mnemonicParsing="false" text="Restart Communications" />
                     </items>
                   </Menu>
       		</menus>

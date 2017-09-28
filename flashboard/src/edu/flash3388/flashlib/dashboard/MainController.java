@@ -113,7 +113,7 @@ public class MainController implements Initializable{
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
 	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, 
-				pidtuner, vision_editor, hid_window;
+				pidtuner, vision_editor, hid_window, comm_restart;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -139,6 +139,9 @@ public class MainController implements Initializable{
 		threadTask.controller = this;
 		Dashboard.getUpdater().addTask(threadTask);
 		
+		comm_restart.setOnAction((e)->{
+			Dashboard.restartCommunications();
+		});
 		hid_window.setOnAction(e -> {
 			HIDWindow.showHIDWindow();
 		});
