@@ -1,4 +1,4 @@
-package examples.robot;
+package examples.robot.flashboard;
 
 import edu.flash3388.flashlib.flashboard.DashboardBooleanProperty;
 import edu.flash3388.flashlib.flashboard.DashboardSlider;

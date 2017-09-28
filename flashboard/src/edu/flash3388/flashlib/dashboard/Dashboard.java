@@ -677,7 +677,8 @@ public class Dashboard extends Application {
 			file.mkdir();
 	}
 	public static void close(){
-		log.log("Shutting down");
+		log.log("Shutting down", "Dashboard");
+		
 		updater.stop();
 		hostRetriever.stop();
 		
@@ -687,19 +688,19 @@ public class Dashboard extends Application {
 				proc.saveXml(FOLDER_SAVES+proc.getName()+".xml");
 			}
 			
-			log.log("Stopping image processing...");
+			log.log("Stopping image processing...", "Dashboard");
 			closeVision();
 		}
 		if(camClient != null){
-			log.log("Stopping camera client...");
+			log.log("Stopping camera client...", "Dashboard");
 			camClient.close();
 		}
 		if(communications != null){
-			log.log("Stopping communications...");
+			log.log("Stopping communications...", "Dashboard");
 			communications.close();
 		}
 		if(updateThread.isAlive()){
-			log.log("Stopping update thread...");
+			log.log("Stopping update thread...", "Dashboard");
 			try {
 				updateThread.join();
 			} catch (InterruptedException e) {
@@ -708,7 +709,7 @@ public class Dashboard extends Application {
 			}
 		}
 		if(hostRetrieverThread.isAlive()){
-			log.log("Stopping host retriever thread...");
+			log.log("Stopping host retriever thread...", "Dashboard");
 			try {
 				hostRetrieverThread.join();
 			} catch (InterruptedException e) {
@@ -726,7 +727,7 @@ public class Dashboard extends Application {
 		Platform.exit();
 		
 		saveSettings();
-		log.log("Settings saved");
+		log.log("Settings saved", "Dashboard");
 		log.close();
 	}
 }

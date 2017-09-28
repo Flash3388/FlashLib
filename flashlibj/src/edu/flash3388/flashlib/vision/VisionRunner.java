@@ -17,7 +17,7 @@ import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
  * @see RemoteVision
  * @see Vision
  */
-public abstract class VisionRunner extends Sendable implements Vision{
+public abstract class VisionRunner extends Sendable implements Vision, ImagePipeline{
 	
 	private boolean newSelection = false, newProcessing = false;
 	
@@ -271,6 +271,13 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		return false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void newImage(Object frame, byte type){
+		setFrame(frame);
+	}
 	/**
 	 * Sets the value of {@link #frameProperty()}.
 	 * 
