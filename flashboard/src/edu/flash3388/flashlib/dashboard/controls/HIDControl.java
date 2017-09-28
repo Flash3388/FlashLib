@@ -127,57 +127,21 @@ public class HIDControl extends Sendable implements Runnable{
 		}
 	}
 	private void loadControllers(){
+		Controller[] controllers = createDefaultEnvironment().getControllers();
 		
-		
-		Controller[] controllers = createDefaultEnvironment().getControllers();//ControllerEnvironment.getDefaultEnvironment().getControllers();
-		System.out.println("Detected: "+controllers.length);
-		
-		if(controllerCount > 0){
-			for (int i = 0; i < hidData.length; i++) {
-				if(hidData[i] == null)
-					continue;
-				
-				boolean inarray = false;
-				for (int j = 0; j < controllers.length; j++) {
-					if(controllers[j] == null)
-						continue;
-					if(!controllers[j].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK)){
-						controllers[j] = null;
-						continue;
-					}
-					
-					if(controllers[j].getPortNumber() == hidData[i].port){
-						inarray = true;
-						controllers[j] = null;
-						break;
-					}
-				}
-				
-				if(!inarray){
-					hidData[i] = null;
-					controllerCount--;
-				}
-			}
+		for (int i = 0; i < hidData.length; i++) {
+			hidData[i] = null;
 		}
 		
-		if(controllerCount < hidData.length){
-			for (int i = 0; i < controllers.length; i++) {
-				if(controllers[i] == null)
-					continue;
-				if(!controllers[i].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK))
-					continue;
-				
-				int index = 0;
-				for (int j = 0; j < hidData.length; j++) {
-					if(hidData[j] == null){
-						index = j;
-						break;
-					}
-				}
-				
-				hidData[index] = loadController(controllers[i]);
-				controllerCount++;
-			}
+		controllerCount = 0;
+		for (int i = 0; i < controllers.length; i++) {
+			if(!controllers[i].getType().equals(Type.GAMEPAD) && 
+					!controllers[i].getType().equals(Type.STICK))
+				continue;
+			
+			hidData[controllerCount++] = loadController(controllers[i]);
+			if(controllerCount == hidData.length)
+				break;
 		}
 	}
 	private HIDData loadController(Controller controller){
@@ -355,3 +319,51 @@ public class HIDControl extends Sendable implements Runnable{
 	public void onConnectionLost() {
 	}
 }
+
+/*if(controllerCount > 0){
+for (int i = 0; i < hidData.length; i++) {
+	if(hidData[i] == null)
+		continue;
+	
+	boolean inarray = false;
+	for (int j = 0; j < controllers.length; j++) {
+		if(controllers[j] == null)
+			continue;
+		if(!controllers[j].getType().equals(Type.GAMEPAD) && !controllers[j].getType().equals(Type.STICK)){
+			controllers[j] = null;
+			continue;
+		}
+		
+		if(controllers[j].getPortNumber() == hidData[i].port){
+			inarray = true;
+			controllers[j] = null;
+			break;
+		}
+	}
+	
+	if(!inarray){
+		hidData[i] = null;
+		controllerCount--;
+	}
+}
+}
+
+if(controllerCount < hidData.length){
+for (int i = 0; i < controllers.length; i++) {
+	if(controllers[i] == null)
+		continue;
+	if(!controllers[i].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK))
+		continue;
+	
+	int index = 0;
+	for (int j = 0; j < hidData.length; j++) {
+		if(hidData[j] == null){
+			index = j;
+			break;
+		}
+	}
+	
+	hidData[index] = loadController(controllers[i]);
+	controllerCount++;
+}
+}*/

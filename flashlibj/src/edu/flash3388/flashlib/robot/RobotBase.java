@@ -263,7 +263,7 @@ public abstract class RobotBase implements SBC, Robot{
 		}
 	}
 	private static void onShutdown(){
-		log.logTime("Shuting down...");
+		log.logTime("Shuting down...", "RobotBase");
 		//user shutdown
 		if(userImplement != null){
 			log.log("User shutdown...", "RobotBase");

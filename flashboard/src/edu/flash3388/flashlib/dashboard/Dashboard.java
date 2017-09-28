@@ -724,8 +724,6 @@ public class Dashboard extends Application {
 			file.delete();
 		}
 		
-		Platform.exit();
-		
 		saveSettings();
 		log.log("Settings saved", "Dashboard");
 		log.close();
