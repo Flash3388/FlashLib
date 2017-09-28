@@ -5,9 +5,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -28,10 +25,8 @@ import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
-import edu.flash3388.flashlib.vision.DefaultFilterCreator;
 import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
 import edu.flash3388.flashlib.vision.Vision;
-import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
 import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
@@ -583,7 +578,7 @@ public class Dashboard extends Application {
 	    log.log("Launching FX...", "Dashboard");
 	    launch();
 	}
-	private static void loadJinputNatives(){
+	/*private static void loadJinputNatives(){
 		String nativeName = "";
 		String folder = FOLDER_LIBS_NATIVES;
 		if(FlashUtil.isUnix()){
@@ -609,7 +604,7 @@ public class Dashboard extends Application {
 					StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 		}
-	}
+	}*/
 	private static void setupValuePath(){
 		String path = FOLDER_LIBS_NATIVES;
 		if(FlashUtil.isWindows()){

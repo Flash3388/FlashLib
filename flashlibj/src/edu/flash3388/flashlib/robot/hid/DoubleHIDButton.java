@@ -14,8 +14,8 @@ public class DoubleHIDButton extends DoubleButton{
 	
 	private HIDRunnable updateRunnable;
 	
-	public DoubleHIDButton(HIDButton button1, HIDButton button2) {
-		super(button1, button2);
+	public DoubleHIDButton(Button a, Button b) {
+		super(a, b);
 		updateRunnable = new HIDRunnable(this);
 	}
 	

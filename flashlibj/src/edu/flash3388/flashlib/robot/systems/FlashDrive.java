@@ -680,7 +680,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
 	 * rotate value is responsible for the robot rotation. 
 	 * 
-	 * 	 * <p>
+	 * <p>
 	 * This method calculates the outputs to the motors and returns them as an array. They array will contain
 	 * values for 2 sides in the following order: right, left.
 	 * </p>
@@ -688,10 +688,10 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param moveValue The value to move forward or backward 1 to -1.
 	 * @param rotateValue The value to rotate right or left 1 to -1.
 	 * 
-	 * @return returns an array of 4 with the motor output values in this order: right, left.
+	 * @return returns an array of 2 with the motor output values in this order: right, left.
 	 */
 	public static double[] calculate_arcadeDrive(double moveValue, double rotateValue){
-		double rSpeed = 0, lSpeed = 0;
+		double rSpeed = 0.0, lSpeed = 0.0;
 		
 		if (moveValue > 0.0) {
 			if (rotateValue > 0.0) {
@@ -738,7 +738,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @see #arcadeDrive(double, double)
 	 */
 	public static double[] calculate_vectoredOmniDrive_cartesian(double y, double x, double rotation){
-		double right = 0, left = 0, front = 0, rear = 0;
+		double right = 0.0, left = 0.0, front = 0.0, rear = 0.0;
 		
 		if (y > 0.0) {
   	      	if (rotation > 0.0) {
