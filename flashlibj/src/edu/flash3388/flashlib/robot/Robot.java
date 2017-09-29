@@ -1,7 +1,14 @@
 package edu.flash3388.flashlib.robot;
 
 /**
- * An interface for the current robot implementation. Provides for data about the robot.
+ * An interface for the current robot implementation. This interface is used by
+ * the robot framework to access data about robot operations. When initializing robot operations,
+ * an implementation of this interface is set to {@link RobotFactory} and can be accessed by
+ * {@link RobotFactory#getImplementation()}.
+ * <p>
+ * For non-FRC robots, {@link RobotBase} implements most of this interface.
+ * <p>
+ * For FRC robot, {@link edu.flash3388.flashlib.robot.frc.FRCRobotBase FRCRobotBase} implements this interface.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2

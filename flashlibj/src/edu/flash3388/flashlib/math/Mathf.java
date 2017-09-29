@@ -1,24 +1,18 @@
 package edu.flash3388.flashlib.math;
 
 /**
- * Holds a ton of static methods with mathematical functionalities.
+ * Mathf is FlashLib's math utilities class. It is not meant to replace java's {@link Math}, but
+ * rather expend upon it with additional utilities. This class cannot be instantiated and all
+ * methods are static.
+ * <p>
+ * Methods in this class handle many math topics, including by not limited to: integrals, derivatives,
+ * complex numbers, vectors, matrices and much more.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public class Mathf {
 	private Mathf(){}
-	
-	/**
-	 * Represents a function
-	 * 
-	 * @author Tom Tzook
-	 * @since FlashLib 1.0.0
-	 */
-	@FunctionalInterface
-	public static interface Function {
-		double f(double x);
-	}
 	
 	
 	private static final double ROOT_DIFFERENCE = 1e-8;
@@ -72,8 +66,10 @@ public class Mathf {
 	/**
 	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
 	 * will be changed to meet the limit accordingly:
-	 * value bigger than max : value = max
-	 * value smaller than min : value = min
+	 * <ul>
+	 * 	<li>value bigger than max : value = max</li>
+	 * 	<li>value smaller than min : value = min</li>
+	 * </ul>
 	 * 
 	 * @param value The value to limit
 	 * @param min The minimum limit
@@ -95,6 +91,7 @@ public class Mathf {
 	 * the value was initially negative, a negative value is returned, otherwise a positive number is
 	 * returned.
 	 * </p>
+	 * 
 	 * @param value The value to limit
 	 * @param min The minimum limit. must be non-negative
 	 * @param max The maximum limit. must be non-negative
@@ -107,7 +104,8 @@ public class Mathf {
 		return value >= 0? mag : -mag;
 	}
 	/**
-	 * Gets whether a value is limited between to values.
+	 * Gets whether a value is limited between two boundaries.
+	 * 
 	 * @param value value to check
 	 * @param min lower boundary
 	 * @param max upper boundary
@@ -207,24 +205,27 @@ public class Mathf {
 	}
 
 	/**
-	 * Calculates the nth root of a given number.
+	 * Calculates the nth root of a given number and degree.
+	 * <p>
+	 * In mathematics, an nth root of a number x, where n is usually assumed to be a positive integer, 
+	 * is a number r which, when raised to the power n yields x
 	 * 
 	 * @param result The result of the base in the power of exponent.
-	 * @param exponent The root exponent
+	 * @param degree The root degree
 	 * @return The base who when multiplied exponent times returns the given result
 	 * @throws IllegalArgumentException if result is negative
 	 */
-	public static double root(double result, int exponent){
+	public static double root(double result, int degree){
 		if(result < 0)
 			throw new IllegalArgumentException("Cannot calculate negative root! Use complexRoot instead");
         if(result == 0) 
             return 0;
         
         double x1 = result;
-        double x2 = result / exponent;  
+        double x2 = result / degree;  
         while (Math.abs(x1 - x2) > ROOT_DIFFERENCE){
             x1 = x2;
-            x2 = ((exponent - 1.0) * x2 + result / Math.pow(x2, exponent - 1.0)) / exponent;
+            x2 = ((degree - 1.0) * x2 + result / Math.pow(x2, degree - 1.0)) / degree;
         }
         return x2;
 	}
@@ -236,6 +237,9 @@ public class Mathf {
 	/**
 	 * Calculates the nth root of a given number. This method considers the existence of complex numbers
 	 * and will work with a negative number.
+	 * <p>
+	 * In mathematics, an nth root of a number x, where n is usually assumed to be a positive integer, 
+	 * is a number r which, when raised to the power n yields x
 	 * 
 	 * @param result The result of the base in the power of exponent.
 	 * @param exponent The root exponent
@@ -258,7 +262,7 @@ public class Mathf {
 	}
 	/**
 	 * Divides a real number by a complex number.
-	 * 
+	 * <p>
 	 * This is done by multiplying the both numbers by the conjugate of the complex number, which gives
 	 * us a real number as the divisor and a complex number as the dividend, we then use {@link Complex#divide(Complex)} 
 	 * to get the result. 
@@ -273,7 +277,7 @@ public class Mathf {
 	}
 	
 	/**
-	 * Performs a discrete fourier transform for an array of samples.
+	 * Performs a discrete Fourier transform for an array of samples.
 	 * <p>
 	 * The Fourier transform decomposes a function of time (a signal) 
 	 * into the frequencies that make it up, in a way similar to how a 
@@ -294,7 +298,7 @@ public class Mathf {
 		return discreteFourierTransform(func, samples.length);
 	}
 	/**
-	 * Performs a discrete fourier transform for an array of samples.
+	 * Performs a discrete Fourier transform for an array of samples.
 	 * <p>
 	 * The Fourier transform decomposes a function of time (a signal) 
 	 * into the frequencies that make it up, in a way similar to how a 
@@ -318,7 +322,7 @@ public class Mathf {
 		return results;
 	}
 	/**
-	 * Performs a discrete fourier transform for an array of samples.
+	 * Performs a discrete Fourier transform for an array of samples.
 	 * <p>
 	 * The Fourier transform decomposes a function of time (a signal) 
 	 * into the frequencies that make it up, in a way similar to how a 
