@@ -58,7 +58,7 @@ public class ExampleIterativeRobot extends IterativeRobot{
 	@Override
 	protected void disabledPeriodic() {
 		/*
-		 * This function is called periodically (~10ms) while the robot is in disabled mode.
+		 * This method is called periodically (~10ms) while the robot is in disabled mode.
 		 * Generally no code should be here since disabled mode should insure that the robot does nothing
 		 * thus making it safe. But if wanted this method could be used for things like data updates, but actuators
 		 * should not be operated.

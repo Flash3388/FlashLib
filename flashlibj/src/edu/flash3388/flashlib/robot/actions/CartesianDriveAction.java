@@ -2,18 +2,19 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.Subsystem;
-import edu.flash3388.flashlib.robot.hid.Axis;
 import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class HIDPolarDriveAction extends Action{
+public class CartesianDriveAction extends Action{
 	
 	private HolonomicDriveSystem driveTrain;
-	private Axis dirAxis, magAxis, rotateAxis;
+	private DoubleSource xAxis, yAxis, rotateAxis;
 	
-	public HIDPolarDriveAction(HolonomicDriveSystem driveTrain, Axis magnitude, Axis direction, Axis rotate) {
+	public CartesianDriveAction(HolonomicDriveSystem driveTrain,
+			DoubleSource y, DoubleSource x, DoubleSource rotate) {
 		this.driveTrain = driveTrain;
-		this.dirAxis = direction;
-		this.magAxis = magnitude;
+		this.xAxis = x;
+		this.yAxis = y;
 		this.rotateAxis = rotate;
 		
 		if(driveTrain instanceof Subsystem)
@@ -22,7 +23,7 @@ public class HIDPolarDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		driveTrain.holonomicPolar(magAxis.get(), dirAxis.get(), rotateAxis.get());
+		driveTrain.holonomicCartesian(yAxis.get(), xAxis.get(), rotateAxis.get());
 	}
 	@Override
 	protected void end() {

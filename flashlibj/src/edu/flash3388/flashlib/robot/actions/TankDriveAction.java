@@ -2,18 +2,18 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.Subsystem;
-import edu.flash3388.flashlib.robot.hid.Axis;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class HIDArcadeDriveAction extends Action{
+public class TankDriveAction extends Action{
 	
 	private TankDriveSystem driveTrain;
-	private Axis rotateAxis, moveAxis;
+	private DoubleSource leftAxis, rightAxis;
 	
-	public HIDArcadeDriveAction(TankDriveSystem driveTrain, Axis move, Axis rotate) {
+	public TankDriveAction(TankDriveSystem driveTrain, DoubleSource right, DoubleSource left) {
 		this.driveTrain = driveTrain;
-		this.rotateAxis = rotate;
-		this.moveAxis = move;
+		this.leftAxis = left;
+		this.rightAxis = right;
 		
 		if(driveTrain instanceof Subsystem)
 			requires((Subsystem)driveTrain);
@@ -21,11 +21,10 @@ public class HIDArcadeDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		driveTrain.arcadeDrive(moveAxis.get(), rotateAxis.get());
+		driveTrain.tankDrive(rightAxis.get(), leftAxis.get());
 	}
 	@Override
 	protected void end() {
 		driveTrain.stop();
 	}
-
 }
