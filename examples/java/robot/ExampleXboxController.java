@@ -90,7 +90,7 @@ public class ExampleXboxController extends IterativeRobot{
 		//A DPad (specific case of POV) is defined in the DPad class.
 		
 		//let's get the x-axis value of the controller's left stick:
-		double x = xbox.LeftStick.getXAxis().get();
+		double x = xbox.LeftStick.AxisX.get();
 		//we can also do it like this:
 		x = xbox.LeftStick.getX();
 		

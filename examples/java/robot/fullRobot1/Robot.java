@@ -99,7 +99,7 @@ public class Robot extends IterativeRobot{
 		//creating our stick drive action. passing our drive system as parameter and two axes 
 		//from our xbox controller which will control the movement of the system.
 		stickDriveAction = new StickTankDriveAction(driveTrain, 
-				xbox.RightStick.getYAxis(), xbox.LeftStick.getYAxis());
+				xbox.RightStick.AxisY, xbox.LeftStick.AxisX);
 		//indicate to the scheduler that the action uses our drive system. this is very
 		//important. usually it should be done from within the action class, but for this example
 		//we will do it here.

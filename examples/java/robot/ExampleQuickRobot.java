@@ -6,6 +6,7 @@ import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
 import edu.flash3388.flashlib.robot.FlashboardModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.actions.OmniDriveAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Talon;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
@@ -102,21 +103,13 @@ public class ExampleQuickRobot extends IterativeRobot{
 		//creating an instance of FlashDrive with our speed controllers
 		driveTrain = new FlashDrive(motorRight, motorLeft, motorFront, motorRear);
 		
-		//creating a default action for the drive train
-		//we will create an anonymous class.
-		Action stickDrive = new Action(){
-			@Override
-			protected void execute() {
-				//driving our drive train. We will use the left stick of the xbox
-				//and use the Omni drive algorithm
-				driveTrain.omniDrive(xbox.LeftStick.getY(), xbox.LeftStick.getX());
-			}
-			@Override
-			protected void end() {
-				//stopping our drive system
-				driveTrain.stop();
-			}
-		};
+		//creating a default action for the drive train.
+		//we will use a built-in action which drives our system
+		//by calling the omniDrive method.
+		//We will pass it our driveTrain and the Axis objects of our controller's
+		//right stick.
+		Action stickDrive = new OmniDriveAction(driveTrain, 
+				xbox.RightStick.AxisY, xbox.RightStick.AxisX);
 		//adding a dependency of the action on our drive system
 		stickDrive.requires(driveTrain);
 		

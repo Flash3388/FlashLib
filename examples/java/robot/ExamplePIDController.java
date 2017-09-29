@@ -104,6 +104,9 @@ public class ExamplePIDController extends IterativeRobot{
 		//it is important to reset the controller when using it each time. this
 		//resets accumulated information from the last run:
 		pidcontroller.reset();
+		
+		//we need to make sure the PID controller is enabled
+		pidcontroller.setEnabled(true);
 	}
 	@Override
 	protected void modePeriodic(int mode) {
