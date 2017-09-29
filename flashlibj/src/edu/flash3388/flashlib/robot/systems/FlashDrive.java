@@ -5,6 +5,7 @@ import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
+import edu.flash3388.flashlib.robot.hid.Axis;
 import edu.flash3388.flashlib.robot.hid.HID;
 import edu.flash3388.flashlib.robot.hid.Stick;
 
@@ -36,14 +37,14 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		Front, Rear, Right, Left
 	}
 	
-	private FlashSpeedController right_controllers;
-	private FlashSpeedController left_controllers;
-	private FlashSpeedController front_controllers;
-	private FlashSpeedController rear_controllers;
+	private FlashSpeedController rightController;
+	private FlashSpeedController leftController;
+	private FlashSpeedController frontController;
+	private FlashSpeedController rearController;
 	
-	private double speed_limit = 1.0;
+	private double speedLimit = 1.0;
 	private double minSpeed = 0.0;
-	private double default_speed = 0.5;
+	private double defaultSpeed = 0.5;
 	private boolean voltageScaling = false;
 	
 	/**
@@ -72,10 +73,10 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		if(right == null && left == null && front == null && back == null) 
 			throw new IllegalArgumentException("At least one side must have wheels");
 		
-		right_controllers = right;
-		left_controllers = left;
-		front_controllers = front;
-		rear_controllers = back;
+		rightController = right;
+		leftController = left;
+		frontController = front;
+		rearController = back;
 		
 		enableBrakeMode(false);
 	}
@@ -89,16 +90,16 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	public void setInverted(MotorSide s, boolean inverted){
 		switch(s){
 			case Left:
-				left_controllers.setInverted(inverted);
+				leftController.setInverted(inverted);
 				break;
 			case Right:
-				right_controllers.setInverted(inverted);
+				rightController.setInverted(inverted);
 				break;
 			case Front:
-				front_controllers.setInverted(inverted);
+				frontController.setInverted(inverted);
 				break;
 			case Rear:
-				rear_controllers.setInverted(inverted);
+				rearController.setInverted(inverted);
 				break;
 		}
 	}
@@ -110,13 +111,13 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	public FlashSpeedController getController(MotorSide s){
 		switch(s){
 			case Left:
-				return left_controllers;
+				return leftController;
 			case Right:
-				return right_controllers;
+				return rightController;
 			case Front:
-				return front_controllers;
+				return frontController;
 			case Rear:
-				return rear_controllers;
+				return rearController;
 			default: return null;
 		}
 	}
@@ -126,14 +127,14 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param limit speed limit [0...1]
 	 */
 	public void setSpeedLimit(double limit){
-		speed_limit = Math.abs(limit);
+		speedLimit = Math.abs(limit);
 	}
 	/**
 	 * Gets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
 	 * @return speed limit [0...1]
 	 */
 	public double getSpeedLimit(){
-		return speed_limit;
+		return speedLimit;
 	}
 	/**
 	 * Sets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
@@ -186,14 +187,38 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	}
 	
 	/**
+	 * Tank drive implements a dual joysitck drive. Given right and left axes, the code sets each side of
+	 * the drive system to move separately.
+	 * 
+	 * @param axisRight The axis for moving the right side.
+	 * @param axisLeft The axis for moving the left side.
+	 */
+	public void tankDrive(Axis axisRight, Axis axisLeft){
+		tankDrive(axisRight.get(), axisLeft.get());
+	}
+	
+	/**
+	 * Tank drive implements a dual joysitck drive. Given right and left axes, the code sets each side of
+	 * the drive system to move separately. Allows to decrease the values of the speeds by choosing to square them. Given a 
+	 * value SPEED when squared is true, the resulting value is SPEED * SPEED.
+	 * 
+	 * @param axisRight The axis for moving the right side.
+	 * @param axisLeft The axis for moving the left side.
+	 * @param squared If true, the speed will be multiplied by it self for smaller values.
+	 */
+	public void tankDrive(Axis axisRight, Axis axisLeft, boolean squared){
+		tankDrive(axisRight.get(), axisLeft.get(), squared);
+	}
+	
+	/**
 	 * Tank drive implements a dual joystick drive. Given right and left joysticks, the code sets the Y axis values 
 	 * to move each side separately.
 	 * 
-	 * @param stick_right The joystick for moving the right side.
-	 * @param stick_left The joystick for moving the left side.
+	 * @param stickRight The joystick for moving the right side.
+	 * @param stickLeft The joystick for moving the left side.
 	 */
-	public void tankDrive(Stick stick_right, Stick stick_left){
-		tankDrive(-stick_right.getY(), stick_left.getY());
+	public void tankDrive(Stick stickRight, Stick stickLeft){
+		tankDrive(stickRight.getY(), stickLeft.getY());
 	}
 	
 	/**
@@ -201,25 +226,25 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * to move each side separately. Allows to decrease the values of the speeds by choosing to square them. Given a 
 	 * value SPEED when squared is true, the resulting value is SPEED * SPEED.
 	 * 
-	 * @param stick_right The joystick for moving the right side.
-	 * @param stick_left The joystick for moving the left side.
+	 * @param stickRight The joystick for moving the right side.
+	 * @param stickLeft The joystick for moving the left side.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void tankDrive(Stick stick_right, Stick stick_left, boolean squared){
-		tankDrive(-stick_right.getY(), stick_left.getY(), squared);
+	public void tankDrive(Stick stickRight, Stick stickLeft, boolean squared){
+		tankDrive(stickRight.getY(), stickLeft.getY(), squared);
 	}
 	
 	/**
 	 * Tank drive implements a dual joystick drive. Given right and left joysticks, the code sets the values 
 	 * of a given axis to move each side separately. 
 	 * 
-	 * @param stick_right The joystick for moving the right side.
-	 * @param right_axis The axis on the right side joystick.
-	 * @param stick_left The joystick for moving the left side.
-	 * @param left_axis The axis on the left side joystick.
+	 * @param stickRight The joystick for moving the right side.
+	 * @param rightAxis The axis on the right side joystick.
+	 * @param stickLeft The joystick for moving the left side.
+	 * @param leftAxis The axis on the left side joystick.
 	 */
-	public void tankDrive(HID stick_right, int right_axis, HID stick_left, int left_axis){
-		tankDrive(-stick_right.getRawAxis(right_axis), stick_left.getRawAxis(left_axis));
+	public void tankDrive(HID stickRight, int rightAxis, HID stickLeft, int leftAxis){
+		tankDrive(stickRight.getRawAxis(rightAxis), stickLeft.getRawAxis(leftAxis));
 	}
 	
 	/**
@@ -227,14 +252,14 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * of a given axis to move each side separately. Allows to decrease the values of the speeds by choosing to square 
 	 * them. Given a value SPEED when squared is true, the resulting value is SPEED * SPEED.
 	 * 
-	 * @param stick_right The joystick for moving the right side.
-	 * @param right_axis The axis on the right side joystick.
-	 * @param stick_left The joystick for moving the left side.
-	 * @param left_axis The axis on the left side joystick.
+	 * @param stickRight The joystick for moving the right side.
+	 * @param rightAxis The axis on the right side joystick.
+	 * @param stickLeft The joystick for moving the left side.
+	 * @param leftAxis The axis on the left side joystick.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void tankDrive(HID stick_right, int right_axis, HID stick_left, int left_axis, boolean squared){
-		tankDrive(-stick_right.getRawAxis(right_axis), -stick_left.getRawAxis(left_axis), squared);
+	public void tankDrive(HID stickRight, int rightAxis, HID stickLeft, int leftAxis, boolean squared){
+		tankDrive(stickRight.getRawAxis(rightAxis), stickLeft.getRawAxis(leftAxis), squared);
 	}
 	
 	/**
@@ -267,6 +292,31 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	}
 	
 	/**
+	 * Arcade drive implements a single joystick drive. Given 2 axes, the code sets the values of the Ymove axis 
+	 * as move value and rotate axis as the rotate value. The move value is responsible for moving the robot forward and 
+	 * backward while the rotate value is responsible for the robot rotation.
+	 * 
+	 * @param moveAxis the axis for the move value
+	 * @param rotateAxis the axis for the rotate value
+	 */
+	public void arcadeDrive(Axis moveAxis, Axis rotateAxis){
+		arcadeDrive(moveAxis.get(), rotateAxis.get());
+	}
+	/**
+	 * Arcade drive implements a single joystick drive. Given 2 axes, the code sets the values of the Ymove axis 
+	 * as move value and rotate axis as the rotate value. The move value is responsible for moving the robot forward and 
+	 * backward while the rotate value is responsible for the robot rotation. Allows to decrease the values of the speeds by choosing to square them. 
+	 * Given a value SPEED when squared is true, the resulting value is SPEED * SPEED.
+	 * 
+	 * @param moveAxis the axis for the move value
+	 * @param rotateAxis the axis for the rotate value
+	 * @param squared If true, the speed will be multiplied by it self for smaller values.
+	 */
+	public void arcadeDrive(Axis moveAxis, Axis rotateAxis, boolean squared){
+		arcadeDrive(moveAxis.get(), rotateAxis.get(), squared);
+	}
+	
+	/**
 	 * Arcade drive implements a single joystick drive. Given a joystick, the code sets the values of the Y axis 
 	 * as move value and X axis as the rotate value. The move value is responsible for moving the robot forward and 
 	 * backward while the rotate value is responsible for the robot rotation. When both values are not zero then the 
@@ -277,7 +327,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
      *        be selected for rotation rate.
 	 */
 	public void arcadeDrive(Stick stick){
-		arcadeDrive(-stick.getY(), stick.getX());
+		arcadeDrive(stick.getY(), stick.getX());
 	}
 	/**
 	 * Arcade drive implements a single joystick drive. Given a joystick, the code sets the values of the Y axis 
@@ -291,7 +341,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
      *        be selected for rotation rate.
 	 */
 	public void arcadeDrive(Stick mstick, Stick rstick){
-		arcadeDrive(-mstick.getY(), rstick.getX());
+		arcadeDrive(mstick.getY(), rstick.getX());
 	}
 	
 	/**
@@ -307,7 +357,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void arcadeDrive(Stick stick, boolean squared){
-		arcadeDrive(-stick.getY(), stick.getX(), squared);
+		arcadeDrive(stick.getY(), stick.getX(), squared);
 	}
 	/**
 	 * Arcade drive implements a single joystick drive. Given a joystick, the code sets the values of the Y axis 
@@ -323,7 +373,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void arcadeDrive(Stick mstick, Stick rstick, boolean squared){
-		arcadeDrive(-mstick.getY(), rstick.getX(), squared);
+		arcadeDrive(mstick.getY(), rstick.getX(), squared);
 	}
 	
 	/**
@@ -335,11 +385,11 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param stick The joystick to use for Arcade single stick driving. The
      *        move axis will be selected for forwards and backwards and the rotate axis will
      *        be selected for rotation rate.
-	 * @param move_axis The axis number on the joystick to be selected for forwards and backwards.
-	 * @param rotate_axis The axis number on the joystick to be selected for rotation rate.
+	 * @param moveAxis The axis number on the joystick to be selected for forwards and backwards.
+	 * @param rotateAxis The axis number on the joystick to be selected for rotation rate.
 	 */
-	public void arcadeDrive(HID stick, int move_axis, int rotate_axis){
-		arcadeDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(rotate_axis));
+	public void arcadeDrive(HID stick, int moveAxis, int rotateAxis){
+		arcadeDrive(stick.getRawAxis(moveAxis), stick.getRawAxis(rotateAxis));
 	}
 	
 	/**
@@ -352,12 +402,12 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param stick The joystick to use for Arcade single stick driving. The
      *        move axis will be selected for forwards and backwards and the rotate axis will
      *        be selected for rotation rate.
-	 * @param move_axis The axis number on the joystick to be selected for forwards and backwards.
-	 * @param rotate_axis The axis number on the joystick to be selected for rotation rate.
+	 * @param moveAxis The axis number on the joystick to be selected for forwards and backwards.
+	 * @param rotateAxis The axis number on the joystick to be selected for rotation rate.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void arcadeDrive(HID stick, int move_axis, int rotate_axis, boolean squared){
-		arcadeDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(rotate_axis), squared);
+	public void arcadeDrive(HID stick, int moveAxis, int rotateAxis, boolean squared){
+		arcadeDrive(stick.getRawAxis(moveAxis), stick.getRawAxis(rotateAxis), squared);
 	}
 	
 	/**
@@ -393,6 +443,33 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	/**
 	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
 	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
+	 * 2 axes the drive sets the Y axis value to move the wheels on the sides of the robot(right and left) and
+	 * the X axis value to move the wheels in the front and back.
+	 * 
+	 * @param yAxis axis for y-axis motion
+	 * @param xAxis axis for x-axis motion
+	 */
+	public void omniDrive(Axis yAxis, Axis xAxis){
+		omniDrive(yAxis.get(), xAxis.get());
+	}
+	/**
+	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
+	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
+	 * 2 axes the drive sets the Y axis value to move the wheels on the sides of the robot(right and left) and
+	 * the X axis value to move the wheels in the front and back. Allows to decrease the values of the speeds by choosing to 
+	 * square them. Given a value SPEED when squared is true, the resulting value is SPEED * SPEED.
+	 * 
+	 * @param yAxis axis for y-axis motion
+	 * @param xAxis axis for x-axis motion
+	 * @param squared If true, the speed will be multiplied by it self for smaller values.
+	 */
+	public void omniDrive(Axis yAxis, Axis xAxis, boolean squared){
+		omniDrive(yAxis.get(), xAxis.get(), squared);
+	}
+	
+	/**
+	 * Omni drive implements a single joystick drive where there are wheels on the sides of the robot to move forward
+	 * and backwards and there are also wheels in the front and back to move right and left without rotating. Given
 	 * a joystick the drive sets the Y axis value to move the wheels on the sides of the robot(right and left) and
 	 * the X axis value to move the wheels in the front and back.
 	 * 
@@ -401,7 +478,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
      *        be selected for right and left.
 	 */
 	public void omniDrive(Stick stick){
-		omniDrive(-stick.getY(), stick.getX());
+		omniDrive(stick.getY(), stick.getX());
 	}
 	
 	/**
@@ -417,7 +494,7 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
 	public void omniDrive(Stick stick, boolean squared){
-		omniDrive(-stick.getY(), stick.getX(), squared);
+		omniDrive(stick.getY(), stick.getX(), squared);
 	}
 	
 	/**
@@ -429,11 +506,11 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param stick The joystick to use for omni single stick driving. The
      *        move axis will be selected for forwards and backwards and the side axis will
      *        be selected for right and left.
-	 * @param move_axis The move axis will be selected for forwards and backward.
-	 * @param side_axis The side axis will be selected for right and left.
+	 * @param moveAxis The move axis will be selected for forwards and backward.
+	 * @param sideAxis The side axis will be selected for right and left.
 	 */
-	public void omniDrive(HID stick, int move_axis, int side_axis){
-		omniDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(side_axis));
+	public void omniDrive(HID stick, int moveAxis, int sideAxis){
+		omniDrive(stick.getRawAxis(moveAxis), stick.getRawAxis(sideAxis));
 	}
 	
 	/**
@@ -446,12 +523,12 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @param stick The joystick to use for omni single stick driving. The
      *        move axis will be selected for forwards and backwards and the side axis will
      *        be selected for right and left.
-	 * @param move_axis The move axis will be selected for forwards and backward.
-	 * @param side_axis The side axis will be selected for right and left.
+	 * @param moveAxis The move axis will be selected for forwards and backward.
+	 * @param sideAxis The side axis will be selected for right and left.
 	 * @param squared If true, the speed will be multiplied by it self for smaller values.
 	 */
-	public void omniDrive(HID stick, int move_axis, int side_axis, boolean squared){
-		omniDrive(-stick.getRawAxis(move_axis), stick.getRawAxis(side_axis), squared);
+	public void omniDrive(HID stick, int moveAxis, int sideAxis, boolean squared){
+		omniDrive(stick.getRawAxis(moveAxis), stick.getRawAxis(sideAxis), squared);
 	}
 	
 	/**
@@ -483,34 +560,17 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	public void moveY(double speed) {
 		setMotors(0.0, speed, speed, 0.0);
 	}
-	
-	/**
-	 * Sets the right left motors with speeds to move forward.
-	 * @param r value for right [0...1]
-	 * @param l value for left [0...1]
-	 */
-	public void forward(double r, double l){
-		setMotors(0, r, l, 0);
-	}
 	/**
 	 * Moves the system forward at the default speed.
 	 */
 	public void forward(){
-		forward(default_speed);
-	}
-	/**
-	 * Sets the right left motors with speeds to move backwards.
-	 * @param r value for right [0...1]
-	 * @param l value for left [0...1]
-	 */
-	public void backward(double r, double l){
-		setMotors(0, -r, -l, 0);
+		forward(defaultSpeed);
 	}
 	/**
 	 * Moves the system backwards at the default speed.
 	 */
 	public void backward(){
-		backward(default_speed);
+		backward(defaultSpeed);
 	}
 	
 	@Override
@@ -518,33 +578,16 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		setMotors(speed, 0.0, 0.0, speed);
 	}
 	/**
-	 * Sets the front and rear motors with speeds to move right.
-	 * @param r value for rear [0...1]
-	 * @param f value for front [0...1]
-	 */
-	public void right(double f, double r){
-		setMotors(f, 0, 0, r);
-	}
-	/**
 	 * Moves the system right at the default speed.
 	 */
 	public void right(){
-		right(default_speed);
-	}
-	
-	/**
-	 * Sets the front and rear motors with speeds to move left.
-	 * @param r value for rear [0...1]
-	 * @param f value for front [0...1]
-	 */
-	public void left(double f, double r){
-		setMotors(-f, 0, 0, -r);
+		right(defaultSpeed);
 	}
 	/**
 	 * Moves the system left at the default speed.
 	 */
 	public void left(){
-		left(default_speed);
+		left(defaultSpeed);
 	}
 	
 	/**
@@ -554,18 +597,17 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	public void rotate(double speed){
 		setMotors(-speed, -speed, speed, speed);
 	}
-
 	/**
 	 * Rotates the system right at the default speed.
 	 */
 	public void rotateRight(){
-		rotateRight(default_speed);
+		rotateRight(defaultSpeed);
 	}
 	/**
 	 * Rotates the system left at the default speed.
 	 */
 	public void rotateLeft(){
-		rotateLeft(default_speed);
+		rotateLeft(defaultSpeed);
 	}
 	
 	/**
@@ -595,28 +637,28 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		l = limit(l);
 		b = limit(b);
 		
-		if(right_controllers != null) 
-			right_controllers.set(r);
-		if(left_controllers != null) 
-			left_controllers.set(l);
-		if(front_controllers != null) 
-			front_controllers.set(f); 
-		if(rear_controllers != null) 
-			rear_controllers.set(b); 
+		if(rightController != null) 
+			rightController.set(r);
+		if(leftController != null) 
+			leftController.set(l);
+		if(frontController != null) 
+			frontController.set(f); 
+		if(rearController != null) 
+			rearController.set(b); 
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override 
 	public void stop(){
-		if(right_controllers != null) 
-			right_controllers.stop();
-		if(left_controllers != null) 
-			left_controllers.stop();
-		if(front_controllers != null) 
-			front_controllers.stop(); 
-		if(rear_controllers != null) 
-			rear_controllers.stop(); 
+		if(rightController != null) 
+			rightController.stop();
+		if(leftController != null) 
+			leftController.stop();
+		if(frontController != null) 
+			frontController.stop(); 
+		if(rearController != null) 
+			rearController.stop(); 
 	}
 	
 	private double limit(double speed){
@@ -626,8 +668,8 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
 			
-		if(speed_limit != 1.0)
-			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
+		if(speedLimit != 1.0)
+			speed = Mathf.constrain(speed * speedLimit, -speedLimit, speedLimit);
 		return speed;
 	}
 
@@ -636,28 +678,28 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 */
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		if(front_controllers != null && front_controllers instanceof ModableMotor)
-			((ModableMotor)front_controllers).enableBrakeMode(mode);
-		if(left_controllers != null && left_controllers instanceof ModableMotor)
-			((ModableMotor)left_controllers).enableBrakeMode(mode);
-		if(right_controllers != null && right_controllers instanceof ModableMotor)
-			((ModableMotor)right_controllers).enableBrakeMode(mode);
-		if(rear_controllers != null && rear_controllers instanceof ModableMotor)
-			((ModableMotor)rear_controllers).enableBrakeMode(mode);
+		if(frontController != null && frontController instanceof ModableMotor)
+			((ModableMotor)frontController).enableBrakeMode(mode);
+		if(leftController != null && leftController instanceof ModableMotor)
+			((ModableMotor)leftController).enableBrakeMode(mode);
+		if(rightController != null && rightController instanceof ModableMotor)
+			((ModableMotor)rightController).enableBrakeMode(mode);
+		if(rearController != null && rearController instanceof ModableMotor)
+			((ModableMotor)rearController).enableBrakeMode(mode);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean inBrakeMode() {
-		return (front_controllers == null || (front_controllers instanceof ModableMotor && 
-												((ModableMotor)front_controllers).inBrakeMode())) && 
-				(left_controllers == null || left_controllers instanceof ModableMotor && 
-												((ModableMotor)left_controllers).inBrakeMode()) &&
-				(right_controllers == null || right_controllers instanceof ModableMotor && 
-												((ModableMotor)right_controllers).inBrakeMode()) && 
-				(rear_controllers == null || rear_controllers instanceof ModableMotor && 
-												((ModableMotor)rear_controllers).inBrakeMode());
+		return (frontController == null || (frontController instanceof ModableMotor && 
+												((ModableMotor)frontController).inBrakeMode())) && 
+				(leftController == null || leftController instanceof ModableMotor && 
+												((ModableMotor)leftController).inBrakeMode()) &&
+				(rightController == null || rightController instanceof ModableMotor && 
+												((ModableMotor)rightController).inBrakeMode()) && 
+				(rearController == null || rearController instanceof ModableMotor && 
+												((ModableMotor)rearController).inBrakeMode());
 	}
 
 	/**

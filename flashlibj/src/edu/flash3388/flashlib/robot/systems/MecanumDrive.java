@@ -66,14 +66,14 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.1
 	 */
-	public static class PidMecanumStabilizer implements MecanumStabilizer{
+	public static class PIDMecanumStabilizer implements MecanumStabilizer{
 
 		private PIDController pidcontroller;
 		private Gyro gyro;
 		private DoubleProperty setPoint = new SimpleDoubleProperty();
 		private double[] values = new double[3];
 		
-		public PidMecanumStabilizer(double kp, double ki, double kd, double kf, Gyro gyro){
+		public PIDMecanumStabilizer(double kp, double ki, double kd, double kf, Gyro gyro){
 			this.pidcontroller = new PIDController(kp, ki, kd, kf);
 			this.pidcontroller.setPIDSource(new PIDSource.GyroPIDSource(gyro));
 			this.pidcontroller.setEnabled(true);
@@ -99,15 +99,15 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 		}
 	}
 
-	private FlashSpeedController front_left;
-	private FlashSpeedController rear_left;
-	private FlashSpeedController front_right;
-	private FlashSpeedController rear_right;
+	private FlashSpeedController frontLeft;
+	private FlashSpeedController rearLeft;
+	private FlashSpeedController frontRight;
+	private FlashSpeedController rearRight;
 
 	private MecanumStabilizer stabilizer;
 	private boolean stabilizing = false, voltageScaling = false;
 	private double sensitivityLimit = 0;
-	private double speed_limit = 1.0;
+	private double speedLimit = 1.0;
 	private double minSpeed = 0.0;
 	private int angleRound = 0;
 
@@ -121,11 +121,11 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 */
 	public MecanumDrive(FlashSpeedController right_front, FlashSpeedController right_back, FlashSpeedController left_front,
 			FlashSpeedController left_back) {
-		super("");
-		front_right = right_front;
-		rear_right = right_back;
-		front_left = left_front;
-		rear_left = left_back;
+		frontRight = right_front;
+		rearRight = right_back;
+		frontLeft = left_front;
+		rearLeft = left_back;
+		
 		enableBrakeMode(false);
 	}
 	
@@ -179,14 +179,14 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 * @param limit speed limit [0...1]
 	 */
 	public void setSpeedLimit(double limit){
-		speed_limit = Math.abs(limit);
+		speedLimit = Math.abs(limit);
 	}
 	/**
 	 * Gets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
 	 * @return speed limit [0...1]
 	 */
 	public double getSpeedLimit(){
-		return speed_limit;
+		return speedLimit;
 	}
 	/**
 	 * Sets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
@@ -235,10 +235,10 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 		fl = limit(fl);
 		rl = limit(rl);
 		
-		front_right.set(fr);
-		front_left.set(fl);
-		rear_right.set(rr);
-		rear_left.set(rl);
+		frontRight.set(fr);
+		frontLeft.set(fl);
+		rearRight.set(rr);
+		rearLeft.set(rl);
 	}
 	
 	/**
@@ -250,7 +250,7 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 * @param rotation rotation value [-1...1], -1 for left, 1 for right
 	 */
 	public void mecanumDrive_cartesian(double x, double y, double rotation) {
-		mecanumDrive_polar(Math.sqrt(x * x + y * y), Math.toDegrees(Math.atan2(x, y)), rotation);
+		mecanumDrive_polar(Mathf.vecMagnitude(x, y), Mathf.vecAzimuth(y, x), rotation);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -285,7 +285,7 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 		}
 		
 		double[] wheelSpeeds = calculate_mecanumDrive_Polar(magnitude, direction, rotation);
-		setMotors(-wheelSpeeds[0], -wheelSpeeds[2], wheelSpeeds[1], wheelSpeeds[3]);
+		setMotors(wheelSpeeds[0], wheelSpeeds[2], wheelSpeeds[1], wheelSpeeds[3]);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -418,8 +418,8 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
 			
-		if(speed_limit != 1.0)
-			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
+		if(speedLimit != 1.0)
+			speed = Mathf.constrain(speed * speedLimit, -speedLimit, speedLimit);
 		return speed;
 	}
 	
@@ -513,10 +513,10 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 */
 	@Override
 	public void stop() {
-		front_left.set(0);
-		front_right.set(0);
-		rear_right.set(0);
-		rear_left.set(0);
+		frontLeft.set(0);
+		frontRight.set(0);
+		rearRight.set(0);
+		rearLeft.set(0);
 	}
 
 	/**
@@ -524,24 +524,24 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, Mod
 	 */
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		if(front_left instanceof ModableMotor)
-			((ModableMotor)front_left).enableBrakeMode(mode);
-		if(front_right instanceof ModableMotor)
-			((ModableMotor)front_right).enableBrakeMode(mode);
-		if(rear_right instanceof ModableMotor)
-			((ModableMotor)rear_right).enableBrakeMode(mode);
-		if(rear_left instanceof ModableMotor)
-			((ModableMotor)rear_left).enableBrakeMode(mode);
+		if(frontLeft instanceof ModableMotor)
+			((ModableMotor)frontLeft).enableBrakeMode(mode);
+		if(frontRight instanceof ModableMotor)
+			((ModableMotor)frontRight).enableBrakeMode(mode);
+		if(rearRight instanceof ModableMotor)
+			((ModableMotor)rearRight).enableBrakeMode(mode);
+		if(rearLeft instanceof ModableMotor)
+			((ModableMotor)rearLeft).enableBrakeMode(mode);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean inBrakeMode() {
-		return (front_left instanceof ModableMotor && ((ModableMotor)front_left).inBrakeMode()) && 
-			   (front_right instanceof ModableMotor && ((ModableMotor)front_right).inBrakeMode()) &&
-			   (rear_right instanceof ModableMotor && ((ModableMotor)rear_right).inBrakeMode()) && 
-			   (rear_left instanceof ModableMotor && ((ModableMotor)rear_left).inBrakeMode());
+		return (frontLeft instanceof ModableMotor && ((ModableMotor)frontLeft).inBrakeMode()) && 
+			   (frontRight instanceof ModableMotor && ((ModableMotor)frontRight).inBrakeMode()) &&
+			   (rearRight instanceof ModableMotor && ((ModableMotor)rearRight).inBrakeMode()) && 
+			   (rearLeft instanceof ModableMotor && ((ModableMotor)rearLeft).inBrakeMode());
 	}
 	/**
 	 * {@inheritDoc}
