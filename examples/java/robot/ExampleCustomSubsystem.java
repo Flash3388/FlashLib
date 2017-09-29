@@ -24,9 +24,12 @@ import edu.flash3388.flashlib.robot.systems.Rotatable;
  * 
  * The we need to define the properties of the subsystem. Since our arm is controlled by a single motor, 
  * we will define a FlashSpeedController variable. We will initialize this object in our constructor.
+ * Then we need to create methods which will use our subsystem.
  * 
- * Then we need to create methods which will move our arm. To help FlashLib provides interfaces for
- * subsystems, making sure users have appropriate operation methods. We will implement the Rotatable interface.
+ * FlashLib provides several interfaces for subsystem which provide a template for the system, 
+ * allow usage of built-in actions and some even provide extra control method with default implementations
+ * which makes creation of systems easier. It is highly recommended to use those interfaces.
+ * In this example we will use the Rotatable interface.
  */
 public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
 
@@ -38,8 +41,8 @@ public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
 	
 	public ExampleCustomSubsystem() {
 		/*
-		 * Here we should create an prepare our speed controller for use. Since
-		 * it which is used depends on the robot and platform, here we will 
+		 * Here we should create an prepare our subsystem for use. We will create our
+		 * speed controller here, since which is used depends on the robot and platform, here we will 
 		 * use a PWM speed controller called Talon, and use FlashLib's HAL to control it.
 		 * Normally you would need to insure you platform has PWM ports and an HAL implementation
 		 * is available for it.
@@ -71,7 +74,7 @@ public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
 		speedController.set(speed);
 	}
 	/*
-	 * stop is important in order to insure that the motor thus not run when not necessary. It is necessary
+	 * stop is important in order to insure that the motor does not run when not necessary. It is necessary
 	 * to use it in order to make sure the motor does not keep running when not needed. Safety is important.
 	 */
 	@Override

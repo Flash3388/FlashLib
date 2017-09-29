@@ -1,4 +1,4 @@
-package examples.robot.fullRobot1;
+package examples.robot.fullrobot;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;

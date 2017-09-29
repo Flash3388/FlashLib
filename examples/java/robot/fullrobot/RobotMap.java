@@ -1,4 +1,4 @@
-package examples.robot.fullRobot1;
+package examples.robot.fullrobot;
 
 public class RobotMap {
 	private RobotMap(){}

@@ -1,4 +1,4 @@
-package examples.robot.fullRobot1;
+package examples.robot.fullrobot;
 
 import edu.flash3388.flashlib.flashboard.DashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;
