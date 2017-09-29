@@ -93,6 +93,7 @@
                   </Menu>
                   <Menu fx:id="sbc_menu" mnemonicParsing="false" text="Tools">
                     <items>
+                    	<MenuItem fx:id="mode_selector" mnemonicParsing="false" text="Show Mode Selector Window" />
                         <MenuItem fx:id="hid_window" mnemonicParsing="false" text="Show HID Window" />
                     </items>
                   </Menu>

@@ -13,6 +13,7 @@ import org.opencv.core.Core;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.dashboard.controls.HIDControl;
+import edu.flash3388.flashlib.dashboard.controls.ModeSelectorControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -300,6 +301,7 @@ public class Dashboard extends Application {
 	public static final String FOLDER_LIBS_NATIVES_CURRENT = FOLDER_LIBS_NATIVES + "current/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
+	private static final String STATES_FILE = FOLDER_DATA+"states.xml";
 	
 	
 	private static boolean emptyProperty(String prop){
@@ -348,6 +350,7 @@ public class Dashboard extends Application {
 	private static CameraViewer camViewer;
 	private static EmergencyStopControl emergencyStop;
 	private static HIDControl hidcontrol;
+	private static ModeSelectorControl modeSelectorControl;
 	private static boolean fxready = false;
 	
 	private MainController controller;
@@ -375,6 +378,10 @@ public class Dashboard extends Application {
 	
 	public static HIDControl getHIDControl(){
 		return hidcontrol;
+	}
+	
+	public static ModeSelectorControl getModeSelectorControl(){
+		return modeSelectorControl;
 	}
 	
 	private static void fxReady(){
@@ -650,6 +657,17 @@ public class Dashboard extends Application {
 	    hidcontrol = new HIDControl();
 	    updater.addTask(hidcontrol);
 	    
+	    modeSelectorControl = new ModeSelectorControl();
+	    File file = new File(STATES_FILE);
+	    if(file.exists()){
+	    	try {
+				modeSelectorControl.loadStates(file);
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.reportError("Failed to load states");
+			}
+	    }
+	    
 	    connectionTask = new ConnectionTask();
 	    updater.addTask(connectionTask);
 	}
@@ -711,6 +729,11 @@ public class Dashboard extends Application {
 				e.printStackTrace();
 				Thread.currentThread().interrupt();
 			}
+		}
+		
+		if(modeSelectorControl != null){
+			 File file = new File(STATES_FILE);
+			 modeSelectorControl.saveStates(file);
 		}
 		
 		/*File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);

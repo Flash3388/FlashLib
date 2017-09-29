@@ -23,7 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class PidTunerWindow extends Stage{
+public class PIDTunerWindow extends Stage{
 	
 	private static enum PidTunningMode{
 		P, PI, PD, ClassicPID, PessenIntegralRule, SomeOvershoot, NoOvershoot
@@ -38,7 +38,7 @@ public class PidTunerWindow extends Stage{
 	private static final double DEFAULT_X_RANGE = 5.0;
 	private static final double DEFAULT_Y_RANGE = 100.0;
 	
-	private static PidTunerWindow instance;
+	private static PIDTunerWindow instance;
 	private static PidTunningParam[] tunningParams;
 	
 	private DashboardPidTuner tuner;
@@ -65,7 +65,7 @@ public class PidTunerWindow extends Stage{
 	private double yrange = DEFAULT_Y_RANGE, xrange = DEFAULT_X_RANGE;
 	private double kuValue;
 	
-	private PidTunerWindow(){
+	private PIDTunerWindow(){
 		setTitle("FLASHboard - PID Tuner");
 		initStyle(StageStyle.DECORATED);
         initModality(Modality.NONE);
@@ -536,7 +536,7 @@ public class PidTunerWindow extends Stage{
 			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tuner is already open!");
 			return;
 		}
-		instance = new PidTunerWindow();
+		instance = new PIDTunerWindow();
 		instance.show();
 	}
 	public static void reset(){

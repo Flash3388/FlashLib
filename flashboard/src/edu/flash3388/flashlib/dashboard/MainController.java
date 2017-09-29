@@ -113,7 +113,7 @@ public class MainController implements Initializable{
 	@FXML ToolBar camera_toolbar;
 	@FXML ChoiceBox<String> displayBoxType;
 	@FXML MenuItem motorTester, show_log, load_params, showpdp, save_params, prop_viewer, 
-				pidtuner, vision_editor, hid_window, comm_restart;
+				pidtuner, vision_editor, hid_window, comm_restart, mode_selector;
 	
 	private UpdateTask threadTask;
 	private boolean local = false;
@@ -141,6 +141,9 @@ public class MainController implements Initializable{
 		
 		comm_restart.setOnAction((e)->{
 			Dashboard.restartCommunications();
+		});
+		mode_selector.setOnAction((e)->{
+			ModeSelectorWindow.showModeSelector();
 		});
 		hid_window.setOnAction(e -> {
 			HIDWindow.showHIDWindow();
@@ -481,7 +484,7 @@ public class MainController implements Initializable{
 		TesterWindow.showTester();
 	}
 	private void showPidTuner(){
-		PidTunerWindow.showTuner();
+		PIDTunerWindow.showTuner();
 	}
 	private void showVisionEditor(){
 		if(Dashboard.visionInitialized()){
@@ -619,7 +622,7 @@ public class MainController implements Initializable{
 		PDP.resetBoards();
 		TesterWindow.closeTester();
 		VisionEditorWindow.closeEditor();
-		PidTunerWindow.reset();
+		PIDTunerWindow.reset();
 		FlashboardTester.resetTesters();
 		DashboardPidTuner.resetTuners();
 	}

@@ -22,6 +22,7 @@ public class FlashboardSendableType {
 	public static final byte SLIDER = 0x10;
 	public static final byte MOTOR = 0xa;
 	public static final byte VISION = 0xb;
+	public static final byte MODE_SELECTOR = 0xc;
 	public static final byte PDP = 0xe;
 	public static final byte INPUT = 0xf;
 }
