@@ -7,39 +7,34 @@ import java.util.Set;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
- * An Action is something that can be executed by a System on the robot. When started, the action
- * is added to the Scheduler which is responsible for running it. The Action is ran until a condition is met
- * or an action using the same system is used.
- * 
+ * An Action is something that can be executed on the robot. This can include any operation on the robot,
+ * depending on what users want. When started, the action is added to the {@link Scheduler} which is responsible
+ * for executing the action. To start an action, call {@link #start()}. This class is abstract.
  * <p>
  * An action has few running phases:
  * <ul>
  * 	<li> {@link #initialize()} called once at the start </li>
  * 	<li> {@link #execute()}: called repeatedly until {@link #isFinished()} returns true</li>
  * 	<li> {@link #end()}: called when the action is done ({@link #isFinished()} returns true) or</li>
- * 	<li> {@link #interrupted()}: called when another action starts running on the same system, or the action is
- * manual canceled <li>
+ * 	<li> {@link #interrupted()}: called when this action stops running and {@link #isFinished()} did not
+ * return true. <li>
  * </ul>
- * 
+ * To indicate whether an action should stop running, users can override the {@link #isFinished()} method and
+ * return true to stop the action, or false to keep running. To manually stop an action, {@link #cancel()} can
+ * be called.
  * <p>
- * There are many different types of wrapper for action. Those wrapper allows for the modification of an action
- * for externally without changing the defined parameters of it:
- * <ul>
- * 	<li> {@link TimedAction}: wraps an action and sets a timeout for it</li>
- *  <li> {@link SystemAction}: wraps an action and sets a system requirement for it</li>
- *  <li> {@link ActionGroup}: a series of actions to be executed at a specified order</li>
- *  <li> {@link ConditionalAction}: selects which action to run according to a condition</li>
- *  <li> {@link InstantAction}: wraps an action so that {@link #execute()} runs once</li>
- *  <li> {@link RunnableAction}: executes a {@link Runnable} object during {@link #execute()} </li>
- *  <li> {@link InstantRunnableAction}: executes a {@link Runnable} object during {@link #execute()}. Execute runs once</li>
- *  <li> {@link CombinedAction}: allows to combine several actions to run together on a single system </li>
- *  <li> {@link SourceAction}: used by combined actions. Provide data from DoubleDataSource after running </li>
- * </ul>
+ * An action can have a timeout. If the time since the action started running has passed a given timeout, the
+ * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeout(int)}.
+ * <p>
+ * It is possible to define dependencies for actions. Basically, if an action is using a {@link Subsystem} object
+ * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
+ * that system. To do that, users must explicitly call {@link #requires(Subsystem)} and pass a system which is
+ * used (multiple systems can be required). By doing so, the {@link Scheduler} now knows to stop any other action
+ * with at least one similar system requirement. If an action is running and another starts with a similar system
+ * requirement, the previous action is canceled, invoking a call to {@link #interrupted()}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
- * @see Scheduler
- * @see Subsystem
  */
 public abstract class Action{
 	
@@ -58,11 +53,12 @@ public abstract class Action{
 	private boolean canceled = false;
 	private boolean running = false;
 	private int timeout = -1;
-	private int start_time = -1;
+	private int startTime = -1;
 	private String name;
 	
 	/**
 	 * Creates a new action with a given name.
+	 * 
 	 * @param name name of the action
 	 */
 	public Action(String name){
@@ -103,7 +99,7 @@ public abstract class Action{
 		initialized = false;
 		canceled = false;
 		running = false;
-		start_time = -1;
+		startTime = -1;
 	}
 	boolean run(){
 		if(isTimedout())
@@ -112,7 +108,7 @@ public abstract class Action{
 			return false;
 		if(!initialized){
 			initialized = true;
-			start_time = FlashUtil.millisInt();
+			startTime = FlashUtil.millisInt();
 			initialize();
 		}
 		execute();
@@ -221,7 +217,7 @@ public abstract class Action{
 	 * @return true if the action timeout, false otherwise
 	 */
 	protected boolean isTimedout(){
-		return start_time > 0 && timeout > 0 && (FlashUtil.millisInt() - start_time) 
+		return startTime > 0 && timeout > 0 && (FlashUtil.millisInt() - startTime) 
 				>= timeout;
 	}
 	

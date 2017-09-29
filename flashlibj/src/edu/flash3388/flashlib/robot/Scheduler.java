@@ -7,15 +7,34 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * Scheduler is responsible for executing actions for robot systems. Scheduler contains a collection for actions,
- * systems and scheduled tasks. When a system is created it is added automatically by the constructor. Actions are 
- * added when they are started. ScheduledTasks are added manually. To avoid collisions between actions running on the
- * same system, when an action is added its system requirements are checked and any actions using those systems are canceled.
- * If registered systems do not gave an action running but do have a default action, the default action is started.
- * 
+ * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
+ * {@link Runnable} objects to the scheduler which will then be executed by when the {@link Scheduler} 
+ * runs. This allows for easy management of robot operations.
  * <p>
- * To run the scheduler, it is necessary to manually call {@link #run()}.
- * </p>
+ * The scheduler can work with simple {@link Runnable} objects, or tasks, which can be added to run once,
+ * or run continuously.
+ * <p>
+ * For more complex operations, the scheduler can use {@link Action} objects. Those objects can be added
+ * to the scheduler and then executed as well. Unlike simple tasks, actions might depend on {@link Subsystem}
+ * objects for operations. The scheduler tracks the required systems of each action making sure that only one 
+ * {@link Action} object runs on a {@link Subsystem} at any given time. 
+ * <p>
+ * In addition, the scheduler can allow {@link Subsystem} to hold default {@link Action} objects, which
+ * run only if no {@link Action} is using the {@link Subsystem} at the moment. When the scheduler runs,
+ * it checks all registered {@link Subsystem} objects to see if one does not have an action at the moment.
+ * If it doesn't and a default action is defined, the default action is started. Systems are registered
+ * by calling {@link #registerSystem(Subsystem)}, but this occurs in the {@link Subsystem} constructor.
+ * <p>
+ * The scheduler has 4 run modes: 
+ * <ul>
+ * 	<li> {@link #MODE_DISABLED}: do nothing when running </li>
+ * 	<li> {@link #MODE_TASKS}: run only tasks ( {@link Runnable} object) </li>
+ * 	<li> {@link #MODE_ACTIONS}: run only {@link Action} objects an update {@link Subsystem} objects </li>
+ * 	<li> {@link #MODE_FULL}: run both tasks and actions. A combination of {@link #MODE_TASKS} and {@link #MODE_ACTIONS} </li>
+ * </ul>
+ * The mode can be set by calling {@link #setMode(byte)}.
+ * <p>
+ * To run the scheduler, it is necessary to manually call {@link #run()} periodically.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -106,6 +125,7 @@ public final class Scheduler {
 	
 	/**
 	 * Adds a new {@link Runnable} to be executed continuously until manually removed.
+	 * 
 	 * @param runnable task to execute
 	 * @return true if the task was added, false if the task already exists
 	 */
@@ -118,6 +138,7 @@ public final class Scheduler {
 	}
 	/**
 	 * Adds a new {@link Runnable} to be executed once.
+	 * 
 	 * @param runnable task to execute
 	 * @return true if the task was added, false if the task already exists
 	 */
@@ -130,6 +151,7 @@ public final class Scheduler {
 	}
 	/**
 	 * Removes a {@link Runnable} from execution.
+	 * 
 	 * @param runnable task to remove
 	 * @return true if the task was in execution, false otherwise
 	 */
@@ -140,6 +162,7 @@ public final class Scheduler {
 	/**
 	 * Registers a {@link Subsystem} to this {@link Scheduler}. Allows for activation of
 	 * default {@link Action} for this system.
+	 * 
 	 * @param system system to register
 	 */
 	public void registerSystem(Subsystem system){
@@ -220,6 +243,7 @@ public final class Scheduler {
 	
 	/**
 	 * Sets whether or not the scheduler is disabled. If the scheduler is disabled, it cannot be run.
+	 * 
 	 * @param disable true to disable, false otherwise
 	 */
 	public void setDisabled(boolean disable){
