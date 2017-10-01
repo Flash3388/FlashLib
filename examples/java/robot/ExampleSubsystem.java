@@ -31,7 +31,7 @@ import edu.flash3388.flashlib.robot.systems.Rotatable;
  * which makes creation of systems easier. It is highly recommended to use those interfaces.
  * In this example we will use the Rotatable interface.
  */
-public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
+public class ExampleSubsystem extends Subsystem implements Rotatable{
 
 	/*
 	 * Our speed controller object. FlashSpeedController is an interface, so
@@ -39,7 +39,7 @@ public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
 	 */
 	private FlashSpeedController speedController;
 	
-	public ExampleCustomSubsystem() {
+	public ExampleSubsystem() {
 		/*
 		 * Here we should create an prepare our subsystem for use. We will create our
 		 * speed controller here, since which is used depends on the robot and platform, here we will 

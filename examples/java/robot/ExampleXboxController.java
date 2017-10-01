@@ -2,9 +2,9 @@ package examples.robot;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
-import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.IterativeRobot;
+import edu.flash3388.flashlib.robot.ManualModeSelector;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hid.DoubleButton;
 import edu.flash3388.flashlib.robot.hid.DoubleHIDButton;
@@ -26,10 +26,10 @@ public class ExampleXboxController extends IterativeRobot{
 	//a DoubleButton object
 	DoubleButton doubleButton;
 	
-	//create our mode selector. 
-	//we will use a flashboard mode selector which is basically a combo box
-	//on the flashboard.
-	FlashboardSimpleModeSelector modeSelector = new FlashboardSimpleModeSelector();
+	//create our mode selector. we will need one just to put us in operation mode and
+	//not disabled.
+	ManualModeSelector modeSelector = new ManualModeSelector();
+	
 	//create our HID interface.
 	//This allows us to use controllers and joysticks to control
 	//the robot. Data about the controllers is received using this interface.
@@ -50,11 +50,6 @@ public class ExampleXboxController extends IterativeRobot{
 	}
 	@Override
 	protected void robotInit() {
-		
-		//define the operation modes to our mode selector.
-		modeSelector.addOption("Operation", MODE_OPERATION);
-		//attach our mode selector to flashboard
-		modeSelector.attachToFlashboard();
 		
 		//attach our hid interface to flashboard
 		hidInterface.attachToFlashboard();
@@ -199,6 +194,12 @@ public class ExampleXboxController extends IterativeRobot{
 		
 		//When our robot is in MODE_OPERATION, controllers will be updated and we
 		//can check our buttons and axes.
+		
+		//setting ourselves to operation mode so we could checkout the 
+		//values of controllers. This is not recommended when using an
+		//actual movable robot since we are forcing it to stay in operation
+		//and not allowing it to enter disabled mode at any given time.
+		modeSelector.setMode(MODE_OPERATION);
 	}
 
 	@Override

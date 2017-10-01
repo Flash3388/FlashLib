@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard;
 
-import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
+import edu.flash3388.flashlib.dashboard.controls.DashboardPIDTuner;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.math.Mathf;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -41,7 +41,7 @@ public class PIDTunerWindow extends Stage{
 	private static PIDTunerWindow instance;
 	private static PidTunningParam[] tunningParams;
 	
-	private DashboardPidTuner tuner;
+	private DashboardPIDTuner tuner;
 	private ComboBox<String> keysBox;
 	
 	private LineChart<Number, Number> chart;
@@ -335,7 +335,7 @@ public class PIDTunerWindow extends Stage{
 		keysBox = new ComboBox<String>();
 		keysBox.getItems().add("-- Choose Tuner --");
 		keysBox.getSelectionModel().select(0);
-		keysBox.getItems().addAll(DashboardPidTuner.getTunerNames());
+		keysBox.getItems().addAll(DashboardPIDTuner.getTunerNames());
 		keysBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
 			disableControls(true);
 			resetBinds();
@@ -347,7 +347,7 @@ public class PIDTunerWindow extends Stage{
 				return;
 			}
 			
-			tuner = DashboardPidTuner.getTuner(newValue);
+			tuner = DashboardPIDTuner.getTuner(newValue);
 			if(tuner == null){
 				keysBox.getSelectionModel().select(0);
 				return;

@@ -9,7 +9,7 @@ import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
-import edu.flash3388.flashlib.dashboard.controls.DashboardPidTuner;
+import edu.flash3388.flashlib.dashboard.controls.DashboardPIDTuner;
 import edu.flash3388.flashlib.gui.FlashFxUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -624,6 +624,6 @@ public class MainController implements Initializable{
 		VisionEditorWindow.closeEditor();
 		PIDTunerWindow.reset();
 		FlashboardTester.resetTesters();
-		DashboardPidTuner.resetTuners();
+		DashboardPIDTuner.resetTuners();
 	}
 }

@@ -26,12 +26,12 @@ import edu.wpi.first.wpilibj.Talon;
  * Then we need to create methods which will move our arm. To help FlashLib provides interfaces for
  * subsystems, making sure users have appropriate operation methods. We will implement the Rotatable interface.
  */
-public class ExampleCustomSubsystem extends Subsystem implements Rotatable{
+public class ExampleSubsystem extends Subsystem implements Rotatable{
 
 	//the speed controller for our system. we will use a Talon controller.
 	private Talon speedController;
 	
-	public ExampleCustomSubsystem() {
+	public ExampleSubsystem() {
 		/*
 		 * Here we should prepare our system for use. We will create 
 		 * our speed controller.

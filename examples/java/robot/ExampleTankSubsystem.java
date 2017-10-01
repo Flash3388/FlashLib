@@ -26,7 +26,7 @@ import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
  * which makes creation of systems easier. It is highly recommended to use those interfaces.
  * In this example we will use the TankDriveSystem interface.
  */
-public class ExampleCustomTankSubsystem implements TankDriveSystem{
+public class ExampleTankSubsystem implements TankDriveSystem{
 
 	/*
 	 * Our speed controller objects. FlashSpeedController is an interface, so
@@ -37,7 +37,7 @@ public class ExampleCustomTankSubsystem implements TankDriveSystem{
 	private FlashSpeedController controllerLeft;
 	
 	
-	public ExampleCustomTankSubsystem() {
+	public ExampleTankSubsystem() {
 		/*
 		 * Here we should create an prepare our subsystem for use. We will create our
 		 * speed controllers here, since which are used depends on the robot and platform, here we will 

@@ -1,4 +1,4 @@
-package examples.robot;
+package examples.robot.frc;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
@@ -25,17 +25,17 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * The action will receive an instance of the subsystem and a DoubleSource object. In execute the action
  * will call rotate and pass the DoubleSource value.
  */
-public class ExampleCustomAction extends Action{
+public class ExampleAction extends Action{
 
 	//the DoubleSource object. This will retreive speed values for the subsystem
 	private DoubleSource source;
 	//our subsystem object
-	private ExampleCustomSubsystem subsytem;
+	private ExampleSubsystem subsytem;
 	
 	//constructor: receives both the subsystem and speed source object
 	//save the objects
 	//declare system requirement
-	public ExampleCustomAction(ExampleCustomSubsystem subsystem, DoubleSource source) {
+	public ExampleAction(ExampleSubsystem subsystem, DoubleSource source) {
 		this.subsytem = subsystem;
 		this.source = source;
 		

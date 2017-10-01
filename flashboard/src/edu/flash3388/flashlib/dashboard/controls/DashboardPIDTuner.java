@@ -13,9 +13,9 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.StackPane;
 
-public class DashboardPidTuner extends Displayble{
+public class DashboardPIDTuner extends Displayble{
 
-	private static final HashMap<String, DashboardPidTuner> tuners = new HashMap<String, DashboardPidTuner>();
+	private static final HashMap<String, DashboardPIDTuner> tuners = new HashMap<String, DashboardPIDTuner>();
 	
 	private LineChart.Series<Number, Number> series;
 	
@@ -33,7 +33,7 @@ public class DashboardPidTuner extends Displayble{
 	private boolean update = false, remoteUpdate = false, setUpdate = false,
 			newValueSet = false, newSetpointSet = false, newKSet = false, lastValBigger = false;
 	
-	public DashboardPidTuner(String name) {
+	public DashboardPIDTuner(String name) {
 		super(name, FlashboardSendableType.PIDTUNER);
 		
 		series = new LineChart.Series<Number, Number>();
@@ -225,7 +225,7 @@ public class DashboardPidTuner extends Displayble{
 	}
 	
 	
-	public static DashboardPidTuner getTuner(String name){
+	public static DashboardPIDTuner getTuner(String name){
 		return tuners.get(name);
 	}
 	public static String[] getTunerNames(){
