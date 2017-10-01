@@ -104,7 +104,7 @@ public class Mathf {
 		return value >= 0? mag : -mag;
 	}
 	/**
-	 * Gets whether a value is limited between two boundaries.
+	 * Gets whether a value is between two boundaries.
 	 * 
 	 * @param value value to check
 	 * @param min lower boundary
@@ -114,6 +114,30 @@ public class Mathf {
 	public static boolean constrained(double value, double min, double max){
 		return value >= min && value <= max;
 	}
+	
+	/**
+	 * Scales a given value between 2 boundaries. 
+	 * <p>
+	 * Uses Feature Scaling, a method to standardize the range of independent variables or features of data.
+	 * In data processing, it is also known as data normalization and is generally performed during the data 
+	 * preprocessing step.
+	 * <p>
+	 * This method uses rescaling of the features to range in a given boundary. The general formula:
+	 * <p>
+	 * {@code
+	 * x` = (x - min) / (max - min)
+	 * }
+	 * 
+	 * 
+	 * @param value value to scale
+	 * @param min minimum boundary
+	 * @param max maximum boundary
+	 * @return scaled value
+	 */
+	public static double scale(double value, double min, double max){
+		return (value - min) / (max - min);
+	}
+	
 	/**
 	 * Rounds a decimal number to 2 numbers after the decimal point.
 	 * 
