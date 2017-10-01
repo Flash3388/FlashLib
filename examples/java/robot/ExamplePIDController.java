@@ -1,6 +1,6 @@
 package examples.robot;
 
-import edu.flash3388.flashlib.robot.FlashboardModeSelector;
+import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.PIDController;
 import edu.flash3388.flashlib.robot.PIDSource;
@@ -20,7 +20,7 @@ public class ExamplePIDController extends IterativeRobot{
 	//create our mode selector. 
 	//we will use a flashboard mode selector which is basically a combo box
 	//on the flashboard.
-	FlashboardModeSelector modeSelector = new FlashboardModeSelector();
+	FlashboardSimpleModeSelector modeSelector = new FlashboardSimpleModeSelector();
 	
 	//our PID controller object
 	PIDController pidcontroller;

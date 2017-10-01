@@ -3,7 +3,7 @@ package examples.robot;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
-import edu.flash3388.flashlib.robot.FlashboardModeSelector;
+import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.actions.OmniDriveAction;
@@ -24,7 +24,6 @@ import edu.flash3388.flashlib.robot.systems.FlashDrive;
  * move our robot in the X axis (right and left). We can combine both when wanted.
  */
 public class ExampleQuickRobot extends IterativeRobot{
-
 	
 	private static final int MOTOR_RIGHT = 3, 
 						 	MOTOR_LEFT = 2,
@@ -38,7 +37,7 @@ public class ExampleQuickRobot extends IterativeRobot{
 	//create our mode selector. 
 	//we will use a flashboard mode selector which is basically a combo box
 	//on the flashboard.
-	FlashboardModeSelector modeSelector = new FlashboardModeSelector();
+	FlashboardSimpleModeSelector modeSelector = new FlashboardSimpleModeSelector();
 	//create our HID interface.
 	//This allows us to use controllers and joysticks to control
 	//the robot. Data about the controllers is received using this interface.

@@ -2,7 +2,7 @@ package examples.robot;
 
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
-import edu.flash3388.flashlib.robot.FlashboardModeSelector;
+import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.InstantAction;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -29,7 +29,7 @@ public class ExampleXboxController extends IterativeRobot{
 	//create our mode selector. 
 	//we will use a flashboard mode selector which is basically a combo box
 	//on the flashboard.
-	FlashboardModeSelector modeSelector = new FlashboardModeSelector();
+	FlashboardSimpleModeSelector modeSelector = new FlashboardSimpleModeSelector();
 	//create our HID interface.
 	//This allows us to use controllers and joysticks to control
 	//the robot. Data about the controllers is received using this interface.
