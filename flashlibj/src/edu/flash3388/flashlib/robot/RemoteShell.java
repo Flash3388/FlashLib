@@ -45,7 +45,7 @@ public class RemoteShell extends Sendable implements Shell{
 	private RemoteShellOutputStream out = new RemoteShellOutputStream();
 	
 	public RemoteShell() {
-		super("", SBCSendableType.SHELL_EXECUTOR);
+		super("", SENDABLE_TYPE);
 	}
 	
 	@Override

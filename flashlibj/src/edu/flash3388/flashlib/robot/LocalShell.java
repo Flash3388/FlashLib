@@ -90,7 +90,7 @@ public class LocalShell extends Sendable implements Shell{
 	private byte[] inputStreamData = null;
 	
 	public LocalShell() {
-		super("", SBCSendableType.SHELL_EXECUTOR);
+		super("", SENDABLE_TYPE);
 		tracker = new ProcessTracker();
 		tracker.shell = this;
 	}

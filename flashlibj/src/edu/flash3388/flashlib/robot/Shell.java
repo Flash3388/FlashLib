@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface Shell {
+	
+	public static final byte SENDABLE_TYPE = 0xf;
 
 	public static final byte EXECUTE_PROGRESS = 0x07;
 	public static final byte EXECUTE_IDLE = 0x00;
