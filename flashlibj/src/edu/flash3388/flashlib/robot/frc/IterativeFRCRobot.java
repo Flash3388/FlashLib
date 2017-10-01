@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.frc;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
@@ -55,6 +56,12 @@ import edu.flash3388.flashlib.util.Log;
  * addition, when in disabled mode the scheduling enters {@link Scheduler#MODE_TASKS} mode so {@link Action} objects
  * are not executed, only tasks are, this is for safety of operation.
  * <p>
+ * IterativeFRCRobot features power tracking using a {@link PowerLogger} object. If initialized, this object
+ * tracks power issues in the robot's power supply. By default, the tracked values are the robot's voltage level
+ * from {@link DriverStation#getBatteryVoltage()} and the total PDP power from {@link PDP#getTotalCurrent()} using
+ * {@link FlashFRCUtil#getPDP()}. If issues are detected with the values of either ones, data is logged into a power
+ * log. Issues refer to the values been too low or high.
+ * <p>
  * This class provides custom initialization. When the robot is initializing, {@link #preInit(RobotInitializer)}
  * is called for custom initialization. The passed object, {@link RobotInitializer} provides variables whose
  * values are used to initialize FlashLib and control loop operations.
@@ -99,6 +106,21 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		 * The default value is `false`.
 		 */
 		public boolean logPower = false;
+		/**
+		 * Indicates to the power tracker what current draw in Ampre to consider high enough to warrant
+		 * a warning.
+		 * <p>
+		 * The default value is 120A
+		 */
+		public double maxTotalCurrentDraw = PowerLogger.DEFAULT_WARNING_CURRENT_DRAW;
+		/**
+		 * Indicates to the power tracker what voltage level in volts to consider low enough to warrant
+		 * a warning. 
+		 * <p>
+		 * Rge default value is 8.0v
+		 */
+		public double minVoltageLevel = PowerLogger.DEFAULT_WARNING_VOLTAGE;
+		
 		/**
 		 * Indicates whether or not the robot should log operations into FlashLib's standard logs.
 		 * If this value is false, FlashLib's main log's file writing is disabled and the file
@@ -168,8 +190,8 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 			log.delete();
 		}
 		if(logPower){
-			powerLogger = new PowerLogger("powerLog", ()->m_ds.getBatteryVoltage(), 
-					()->FlashFRCUtil.getPDP().getTotalCurrent());
+			powerLogger = new PowerLogger("powerLog", new FRCVoltagePowerSource(initializer.minVoltageLevel, 15.0),
+					new FRCTotalCurrentPowerSource(-1.0, initializer.maxTotalCurrentDraw));
 		}
 		if(initializer.autoUpdateHid){
 			schedulerImpl.addTask(new HIDUpdateTask());
