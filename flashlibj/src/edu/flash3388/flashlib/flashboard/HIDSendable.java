@@ -157,8 +157,6 @@ public class HIDSendable extends Sendable implements Runnable{
 			synchronized (joystickMutex) {
 				updated = false;
 				
-				//System.out.println("DATA: "+data.length);
-				
 				int pos = 1;
 				int joystick;
 				byte i, value;

@@ -59,6 +59,11 @@ public final class FlashUtil {
 	//-----------------------General--------------------------------------
 	//--------------------------------------------------------------------
 	
+	private static void setStartTime(long time){
+		if(startTime == 0)
+			startTime = time;
+	}
+	
 	/**
 	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 
 	 * milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not 
@@ -187,19 +192,7 @@ public final class FlashUtil {
 	public static double secs(){
 		return millis() * 0.001;
 	}
-	/**
-	 * Returns the current value of the running Java Virtual Machine's high-resolution time source, in seconds. 
-	 * @return the current value of the running Java Virtual Machine's high-resolution time source, in seconds
-	 */
-	public static double clockSecs(){
-		return System.nanoTime() / 1e6;
-	}
 
-	
-	private static void setStartTime(long time){
-		if(startTime == 0)
-			startTime = time;
-	}
 	/**
 	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized 
 	 * to a new log named "flashlib" and the log implementation is {@link SimpleStreamLog}.
