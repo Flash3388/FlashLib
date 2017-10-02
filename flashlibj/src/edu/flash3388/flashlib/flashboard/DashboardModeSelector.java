@@ -36,14 +36,12 @@ public class DashboardModeSelector extends Sendable{
 	public void newData(byte[] data) {
 		if(data[0] == UPDATE_DISABLED){
 			boolean setd = data[1] != 0;
-			
 			synchronized (stateMutex) {
 				disabled = setd;
 			}
 		}
-		if(data[0] == UPDATE_MODE){
+		else if(data[0] == UPDATE_MODE){
 			int state = FlashUtil.toInt(data, 1);
-			
 			synchronized (stateMutex) {
 				currentState = state;
 			}

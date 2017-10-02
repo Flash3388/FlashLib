@@ -42,6 +42,9 @@ subprojects {
 	}
 }
 
+project(':hal:test'){
+	buildDir = halOutputFolder + 'haltest/'
+}
 project(':hal:beagleboneblack'){
 	buildDir = halOutputFolder + 'beagleboneblack/'
 }

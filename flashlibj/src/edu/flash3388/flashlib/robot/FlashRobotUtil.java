@@ -151,8 +151,10 @@ public class FlashRobotUtil {
 		
 		if(flashboardInitData != null){
 			Flashboard.init(flashboardInitData);
-			Flashboard.attach(estopControl,
-						      new SendableLog(FlashUtil.getLog()));
+			if(Flashboard.flashboardInit()){
+				Flashboard.attach(estopControl,
+					      new SendableLog(FlashUtil.getLog()));
+			}
 		}
 		
 		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE", "Robot");

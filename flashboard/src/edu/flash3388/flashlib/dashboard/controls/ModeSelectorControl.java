@@ -128,7 +128,7 @@ public class ModeSelectorControl extends Sendable{
 			stateChanged = false;
 			byte[] bytes = new byte[5];
 			bytes[0] = DashboardModeSelector.UPDATE_MODE;
-			FlashUtil.fillByteArray(states.get(currentStateIndex).value, bytes);
+			FlashUtil.fillByteArray(states.get(currentStateIndex).value, 1, bytes);
 			return bytes;
 		}
 		disabledChanged = false;

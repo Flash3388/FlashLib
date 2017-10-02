@@ -19,7 +19,7 @@ public interface AnalogOutput {
 	/**
 	 * Sets the analog output voltage for the port.
 	 * 
-	 * @param value analog output voltage in volts
+	 * @param voltage analog output voltage in volts
 	 */
 	void setVoltage(double voltage);
 	

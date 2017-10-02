@@ -1,12 +1,14 @@
 package edu.flash3388.flashlib.robot.devices;
 
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+
 /**
  * Interface for speed controllers.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface FlashSpeedController{
+public interface FlashSpeedController extends DoubleSource{
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
@@ -64,6 +66,7 @@ public interface FlashSpeedController{
 	 * Gets the currently set percent vbus in the motor controller.
 	 * @return used percent vbus
 	 */
+	@Override
 	double get();
 	
 	/**
