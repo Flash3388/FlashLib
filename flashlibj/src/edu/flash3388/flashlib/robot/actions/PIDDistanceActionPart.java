@@ -1,8 +1,10 @@
 package edu.flash3388.flashlib.robot.actions;
 
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.PIDController;
 import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.PropertyAction;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
@@ -10,6 +12,8 @@ public class PIDDistanceActionPart extends PropertyAction implements PIDAction{
 
 	private PIDController pidcontroller;
 	private double distanceMargin;
+	
+	private int timeInThreshold = 0, thresholdStart = 0;
 	
 	public PIDDistanceActionPart(PIDController controller, double distanceMargin){
 		this.distanceMargin = distanceMargin;
@@ -48,18 +52,24 @@ public class PIDDistanceActionPart extends PropertyAction implements PIDAction{
 		set(0);
 		pidcontroller.setEnabled(true);
 		pidcontroller.reset();
+		thresholdStart = 0;
 	}
 	@Override
 	public void execute() {
-		if(!pidcontroller.isEnabled() || inDistanceThreshold())
+		if(!pidcontroller.isEnabled() || inDistanceThreshold()){
 			set(0);
+			if(thresholdStart < 1)
+				thresholdStart = FlashUtil.millisInt();
+		}
 		else {
-			set(-pidcontroller.calculate());
+			if(thresholdStart >= 1)
+				thresholdStart = 0;
+			set(pidcontroller.calculate());
 		}
 	}
 	@Override
 	protected boolean isFinished() {
-		return inDistanceThreshold();
+		return inDistanceThreshold() && FlashUtil.millisInt() - thresholdStart >= timeInThreshold;
 	}
 	@Override
 	protected void end() {
@@ -68,7 +78,7 @@ public class PIDDistanceActionPart extends PropertyAction implements PIDAction{
 	
 	public boolean inDistanceThreshold(){
 		double current = pidcontroller.getPIDSource().pidGet();
-		return (current >= getDistanceThreshold() - distanceMargin && current <= getDistanceThreshold() + distanceMargin);
+		return Mathf.constrained(getDistanceThreshold() - current, -distanceMargin, distanceMargin);
 	}
 	
 	public double getDistanceMargin(){
@@ -79,6 +89,13 @@ public class PIDDistanceActionPart extends PropertyAction implements PIDAction{
 	}
 	public double getDistanceThreshold(){
 		return pidcontroller.getSetPoint().get();
+	}
+	
+	public void setTimeInThreshold(int ms){
+		timeInThreshold = ms;
+	}
+	public int getTimeInThreshold(){
+		return timeInThreshold;
 	}
 
 	@Override

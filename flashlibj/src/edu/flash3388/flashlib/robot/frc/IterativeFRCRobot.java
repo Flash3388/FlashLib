@@ -9,6 +9,7 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
 import edu.flash3388.flashlib.robot.PowerLogger;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -180,6 +181,9 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		
 		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
 		
+		FRCVoltagePowerSource voltageSource = new FRCVoltagePowerSource(initializer.minVoltageLevel, 13.7);
+		FlashRobotUtil.setVoltageSource(voltageSource);
+		
 		log = FlashUtil.getLog();
 		
 		stdLog = initializer.standardLogs;
@@ -190,7 +194,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 			log.delete();
 		}
 		if(logPower){
-			powerLogger = new PowerLogger("powerLog", new FRCVoltagePowerSource(initializer.minVoltageLevel, 15.0),
+			powerLogger = new PowerLogger("powerLog", voltageSource,
 					new FRCTotalCurrentPowerSource(-1.0, initializer.maxTotalCurrentDraw));
 		}
 		if(initializer.autoUpdateHid){

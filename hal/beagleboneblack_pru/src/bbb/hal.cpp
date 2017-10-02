@@ -64,20 +64,23 @@ void* pru_watchdog_function(void* param){
 
 	while(data.run){
 
-
 		pthread_mutex_lock(&io_mutex);
 
 		new_value = pru_data.shared_memory[PRU_MEM_STATUS_REG];
-		if(new_value <= last_value && (++errors) >= 3){
+		if(new_value <= last_value){
+			if((++errors) >= 3){
+				//TODO: HANDLE PRU_UPDATE_ERROR
+				pru_watchdog_error = WATCHDOG_PRU_UPDATE_ERROR;
 
-			//TODO: HANDLE PRU_UPDATE_ERROR
-			pru_watchdog_error = WATCHDOG_PRU_UPDATE_ERROR;
+				pthread_mutex_lock(&watchdog_mutex);
+				data.run = false;
+				watchdog_thread_data.run = false;
+				pthread_mutex_unlock(&watchdog_mutex);
 
-			pthread_mutex_lock(&watchdog_mutex);
-			data.run = false;
-			watchdog_thread_data.run = false;
-			pthread_mutex_unlock(&watchdog_mutex);
-
+				break;
+			}else{
+				++errors;
+			}
 		}else{
 			last_value = new_value;
 			errors = 0;

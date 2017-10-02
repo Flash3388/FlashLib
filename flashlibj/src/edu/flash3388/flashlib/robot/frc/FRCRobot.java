@@ -1,11 +1,11 @@
 package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.ModeSelector;
-import edu.flash3388.flashlib.robot.Robot;
+import edu.flash3388.flashlib.robot.RobotInterface;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
-public class FRCRobot implements Robot{
+public class FRCRobot implements RobotInterface{
 	
 	private DriverStation ds = DriverStation.getInstance();
 	private ModeSelector selector = new FRCModeSelector();

@@ -1,12 +1,15 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.robot.PIDSource;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Vision;
 
 public class PIDVisionRotateActionPart extends PIDRotationActionPart implements VisionAction{
 
+	private int visionTimeout, timeSinceNoAnalysis;
+	
 	public PIDVisionRotateActionPart(Vision source, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, boolean horizontal,
 			DoubleSource rotationThreshold, double rotationMargin){
@@ -36,10 +39,28 @@ public class PIDVisionRotateActionPart extends PIDRotationActionPart implements 
 	}
 	
 	@Override
+	protected void initialize() {
+		super.initialize();
+		timeSinceNoAnalysis = 0;
+	}
+	@Override
 	public void execute() {
 		if(!getVision().hasNewAnalysis()){
 			set(0.0);
-		}else super.execute();
+			
+			if(timeSinceNoAnalysis < 1)
+				timeSinceNoAnalysis = FlashUtil.millisInt();
+		}else {
+			if(timeSinceNoAnalysis >= 1)
+				timeSinceNoAnalysis = 0;
+			
+			super.execute();
+		}
+	}
+	@Override
+	protected boolean isFinished() {
+		return super.isFinished() || 
+				(timeSinceNoAnalysis >= 1 && FlashUtil.millisInt() >= visionTimeout);
 	}
 	
 	@Override
@@ -54,5 +75,12 @@ public class PIDVisionRotateActionPart extends PIDRotationActionPart implements 
 		if(source instanceof PIDSource.VisionPIDSource)
 			return ((PIDSource.VisionPIDSource)source).getVision();
 		return null;
+	}
+	
+	public void setVisionTimeout(int ms){
+		visionTimeout = ms;
+	}
+	public int getVisionTimeout(){
+		return visionTimeout;
 	}
 }

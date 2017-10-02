@@ -13,7 +13,7 @@ package edu.flash3388.flashlib.robot;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public interface Robot {
+public interface RobotInterface {
 	
 	/**
 	 * Gets the initialized {@link ModeSelector} object for the robot. 

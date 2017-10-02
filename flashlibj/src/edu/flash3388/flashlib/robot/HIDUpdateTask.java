@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 /**
- * A runnable implementation which calls {@link FlashRobotUtil#updateHID()} if {@link Robot#isOperatorControl()} from
+ * A runnable implementation which calls {@link FlashRobotUtil#updateHID()} if {@link RobotInterface#isOperatorControl()} from
  * the {@link RobotFactory} implementation returns true.
  * 
  * @author Tom Tzook

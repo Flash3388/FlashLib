@@ -28,7 +28,7 @@ import edu.flash3388.flashlib.util.Log;
  * and the value should be the user robot classname and package (full package.classname). Remember that the user
  * robot class should inherit this base or extend a class which already inherited this.
  * <p>
- * This class implements the interfaces {@link Robot} and {@link SBC} and provides basic implementations. Those
+ * This class implements the interfaces {@link RobotInterface} and {@link SBC} and provides basic implementations. Those
  * can be overridden if needed.
  * <p>
  * There are 2 abstract method: {@link #robotMain()} and {@link #robotShutdown()}. Those must recieve implementation.
@@ -38,7 +38,7 @@ import edu.flash3388.flashlib.util.Log;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class RobotBase implements SBC, Robot{
+public abstract class RobotBase implements SBC, RobotInterface{
 	
 	/**
 	 * The base class for robot initialization customization. Holds variables with initialization

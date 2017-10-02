@@ -132,7 +132,7 @@ public class FlashRobotUtil {
 		return init;
 	}
 	/**
-	 * Initializes FlashLib for robotics use. Sets the {@link Robot} implementation given to {@link RobotFactory}
+	 * Initializes FlashLib for robotics use. Sets the {@link RobotInterface} implementation given to {@link RobotFactory}
 	 * and initializes {@link Flashboard} according to the given initialization data.
 	 * 
 	 * @param robot the robot implementation
@@ -141,7 +141,7 @@ public class FlashRobotUtil {
 	 * 
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(Robot robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
+	public static void initFlashLib(RobotInterface robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
