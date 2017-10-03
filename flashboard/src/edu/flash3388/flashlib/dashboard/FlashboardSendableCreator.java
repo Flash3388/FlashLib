@@ -4,8 +4,6 @@ import edu.flash3388.flashlib.dashboard.controls.*;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableCreator;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
-import edu.flash3388.flashlib.vision.VisionRunner;
 
 public class FlashboardSendableCreator implements SendableCreator{
 
@@ -22,9 +20,9 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.TESTER: return new FlashboardTester(name);
 			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name);
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name);
-			case FlashboardSendableType.VISION: return Dashboard.visionInitialized()? null : new ThreadedVisionRunner(name);
+			case FlashboardSendableType.VISION: return (Sendable) Dashboard.getVision();
 			case FlashboardSendableType.PDP: return new PDP(name);
-			case FlashboardSendableType.ESTOP: return new EmergencyStopControl();
+			case FlashboardSendableType.ESTOP: return Dashboard.getEmergencyStopControl();
 			case FlashboardSendableType.PIDTUNER: return new DashboardPIDTuner(name);
 			case FlashboardSendableType.MODE_SELECTOR: return Dashboard.getModeSelectorControl();
 		}
@@ -33,12 +31,8 @@ public class FlashboardSendableCreator implements SendableCreator{
 	@Override
 	public Sendable create(String name, byte type) {
 		Sendable s = get(name, type);
-		if(s != null && s instanceof VisionRunner)
-			Dashboard.setVision((VisionRunner)s);
 		if(s != null && s instanceof Displayable)
 			Dashboard.addDisplayable((Displayable)s);
-		if(s != null && s instanceof EmergencyStopControl)
-			Dashboard.setEmergencyStopControl((EmergencyStopControl)s);
 		return s;
 	}
 }

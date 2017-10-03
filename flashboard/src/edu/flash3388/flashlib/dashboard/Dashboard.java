@@ -33,12 +33,10 @@ import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class Dashboard extends Application {
@@ -365,18 +363,8 @@ public class Dashboard extends Application {
 	private static Vector<Displayable> displayables = new Vector<Displayable>();
 	private static Stage primaryStage;
 	private static CameraViewer camViewer;
-	private static EmergencyStopControl emergencyStop;
-	private static HIDControl hidcontrol;
-	private static ModeSelectorControl modeSelectorControl;
 	private static boolean fxready = false;
 	
-	private MainController controller;
-	
-	public static void updateParamDisplay(){
-		Platform.runLater(()->{
-			instance.controller.updateParam();
-		});
-	}
 	public static Stage getPrimary(){
 		return primaryStage;
 	}
@@ -389,16 +377,8 @@ public class Dashboard extends Application {
 	}
 	public static void resetDisplaybles(){
 		displayables.clear();
-		closeVision();
 		addDisplayable(camViewer);
-	}
-	
-	public static HIDControl getHIDControl(){
-		return hidcontrol;
-	}
-	
-	public static ModeSelectorControl getModeSelectorControl(){
-		return modeSelectorControl;
+		addDisplayable(emergencyStop);
 	}
 	
 	private static void fxReady(){
@@ -417,9 +397,9 @@ public class Dashboard extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Dashboard.primaryStage = primaryStage;
 		Dashboard.instance = this;
-		
+		Dashboard.primaryStage = primaryStage;
+		/*
 		BorderPane root = new BorderPane();
 		
 		try {
@@ -431,6 +411,9 @@ public class Dashboard extends Application {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		*/
+		
+		Parent root = GUI.initializeMainWindow(primaryStage);
 		
 		Scene scene = new Scene(root, 1300, 680);
 		scene.addEventFilter(KeyEvent.KEY_PRESSED, (e)->{
@@ -446,7 +429,6 @@ public class Dashboard extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.setResizable(true);
 		primaryStage.setOnCloseRequest((e)->{
-			controller.stop();
 			System.exit(0);
 		});
 		primaryStage.setTitle("FLASHboard");
@@ -509,10 +491,6 @@ public class Dashboard extends Application {
 		return camViewer;
 	}
 	
-	protected static void setEmergencyStopControl(EmergencyStopControl estop){
-		Dashboard.emergencyStop = estop;
-	}
-	
 	//--------------------------------------------------------------------
 	//-----------------------Vision--------------------------------------
 	//--------------------------------------------------------------------
@@ -531,7 +509,7 @@ public class Dashboard extends Application {
 		}
 	}
 	private static void loadVisionSaves(){
-		log.log("Loading vision files from saves folder...");
+		log.log("Loading vision files from saves folder...", "Dashboard");
 		File savesFolder = new File(FOLDER_SAVES);
 		File[] files = savesFolder.listFiles(new FilenameFilter(){
 			@Override
@@ -540,19 +518,23 @@ public class Dashboard extends Application {
 			}
 		});
 		
-		for (File file : files) 
-			instance.controller.loadParam(file.getAbsolutePath(), false);
+		VisionProcessing processing = null;
+		for (File file : files){
+			processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+			if(processing != null){
+				vision.addProcessing(processing);
+			}
+		}
 		
 		String name = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
 		if(name != null){
 			for (int i = 0; i < vision.getProcessingCount(); i++) {
 				if(vision.getProcessing(i).getName().equals(name)){
 					vision.selectProcessing(i);
-					instance.controller.updateParamBoxSelection();
 				}
 			}
 		}
-		log.log("done");
+		log.log("Done", "Dashboard");
 	}
 	public static boolean visionInitialized(){
 		return vision != null;
@@ -560,13 +542,23 @@ public class Dashboard extends Application {
 	public static void setForVision(Object frame){
 		vision.setFrame(frame);
 	}
-	protected static void setVision(VisionRunner vision){
-		Dashboard.vision = vision;
-		vision.setVisionSource(new CvSource());
-		vision.getVisionSource().setImagePipeline(camViewer);
-		updater.execute(()->{
-			loadVisionSaves();
-		});
+	
+	//--------------------------------------------------------------------
+	//--------------------------MAIN--------------------------------------
+	//--------------------------------------------------------------------
+	
+	private static EmergencyStopControl emergencyStop;
+	private static HIDControl hidcontrol;
+	private static ModeSelectorControl modeSelectorControl;
+	
+	public static HIDControl getHIDControl(){
+		return hidcontrol;
+	}
+	public static ModeSelectorControl getModeSelectorControl(){
+		return modeSelectorControl;
+	}
+	public static EmergencyStopControl getEmergencyStopControl(){
+		return emergencyStop;
 	}
 	
 	//--------------------------------------------------------------------
@@ -660,6 +652,15 @@ public class Dashboard extends Application {
 	    
 	    connectionTask = new ConnectionTask();
 	    updater.addTask(connectionTask);
+	    
+	    emergencyStop = new EmergencyStopControl();
+	    
+	    vision = new ThreadedVisionRunner("flashboard-vision");
+	    vision.setVisionSource(new CvSource());
+		vision.getVisionSource().setImagePipeline(camViewer);
+		updater.execute(()->{
+			loadVisionSaves();
+		});
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);

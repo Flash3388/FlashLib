@@ -2,16 +2,18 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
 
+import edu.flash3388.flashlib.robot.PeriodicRunnable;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
+
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -21,6 +23,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -46,10 +49,12 @@ public class MainWindow {
 			slider.setMin(0.0);
 			slider.setMax(255.0);
 			slider.setValue(0.0);
+			slider.setMaxWidth(250.0);
 			slider.setDisable(true);
 			
 			inputText = new TextField();
 			inputText.setText("0");
+			inputText.setMaxWidth(50.0);
 			inputText.setOnKeyPressed((e)->{
 				if(e.getCode() == KeyCode.ENTER){
 					setTextFromField();
@@ -64,10 +69,11 @@ public class MainWindow {
 			nameLabel = new Label("");
 			
 			HBox top = new HBox();
+			top.setSpacing(5.0);
 			top.getChildren().addAll(nameLabel, inputText);
 			
 			VBox all = new VBox();
-			all.setSpacing(5.0);
+			all.setSpacing(10.0);
 			all.getChildren().addAll(top, slider);
 			root = all;
 		}
@@ -101,6 +107,9 @@ public class MainWindow {
 		public void setValue(int value){
 			slider.setValue(value);
 			inputText.setText(String.valueOf(value));
+		}
+		public int getValue(){
+			return (int) slider.getValue();
 		}
 		
 		public void bind(IntegerProperty prop){
@@ -140,9 +149,31 @@ public class MainWindow {
 	private void refreshVisionParameters(){
 		Object selected = vision_paramBox.getSelectionModel().getSelectedItem();
 		vision_paramBox.getItems().clear();
+		
+		VisionProcessing processing = null;
+		int selectedIndex = 0;
+		for (int i = 0; i < Dashboard.getVision().getProcessingCount(); i++) {
+			processing = Dashboard.getVision().getProcessing(i);
+			vision_paramBox.getItems().add(processing.getName());
+			
+			if(processing.getName().equals(selected)){
+				selectedIndex = i;
+			}
+		}
+		
+		vision_paramBox.getSelectionModel().select(selectedIndex);
 	}
 	private void selectParameters(int index){
-		Dashboard.getVision().selectProcessing(index);
+		if(Dashboard.getVision().getSelectedProcessingIndex() != index){
+			Dashboard.getVision().selectProcessing(index);
+		}
+		if(vision_paramBox.getSelectionModel().getSelectedIndex() != index){
+			localVisionChange = true;
+			vision_paramBox.getSelectionModel().select(index);
+			localVisionChange = false;
+		}
+		
+		
 		VisionProcessing proc = Dashboard.getVision().getProcessing();
 		
 		colorFilter = null;
@@ -176,30 +207,58 @@ public class MainWindow {
 			localVisionChange = false;
 		}
 	}
-	private void loadVisionParameters(File file){
-		VisionProcessing processing = null;
+	private void loadVisionParameters(){
+		File file = GUI.showVisionLoadDialog();
 		
-		try{
-			processing = VisionProcessing.createFromXml(file.getAbsolutePath());
-		}catch(Throwable t){
-			FlashUtil.getLog().reportError(t);
-			GUI.showMainErrorDialog("Failed to load vision");
-		}
-		
-		if(processing != null){
-			Dashboard.getVision().addProcessing(processing);
-			refreshVisionParameters();
-			selectParameters(Dashboard.getVision().getProcessingCount() - 1);
+		if(file != null){
+			VisionProcessing processing = null;
+			
+			try{
+				processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+			}catch(Throwable t){
+				FlashUtil.getLog().reportError(t);
+				GUI.showMainErrorDialog("Failed to load vision");
+			}
+			
+			if(processing != null){
+				Dashboard.getVision().addProcessing(processing);
+				refreshVisionParameters();
+				selectParameters(Dashboard.getVision().getProcessingCount() - 1);
+			}
 		}
 	}
-	private void saveVisionParameters(File file){
+	private void saveVisionParameters(){
+		VisionProcessing processing = Dashboard.getVision().getProcessing();
 		
+		if(processing == null){
+			GUI.showMainErrorDialog("No vision processing is selected");
+		}else{
+			File file = GUI.showVisionSaveDialog();
+			
+			if(file != null){
+				processing.saveXml(file.getAbsolutePath());
+			}
+		}
 	}
 	private void changeVisionColorScheme(boolean hsv){
 		if(hsv){
 			vision_max1.setMax(180);
+			
+			vision_min1.setName("Min Hue");
+			vision_max1.setName("Max Hue");
+			vision_min2.setName("Min Saturation");
+			vision_max2.setName("Max Saturation");
+			vision_min3.setName("Min Value");
+			vision_max3.setName("Max Value");
 		}else{
 			vision_max1.setMax(255);
+			
+			vision_min1.setName("Min Red");
+			vision_max1.setName("Max Red");
+			vision_min2.setName("Min Green");
+			vision_max2.setName("Max Green");
+			vision_min3.setName("Min Blue");
+			vision_max3.setName("Max Blue");
 		}
 		
 		if(vision_hsvBox.isSelected() != hsv){
@@ -209,6 +268,8 @@ public class MainWindow {
 		}
 	}
 	private void resetVisionColorControls(){
+		colorFilter = null;
+		
 		vision_min1.unbind();
 		vision_min1.disable();
 		vision_max1.unbind();
@@ -239,6 +300,42 @@ public class MainWindow {
 			vision_runBox.setSelected(Dashboard.getVision().isRunning());
 			localVisionChange = false;
 		}
+		if(Dashboard.getVision().getProcessingCount() != vision_paramBox.getItems().size()){
+			refreshVisionParameters();
+		}
+		if(Dashboard.getVision().getSelectedProcessingIndex() != 
+				vision_paramBox.getSelectionModel().getSelectedIndex()){
+			selectParameters(Dashboard.getVision().getSelectedProcessingIndex());
+		}
+		if(colorFilter != null){
+			if(colorFilter.hsvProperty().get() != vision_hsvBox.isSelected()){
+				localVisionChange = true;
+				vision_hsvBox.setSelected(colorFilter.hsvProperty().get());
+				localVisionChange = false;
+				changeVisionColorScheme(colorFilter.hsvProperty().get());
+			}
+			
+			if(colorFilter.min1Property().get() != vision_min1.getValue()){
+				vision_min1.setValue(colorFilter.min1Property().get());
+			}
+			if(colorFilter.max1Property().get() != vision_max1.getValue()){
+				vision_max1.setValue(colorFilter.max1Property().get());
+			}
+			
+			if(colorFilter.min2Property().get() != vision_min2.getValue()){
+				vision_min2.setValue(colorFilter.min2Property().get());
+			}
+			if(colorFilter.max2Property().get() != vision_max2.getValue()){
+				vision_max2.setValue(colorFilter.max2Property().get());
+			}
+			
+			if(colorFilter.min3Property().get() != vision_min3.getValue()){
+				vision_min3.setValue(colorFilter.min3Property().get());
+			}
+			if(colorFilter.max3Property().get() != vision_max3.getValue()){
+				vision_max3.setValue(colorFilter.max3Property().get());
+			}
+		}
 	}
 	
 	private Node initializeVisionControl(){
@@ -250,8 +347,11 @@ public class MainWindow {
 		vision_max3 = new VisionControl();
 		
 		vision_paramBox = new ComboBox<String>();
+		vision_paramBox.setMaxWidth(100.0);
 		refreshVisionParameters();
 		vision_paramBox.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
+			if(localVisionChange)
+				return;
 			selectParameters(n.intValue());
 		});
 		
@@ -276,7 +376,11 @@ public class MainWindow {
 			
 			changeVisionColorScheme(n.booleanValue());
 		});
+		resetVisionColorControls();
+		changeVisionColorScheme(false);
+		localVisionChange = true;
 		vision_hsvBox.setSelected(false);
+		localVisionChange = false;
 		
 		vision_runBox = new CheckBox();
 		vision_runBox.selectedProperty().addListener((obs, o, n)->{
@@ -299,22 +403,22 @@ public class MainWindow {
 		
 		HBox hsvBox = new HBox();
 		hsvBox.setSpacing(5.0);
-		hsvBox.setAlignment(Pos.CENTER);
+		//hsvBox.setAlignment(Pos.CENTER);
 		hsvBox.getChildren().addAll(vision_hsvBox, new Label("HSV"));
 		HBox runBox = new HBox();
 		runBox.setSpacing(5.0);
-		runBox.setAlignment(Pos.CENTER);
+		//runBox.setAlignment(Pos.CENTER);
 		runBox.getChildren().addAll(vision_runBox, new Label("Vision"));
 		
 		VBox checkBox = new VBox();
 		checkBox.setSpacing(10.0);
-		checkBox.setAlignment(Pos.CENTER);
+		checkBox.setAlignment(Pos.CENTER_LEFT);
 		checkBox.getChildren().addAll(hsvBox, runBox);
 		
 		VBox visionBox = new VBox();
 		visionBox.setSpacing(10.0);
-		visionBox.setPadding(new Insets(10.0));
-		visionBox.setAlignment(Pos.CENTER);
+		visionBox.setPadding(new Insets(20.0));
+		//visionBox.setAlignment(Pos.CENTER);
 		visionBox.getChildren().addAll(
 				vision_min1.getRoot(), vision_max1.getRoot(),
 				vision_min2.getRoot(), vision_max2.getRoot(),
@@ -332,13 +436,11 @@ public class MainWindow {
 		Menu vision = new Menu("Vision");
 		MenuItem loadvision = new MenuItem("Load Vision Parameters");
 		loadvision.setOnAction((e)->{
-			File file = GUI.showVisionLoadDialog();
-			//TODO: LOAD VISION
+			loadVisionParameters();
 		});
 		MenuItem savevision = new MenuItem("Save Vision Parameters");
 		savevision.setOnAction((e)->{
-			File file = GUI.showVisionSaveDialog();
-			//TODO: SAVE VISION
+			saveVisionParameters();
 		});
 		vision.getItems().addAll(loadvision, savevision);
 		
@@ -381,16 +483,68 @@ public class MainWindow {
 	}
 	
 	//--------------------------------------------------------------------
-	//-----------------------Camera---------------------------------------
+	//-----------------------Center---------------------------------------
 	//--------------------------------------------------------------------
 	
 	private ComboBox<String> cam_outputImageType;
+	
+	private Node initializeCenterNode(){
+		
+		
+		VBox root = new VBox();
+		return root;
+	}
 	
 	//--------------------------------------------------------------------
 	//-----------------------Controls-------------------------------------
 	//--------------------------------------------------------------------
 	
-	public Node initializeMainScene(){
-		return null;
+	private Node initializeDisplayControls(){
+		
+		HBox root = new HBox();
+		return root;
+	}
+	
+	private Node initializeInputControls(){
+		
+		BorderPane root = new BorderPane();
+		return root;
+	}
+	
+	//--------------------------------------------------------------------
+	//-------------------------Main---------------------------------------
+	//--------------------------------------------------------------------
+	
+	private static final int UPDATE_PERIOD = 100;
+	
+	private Runnable updateTask;
+	
+	public MainWindow() {
+		updateTask = new PeriodicRunnable(()->{
+			update();
+		}, UPDATE_PERIOD);
+		
+		Dashboard.getUpdater().addTask(updateTask);
+	}
+	
+	private void update(){
+		updateVisionControls();
+	}
+	
+	public Parent initializeMainScene(){
+		Node toolBarNode = initializeToolbar();
+		Node visionNode = initializeVisionControl();
+		Node centerNode = initializeCenterNode();
+		Node displayNode = initializeDisplayControls();
+		Node inputNode = initializeInputControls();
+		
+		BorderPane root = new BorderPane();
+		root.setTop(toolBarNode);
+		root.setBottom(inputNode);
+		root.setLeft(displayNode);
+		root.setCenter(centerNode);
+		root.setRight(visionNode);
+		
+		return root;
 	}
 }

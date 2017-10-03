@@ -5,6 +5,8 @@ import java.io.File;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
+
+import javafx.scene.Parent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -20,6 +22,13 @@ public class GUI {
 	}
 	public static MainWindow getMain(){
 		return mainWindow;
+	}
+	
+	static Parent initializeMainWindow(Stage primary){
+		GUI.primary = primary;
+		
+		mainWindow = new MainWindow();
+		return mainWindow.initializeMainScene();
 	}
 	
 	public static void resetWindows(){
