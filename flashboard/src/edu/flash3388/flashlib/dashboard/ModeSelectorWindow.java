@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.util.Optional;
 
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -78,7 +78,7 @@ public class ModeSelectorWindow extends Stage{
 			try {
 				Integer.parseInt(n);
 			} catch (NumberFormatException e) {
-				FlashFxUtils.showErrorDialog(this, "Value Error", "State Value is not valid");
+				FlashFXUtils.showErrorDialog(this, "Value Error", "State Value is not valid");
 				stateValue.setText(o);
 				return;
 			}
@@ -104,11 +104,11 @@ public class ModeSelectorWindow extends Stage{
 		int value = result.get().getValue();
 		
 		if(Dashboard.getModeSelectorControl().getStateForName(name) != null){
-			FlashFxUtils.showErrorDialog(this, "Name Taken", "Another state already uses the name: "+name);
+			FlashFXUtils.showErrorDialog(this, "Name Taken", "Another state already uses the name: "+name);
 			return;
 		}
 		if(Dashboard.getModeSelectorControl().getStateForValue(value) != null){
-			FlashFxUtils.showErrorDialog(this, "Value Taken", "Another state already uses the value: "+value);
+			FlashFXUtils.showErrorDialog(this, "Value Taken", "Another state already uses the value: "+value);
 			return;
 		}
 		
@@ -119,7 +119,7 @@ public class ModeSelectorWindow extends Stage{
 		int selected = getSelectedState();
 		
 		if(selected < 0){
-			FlashFxUtils.showErrorDialog(this, "Remove Error", "No state was selected");
+			FlashFXUtils.showErrorDialog(this, "Remove Error", "No state was selected");
 			return; 
 		}
 		
@@ -176,7 +176,7 @@ public class ModeSelectorWindow extends Stage{
 			if(!Dashboard.getModeSelectorControl().remoteAttached()){
 				e.consume();
 				setDisabled(true);
-				FlashFxUtils.showErrorDialog(this, "Error", "Remote mode selector not connected");
+				FlashFXUtils.showErrorDialog(this, "Error", "Remote mode selector not connected");
 				return;
 			}
 			if(!Dashboard.getModeSelectorControl().isDisabled()){
@@ -189,7 +189,7 @@ public class ModeSelectorWindow extends Stage{
 			if(state < 0){
 				e.consume();
 				setDisabled(true);
-				FlashFxUtils.showErrorDialog(this, "Error", "No state was selected");
+				FlashFXUtils.showErrorDialog(this, "Error", "No state was selected");
 				return;
 			}
 			

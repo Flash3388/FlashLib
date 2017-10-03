@@ -4,7 +4,7 @@ import java.util.Enumeration;
 
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTesterMotor;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -93,7 +93,7 @@ public class TesterWindow extends Stage{
 	
 	public static void showTester(){
 		if(instance != null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tester is already open!");
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tester is already open!");
 			return;
 		}
 		instance = new TesterWindow();

@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import java.util.HashMap;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.PIDTuner;
 import edu.flash3388.flashlib.math.Mathf;
@@ -13,7 +13,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.StackPane;
 
-public class DashboardPIDTuner extends Displayble{
+public class DashboardPIDTuner extends Displayable{
 
 	private static final HashMap<String, DashboardPIDTuner> tuners = new HashMap<String, DashboardPIDTuner>();
 	
@@ -110,7 +110,7 @@ public class DashboardPIDTuner extends Displayble{
 	}
 	
 	@Override
-	public void update() {
+	protected void update() {
 		if(!update || !remoteUpdate) return;
 		
 		double time = (FlashUtil.millis() - startTime) * 0.001;

@@ -5,12 +5,12 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-import edu.flash3388.flashlib.dashboard.Displayble.DisplayType;
+import edu.flash3388.flashlib.dashboard.Displayable.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
 import edu.flash3388.flashlib.dashboard.controls.PDP;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
 import edu.flash3388.flashlib.dashboard.controls.DashboardPIDTuner;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.ColorFilter;
@@ -83,7 +83,7 @@ public class MainController implements Initializable{
 		};
 		@Override
 		public void run() {
-			FlashFxUtils.onFxThread(dxUpdate);
+			FlashFXUtils.onFXThread(dxUpdate);
 		}
 	}
 	
@@ -383,7 +383,7 @@ public class MainController implements Initializable{
 	
 	private void saveParams(){
 		if(Dashboard.getVision() == null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot save parameters");
 			return;
 		}
 		if(Dashboard.getVision().getProcessing() != null){
@@ -401,7 +401,7 @@ public class MainController implements Initializable{
 	}
 	private void loadParams(){
 		if(Dashboard.getVision() == null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Vision was not set!\nCannot load parameters");
 			return;
 		}
 		FileChooser chooser = new FileChooser();
@@ -420,7 +420,7 @@ public class MainController implements Initializable{
 		try {
 			proc = VisionProcessing.createFromXml(path);
 		} catch (Throwable e) {
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "XML Parsing Error", e.getMessage());
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "XML Parsing Error", e.getMessage());
 			
 			FlashUtil.getLog().reportError(e.getMessage());
 			FlashUtil.getLog().log("Loading failed");
@@ -491,7 +491,7 @@ public class MainController implements Initializable{
 			VisionEditorWindow.showEditor(Dashboard.getVision());
 			updateParam();
 		}
-		else FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Vision Missing", "No Vision Runner was found");
+		else FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Vision Missing", "No Vision Runner was found");
 	}
 	public void stop(){
 		
@@ -602,18 +602,16 @@ public class MainController implements Initializable{
 		sensor_node.getChildren().clear();
 		controller_node.getChildren().clear();
 		
-		for (Enumeration<Displayble> denum = Dashboard.getDisplaybles(); denum.hasMoreElements();)
+		for (Enumeration<Displayable> denum = Dashboard.getDisplayables(); denum.hasMoreElements();)
 			denum.nextElement().reset();
 		Dashboard.resetDisplaybles();
 	}
 	public void update(){
-		for (Enumeration<Displayble> denum = Dashboard.getDisplaybles(); denum.hasMoreElements();) {
-			Displayble d = denum.nextElement();
+		for (Enumeration<Displayable> denum = Dashboard.getDisplayables(); denum.hasMoreElements();) {
+			Displayable d = denum.nextElement();
 			d.update();
 			if(!d.init()) 
 				addToDisplay(d.getDisplayType(), d.setDisplay());
-			Runnable r = d.updateDisplay();
-			if(r != null) r.run();
 		}
 	}
 	

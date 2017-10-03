@@ -18,7 +18,7 @@ public class DashboardDoubleInput extends DashboardStringInput implements String
 		super(name, null);
 		this.property = property;
 		setProperty(this);
-		setType(InputType.Double);
+		setType(ValueType.Double);
 	}
 
 	public DoubleProperty numberValueProperty(){

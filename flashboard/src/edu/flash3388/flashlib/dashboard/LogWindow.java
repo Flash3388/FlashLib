@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -141,6 +141,6 @@ public class LogWindow extends Stage{
 		currentInstance = new LogWindow();
 		currentInstance.show();
 		if(logs.size() < 1)
-			FlashFxUtils.showErrorDialog(currentInstance, "Error", "No logs located");
+			FlashFXUtils.showErrorDialog(currentInstance, "Error", "No logs located");
 	}
 }

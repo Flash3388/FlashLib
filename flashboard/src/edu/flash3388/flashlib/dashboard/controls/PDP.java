@@ -4,11 +4,11 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathf;
 
-public class PDP extends Displayble{
+public class PDP extends Displayable{
 
 	private static Vector<PDP> pdps = new Vector<PDP>();
 	
@@ -94,6 +94,7 @@ public class PDP extends Displayble{
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
+	
 	
 	public static Enumeration<PDP> getBoards(){
 		return pdps.elements();

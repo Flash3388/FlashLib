@@ -11,18 +11,18 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  */
 public class DashboardStringInput extends Sendable{
 	
-	private InputType type;
+	private ValueType type;
 	private boolean updateType = false, updateValue = false;
 	private String lastValue, value;
 	private StringProperty property;
 	
 	public DashboardStringInput(String name, StringProperty property) {
 		super(name, FlashboardSendableType.INPUT);
-		this.type = InputType.String;
+		this.type = ValueType.String;
 		this.property = property;
 	}
 	
-	protected void setType(InputType type){
+	protected void setType(ValueType type){
 		this.type = type;
 	}
 	protected void setProperty(StringProperty property){

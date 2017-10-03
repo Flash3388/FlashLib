@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.Property;
 import edu.flash3388.flashlib.vision.*;
@@ -66,7 +66,7 @@ public class VisionEditorWindow extends Stage{
 		
 		private void newValue(){
 			if(!parseNewValue()){
-				FlashFxUtils.showErrorDialog(instance, "Format Error", "Inputed value is incompatible of data type");
+				FlashFXUtils.showErrorDialog(instance, "Format Error", "Inputed value is incompatible of data type");
 				field.setText(lastValue.toString());
 			}
 		}
@@ -238,7 +238,7 @@ public class VisionEditorWindow extends Stage{
 			loadPossibleFilters();
 			
 			if(filterTypes.size() < 1){
-				FlashFxUtils.showErrorDialog(this, "Filters Undetected", "Unable to find vision filters!"
+				FlashFXUtils.showErrorDialog(this, "Filters Undetected", "Unable to find vision filters!"
 						+ "\nPlease insure a filter creator is present and contains filter types");
 			}
 			ChoiceDialog<String> dialog = new ChoiceDialog<String>(filterTypes.get(0), filterTypes);
@@ -344,7 +344,7 @@ public class VisionEditorWindow extends Stage{
 	
 	public static void showEditor(Vision vision){
 		if(instance != null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Editor is already open!");
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Editor is already open!");
 			return;
 		}
 		instance = new VisionEditorWindow(vision);

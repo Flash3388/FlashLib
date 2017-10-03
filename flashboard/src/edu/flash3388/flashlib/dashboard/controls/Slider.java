@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class Slider extends Displayble{
+public class Slider extends Displayable{
 	
 	private javafx.scene.control.Slider slider;
 	private Label label;
@@ -17,7 +17,6 @@ public class Slider extends Displayble{
 	private SimpleDoubleProperty value;
 	private double min, max, newValue = 0;
 	private int ticks;
-	private Runnable updater;
 	private boolean changed = false, local = false, valChanged = false, update = true;
 	private byte[] data = new byte[8];
 	
@@ -44,8 +43,11 @@ public class Slider extends Displayble{
 		min = 0;
 		max = 1;
 		ticks = 10;
-		
-		updater = ()->{
+	}
+
+	@Override
+	protected void update() {
+		if(update){
 			update = false;
 			if(min != slider.getMin()){
 				slider.setMin(min);
@@ -71,20 +73,14 @@ public class Slider extends Displayble{
 				label.setText(getName()+": "+Mathf.roundDecimal(this.newValue));
 				local = false;
 			}
-		};
-	}
-
-	@Override
-	public Runnable updateDisplay(){
-		if(!update) return null;
-		return updater;
+		}
 	}
 	@Override
 	protected Node getNode(){
 		return container;
 	}
 	@Override
-	public DisplayType getDisplayType(){
+	protected DisplayType getDisplayType(){
 		return DisplayType.Manual;
 	}
 	

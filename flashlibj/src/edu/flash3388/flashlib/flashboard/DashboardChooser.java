@@ -92,6 +92,21 @@ public class DashboardChooser<T> extends Sendable{
 		return remove(options.size()-1);
 	}
 	
+	public Option<T> get(int index){
+		if(index < 0) 
+			throw new IllegalArgumentException("Index must be non-negative");
+		
+		return options.get(index);
+	}
+	public int indexOf(T object){
+		for (int i = 0; i < options.size(); i++) {
+			Option<T> option = options.get(i);
+			if(option.getOption().equals(object))
+				return i;
+		}
+		return -1;
+	}
+	
 	public IntegerProperty selectedIndexProperty(){
 		return selected;
 	}

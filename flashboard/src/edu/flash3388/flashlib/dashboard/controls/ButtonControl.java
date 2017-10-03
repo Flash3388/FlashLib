@@ -1,31 +1,32 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.DashboardButton;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 
-public class Button extends Displayble{
+public class ButtonControl extends Displayable{
 
 	private static final int WIDTH = 100;
 	private static final int HEIGHT = 30;
 	
-	private javafx.scene.control.Button button;
+	private Button button;
 	private HBox node;
 	private byte[] press = {DashboardButton.DOWN};
 	private boolean changed = false;
 	
-	public Button(String name) {
+	public ButtonControl(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
 		node = new HBox();
-		node.setAlignment(Pos.TOP_CENTER);
+		node.setAlignment(Pos.CENTER);
 		
-		button = new javafx.scene.control.Button(name);
+		button = new Button(name);
 		button.setPrefSize(WIDTH, HEIGHT);
 		button.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
@@ -42,17 +43,27 @@ public class Button extends Displayble{
 		press[0] = DashboardButton.DOWN;
 		changed = true;
 	}
+	
+	@Override
+	protected Node getNode(){
+		return node;
+	}
+	@Override
+	protected DisplayType getDisplayType(){
+		return DisplayType.Manual;
+	}
+	
 	@Override
 	public void newData(byte[] bytes) {
 		if(bytes[0] == DashboardButton.UP){
-			FlashFxUtils.onFxThread(()->{
+			FlashFXUtils.onFXThread(()->{
 				button.setDisable(false);
 			});
 			press[0] = DashboardButton.UP;
 			changed = true;
 		}else if(bytes[0] == DashboardButton.ENABLED){
 			final boolean enabled = bytes[1] == 1;
-			FlashFxUtils.onFxThread(()->{
+			FlashFXUtils.onFXThread(()->{
 				button.setDisable(enabled);
 			});
 			press[0] = DashboardButton.UP;
@@ -72,11 +83,4 @@ public class Button extends Displayble{
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
-	
-	@Override
-	protected Node getNode(){return node;}
-	@Override
-	public DisplayType getDisplayType(){
-		return DisplayType.Manual;
-	}
 }

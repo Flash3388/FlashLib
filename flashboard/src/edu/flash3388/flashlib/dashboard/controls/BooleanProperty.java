@@ -1,13 +1,13 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class BooleanProperty extends Displayble{
+public class BooleanProperty extends Displayable{
 
 	private static final int LABEL_WIDTH = 150;
 	private static final int LABEL_HEIGHT = 10;
@@ -17,7 +17,6 @@ public class BooleanProperty extends Displayble{
 	
 	private Label label;
 	private VBox node;
-	private Runnable updater;
 	
 	public BooleanProperty(String name) {
 		super(name, FlashboardSendableType.BOOLEAN);
@@ -26,17 +25,21 @@ public class BooleanProperty extends Displayble{
 		label.setTextFill(Color.RED);
 		label.setPrefSize(LABEL_WIDTH, LABEL_HEIGHT);
 		node.getChildren().add(label);
-		
-		updater = new Runnable(){
-			@Override
-			public void run() {
-				label.setText(name + ": " + value);
-				changed = false;
-				label.setTextFill(value? Color.GREEN : Color.RED);
-			}
-		};
 	}
 
+	@Override
+	protected void update() {
+		if(changed){
+			label.setText(getName() + ": " + value);
+			changed = false;
+			label.setTextFill(value? Color.GREEN : Color.RED);
+		}
+	}
+	@Override
+	protected Node getNode(){
+		return node;
+	}
+	
 	@Override
 	public void newData(byte[] bytes) {
 		synchronized(this){
@@ -56,13 +59,4 @@ public class BooleanProperty extends Displayble{
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
-	
-	@Override
-	protected Node getNode(){return node;}
-	@Override
-	public Runnable updateDisplay() {
-		if(!changed) return null;
-		return updater;
-	}
-
 }

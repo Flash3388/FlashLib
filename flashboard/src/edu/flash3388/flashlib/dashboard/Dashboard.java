@@ -15,7 +15,7 @@ import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.dashboard.controls.HIDControl;
 import edu.flash3388.flashlib.dashboard.controls.ModeSelectorControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
@@ -37,6 +37,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -280,6 +281,19 @@ public class Dashboard extends Application {
 			}
 		}
 	}
+	private static class DisplayableUpdater implements Runnable{
+		@Override
+		public void run() {
+			Enumeration<Displayable> denum = getDisplayables();
+			while(denum.hasMoreElements()){
+				Displayable d = denum.nextElement();
+				d.update();
+				if(!d.init()) {
+					//GUI.getMain().addToDisplay(d.getDisplayType(), d.setDisplay());
+				}
+			}
+		}
+	}
 	
 	//--------------------------------------------------------------------
 	//-------------------------Props--------------------------------------
@@ -306,7 +320,7 @@ public class Dashboard extends Application {
 	
 	private static boolean emptyProperty(String prop){
 		String propv = ConstantsHandler.getStringValue(prop);
-		return propv == null || propv.equals("");
+		return propv == null || propv.isEmpty();
 	}
 	private static void validateBasicSettings() throws Exception{
 		ConstantsHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
@@ -318,9 +332,11 @@ public class Dashboard extends Application {
 			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
 		
 		ConstantsHandler.addString(PROP_COMM_PROTOCOL, "tcp");
-		if(!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("tcp") && 
-				!ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL, "").equals("udp"))
-			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues are: tcp | udp");
+		String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
+		if(!protocol.equals("tcp") && 
+				!protocol.equals("udp")){
+			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues should be: tcp or udp");
+		}
 		
 		ConstantsHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
 		ConstantsHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
@@ -331,7 +347,8 @@ public class Dashboard extends Application {
 		try {
 			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
 		} catch (Exception e) {
-			log.reportError(e.getMessage());
+			log.reportError("Failed to load settings");
+			log.reportError(e);
 		}
 	}
 	private static void printSettings(){
@@ -345,7 +362,7 @@ public class Dashboard extends Application {
 	//-----------------------Display--------------------------------------
 	//--------------------------------------------------------------------
 	
-	private static Vector<Displayble> displayables = new Vector<Displayble>();
+	private static Vector<Displayable> displayables = new Vector<Displayable>();
 	private static Stage primaryStage;
 	private static CameraViewer camViewer;
 	private static EmergencyStopControl emergencyStop;
@@ -364,10 +381,10 @@ public class Dashboard extends Application {
 		return primaryStage;
 	}
 	
-	public static Enumeration<Displayble> getDisplaybles(){
+	public static Enumeration<Displayable> getDisplayables(){
 		return displayables.elements();
 	}
-	public static void addDisplayable(Displayble d){
+	public static void addDisplayable(Displayable d){
 		displayables.addElement(d);
 	}
 	public static void resetDisplaybles(){
@@ -393,8 +410,8 @@ public class Dashboard extends Application {
 	
 	public static void userError(String error){
 		log.reportError(error);
-		FlashFxUtils.onFxThread(()->{
-			FlashFxUtils.showErrorDialog(primaryStage, "Error", error);
+		FlashFXUtils.onFXThread(()->{
+			FlashFXUtils.showErrorDialog(primaryStage, "Error", error);
 		});
 	}
 	
@@ -416,10 +433,13 @@ public class Dashboard extends Application {
 		}
 		
 		Scene scene = new Scene(root, 1300, 680);
-		scene.setOnKeyPressed((e)->{
-			if(e.getCode() == KeyCode.SPACE && Dashboard.emergencyStop != null){
+		scene.addEventFilter(KeyEvent.KEY_PRESSED, (e)->{
+			if(e.getCode() == KeyCode.SPACE){
 				System.out.println("SPACE! THE FINAL FRONTIER!");
-				Dashboard.emergencyStop.change();
+				
+				if(emergencyStop != null){
+					emergencyStop.change(true);
+				}
 			}
 		});
 		
@@ -573,9 +593,6 @@ public class Dashboard extends Application {
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");
 		
-		//log.log("Loading jinput natives...", "Dashboard");
-		//loadJinputNatives();
-		
 		log.log("Creating shutdown hook...", "Dashboard");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->close()));
 		log.log("Done", "Dashboard");
@@ -585,33 +602,6 @@ public class Dashboard extends Application {
 	    log.log("Launching FX...", "Dashboard");
 	    launch();
 	}
-	/*private static void loadJinputNatives(){
-		String nativeName = "";
-		String folder = FOLDER_LIBS_NATIVES;
-		if(FlashUtil.isUnix()){
-			folder += "linux/";
-			if(FlashUtil.isArchitectureX64())
-				nativeName = "libjinput-linux64.so";
-			else
-				nativeName = "libjinput-linux.so";
-		}else{
-			if(FlashUtil.isArchitectureX64()){
-				folder += "win64/";
-				nativeName += "jinput-raw_64.dll";
-			}
-			else{
-				folder += "win32/";
-				nativeName += "jinput-raw.dll";
-			}
-		}
-		
-		
-		try {
-			Files.copy(Paths.get(folder + nativeName), Paths.get(FOLDER_LIBS_NATIVES_CURRENT + nativeName), 
-					StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
-		}
-	}*/
 	private static void setupValuePath(){
 		String path = FOLDER_LIBS_NATIVES;
 		if(FlashUtil.isWindows()){

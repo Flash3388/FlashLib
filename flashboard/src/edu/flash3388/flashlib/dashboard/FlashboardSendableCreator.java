@@ -11,7 +11,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 
 	private Sendable get(String name, byte type) {
 		switch(type){
-			case FlashboardSendableType.ACTIVATABLE: return new Button(name);
+			case FlashboardSendableType.ACTIVATABLE: return new ButtonControl(name);
 			case FlashboardSendableType.BOOLEAN: return new BooleanProperty(name);
 			case FlashboardSendableType.DOUBLE: return new DoubleProperty(name);
 			case FlashboardSendableType.STRING: return new StringProperty(name);
@@ -35,8 +35,8 @@ public class FlashboardSendableCreator implements SendableCreator{
 		Sendable s = get(name, type);
 		if(s != null && s instanceof VisionRunner)
 			Dashboard.setVision((VisionRunner)s);
-		if(s != null && s instanceof Displayble)
-			Dashboard.addDisplayable((Displayble)s);
+		if(s != null && s instanceof Displayable)
+			Dashboard.addDisplayable((Displayable)s);
 		if(s != null && s instanceof EmergencyStopControl)
 			Dashboard.setEmergencyStopControl((EmergencyStopControl)s);
 		return s;

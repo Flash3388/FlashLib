@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Node;
@@ -8,7 +8,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class EmergencyStopControl extends Displayble{
+public class EmergencyStopControl extends Displayable{
 
 	private static final byte EMERGENCY = 0xe;
 	private static final byte NORMAL = 0x5;
@@ -20,7 +20,6 @@ public class EmergencyStopControl extends Displayble{
 	private Rectangle statusRect;
 	private javafx.scene.control.Button button;
 	private VBox root;
-	private Runnable updater;
 	
 	public EmergencyStopControl() {
 		super("Emergency Stop", FlashboardSendableType.ESTOP);
@@ -41,23 +40,6 @@ public class EmergencyStopControl extends Displayble{
 		root = new VBox();
 		root.setSpacing(2);
 		root.getChildren().addAll(button, statusRect);
-		
-		updater = new Runnable(){
-			@Override
-			public void run() {
-				update = false;
-				
-				if(emergency){
-					button.setText("Normal");
-					statusRect.setFill(Color.RED);
-					FlashUtil.getLog().log("!!!EMERGENCY STOP!!!", "EStop Control");
-				}else{
-					button.setText("Emergency Stop");
-					statusRect.setFill(Color.GREEN);
-					FlashUtil.getLog().log("Normal Operations", "EStop Control");
-				}
-			}
-		};
 	}
 
 	public void change(){
@@ -66,6 +48,31 @@ public class EmergencyStopControl extends Displayble{
 	public void change(boolean e){
 		emergency = e;
 		changed = true;
+	}
+	
+	@Override
+	protected void update() {
+		if(update){
+			update = false;
+			
+			if(emergency){
+				button.setText("Normal");
+				statusRect.setFill(Color.RED);
+				FlashUtil.getLog().log("!!!EMERGENCY STOP!!!", "EStop Control");
+			}else{
+				button.setText("Emergency Stop");
+				statusRect.setFill(Color.GREEN);
+				FlashUtil.getLog().log("Normal Operations", "EStop Control");
+			}
+		}
+	}
+	@Override
+	protected Node getNode(){
+		return root;
+	}
+	@Override
+	protected DisplayType getDisplayType(){
+		return DisplayType.Controller;
 	}
 	
 	@Override
@@ -98,18 +105,5 @@ public class EmergencyStopControl extends Displayble{
 	}
 	@Override
 	public void onConnectionLost() {
-	}
-	
-	@Override
-	protected Node getNode(){
-		return root;
-	}
-	@Override
-	public DisplayType getDisplayType(){
-		return DisplayType.Controller;
-	}
-	@Override
-	public Runnable updateDisplay(){
-		return update? updater : null;
 	}
 }

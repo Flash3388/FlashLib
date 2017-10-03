@@ -1,10 +1,10 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.InputType;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.flashboard.ValueType;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -14,14 +14,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class InputField extends Displayble{
+public class InputField extends Displayable{
 
 	private static final int LABEL_WIDTH = 50;
 	private static final int LABEL_HEIGHT = 10;
 	
 	private String value = "";
 	private boolean changed = false;
-	private InputType type = null;
+	private ValueType type = null;
 	
 	private Label label;
 	private TextField field;
@@ -57,7 +57,7 @@ public class InputField extends Displayble{
 
 	private void receiveInput(){
 		if(type == null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Cannot edit input yet");
+			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Cannot edit input yet");
 			return;
 		}
 		
@@ -70,33 +70,42 @@ public class InputField extends Displayble{
 	}
 	
 	private boolean validate(String str){
-		if(type == InputType.Boolean){
+		if(type == ValueType.Boolean){
 			try {
 				Boolean.parseBoolean(value);
 				return true;
 			} catch (NumberFormatException e) { return false;}
 		}
-		if(type == InputType.Double){
+		if(type == ValueType.Double){
 			try {
 				Double.parseDouble(value);
 				return true;
 			} catch (NumberFormatException e) { return false;}
 		}
-		if(type == InputType.String){
+		if(type == ValueType.String){
 			return true;
 		}
 		return false;
 	}
 	
 	@Override
+	protected Node getNode(){
+		return node;
+	}
+	@Override
+	protected DisplayType getDisplayType(){
+		return DisplayType.Manual;
+	}
+	
+	@Override
 	public void newData(byte[] bytes) {
 		if(bytes[0] == 0){
 			value = new String(bytes, 1, bytes.length - 1);
-			FlashFxUtils.onFxThread(()->{
+			FlashFXUtils.onFXThread(()->{
 				field.setText(value);
 			});
 		}else if(bytes[0] == 1){
-			type = InputType.values()[bytes[1]];
+			type = ValueType.values()[bytes[1]];
 		}
 	}
 	@Override
@@ -115,11 +124,4 @@ public class InputField extends Displayble{
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
-	
-	@Override
-	protected Node getNode(){return node;}
-	@Override
-	public DisplayType getDisplayType(){
-		return DisplayType.Manual;
-	}
 }

@@ -1,13 +1,13 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class DoubleProperty extends Displayble{
+public class DoubleProperty extends Displayable{
 
 	private static final int LABEL_WIDTH = 150;
 	private static final int LABEL_HEIGHT = 10;
@@ -16,7 +16,6 @@ public class DoubleProperty extends Displayble{
 	
 	private Label label;
 	private VBox node;
-	private Runnable updater;
 	private boolean changed = true;
 	
 	public DoubleProperty(String name) {
@@ -25,16 +24,20 @@ public class DoubleProperty extends Displayble{
 		label = new Label(name + ": " + value);
 		label.setPrefSize(LABEL_WIDTH, LABEL_HEIGHT);
 		node.getChildren().add(label);
-		
-		updater = new Runnable(){
-			@Override
-			public void run() {
-				changed = false;
-				label.setText(name + ": " + value);
-			}
-		};
 	}
 
+	@Override
+	protected Node getNode(){
+		return node;
+	}
+	@Override
+	protected void update() {
+		if(changed){
+			changed = false;
+			label.setText(getName() + ": " + value);
+		}
+	}
+	
 	@Override
 	public void newData(byte[] bytes) {
 		if(bytes.length < 8) return;
@@ -55,11 +58,4 @@ public class DoubleProperty extends Displayble{
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
-	@Override
-	protected Node getNode(){return node;}
-	@Override
-	public Runnable updateDisplay() {
-		if(!changed) return null;
-		return updater;
-	}
 }

@@ -18,7 +18,7 @@ public class DashboardBooleanInput extends DashboardStringInput implements Strin
 		super(name, null);
 		this.property = property;
 		setProperty(this);
-		setType(InputType.Boolean);
+		setType(ValueType.Boolean);
 	}
 	
 	public BooleanProperty booleanValueProperty(){

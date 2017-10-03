@@ -18,10 +18,10 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-public class FlashFxUtils {
-	private FlashFxUtils(){}
+public class FlashFXUtils {
+	private FlashFXUtils(){}
 	
-	public static void onFxThread(Runnable r){
+	public static void onFXThread(Runnable r){
 		Platform.runLater(r);
 	}
 	

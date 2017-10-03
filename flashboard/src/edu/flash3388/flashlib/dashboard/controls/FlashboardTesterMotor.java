@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Displayble;
+import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.TesterMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-public class FlashboardTesterMotor extends Displayble{
+public class FlashboardTesterMotor extends Displayable{
 
 	private String testerName = null;
 	

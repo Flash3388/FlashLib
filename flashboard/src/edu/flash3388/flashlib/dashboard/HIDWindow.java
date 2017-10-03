@@ -119,6 +119,7 @@ public class HIDWindow extends Stage implements Runnable{
 		
 		//left
 		controllerView = new ListView<String>();
+		controllerView.setPadding(new Insets(5.0));
 		controllerView.setMaxWidth(200);
 		controllerView.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
 			if(n.intValue() < 0)

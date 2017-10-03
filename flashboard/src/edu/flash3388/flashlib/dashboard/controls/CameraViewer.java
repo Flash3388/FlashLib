@@ -13,8 +13,8 @@ import javax.imageio.stream.ImageInputStream;
 import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
-import edu.flash3388.flashlib.dashboard.Displayble;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.dashboard.Displayable;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.cv.CvProcessing;
@@ -23,7 +23,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 
-public class CameraViewer extends Displayble implements DataListener, ImagePipeline{
+public class CameraViewer extends Displayable implements DataListener, ImagePipeline{
 	
 	public static enum DisplayMode{
 		Normal, PostProcess, Threshold
@@ -31,7 +31,6 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	
 	private ImageView view;
 	private Image image;
-	private Runnable updater;
 	private DisplayMode mode = DisplayMode.Normal;
 	
 	public CameraViewer(String name) {
@@ -41,34 +40,31 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 		view.setFitWidth(640);
 		image = new WritableImage(640, 420);
 		view.setImage(image);
-		
-		updater = new Runnable(){
-			@Override
-			public void run() {
-				if(image != null)
-					view.setImage(image);
-			}
-		};
+	}
+	
+	@Override
+	protected void update() {
+		if(image != null)
+			view.setImage(image);
+	}
+	@Override
+	protected Node getNode(){
+		return view;
+	}
+	@Override
+	protected DisplayType getDisplayType(){
+		return DisplayType.Cam;
 	}
 
 	public void setImage(BufferedImage bf){
 		if(mode != DisplayMode.Normal)
 			return;
-		
-		/*WritableImage wr = null;
-        if (bf != null) {
-            wr = new WritableImage(bf.getWidth(), bf.getHeight());
-            PixelWriter pw = wr.getPixelWriter();
-            for (int x = 0; x < bf.getWidth(); x++) {
-                for (int y = 0; y < bf.getHeight(); y++) 
-                    pw.setArgb(x, y, bf.getRGB(x, y));
-            }
-        }*/
-        image = FlashFxUtils.bufferedImage2FxImage(bf);
+        image = FlashFXUtils.bufferedImage2FxImage(bf);
 	}
 	public void setMatImage(Mat mat){
-		image = FlashFxUtils.cvMat2FxImage(mat);
+		image = FlashFXUtils.cvMat2FxImage(mat);
 	}
+	
 	@Override
 	public void newData(byte[] bytes) {
 		if(Dashboard.visionInitialized()){
@@ -103,16 +99,7 @@ public class CameraViewer extends Displayble implements DataListener, ImagePipel
 	public void onConnection() {}
 	@Override
 	public void onConnectionLost() {}
-	@Override
-	protected Node getNode(){return view;}
-	@Override
-	public Runnable updateDisplay() {
-		return updater;
-	}
-	@Override
-	public DisplayType getDisplayType(){
-		return DisplayType.Cam;
-	}
+
 	
 	public void setDisplayMode(DisplayMode m){
 		mode = m;
