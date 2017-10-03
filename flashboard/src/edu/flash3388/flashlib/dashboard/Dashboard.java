@@ -33,6 +33,8 @@ import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -166,6 +168,7 @@ public class Dashboard extends Application {
 		
 		private boolean commInitialized = false;
 		private boolean commSettingError = false;
+		
 		private boolean camInitialized = false;
 		private boolean camSettingError = false;
 		
@@ -280,15 +283,32 @@ public class Dashboard extends Application {
 		}
 	}
 	private static class DisplayableUpdater implements Runnable{
-		@Override
-		public void run() {
+		
+		Runnable dataRunnable = ()->{
+			update();
+		};
+		boolean done = true;
+		
+		void update(){
+			done = false;
 			Enumeration<Displayable> denum = getDisplayables();
 			while(denum.hasMoreElements()){
 				Displayable d = denum.nextElement();
 				d.update();
 				if(!d.init()) {
-					//GUI.getMain().addToDisplay(d.getDisplayType(), d.setDisplay());
+					Node root = d.getNode();
+					if(root != null){
+						GUI.getMain().addControlToDisplay(root, d.getDisplayType());
+					}
 				}
+			}
+			done = true;
+		}
+		
+		@Override
+		public void run() {
+			if(done){
+				Platform.runLater(dataRunnable);
 			}
 		}
 	}
@@ -397,7 +417,6 @@ public class Dashboard extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Dashboard.instance = this;
 		Dashboard.primaryStage = primaryStage;
 		/*
 		BorderPane root = new BorderPane();
@@ -565,7 +584,6 @@ public class Dashboard extends Application {
 	//-----------------------Init & Shut----------------------------------
 	//--------------------------------------------------------------------
 	
-	private static Dashboard instance;
 	private static Log log;
 	private static String currentNativesFolder = "";
 	
@@ -661,6 +679,8 @@ public class Dashboard extends Application {
 		updater.execute(()->{
 			loadVisionSaves();
 		});
+		
+		updater.addTask(new DisplayableUpdater());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);

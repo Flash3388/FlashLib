@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 
 import edu.flash3388.flashlib.dashboard.Displayable.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
-import edu.flash3388.flashlib.dashboard.controls.PDP;
+import edu.flash3388.flashlib.dashboard.controls.PDPControl;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer.DisplayMode;
 import edu.flash3388.flashlib.dashboard.controls.DashboardPIDTuner;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
@@ -585,16 +585,6 @@ public class MainController implements Initializable{
 	}
 	public void addToDisplay(DisplayType t, Node n){
 		if(n == null) return;
-		switch (t) {
-		case Cam: addToCameras(n);
-			break;
-		case Controller: addToControllers(n);
-			break;
-		case Data: addToData(n);
-			break;
-		case Manual: addToManual(n);
-			break;
-		}
 	}
 	public void resetDisplay(){
 		manual_controls.getChildren().clear();
@@ -617,7 +607,7 @@ public class MainController implements Initializable{
 	
 	public static void resetAllControls(){
 		PDPWindow.reset();
-		PDP.resetBoards();
+		PDPControl.resetBoards();
 		TesterWindow.closeTester();
 		VisionEditorWindow.closeEditor();
 		PIDTunerWindow.reset();

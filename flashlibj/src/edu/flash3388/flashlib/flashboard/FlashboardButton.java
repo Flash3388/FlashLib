@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.robot.hid.ManualButton;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DashboardButton extends Sendable{
+public class FlashboardButton extends Sendable{
 	
 	public static final byte DOWN = 0xe;
 	public static final byte UP = 0x5;
@@ -22,7 +22,7 @@ public class DashboardButton extends Sendable{
 	private boolean updateDisable = true;
 	private boolean enabled = true;
 	
-	public DashboardButton(String name) {
+	public FlashboardButton(String name) {
 		super(name, FlashboardSendableType.ACTIVATABLE);
 		
 		button = new ManualButton();

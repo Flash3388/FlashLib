@@ -2,8 +2,6 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
@@ -114,13 +112,10 @@ public final class Flashboard {
 	private static CameraServer camServer;
 	private static Vision vision;
 	private static Communications communications;
-	private static Map<String, Sendable> sendables;
 	
 	private static void checkInit(){
 		if(!instance || (initMode & INIT_COMM) == 0)
 			throw new IllegalStateException("Flashboard was not initialized");
-		if(sendables == null)
-			sendables = new HashMap<String, Sendable>();
 	}
 	
 	/**
@@ -351,128 +346,73 @@ public final class Flashboard {
 	}
 	
 	
-	public static DashboardDoubleInput putInputField(String name, DoubleProperty prop){
+	public static FlashboardInput putInputField(String name, DoubleProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardDoubleInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardDoubleInput) sen;
-		}
-		DashboardDoubleInput input = new DashboardDoubleInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardBooleanInput putInputField(String name, BooleanProperty prop){
+	public static FlashboardInput putInputField(String name, BooleanProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardBooleanInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardBooleanInput) sen;
-		}
-		DashboardBooleanInput input = new DashboardBooleanInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringInput putInputField(String name, StringProperty prop){
+	public static FlashboardInput putInputField(String name, StringProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardStringInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardStringInput) sen;
-		}
-		DashboardStringInput input = new DashboardStringInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
 	
-	public static DashboardSlider putSlider(String name, DoubleProperty prop, double min, double max, int ticks){
+	public static FlashboardSlider putSlider(String name, DoubleProperty prop, double min, double max, int ticks){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardSlider))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardSlider) sen;
-		}
-		DashboardSlider input = new DashboardSlider(name, prop, min, max, ticks);
-		sendables.put(name, input);
+		
+		FlashboardSlider input = new FlashboardSlider(name, prop, min, max, ticks);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardButton putButton(String name, Action... actions){
+	public static FlashboardButton putButton(String name, Action... actions){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardButton))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardButton) sen;
-		}
-		DashboardButton input = new DashboardButton(name);
+		
+		FlashboardButton input = new FlashboardButton(name);
 		for (int i = 0; i < actions.length; i++)
 			input.whenPressed(actions[i]);
-		sendables.put(name, input);
 		Flashboard.attach(input);
 		return input;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@SafeVarargs
-	public static <T> DashboardChooser<T> putChooser(String name, DashboardChooser.Option<T>...options){
+	public static <T> FlashboardChooser<T> putChooser(String name, FlashboardChooser.Option<T>...options){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardChooser))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardChooser<T>) sen;
-		}
-		DashboardChooser<T> input = new DashboardChooser<T>(name, options);
-		sendables.put(name, input);
+		
+		FlashboardChooser<T> input = new FlashboardChooser<T>(name, options);
 		Flashboard.attach(input);
 		return input;
 	}
 	
 	
-	public static DashboardDoubleProperty putData(String name, DoubleSource prop){
+	public static FlashboardLabel putLabel(String name, DoubleSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardDoubleProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardDoubleProperty) sen;
-		}
-		DashboardDoubleProperty input = new DashboardDoubleProperty(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardLabel input = new FlashboardLabel(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardBooleanProperty putData(String name, BooleanSource prop){
+	public static FlashboardLabel putLabel(String name, BooleanSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardBooleanProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardBooleanProperty) sen;
-		}
-		DashboardBooleanProperty input = new DashboardBooleanProperty(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardLabel input = new FlashboardLabel(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringProperty putData(String name, StringSource prop){
+	public static FlashboardLabel putLabel(String name, StringSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardStringProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardStringProperty) sen;
-		}
-		DashboardStringProperty input = new DashboardStringProperty(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardLabel input = new FlashboardLabel(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}

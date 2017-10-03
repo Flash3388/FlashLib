@@ -12,12 +12,12 @@ import edu.flash3388.flashlib.util.LogListener;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class SendableLog extends Sendable{
+public class FlashboardRemoteLog extends Sendable{
 	
 	private Vector<String> logs = new Vector<String>();
 	private Vector<String> sentLogs = new Vector<String>();
 	
-	public SendableLog(Log log) {
+	public FlashboardRemoteLog(Log log) {
 		super(log.getName(), FlashboardSendableType.LOG);
 		if(!log.isLoggingMode(Log.MODE_INTERFACES))
 			log.setLoggingMode(log.getLoggingMode() | Log.MODE_INTERFACES);

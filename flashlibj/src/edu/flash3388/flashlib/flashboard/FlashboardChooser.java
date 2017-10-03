@@ -16,7 +16,7 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DashboardChooser<T> extends Sendable{
+public class FlashboardChooser<T> extends Sendable{
 
 	public static class Option<T>{
 		private String name;
@@ -42,7 +42,7 @@ public class DashboardChooser<T> extends Sendable{
 	private boolean changed = false, changedIndex = false;
 	
 	@SafeVarargs
-	public DashboardChooser(String name, Option<T>...options) {
+	public FlashboardChooser(String name, Option<T>...options) {
 		super(name, FlashboardSendableType.CHOOSER);
 		
 		if(options != null){
@@ -50,29 +50,29 @@ public class DashboardChooser<T> extends Sendable{
 				this.options.addElement(o);
 		}
 	}
-	public DashboardChooser(String name) {
+	public FlashboardChooser(String name) {
 		this(name, (Option<T>[])null);
 	}
 	
-	public DashboardChooser<T> addDefault(Option<T> option){
+	public FlashboardChooser<T> addDefault(Option<T> option){
 		this.options.addElement(option);
 		select(options.size() - 1);
 		defaultIndex = selected.get();
 		changed = true;
 		return this;
 	}
-	public DashboardChooser<T> addDefault(String name, T option){
+	public FlashboardChooser<T> addDefault(String name, T option){
 		return this.addDefault(new Option<T>(name, option));
 	}
-	public DashboardChooser<T> addOption(Option<T> option){
+	public FlashboardChooser<T> addOption(Option<T> option){
 		this.options.addElement(option);
 		changed = true;
 		return this;
 	}
-	public DashboardChooser<T> addOption(String name, T option){
+	public FlashboardChooser<T> addOption(String name, T option){
 		return this.addOption(new Option<T>(name, option));
 	}
-	public DashboardChooser<T> remove(int index){
+	public FlashboardChooser<T> remove(int index){
 		if(index < 0) 
 			throw new IllegalArgumentException("Index must be non-negative");
 
@@ -88,7 +88,7 @@ public class DashboardChooser<T> extends Sendable{
 		changed = true;
 		return this;
 	}
-	public DashboardChooser<T> removeLast(){
+	public FlashboardChooser<T> removeLast(){
 		return remove(options.size()-1);
 	}
 	

@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class DashboardModeSelector extends Sendable{
+public class FlashboardModeSelectorControl extends Sendable{
 	
 	public static final byte UPDATE_MODE = 0x1;
 	public static final byte UPDATE_DISABLED = 0x5;
@@ -13,7 +13,7 @@ public class DashboardModeSelector extends Sendable{
 	private boolean disabled = true;
 	private int currentState = 0;
 	
-	public DashboardModeSelector() {
+	public FlashboardModeSelectorControl() {
 		super(FlashboardSendableType.MODE_SELECTOR);
 	}
 

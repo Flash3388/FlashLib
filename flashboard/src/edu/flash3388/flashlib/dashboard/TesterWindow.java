@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.dashboard;
 import java.util.Enumeration;
 
 import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
-import edu.flash3388.flashlib.dashboard.controls.FlashboardTesterMotor;
+import edu.flash3388.flashlib.dashboard.controls.TesterMotorControl;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,23 +38,23 @@ public class TesterWindow extends Stage{
 	private Scene loadScene(){
 		VBox root = new VBox();
 		
-		TableView<FlashboardTesterMotor> motorsView = new TableView<FlashboardTesterMotor>();
-		TableColumn<FlashboardTesterMotor, String> nameCol = new TableColumn<FlashboardTesterMotor, String>();
+		TableView<TesterMotorControl> motorsView = new TableView<TesterMotorControl>();
+		TableColumn<TesterMotorControl, String> nameCol = new TableColumn<TesterMotorControl, String>();
 		nameCol.setText("Name");
-		TableColumn<FlashboardTesterMotor, Boolean> brakeCol = new TableColumn<FlashboardTesterMotor, Boolean>();
+		TableColumn<TesterMotorControl, Boolean> brakeCol = new TableColumn<TesterMotorControl, Boolean>();
 		brakeCol.setText("Brake Mode");
-		TableColumn<FlashboardTesterMotor, Double> speedCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> speedCol = new TableColumn<TesterMotorControl, Double>();
 		speedCol.setText("Speed");
-		TableColumn<FlashboardTesterMotor, Double> voltageCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> voltageCol = new TableColumn<TesterMotorControl, Double>();
 		voltageCol.setText("Voltage");
-		TableColumn<FlashboardTesterMotor, Double> currentCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> currentCol = new TableColumn<TesterMotorControl, Double>();
 		currentCol.setText("Current");
 		
-		nameCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, String>("name"));
-		brakeCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Boolean>("brakeMode"));
-		speedCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("speed"));
-		voltageCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("voltage"));
-		currentCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("current"));
+		nameCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, String>("name"));
+		brakeCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Boolean>("brakeMode"));
+		speedCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("speed"));
+		voltageCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("voltage"));
+		currentCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("current"));
 		
 		motorsView.getColumns().addAll(nameCol, brakeCol, speedCol, voltageCol, currentCol);
 		
@@ -78,7 +78,7 @@ public class TesterWindow extends Stage{
 				keysBox.getSelectionModel().select(0);
 				return;
 			}
-			Enumeration<FlashboardTesterMotor> motors = tester.getMotors();
+			Enumeration<TesterMotorControl> motors = tester.getMotors();
 			for(; motors.hasMoreElements();)
 				motorsView.getItems().add(motors.nextElement());
 			tester.enable(true);

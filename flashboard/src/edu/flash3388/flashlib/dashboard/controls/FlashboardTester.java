@@ -8,22 +8,22 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.Tester;
+import edu.flash3388.flashlib.flashboard.FlashboardMotorTester;
 
 public class FlashboardTester extends Sendable{
 
-	private static HashMap<String, List<FlashboardTesterMotor>> unallocatedMotors = 
-			new HashMap<String, List<FlashboardTesterMotor>>();
+	private static HashMap<String, List<TesterMotorControl>> unallocatedMotors = 
+			new HashMap<String, List<TesterMotorControl>>();
 	private static HashMap<String, FlashboardTester> testers = new HashMap<String, FlashboardTester>();
 	
-	private Vector<FlashboardTesterMotor> motors = new Vector<FlashboardTesterMotor>();
+	private Vector<TesterMotorControl> motors = new Vector<TesterMotorControl>();
 	private boolean updateEnable = false, enable = false;
 	
 	public FlashboardTester(String name) {
 		super(name, FlashboardSendableType.TESTER);
 		
 		testers.put(name, this);
-		List<FlashboardTesterMotor> motors = unallocatedMotors.get(name);
+		List<TesterMotorControl> motors = unallocatedMotors.get(name);
 		if(motors != null){
 			unallocatedMotors.remove(name);
 			for (int i = 0; i < motors.size(); i++)
@@ -35,10 +35,10 @@ public class FlashboardTester extends Sendable{
 		this.enable = enable;
 		updateEnable = true;
 	}
-	public Enumeration<FlashboardTesterMotor> getMotors(){
+	public Enumeration<TesterMotorControl> getMotors(){
 		return motors.elements();
 	}
-	private void addMotor(FlashboardTesterMotor motor){
+	private void addMotor(TesterMotorControl motor){
 		motors.addElement(motor);
 	}
 	
@@ -48,7 +48,7 @@ public class FlashboardTester extends Sendable{
 	@Override
 	public byte[] dataForTransmition() {
 		updateEnable = false;
-		return new byte[]{enable? Tester.START : Tester.STOP};
+		return new byte[]{enable? FlashboardMotorTester.START : FlashboardMotorTester.STOP};
 	}
 	@Override
 	public boolean hasChanged() {
@@ -61,7 +61,7 @@ public class FlashboardTester extends Sendable{
 	public void onConnectionLost() {
 	}
 	
-	public static void allocateTesterMotor(FlashboardTesterMotor motor){
+	public static void allocateTesterMotor(TesterMotorControl motor){
 		String name = motor.getTesterName();
 		if(name == null || name.equals("")){
 			return;
@@ -70,9 +70,9 @@ public class FlashboardTester extends Sendable{
 			if(tester != null)
 				tester.addMotor(motor);
 			else{
-				List<FlashboardTesterMotor> motors = unallocatedMotors.get(name);
+				List<TesterMotorControl> motors = unallocatedMotors.get(name);
 				if(motors == null){
-					motors = new ArrayList<FlashboardTesterMotor>();
+					motors = new ArrayList<TesterMotorControl>();
 					unallocatedMotors.put(name, motors);
 				}
 				motors.add(motor);

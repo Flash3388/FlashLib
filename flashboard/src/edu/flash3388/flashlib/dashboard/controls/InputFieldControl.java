@@ -1,10 +1,9 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
-import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.ValueType;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
+
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -14,21 +13,20 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class InputField extends Displayable{
+public class InputFieldControl extends Displayable{
 
 	private static final int LABEL_WIDTH = 50;
 	private static final int LABEL_HEIGHT = 10;
 	
 	private String value = "";
 	private boolean changed = false;
-	private ValueType type = null;
 	
 	private Label label;
 	private TextField field;
 	private javafx.scene.control.Button button;
 	private VBox node;
 	
-	public InputField(String name) {
+	public InputFieldControl(String name) {
 		super(name, FlashboardSendableType.INPUT);
 		
 		node = new VBox();
@@ -56,36 +54,10 @@ public class InputField extends Displayable{
 	}
 
 	private void receiveInput(){
-		if(type == null){
-			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Cannot edit input yet");
-			return;
-		}
 		
 		String val = field.getText();
-		if(!validate(val)){
-			return;
-		}
 		value = val;
 		changed = true;
-	}
-	
-	private boolean validate(String str){
-		if(type == ValueType.Boolean){
-			try {
-				Boolean.parseBoolean(value);
-				return true;
-			} catch (NumberFormatException e) { return false;}
-		}
-		if(type == ValueType.Double){
-			try {
-				Double.parseDouble(value);
-				return true;
-			} catch (NumberFormatException e) { return false;}
-		}
-		if(type == ValueType.String){
-			return true;
-		}
-		return false;
 	}
 	
 	@Override
@@ -94,19 +66,15 @@ public class InputField extends Displayable{
 	}
 	@Override
 	protected DisplayType getDisplayType(){
-		return DisplayType.Manual;
+		return DisplayType.Input;
 	}
 	
 	@Override
 	public void newData(byte[] bytes) {
-		if(bytes[0] == 0){
-			value = new String(bytes, 1, bytes.length - 1);
-			FlashFXUtils.onFXThread(()->{
-				field.setText(value);
-			});
-		}else if(bytes[0] == 1){
-			type = ValueType.values()[bytes[1]];
-		}
+		value = new String(bytes, 1, bytes.length - 1);
+		FlashFXUtils.onFXThread(()->{
+			field.setText(value);
+		});
 	}
 	@Override
 	public byte[] dataForTransmition() {

@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DashboardSlider extends Sendable{
+public class FlashboardSlider extends Sendable{
 	
 	private DoubleProperty valData;
 	private double max, min, lastValue;
@@ -18,7 +18,7 @@ public class DashboardSlider extends Sendable{
 	private boolean changed = false, updateValue = false;
 	private byte[] data = new byte[20];
 	
-	public DashboardSlider(String name, DoubleProperty data, double min, double max, int ticks) {
+	public FlashboardSlider(String name, DoubleProperty data, double min, double max, int ticks) {
 		super(name, FlashboardSendableType.SLIDER);
 		this.ticks = ticks;
 		this.max = max;

@@ -14,13 +14,12 @@ import org.opencv.core.Mat;
 
 import edu.flash3388.flashlib.dashboard.Dashboard;
 import edu.flash3388.flashlib.dashboard.Displayable;
+import edu.flash3388.flashlib.dashboard.GUI;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.communications.DataListener;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.cv.CvProcessing;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 
 public class CameraViewer extends Displayable implements DataListener, ImagePipeline{
@@ -29,40 +28,34 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 		Normal, PostProcess, Threshold
 	}
 	
-	private ImageView view;
 	private Image image;
 	private DisplayMode mode = DisplayMode.Normal;
 	
 	public CameraViewer(String name) {
 		super(name, (byte)-1);
-		view = new ImageView();
-		view.setFitHeight(420);
-		view.setFitWidth(640);
 		image = new WritableImage(640, 420);
-		view.setImage(image);
 	}
 	
 	@Override
 	protected void update() {
-		if(image != null)
-			view.setImage(image);
-	}
-	@Override
-	protected Node getNode(){
-		return view;
-	}
-	@Override
-	protected DisplayType getDisplayType(){
-		return DisplayType.Cam;
+		synchronized (image) {
+			if(image != null){
+				GUI.getMain().setCameraViewImage(image);
+			}
+		}
 	}
 
 	public void setImage(BufferedImage bf){
 		if(mode != DisplayMode.Normal)
 			return;
-        image = FlashFXUtils.bufferedImage2FxImage(bf);
+       synchronized (image) {
+    	   image = FlashFXUtils.bufferedImage2FxImage(bf);
+       }
 	}
 	public void setMatImage(Mat mat){
-		image = FlashFXUtils.cvMat2FxImage(mat);
+		synchronized (image) {
+			image = FlashFXUtils.cvMat2FxImage(mat);
+		}
 	}
 	
 	@Override

@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class Slider extends Displayable{
+public class SliderControl extends Displayable{
 	
 	private javafx.scene.control.Slider slider;
 	private Label label;
@@ -20,7 +20,7 @@ public class Slider extends Displayable{
 	private boolean changed = false, local = false, valChanged = false, update = true;
 	private byte[] data = new byte[8];
 	
-	public Slider(String name) {
+	public SliderControl(String name) {
 		super(name, FlashboardSendableType.SLIDER);
 		label = new Label(name);
 		slider = new javafx.scene.control.Slider();
@@ -81,7 +81,7 @@ public class Slider extends Displayable{
 	}
 	@Override
 	protected DisplayType getDisplayType(){
-		return DisplayType.Manual;
+		return DisplayType.Input;
 	}
 	
 	@Override

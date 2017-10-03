@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.flashboard.HIDSendable;
+import edu.flash3388.flashlib.flashboard.FlashboardHIDSendable;
 
-public class FlashboardHIDInterface extends HIDSendable implements HIDInterface{
+public class FlashboardHIDInterface extends FlashboardHIDSendable implements HIDInterface{
 
 	public FlashboardHIDInterface() {
 		super("HIDInterface");

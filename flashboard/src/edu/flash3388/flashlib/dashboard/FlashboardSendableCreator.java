@@ -10,18 +10,16 @@ public class FlashboardSendableCreator implements SendableCreator{
 	private Sendable get(String name, byte type) {
 		switch(type){
 			case FlashboardSendableType.ACTIVATABLE: return new ButtonControl(name);
-			case FlashboardSendableType.BOOLEAN: return new BooleanProperty(name);
-			case FlashboardSendableType.DOUBLE: return new DoubleProperty(name);
-			case FlashboardSendableType.STRING: return new StringProperty(name);
-			case FlashboardSendableType.INPUT: return new InputField(name);
-			case FlashboardSendableType.SLIDER: return new Slider(name);
+			case FlashboardSendableType.LABEL: return new LabelControl(name);
+			case FlashboardSendableType.INPUT: return new InputFieldControl(name);
+			case FlashboardSendableType.SLIDER: return new SliderControl(name);
 			case FlashboardSendableType.JOYSTICK: return Dashboard.getHIDControl();
-			case FlashboardSendableType.CHOOSER: return new Chooser(name);
+			case FlashboardSendableType.CHOOSER: return new ChooserControl(name);
 			case FlashboardSendableType.TESTER: return new FlashboardTester(name);
-			case FlashboardSendableType.MOTOR: return new FlashboardTesterMotor(name);
+			case FlashboardSendableType.MOTOR: return new TesterMotorControl(name);
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name);
 			case FlashboardSendableType.VISION: return (Sendable) Dashboard.getVision();
-			case FlashboardSendableType.PDP: return new PDP(name);
+			case FlashboardSendableType.PDP: return new PDPControl(name);
 			case FlashboardSendableType.ESTOP: return Dashboard.getEmergencyStopControl();
 			case FlashboardSendableType.PIDTUNER: return new DashboardPIDTuner(name);
 			case FlashboardSendableType.MODE_SELECTOR: return Dashboard.getModeSelectorControl();

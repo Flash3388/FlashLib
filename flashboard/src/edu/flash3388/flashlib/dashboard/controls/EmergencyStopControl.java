@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -38,7 +39,8 @@ public class EmergencyStopControl extends Displayable{
 		});
 		
 		root = new VBox();
-		root.setSpacing(2);
+		root.setAlignment(Pos.CENTER);
+		root.setSpacing(2.0);
 		root.getChildren().addAll(button, statusRect);
 	}
 
@@ -66,13 +68,13 @@ public class EmergencyStopControl extends Displayable{
 			}
 		}
 	}
-	@Override
-	protected Node getNode(){
+	
+	public Node getRoot(){
 		return root;
 	}
 	@Override
 	protected DisplayType getDisplayType(){
-		return DisplayType.Controller;
+		return DisplayType.Activatable;
 	}
 	
 	@Override

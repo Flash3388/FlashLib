@@ -16,7 +16,7 @@ import org.w3c.dom.NodeList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.DashboardModeSelector;
+import edu.flash3388.flashlib.flashboard.FlashboardModeSelectorControl;
 import edu.flash3388.flashlib.util.FlashUtil;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -127,12 +127,12 @@ public class ModeSelectorControl extends Sendable{
 		if(stateChanged){
 			stateChanged = false;
 			byte[] bytes = new byte[5];
-			bytes[0] = DashboardModeSelector.UPDATE_MODE;
+			bytes[0] = FlashboardModeSelectorControl.UPDATE_MODE;
 			FlashUtil.fillByteArray(states.get(currentStateIndex).value, 1, bytes);
 			return bytes;
 		}
 		disabledChanged = false;
-		return new byte[]{DashboardModeSelector.UPDATE_DISABLED, (byte) (disabled.get()? 1 : 0)};
+		return new byte[]{FlashboardModeSelectorControl.UPDATE_DISABLED, (byte) (disabled.get()? 1 : 0)};
 	}
 	@Override
 	public boolean hasChanged() {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.HIDSendable;
+import edu.flash3388.flashlib.flashboard.FlashboardHIDSendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 import net.java.games.input.Component;
@@ -73,7 +73,7 @@ public class HIDControl extends Sendable implements Runnable{
 	private ArrayList<Byte> dataList = new ArrayList<Byte>();
 	private byte[] sendDataBuffer = new byte[0];
 	
-	private HIDData[] hidData = new HIDData[HIDSendable.MAX_PORT_COUNT];
+	private HIDData[] hidData = new HIDData[FlashboardHIDSendable.MAX_PORT_COUNT];
 	private int controllerCount = 0;
 	
 	private long lastUpdate = -1;
@@ -174,7 +174,7 @@ public class HIDControl extends Sendable implements Runnable{
 		dataList.clear();
 		byte[] buttonData = new byte[4];
 		
-		dataList.add(HIDSendable.JOYSTICK_DATA);
+		dataList.add(FlashboardHIDSendable.JOYSTICK_DATA);
 		for (int i = 0; i < hidData.length; i++) {
 			if(hidData[i] == null)
 				continue;

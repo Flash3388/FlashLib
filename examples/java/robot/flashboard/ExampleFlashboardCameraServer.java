@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraViewSelector;
 import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.cams.cv.CvQueueCamera;
-import edu.flash3388.flashlib.flashboard.DashboardCamViewSelector;
+import edu.flash3388.flashlib.flashboard.FlashboardCamViewSelector;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 
@@ -67,7 +67,7 @@ public class ExampleFlashboardCameraServer extends IterativeRobot{
 		 * Instead we can implement the CameraViewSelector interface differently, or maybe use the
 		 * ManualCamViewSelector.
 		 */
-		camSelector = new DashboardCamViewSelector();
+		camSelector = new FlashboardCamViewSelector();
 		Flashboard.getCameraView().setSelector(camSelector);
 		
 		/*

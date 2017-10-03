@@ -1,14 +1,14 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.flashboard.DashboardChooser;
+import edu.flash3388.flashlib.flashboard.FlashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 
 public class FlashboardSimpleModeSelector implements ModeSelector{
 
-	private DashboardChooser<Integer> chooser;
+	private FlashboardChooser<Integer> chooser;
 	
 	public FlashboardSimpleModeSelector() {
-		chooser = new DashboardChooser<Integer>("Mode Selector");
+		chooser = new FlashboardChooser<Integer>("Mode Selector");
 		chooser.addDefault("Disabled", MODE_DISABLED);
 	}
 	

@@ -1,9 +1,9 @@
 package examples.robot.flashboard;
 
-import edu.flash3388.flashlib.flashboard.DashboardBooleanProperty;
-import edu.flash3388.flashlib.flashboard.DashboardSlider;
-import edu.flash3388.flashlib.flashboard.DashboardStringInput;
+import edu.flash3388.flashlib.flashboard.FlashboardSlider;
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.flashboard.FlashboardInput;
+import edu.flash3388.flashlib.flashboard.FlashboardLabel;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
@@ -123,7 +123,7 @@ public class ExampleFlashboard extends IterativeRobot{
 		 * Creating the slider returns a slider object for us. We can use it to change settings, but
 		 * this is generally not needed.
 		 */
-		DashboardSlider slider = Flashboard.putSlider("Slider Example", sliderProperty, 0.0, 1.0, 10);
+		FlashboardSlider slider = Flashboard.putSlider("Slider Example", sliderProperty, 0.0, 1.0, 10);
 		
 		/*
 		 * To get the slider value, we will call the get method from the slider value property.
@@ -150,7 +150,7 @@ public class ExampleFlashboard extends IterativeRobot{
 		 * 
 		 * This returns the control class used. Still not a necessity to use.
 		 */
-		DashboardStringInput input = Flashboard.putInputField("Input Example", inputProperty);
+		FlashboardInput input = Flashboard.putInputField("Input Example", inputProperty);
 		
 		/*
 		 * We can set the value or get the value using the property
@@ -178,7 +178,7 @@ public class ExampleFlashboard extends IterativeRobot{
 		 * 
 		 * This will return the control class which is still not a must for control.
 		 */
-		DashboardBooleanProperty label = Flashboard.putData("Label Example", labelProperty);
+		FlashboardLabel label = Flashboard.putLabel("Label Example", labelProperty);
 		
 		/*
 		 * The label is updated if the get method of the data source returns a different value.

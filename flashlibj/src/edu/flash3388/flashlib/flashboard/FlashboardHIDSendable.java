@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.flashboard;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class HIDSendable extends Sendable implements Runnable{
+public class FlashboardHIDSendable extends Sendable implements Runnable{
 
 	private static class ButtonData{
 		public int buttons;
@@ -43,7 +43,7 @@ public class HIDSendable extends Sendable implements Runnable{
 	private boolean updated = false;
 	private Object joystickMutex = new Object();
 	
-	public HIDSendable(String name) {
+	public FlashboardHIDSendable(String name) {
 		super(name, FlashboardSendableType.JOYSTICK);
 		
 		for (int i = 0; i < MAX_PORT_COUNT; i++) {

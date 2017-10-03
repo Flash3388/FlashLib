@@ -6,7 +6,7 @@ import javafx.scene.Node;
 public abstract class Displayable extends Sendable{
 
 	public static enum DisplayType{
-		Cam, Data, Controller, Manual
+		GraphicData, SimpleData, Input, Activatable
 	}
 	
 	protected Displayable(String name, byte type) {
@@ -32,6 +32,6 @@ public abstract class Displayable extends Sendable{
 		return null;
 	}
 	protected DisplayType getDisplayType(){
-		return DisplayType.Data;
+		return DisplayType.SimpleData;
 	}
 }

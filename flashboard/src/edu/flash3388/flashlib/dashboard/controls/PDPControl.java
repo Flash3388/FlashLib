@@ -8,16 +8,16 @@ import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathf;
 
-public class PDP extends Displayable{
+public class PDPControl extends Displayable{
 
-	private static Vector<PDP> pdps = new Vector<PDP>();
+	private static Vector<PDPControl> pdps = new Vector<PDPControl>();
 	
 	private double[] channelsCurrent = new double[16];
 	private double allVoltage = 0, allCurrent = 0, temperature = 0;
 	private boolean minimumSend = false, maximumSend = false, updatesend = false;
 	private byte[] sendBytes = new byte[1];
 	
-	public PDP(String name) {
+	public PDPControl(String name) {
 		super(name, FlashboardSendableType.PDP);
 		pdps.addElement(this);
 	}
@@ -96,14 +96,14 @@ public class PDP extends Displayable{
 	public void onConnectionLost() {}
 	
 	
-	public static Enumeration<PDP> getBoards(){
+	public static Enumeration<PDPControl> getBoards(){
 		return pdps.elements();
 	}
-	public static PDP get(int i){
+	public static PDPControl get(int i){
 		return pdps.get(i);
 	}
 	public static void resetBoards(){
-		for(Enumeration<PDP> pdpEnum = pdps.elements(); pdpEnum.hasMoreElements();)
+		for(Enumeration<PDPControl> pdpEnum = pdps.elements(); pdpEnum.hasMoreElements();)
 			pdpEnum.nextElement().disableSend();
 		pdps.clear();
 	}

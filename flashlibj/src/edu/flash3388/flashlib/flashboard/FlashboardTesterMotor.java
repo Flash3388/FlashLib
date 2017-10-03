@@ -13,7 +13,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class TesterMotor extends Sendable{
+public class FlashboardTesterMotor extends Sendable{
 	
 	public static final byte UPDATE_TESTER_NAME = 0x5;
 	
@@ -33,7 +33,7 @@ public class TesterMotor extends Sendable{
 	 * @param controller the motor controller
 	 * @param tester the tester which will use it
 	 */
-	public TesterMotor(String name, FlashSpeedController controller, Tester tester) {
+	public FlashboardTesterMotor(String name, FlashSpeedController controller, FlashboardMotorTester tester) {
 		super(name, FlashboardSendableType.MOTOR);
 		this.controller = controller;
 		testerName = tester.getName();
@@ -47,7 +47,7 @@ public class TesterMotor extends Sendable{
 	 * @param source voltage source
 	 * @return this instance
 	 */
-	public TesterMotor setVoltageSource(DoubleSource source){
+	public FlashboardTesterMotor setVoltageSource(DoubleSource source){
 		voltSource = source;
 		return this;
 	}
@@ -56,7 +56,7 @@ public class TesterMotor extends Sendable{
 	 * @param source current source
 	 * @return this instance
 	 */
-	public TesterMotor setCurrentSource(DoubleSource source){
+	public FlashboardTesterMotor setCurrentSource(DoubleSource source){
 		ampSource = source;
 		return this;
 	}
@@ -65,7 +65,7 @@ public class TesterMotor extends Sendable{
 	 * @param source brake mode source
 	 * @return this instance
 	 */
-	public TesterMotor setBrakeModeSource(BooleanSource source){
+	public FlashboardTesterMotor setBrakeModeSource(BooleanSource source){
 		brakeModeSource = source;
 		return this;
 	}

@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayable;
-import edu.flash3388.flashlib.flashboard.DashboardButton;
+import edu.flash3388.flashlib.flashboard.FlashboardButton;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.event.ActionEvent;
@@ -18,7 +18,7 @@ public class ButtonControl extends Displayable{
 	
 	private Button button;
 	private HBox node;
-	private byte[] press = {DashboardButton.DOWN};
+	private byte[] press = {FlashboardButton.DOWN};
 	private boolean changed = false;
 	
 	public ButtonControl(String name) {
@@ -40,7 +40,7 @@ public class ButtonControl extends Displayable{
 	}
 
 	private void press(){
-		press[0] = DashboardButton.DOWN;
+		press[0] = FlashboardButton.DOWN;
 		changed = true;
 	}
 	
@@ -50,23 +50,23 @@ public class ButtonControl extends Displayable{
 	}
 	@Override
 	protected DisplayType getDisplayType(){
-		return DisplayType.Manual;
+		return DisplayType.Activatable;
 	}
 	
 	@Override
 	public void newData(byte[] bytes) {
-		if(bytes[0] == DashboardButton.UP){
+		if(bytes[0] == FlashboardButton.UP){
 			FlashFXUtils.onFXThread(()->{
 				button.setDisable(false);
 			});
-			press[0] = DashboardButton.UP;
+			press[0] = FlashboardButton.UP;
 			changed = true;
-		}else if(bytes[0] == DashboardButton.ENABLED){
+		}else if(bytes[0] == FlashboardButton.ENABLED){
 			final boolean enabled = bytes[1] == 1;
 			FlashFXUtils.onFXThread(()->{
 				button.setDisable(enabled);
 			});
-			press[0] = DashboardButton.UP;
+			press[0] = FlashboardButton.UP;
 			changed = true;
 		}
 	}

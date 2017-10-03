@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.flashboard.SendableLog;
+import edu.flash3388.flashlib.flashboard.FlashboardRemoteLog;
 import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -153,7 +153,7 @@ public class FlashRobotUtil {
 			Flashboard.init(flashboardInitData);
 			if(Flashboard.flashboardInit()){
 				Flashboard.attach(estopControl,
-					      new SendableLog(FlashUtil.getLog()));
+					      new FlashboardRemoteLog(FlashUtil.getLog()));
 			}
 		}
 		

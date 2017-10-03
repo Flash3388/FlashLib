@@ -10,14 +10,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class Chooser extends Displayable{
+public class ChooserControl extends Displayable{
 
 	private ComboBox<String> box;
 	private VBox container = new VBox();
 	private SimpleIntegerProperty selected = new SimpleIntegerProperty(-1);
 	private boolean changed = false, manual = false;
 	
-	public Chooser(String name) {
+	public ChooserControl(String name) {
 		super(name, FlashboardSendableType.CHOOSER);
 		
 		box = new ComboBox<String>();
@@ -38,7 +38,7 @@ public class Chooser extends Displayable{
 	}
 	@Override
 	protected DisplayType getDisplayType(){
-		return DisplayType.Manual;
+		return DisplayType.Input;
 	}
 	
 	@Override

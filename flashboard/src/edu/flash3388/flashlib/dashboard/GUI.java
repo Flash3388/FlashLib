@@ -34,7 +34,6 @@ public class GUI {
 	public static void resetWindows(){
 		PDPWindow.reset();
 		TesterWindow.closeTester();
-		VisionEditorWindow.closeEditor();
 		PIDTunerWindow.reset();
 	}
 	
@@ -65,6 +64,9 @@ public class GUI {
 	}
 	public static void showPropertiesViewer(){
 		PropertyViewer.showPropertyViewer(primary);
+	}
+	public static void showVisionEditor(){
+		VisionEditorWindow.showEditor(Dashboard.getVision());
 	}
 	public static File showVisionLoadDialog(){
 		FileChooser chooser = new FileChooser();

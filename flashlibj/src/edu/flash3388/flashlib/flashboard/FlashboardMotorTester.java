@@ -12,19 +12,19 @@ import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Tester extends Sendable{
+public class FlashboardMotorTester extends Sendable{
 	
 	public static final byte START = 0xe;
 	public static final byte STOP = 0x5;
 	
-	private HashMap<String, TesterMotor> motors = new HashMap<String, TesterMotor>();
+	private HashMap<String, FlashboardTesterMotor> motors = new HashMap<String, FlashboardTesterMotor>();
 	private boolean sending = false;
 	
 	/**
 	 * Creates a new tester for motors. Uses the sendable type {@link FlashboardSendableType#TESTER}.
 	 * @param name the name of the tester.
 	 */
-	public Tester(String name) {
+	public FlashboardMotorTester(String name) {
 		super(name, FlashboardSendableType.TESTER);
 	}
 
@@ -42,9 +42,9 @@ public class Tester extends Sendable{
 	 * 
 	 * @param motor the wrapper for tester motor
 	 * @return the motor object
-	 * @see TesterMotor
+	 * @see FlashboardTesterMotor
 	 */
-	public TesterMotor addMotor(TesterMotor motor){
+	public FlashboardTesterMotor addMotor(FlashboardTesterMotor motor){
 		motors.put(motor.getName(), motor);
 		Flashboard.attach(motor);
 		motor.setDataSending(sending);
@@ -56,19 +56,19 @@ public class Tester extends Sendable{
 	 * @param name name of the motor
 	 * @param controller the motor controller
 	 * @return the created motor object
-	 * @see TesterMotor
+	 * @see FlashboardTesterMotor
 	 */
-	public TesterMotor addMotor(String name, FlashSpeedController controller){
-		return addMotor(new TesterMotor(name, controller, this));
+	public FlashboardTesterMotor addMotor(String name, FlashSpeedController controller){
+		return addMotor(new FlashboardTesterMotor(name, controller, this));
 	}
 	/**
 	 * Adds new motors to the tester.
 	 * 
 	 * @param motors an array of tester motor wrappers
-	 * @see TesterMotor
+	 * @see FlashboardTesterMotor
 	 */
-	public void addMotors(TesterMotor...motors){
-		for (TesterMotor testerMotor : motors)
+	public void addMotors(FlashboardTesterMotor...motors){
+		for (FlashboardTesterMotor testerMotor : motors)
 			addMotor(testerMotor);
 	}
 	
@@ -78,18 +78,18 @@ public class Tester extends Sendable{
 	 * @param name the name of the wrapper
 	 * @return the wrapper object, or null if it does not exist.
 	 */
-	public TesterMotor getMotor(String name){
+	public FlashboardTesterMotor getMotor(String name){
 		return motors.get(name);
 	}
 	
 	private void startDataSending(){
 		sending = true;
-		for (Iterator<TesterMotor> iterator = motors.values().iterator(); iterator.hasNext();)
+		for (Iterator<FlashboardTesterMotor> iterator = motors.values().iterator(); iterator.hasNext();)
 			iterator.next().setDataSending(true);
 	}
 	private void stopDataSending(){
 		sending = false;
-		for (Iterator<TesterMotor> iterator = motors.values().iterator(); iterator.hasNext();)
+		for (Iterator<FlashboardTesterMotor> iterator = motors.values().iterator(); iterator.hasNext();)
 			iterator.next().setDataSending(false);
 	}
 	

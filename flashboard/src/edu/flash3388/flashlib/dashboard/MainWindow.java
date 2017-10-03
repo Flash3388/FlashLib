@@ -2,6 +2,8 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
 
+import edu.flash3388.flashlib.dashboard.Displayable.DisplayType;
+import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.robot.PeriodicRunnable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
@@ -22,11 +24,16 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class MainWindow {
 
@@ -49,7 +56,7 @@ public class MainWindow {
 			slider.setMin(0.0);
 			slider.setMax(255.0);
 			slider.setValue(0.0);
-			slider.setMaxWidth(250.0);
+			slider.setMaxWidth(350.0);
 			slider.setDisable(true);
 			
 			inputText = new TextField();
@@ -347,7 +354,7 @@ public class MainWindow {
 		vision_max3 = new VisionControl();
 		
 		vision_paramBox = new ComboBox<String>();
-		vision_paramBox.setMaxWidth(100.0);
+		vision_paramBox.setMaxWidth(150.0);
 		refreshVisionParameters();
 		vision_paramBox.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
 			if(localVisionChange)
@@ -417,7 +424,8 @@ public class MainWindow {
 		
 		VBox visionBox = new VBox();
 		visionBox.setSpacing(10.0);
-		visionBox.setPadding(new Insets(20.0));
+		visionBox.setPadding(new Insets(5.0));
+		visionBox.setMinWidth(200.0);
 		//visionBox.setAlignment(Pos.CENTER);
 		visionBox.getChildren().addAll(
 				vision_min1.getRoot(), vision_max1.getRoot(),
@@ -442,7 +450,11 @@ public class MainWindow {
 		savevision.setOnAction((e)->{
 			saveVisionParameters();
 		});
-		vision.getItems().addAll(loadvision, savevision);
+		MenuItem visioneditor = new MenuItem("Show Vision Editor");
+		visioneditor.setOnAction((e)->{
+			GUI.showVisionEditor();
+		});
+		vision.getItems().addAll(loadvision, savevision, visioneditor);
 		
 		Menu monitoring = new Menu("Monitoring");
 		MenuItem pdpwindow = new MenuItem("Show PDP");
@@ -486,12 +498,60 @@ public class MainWindow {
 	//-----------------------Center---------------------------------------
 	//--------------------------------------------------------------------
 	
+	private ImageView cam_imageView;
 	private ComboBox<String> cam_outputImageType;
 	
+	public void setCameraViewImage(Image image){
+		//cam_imageView.setImage(image);
+	}
+	
+	private void updateConnectionIndicators(){
+		if(comm_connected != Dashboard.communicationsConnected()){
+			comm_connected = Dashboard.communicationsConnected();
+			comm_connectionIndicator.setFill(comm_connected? Color.DARKGREEN : Color.RED);
+			
+			if(!comm_connected){
+				Dashboard.resetDisplaybles();
+				GUI.resetWindows();
+				resetControlsDisplay();
+			}
+		}
+		if(cam_connected != Dashboard.camConnected()){
+			cam_connected = Dashboard.camConnected();
+			cam_connectionIndicator.setFill(cam_connected? Color.DARKGREEN : Color.RED);
+		}
+	}
+	
 	private Node initializeCenterNode(){
+		cam_imageView = new ImageView();
+		cam_imageView.setFitWidth(640);
+		cam_imageView.setFitHeight(420);
+		cam_imageView.setImage(new Image(new File("data/res/pdp.png").toURI().toString()));
 		
+		cam_outputImageType = new ComboBox<String>();
+		for (CameraViewer.DisplayMode mode : CameraViewer.DisplayMode.values()) {
+			cam_outputImageType.getItems().add(mode.toString());
+		}
+		cam_outputImageType.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
+			Dashboard.getCamViewer().setDisplayMode(CameraViewer.DisplayMode.values()[n.intValue()]);
+		});
+		cam_outputImageType.getSelectionModel().select(0);
+		
+		HBox imageTypeBox = new HBox();
+		imageTypeBox.setSpacing(5.0);
+		imageTypeBox.setAlignment(Pos.CENTER);
+		imageTypeBox.setPadding(new Insets(5.0));
+		imageTypeBox.getChildren().addAll(new Label("Display Type:"), cam_outputImageType);
+		
+		VBox objs = new VBox();
+		objs.setSpacing(5.0);
+		objs.setAlignment(Pos.CENTER);
+		objs.getChildren().addAll(cam_imageView, imageTypeBox);
 		
 		VBox root = new VBox();
+		root.setPadding(new Insets(5.0));
+		//root.setAlignment(Pos.);
+		root.getChildren().addAll(objs);
 		return root;
 	}
 	
@@ -499,15 +559,119 @@ public class MainWindow {
 	//-----------------------Controls-------------------------------------
 	//--------------------------------------------------------------------
 	
+	private VBox controlsGraphic_Pane;
+	private VBox controlsSimple_Pane;
+	
+	private GridPane controlsActivatable_Pane;
+	private int controlsActivatable_row = 0;
+	private int controlsActivatable_column = 0;
+	
+	private GridPane controlsInput_Pane;
+	private int controlsInput_row = 0;
+	private int controlsInput_column = 0;
+	
+	public void addControlToDisplay(Node node, DisplayType type){
+		switch(type){
+			case Activatable:
+				addToActivatableControls(node);
+				break;
+			case GraphicData:
+				addToGraphicControls(node);
+				break;
+			case Input:
+				addToInputControls(node);
+				break;
+			case SimpleData:
+				addToSimpleControls(node);
+				break;
+		}
+	}
+	
+	private void resetControlsDisplay(){
+		controlsActivatable_Pane.getChildren().clear();
+		controlsInput_Pane.getChildren().clear();
+		controlsSimple_Pane.getChildren().clear();
+		controlsGraphic_Pane.getChildren().clear();
+		
+		controlsActivatable_row = 0;
+		controlsActivatable_column = 0;
+		
+		controlsInput_row = 0;
+		controlsInput_column = 0;
+	}
+	private void addToGraphicControls(Node node){
+		controlsGraphic_Pane.getChildren().add(node);
+	}
+	private void addToSimpleControls(Node node){
+		controlsSimple_Pane.getChildren().add(node);
+	}
+	private void addToInputControls(Node node){
+		controlsInput_Pane.add(node, controlsInput_column, controlsInput_row);
+		controlsInput_column++;
+		
+		if(controlsInput_column > 4){
+			controlsInput_column = 0;
+			controlsInput_row++;
+		}
+	}
+	private void addToActivatableControls(Node node){
+		controlsActivatable_Pane.add(node, controlsActivatable_column, controlsActivatable_row);
+		controlsActivatable_column++;
+		
+		if(controlsActivatable_column > 4){
+			controlsActivatable_column = 0;
+			controlsActivatable_row++;
+		}
+	}
+	
 	private Node initializeDisplayControls(){
+		VBox simplecontrols = new VBox();
+		simplecontrols.setSpacing(5.0);
+		simplecontrols.setAlignment(Pos.TOP_CENTER);
+		controlsSimple_Pane = simplecontrols;
+		
+		VBox graphiccontrols = new VBox();
+		graphiccontrols.setSpacing(5.0);
+		graphiccontrols.setAlignment(Pos.TOP_CENTER);
+		controlsGraphic_Pane = graphiccontrols;
 		
 		HBox root = new HBox();
+		root.setSpacing(10.0);
+		root.setAlignment(Pos.TOP_CENTER);
+		root.setPadding(new Insets(10.0));
+		root.setMinWidth(360.0);
+		root.getChildren().addAll(graphiccontrols, simplecontrols);
 		return root;
 	}
 	
 	private Node initializeInputControls(){
+		GridPane activatablecontrols = new GridPane();
+		activatablecontrols.setAlignment(Pos.CENTER);
+		controlsActivatable_Pane = activatablecontrols;
+		
+		GridPane inputcontrols = new GridPane();
+		inputcontrols.setAlignment(Pos.CENTER);
+		controlsInput_Pane = inputcontrols;
+		
+		comm_connectionIndicator = new Rectangle(80.0, 30.0, Color.RED);
+		cam_connectionIndicator = new Rectangle(80.0, 30.0, Color.RED);
+		
+		HBox connectionBox = new HBox();
+		connectionBox.setSpacing(5.0);
+		connectionBox.setAlignment(Pos.CENTER);
+		//connectionBox.setPadding(new Insets(10.0));
+		connectionBox.getChildren().addAll(comm_connectionIndicator, cam_connectionIndicator);
+		
+		VBox estopBox = new VBox();
+		estopBox.setSpacing(5.0);
+		estopBox.setPadding(new Insets(10.0));
+		estopBox.setAlignment(Pos.CENTER);
+		estopBox.getChildren().addAll(connectionBox, Dashboard.getEmergencyStopControl().getRoot());
 		
 		BorderPane root = new BorderPane();
+		root.setRight(activatablecontrols);
+		root.setLeft(inputcontrols);
+		root.setCenter(estopBox);
 		return root;
 	}
 	
@@ -516,6 +680,11 @@ public class MainWindow {
 	//--------------------------------------------------------------------
 	
 	private static final int UPDATE_PERIOD = 100;
+	
+	private Rectangle comm_connectionIndicator;
+	private boolean comm_connected = false;
+	private Rectangle cam_connectionIndicator;
+	private boolean cam_connected = false;
 	
 	private Runnable updateTask;
 	
@@ -529,8 +698,12 @@ public class MainWindow {
 	
 	private void update(){
 		updateVisionControls();
+		updateConnectionIndicators();
 	}
 	
+	public void resetWindow(){
+		resetControlsDisplay();
+	}
 	public Parent initializeMainScene(){
 		Node toolBarNode = initializeToolbar();
 		Node visionNode = initializeVisionControl();

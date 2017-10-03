@@ -1,6 +1,6 @@
 package examples.robot.fullrobot;
 
-import edu.flash3388.flashlib.flashboard.DashboardChooser;
+import edu.flash3388.flashlib.flashboard.FlashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
@@ -130,7 +130,7 @@ public class Robot extends IterativeRobot{
 		//put a combo box on the flashboard and add several options to it. 
 		//this combo box will be used to select which action to execute during
 		//auto mode.
-		DashboardChooser<Action> autoChooser = Flashboard.<Action>putChooser("Auto Chooser");
+		FlashboardChooser<Action> autoChooser = Flashboard.<Action>putChooser("Auto Chooser");
 		autoChooser.addDefault("Empty", Action.EMPTY);
 		autoChooser.addOption("Arcade Drive", arcadeDriveAction);
 		autoChooser.addOption("Tank Drive", tankDriveAction);

@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.flashboard.DashboardModeSelector;
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.flashboard.FlashboardModeSelectorControl;
 
-public class FlashboardModeSelector extends DashboardModeSelector implements ModeSelector{
+public class FlashboardModeSelector extends FlashboardModeSelectorControl implements ModeSelector{
 
 	public void attachToFlashboard(){
 		if(Flashboard.flashboardInit())
