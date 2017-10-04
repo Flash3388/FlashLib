@@ -48,7 +48,7 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 	}
 
 	public void setImage(BufferedImage bf){
-		if(mode != DisplayMode.Normal && bf != null)
+		if(mode != DisplayMode.Normal || bf == null)
 			return;
        synchronized (imageMutex) {
     	   image = FlashFXUtils.bufferedImage2FxImage(bf);
