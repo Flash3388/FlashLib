@@ -26,4 +26,8 @@ public class FlashboardSendableType {
 	public static final byte INPUT = 0x0f;
 	public static final byte SLIDER = 0x10;
 	public static final byte CHECKBOX = 0x11;
+	public static final byte LINECHART = 0x12;
+	public static final byte AREACHART = 0x13;
+	public static final byte BARCHART = 0x14;
+	public static final byte BARCHART_SERIES = 0x15;
 }

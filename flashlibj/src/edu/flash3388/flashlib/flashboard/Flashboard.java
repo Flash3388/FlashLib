@@ -437,5 +437,30 @@ public final class Flashboard {
 		Flashboard.attach(indicator);
 		return indicator;
 	}
+	public static FlashboardXYChart putLineChart(String name, DoubleSource xsource, DoubleSource ysource, 
+			double rangeX, double minY, double maxY){
+		checkInit();
+		
+		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Line,
+				xsource, ysource, rangeX, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
+	public static FlashboardXYChart putAreaChart(String name, DoubleSource xsource, DoubleSource ysource, 
+			double rangeX, double minY, double maxY){
+		checkInit();
+		
+		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Area,
+				xsource, ysource, rangeX, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
+	public static FlashboardBarChart putBarChart(String name, double minY, double maxY){
+		checkInit();
+		
+		FlashboardBarChart chart = new FlashboardBarChart(name, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
 }
 

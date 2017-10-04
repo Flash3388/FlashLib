@@ -13,6 +13,9 @@ public class SimpleVisionRunner extends VisionRunner{
 	private Analysis analysis;
 	private ObservableProperty<Object> newFrame = new SimpleObservableProperty<Object>();
 	
+	public SimpleVisionRunner(String name, byte type) {
+		super(name, type);
+	}
 	public SimpleVisionRunner(String name) {
 		super(name);
 	}

@@ -642,7 +642,7 @@ public class MainWindow {
 		
 		VBox graphiccontrols = new VBox();
 		graphiccontrols.setSpacing(10.0);
-		graphiccontrols.setPadding(new Insets(0.0, 5.0, 0.0, 0.0));
+		graphiccontrols.setPadding(new Insets(5.0, 5.0, 0.0, 0.0));
 		graphiccontrols.setAlignment(Pos.TOP_CENTER);
 		controlsGraphic_Pane = graphiccontrols;
 		

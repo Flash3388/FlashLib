@@ -38,9 +38,19 @@ public class RemoteVision extends Sendable implements Vision{
 	 * Creates a new remote vision controller.
 	 * 
 	 * @param name the sendable name
+	 * @param type the sendable type
+	 */
+	public RemoteVision(String name, byte type) {
+		super(name, type);
+	}
+	/**
+	 * Creates a new remote vision controller with a {@link FlashboardSendableType#VISION}
+	 * sendable type.
+	 * 
+	 * @param name the sendable name
 	 */
 	public RemoteVision(String name) {
-		super(name, FlashboardSendableType.VISION);
+		this(name, FlashboardSendableType.VISION);
 	}
 	/**
 	 * Creates a new remote vision controller.

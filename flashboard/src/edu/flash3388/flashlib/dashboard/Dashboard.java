@@ -10,10 +10,12 @@ import java.util.Vector;
 
 import org.opencv.core.Core;
 
+import edu.flash3388.flashlib.dashboard.controls.BarChartControl;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
 import edu.flash3388.flashlib.dashboard.controls.EmergencyStopControl;
 import edu.flash3388.flashlib.dashboard.controls.HIDControl;
 import edu.flash3388.flashlib.dashboard.controls.ModeSelectorControl;
+import edu.flash3388.flashlib.dashboard.controls.TesterControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.robot.Scheduler;
@@ -421,6 +423,9 @@ public class Dashboard extends Application {
 		displayables.clear();
 		addDisplayable(camViewer);
 		addDisplayable(emergencyStop);
+		
+		TesterControl.resetTesters();
+		BarChartControl.resetControls();
 	}
 	
 	private static void fxReady(){

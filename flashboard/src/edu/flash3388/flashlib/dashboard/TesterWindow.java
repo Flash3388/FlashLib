@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.util.Enumeration;
 
-import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
+import edu.flash3388.flashlib.dashboard.controls.TesterControl;
 import edu.flash3388.flashlib.dashboard.controls.TesterMotorControl;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.geometry.Insets;
@@ -20,7 +20,7 @@ import javafx.stage.StageStyle;
 public class TesterWindow extends Stage{
 
 	private static TesterWindow instance;
-	private FlashboardTester tester;
+	private TesterControl tester;
 	private ComboBox<String> keysBox;
 	
 	private TesterWindow(){
@@ -67,7 +67,7 @@ public class TesterWindow extends Stage{
 		VBox.setMargin(keysBox, new Insets(5.0, 0.0, 0.0, 0.0));
 		keysBox.getItems().add("-- Choose Tester --");
 		keysBox.getSelectionModel().select(0);
-		keysBox.getItems().addAll(FlashboardTester.getTestersNames());
+		keysBox.getItems().addAll(TesterControl.getTestersNames());
 		keysBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
 			motorsView.getItems().clear();
 			if(tester != null){
@@ -78,7 +78,7 @@ public class TesterWindow extends Stage{
 				return;
 			}
 			
-			tester = FlashboardTester.getTester(newValue);
+			tester = TesterControl.getTester(newValue);
 			if(tester == null){
 				keysBox.getSelectionModel().select(0);
 				return;

@@ -10,16 +10,16 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.FlashboardMotorTester;
 
-public class FlashboardTester extends Sendable{
+public class TesterControl extends Sendable{
 
 	private static HashMap<String, List<TesterMotorControl>> unallocatedMotors = 
 			new HashMap<String, List<TesterMotorControl>>();
-	private static HashMap<String, FlashboardTester> testers = new HashMap<String, FlashboardTester>();
+	private static HashMap<String, TesterControl> testers = new HashMap<String, TesterControl>();
 	
 	private Vector<TesterMotorControl> motors = new Vector<TesterMotorControl>();
 	private boolean updateEnable = false, enable = false;
 	
-	public FlashboardTester(String name) {
+	public TesterControl(String name) {
 		super(name, FlashboardSendableType.TESTER);
 		
 		testers.put(name, this);
@@ -66,7 +66,7 @@ public class FlashboardTester extends Sendable{
 		if(name == null || name.equals("")){
 			return;
 		}else{
-			FlashboardTester tester = testers.get(name);
+			TesterControl tester = testers.get(name);
 			if(tester != null)
 				tester.addMotor(motor);
 			else{
@@ -79,7 +79,7 @@ public class FlashboardTester extends Sendable{
 			}
 		}
 	}
-	public static FlashboardTester getTester(String name){
+	public static TesterControl getTester(String name){
 		return testers.get(name);
 	}
 	public static String[] getTestersNames(){
@@ -88,11 +88,11 @@ public class FlashboardTester extends Sendable{
 	public static void resetTesters(){
 		String[] testers = getTestersNames();
 		for (int i = 0; i < testers.length; i++){
-			FlashboardTester tester = getTester(testers[i]);
+			TesterControl tester = getTester(testers[i]);
 			tester.enable(false);
 			tester.motors.clear();
 		}
-		FlashboardTester.testers.clear();
+		TesterControl.testers.clear();
 		unallocatedMotors.clear();
 	}
 }

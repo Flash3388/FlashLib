@@ -25,7 +25,7 @@ public class TesterMotorControl extends Displayable{
 	
 	public TesterMotorControl(String name) {
 		super(name, FlashboardSendableType.MOTOR);
-		FlashboardTester.allocateTesterMotor(this);
+		TesterControl.allocateTesterMotor(this);
 		nameprop = new SimpleStringProperty(name);
 	}
 
@@ -53,7 +53,7 @@ public class TesterMotorControl extends Displayable{
 	public void newData(byte[] data) {
 		if(data[0] == FlashboardTesterMotor.UPDATE_TESTER_NAME){
 			testerName = new String(data, 1, data.length - 1);
-			FlashboardTester.allocateTesterMotor(this);
+			TesterControl.allocateTesterMotor(this);
 		}else{
 			int pos = 8;
 			speed = FlashUtil.toDouble(data);

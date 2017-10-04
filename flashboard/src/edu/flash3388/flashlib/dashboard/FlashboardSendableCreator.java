@@ -10,6 +10,10 @@ public class FlashboardSendableCreator implements SendableCreator{
 	private Sendable get(String name, byte type) {
 		switch(type){
 			case FlashboardSendableType.DIR_INDICATOR: return new DirectionControl(name);
+			case FlashboardSendableType.LINECHART: return new LineChartControl(name);
+			case FlashboardSendableType.AREACHART: return new AreaChartControl(name);
+			case FlashboardSendableType.BARCHART: return new BarChartControl(name);
+			case FlashboardSendableType.BARCHART_SERIES: return new BarChartControl.BarChartSeriesControl(name);
 			case FlashboardSendableType.BOOL_INDICATOR: return new BooleanIndicatorControl(name);
 			case FlashboardSendableType.CHECKBOX: return new CheckBoxControl(name);
 			case FlashboardSendableType.ACTIVATABLE: return new ButtonControl(name);
@@ -18,7 +22,7 @@ public class FlashboardSendableCreator implements SendableCreator{
 			case FlashboardSendableType.SLIDER: return new SliderControl(name);
 			case FlashboardSendableType.JOYSTICK: return Dashboard.getHIDControl();
 			case FlashboardSendableType.CHOOSER: return new ChooserControl(name);
-			case FlashboardSendableType.TESTER: return new FlashboardTester(name);
+			case FlashboardSendableType.TESTER: return new TesterControl(name);
 			case FlashboardSendableType.MOTOR: return new TesterMotorControl(name);
 			case FlashboardSendableType.LOG: return new LogWindow.RemoteLog(name);
 			case FlashboardSendableType.VISION: return (Sendable) Dashboard.getVision();

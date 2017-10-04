@@ -30,14 +30,21 @@ public abstract class VisionRunner extends Sendable implements Vision, ImagePipe
 	
 	/**
 	 * Creates a base for running vision. 
+	 * 
+	 * @param name the name of the runner
+	 * @param type the sendable type of the vision runner
+	 */
+	public VisionRunner(String name, byte type) {
+		super(name, type);
+	}
+	/**
+	 * Creates a base for running vision. 
 	 * Uses {@link FlashboardSendableType#VISION} as a sendable type.
 	 * 
 	 * @param name the name of the runner
 	 */
 	public VisionRunner(String name) {
 		super(name, FlashboardSendableType.VISION);
-		
-		
 	}
 	/**
 	 * Creates a base for running vision. When using the runner for local vision and not remote, this constructor is

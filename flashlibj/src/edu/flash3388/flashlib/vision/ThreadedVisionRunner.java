@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
 import edu.flash3388.flashlib.util.beans.observable.ObservablePropertyBase;
@@ -73,11 +74,14 @@ public class ThreadedVisionRunner extends VisionRunner{
 	private Thread visionThread;
 	private VisionRunnerTask runTask;
 	
-	public ThreadedVisionRunner(String name) {
-		super(name);
+	public ThreadedVisionRunner(String name, byte type) {
+		super(name, type);
 		
 		runTask = new VisionRunnerTask(this);
 		visionThread = new Thread(runTask, name);
+	}
+	public ThreadedVisionRunner(String name) {
+		this(name, FlashboardSendableType.VISION);
 	}
 	public ThreadedVisionRunner() {
 		this("ThreadedVisionRunner");
