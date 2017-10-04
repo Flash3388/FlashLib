@@ -22,95 +22,95 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public class ModeSelectorControl extends Sendable{
 
-	public static class State{
+	public static class OpMode{
 		public final int value;
 		public final String name;
 		
-		State(String name, int value) {
+		OpMode(String name, int value) {
 			this.name = name;
 			this.value = value;
 		}
 	}
 	
-	private static final State DISABLED = new State("Disabled", 0);
+	private static final OpMode DISABLED = new OpMode("Disabled", 0);
 	
-	private List<State> states;
-	private int currentStateIndex;
+	private List<OpMode> modes;
+	private int currentModeIndex;
 	private javafx.beans.property.BooleanProperty disabled = new SimpleBooleanProperty(false);
 	
-	private boolean stateChanged = false;
+	private boolean modeChanged = false;
 	private boolean disabledChanged = false;
 	
 	public ModeSelectorControl() {
 		super(FlashboardSendableType.MODE_SELECTOR);
-		currentStateIndex = 0;
-		states = new ArrayList<State>();
+		currentModeIndex = 0;
+		modes = new ArrayList<OpMode>();
 	}
 
-	public void addState(String name, int value){
-		addState(new State(name, value));
+	public void addMode(String name, int value){
+		addMode(new OpMode(name, value));
 	}
-	public void addState(State state){
-		states.add(state);
+	public void addMode(OpMode mode){
+		modes.add(mode);
 	}
-	public void removeState(int index){
-		if(index == currentStateIndex)
+	public void removeMode(int index){
+		if(index == currentModeIndex)
 			setDisabled(true);
-		states.remove(index);
+		modes.remove(index);
 		
-		if(!states.isEmpty())
-			setCurrentState(index < states.size()? index : states.size() - 1);
+		if(!modes.isEmpty())
+			setCurrentMode(index < modes.size()? index : modes.size() - 1);
 	}
 	
-	public int getStatesCount(){
-		return states.size();
+	public int getModesCount(){
+		return modes.size();
 	}
-	public State getState(int state){
-		return states.get(state);
+	public OpMode getMode(int mode){
+		return modes.get(mode);
 	}
 	
-	public State getStateForName(String name){
-		for (int i = 0; i < states.size(); i++) {
-			if(states.get(i).name.equals(name))
-				return states.get(i);
+	public OpMode getModeForName(String name){
+		for (int i = 0; i < modes.size(); i++) {
+			if(modes.get(i).name.equals(name))
+				return modes.get(i);
 		}
 		
 		return null;
 	}
-	public State getStateForValue(int value){
+	public OpMode getModeForValue(int value){
 		if(value == 0){
 			return DISABLED;
 		}
 		
-		for (int i = 0; i < states.size(); i++) {
-			if(states.get(i).value == value)
-				return states.get(i);
+		for (int i = 0; i < modes.size(); i++) {
+			if(modes.get(i).value == value)
+				return modes.get(i);
 		}
 		
 		return null;
 	}
 	
-	public int getCurrentState(){
-		return currentStateIndex;
+	public int getCurrentMode(){
+		return currentModeIndex;
 	}
 	
 	public boolean isDisabled(){
 		return disabled.get();
 	}
 	
-	public void setCurrentState(int state){
-		if(state < 0 || state >= states.size())
+	public void setCurrentMode(int state){
+		if(state < 0 || state >= modes.size())
 			return;
 		
-		currentStateIndex = state;
+		currentModeIndex = state;
 		
 		if(!disabled.get())
-			stateChanged = true;
+			modeChanged = true;
 	}
 	public void setDisabled(boolean disabled){
 		this.disabled.set(disabled);
 		if(!disabled){
-			stateChanged = true;
+			modeChanged = true;
 		}
 		disabledChanged = true;
 	}
@@ -124,11 +124,11 @@ public class ModeSelectorControl extends Sendable{
 	}
 	@Override
 	public byte[] dataForTransmition() {
-		if(stateChanged){
-			stateChanged = false;
+		if(modeChanged){
+			modeChanged = false;
 			byte[] bytes = new byte[5];
 			bytes[0] = FlashboardModeSelectorControl.UPDATE_MODE;
-			FlashUtil.fillByteArray(states.get(currentStateIndex).value, 1, bytes);
+			FlashUtil.fillByteArray(modes.get(currentModeIndex).value, 1, bytes);
 			return bytes;
 		}
 		disabledChanged = false;
@@ -136,7 +136,7 @@ public class ModeSelectorControl extends Sendable{
 	}
 	@Override
 	public boolean hasChanged() {
-		return stateChanged || disabledChanged;
+		return modeChanged || disabledChanged;
 	}
 
 	@Override
@@ -150,14 +150,14 @@ public class ModeSelectorControl extends Sendable{
 	}
 	
 	
-	public void loadStates(File file) throws Exception{
-		states.clear();
+	public void loadModes(File file) throws Exception{
+		modes.clear();
 		
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 				.parse(file);
 		
 		doc.getDocumentElement().normalize();
-		NodeList stateList = doc.getElementsByTagName("state");
+		NodeList stateList = doc.getElementsByTagName("mode");
 		for (int i = 0; i < stateList.getLength(); i++) {
 			Node node = stateList.item(i);
 			if(node.getNodeType() == Node.ELEMENT_NODE){
@@ -165,8 +165,8 @@ public class ModeSelectorControl extends Sendable{
 				
 				String name = element.getAttribute("name");
 				
-				if(getStateForName(name) != null)
-					throw new RuntimeException("State name taken: "+name);
+				if(getModeForName(name) != null)
+					throw new RuntimeException("Mode name taken: "+name);
 				
 				String value = element.getAttribute("value");
 				int bvalue = -1;
@@ -174,29 +174,29 @@ public class ModeSelectorControl extends Sendable{
 				try{
 					bvalue = Integer.parseInt(value);
 				}catch(NumberFormatException e){
-					throw new RuntimeException("Value for state "+name+ " is not an int");
+					throw new RuntimeException("Value for mode "+name+ " is not an int");
 				}
 				
 				if(bvalue == 0)
-					throw new RuntimeException("value for state "+name+" cannot be 0");
+					throw new RuntimeException("value for mode "+name+" cannot be 0");
 				
-				if(getStateForValue(bvalue) != null)
-					throw new RuntimeException("State value taken: "+bvalue);
+				if(getModeForValue(bvalue) != null)
+					throw new RuntimeException("Mode value taken: "+bvalue);
 				
-				State state = new State(name, bvalue);
-				states.add(state);
+				OpMode state = new OpMode(name, bvalue);
+				modes.add(state);
 			}
 		}
 	}
-	public void saveStates(File file){
+	public void saveModes(File file){
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		lines.add("<?xml version=\"1.0\" ?>");
-		lines.add("<state-selector>");
-		for (int i = 0; i < states.size(); i++) {
-			lines.add("\t<state name=\""+states.get(i).name+"\" value=\""+states.get(i).value+"\" />");
+		lines.add("<mode-selector>");
+		for (int i = 0; i < modes.size(); i++) {
+			lines.add("\t<mode name=\""+modes.get(i).name+"\" value=\""+modes.get(i).value+"\" />");
 		}
-		lines.add("</state-selector>");
+		lines.add("</mode-selector>");
 		
 		try {
 			Files.write(file.toPath(), lines, StandardOpenOption.CREATE);

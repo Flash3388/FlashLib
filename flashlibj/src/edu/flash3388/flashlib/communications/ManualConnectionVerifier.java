@@ -36,7 +36,7 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	/**
 	 * A default connection timeout for protocols which need to manually check for connection, like: UDP.
 	 */
-	public static final int CONNECTION_TIMEOUT = 1500;
+	public static final int CONNECTION_TIMEOUT = 1000;
 	
 	private int lastRead = -1, timeLastTimeout = -1, lastSend = -1;
 	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
@@ -53,17 +53,6 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 */
 	@Override
 	public void update(int millis){
-		/*if(outInet != null && millis - lastRemoteReachCheck > CONNECTION_TIMEOUT){
-			System.out.println("Checking network reachable");
-			try {
-				if (!outInet.isReachable(CONNECTION_TIMEOUT)){
-					disconnect();
-					System.out.println("Network not reachable");
-				}
-			} catch (IOException e) {
-			}
-			lastRemoteReachCheck = millis;
-		}*/
 		if(!verifyConnection)
 			return;
 		if(millis - lastRead >= connectionTimeout){
@@ -79,8 +68,9 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 			timeouts = 0;
 			timeLastTimeout = -1;
 		}
-		if(millis - lastSend >= connectionTimeout / 2)
+		if(millis - lastSend >= connectionTimeout / 2){
 			writeHandshake();
+		}
 	}
 	
 	/**
@@ -93,7 +83,7 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * Updates the send verifiers of new data that has been sent. Should be called when new data was sent.
 	 */
 	protected void newDataSent(){
-		lastRead = FlashUtil.millisInt();
+		lastSend = FlashUtil.millisInt();
 	}
 	/**
 	 * Resets the connection verification data handlers. Should be called on connection.

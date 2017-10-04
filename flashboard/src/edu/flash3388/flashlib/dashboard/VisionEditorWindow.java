@@ -344,7 +344,7 @@ public class VisionEditorWindow extends Stage{
 	
 	public static void showEditor(Vision vision){
 		if(instance != null){
-			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Editor is already open!");
+			FlashFXUtils.showErrorDialog(GUI.getPrimary(), "Error", "Editor is already open!");
 			return;
 		}
 		instance = new VisionEditorWindow(vision);

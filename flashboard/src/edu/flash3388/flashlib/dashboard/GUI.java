@@ -5,7 +5,7 @@ import java.io.File;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.gui.PropertyViewer;
 import edu.flash3388.flashlib.util.FlashUtil;
-
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -32,11 +32,13 @@ public class GUI {
 	}
 	
 	public static void resetWindows(){
-		mainWindow.resetWindow();
-		PDPWindow.reset();
-		TesterWindow.resetTester();
-		PIDTunerWindow.reset();
-		LogWindow.resetLogs();
+		Platform.runLater(()->{
+			mainWindow.resetWindow();
+			PDPWindow.reset();
+			TesterWindow.resetTester();
+			PIDTunerWindow.reset();
+			LogWindow.resetLogs();
+		});
 	}
 	
 	public static void showMainErrorDialog(String error){
@@ -86,6 +88,6 @@ public class GUI {
 		chooser.setSelectedExtensionFilter(extFilter);
 		chooser.setInitialDirectory(new File(Dashboard.FOLDER_SAVES));
 		
-		return chooser.showSaveDialog(Dashboard.getPrimary());
+		return chooser.showSaveDialog(primary);
 	}
 }

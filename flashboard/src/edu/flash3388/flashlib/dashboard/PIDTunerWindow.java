@@ -533,7 +533,7 @@ public class PIDTunerWindow extends Stage{
 	}
 	public static void showTuner(){
 		if(instance != null){
-			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tuner is already open!");
+			FlashFXUtils.showErrorDialog(GUI.getPrimary(), "Error", "Tuner is already open!");
 			return;
 		}
 		instance = new PIDTunerWindow();

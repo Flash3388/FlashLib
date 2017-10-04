@@ -181,7 +181,7 @@ public class Dashboard extends Application {
 				if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
 						(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 					if(!commSettingError){
-						userError("Failed to initialize communications: validate values of "+
+						GUI.showMainErrorDialog("Failed to initialize communications: validate values of "+
 								PROP_HOST_ROBOT + " and " + PROP_COMM_PROTOCOL);
 						commSettingError = true;
 						
@@ -190,7 +190,7 @@ public class Dashboard extends Application {
 				}
 				else if(localport < 100 || remoteport < 100){
 					if(!commSettingError){
-						userError("Failed to initialize communications: validate values of "+
+						GUI.showMainErrorDialog("Failed to initialize communications: validate values of "+
 								PROP_COMM_PORT_LOCAL + ", " + PROP_COMM_PORT_REMOTE);
 						commSettingError = true;
 						
@@ -239,7 +239,7 @@ public class Dashboard extends Application {
 				int remotecamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
 				if(host == null || host.equals("")) {
 					if(!camSettingError){
-						userError("Failed to initialize cam communications: validate values of "+
+						GUI.showMainErrorDialog("Failed to initialize cam communications: validate values of "+
 								PROP_HOST_CAM);
 						camSettingError = true;
 						
@@ -248,7 +248,7 @@ public class Dashboard extends Application {
 				}
 				else if(localcamport < 100 || remotecamport < 100){
 					if(!camSettingError){
-						userError("Failed to initialize cam communications: validate values of "+
+						GUI.showMainErrorDialog("Failed to initialize cam communications: validate values of "+
 								PROP_CAM_PORT_LOCAL + ", " + PROP_CAM_PORT_REMOTE);
 						camSettingError = true;
 						
@@ -360,7 +360,7 @@ public class Dashboard extends Application {
 	public static final String FOLDER_LIBS_NATIVES_CURRENT = FOLDER_LIBS_NATIVES + "current/";
 	
 	private static final String SETTINGS_FILE = FOLDER_DATA+"dash.xml";
-	private static final String STATES_FILE = FOLDER_DATA+"states.xml";
+	private static final String MODES_FILE = FOLDER_DATA+"modes.xml";
 	
 	
 	private static boolean emptyProperty(String prop){
@@ -408,13 +408,8 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	private static Vector<Displayable> displayables = new Vector<Displayable>();
-	private static Stage primaryStage;
 	private static CameraViewer camViewer;
 	private static boolean fxready = false;
-	
-	public static Stage getPrimary(){
-		return primaryStage;
-	}
 	
 	public static Enumeration<Displayable> getDisplayables(){
 		return displayables.elements();
@@ -435,29 +430,8 @@ public class Dashboard extends Application {
 		return fxready;
 	}
 	
-	public static void userError(String error){
-		log.reportError(error);
-		FlashFXUtils.onFXThread(()->{
-			FlashFXUtils.showErrorDialog(primaryStage, "Error", error);
-		});
-	}
-	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Dashboard.primaryStage = primaryStage;
-		/*
-		BorderPane root = new BorderPane();
-		
-		try {
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(Dashboard.class.getResource("WorldWindow.fxml"));
-			loader.setRoot(root);
-			root = loader.load();
-			controller = loader.getController(); 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		*/
 		
 		Parent root = GUI.initializeMainWindow(primaryStage);
 		
@@ -689,10 +663,10 @@ public class Dashboard extends Application {
 	    updater.addTask(hidcontrol);
 	    
 	    modeSelectorControl = new ModeSelectorControl();
-	    File file = new File(STATES_FILE);
+	    File file = new File(MODES_FILE);
 	    if(file.exists()){
 	    	try {
-				modeSelectorControl.loadStates(file);
+				modeSelectorControl.loadModes(file);
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.reportError("Failed to load states");
@@ -775,8 +749,8 @@ public class Dashboard extends Application {
 		}
 		
 		if(modeSelectorControl != null){
-			 File file = new File(STATES_FILE);
-			 modeSelectorControl.saveStates(file);
+			 File file = new File(MODES_FILE);
+			 modeSelectorControl.saveModes(file);
 		}
 		
 		/*File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);

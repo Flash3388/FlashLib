@@ -34,9 +34,9 @@ public class ModeSelectorWindow extends Stage{
 	private ToggleButton enabled;
 	private ToggleButton disabled;
 	
-	private VBox statesBox;
-	private ToggleGroup statesToggleGroup;
-	private ToggleButton[] statesButtons;
+	private VBox modesBox;
+	private ToggleGroup modesToggleGroup;
+	private ToggleButton[] modesButtons;
 	
 	private ModeSelectorWindow(){
 		setTitle("FLASHboard - Mode Selector");
@@ -52,7 +52,7 @@ public class ModeSelectorWindow extends Stage{
 	
 	private void addState(){
 		Dialog<Pair<String, Integer>> dialog = new Dialog<Pair<String, Integer>>();
-		dialog.setTitle("New State");
+		dialog.setTitle("New Mode");
 		dialog.initOwner(this);
 		
 		ButtonType addType = new ButtonType("Add", ButtonData.OK_DONE);
@@ -64,21 +64,21 @@ public class ModeSelectorWindow extends Stage{
 		grid.setPadding(new Insets(20.0, 150.0, 10.0, 10.0));
 		
 		TextField stateName = new TextField();
-		stateName.setPromptText("State Name");
+		stateName.setPromptText("Mode Name");
 		TextField stateValue = new TextField();
-		stateValue.setPromptText("State Value");
+		stateValue.setPromptText("Mode Value");
 		stateValue.setText("1");
 		
-		grid.add(new Label("State Name:"), 0, 0);
+		grid.add(new Label("Mode Name:"), 0, 0);
 		grid.add(stateName, 1, 0);
-		grid.add(new Label("State Value:"), 0, 1);
+		grid.add(new Label("Mode Value:"), 0, 1);
 		grid.add(stateValue, 1, 1);
 		
 		stateValue.textProperty().addListener((obs, o, n)->{
 			try {
 				Integer.parseInt(n);
 			} catch (NumberFormatException e) {
-				FlashFXUtils.showErrorDialog(this, "Value Error", "State Value is not valid");
+				FlashFXUtils.showErrorDialog(this, "Value Error", "Mode Value is not valid");
 				stateValue.setText(o);
 				return;
 			}
@@ -103,54 +103,54 @@ public class ModeSelectorWindow extends Stage{
 		String name = result.get().getKey();
 		int value = result.get().getValue();
 		
-		if(Dashboard.getModeSelectorControl().getStateForName(name) != null){
-			FlashFXUtils.showErrorDialog(this, "Name Taken", "Another state already uses the name: "+name);
+		if(Dashboard.getModeSelectorControl().getModeForName(name) != null){
+			FlashFXUtils.showErrorDialog(this, "Name Taken", "Another mode already uses the name: "+name);
 			return;
 		}
-		if(Dashboard.getModeSelectorControl().getStateForValue(value) != null){
-			FlashFXUtils.showErrorDialog(this, "Value Taken", "Another state already uses the value: "+value);
+		if(Dashboard.getModeSelectorControl().getModeForValue(value) != null){
+			FlashFXUtils.showErrorDialog(this, "Value Taken", "Another mode already uses the value: "+value);
 			return;
 		}
 		
-		Dashboard.getModeSelectorControl().addState(name, value);
-		loadStates();
+		Dashboard.getModeSelectorControl().addMode(name, value);
+		loadModes();
 	}
 	private void removeState(){
-		int selected = getSelectedState();
+		int selected = getSelectedMode();
 		
 		if(selected < 0){
-			FlashFXUtils.showErrorDialog(this, "Remove Error", "No state was selected");
+			FlashFXUtils.showErrorDialog(this, "Remove Error", "No mode was selected");
 			return; 
 		}
 		
-		Dashboard.getModeSelectorControl().removeState(selected);
-		loadStates();
+		Dashboard.getModeSelectorControl().removeMode(selected);
+		loadModes();
 	}
-	private void loadStates(){
-		statesBox.getChildren().clear();
+	private void loadModes(){
+		modesBox.getChildren().clear();
 		
-		int statescount = Dashboard.getModeSelectorControl().getStatesCount();
-		statesButtons = new ToggleButton[statescount];
+		int count = Dashboard.getModeSelectorControl().getModesCount();
+		modesButtons = new ToggleButton[count];
 		
-		for (int i = 0; i < statesButtons.length; i++) {
-			statesButtons[i] = new ToggleButton(
-					Dashboard.getModeSelectorControl().getState(i).name);
-			statesButtons[i].setMinSize(130, 20);
-			statesButtons[i].setToggleGroup(statesToggleGroup);
-			statesBox.getChildren().add(statesButtons[i]);
+		for (int i = 0; i < modesButtons.length; i++) {
+			modesButtons[i] = new ToggleButton(
+					Dashboard.getModeSelectorControl().getMode(i).name);
+			modesButtons[i].setMinSize(130, 20);
+			modesButtons[i].setToggleGroup(modesToggleGroup);
+			modesBox.getChildren().add(modesButtons[i]);
 		}
 		
-		if(statescount > 0)
-			statesButtons[0].setSelected(true);
+		if(count > 0)
+			modesButtons[0].setSelected(true);
 	}
-	private int getSelectedState(){
-		ToggleButton selectedButton = (ToggleButton)statesToggleGroup.getSelectedToggle();
+	private int getSelectedMode(){
+		ToggleButton selectedButton = (ToggleButton)modesToggleGroup.getSelectedToggle();
 		if(selectedButton == null)
 			return -1;
 		
 		int index = -1;
-		for (int i = 0; i < statesButtons.length; i++) {
-			if(selectedButton.equals(statesButtons[i])){
+		for (int i = 0; i < modesButtons.length; i++) {
+			if(selectedButton.equals(modesButtons[i])){
 				index = i;
 				break;
 			}
@@ -185,15 +185,15 @@ public class ModeSelectorWindow extends Stage{
 				return;
 			}
 			
-			int state = getSelectedState();
-			if(state < 0){
+			int mode = getSelectedMode();
+			if(mode < 0){
 				e.consume();
 				setDisabled(true);
-				FlashFXUtils.showErrorDialog(this, "Error", "No state was selected");
+				FlashFXUtils.showErrorDialog(this, "Error", "No mode was selected");
 				return;
 			}
 			
-			Dashboard.getModeSelectorControl().setCurrentState(state);
+			Dashboard.getModeSelectorControl().setCurrentMode(mode);
 			Dashboard.getModeSelectorControl().setDisabled(false);
 		});
 		
@@ -216,35 +216,35 @@ public class ModeSelectorWindow extends Stage{
 			setDisabled(n.booleanValue());
 		});
 		
-		statesToggleGroup = new ToggleGroup();
-		statesToggleGroup.selectedToggleProperty().addListener((obs, o, n)->{
+		modesToggleGroup = new ToggleGroup();
+		modesToggleGroup.selectedToggleProperty().addListener((obs, o, n)->{
 			if(!disabled.isSelected()){
 				setDisabled(true);
 			}
 		});
-		statesBox = new VBox();
-		statesBox.setSpacing(5.0);
-		loadStates();
+		modesBox = new VBox();
+		modesBox.setSpacing(5.0);
+		loadModes();
 		
-		MenuItem addState = new MenuItem("Add");
-		addState.setOnAction((e)->{
+		MenuItem addmode = new MenuItem("Add");
+		addmode.setOnAction((e)->{
 			addState();
 		});
-		MenuItem removeState = new MenuItem("Remove");
-		removeState.setOnAction((e)->{
+		MenuItem removemode = new MenuItem("Remove");
+		removemode.setOnAction((e)->{
 			removeState();
 		});
 		
 		MenuBar toolbar = new MenuBar();
-		Menu states = new Menu("States");
-		states.getItems().addAll(addState, removeState);
-		toolbar.getMenus().add(states);
+		Menu modes = new Menu("Modes");
+		modes.getItems().addAll(addmode, removemode);
+		toolbar.getMenus().add(modes);
 		
-		HBox statesb = new HBox();
-		statesb.setSpacing(10.0);
-		statesb.setAlignment(Pos.CENTER);
-		statesb.setPadding(new Insets(10.0));
-		statesb.getChildren().addAll(statesBox);
+		HBox modesb = new HBox();
+		modesb.setSpacing(10.0);
+		modesb.setAlignment(Pos.CENTER);
+		modesb.setPadding(new Insets(10.0));
+		modesb.getChildren().addAll(modesBox);
 		
 		HBox controlBox = new HBox();
 		controlBox.setSpacing(5.0);
@@ -254,7 +254,7 @@ public class ModeSelectorWindow extends Stage{
 		
 		BorderPane root = new BorderPane();
 		root.setTop(toolbar);
-		root.setCenter(statesb);
+		root.setCenter(modesb);
 		root.setBottom(controlBox);
 		
 		return new Scene(root, 300, 200);

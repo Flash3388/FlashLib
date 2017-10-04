@@ -98,7 +98,7 @@ public class TesterWindow extends Stage{
 	
 	public static void showTester(){
 		if(instance != null){
-			FlashFXUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tester is already open!");
+			FlashFXUtils.showErrorDialog(GUI.getPrimary(), "Error", "Tester is already open!");
 			return;
 		}
 		instance = new TesterWindow();
