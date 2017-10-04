@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.util.beans.StringSource;
@@ -48,7 +49,7 @@ public class FlashboardLabel extends Sendable{
 		@Override
 		public String get() {
 			lastValue = value;
-			return String.valueOf(value);
+			return String.valueOf(Mathf.roundDecimal(value, 3));
 		}
 	}
 	private static class BooleanSourceLabelData implements LabelData{

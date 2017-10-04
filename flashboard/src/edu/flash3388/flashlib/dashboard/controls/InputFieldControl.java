@@ -15,7 +15,7 @@ import javafx.scene.layout.VBox;
 
 public class InputFieldControl extends Displayable{
 
-	private static final int LABEL_WIDTH = 50;
+	private static final int LABEL_WIDTH = 70;
 	private static final int LABEL_HEIGHT = 10;
 	
 	private String value = "";

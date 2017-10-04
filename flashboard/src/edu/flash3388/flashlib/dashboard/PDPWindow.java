@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.Enumeration;
 
 import edu.flash3388.flashlib.dashboard.controls.PDPControl;
-
+import edu.flash3388.flashlib.robot.PeriodicRunnable;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -24,6 +25,7 @@ public class PDPWindow extends Stage{
 	private static final String IMAGE_PATH = "data/res/pdp.png";
 	
 	private static PDPWindow instance = null;
+	
 	private ImageView pdpView;
 	private Label volt, temp, tCurrent;
 	private VBox channelsRight, channelsLeft;
@@ -33,6 +35,8 @@ public class PDPWindow extends Stage{
 	private boolean reset = false;
 	private Label[] channelLabels;
 	
+	private Runnable updateRunnable;
+	
 	private PDPWindow(){
 		setTitle("FLASHBoard - PDP");
 		initStyle(StageStyle.DECORATED);
@@ -41,7 +45,15 @@ public class PDPWindow extends Stage{
         setScene(loadScene());
         setOnCloseRequest((v)->{
         	deselect();
+        	instance = null;
+        	
+        	Dashboard.getUpdater().removeTask(updateRunnable);
         });
+        
+        updateRunnable = new PeriodicRunnable(()->{
+        	Platform.runLater(()->update());
+        }, 50);
+        Dashboard.getUpdater().addTask(updateRunnable);
 	}
 	
 	private Scene loadScene(){

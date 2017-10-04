@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.vision.ColorFilter;
 import edu.flash3388.flashlib.vision.VisionFilter;
 import edu.flash3388.flashlib.vision.VisionProcessing;
-
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,6 +23,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -69,8 +70,12 @@ public class MainWindow {
 			});
 			inputText.focusedProperty().addListener((obs, o, n)->{
 				if(!n.booleanValue()){
-					inputText.setText(String.valueOf(slider.getValue()));
+					inputText.setText(String.valueOf((int)slider.getValue()));
 				}
+			});
+			
+			slider.valueProperty().addListener((obs, o, n)->{
+				inputText.setText(String.valueOf((int)slider.getValue()));
 			});
 			
 			nameLabel = new Label("");
@@ -158,7 +163,7 @@ public class MainWindow {
 		vision_paramBox.getItems().clear();
 		
 		VisionProcessing processing = null;
-		int selectedIndex = 0;
+		int selectedIndex = -1;
 		for (int i = 0; i < Dashboard.getVision().getProcessingCount(); i++) {
 			processing = Dashboard.getVision().getProcessing(i);
 			vision_paramBox.getItems().add(processing.getName());
@@ -168,7 +173,15 @@ public class MainWindow {
 			}
 		}
 		
-		vision_paramBox.getSelectionModel().select(selectedIndex);
+		if(selectedIndex < 0 && vision_paramBox.getItems().size() > 0)
+			selectedIndex = 0;
+		
+		if(selectedIndex >= 0){
+			localVisionChange = true;
+			vision_paramBox.getSelectionModel().select(selectedIndex);
+			localVisionChange = false;
+			selectParameters(selectedIndex);
+		}
 	}
 	private void selectParameters(int index){
 		if(Dashboard.getVision().getSelectedProcessingIndex() != index){
@@ -180,6 +193,7 @@ public class MainWindow {
 			localVisionChange = false;
 		}
 		
+		resetVisionColorControls();
 		
 		VisionProcessing proc = Dashboard.getVision().getProcessing();
 		
@@ -192,9 +206,14 @@ public class MainWindow {
 			}
 		}
 		
-		resetVisionColorControls();
-		
 		if(colorFilter != null){
+			localVisionChange = true;
+			vision_hsvBox.setDisable(false);
+			vision_hsvBox.setSelected(colorFilter.hsvProperty().get());
+			localVisionChange = false;
+			
+			changeVisionColorScheme(colorFilter.hsvProperty().get());
+			
 			vision_min1.bind(colorFilter.min1Property());
 			vision_min1.enable();
 			vision_max1.bind(colorFilter.max1Property());
@@ -207,11 +226,6 @@ public class MainWindow {
 			vision_min3.enable();
 			vision_max3.bind(colorFilter.max3Property());
 			vision_max3.enable();
-			
-			localVisionChange = true;
-			vision_hsvBox.setDisable(false);
-			vision_hsvBox.setSelected(colorFilter.hsvProperty().get());
-			localVisionChange = false;
 		}
 	}
 	private void loadVisionParameters(){
@@ -268,6 +282,9 @@ public class MainWindow {
 			vision_max3.setName("Max Blue");
 		}
 		
+		if(colorFilter != null && colorFilter.hsvProperty().get() != hsv){
+			colorFilter.hsvProperty().set(hsv);
+		}
 		if(vision_hsvBox.isSelected() != hsv){
 			localVisionChange = true;
 			vision_hsvBox.setSelected(hsv);
@@ -355,12 +372,12 @@ public class MainWindow {
 		
 		vision_paramBox = new ComboBox<String>();
 		vision_paramBox.setMaxWidth(150.0);
-		refreshVisionParameters();
 		vision_paramBox.getSelectionModel().selectedIndexProperty().addListener((obs, o, n)->{
 			if(localVisionChange)
 				return;
 			selectParameters(n.intValue());
 		});
+		refreshVisionParameters();
 		
 		VBox paramBox = new VBox();
 		paramBox.setSpacing(5.0);
@@ -457,6 +474,10 @@ public class MainWindow {
 		vision.getItems().addAll(loadvision, savevision, visioneditor);
 		
 		Menu monitoring = new Menu("Monitoring");
+		MenuItem logwindow = new MenuItem("Show Log Window");
+		logwindow.setOnAction((e)->{
+			GUI.showLogDialog();
+		});
 		MenuItem pdpwindow = new MenuItem("Show PDP");
 		pdpwindow.setOnAction((e)->{
 			GUI.showPDPWindow();
@@ -465,7 +486,7 @@ public class MainWindow {
 		testerwindow.setOnAction((e)->{
 			GUI.showMotorTester();
 		});
-		monitoring.getItems().addAll(pdpwindow, testerwindow);
+		monitoring.getItems().addAll(logwindow, pdpwindow, testerwindow);
 		
 		Menu tools = new Menu("Tools");
 		MenuItem hidwindow = new MenuItem("Show HID Control");
@@ -502,31 +523,14 @@ public class MainWindow {
 	private ComboBox<String> cam_outputImageType;
 	
 	public void setCameraViewImage(Image image){
-		//cam_imageView.setImage(image);
-	}
-	
-	private void updateConnectionIndicators(){
-		if(comm_connected != Dashboard.communicationsConnected()){
-			comm_connected = Dashboard.communicationsConnected();
-			comm_connectionIndicator.setFill(comm_connected? Color.DARKGREEN : Color.RED);
-			
-			if(!comm_connected){
-				Dashboard.resetDisplaybles();
-				GUI.resetWindows();
-				resetControlsDisplay();
-			}
-		}
-		if(cam_connected != Dashboard.camConnected()){
-			cam_connected = Dashboard.camConnected();
-			cam_connectionIndicator.setFill(cam_connected? Color.DARKGREEN : Color.RED);
-		}
+		cam_imageView.setImage(image);
 	}
 	
 	private Node initializeCenterNode(){
 		cam_imageView = new ImageView();
 		cam_imageView.setFitWidth(640);
 		cam_imageView.setFitHeight(420);
-		cam_imageView.setImage(new Image(new File("data/res/pdp.png").toURI().toString()));
+		//cam_imageView.setImage(new Image(new File("data/res/pdp.png").toURI().toString()));
 		
 		cam_outputImageType = new ComboBox<String>();
 		for (CameraViewer.DisplayMode mode : CameraViewer.DisplayMode.values()) {
@@ -543,10 +547,12 @@ public class MainWindow {
 		imageTypeBox.setPadding(new Insets(5.0));
 		imageTypeBox.getChildren().addAll(new Label("Display Type:"), cam_outputImageType);
 		
+		Node connectionsNode = initializeConnectionIndicators();
+		
 		VBox objs = new VBox();
 		objs.setSpacing(5.0);
 		objs.setAlignment(Pos.CENTER);
-		objs.getChildren().addAll(cam_imageView, imageTypeBox);
+		objs.getChildren().addAll(connectionsNode, cam_imageView, imageTypeBox);
 		
 		VBox root = new VBox();
 		root.setPadding(new Insets(5.0));
@@ -558,6 +564,9 @@ public class MainWindow {
 	//--------------------------------------------------------------------
 	//-----------------------Controls-------------------------------------
 	//--------------------------------------------------------------------
+	
+	private static final int INPUT_CONTROLS_PER_ROW = 4;
+	private static final int BUTTON_CONTROLS_PER_ROW = 4;
 	
 	private VBox controlsGraphic_Pane;
 	private VBox controlsSimple_Pane;
@@ -609,7 +618,7 @@ public class MainWindow {
 		controlsInput_Pane.add(node, controlsInput_column, controlsInput_row);
 		controlsInput_column++;
 		
-		if(controlsInput_column > 4){
+		if(controlsInput_column > INPUT_CONTROLS_PER_ROW){
 			controlsInput_column = 0;
 			controlsInput_row++;
 		}
@@ -618,7 +627,7 @@ public class MainWindow {
 		controlsActivatable_Pane.add(node, controlsActivatable_column, controlsActivatable_row);
 		controlsActivatable_column++;
 		
-		if(controlsActivatable_column > 4){
+		if(controlsActivatable_column > BUTTON_CONTROLS_PER_ROW){
 			controlsActivatable_column = 0;
 			controlsActivatable_row++;
 		}
@@ -627,51 +636,56 @@ public class MainWindow {
 	private Node initializeDisplayControls(){
 		VBox simplecontrols = new VBox();
 		simplecontrols.setSpacing(5.0);
+		simplecontrols.setPadding(new Insets(0.0, 0.0, 0.0, 5.0));
 		simplecontrols.setAlignment(Pos.TOP_CENTER);
 		controlsSimple_Pane = simplecontrols;
 		
 		VBox graphiccontrols = new VBox();
-		graphiccontrols.setSpacing(5.0);
+		graphiccontrols.setSpacing(10.0);
+		graphiccontrols.setPadding(new Insets(0.0, 5.0, 0.0, 0.0));
 		graphiccontrols.setAlignment(Pos.TOP_CENTER);
 		controlsGraphic_Pane = graphiccontrols;
 		
+		SplitPane controlsPane = new SplitPane();
+		controlsPane.getItems().addAll(graphiccontrols, simplecontrols);
+		controlsPane.setMinSize(380.0, 300.0);
+		
 		HBox root = new HBox();
-		root.setSpacing(10.0);
 		root.setAlignment(Pos.TOP_CENTER);
-		root.setPadding(new Insets(10.0));
-		root.setMinWidth(360.0);
-		root.getChildren().addAll(graphiccontrols, simplecontrols);
+		root.setPadding(new Insets(5.0, 0.0, 5.0, 5.0));
+		root.setMinWidth(380.0);
+		root.getChildren().addAll(controlsPane);
 		return root;
 	}
 	
 	private Node initializeInputControls(){
 		GridPane activatablecontrols = new GridPane();
 		activatablecontrols.setAlignment(Pos.CENTER);
+		activatablecontrols.setPadding(new Insets(10.0));
+		activatablecontrols.setVgap(10.0);
+		activatablecontrols.setHgap(10.0);
 		controlsActivatable_Pane = activatablecontrols;
 		
 		GridPane inputcontrols = new GridPane();
 		inputcontrols.setAlignment(Pos.CENTER);
+		inputcontrols.setPadding(new Insets(10.0));
+		inputcontrols.setVgap(10.0);
+		inputcontrols.setHgap(15.0);
 		controlsInput_Pane = inputcontrols;
-		
-		comm_connectionIndicator = new Rectangle(80.0, 30.0, Color.RED);
-		cam_connectionIndicator = new Rectangle(80.0, 30.0, Color.RED);
-		
-		HBox connectionBox = new HBox();
-		connectionBox.setSpacing(5.0);
-		connectionBox.setAlignment(Pos.CENTER);
-		//connectionBox.setPadding(new Insets(10.0));
-		connectionBox.getChildren().addAll(comm_connectionIndicator, cam_connectionIndicator);
 		
 		VBox estopBox = new VBox();
 		estopBox.setSpacing(5.0);
 		estopBox.setPadding(new Insets(10.0));
 		estopBox.setAlignment(Pos.CENTER);
-		estopBox.getChildren().addAll(connectionBox, Dashboard.getEmergencyStopControl().getRoot());
+		estopBox.getChildren().addAll(Dashboard.getEmergencyStopControl().getRoot());
+		
+		SplitPane controlsPane = new SplitPane();
+		controlsPane.getItems().addAll(inputcontrols, activatablecontrols);
+		controlsPane.setMinSize(800.0, 150.0);
 		
 		BorderPane root = new BorderPane();
-		root.setRight(activatablecontrols);
-		root.setLeft(inputcontrols);
-		root.setCenter(estopBox);
+		root.setLeft(controlsPane);
+		root.setRight(estopBox);
 		return root;
 	}
 	
@@ -682,23 +696,46 @@ public class MainWindow {
 	private static final int UPDATE_PERIOD = 100;
 	
 	private Rectangle comm_connectionIndicator;
-	private boolean comm_connected = false;
 	private Rectangle cam_connectionIndicator;
-	private boolean cam_connected = false;
 	
 	private Runnable updateTask;
 	
+	private boolean done = true;
+	
 	public MainWindow() {
 		updateTask = new PeriodicRunnable(()->{
-			update();
+			if(done){
+				Platform.runLater(()->update());
+			}
 		}, UPDATE_PERIOD);
 		
 		Dashboard.getUpdater().addTask(updateTask);
 	}
 	
 	private void update(){
+		done = false;
 		updateVisionControls();
-		updateConnectionIndicators();
+		done = true;
+	}
+	
+	private Node initializeConnectionIndicators(){
+		comm_connectionIndicator = new Rectangle(150.0, 30.0, Color.RED);
+		cam_connectionIndicator = new Rectangle(150.0, 30.0, Color.RED);
+		
+		HBox connectionBox = new HBox();
+		connectionBox.setSpacing(2.0);
+		connectionBox.setAlignment(Pos.CENTER);
+		connectionBox.setPadding(new Insets(2.0));
+		connectionBox.getChildren().addAll(comm_connectionIndicator, cam_connectionIndicator);
+		
+		return connectionBox;
+	}
+	
+	public void setCommConnected(boolean connected){
+		comm_connectionIndicator.setFill(connected? Color.DARKGREEN : Color.RED);
+	}
+	public void setCamConnected(boolean connected){
+		cam_connectionIndicator.setFill(connected? Color.DARKGREEN : Color.RED);
 	}
 	
 	public void resetWindow(){

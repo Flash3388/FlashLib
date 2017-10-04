@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.StringProperty;
@@ -56,7 +57,7 @@ public class FlashboardInput extends Sendable{
 		public String get() {
 			lastValue = value;
 			forceUpdate = false;
-			return String.valueOf(value);
+			return String.valueOf(Mathf.roundDecimal(value, 3));
 		}
 		@Override
 		public void set(String val) {

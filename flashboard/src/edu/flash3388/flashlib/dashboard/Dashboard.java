@@ -296,7 +296,7 @@ public class Dashboard extends Application {
 				Displayable d = denum.nextElement();
 				d.update();
 				if(!d.init()) {
-					Node root = d.getNode();
+					Node root = d.setDisplay();
 					if(root != null){
 						GUI.getMain().addControlToDisplay(root, d.getDisplayType());
 					}
@@ -309,6 +309,33 @@ public class Dashboard extends Application {
 		public void run() {
 			if(done){
 				Platform.runLater(dataRunnable);
+			}
+		}
+	}
+	private static class ConnectionTracker implements Runnable{
+		
+		private boolean commConnected = false;
+		private boolean camConnected = false;
+		
+		@Override
+		public void run() {
+			if(commConnected != communicationsConnected()){
+				commConnected = communicationsConnected();
+				if(!commConnected){
+					Dashboard.resetDisplaybles();
+					GUI.resetWindows();
+				}
+				
+				FlashFXUtils.onFXThread(()->{
+					GUI.getMain().setCommConnected(commConnected);
+				});
+			}
+			if(camConnected != camConnected()){
+				camConnected = camConnected();
+				
+				FlashFXUtils.onFXThread(()->{
+					GUI.getMain().setCamConnected(camConnected);
+				});
 			}
 		}
 	}
@@ -539,7 +566,11 @@ public class Dashboard extends Application {
 		
 		VisionProcessing processing = null;
 		for (File file : files){
-			processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+			try{
+				processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+			}catch(Throwable t){
+				processing = null;
+			}
 			if(processing != null){
 				vision.addProcessing(processing);
 			}
@@ -681,6 +712,7 @@ public class Dashboard extends Application {
 		});
 		
 		updater.addTask(new DisplayableUpdater());
+		updater.addTask(new ConnectionTracker());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);

@@ -367,54 +367,75 @@ public final class Flashboard {
 		Flashboard.attach(input);
 		return input;
 	}
-	
+	public static FlashboardCheckbox putCheckBox(String name, BooleanProperty prop){
+		checkInit();
+		
+		FlashboardCheckbox checkbox = new FlashboardCheckbox(name, prop);
+		Flashboard.attach(checkbox);
+		return checkbox;
+	}
 	public static FlashboardSlider putSlider(String name, DoubleProperty prop, double min, double max, int ticks){
 		checkInit();
 		
-		FlashboardSlider input = new FlashboardSlider(name, prop, min, max, ticks);
-		Flashboard.attach(input);
-		return input;
+		FlashboardSlider slider = new FlashboardSlider(name, prop, min, max, ticks);
+		Flashboard.attach(slider);
+		return slider;
 	}
 	public static FlashboardButton putButton(String name, Action... actions){
 		checkInit();
 		
-		FlashboardButton input = new FlashboardButton(name);
+		FlashboardButton button = new FlashboardButton(name);
 		for (int i = 0; i < actions.length; i++)
-			input.whenPressed(actions[i]);
-		Flashboard.attach(input);
-		return input;
+			button.whenPressed(actions[i]);
+		Flashboard.attach(button);
+		return button;
 	}
 	
 	@SafeVarargs
 	public static <T> FlashboardChooser<T> putChooser(String name, FlashboardChooser.Option<T>...options){
 		checkInit();
 		
-		FlashboardChooser<T> input = new FlashboardChooser<T>(name, options);
-		Flashboard.attach(input);
-		return input;
+		FlashboardChooser<T> chooser = new FlashboardChooser<T>(name, options);
+		Flashboard.attach(chooser);
+		return chooser;
 	}
 	
 	
 	public static FlashboardLabel putLabel(String name, DoubleSource prop){
 		checkInit();
 		
-		FlashboardLabel input = new FlashboardLabel(name, prop);
-		Flashboard.attach(input);
-		return input;
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
 	}
 	public static FlashboardLabel putLabel(String name, BooleanSource prop){
 		checkInit();
 		
-		FlashboardLabel input = new FlashboardLabel(name, prop);
-		Flashboard.attach(input);
-		return input;
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
 	}
 	public static FlashboardLabel putLabel(String name, StringSource prop){
 		checkInit();
 		
-		FlashboardLabel input = new FlashboardLabel(name, prop);
-		Flashboard.attach(input);
-		return input;
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
+	}
+	
+	public static FlashboardDirectionIndicator putDirectionIndicator(String name, DoubleSource prop){
+		checkInit();
+		
+		FlashboardDirectionIndicator indicator = new FlashboardDirectionIndicator(name, prop);
+		Flashboard.attach(indicator);
+		return indicator;
+	}
+	public static FlashboardBooleanIndicator putBooleanIndicator(String name, BooleanSource prop){
+		checkInit();
+		
+		FlashboardBooleanIndicator indicator = new FlashboardBooleanIndicator(name, prop);
+		Flashboard.attach(indicator);
+		return indicator;
 	}
 }
 

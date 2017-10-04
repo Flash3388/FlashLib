@@ -32,9 +32,11 @@ public class GUI {
 	}
 	
 	public static void resetWindows(){
+		mainWindow.resetWindow();
 		PDPWindow.reset();
-		TesterWindow.closeTester();
+		TesterWindow.resetTester();
 		PIDTunerWindow.reset();
+		LogWindow.resetLogs();
 	}
 	
 	public static void showMainErrorDialog(String error){

@@ -608,7 +608,7 @@ public class MainController implements Initializable{
 	public static void resetAllControls(){
 		PDPWindow.reset();
 		PDPControl.resetBoards();
-		TesterWindow.closeTester();
+		TesterWindow.resetTester();
 		VisionEditorWindow.closeEditor();
 		PIDTunerWindow.reset();
 		FlashboardTester.resetTesters();

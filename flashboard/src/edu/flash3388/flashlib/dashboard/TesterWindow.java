@@ -34,6 +34,11 @@ public class TesterWindow extends Stage{
         });
 	}
 	
+	private void refresh(){
+		keysBox.getItems().clear();
+		keysBox.getItems().add("-- Choose Tester --");
+		keysBox.getSelectionModel().select(0);
+	}
 	@SuppressWarnings("unchecked")
 	private Scene loadScene(){
 		VBox root = new VBox();
@@ -99,11 +104,11 @@ public class TesterWindow extends Stage{
 		instance = new TesterWindow();
 		instance.show();
 	}
-	public static void closeTester(){
+	public static void resetTester(){
 		if(instance != null){
 			if(instance.tester != null)
 				instance.tester.enable(false);
-			instance.close();
+			instance.refresh();
 		}
 	}
 }

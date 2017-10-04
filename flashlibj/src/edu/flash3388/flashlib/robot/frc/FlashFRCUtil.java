@@ -55,5 +55,8 @@ public class FlashFRCUtil {
 		FlashRobotUtil.initFlashLib(robot, RobotFactory.createFRCHIDInterface(), flashboardInitData);
 		FlashUtil.getLog().addListener(new DriverStationLogListener());
 		pdp = new PDP();
+		
+		if(Flashboard.flashboardInit())
+			Flashboard.attach(pdp);
 	}
 }

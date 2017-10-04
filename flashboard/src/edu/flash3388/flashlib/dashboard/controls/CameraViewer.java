@@ -29,6 +29,7 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 	}
 	
 	private Image image;
+	private Object imageMutex = new Object();
 	private DisplayMode mode = DisplayMode.Normal;
 	
 	public CameraViewer(String name) {
@@ -38,9 +39,10 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 	
 	@Override
 	protected void update() {
-		synchronized (image) {
+		synchronized (imageMutex) {
 			if(image != null){
 				GUI.getMain().setCameraViewImage(image);
+				image = null;
 			}
 		}
 	}
@@ -48,12 +50,12 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 	public void setImage(BufferedImage bf){
 		if(mode != DisplayMode.Normal)
 			return;
-       synchronized (image) {
+       synchronized (imageMutex) {
     	   image = FlashFXUtils.bufferedImage2FxImage(bf);
        }
 	}
 	public void setMatImage(Mat mat){
-		synchronized (image) {
+		synchronized (imageMutex) {
 			image = FlashFXUtils.cvMat2FxImage(mat);
 		}
 	}

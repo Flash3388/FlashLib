@@ -9,6 +9,9 @@ public class FlashboardSendableCreator implements SendableCreator{
 
 	private Sendable get(String name, byte type) {
 		switch(type){
+			case FlashboardSendableType.DIR_INDICATOR: return new DirectionControl(name);
+			case FlashboardSendableType.BOOL_INDICATOR: return new BooleanIndicatorControl(name);
+			case FlashboardSendableType.CHECKBOX: return new CheckBoxControl(name);
 			case FlashboardSendableType.ACTIVATABLE: return new ButtonControl(name);
 			case FlashboardSendableType.LABEL: return new LabelControl(name);
 			case FlashboardSendableType.INPUT: return new InputFieldControl(name);

@@ -64,7 +64,7 @@ public class ButtonControl extends Displayable{
 		}else if(bytes[0] == FlashboardButton.ENABLED){
 			final boolean enabled = bytes[1] == 1;
 			FlashFXUtils.onFXThread(()->{
-				button.setDisable(enabled);
+				button.setDisable(!enabled);
 			});
 			press[0] = FlashboardButton.UP;
 			changed = true;

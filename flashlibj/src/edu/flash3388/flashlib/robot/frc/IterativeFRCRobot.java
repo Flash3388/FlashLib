@@ -142,9 +142,9 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		 * Inidicates whether or not to initialize flashboard. If true, flashboard will 
 		 * be initialize. If false, flashboard will be initialized.
 		 * <p>
-		 * The default value is `false`.
+		 * The default value is `true`.
 		 */
-		public boolean initFlashboard = false;
+		public boolean initFlashboard = true;
 	}
 	
 	private static final int ITERATION_DELAY = 5;
