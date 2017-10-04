@@ -5,9 +5,9 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.FlashboardInput;
 import edu.flash3388.flashlib.flashboard.FlashboardLabel;
 import edu.flash3388.flashlib.robot.IterativeRobot;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.PropertyHandler;
 import edu.flash3388.flashlib.util.beans.StringProperty;
 
 /*
@@ -26,11 +26,11 @@ public class ExampleFlashboard extends IterativeRobot{
 	 */
 	
 	//A double property example, we will use it for a slider control
-	DoubleProperty sliderProperty = ConstantsHandler.addNumber("slider", 0.0);
+	DoubleProperty sliderProperty = PropertyHandler.addNumber("slider", 0.0);
 	//A boolean property example, we will use it for a boolean label control
-	BooleanProperty labelProperty = ConstantsHandler.addBoolean("label", false);
+	BooleanProperty labelProperty = PropertyHandler.addBoolean("label", false);
 	//A string property example, we will use it for a string input control
-	StringProperty inputProperty = ConstantsHandler.addString("input", "Something");
+	StringProperty inputProperty = PropertyHandler.addString("input", "Something");
 	
 	@Override
 	protected void preInit(IterativeRobotInitializer initializer) {
@@ -47,7 +47,7 @@ public class ExampleFlashboard extends IterativeRobot{
 		 * control.
 		 * By default flashboard is not initialized
 		 */
-		//initializer.initFlashboard = true;
+		initializer.initFlashboard = true;
 		
 		/*
 		 * To control flashboard initialization parameters, we can use a FlashboardInitData

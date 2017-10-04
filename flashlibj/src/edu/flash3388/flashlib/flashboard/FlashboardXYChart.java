@@ -23,19 +23,20 @@ public class FlashboardXYChart extends Sendable{
 	private double lastX = 0.0, valueX = 0.0;
 	private boolean forceUpdate = false;
 	
-	private double minY = 0.0, maxY = 1.0, rangeX = 10.0;
+	private double minY = 0.0, maxY = 1.0, minX = 0.0, maxX = 1.0;
 	private boolean updateConfig = false;
 	
 	private byte[] send = new byte[17];
 	
 	public FlashboardXYChart(String name, ChartType type, DoubleSource xSource, DoubleSource ySource, 
-			double rangeX, double minY, double maxY) {
+			double minX, double maxX, double minY, double maxY) {
 		super(name, type.type);
 		
 		this.sourceX = xSource;
 		this.sourceY = ySource;
 		
-		this.rangeX = rangeX;
+		this.minX = minX;
+		this.maxX = maxX;
 		this.minY = minY;
 		this.maxY = maxY;
 	}
@@ -48,8 +49,12 @@ public class FlashboardXYChart extends Sendable{
 		this.maxY = maxY;
 		updateConfig = true;
 	}
-	public void setXRange(double xrange){
-		this.rangeX = xrange;
+	public void setMinX(double minX){
+		this.minX = minX;
+		updateConfig = true;
+	}
+	public void setMaxX(double maxX){
+		this.maxX = maxX;
 		updateConfig = true;
 	}
 	
@@ -61,11 +66,12 @@ public class FlashboardXYChart extends Sendable{
 	public byte[] dataForTransmition() {
 		if(updateConfig){
 			updateConfig = false;
-			byte[] bytes = new byte[25];
+			byte[] bytes = new byte[33];
 			bytes[0] = CONFIG_UPDATE;
-			FlashUtil.fillByteArray(rangeX, 1, bytes);
-			FlashUtil.fillByteArray(minY, 9, bytes);
-			FlashUtil.fillByteArray(maxY, 17, bytes);
+			FlashUtil.fillByteArray(minX, 1, bytes);
+			FlashUtil.fillByteArray(maxX, 9, bytes);
+			FlashUtil.fillByteArray(minY, 17, bytes);
+			FlashUtil.fillByteArray(maxY, 25, bytes);
 			return bytes;
 		}
 		

@@ -131,6 +131,10 @@ public class HIDWindow extends Stage implements Runnable{
 			controllerView.getItems().add(i + " - not connected");
 		}
 		
+		HBox controllersBox = new HBox();
+		controllersBox.setPadding(new Insets(10.0));
+		controllersBox.getChildren().add(controllerView);
+		
 		//right
 		axesDataBox = new VBox();
 		buttonDataBox = new HBox();
@@ -142,7 +146,7 @@ public class HIDWindow extends Stage implements Runnable{
 		dataBox.getChildren().addAll(axesDataBox, buttonDataBox);
 		
 		BorderPane root = new BorderPane();
-		root.setLeft(controllerView);
+		root.setLeft(controllersBox);
 		root.setRight(dataBox);
 		
 		return new Scene(root, 400, 300);

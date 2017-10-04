@@ -4,8 +4,8 @@ import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.PIDController;
 import edu.flash3388.flashlib.robot.PIDSource;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
+import edu.flash3388.flashlib.util.beans.PropertyHandler;
 
 /*
  * In this example we will take a look at FlashLib's PID controller. 
@@ -26,7 +26,7 @@ public class ExamplePIDController extends IterativeRobot{
 	PIDController pidcontroller;
 	
 	//a set point for the PID controller
-	DoubleProperty pidSetPoint = ConstantsHandler.putNumber("setpoint", 0.0);
+	DoubleProperty pidSetPoint = PropertyHandler.putNumber("setpoint", 0.0);
 
 	@Override
 	protected void preInit(IterativeRobotInitializer initializer) {

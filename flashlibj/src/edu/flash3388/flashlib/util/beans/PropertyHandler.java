@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.util;
+package edu.flash3388.flashlib.util.beans;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +18,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
+import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
 
 /**
  * 
@@ -42,9 +38,9 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class ConstantsHandler {
+public class PropertyHandler {
 	
-	private ConstantsHandler(){}
+	private PropertyHandler(){}
 	
 	private static final Map<String, DoubleProperty> doubleMap = 
 			new HashMap<String, DoubleProperty>();

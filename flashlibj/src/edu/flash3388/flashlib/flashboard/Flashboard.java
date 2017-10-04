@@ -438,20 +438,20 @@ public final class Flashboard {
 		return indicator;
 	}
 	public static FlashboardXYChart putLineChart(String name, DoubleSource xsource, DoubleSource ysource, 
-			double rangeX, double minY, double maxY){
+			double minX, double maxX, double minY, double maxY){
 		checkInit();
 		
 		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Line,
-				xsource, ysource, rangeX, minY, maxY);
+				xsource, ysource, minX, maxX, minY, maxY);
 		Flashboard.attach(chart);
 		return chart;
 	}
 	public static FlashboardXYChart putAreaChart(String name, DoubleSource xsource, DoubleSource ysource, 
-			double rangeX, double minY, double maxY){
+			double minX, double maxX, double minY, double maxY){
 		checkInit();
 		
 		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Area,
-				xsource, ysource, rangeX, minY, maxY);
+				xsource, ysource, minX, maxX, minY, maxY);
 		Flashboard.attach(chart);
 		return chart;
 	}

@@ -8,9 +8,9 @@ import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.Property;
+import edu.flash3388.flashlib.util.beans.PropertyHandler;
 
 /*
  * The main class of our robot. It extends IterativeRobot.
@@ -36,9 +36,9 @@ public class Robot extends IterativeRobot{
 	Action stickDriveAction;
 	
 	//speed property for motion with the actions: arcade - move source, tank - right source
-	DoubleProperty speedSource_move_right = ConstantsHandler.addNumber("move/right", 0.0);
+	DoubleProperty speedSource_move_right = PropertyHandler.addNumber("move/right", 0.0);
 	//speed property for motion with the actions: arcade - rotate source, tank - left source
-	DoubleProperty speedSource_rotate_left = ConstantsHandler.addNumber("rotate/left", 0.0);
+	DoubleProperty speedSource_rotate_left = PropertyHandler.addNumber("rotate/left", 0.0);
 	//property for the action which we will run during auto mode
 	Property<Action> autoActionProp;
 	

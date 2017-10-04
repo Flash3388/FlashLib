@@ -24,10 +24,10 @@ import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.IPCommInterface;
 import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.communications.UDPCommInterface;
-import edu.flash3388.flashlib.util.ConstantsHandler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
+import edu.flash3388.flashlib.util.beans.PropertyHandler;
 import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
 import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.vision.VisionProcessing;
@@ -127,8 +127,8 @@ public class Dashboard extends Application {
 						break;
 				}
 				
-				String commhost = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
-				String camhost = ConstantsHandler.getStringValue(PROP_HOST_CAM);
+				String commhost = PropertyHandler.getStringValue(PROP_HOST_ROBOT);
+				String camhost = PropertyHandler.getStringValue(PROP_HOST_CAM);
 				
 				if(retreiveComm && commhost != null && !commhost.isEmpty()){
 					try {
@@ -176,10 +176,10 @@ public class Dashboard extends Application {
 		
 		private void commUpdate(){
 			if(!commInitialized){
-				String host = ConstantsHandler.getStringValue(PROP_HOST_ROBOT);
-				String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
-				int localport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_LOCAL);
-				int remoteport = ConstantsHandler.getIntegerValue(PROP_COMM_PORT_REMOTE);
+				String host = PropertyHandler.getStringValue(PROP_HOST_ROBOT);
+				String protocol = PropertyHandler.getStringValue(PROP_COMM_PROTOCOL);
+				int localport = PropertyHandler.getIntegerValue(PROP_COMM_PORT_LOCAL);
+				int remoteport = PropertyHandler.getIntegerValue(PROP_COMM_PORT_REMOTE);
 				if(host == null || host.equals("") || protocol == null || protocol.equals("") || 
 						(!protocol.equalsIgnoreCase("udp") && !protocol.equalsIgnoreCase("tcp"))) {
 					if(!commSettingError){
@@ -236,9 +236,9 @@ public class Dashboard extends Application {
 		}
 		private void camUpdate(){
 			if(!camInitialized){
-				String host = ConstantsHandler.getStringValue(PROP_HOST_CAM);
-				int localcamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_LOCAL);
-				int remotecamport = ConstantsHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
+				String host = PropertyHandler.getStringValue(PROP_HOST_CAM);
+				int localcamport = PropertyHandler.getIntegerValue(PROP_CAM_PORT_LOCAL);
+				int remotecamport = PropertyHandler.getIntegerValue(PROP_CAM_PORT_REMOTE);
 				if(host == null || host.equals("")) {
 					if(!camSettingError){
 						GUI.showMainErrorDialog("Failed to initialize cam communications: validate values of "+
@@ -366,43 +366,43 @@ public class Dashboard extends Application {
 	
 	
 	private static boolean emptyProperty(String prop){
-		String propv = ConstantsHandler.getStringValue(prop);
+		String propv = PropertyHandler.getStringValue(prop);
 		return propv == null || propv.isEmpty();
 	}
 	private static void validateBasicSettings() throws Exception{
-		ConstantsHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
-		ConstantsHandler.addString(PROP_HOST_ROBOT, "");
-		ConstantsHandler.addString(PROP_HOST_CAM, "");
+		PropertyHandler.addString(PROP_VISION_DEFAULT_PARAM, "");
+		PropertyHandler.addString(PROP_HOST_ROBOT, "");
+		PropertyHandler.addString(PROP_HOST_CAM, "");
 		if(emptyProperty(PROP_HOST_ROBOT))
 			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
 		if(emptyProperty(PROP_HOST_CAM))
 			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
 		
-		ConstantsHandler.addString(PROP_COMM_PROTOCOL, "tcp");
-		String protocol = ConstantsHandler.getStringValue(PROP_COMM_PROTOCOL);
+		PropertyHandler.addString(PROP_COMM_PROTOCOL, "tcp");
+		String protocol = PropertyHandler.getStringValue(PROP_COMM_PROTOCOL);
 		if(!protocol.equals("tcp") && 
 				!protocol.equals("udp")){
 			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues should be: tcp or udp");
 		}
 		
-		ConstantsHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
-		ConstantsHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
-		ConstantsHandler.addNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
-		ConstantsHandler.addNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
+		PropertyHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
+		PropertyHandler.addNumber(PROP_COMM_PORT_REMOTE, Flashboard.PORT_ROBOT);
+		PropertyHandler.addNumber(PROP_CAM_PORT_LOCAL, Flashboard.CAMERA_PORT_BOARD);
+		PropertyHandler.addNumber(PROP_CAM_PORT_REMOTE, Flashboard.CAMERA_PORT_ROBOT);
 	}
 	private static void loadSettings(){
 		try {
-			ConstantsHandler.loadConstantsFromXml(SETTINGS_FILE);
+			PropertyHandler.loadConstantsFromXml(SETTINGS_FILE);
 		} catch (Exception e) {
 			log.reportError("Failed to load settings");
 			log.reportError(e);
 		}
 	}
 	private static void printSettings(){
-		ConstantsHandler.printAll(log);
+		PropertyHandler.printAll(log);
 	}
 	private static void saveSettings(){
-		ConstantsHandler.saveConstantsToXml(SETTINGS_FILE);
+		PropertyHandler.saveConstantsToXml(SETTINGS_FILE);
 	}
 
 	//--------------------------------------------------------------------
@@ -555,7 +555,7 @@ public class Dashboard extends Application {
 			}
 		}
 		
-		String name = ConstantsHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
+		String name = PropertyHandler.getStringValue(PROP_VISION_DEFAULT_PARAM);
 		if(name != null){
 			for (int i = 0; i < vision.getProcessingCount(); i++) {
 				if(vision.getProcessing(i).getName().equals(name)){

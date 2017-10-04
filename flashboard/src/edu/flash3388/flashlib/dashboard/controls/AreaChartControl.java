@@ -31,8 +31,10 @@ public class AreaChartControl extends Displayable{
 	private Vector<Data<Number, Number>> dataCollection = new Vector<Data<Number, Number>>();
 	
 	private Object configMutex = new Object();
-	private double minY = 0.0, maxY = 1.0, xRange = 10.0;
+	private double minY = 0.0, maxY = 1.0, minX = 0.0, maxX = 1.0;
 	private boolean configUpdate = false;
+	
+	private double rangeY = 1.0, rangeX = 1.0;
 	
 	public AreaChartControl(String name) {
 		super(name, FlashboardSendableType.AREACHART);
@@ -40,8 +42,8 @@ public class AreaChartControl extends Displayable{
 		axisX = new NumberAxis();
 		axisX.setForceZeroInRange(false);
 		axisX.setAutoRanging(false);
-		axisX.setUpperBound(xRange);
-		axisX.setLowerBound(0.0);
+		axisX.setUpperBound(maxX);
+		axisX.setLowerBound(minX);
 		axisY = new NumberAxis();
 		axisY.setForceZeroInRange(false);
 		axisY.setAutoRanging(false);
@@ -74,15 +76,15 @@ public class AreaChartControl extends Displayable{
 	protected void update() {
 		synchronized (configMutex) {
 			if(configUpdate){
-				configUpdate = false;
+				configUpdate = false;	
 				
-				double top = Mathf.roundToMultiplier(axisX.getLowerBound(), xRange, true);		
-				
-				axisX.setLowerBound(top - xRange);
-				axisX.setUpperBound(top);
+				axisX.setLowerBound(maxX);
+				axisX.setUpperBound(minX);
+				rangeX = maxX - minX;
 				
 				axisY.setUpperBound(maxY);
 				axisY.setLowerBound(minY);
+				rangeY = maxY - minY;
 			}
 		}
 		synchronized (dataCollection) {
@@ -93,10 +95,17 @@ public class AreaChartControl extends Displayable{
 					
 					double x = data.getXValue().doubleValue();
 					if(x > axisX.getUpperBound() || x < axisX.getLowerBound()){
-						double top = Mathf.roundToMultiplier(x, xRange, true);		
+						double top = Mathf.roundToMultiplier(x, rangeX, true);		
 						
-						axisX.setLowerBound(top - xRange);
+						axisX.setLowerBound(top - rangeX);
 						axisX.setUpperBound(top);
+					}
+					double y = data.getYValue().doubleValue();
+					if(y > axisY.getUpperBound() || y < axisY.getLowerBound()){
+						double top = Mathf.roundToMultiplier(y, rangeY, true);		
+						
+						axisY.setLowerBound(top - rangeY);
+						axisY.setUpperBound(top);
 					}
 					
 					chartSeries.getData().add(data);
@@ -119,9 +128,10 @@ public class AreaChartControl extends Displayable{
 		}
 		if(data[0] == FlashboardXYChart.CONFIG_UPDATE){
 			synchronized (configMutex) {
-				xRange = FlashUtil.toDouble(data, 1);
-				minY = FlashUtil.toDouble(data, 9);
-				maxY = FlashUtil.toDouble(data, 17);
+				minX = FlashUtil.toDouble(data, 1);
+				maxX = FlashUtil.toDouble(data, 9);
+				minY = FlashUtil.toDouble(data, 17);
+				maxY = FlashUtil.toDouble(data, 25);
 				configUpdate = true;
 			}
 		}
