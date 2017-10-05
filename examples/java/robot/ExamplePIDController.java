@@ -152,7 +152,7 @@ public class ExamplePIDController extends IterativeRobot{
 		//range of outputs. FlashLib motor's accept a range -1 to 1.
 		//But since we only want to rotate our system in one direction: forward, so
 		//it would shoot, we should limit our values between 0 and 1:
-		pidcontroller.setOutputLimit(-1.0, 1.0);
+		pidcontroller.setOutputLimit(0.0, 1.0);
 		
 		//now we have our PID controller ready for use. 
 		

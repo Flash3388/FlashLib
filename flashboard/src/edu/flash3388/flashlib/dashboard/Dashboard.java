@@ -392,7 +392,7 @@ public class Dashboard extends Application {
 	}
 	private static void loadSettings(){
 		try {
-			PropertyHandler.loadConstantsFromXml(SETTINGS_FILE);
+			PropertyHandler.loadPropertyFromXml(SETTINGS_FILE);
 		} catch (Exception e) {
 			log.reportError("Failed to load settings");
 			log.reportError(e);
@@ -402,7 +402,7 @@ public class Dashboard extends Application {
 		PropertyHandler.printAll(log);
 	}
 	private static void saveSettings(){
-		PropertyHandler.saveConstantsToXml(SETTINGS_FILE);
+		PropertyHandler.savePropertiesToXml(SETTINGS_FILE);
 	}
 
 	//--------------------------------------------------------------------

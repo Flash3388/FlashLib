@@ -460,9 +460,9 @@ public class PropertyHandler {
 				.parse(file);
 		
 		doc.getDocumentElement().normalize();
-		NodeList constantList = doc.getElementsByTagName("constant");
-		for (int i = 0; i < constantList.getLength(); i++) {
-			Node node = constantList.item(i);
+		NodeList propertyList = doc.getElementsByTagName("property");
+		for (int i = 0; i < propertyList.getLength(); i++) {
+			Node node = propertyList.item(i);
 			if(node.getNodeType() == Node.ELEMENT_NODE){
 				Element element = (Element) node;
 				
@@ -493,11 +493,11 @@ public class PropertyHandler {
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		lines.add("<?xml version=\"1.0\" ?>");
-		lines.add("<constants-handler>");
+		lines.add("<property-handler>");
 		fillXmlBoolean(lines);
 		fillXmlDouble(lines);
 		fillXmlString(lines);
-		lines.add("</constants-handler>");
+		lines.add("</property-handler>");
 		
 		try {
 			Files.write(file.toPath(), lines, StandardOpenOption.CREATE);
@@ -509,36 +509,36 @@ public class PropertyHandler {
 		String[] names = getStringMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"string\">"+(getStringValue(names[i]))+"</constant>");
+			 lines.add("\t<property name=\""+names[i]+"\" type=\"string\">"+(getStringValue(names[i]))+"</property>");
 	}
 	private static void fillXmlBoolean(ArrayList<String> lines){
 		String[] names = getBooleanMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"boolean\">"+(getBooleanValue(names[i]))+"</constant>");
+			 lines.add("\t<property name=\""+names[i]+"\" type=\"boolean\">"+(getBooleanValue(names[i]))+"</property>");
 	}
 	private static void fillXmlDouble(ArrayList<String> lines){
 		String[] names = getNumberMapNames();
 		
 		for (int i = 0; i < names.length; i++) 
-			 lines.add("\t<constant name=\""+names[i]+"\" type=\"double\">"+(getNumberValue(names[i]))+"</constant>");
+			 lines.add("\t<property name=\""+names[i]+"\" type=\"double\">"+(getNumberValue(names[i]))+"</property>");
 	}
 	
 	/**
-	 * Loads constant values from an XML file using the XML DOM parser.
+	 * Loads property values from an XML file using the XML DOM parser.
 	 * <p>
 	 * The syntax of the XML values is as follows:<br>
-	 * {@code<constants-handler>}<br>
-	 * 		{@code<constant name="boolean constant" type="boolean">true</constant>}<br>
-	 * 		{@code<constant name="string constant" type="string">a string</constant>}<br>
-	 * 		{@code<constant name="number constant" type="double">15.5</constant>}<br>
-	 * {@code</constants-handler>}
+	 * {@code<property-handler>}<br>
+	 * 		{@code<property name="boolean property" type="boolean">true</property>}<br>
+	 * 		{@code<property name="string property" type="string">a string</property>}<br>
+	 * 		{@code<property name="number property" type="double">15.5</property>}<br>
+	 * {@code</property-handler>}
 	 * </p>
 	 * 
 	 * @param file the path of the xml file
 	 * @throws IllegalArgumentException if the given path is missing or is not a file
 	 */
-	public static void loadConstantsFromXml(String file){
+	public static void loadPropertyFromXml(String file){
 		File wfile = new File(file);
 		if(!wfile.exists())
 			throw new IllegalArgumentException("File is missing");
@@ -555,16 +555,16 @@ public class PropertyHandler {
 	 * Saves values from the maps to an XML file.
 	 * <p>
 	 * The syntax of the XML values is as follows:<br>
-	 * {@code<constants-handler>}<br>
-	 * 		{@code<constant name="boolean constant" type="boolean">true</constant>}<br>
-	 * 		{@code<constant name="string constant" type="string">a string</constant>}<br>
-	 * 		{@code<constant name="number constant" type="double">15.5</constant>}<br>
-	 * {@code</constants-handler>}
+	 * {@code<property-handler>}<br>
+	 * 		{@code<property name="boolean property" type="boolean">true</property>}<br>
+	 * 		{@code<property name="string property" type="string">a string</property>}<br>
+	 * 		{@code<property name="number property" type="double">15.5</property>}<br>
+	 * {@code</property-handler>}
 	 * </p>
 	 * 
 	 * @param file the path of the xml file
 	 */
-	public static void saveConstantsToXml(String file){
+	public static void savePropertiesToXml(String file){
 		File wfile = FlashUtil.getFile(file);
 		if(!wfile.isFile())
 			throw new IllegalArgumentException("Given path is not a file");
@@ -577,7 +577,7 @@ public class PropertyHandler {
 	 */
 	public static void printAll(Log log){
 		log.log("\n" + getBooleanPrint() + "\n" + getNumberPrint() + "\n" + getStringPrint(),
-				"ConstantsHandler");
+				"PropertyHandler");
 	}
 	/**
 	 * Gets a string representing all string values in the string map. The string should be used for printing.
@@ -586,7 +586,7 @@ public class PropertyHandler {
 	public static String getStringPrint(){
 		String[] names = getStringMapNames();
 		
-		String str = "String Constants:\n";
+		String str = "String Properties:\n";
 		for (int i = 0; i < names.length; i++) 
 			str += "\t"+names[i]+" : "+getStringValue(names[i])+"\n";
 		return str;
@@ -598,7 +598,7 @@ public class PropertyHandler {
 	public static String getBooleanPrint(){
 		String[] names = getBooleanMapNames();
 		
-		String str = "Boolean Constants:\n";
+		String str = "Boolean Properties:\n";
 		for (int i = 0; i < names.length; i++) 
 			str += "\t"+names[i]+" : "+getBooleanValue(names[i])+"\n";
 		return str;
@@ -610,7 +610,7 @@ public class PropertyHandler {
 	public static String getNumberPrint(){
 		String[] names = getNumberMapNames();
 		
-		String str = "Number Constants:\n";
+		String str = "Number Properties:\n";
 		for (int i = 0; i < names.length; i++) 
 			str += "\t"+names[i]+" : "+getNumberValue(names[i])+"\n";
 		return str;
