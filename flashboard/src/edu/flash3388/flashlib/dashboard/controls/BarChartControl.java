@@ -168,7 +168,9 @@ public class BarChartControl extends Displayable{
 				double dataY = Mathf.roundDecimal(control.getData());
 				Data<String, Number> data = new Data<String, Number>(control.getName(), dataY);
 				
+				chart.setTitle(getName()+": "+dataY);
 				chartSeries.getData().add(data);
+				//((StackPane)data.getNode()).getChildren().add(new Label(String.valueOf(dataY)));
 			}
 		}
 	}

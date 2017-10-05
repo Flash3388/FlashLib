@@ -13,6 +13,7 @@ import edu.flash3388.flashlib.vision.VisionProcessing;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -601,6 +602,7 @@ public class MainWindow {
 		controlsInput_Pane.getChildren().clear();
 		controlsSimple_Pane.getChildren().clear();
 		controlsGraphic_Pane.getChildren().clear();
+		//controlsGraphic_Pane.getItems().clear();
 		
 		controlsActivatable_row = 0;
 		controlsActivatable_column = 0;
@@ -610,6 +612,7 @@ public class MainWindow {
 	}
 	private void addToGraphicControls(Node node){
 		controlsGraphic_Pane.getChildren().add(node);
+		//controlsGraphic_Pane.getItems().add(node);
 	}
 	private void addToSimpleControls(Node node){
 		controlsSimple_Pane.getChildren().add(node);
@@ -642,11 +645,16 @@ public class MainWindow {
 		
 		VBox graphiccontrols = new VBox();
 		graphiccontrols.setSpacing(10.0);
-		graphiccontrols.setPadding(new Insets(5.0, 5.0, 0.0, 0.0));
 		graphiccontrols.setAlignment(Pos.TOP_CENTER);
+		
+		//SplitPane graphiccontrols = new SplitPane();
+		//graphiccontrols.setOrientation(Orientation.VERTICAL);
+		
+		graphiccontrols.setPadding(new Insets(5.0, 5.0, 0.0, 0.0));
 		controlsGraphic_Pane = graphiccontrols;
 		
 		SplitPane controlsPane = new SplitPane();
+		controlsPane.setOrientation(Orientation.HORIZONTAL);
 		controlsPane.getItems().addAll(graphiccontrols, simplecontrols);
 		controlsPane.setMinSize(380.0, 300.0);
 		
@@ -680,6 +688,7 @@ public class MainWindow {
 		estopBox.getChildren().addAll(Dashboard.getEmergencyStopControl().getRoot());
 		
 		SplitPane controlsPane = new SplitPane();
+		controlsPane.setOrientation(Orientation.HORIZONTAL);
 		controlsPane.getItems().addAll(inputcontrols, activatablecontrols);
 		controlsPane.setMinSize(800.0, 150.0);
 		

@@ -31,6 +31,7 @@ public class CircularDirectionIndicator{
 		root = new VBox();
 		
 		StackPane graphicalData = new StackPane();
+		graphicalData.setMaxSize(radius * 2, radius * 2);
 		lineBox = new Canvas();
 		
 		outerCircle = new Circle(graphicalData.getWidth() * 0.5, graphicalData.getHeight() * 0.5, radius);
@@ -40,14 +41,12 @@ public class CircularDirectionIndicator{
 		innerCircle.setFill(Color.TRANSPARENT);
 		innerCircle.setStroke(Color.BLACK);*/
 		
-		lineBox.setWidth(116);
-		lineBox.setHeight(100);
-		lineBox.getGraphicsContext2D().strokeLine(lineBox.getWidth() * 0.5, lineBox.getHeight() * 0.5,
-				lineBox.getWidth() * 0.5 + radius, lineBox.getHeight() * 0.5);
+		lineBox.setWidth(radius * 2);
+		lineBox.setHeight(radius * 2);
 		
 		graphicalData.getChildren().addAll(outerCircle, lineBox);
 		
-		valLbl = new Label(name+": 0");
+		valLbl = new Label(name+": 0.0");
 		valLbl.setMinWidth(radius * 2);
 		valLbl.setTextAlignment(TextAlignment.CENTER);
 		
@@ -56,8 +55,8 @@ public class CircularDirectionIndicator{
 		labalBox.setAlignment(Pos.CENTER);
 		
 		root.setAlignment(Pos.CENTER);
-		root.setSpacing(5);
-		root.getChildren().addAll(graphicalData, labalBox);
+		root.setSpacing(2.0);
+		root.getChildren().addAll(labalBox, graphicalData);
 		
 		setValue(0);
 	}

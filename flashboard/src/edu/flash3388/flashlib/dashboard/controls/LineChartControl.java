@@ -108,6 +108,7 @@ public class LineChartControl extends Displayable{
 						axisY.setUpperBound(top);
 					}
 					
+					chart.setTitle(getName()+": "+Mathf.roundDecimal(y));
 					chartSeries.getData().add(data);
 					((StackPane)data.getNode()).setVisible(false);
 				}

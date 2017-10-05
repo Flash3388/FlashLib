@@ -594,11 +594,11 @@ public class Dashboard extends Application {
 	//-----------------------Init & Shut----------------------------------
 	//--------------------------------------------------------------------
 	
-	private static Log log;
+	private static final Log log = Log.createStreamLog("flashboard");
 	private static String currentNativesFolder = "";
 	
 	public static void main(String[] args) throws Exception{
-		log = FlashUtil.getLog();
+		FlashUtil.setLog(log);
 		
 		log.log("Loading settings and properties...", "Dashboard");
 		validateBasicHierarcy();
