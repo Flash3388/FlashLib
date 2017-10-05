@@ -10,6 +10,13 @@ public class AnalogRangeFinder implements RangeFinder{
 		this.voltageToCM = vtocm;
 	}
 	
+	@Override
+	public void free() {
+		if(input != null)
+			input.free();
+		input = null;
+	}
+	
 	public void setVoltToCMRatio(double vtocm){
 		this.voltageToCM = vtocm;
 	}

@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "hal_defines.h"
+#include <haltypes.h>
 
 typedef struct dio_port{
 	uint8_t header;
@@ -38,5 +39,16 @@ typedef struct adc_port{
 
 	unsigned int sample_buffer[HAL_AIN_SAMPLING_SIZE];
 } adc_port_t;
+
+typedef struct pulse_counter{
+	hal_handle_t dio_port;
+
+	uint8_t last_value;
+
+	uint32_t count;
+	uint32_t period;
+
+	bool release;
+} pulse_counter_t;
 
 #endif /* BBB_HANDLES_H_ */

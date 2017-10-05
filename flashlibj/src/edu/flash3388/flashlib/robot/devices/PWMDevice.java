@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.devices;
 
 import edu.flash3388.flashlib.math.Mathf;
 
-public class PWMDevice {
+public class PWMDevice implements IOPort{
 
 	private PWM port;
 	private double center, min, max, deadbandMin, deadbandMax;
@@ -111,5 +111,12 @@ public class PWMDevice {
 			return -1.0;
 		
 		return (duty - getMinNegative()) / getFullScaleFactor();
+	}
+	
+	@Override
+	public void free() {
+		if(port != null)
+			port.free();
+		port = null;
 	}
 }

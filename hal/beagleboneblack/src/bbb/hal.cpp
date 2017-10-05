@@ -31,6 +31,8 @@ namespace hal{
 std::unordered_map<hal_handle_t, std::shared_ptr<dio_pulse_t>> pulse_map;
 std::unordered_map<hal_handle_t, std::shared_ptr<dio_port_t>> dio_map;
 
+std::unordered_map<hal_handle_t, std::shared_ptr<pulse_counter_t>> pulse_counter_map;
+
 pwm_port_t pwm_map[BBB_PWMSS_MODULE_COUNT];
 adc_port_t adc_map[BBB_ADC_CHANNEL_COUNT];
 
@@ -39,12 +41,14 @@ typedef struct thread_data{
 } thread_data_t;
 
 pthread_t io_thread;
-thread_data_t io_thread_data;
+pthread_t counter_thread;
+thread_data_t thread_data;
 
 pthread_mutex_t pulse_map_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t thread_param_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t io_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t adc_sampling_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t pulse_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 bool init = false;
 
@@ -59,6 +63,21 @@ void limitPWMDuty(float* duty){
 		*duty = 0.0f;
 }
 
+void* counter_thread_function(void* param){
+
+	thread_data_t data;
+
+	while(data.run){
+		//TODO: USE EPOLL TO WAIT FOR VALUE CHANGES!!!!
+
+		//get thread data
+		pthread_mutex_lock(&thread_param_mutex);
+		data.run = thread_data.run;
+		pthread_mutex_unlock(&thread_param_mutex);
+	}
+
+	return NULL;
+}
 void* io_thread_function(void* param){
 
 	thread_data_t data;
@@ -71,10 +90,13 @@ void* io_thread_function(void* param){
 
 	long long pulse_us_passed;
 	auto pulse_start = std::chrono::high_resolution_clock::now();
+	int32_t pulse_min_time = 10000;
 
 	while(data.run){
 
 		//run pulses
+		pulse_min_time = 10000;
+
 		pthread_mutex_lock(&pulse_map_mutex);
 		auto pulse_elapsed = std::chrono::high_resolution_clock::now() - pulse_start;
 		pulse_us_passed = std::chrono::duration_cast<std::chrono::microseconds>(pulse_elapsed).count();
@@ -83,6 +105,7 @@ void* io_thread_function(void* param){
 			pulse->remaining_time -= pulse_us_passed;
 			if(pulse->remaining_time <= 0){
 #ifdef HAL_USE_IO
+				//TODO: SET DIO TO LOW
 				pthread_mutex_lock(&io_mutex);
 				if(dio_map.count(it->first)){
 					dio_port_t* dio = dio_map[it->first].get();
@@ -92,8 +115,11 @@ void* io_thread_function(void* param){
 				pthread_mutex_unlock(&io_mutex);
 #endif
 				it = pulse_map.erase(it);
-			}else
+			}else{
 				++it;
+				if(pulse->remaining_time < pulse_min_time)
+					pulse_min_time = pulse->remaining_time;
+			}
 		}
 		pulse_start = std::chrono::high_resolution_clock::now();
 		pthread_mutex_unlock(&pulse_map_mutex);
@@ -122,11 +148,11 @@ void* io_thread_function(void* param){
 			adc_start = std::chrono::high_resolution_clock::now();
 		}
 
-		usleep(HAL_IO_THREAD_DELAY);
+		usleep(pulse_min_time);
 
 		//get thread data
 		pthread_mutex_lock(&thread_param_mutex);
-		data.run = io_thread_data.run;
+		data.run = thread_data.run;
 		pthread_mutex_unlock(&thread_param_mutex);
 	}
 
@@ -177,6 +203,17 @@ int BBB_initialize(int mode){
 	}
 #endif
 
+#ifdef HAL_USE_THREAD
+	status = pthread_create(&counter_thread, NULL, &counter_thread_function, NULL);
+	if(status){
+		//TODO: ERROR
+#ifdef HAL_BBB_DEBUG
+		printf("Failed to initializing counter thread \n");
+#endif
+		return -1;
+	}
+#endif
+
 	init = true;
 	return 0;
 }
@@ -189,22 +226,26 @@ void BBB_shutdown(){
 		return;
 	}
 
+	pthread_mutex_lock(&io_mutex);
+
 #ifdef HAL_BBB_DEBUG
-	printf("Shutting down IO thread \n");
+	printf("Shutting down threads \n");
 #endif
 
 	//TODO: KILL THREAD IF IO INIT WAS SUCCESSFUL
 	pthread_mutex_lock(&thread_param_mutex);
-	io_thread_data.run = false;
+	thread_data.run = false;
 	pthread_mutex_unlock(&thread_param_mutex);
 
 #ifdef HAL_USE_THREAD
-	pthread_mutex_lock(&io_mutex);
 	pthread_join(io_thread, NULL);
-	pthread_mutex_unlock(&io_mutex);
+	pthread_join(counter_thread, NULL);
 #endif
 
+	pthread_mutex_lock(&pulse_counter_mutex);
+
 	pulse_map.clear();
+	pulse_counter_map.clear();
 
 #ifdef HAL_BBB_DEBUG
 	printf("Clearing PWM handles \n");
@@ -257,12 +298,12 @@ void BBB_shutdown(){
 	printf("Shutting down BBBIOLib \n");
 #endif
 
-	pthread_mutex_lock(&io_mutex);
 	iolib_free();
-	pthread_mutex_unlock(&io_mutex);
 #endif
 
-
+	pthread_mutex_unlock(&pulse_counter_mutex);
+	pthread_mutex_unlock(&io_mutex);
+	pthread_mutex_destroy(&pulse_counter_mutex);
 	pthread_mutex_destroy(&io_mutex);
 
 	init = false;
@@ -380,24 +421,41 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 	if(dio_map.count(portHandle)){
 		dio_port_t* dio = dio_map[portHandle].get();
 		if(dio->dir == BBB_DIR_OUTPUT){
-			dio->val = high;
-			if(high == BBB_GPIO_HIGH){
+			if(dio->val != high){
+				dio->val = high;
+				if(high == BBB_GPIO_HIGH){
 #ifdef HAL_USE_IO
-				pin_high(dio->header + 8, dio->pin);
+					pin_high(dio->header + 8, dio->pin);
 #endif
-				dio->val = BBB_GPIO_HIGH;
+					dio->val = BBB_GPIO_HIGH;
 
 #ifdef HAL_BBB_DEBUG
-				printf("Set DIO to high: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+					printf("Set DIO to high: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
 #endif
-			}else if(high == BBB_GPIO_LOW){
+				}else if(high == BBB_GPIO_LOW){
+					//TODO: CHECK IF PULSING
+					pthread_mutex_lock(&pulse_map_mutex);
+					if(pulse_map.count(portHandle)){
+#ifdef HAL_BBB_DEBUG
+						printf("DIO, stopping pulse: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+#endif
+						dio_pulse_t* pulse = pulse_map[portHandle].get();
+						pulse->remaining_time = 0;
+					}
+					pthread_mutex_unlock(&pulse_map_mutex);
+
 #ifdef HAL_USE_IO
-				pin_low(dio->header + 8, dio->pin);
+					pin_low(dio->header + 8, dio->pin);
 #endif
-				dio->val = BBB_GPIO_LOW;
+					dio->val = BBB_GPIO_LOW;
 
 #ifdef HAL_BBB_DEBUG
-				printf("Set DIO to low: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+					printf("Set DIO to low: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+#endif
+				}
+			}else{
+#ifdef HAL_BBB_DEBUG
+				printf("DIO already set to given value: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
 #endif
 			}
 		}else{
@@ -792,18 +850,29 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 			limitPWMDuty(&duty);
 
 			uint8_t port = BBB_PWMSS_PORT_TO_PIN(portHandle);
-			if(port == BBB_PWMSSA && pwm->enabledA)
+			bool update = false;
+
+			if(port == BBB_PWMSSA && pwm->enabledA && pwm->dutyA != duty){
 				pwm->dutyA = duty;
-			else if(port == BBB_PWMSSB && pwm->enabledB)
+				update = true;
+			}
+			else if(port == BBB_PWMSSB && pwm->enabledB && pwm->dutyB != duty){
 				pwm->dutyB = duty;
+				update = true;
+			}
 
+			if(update){
 #ifdef HAL_USE_IO
-			BBBIO_PWMSS_Setting(module, pwm->frequency, pwm->dutyA, pwm->dutyB);
+				BBBIO_PWMSS_Setting(module, pwm->frequency, pwm->dutyA, pwm->dutyB);
 #endif
-
 #ifdef HAL_BBB_DEBUG
-			printf("PWM port set: %f - MODULE= %d, PIN= %d \n", duty, module, port);
+				printf("PWM port set: %f - MODULE= %d, PIN= %d \n", duty, module, port);
 #endif
+			}else{
+#ifdef HAL_BBB_DEBUG
+				printf("PWM port is already set to given cycle: %f - MODULE= %d, PIN= %d \n", duty, module, port);
+#endif
+			}
 		}else{
 #ifdef HAL_BBB_DEBUG
 			printf("PWM ports are not enabled:  MODULE= %d \n", module);
@@ -879,6 +948,139 @@ float BBB_getPWMFrequency(hal_handle_t portHandle){
 	}
 
 	return frequency;
+}
+
+/***********************************************************************\
+ * Pulse Counter
+\***********************************************************************/
+
+hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
+	if(!init){
+		return HAL_INVALID_HANDLE;
+	}
+
+	hal_handle_t handle = (hal_handle_t)dioPort;
+	pthread_mutex_lock(&pulse_counter_mutex);
+	if(pulse_counter_map.count(handle)){
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter for port exists: %d \n", dioPort);
+#endif
+	}else{
+		pulse_counter_t counter;
+		counter.period = 0;
+		counter.count = 0;
+		counter.release = false;
+		counter.dio_port = BBB_initializeDIOPort(dioPort, BBB_DIR_INPUT);
+
+		if(counter.dio_port != HAL_INVALID_HANDLE){
+			counter.last_value = BBB_getDIO(counter.dio_port);
+			pulse_counter_map.emplace(handle, std::make_shared<pulse_counter_t>(counter));
+
+#ifdef HAL_BBB_DEBUG
+			printf("Pulse counter initialized for DIO port: %d \n", dioPort);
+#endif
+		}else{
+			handle = HAL_INVALID_HANDLE;
+#ifdef HAL_BBB_DEBUG
+			printf("Pulse counter failed to initialize DIO port: %d \n", dioPort);
+#endif
+		}
+	}
+	pthread_mutex_unlock(&pulse_counter_mutex);
+
+	return handle;
+}
+void BBB_freePulseCounter(hal_handle_t counterHandle){
+	if(!init){
+		return;
+	}
+
+	pthread_mutex_lock(&pulse_counter_mutex);
+	if(pulse_counter_map.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+		counter->release = true;
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is set for release: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&pulse_counter_mutex);
+}
+
+void BBB_resetPulseCounter(hal_handle_t counterHandle){
+	if(!init){
+		return;
+	}
+
+	pthread_mutex_lock(&pulse_counter_mutex);
+	if(pulse_counter_map.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+		counter->count = 0;
+		counter->period = 0;
+		counter->last_value = BBB_getDIO(counter->dio_port);
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter reset: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&pulse_counter_mutex);
+}
+
+uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle){
+	if(!init){
+		return 0;
+	}
+
+	uint32_t count = 0;
+	pthread_mutex_lock(&pulse_counter_mutex);
+	if(pulse_counter_map.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+		count = counter->count;
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter count get: %d, %d \n", counterHandle, count);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&pulse_counter_mutex);
+
+	return count;
+}
+float BBB_getPulseCounterPeriod(hal_handle_t counterHandle){
+	if(!init){
+		return 0.0;
+	}
+
+	uint32_t period = 0;
+	pthread_mutex_lock(&pulse_counter_mutex);
+	if(pulse_counter_map.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+		period = counter->period;
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter period get: %d, %d \n", counterHandle, period);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&pulse_counter_mutex);
+
+	//TODO: CONVERT US TO SEC
+	float periodSec = period / 1000000.0f;
+	return periodSec;
 }
 
 } /* namespace hal */

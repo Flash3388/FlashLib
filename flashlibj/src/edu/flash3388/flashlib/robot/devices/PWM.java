@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot.devices;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface PWM {
+public interface PWM extends IOPort{
 
 	/**
 	 * Sets the PWM port output duty cycle.

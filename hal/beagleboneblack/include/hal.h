@@ -57,6 +57,18 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty);
 void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency);
 float BBB_getPWMFrequency(hal_handle_t portHandle);
 
+/***********************************************************************\
+ * Pulse Counter
+\***********************************************************************/
+
+hal_handle_t BBB_initializePulseCounter(int16_t dioPort);
+void BBB_freePulseCounter(hal_handle_t counterHandle);
+
+void BBB_resetPulseCounter(hal_handle_t counterHandle);
+
+uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle);
+float BBB_getPulseCounterPeriod(hal_handle_t counterHandle);
+
 } /* namespace hal */
 
 } /* namespace flashlib */

@@ -1,15 +1,28 @@
 package edu.flash3388.flashlib.robot.devices;
 
-public class AnalogAccelerometer{
+import edu.flash3388.flashlib.robot.PIDSource;
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort{
 
 	private AnalogInput input;
 	private double zeroGvoltage;
 	private double voltsPerG;
 	
+	public AnalogAccelerometer(AnalogInput input) {
+		this(input, 2.5, 1.0);
+	}
 	public AnalogAccelerometer(AnalogInput input, double zeroGVoltage, double voltsPerG) {
 		this.input = input;
 		this.zeroGvoltage = zeroGVoltage;
 		this.voltsPerG = voltsPerG;
+	}
+	
+	@Override
+	public void free() {
+		if(input != null)
+			input.free();
+		input = null;
 	}
 	
 	public void setSensitivity(double voltsPerG){
@@ -28,5 +41,14 @@ public class AnalogAccelerometer{
 	
 	public double getAcceleration(){
 		return (input.getVoltage() - zeroGvoltage) / voltsPerG;
+	}
+
+	@Override
+	public double pidGet() {
+		return getAcceleration();
+	}
+	@Override
+	public double get() {
+		return getAcceleration();
 	}
 }

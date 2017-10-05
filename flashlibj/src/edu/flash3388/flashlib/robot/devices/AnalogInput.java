@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot.devices;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface AnalogInput {
+public interface AnalogInput extends IOPort{
 
 	/**
 	 * Gets the current analog value measured on the port. This corresponds to
