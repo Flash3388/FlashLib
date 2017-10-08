@@ -18,6 +18,8 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class BarChartControl extends Displayable{
@@ -168,9 +170,9 @@ public class BarChartControl extends Displayable{
 				double dataY = Mathf.roundDecimal(control.getData());
 				Data<String, Number> data = new Data<String, Number>(control.getName(), dataY);
 				
-				chart.setTitle(getName()+": "+dataY);
+				//chart.setTitle(getName()+": "+dataY);
 				chartSeries.getData().add(data);
-				//((StackPane)data.getNode()).getChildren().add(new Label(String.valueOf(dataY)));
+				((StackPane)data.getNode()).getChildren().add(new Label(String.valueOf(dataY)));
 			}
 		}
 	}
