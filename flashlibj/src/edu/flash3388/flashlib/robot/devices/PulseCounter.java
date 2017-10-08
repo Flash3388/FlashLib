@@ -31,5 +31,12 @@ public interface PulseCounter extends IntegerSource, IOPort{
 	 * 
 	 * @return length of the last pulse in seconds.
 	 */
-	double getPeriod();
+	double getPulseLength();
+	
+	/**
+	 * Gets the time period between the last two pulses in seconds.
+	 * 
+	 * @return time in seconds between last 2 pulses.
+	 */
+	double getPulsePeriod();
 }

@@ -38,7 +38,7 @@ public class IndexEncoder implements Encoder{
 	
 	@Override
 	public double getRate() {
-		return distancePerPulse / counter.getPeriod();
+		return distancePerPulse / counter.getPulsePeriod();
 	}
 	@Override
 	public double getDistance() {

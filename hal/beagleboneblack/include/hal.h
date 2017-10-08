@@ -68,6 +68,7 @@ void BBB_resetPulseCounter(hal_handle_t counterHandle);
 
 uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle);
 float BBB_getPulseCounterPeriod(hal_handle_t counterHandle);
+float BBB_getPulseCounterLength(hal_handle_t counterHandle);
 
 } /* namespace hal */
 

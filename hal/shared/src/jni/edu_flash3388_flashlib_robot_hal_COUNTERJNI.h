@@ -33,18 +33,26 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_resetPul
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
- * Method:    getPulseCounterCount
+ * Method:    getPulseCounterPulseCount
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterCount
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulseCount
   (JNIEnv *, jclass, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
- * Method:    getPulseCounterPeriod
+ * Method:    getPulseCounterPulseLength
  * Signature: (I)F
  */
-JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPeriod
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulseLength
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
+ * Method:    getPulseCounterPulsePeriod
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulsePeriod
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

@@ -9,8 +9,11 @@
 #define BBB_HANDLES_H_
 
 #include <stdint.h>
-#include "hal_defines.h"
 #include <haltypes.h>
+#include <pthread.h>
+#include <sys/epoll.h>
+
+#include "hal_defines.h"
 
 typedef struct dio_port{
 	uint8_t header;
@@ -43,10 +46,14 @@ typedef struct adc_port{
 typedef struct pulse_counter{
 	hal_handle_t dio_port;
 
-	uint8_t last_value;
-
 	uint32_t count;
 	uint32_t period;
+	uint32_t length;
+
+	pthread_t pthread;
+	pthread_mutex_t mutex;
+
+	int epoll_fd;
 
 	bool release;
 } pulse_counter_t;

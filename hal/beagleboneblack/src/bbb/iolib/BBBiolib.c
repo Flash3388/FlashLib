@@ -210,6 +210,56 @@ int iolib_setdir(char port, char pin, char dir)
 
 	return(0);
 }
+char pin_bank(char port, char pin){
+	int param_error=0;			// parameter error
+
+	// sanity checks
+	if (memh == 0)
+		param_error=1;
+	if ((port < 8) || (port > 9))		// if input is not port8 and port 9 , because BBB support P8/P9 Connector
+		param_error=1;
+	if ((pin < 1 ) || (pin > 46))		// if pin over/underflow , range : 1~46
+		param_error=1;
+	if (PortSet_ptr[port - 8][pin - 1] < 0)	// pass GND OR VCC (PortSet as -1)
+		param_error=1;
+
+	if (param_error)
+	{
+#ifdef BBBIO_LIB_DBG
+		printf("iolib_setdir: parameter error!\n");
+#endif
+		return(-1);
+	}
+
+	return PortSet_ptr[port - 8][pin - 1];
+}
+char pin_offset(char port, char pin){
+	int param_error=0;			// parameter error
+
+	// sanity checks
+	if (memh == 0)
+		param_error=1;
+	if ((port < 8) || (port > 9))		// if input is not port8 and port 9 , because BBB support P8/P9 Connector
+		param_error=1;
+	if ((pin < 1 ) || (pin > 46))		// if pin over/underflow , range : 1~46
+		param_error=1;
+	if (PortSet_ptr[port - 8][pin - 1] < 0)	// pass GND OR VCC (PortSet as -1)
+		param_error=1;
+
+	if (param_error)
+	{
+#ifdef BBBIO_LIB_DBG
+		printf("iolib_setdir: parameter error!\n");
+#endif
+		return(-1);
+	}
+
+	unsigned int idset = PortIDSet_ptr[port - 8][pin - 1];
+	int offset = 0;
+	for(; offset < 32 && (offset & idset == 0); ++offset);
+
+	return offset;
+}
 /* ----------------------------------------------------------------------------------------------- */
 void pin_high(char port, char pin)
 {

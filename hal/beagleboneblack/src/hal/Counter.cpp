@@ -23,11 +23,14 @@ void HAL_resetPulseCounter(hal_handle_t counterHandle){
 	BBB_resetPulseCounter(counterHandle);
 }
 
-uint32_t HAL_getPulseCounterCount(hal_handle_t counterHandle){
+uint32_t HAL_getPulseCounterPulseCount(hal_handle_t counterHandle){
 	return BBB_getPulseCounterCount(counterHandle);
 }
-float HAL_getPulseCounterPeriod(hal_handle_t counterHandle){
+float HAL_getPulseCounterPulsePeriod(hal_handle_t counterHandle){
 	return BBB_getPulseCounterPeriod(counterHandle);
+}
+float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle){
+	return BBB_getPulseCounterLength(counterHandle);
 }
 
 

@@ -55,10 +55,21 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_resetPul
  * Method:    getPulseCounterCount
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterCount
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulseCount
 	(JNIEnv *env, jclass obj, jint handle){
-	uint32_t value = HAL_getPulseCounterCount((hal_handle_t)handle);
+	uint32_t value = HAL_getPulseCounterPulseCount((hal_handle_t)handle);
 	return (jint)value;
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
+ * Method:    getPulseCounterPulseLength
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulseLength
+(JNIEnv *env, jclass obj, jint handle){
+	float value = HAL_getPulseCounterPulseLength((hal_handle_t)handle);
+	return (jfloat)value;
 }
 
 /*
@@ -66,9 +77,9 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulse
  * Method:    getPulseCounterPeriod
  * Signature: (I)F
  */
-JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPeriod
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulsePeriod
 (JNIEnv *env, jclass obj, jint handle){
-	float value = HAL_getPulseCounterPeriod((hal_handle_t)handle);
+	float value = HAL_getPulseCounterPulsePeriod((hal_handle_t)handle);
 	return (jfloat)value;
 }
 

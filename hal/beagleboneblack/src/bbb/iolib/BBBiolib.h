@@ -311,6 +311,9 @@ void pin_low(char port, char pin);
 char is_high(char port, char pin);
 char is_low(char port, char pin);
 
+char pin_bank(char port, char pin);
+char pin_offset(char port, char pin);
+
 /* ----------------------------------------------------------------------
  * BBBIO basic function
  */

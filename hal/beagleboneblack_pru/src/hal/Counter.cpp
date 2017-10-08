@@ -6,36 +6,34 @@
  */
 
 #include <Counter.h>
-#include <stdio.h>
+#include <hal.h>
+#include <platformexception.h>
 
 namespace flashlib{
 
 namespace hal{
 
 hal_handle_t HAL_initializePulseCounter(int16_t port){
-	printf("INIT PULSE COUNTER: %d \n", port);
-	return HAL_INVALID_HANDLE;
+	throw platform_exception();
 }
 void HAL_freePulseCounter(hal_handle_t counterHandle){
-	printf("FREE PULSE COUNTER: %d \n", counterHandle);
+	throw platform_exception();
 }
 
 void HAL_resetPulseCounter(hal_handle_t counterHandle){
-	printf("RESET PULSE COUNTER: %d \n", counterHandle);
+	throw platform_exception();
 }
 
 uint32_t HAL_getPulseCounterPulseCount(hal_handle_t counterHandle){
-	printf("GET COUNT PULSE COUNTER: %d \n", counterHandle);
-	return 0;
-}
-float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle){
-	printf("GET LENGTH PULSE COUNTER: %d \n", counterHandle);
-	return 0.0;
+	throw platform_exception();
 }
 float HAL_getPulseCounterPulsePeriod(hal_handle_t counterHandle){
-	printf("GET PERIOD PULSE COUNTER: %d \n", counterHandle);
-	return 0.0;
+	throw platform_exception();
 }
+float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle){
+	throw platform_exception();
+}
+
 
 } /* namespace hal */
 

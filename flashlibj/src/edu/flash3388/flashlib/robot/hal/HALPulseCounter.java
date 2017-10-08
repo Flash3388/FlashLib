@@ -61,15 +61,24 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 	 */
 	@Override 
 	public int get(){
-		return COUNTERJNI.getPulseCounterCount(handle);
+		return COUNTERJNI.getPulseCounterPulseCount(handle);
 	}
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * If the port was initialized, the period of the last pulse is returned.
+	 * If the port was initialized, the length of the last pulse is returned.
 	 */
 	@Override
-	public double getPeriod(){
-		return (double)COUNTERJNI.getPulseCounterPeriod(handle);
+	public double getPulseLength(){
+		return (double)COUNTERJNI.getPulseCounterPulseLength(handle);
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If the port was initialized, the period between last 2 pulses is returned.
+	 */
+	@Override
+	public double getPulsePeriod() {
+		return (double)COUNTERJNI.getPulseCounterPulsePeriod(handle);
 	}
 }

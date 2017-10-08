@@ -104,7 +104,7 @@ public class Ultrasonic implements RangeFinder{
 	public double getRangeCM() {
 		if(!isRangeValid())
 			return 0.0;
-		return counter.getPeriod() * SPEED_OF_SOUND * 0.5;
+		return counter.getPulseLength() * SPEED_OF_SOUND * 0.5;
 	}
 	
 	
