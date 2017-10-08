@@ -83,7 +83,7 @@ void* counter_thread_function(void* param){
 
 	pulse_counter_t* counter = (pulse_counter_t*)param;
 
-	epoll_event* epoll_events;
+	epoll_event epoll_events;
 	int epoll_r = 0;
 
 	uint8_t current_value;
@@ -98,7 +98,7 @@ void* counter_thread_function(void* param){
 
 	while(run){
 		//TODO: USE EPOLL TO WAIT FOR VALUE CHANGES!!!!
-		epoll_r = epoll_wait(counter->epoll_fd, epoll_events, 1, 1);
+		epoll_r = epoll_wait(counter->epoll_fd, &epoll_events, 1, HAL_PCOUNTER_TIMEOUT);
 		if(epoll_r < 0){
 			//TODO: HANDLE EPOLL ERROR
 #ifdef HAL_BBB_DEBUG
@@ -144,8 +144,6 @@ void* counter_thread_function(void* param){
 		}
 	}
 
-	free(epoll_events);
-
 	return NULL;
 }
 void* io_thread_function(void* param){
@@ -174,16 +172,9 @@ void* io_thread_function(void* param){
 			dio_pulse_t* pulse = it->second.get();
 			pulse->remaining_time -= pulse_us_passed;
 			if(pulse->remaining_time <= 0){
-#ifdef HAL_USE_IO
-				//TODO: SET DIO TO LOW
-				pthread_mutex_lock(&io_mutex);
-				if(dio_map.count(it->first)){
-					dio_port_t* dio = dio_map[it->first].get();
-					if(dio->dir == BBB_DIR_OUTPUT)
-						pin_low(dio->header + 8, dio->pin);
-				}
-				pthread_mutex_unlock(&io_mutex);
-#endif
+				//TODO: SET DIO LOW
+				BBB_setDIO(it->first, BBB_GPIO_LOW);
+
 				it = pulse_map.erase(it);
 			}else{
 				++it;
@@ -198,10 +189,11 @@ void* io_thread_function(void* param){
 		auto adc_elapsed = std::chrono::high_resolution_clock::now() - adc_start;
 		adc_ms_passed = std::chrono::duration_cast<std::chrono::milliseconds>(adc_elapsed).count();
 		if(adc_ms_passed >= HAL_AIN_SMAPLING_RATE){
-			pthread_mutex_lock(&adc_sampling_mutex);
 #ifdef HAL_USE_IO
 			BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
 #endif
+
+			pthread_mutex_lock(&adc_sampling_mutex);
 			for(adc_idx = 0; adc_idx < BBB_ADC_CHANNEL_COUNT; ++adc_idx){
 				adc_port_t adc = adc_map[adc_idx];
 				if(adc.enabled){
@@ -355,7 +347,7 @@ void BBB_shutdown(){
 		dio_port_t* dio = it->second.get();
 
 #ifdef HAL_USE_IO
-		pin_low(dio->header + 8, dio->pin);
+		pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
 
 		it = dio_map.erase(it);
@@ -420,14 +412,14 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 		int result;
 
 #ifdef HAL_USE_IO
-		result = iolib_setdir(dio.header + 8, dio.pin, dir);
+		result = iolib_setdir(HAL_HEADER(dio.header + 8), dio.pin, dir);
 #else
 		result = 0;
 #endif
 
 		if(result == 0){
 #ifdef HAL_USE_IO
-			pin_low(dio.header + 8, dio.pin);
+			pin_low(HAL_HEADER(dio.header + 8), dio.pin);
 #endif
 			dio_map.emplace(handle, std::make_shared<dio_port_t>(dio));
 
@@ -471,7 +463,7 @@ void BBB_freeDIOPort(hal_handle_t portHandle){
 
 		dio_port_t* dio = dio_map[portHandle].get();
 #ifdef HAL_USE_IO
-		pin_low(dio->header + 8, dio->pin);
+		pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
 		//TODO: REMOVE DIO FROM MAP AND DESTROY OBJECT...
 		dio_map.erase(portHandle);
@@ -500,7 +492,7 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 				dio->val = high;
 				if(high == BBB_GPIO_HIGH){
 #ifdef HAL_USE_IO
-					pin_high(dio->header + 8, dio->pin);
+					pin_high(HAL_HEADER(dio->header), dio->pin);
 #endif
 					dio->val = BBB_GPIO_HIGH;
 
@@ -520,7 +512,7 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 					pthread_mutex_unlock(&pulse_map_mutex);
 
 #ifdef HAL_USE_IO
-					pin_low(dio->header + 8, dio->pin);
+					pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
 					dio->val = BBB_GPIO_LOW;
 
@@ -568,7 +560,7 @@ void BBB_pulseDIO(hal_handle_t portHandle, float length){
 				dio->val = BBB_GPIO_HIGH;
 
 #ifdef HAL_USE_IO
-				pin_high(dio->header + 8, dio->pin);
+				pin_high(HAL_HEADER(dio->header), dio->pin);
 #endif
 
 				dio_pulse_t pulse;
@@ -611,7 +603,7 @@ uint8_t BBB_getDIO(hal_handle_t portHandle){
 		}else{
 
 #ifdef HAL_USE_IO
-			val = is_high(dio->header + 8, dio->pin);
+			val = is_high(HAL_HEADER(dio->header), dio->pin);
 #endif
 
 #ifdef HAL_BBB_DEBUG
@@ -1221,7 +1213,7 @@ float BBB_getPulseCounterPeriod(hal_handle_t counterHandle){
 	}
 
 	//TODO: CONVERT US TO SEC
-	float periodSec = period / 1000000.0f;
+	float periodSec = (float)(period * 0.000001f);
 	return periodSec;
 }
 float BBB_getPulseCounterLength(hal_handle_t counterHandle){
@@ -1246,7 +1238,7 @@ float BBB_getPulseCounterLength(hal_handle_t counterHandle){
 	}
 
 	//TODO: CONVERT US TO SEC
-	float lengthSec = length / 1000000.0f;
+	float lengthSec = (float)(length * 0.000001f);
 	return lengthSec;
 }
 

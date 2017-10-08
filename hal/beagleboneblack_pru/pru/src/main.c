@@ -23,7 +23,10 @@ void dio_pulse();
 
 void pwm_frequency_set();
 
+void counter_reset();
+
 int main(void){
+	HWREG(0x26004) &= 0xffffffef;
 
 	int status_value = 0;
 	unsigned long status_last_update = 0;
@@ -85,14 +88,19 @@ void handle_host_interrupt(){
 		case PRU_ACTION_PWM_FREQ_S:
 			pwm_frequency_set();
 			break;
+
+		case PRU_ACTION_COUNTER_RE:
+			counter_reset();
+			break;
 	}
 }
 
 void initialize_port(){
 	unsigned char type = shared_memory[PRU_MEM_HANDLE_TYPE_REG];
-	short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+	signed short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+	unsigned short module = 0, pin = 0;
 
-	short handle = -1;
+	signed short handle = -1;
 
 	switch(type){
 		case PRU_HANDLE_ADC:
@@ -102,10 +110,17 @@ void initialize_port(){
 			handle = pru_pwm_initialize(port);
 			break;
 		case PRU_HANDLE_DO:
-			handle = pru_dio_initialize(port, BBB_DIR_OUTPUT);
+			module = (shared_memory[PRU_MEM_HANDLE_VAL_REG+1] & 0xff);
+			pin = ((shared_memory[PRU_MEM_HANDLE_VAL_REG+1] >> 8) & 0xff);
+			handle = pru_dio_initialize(port, module, pin, BBB_DIR_OUTPUT);
 			break;
 		case PRU_HANDLE_DI:
-			handle = pru_dio_initialize(port, BBB_DIR_INPUT);
+			module = (shared_memory[PRU_MEM_HANDLE_VAL_REG+1] & 0xff);
+			pin = ((shared_memory[PRU_MEM_HANDLE_VAL_REG+1] >> 8) & 0xff);
+			handle = pru_dio_initialize(port, module, pin, BBB_DIR_INPUT);
+			break;
+		case PRU_HANDLE_COUNTER:
+			handle = pru_counter_initialize(port);
 			break;
 	}
 
@@ -113,7 +128,7 @@ void initialize_port(){
 }
 void free_port(){
 	unsigned char type = shared_memory[PRU_MEM_HANDLE_TYPE_REG];
-	short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+	signed short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
 
 	switch(type){
 		case PRU_HANDLE_ADC:
@@ -126,19 +141,27 @@ void free_port(){
 		case PRU_HANDLE_DI:
 			pru_dio_free(port);
 			break;
+		case PRU_HANDLE_COUNTER:
+			pru_counter_free(port);
+			break;
 	}
 }
 void dio_pulse(){
 	unsigned int length = shared_memory[PRU_MEM_ACTION_VAL_REG];
-	short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+	signed short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
 
 	pru_dio_pulse(port, length);
 }
 void pwm_frequency_set(){
 	unsigned char clkdiv = (shared_memory[PRU_MEM_ACTION_VAL_REG] & 0xff);
 	unsigned char hspclkdiv = ((shared_memory[PRU_MEM_ACTION_VAL_REG] >> 8) & 0xff);
-	short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+	signed short port = shared_memory[PRU_MEM_HANDLE_VAL_REG];
 
 	pru_pwm_frequency_set(port, clkdiv, hspclkdiv);
+}
+void counter_reset(){
+	signed short handle = shared_memory[PRU_MEM_HANDLE_VAL_REG];
+
+	pru_counter_reset(handle);
 }
 

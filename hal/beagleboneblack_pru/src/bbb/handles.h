@@ -29,4 +29,9 @@ typedef struct adc_port{
 	uint32_t val_addr_offset;
 } adc_port_t;
 
+typedef struct pulse_counter{
+
+	uint32_t val_addr_offset;
+} pulse_counter_t;
+
 #endif /* BBB_HANDLES_H_ */

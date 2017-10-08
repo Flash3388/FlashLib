@@ -256,7 +256,7 @@ char pin_offset(char port, char pin){
 
 	unsigned int idset = PortIDSet_ptr[port - 8][pin - 1];
 	int offset = 0;
-	for(; offset < 32 && (offset & idset == 0); ++offset);
+	for(; offset < 32 && ((offset & idset) == 0); ++offset);
 
 	return offset;
 }

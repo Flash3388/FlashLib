@@ -17,6 +17,7 @@
 #include "pru_defines.h"
 #include "handles.h"
 #include "pru.h"
+#include "gpio.h"
 
 #ifdef HAL_BBB_DEBUG
 #include <iostream>
@@ -27,6 +28,7 @@ namespace flashlib{
 namespace hal{
 
 std::unordered_map<hal_handle_t, std::shared_ptr<dio_port_t>> dio_ports;
+std::unordered_map<hal_handle_t, std::shared_ptr<pulse_counter_t>> pulse_counters;
 
 pwm_port_t pwm_ports[HAL_PWMSS_PORTS_COUNT];
 adc_port_t adc_ports[BBB_ADC_CHANNEL_COUNT];
@@ -152,9 +154,19 @@ void pru_shutdown(){
 hal_handle_t pru_dio_initialize(uint16_t port, uint8_t dir, dio_port_t* dio){
 	uint8_t handle_type = dir == BBB_DIR_OUTPUT? PRU_HANDLE_DO : PRU_HANDLE_DI;
 
+	unsigned char header = BBB_GPIO_PORT_TO_HEADER(port);
+	unsigned char pin = BBB_GPIO_PORT_TO_PIN(port);
+
+	unsigned char module = gpio_module_get(header, pin);
+	pin = gpio_pin_get(header, pin);
+
+	if(module < 0 || pin <= 0)
+		return HAL_INVALID_HANDLE;
+
 	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PORT_INIT;
 	pru_data.shared_memory[PRU_MEM_HANDLE_TYPE_REG] = handle_type;
 	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = port;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG+1] = (module || (pin << 8));
 
 	pru_interrupt_send(&pru_data);
 	pru_interrupt_wait();
@@ -272,6 +284,54 @@ void pru_pwm_frequency_set(hal_handle_t handle, float frequency){
 	pru_interrupt_wait();
 }
 
+hal_handle_t pru_counter_initialize(int16_t port, pulse_counter_t* counter){
+	uint8_t handle_type = PRU_HANDLE_COUNTER;
+
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PORT_INIT;
+	pru_data.shared_memory[PRU_MEM_HANDLE_TYPE_REG] = handle_type;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = port;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait();
+
+	hal_handle_t handle = (hal_handle_t)pru_data.shared_memory[PRU_MEM_HANDLE_RES_REG];
+
+	if(handle != HAL_INVALID_HANDLE)
+		counter->val_addr_offset = PRU_MEM_COUNTER_OFFSET + (handle * 3);
+
+	return handle;
+}
+void pru_counter_free(hal_handle_t handle){
+	uint8_t handle_type = PRU_HANDLE_COUNTER;
+
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_PORT_FREE;
+	pru_data.shared_memory[PRU_MEM_HANDLE_TYPE_REG] = handle_type;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait();
+}
+void pru_counter_reset(hal_handle_t handle){
+	uint8_t handle_type = PRU_HANDLE_COUNTER;
+
+	pru_data.shared_memory[PRU_MEM_ACTION_TYPE_REG] = PRU_ACTION_COUNTER_RE;
+	pru_data.shared_memory[PRU_MEM_HANDLE_TYPE_REG] = handle_type;
+	pru_data.shared_memory[PRU_MEM_HANDLE_VAL_REG] = handle;
+
+	pru_interrupt_send(&pru_data);
+	pru_interrupt_wait();
+}
+uint32_t pru_counter_count(pulse_counter_t* counter){
+	return (uint32_t)pru_data.shared_memory[counter->val_addr_offset];
+}
+float pru_counter_period(pulse_counter_t* counter){
+	uint32_t period = (uint32_t)pru_data.shared_memory[counter->val_addr_offset + 2];
+	return (float)(period * 0.000001f);
+}
+float pru_counter_length(pulse_counter_t* counter){
+	uint32_t length = (uint32_t)pru_data.shared_memory[counter->val_addr_offset + 2];
+	return (float)(length * 0.000001f);
+}
 #endif
 
 void bbb_pwm_limit(uint8_t* val){
@@ -375,8 +435,12 @@ void BBB_shutdown(){
 		adc->enabled = false;
 		adc->val_addr_offset = PRU_MEM_ADC_EMPTY;
 	}
+
+	//clear pulse handles
+	pulse_counters.clear();
 	//clear dio handles
 	dio_ports.clear();
+
 	pthread_mutex_unlock(&io_mutex);
 
 	pthread_mutex_destroy(&io_mutex);
@@ -969,6 +1033,219 @@ float BBB_getPWMFrequency(hal_handle_t portHandle){
 	}
 
 	return val;
+}
+
+/***********************************************************************\
+ * Pulse Counter
+\***********************************************************************/
+
+hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return HAL_INVALID_HANDLE;
+	}
+
+	pthread_mutex_lock(&io_mutex);
+	hal_handle_t portHandle = (hal_handle_t)dioPort;
+	if(pulse_counters.count(portHandle)){
+		pulse_counter_t* counter = pulse_counters[portHandle].get();
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle already initialized: %d \n", portHandle);
+#endif
+
+	}else if(dioPort > 0){
+		if(dio_ports.count(portHandle)){
+			dio_port_t* dio = dio_ports[portHandle].get();
+
+			if(dio->dir == BBB_DIR_OUTPUT){
+				portHandle = HAL_INVALID_HANDLE;
+
+#ifdef HAL_BBB_DEBUG
+				printf("Invalid DIO port direction for pulse counter: %d \n", portHandle);
+#endif
+			}
+		}else{
+			portHandle = BBB_initializeDIOPort(dioPort, BBB_DIR_INPUT);
+		}
+
+		if(portHandle != HAL_INVALID_HANDLE){
+			pulse_counter_t counter;
+
+#ifdef HAL_USE_IO
+			portHandle = pru_counter_initialize(dioPort, &counter);
+#endif
+
+			if(portHandle != HAL_INVALID_HANDLE){
+				pulse_counters.emplace(portHandle, std::make_shared<pulse_counter_t>(counter));
+
+#ifdef HAL_BBB_DEBUG
+				printf("Initialized Pulse Counter handle: %d \n", portHandle);
+#endif
+			}else{
+#ifdef HAL_BBB_DEBUG
+				printf("Failed to initialize Pulse Counter handle: %d \n", portHandle);
+#endif
+			}
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("Failed to initialize DIO port for Pulse Counter: %d \n", portHandle);
+#endif
+		}
+	}else{
+		portHandle = HAL_INVALID_HANDLE;
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter port is invalid: %d \n", portHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+	return portHandle;
+}
+void BBB_freePulseCounter(hal_handle_t counterHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return;
+	}
+
+	pthread_mutex_lock(&io_mutex);
+	if(pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counters[counterHandle].get();
+
+#ifdef HAL_USE_IO
+		pru_counter_free(counterHandle);
+#endif
+
+		pulse_counters.erase(counterHandle);
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle freed: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+}
+
+void BBB_resetPulseCounter(hal_handle_t counterHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return;
+	}
+
+	pthread_mutex_lock(&io_mutex);
+	if(pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counters[counterHandle].get();
+
+#ifdef HAL_USE_IO
+		pru_counter_reset(counterHandle);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle reset: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+}
+
+uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return 0;
+	}
+
+	uint32_t count = 0;
+	pthread_mutex_lock(&io_mutex);
+	if(pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counters[counterHandle].get();
+
+#ifdef HAL_USE_IO
+		count = pru_counter_count(counter);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle count: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+
+	return count;
+}
+float BBB_getPulseCounterPeriod(hal_handle_t counterHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return 0.0f;
+	}
+
+	float period = 0.0f;
+	pthread_mutex_lock(&io_mutex);
+	if(pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counters[counterHandle].get();
+
+#ifdef HAL_USE_IO
+		period = pru_counter_period(counter);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle period: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+
+	return period;
+}
+float BBB_getPulseCounterLength(hal_handle_t counterHandle){
+	if(!init){
+#ifdef HAL_BBB_DEBUG
+		printf("HAL not initialized \n");
+#endif
+		return 0.0f;
+	}
+
+	float length = 0.0f;
+	pthread_mutex_lock(&io_mutex);
+	if(pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = pulse_counters[counterHandle].get();
+
+#ifdef HAL_USE_IO
+		length = pru_counter_period(counter);
+#endif
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle length: %d \n", counterHandle);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse Counter handle not initialized: %d \n", counterHandle);
+#endif
+	}
+	pthread_mutex_unlock(&io_mutex);
+
+	return length;
 }
 
 } /* namespace hal */

@@ -19,12 +19,14 @@
 
 #include <time.h>
 
-dio_port_t dio_ports[BBB_GPIO_PORTS_COUNT];
+#define NULL_PTR ((void*)0)
+
+dio_port_t* dio_ports[BBB_GPIO_PORTS_COUNT];
 adc_port_t adc_ports[BBB_ADC_CHANNEL_COUNT];
 pwm_port_t pwm_ports[BBB_PWMSS_MODULE_COUNT];
 
-unsigned long adc_last_update;
-unsigned long dio_last_update;
+unsigned long adc_last_update = 0;
+unsigned long dio_last_update = 0;
 
 unsigned long pru_clock_us(){
 	return clock();
@@ -35,13 +37,13 @@ int pru_initialize(){
 	int i, j;
 
 	adc_port_t* adc_port;
-	dio_port_t* dio_port;
+	//dio_port_t* dio_port;
 	pwm_port_t* pwm_port;
 
 	//GPIO initialize
 	gpio_initialize();
 
-	for(i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
+	/*for(i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
 		dio_port = &dio_ports[i];
 		dio_port->enabled = 0;
 		dio_port->value = 0;
@@ -49,7 +51,7 @@ int pru_initialize(){
 
 		dio_port->header = BBB_GPIO_PORT_TO_HEADER(i);
 		dio_port->pin = BBB_GPIO_PORT_TO_PIN(i);
-	}
+	}*/
 
 	//ADC initialize
 	adc_initialize();
@@ -76,6 +78,17 @@ int pru_initialize(){
 	return 0;
 }
 void pru_shutdown(){
+	int i;
+
+	for(i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
+		pru_dio_free(i);
+	}
+	for(i = 0; i < BBB_ADC_CHANNEL_COUNT; ++i){
+		pru_adc_free(i);
+	}
+	for(i = 0; i < HAL_PWMSS_PORTS_COUNT; ++i){
+		pru_pwm_free(i);
+	}
 
 	//PWM shutdown
 	pwm_free();
@@ -89,26 +102,51 @@ void pru_shutdown(){
 
 void pru_handles_update(unsigned int* shared_memory){
 	int i, j;
-	unsigned long timepasssed = 0;
+	unsigned long timepassed = 0;
 
 	unsigned int adc_fifo_count;
 	unsigned int adc_fifo_data;
 
-	adc_port_t* adc_port;
 	dio_port_t* dio_port;
+	adc_port_t* adc_port;
 	pwm_port_t* pwm_port;
 
 	//update dio
-	timepasssed = clock() - dio_last_update;
-
+	timepassed = pru_clock_us() - dio_last_update;
 	for(i = 0; i < BBB_GPIO_PORTS_COUNT; ++i){
-		dio_port = &dio_ports[i];
+		dio_port = dio_ports[i];
 
-		if(dio_port->enabled){
+		if(dio_port != NULL){
 			if(dio_port->dir == BBB_DIR_INPUT){
-				char value = 0;//TODO: READ GPIO VALUE
+				char value = gpio_ishigh(dio_port->header, dio_port->pin);
 
 				if(value != dio_port->value){
+					if(dio_port->counter != NULL){
+						if(value == BBB_GPIO_HIGH){
+							//TODO: RISING
+							dio_port->counter->count++;
+
+							unsigned long time = pru_clock_us();
+							dio_port->counter->length_start = time;
+
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3)] = dio_port->counter->count;
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 1] =
+													(time - dio_port->counter->period_start);
+
+							dio_port->counter->period_start = 0;
+						}else{
+							//TODO: FALLING
+
+							unsigned long time = pru_clock_us();
+							dio_port->counter->period_start = time;
+
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 2] =
+													(time - dio_port->counter->length_start);
+
+							dio_port->counter->length_start = 0;
+						}
+					}
+
 					dio_port->value = value;
 					shared_memory[PRU_MEM_DIO_OFFSET + i] = value;
 				}
@@ -124,21 +162,24 @@ void pru_handles_update(unsigned int* shared_memory){
 					else
 						gpio_setlow(dio_port->header, dio_port->pin);
 
-					if(dio_port->pulse_enabled && value == BBB_GPIO_LOW){
-						dio_port->pulse_enabled = 0;
-						dio_port->pulse_length = 0;
+					if(dio_port->pulse != NULL && value == BBB_GPIO_LOW){
+						free(dio_port->pulse);
 					}
 				}
 
-				if(dio_port->pulse_enabled){
-					//TODO: CHECK TIME PASSED AND UPDATE
-					if(dio_port->pulse_length <= timepasssed)
-						dio_port->pulse_length = 0;
-					else dio_port->pulse_length -= timepasssed;
+				if(dio_port->pulse != NULL){
+					if(dio_port->pulse->pulse_length <= timepassed)
+						dio_port->pulse->pulse_length = 0;
+					else
+						dio_port->pulse->pulse_length -= timepassed;
 
-					if(dio_port->pulse_length == 0){
+					if(dio_port->pulse->pulse_length == 0){
+						dio_port->value = BBB_GPIO_LOW;
+						shared_memory[PRU_MEM_DIO_OFFSET + i] = BBB_GPIO_LOW;
+
 						gpio_setlow(dio_port->header, dio_port->pin);
-						dio_port->pulse_enabled = 0;
+
+						free(dio_port->pulse);
 					}
 				}
 			}
@@ -147,8 +188,8 @@ void pru_handles_update(unsigned int* shared_memory){
 	dio_last_update = pru_clock_us();
 
 	//update adc
-	timepasssed = pru_clock_us() - adc_last_update;
-	if(timepasssed >= HAL_AIN_SMAPLING_RATE){
+	timepassed = pru_clock_us() - adc_last_update;
+	if(timepassed >= HAL_AIN_SMAPLING_RATE){
 		for(i = 0; i < 2; ++i){
 			adc_fifo_count = adc_fifo_data_count(i);
 			if(adc_fifo_count > 0){
@@ -201,27 +242,25 @@ void pru_handles_update(unsigned int* shared_memory){
 	}
 }
 
-short pru_dio_initialize(short port, char dir){
-
+signed short pru_dio_initialize(signed short port, signed short module, signed short pin, char dir){
 	if(port > 0 && port < BBB_GPIO_PORTS_COUNT){
-		--port;//decrease to match our actual counting which is from 0
-		dio_port_t* dio = &dio_ports[port];
+		dio_port_t* dio = dio_ports[port];
 
-		if(!dio->enabled){
-			if(gpio_module_get(dio->header, dio->pin) >= 0){
-				dio->dir = dir;
-				dio->enabled = 1;
-				dio->value = 0;
-				dio->pulse_enabled = 0;
-				dio->pulse_length = 0;
+		if(dio == NULL){
+			dio = (dio_port_t*)malloc(sizeof(dio_port_t));
 
-				gpio_setdir(dio->header, dio->pin, dir);
+			dio->header = module;
+			dio->pin = pin;
 
-				if(dir == BBB_DIR_OUTPUT){
-					gpio_setlow(dio->header, dio->pin);
-				}
-			}else{
-				port = -1;
+			dio->dir = dir;
+			//dio->enabled = 1;
+			dio->value = 0;
+			dio->pulse = 0;
+
+			gpio_setdir(dio->header, dio->pin, dir);
+
+			if(dir == BBB_DIR_OUTPUT){
+				gpio_setlow(dio->header, dio->pin);
 			}
 		}
 		else if(dio->dir != dir){
@@ -233,39 +272,53 @@ short pru_dio_initialize(short port, char dir){
 
 	return port;
 }
-void pru_dio_free(short handle){
+void pru_dio_free(signed short handle){
 	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
-		dio_port_t* dio = &dio_ports[handle];
+		dio_port_t* dio = dio_ports[handle];
 
-		if(dio->enabled){
-			dio->enabled = 0;
+		if(dio != NULL){
+			//dio->enabled = 0;
+
+			if(dio->pulse != NULL){
+				free(dio->pulse);
+			}
+			if(dio->counter != NULL){
+				free(dio->counter);
+			}
 
 			if(dio->dir == BBB_DIR_OUTPUT){
 				gpio_setlow(dio->header, dio->pin);
 			}
+
+			free(dio);
 		}
 	}
 }
-void pru_dio_set(short handle, char value){
+void pru_dio_set(signed short handle, char value){
 	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
-		dio_port_t* dio = &dio_ports[handle];
+		dio_port_t* dio = dio_ports[handle];
 
-		if(dio->enabled && dio->dir == BBB_DIR_OUTPUT){
+		if(dio != NULL && dio->dir == BBB_DIR_OUTPUT){
 			dio->value = value;
 
 			if(value == BBB_GPIO_HIGH)
 				gpio_sethigh(dio->header, dio->pin);
-			else
+			else{
 				gpio_setlow(dio->header, dio->pin);
+
+				if(dio->pulse != NULL){
+					free(dio->pulse);
+				}
+			}
 		}
 	}
 }
-char pru_dio_get(short handle){
+char pru_dio_get(signed short handle){
 	char value = 0;
 	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
-		dio_port_t* dio = &dio_ports[handle];
+		dio_port_t* dio = dio_ports[handle];
 
-		if(dio->enabled){
+		if(dio != NULL){
 			if(dio->dir == BBB_DIR_INPUT){
 				value = gpio_ishigh(dio->header, dio->pin);
 			}
@@ -277,17 +330,17 @@ char pru_dio_get(short handle){
 
 	return value;
 }
-void pru_dio_pulse(short handle, unsigned int length){
+void pru_dio_pulse(signed short handle, unsigned int length){
 	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
-		dio_port_t* dio = &dio_ports[handle];
+		dio_port_t* dio = dio_ports[handle];
 
-		if(dio->enabled && dio->dir == BBB_DIR_OUTPUT){
-			if(dio->pulse_enabled){
-				dio->pulse_length += length;
+		if(dio != NULL && dio->dir == BBB_DIR_OUTPUT){
+			if(dio->pulse != NULL){
+				dio->pulse->pulse_length += length;
 			}
 			else{
-				dio->pulse_length = length;
-				dio->pulse_enabled = 1;
+				dio->pulse = (dio_pulse_t*)malloc(sizeof(dio_pulse_t));
+				dio->pulse->pulse_length = length;
 
 				gpio_sethigh(dio->header, dio->pin);
 				dio->value = 1;
@@ -297,7 +350,7 @@ void pru_dio_pulse(short handle, unsigned int length){
 }
 
 
-short pru_adc_initialize(short channel){
+signed short pru_adc_initialize(signed short channel){
 	if(channel >= 0 && channel < BBB_ADC_CHANNEL_COUNT){
 		adc_port_t* adc = &adc_ports[channel];
 
@@ -313,7 +366,7 @@ short pru_adc_initialize(short channel){
 
 	return channel;
 }
-void pru_adc_free(short handle){
+void pru_adc_free(signed short handle){
 	if(handle >= 0 && handle < BBB_ADC_CHANNEL_COUNT){
 		adc_port_t* adc = &adc_ports[handle];
 
@@ -325,7 +378,7 @@ void pru_adc_free(short handle){
 		}
 	}
 }
-unsigned int pru_adc_get(short handle){
+unsigned int pru_adc_get(signed short handle){
 	unsigned int value = 0;
 	if(handle >= 0 && handle < BBB_ADC_CHANNEL_COUNT){
 		adc_port_t* adc = &adc_ports[handle];
@@ -338,7 +391,7 @@ unsigned int pru_adc_get(short handle){
 }
 
 
-short pru_pwm_initialize(short port){
+signed short pru_pwm_initialize(signed short port){
 	if(port >= 0 && port < HAL_PWMSS_PORTS_COUNT){
 		char module = BBB_PWMSS_PORT_TO_MODULE(port);
 		pwm_port_t* pwm = &pwm_ports[module];
@@ -360,7 +413,7 @@ short pru_pwm_initialize(short port){
 
 	return port;
 }
-void pru_pwm_free(short handle){
+void pru_pwm_free(signed short handle){
 	if(handle >= 0 && handle < HAL_PWMSS_PORTS_COUNT){
 		char module = BBB_PWMSS_PORT_TO_MODULE(handle);
 		pwm_port_t* pwm = &pwm_ports[module];
@@ -377,7 +430,7 @@ void pru_pwm_free(short handle){
 		}
 	}
 }
-void pru_pwm_set(short handle, char value){
+void pru_pwm_set(signed short handle, char value){
 	if(handle >= 0 && handle < HAL_PWMSS_PORTS_COUNT){
 		char module = BBB_PWMSS_PORT_TO_MODULE(handle);
 		pwm_port_t* pwm = &pwm_ports[module];
@@ -390,7 +443,7 @@ void pru_pwm_set(short handle, char value){
 		}
 	}
 }
-char pru_pwm_get(short handle){
+char pru_pwm_get(signed short handle){
 	char value = 0;
 	if(handle >= 0 && handle < HAL_PWMSS_PORTS_COUNT){
 		char module = BBB_PWMSS_PORT_TO_MODULE(handle);
@@ -404,7 +457,7 @@ char pru_pwm_get(short handle){
 	}
 	return value;
 }
-void pru_pwm_frequency_set(short handle, unsigned char clkdiv, unsigned char hspclkdiv){
+void pru_pwm_frequency_set(signed short handle, unsigned char clkdiv, unsigned char hspclkdiv){
 	if(handle >= 0 && handle < HAL_PWMSS_PORTS_COUNT){
 		char module = BBB_PWMSS_PORT_TO_MODULE(handle);
 		pwm_port_t* pwm = &pwm_ports[module];
@@ -417,4 +470,74 @@ void pru_pwm_frequency_set(short handle, unsigned char clkdiv, unsigned char hsp
 			pwm_module_settings(module, pwm->clkdiv, pwm->hspclkdiv, pwm->value[0], pwm->value[1]);
 		}
 	}
+}
+
+signed short pru_counter_initialize(signed short port){
+	if(port > 0 && port < BBB_GPIO_PORTS_COUNT){
+		--port;//decrease to match our actual counting which is from 0
+		dio_port_t* dio = dio_ports[port];
+
+		if(port >= 0 && dio->counter != NULL){
+			dio->counter = (pulse_counter_t*)malloc(sizeof(pulse_counter_t));
+
+			dio->counter->count = 0;
+			dio->counter->length_start = 0;
+			dio->counter->period_start = 0;
+		}
+	}else{
+		port = -1;
+	}
+
+	return port;
+}
+void pru_counter_free(signed short handle){
+	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
+		dio_port_t* dio = dio_ports[handle];
+
+		if(dio != NULL && dio->counter != NULL){
+			free(dio->counter);
+		}
+	}
+}
+void pru_counter_reset(signed short handle){
+	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
+		dio_port_t* dio = dio_ports[handle];
+
+		if(dio != NULL && dio->counter != NULL){
+			dio->counter->count = 0;
+		}
+	}
+}
+unsigned int pru_counter_count(signed short handle){
+	unsigned int count = 0;
+	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
+		dio_port_t* dio = dio_ports[handle];
+
+		if(dio != NULL && dio->counter != NULL){
+			count = dio->counter->count;
+		}
+	}
+	return count;
+}
+unsigned int pru_counter_period(signed short handle){
+	unsigned int period = 0;
+	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
+		dio_port_t* dio = dio_ports[handle];
+
+		if(dio != NULL && dio->counter != NULL && dio->counter->period_start > 0){
+			period = pru_clock_us() - dio->counter->period_start;
+		}
+	}
+	return period;
+}
+unsigned int pru_counter_length(signed short handle){
+	unsigned int length = 0;
+	if(handle >= 0 && handle < BBB_GPIO_PORTS_COUNT){
+		dio_port_t* dio = dio_ports[handle];
+
+		if(dio != NULL && dio->counter != NULL && dio->counter->length_start > 0){
+			length = pru_clock_us() - dio->counter->length_start;
+		}
+	}
+	return length;
 }

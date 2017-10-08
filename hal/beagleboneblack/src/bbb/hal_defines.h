@@ -24,6 +24,9 @@
 #define HAL_PWMSS_DUTY_TO_VALUE(d)  (d * HAL_PWMSS_MAX_VALUE)
 
 #define HAL_IO_THREAD_DELAY         (500)//us
+#define HAL_PCOUNTER_TIMEOUT        (10)//ms
+
+#define HAL_HEADER(h)               (h+8)
 
 //#define HAL_BBB_DEBUG
 #define HAL_USE_IO

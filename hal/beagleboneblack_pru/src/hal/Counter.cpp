@@ -7,31 +7,30 @@
 
 #include <Counter.h>
 #include <hal.h>
-#include <platformexception.h>
 
 namespace flashlib{
 
 namespace hal{
 
 hal_handle_t HAL_initializePulseCounter(int16_t port){
-	throw platform_exception();
+	return BBB_initializePulseCounter(port);
 }
 void HAL_freePulseCounter(hal_handle_t counterHandle){
-	throw platform_exception();
+	BBB_freePulseCounter(counterHandle);
 }
 
 void HAL_resetPulseCounter(hal_handle_t counterHandle){
-	throw platform_exception();
+	BBB_resetPulseCounter(counterHandle);
 }
 
 uint32_t HAL_getPulseCounterPulseCount(hal_handle_t counterHandle){
-	throw platform_exception();
+	return BBB_getPulseCounterCount(counterHandle);
 }
 float HAL_getPulseCounterPulsePeriod(hal_handle_t counterHandle){
-	throw platform_exception();
+	return BBB_getPulseCounterPeriod(counterHandle);
 }
 float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle){
-	throw platform_exception();
+	return BBB_getPulseCounterLength(counterHandle);
 }
 
 

@@ -10,8 +10,18 @@
 
 #include "hal_defines.h"
 
+typedef struct pulse_counter{
+	unsigned int count;
+	unsigned int period_start;
+	unsigned int length_start;
+} pulse_counter_t;
+
+typedef struct dio_pulse{
+	unsigned int pulse_length;
+} dio_pulse_t;
+
 typedef struct dio_port{
-	char enabled;
+	//char enabled;
 
 	char header;
 	char pin;
@@ -19,8 +29,8 @@ typedef struct dio_port{
 	char dir;
 	char value;
 
-	char pulse_enabled;
-	unsigned int pulse_length;
+	pulse_counter_t* counter;
+	dio_pulse_t* pulse;
 } dio_port_t;
 
 typedef struct adc_port{
