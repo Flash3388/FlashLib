@@ -18,10 +18,12 @@ namespace hal{
 \***********************************************************************/
 
 hal_handle_t HAL_initializeAnalogInputPort(uint8_t port){
-	return BBB_initializeAnalogInput(port);
+	throw platform_exception();
+	//return BBB_initializeAnalogInput(port);
 }
 void HAL_freeAnalogInputPort(hal_handle_t portHandle){
-	BBB_freeAnalogInput(portHandle);
+	throw platform_exception();
+	//BBB_freeAnalogInput(portHandle);
 }
 
 hal_handle_t HAL_initializeAnalogOutputPort(uint8_t port){
@@ -43,10 +45,12 @@ void HAL_setAnalogVoltage(hal_handle_t portHandle, float volts){
 }
 
 float HAL_getAnalogVoltage(hal_handle_t portHandle){
-	return BBB_getAnalogVoltage(portHandle);
+	throw platform_exception();
+	//return BBB_getAnalogVoltage(portHandle);
 }
 uint32_t HAL_getAnalogValue(hal_handle_t portHandle){
-	return BBB_getAnalogValue(portHandle);
+	throw platform_exception();
+	//return BBB_getAnalogValue(portHandle);
 }
 
 } /* namespace hal */

@@ -11,9 +11,8 @@
 #include "hal_defines.h"
 
 typedef struct pulse_counter{
-	unsigned int count;
-	unsigned int period_start;
-	unsigned int length_start;
+	unsigned char count;
+	unsigned int start_time;
 } pulse_counter_t;
 
 typedef struct dio_pulse{
@@ -34,7 +33,7 @@ typedef struct dio_port{
 } dio_port_t;
 
 typedef struct adc_port{
-	char enabled;
+	//char enabled;
 
 	unsigned int value_buffer[HAL_AIN_SAMPLING_SIZE];
 	unsigned char buffer_sample_count;

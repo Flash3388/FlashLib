@@ -6,6 +6,7 @@
  */
 
 #include <PWM.h>
+#include <platformexception.h>
 #include "../../include/hal.h"
 
 namespace flashlib{
@@ -13,24 +14,30 @@ namespace flashlib{
 namespace hal{
 
 hal_handle_t HAL_initializePWMPort(uint8_t port){
-	return BBB_initializePWMPort(port);
+	throw platform_exception();
+	//return BBB_initializePWMPort(port);
 }
 void HAL_freePWMPort(hal_handle_t portHandle){
-	BBB_freePWMPort(portHandle);
+	throw platform_exception();
+	//BBB_freePWMPort(portHandle);
 }
 
 void HAL_setPWMDuty(hal_handle_t portHandle, float dutyCycle){
-	BBB_setPWMDuty(portHandle, dutyCycle);
+	throw platform_exception();
+	//BBB_setPWMDuty(portHandle, dutyCycle);
 }
 float HAL_getPWMDuty(hal_handle_t portHandle){
-	return BBB_getPWMDuty(portHandle);
+	throw platform_exception();
+	//return BBB_getPWMDuty(portHandle);
 }
 
 void HAL_setPWMValue(hal_handle_t portHandle, uint8_t value){
-	BBB_setPWMValue(portHandle, value);
+	throw platform_exception();
+	//BBB_setPWMValue(portHandle, value);
 }
 uint8_t HAL_getPWMValue(hal_handle_t portHandle){
-	return BBB_getPWMValue(portHandle);
+	throw platform_exception();
+	//return BBB_getPWMValue(portHandle);
 }
 
 

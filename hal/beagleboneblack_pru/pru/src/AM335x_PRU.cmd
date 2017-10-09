@@ -24,6 +24,7 @@ MEMORY
     
     PAGE 2:
     PRU_SHAREDMEM   : org = 0x00010000 len = 0x00003000  CREGISTER=28  /* 12kB Shared RAM */
+    //SCM_BUF         : org = 0x000120FF len = 0x0000008C
 
     DDR             : org = 0x80000000 len = 0x00000100  CREGISTER=31
     L3OCMC          : org = 0x40000000 len = 0x00010000  CREGISTER=30
@@ -83,4 +84,6 @@ SECTIONS {
     .farbss            >  PRU_DMEM_0_1, PAGE 1
     .fardata           >  PRU_DMEM_0_1, PAGE 1
     .resource_table    >  PRU_DMEM_0_1, PAGE 1
+
+    .shared_mem  >  PRU_SHAREDMEM, PAGE 2
 }

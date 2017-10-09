@@ -38,17 +38,17 @@ uint8_t BBB_getDIO(hal_handle_t portHandle);
  * ANALOG
 \***********************************************************************/
 
-hal_handle_t BBB_initializeAnalogInput(int16_t port);
+/*hal_handle_t BBB_initializeAnalogInput(int16_t port);
 void BBB_freeAnalogInput(hal_handle_t portHandle);
 
 uint32_t BBB_getAnalogValue(hal_handle_t portHandle);
-float BBB_getAnalogVoltage(hal_handle_t portHandle);
+float BBB_getAnalogVoltage(hal_handle_t portHandle);*/
 
 /***********************************************************************\
  * PWM
 \***********************************************************************/
 
-hal_handle_t BBB_initializePWMPort(int16_t port);
+/*hal_handle_t BBB_initializePWMPort(int16_t port);
 void BBB_freePWMPort(hal_handle_t portHandle);
 
 uint8_t BBB_getPWMValue(hal_handle_t portHandle);
@@ -58,7 +58,7 @@ void BBB_setPWMValue(hal_handle_t portHandle, uint8_t value);
 void BBB_setPWMDuty(hal_handle_t portHandle, float duty);
 
 void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency);
-float BBB_getPWMFrequency(hal_handle_t portHandle);
+float BBB_getPWMFrequency(hal_handle_t portHandle);*/
 
 /***********************************************************************\
  * Pulse Counter

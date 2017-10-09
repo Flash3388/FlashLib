@@ -10,7 +10,7 @@
 
 #include "bbb_defines.h"
 
-#define HAL_AIN_SAMPLING_SIZE        (10)
+#define HAL_AIN_SAMPLING_SIZE        (5)
 #define HAL_AIN_SMAPLING_RATE        (1000)//us
 #define HAL_AIN_CLK_DIVISOR          (160)
 #define HAL_AIN_OPEN_DELAY           (0)

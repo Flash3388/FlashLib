@@ -13,7 +13,7 @@ unsigned long pru_clock_us();
 int pru_initialize();
 void pru_shutdown();
 
-void pru_handles_update(unsigned int* shared_memory);
+void pru_handles_update(volatile unsigned int* shared_memory);
 
 signed short pru_dio_initialize(signed short port, signed short module, signed short pin, char dir);
 void pru_dio_free(signed short handle);
@@ -21,15 +21,15 @@ void pru_dio_set(signed short handle, char value);
 char pru_dio_get(signed short handle);
 void pru_dio_pulse(signed short handle, unsigned int length);
 
-signed short pru_adc_initialize(signed short channel);
+/*signed short pru_adc_initialize(signed short channel);
 void pru_adc_free(signed short handle);
-unsigned int pru_adc_get(signed short handle);
+unsigned int pru_adc_get(signed short handle);*/
 
-signed short pru_pwm_initialize(signed short port);
+/*signed short pru_pwm_initialize(signed short port);
 void pru_pwm_free(signed short handle);
 void pru_pwm_set(signed short handle, char value);
 char pru_pwm_get(signed short handle);
-void pru_pwm_frequency_set(signed short handle, unsigned char clkdiv, unsigned char hspclkdiv);
+void pru_pwm_frequency_set(signed short handle, unsigned char clkdiv, unsigned char hspclkdiv);*/
 
 signed short pru_counter_initialize(signed short port);
 void pru_counter_free(signed short handle);
