@@ -3,12 +3,10 @@ package edu.flash3388.flashlib.robot.devices;
 public class IndexEncoder implements Encoder{
 
 	private PulseCounter counter;
-	private DigitalInput indexChannel;
 	private PIDType pidType;
 	private double distancePerPulse;
 	
-	public IndexEncoder(DigitalInput indexChannel, PulseCounter counter, double distancePerPulse) {
-		this.indexChannel = indexChannel;
+	public IndexEncoder(PulseCounter counter, double distancePerPulse) {
 		this.counter = counter;
 		this.distancePerPulse = distancePerPulse;
 	}
@@ -25,10 +23,6 @@ public class IndexEncoder implements Encoder{
 		if(counter != null)
 			counter.free();
 		counter = null;
-		
-		if(indexChannel != null)
-			indexChannel.free();
-		indexChannel = null;
 	}
 	
 	@Override
@@ -37,8 +31,12 @@ public class IndexEncoder implements Encoder{
 	}
 	
 	@Override
-	public double getRate() {
+	public double getVelocity(){
 		return distancePerPulse / counter.getPulsePeriod();
+	}
+	@Override
+	public double getRate() {
+		return 60.0 / counter.getPulsePeriod();
 	}
 	@Override
 	public double getDistance() {

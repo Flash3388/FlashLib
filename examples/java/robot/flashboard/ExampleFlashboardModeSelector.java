@@ -32,8 +32,8 @@ public class ExampleFlashboardModeSelector extends IterativeRobot{
 	}
 	@Override
 	protected void robotInit() {
-		//attach our mode selector to flashboard
-		modeSelector.attachToFlashboard();
+		//there is no need to attach the mode selector to flashboard since it i s attached
+		//automatically when IterativeRobot calls Flashboard.start()
 	}
 
 	@Override

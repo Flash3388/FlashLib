@@ -44,11 +44,12 @@ public class ExampleFlashboardHIDInterface extends IterativeRobot{
 	}
 	@Override
 	protected void robotInit() {
-		//attach our hid interface to flashboard
-		hidInterface.attachToFlashboard();
 		//the hid interface needs to be updated periodically
 		//so we add it as an update task to the Scheduler
 		Scheduler.getInstance().addTask(hidInterface);
+		
+		//there is no need to attach the HID interface to flashboard since it is attached
+		//automatically when we Flashboard.start() is called by IterativeRobot
 		
 		//create our xbox controller. It should be connected to channel 0 of
 		//the hid interface

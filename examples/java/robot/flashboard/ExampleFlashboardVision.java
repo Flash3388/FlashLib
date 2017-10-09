@@ -3,6 +3,7 @@ package examples.robot.flashboard;
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.robot.FlashboardModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.GrayFilter;
@@ -25,6 +26,22 @@ public class ExampleFlashboardVision extends IterativeRobot{
 	//will hold our vision control object
 	Vision vision;
 	
+	//create our mode selector. 
+	//this mode selector is a window in Flashboard. 
+	//You can easily select you operation modes from there.
+	//But! you must define those modes for the window.
+	FlashboardModeSelector modeSelector = new FlashboardModeSelector();
+	
+	@Override
+	protected void preInit(IterativeRobotInitializer initializer) {
+		//indicate that we want to initialize flashboard
+		initializer.initFlashboard = true;
+		//since we need both the camera server and the standard communications, we set the mode to full
+		initializer.flashboardInitData.initMode = Flashboard.INIT_FULL;
+		
+		//set our mode selector
+		initializer.modeSelector = modeSelector;
+	}
 	@Override
 	protected void robotInit() {
 		/*

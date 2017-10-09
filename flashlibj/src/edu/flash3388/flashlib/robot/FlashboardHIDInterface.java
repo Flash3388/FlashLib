@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.FlashboardHIDControl;
 
-public class FlashboardHIDInterface implements HIDInterface{
+public class FlashboardHIDInterface implements HIDInterface, Runnable{
 
 	private FlashboardHIDControl hidcontrol = FlashboardHIDControl.getInstance();
 
@@ -46,5 +46,10 @@ public class FlashboardHIDInterface implements HIDInterface{
 		if(FlashRobotUtil.inEmergencyStop())
 			return -1;
 		return hidcontrol.getPOV(hid, pov);
+	}
+
+	@Override
+	public void run() {
+		hidcontrol.run();
 	}
 }

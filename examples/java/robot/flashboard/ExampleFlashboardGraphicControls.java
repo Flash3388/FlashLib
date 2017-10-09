@@ -52,8 +52,6 @@ public class ExampleFlashboardGraphicControls extends IterativeRobot{
 	}
 	@Override
 	protected void robotInit() {
-		//attach our hid interface to flashboard
-		hidInterface.attachToFlashboard();
 		//the hid interface needs to be updated periodically
 		//so we add it as an update task to the Scheduler
 		Scheduler.getInstance().addTask(hidInterface);

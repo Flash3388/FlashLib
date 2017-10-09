@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.flashboard.FlashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashboardHIDInterface;
-import edu.flash3388.flashlib.robot.FlashboardSimpleModeSelector;
+import edu.flash3388.flashlib.robot.FlashboardModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -43,9 +43,10 @@ public class Robot extends IterativeRobot{
 	Property<Action> autoActionProp;
 	
 	//create our mode selector. 
-	//we will use a flashboard mode selector which is basically a combo box
-	//on the flashboard.
-	FlashboardSimpleModeSelector modeSelector = new FlashboardSimpleModeSelector();
+	//this mode selector is a window in Flashboard. 
+	//You can easily select you operation modes from there.
+	//But! you must define those modes for the window.
+	FlashboardModeSelector modeSelector = new FlashboardModeSelector();
 	//create our HID interface.
 	//This allows us to use controllers and joysticks to control
 	//the robot. Data about the controllers is received using this interface.
@@ -110,14 +111,6 @@ public class Robot extends IterativeRobot{
 		//that mode)
 		driveTrain.setDefaultAction(stickDriveAction);
 		
-		//define the operation modes to our mode selector.
-		modeSelector.addOption("Manual", OPERATION_MODE_MANUAL);
-		modeSelector.addOption("Auto", OPERATION_MODE_AUTO);
-		//attach our mode selector to flashboard
-		modeSelector.attachToFlashboard();
-		
-		//attach our hid interface to flashboard
-		hidInterface.attachToFlashboard();
 		//the hid interface needs to be updated periodically
 		//so we add it as an update task to the Scheduler
 		Scheduler.getInstance().addTask(hidInterface);

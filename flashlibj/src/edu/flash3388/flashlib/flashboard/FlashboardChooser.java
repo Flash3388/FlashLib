@@ -139,7 +139,7 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		if(index < 0)
 			selectedValue.setValue(null);
 		else
-			selectedValue.setValue(options.get(selected.get()).option);
+			selectedValue.setValue(options.get(index).option);
 	}
 
 	@Override

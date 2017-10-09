@@ -5,13 +5,11 @@ import edu.flash3388.flashlib.robot.FlashboardModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.PIDController;
 import edu.flash3388.flashlib.robot.PIDSource;
-import edu.flash3388.flashlib.robot.devices.DigitalInput;
 import edu.flash3388.flashlib.robot.devices.Encoder;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.IndexEncoder;
 import edu.flash3388.flashlib.robot.devices.PulseCounter;
 import edu.flash3388.flashlib.robot.devices.Talon;
-import edu.flash3388.flashlib.robot.hal.HALDigitalInput;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
 import edu.flash3388.flashlib.robot.hal.HALPulseCounter;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
@@ -78,9 +76,6 @@ public class ExamplePIDController extends IterativeRobot{
 	@Override
 	protected void robotInit() {
 		
-		//attach our mode selector to flashboard
-		modeSelector.attachToFlashboard();
-		
 		//let's initialize our subsystem. We will use a PWM speed controller
 		//to control the shooter's motor. In this example we will use the Talon
 		//speed controller with the built in FlashLib class. For PWM port, we will
@@ -95,9 +90,8 @@ public class ExamplePIDController extends IterativeRobot{
 		double distancePerPulse = 2 * Math.PI * SHOOTER_WHEEL_RADIUS;
 		
 		//For encoder ports, we will use FlashLib HAL:
-		DigitalInput encoderInput = new HALDigitalInput(SHOOTER_ENCODER);
 		PulseCounter encoderCounter = new HALPulseCounter(SHOOTER_ENCODER);
-		encoder = new IndexEncoder(encoderInput, encoderCounter, distancePerPulse);
+		encoder = new IndexEncoder(encoderCounter, distancePerPulse);
 		
 		/*
 		 * The PIDController class allows us to control a system using a PID control loop.

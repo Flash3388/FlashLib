@@ -2,9 +2,9 @@ package examples.robot.flashboard;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraViewSelector;
+import edu.flash3388.flashlib.cams.FlashboardCamViewSelector;
 import edu.flash3388.flashlib.cams.cv.CvCamera;
 import edu.flash3388.flashlib.cams.cv.CvQueueCamera;
-import edu.flash3388.flashlib.flashboard.FlashboardCamViewSelector;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 
