@@ -2,13 +2,12 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class FlashboardBarChart extends Sendable{
+public class FlashboardBarChart extends FlashboardControl{
 
-	private static class FlashboardBarSeries extends Sendable{
+	private static class FlashboardBarSeries extends FlashboardControl{
 
 		private DoubleSource source;
 		private double value = 0.0, lastValue = 0.0;

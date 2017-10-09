@@ -3,12 +3,13 @@ package edu.flash3388.flashlib.flashboard;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.util.beans.Property;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleProperty;
+import edu.flash3388.flashlib.util.beans.observable.ObservableIntegerProperty;
+import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
+import edu.flash3388.flashlib.util.beans.observable.SimpleObservableIntegerProperty;
+import edu.flash3388.flashlib.util.beans.observable.SimpleObservableProperty;
 
 /**
  * Represents a combo box for values on the Flashboard.
@@ -16,7 +17,7 @@ import edu.flash3388.flashlib.util.beans.SimpleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashboardChooser<T> extends Sendable{
+public class FlashboardChooser<T> extends FlashboardControl{
 
 	public static class Option<T>{
 		private String name;
@@ -36,9 +37,10 @@ public class FlashboardChooser<T> extends Sendable{
 	}
 	
 	private Vector<Option<T>> options = new Vector<Option<T>>();
-	private IntegerProperty selected = new SimpleIntegerProperty();
-	private Property<T> selectedValue = new SimpleProperty<T>(null);
+	private ObservableIntegerProperty selected;
+	private ObservableProperty<T> selectedValue;
 	private int defaultIndex = -1;
+	
 	private boolean changed = false, changedIndex = false;
 	
 	@SafeVarargs
@@ -49,6 +51,19 @@ public class FlashboardChooser<T> extends Sendable{
 			for(Option<T> o : options)
 				this.options.addElement(o);
 		}
+		
+		selected = new SimpleObservableIntegerProperty(-1);
+		selected.addListener((obs, o, n)->{
+			changedIndex = true;
+		});
+		selectedValue = new SimpleObservableProperty<T>(null);
+		selectedValue.addListener((obs, o, n)->{
+			int index = -1;
+			if(n != null)
+				index = indexOf(n);
+			
+			selected.set(index);
+		});
 	}
 	public FlashboardChooser(String name) {
 		this(name, (Option<T>[])null);
@@ -121,12 +136,6 @@ public class FlashboardChooser<T> extends Sendable{
 		return selected.get();
 	}
 	public void select(int index){
-		setSelected(index);
-		changedIndex = true;
-	}
-	
-	private void setSelected(int index){
-		selected.set(index);
 		if(index < 0)
 			selectedValue.setValue(null);
 		else
@@ -137,8 +146,10 @@ public class FlashboardChooser<T> extends Sendable{
 	public void newData(byte[] data) {
 		if(data.length < 4) return;
 		int sel = FlashUtil.toInt(data);
-		if(sel >= 0 && sel < options.size() && sel != selected.get())
-			setSelected(sel);
+		if(sel >= 0 && sel < options.size() && sel != selected.get()){
+			select(sel);
+			changedIndex = false;
+		}
 	}
 	@Override
 	public byte[] dataForTransmition() {
@@ -149,7 +160,9 @@ public class FlashboardChooser<T> extends Sendable{
 			return bytes;
 		}
 		changed = false;
-		if(!changedIndex) changedIndex = true;
+		if(!changedIndex) 
+			changedIndex = true;
+		
 		String all = "";
 		for(Enumeration<Option<T>> opEnum = options.elements(); opEnum.hasMoreElements();)
 			all += opEnum.nextElement().name + ":";
@@ -166,10 +179,11 @@ public class FlashboardChooser<T> extends Sendable{
 	@Override
 	public void onConnection() {
 		changed = true;
+		changedIndex = true;
 	}
 	@Override
 	public void onConnectionLost() {
 		changed = false;
-		setSelected(defaultIndex);
+		select(defaultIndex);
 	}
 }

@@ -122,36 +122,35 @@ public final class Flashboard {
 	 * Attaches a new control sendable to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
 	 * 
-	 * @param sendable control to attach
+	 * @param control control to attach
 	 * 
 	 * @see Communications#attach(Sendable)
 	 * 
 	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static void attach(Sendable sendable){
+	public static void attach(FlashboardControl control){
 		checkInit();
-		communications.attach(sendable);
+		communications.attach(control);
 	}
 	/**
 	 * Attaches new control sendables to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
 	 * 
-	 * @param sendables controls to attach
+	 * @param controls controls to attach
 	 * 
 	 * @see Communications#attach(Sendable...)
 	 * 
 	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static void attach(Sendable... sendables){
+	public static void attach(FlashboardControl... controls){
 		checkInit();
-		for (Sendable sendable : sendables) 
-			communications.attach(sendable);
+		communications.attach(controls);
 	}
 	/**
 	 * Detaches control sendable from the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
 	 * 
-	 * @param sendable control to detach
+	 * @param control control to detach
 	 * 
 	 * @return true if the control was successfully detached, false otherwise
 	 * 
@@ -159,9 +158,9 @@ public final class Flashboard {
 	 * 
 	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static boolean detach(Sendable sendable){
+	public static boolean detach(FlashboardControl control){
 		checkInit();
-		return communications.detach(sendable);
+		return communications.detach(control);
 	}
 	/**
 	 * Detaches control sendable from the Flashboard by its id. Flashboard should be initialized first for it 
@@ -182,15 +181,16 @@ public final class Flashboard {
 	/**
 	 * Gets a control from the Flashboard by its ID. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param id the id of the control
-	 * @return the sendable object with the given id, null if not found.
+	 * @return the flashboard control object with the given id, null if not found.
 	 * @see Communications#getLocalyAttachedByID(int)
 	 * 
 	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static Sendable getLocalByID(int id){
+	public static FlashboardControl getLocalByID(int id){
 		checkInit();
-		return communications.getLocalyAttachedByID(id);
+		return (FlashboardControl) communications.getLocalyAttachedByID(id);
 	}
 	
 	/**
@@ -216,6 +216,12 @@ public final class Flashboard {
 	 */
 	public static void start(){
 		checkInit();
+		
+		if(FlashboardHIDControl.hasInstance())
+			attach(FlashboardHIDControl.getInstance());
+		if(FlashboardModeSelectorControl.hasInstance())
+			attach(FlashboardModeSelectorControl.getInstance());
+		
 		communications.start();
 	}
 	

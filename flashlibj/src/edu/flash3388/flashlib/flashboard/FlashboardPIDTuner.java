@@ -1,9 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
  * PIDTuner provides real-time tracking and tuning of pid controllers and loops. It is possible to 
@@ -12,7 +11,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class FlashboardPIDTuner extends Sendable{
+public class FlashboardPIDTuner extends FlashboardControl{
 
 	public static final byte K_UPDATE = 0x1;
 	public static final byte SP_UPDATE = 0x2;
@@ -21,7 +20,7 @@ public class FlashboardPIDTuner extends Sendable{
 	public static final byte SLIDER_UPDATE = 0x5;
 	
 	private DoubleProperty kp, ki, kd, kf, setpoint;
-	private DoubleSource currentValue;
+	private PIDSource currentValue;
 	private double maxValue;
 	private int ticks;
 	
@@ -29,7 +28,7 @@ public class FlashboardPIDTuner extends Sendable{
 	private double lastP, lastI, lastD, lastF, lastSetPoint, lastValue;
 	
 	public FlashboardPIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
-			DoubleProperty setPoint, DoubleSource currentValue,
+			DoubleProperty setPoint, PIDSource currentValue,
 			double maxValue, int ticks) {
 		super(name, FlashboardSendableType.PIDTUNER);
 		
@@ -43,7 +42,7 @@ public class FlashboardPIDTuner extends Sendable{
 		this.ticks = ticks;
 	}
 	public FlashboardPIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf, 
-			DoubleProperty setPoint, DoubleSource currentValue){
+			DoubleProperty setPoint, PIDSource currentValue){
 		this(name, kp, ki, kd, kf, setPoint, currentValue, 10.0, 1000);
 	}
 
@@ -67,7 +66,7 @@ public class FlashboardPIDTuner extends Sendable{
 		return setpoint;
 	}
 	
-	public DoubleSource valueSource(){
+	public PIDSource valueSource(){
 		return currentValue;
 	}
 	
@@ -102,16 +101,22 @@ public class FlashboardPIDTuner extends Sendable{
 			FlashUtil.fillByteArray(ticks, 9, data);
 			return data;
 		}
-		if(lastSetPoint != setpoint.get()){
-			lastSetPoint = setpoint.get();
+		
+		double checkvalue = 0.0;
+		
+		checkvalue = setpoint.get();
+		if(lastSetPoint != checkvalue){
+			lastSetPoint = checkvalue;
 			
 			byte[] data = new byte[9];
 			data[0] = SP_UPDATE;
 			FlashUtil.fillByteArray(lastSetPoint, 1, data);
 			return data;
 		}
-		if(lastValue != currentValue.get()){
-			lastValue = currentValue.get();
+		
+		checkvalue = currentValue.pidGet();
+		if(lastValue != checkvalue){
+			lastValue = checkvalue;
 			
 			byte[] data = new byte[9];
 			data[0] = CV_UPDATE;
@@ -150,7 +155,7 @@ public class FlashboardPIDTuner extends Sendable{
 		lastF = kf.get() - 1;
 		
 		lastSetPoint = setpoint.get() - 1;
-		lastValue = currentValue.get() - 1;
+		lastValue = currentValue.pidGet() - 1;
 		
 		sliderValuesUpdated = true;
 	}

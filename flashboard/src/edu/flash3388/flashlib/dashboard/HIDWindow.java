@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.dashboard;
 
-import edu.flash3388.flashlib.flashboard.FlashboardHIDSendable;
+import edu.flash3388.flashlib.flashboard.FlashboardHIDControl;
 import edu.flash3388.flashlib.robot.PeriodicRunnable;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -127,7 +127,7 @@ public class HIDWindow extends Stage implements Runnable{
 			else
 				selectedHID(n.intValue());
 		});
-		for (int i = 0; i < FlashboardHIDSendable.MAX_PORT_COUNT; i++) {
+		for (int i = 0; i < FlashboardHIDControl.MAX_PORT_COUNT; i++) {
 			controllerView.getItems().add(i + " - not connected");
 		}
 		
@@ -153,7 +153,7 @@ public class HIDWindow extends Stage implements Runnable{
 	}
 	
 	private void update(){
-		for (int i = 0; i < FlashboardHIDSendable.MAX_PORT_COUNT; i++) {
+		for (int i = 0; i < FlashboardHIDControl.MAX_PORT_COUNT; i++) {
 			if(Dashboard.getHIDControl().isHIDConnected(i)){
 				controllerView.getItems().set(i, i + " - " + Dashboard.getHIDControl().getHIDName(i));
 			}else{

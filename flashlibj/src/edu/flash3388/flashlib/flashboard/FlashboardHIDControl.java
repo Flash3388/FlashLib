@@ -1,9 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class FlashboardHIDSendable extends Sendable implements Runnable{
+public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 
 	private static class ButtonData{
 		public int buttons;
@@ -32,6 +31,8 @@ public class FlashboardHIDSendable extends Sendable implements Runnable{
 	public static final int MAX_AXES_COUNT = 10;
 	public static final int MAX_POV_COUNT = 2;
 	
+	private static FlashboardHIDControl instance;
+	
 	private ButtonData[] joystickButton_data = new ButtonData[MAX_PORT_COUNT];
 	private POVData[] joystickPOV_data = new POVData[MAX_PORT_COUNT];
 	private AxesData[] joystickAxes_data = new AxesData[MAX_PORT_COUNT];
@@ -43,8 +44,8 @@ public class FlashboardHIDSendable extends Sendable implements Runnable{
 	private boolean updated = false;
 	private Object joystickMutex = new Object();
 	
-	public FlashboardHIDSendable(String name) {
-		super(name, FlashboardSendableType.JOYSTICK);
+	private FlashboardHIDControl() {
+		super("HIDControl", FlashboardSendableType.JOYSTICK);
 		
 		for (int i = 0; i < MAX_PORT_COUNT; i++) {
 			joystickAxes_data[i] = new AxesData(MAX_AXES_COUNT);
@@ -253,5 +254,14 @@ public class FlashboardHIDSendable extends Sendable implements Runnable{
 				updated = false;
 			}
 		}
+	}
+	
+	public static boolean hasInstance(){
+		return instance != null;
+	}
+	public static FlashboardHIDControl getInstance(){
+		if(instance == null)
+			instance = new FlashboardHIDControl();
+		return instance;
 	}
 }

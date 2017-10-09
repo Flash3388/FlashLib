@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.LogListener;
 
@@ -12,7 +11,7 @@ import edu.flash3388.flashlib.util.LogListener;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashboardRemoteLog extends Sendable{
+public class FlashboardRemoteLog extends FlashboardControl{
 	
 	private Vector<String> logs = new Vector<String>();
 	private Vector<String> sentLogs = new Vector<String>();

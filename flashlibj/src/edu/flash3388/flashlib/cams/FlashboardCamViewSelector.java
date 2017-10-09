@@ -1,7 +1,7 @@
-package edu.flash3388.flashlib.flashboard;
+package edu.flash3388.flashlib.cams;
 
-import edu.flash3388.flashlib.cams.Camera;
-import edu.flash3388.flashlib.cams.CameraViewSelector;
+import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.flashboard.FlashboardChooser;
 
 /**
  * Represents a {@link CameraViewSelector} on the Flashboard. Uses a {@link FlashboardChooser}.

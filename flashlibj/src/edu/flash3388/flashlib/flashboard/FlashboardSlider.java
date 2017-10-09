@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
@@ -10,7 +9,7 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashboardSlider extends Sendable{
+public class FlashboardSlider extends FlashboardControl{
 	
 	private DoubleProperty valData;
 	private double max, min, lastValue;

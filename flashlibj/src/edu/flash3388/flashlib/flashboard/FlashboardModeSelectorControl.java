@@ -1,20 +1,21 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-public class FlashboardModeSelectorControl extends Sendable{
+public class FlashboardModeSelectorControl extends FlashboardControl{
 	
 	public static final byte UPDATE_MODE = 0x1;
 	public static final byte UPDATE_DISABLED = 0x5;
+	
+	private static FlashboardModeSelectorControl instance;
 	
 	private Object stateMutex = new Object();
 	
 	private boolean disabled = true;
 	private int currentState = 0;
 	
-	public FlashboardModeSelectorControl() {
-		super(FlashboardSendableType.MODE_SELECTOR);
+	private FlashboardModeSelectorControl() {
+		super("ModeSelector", FlashboardSendableType.MODE_SELECTOR);
 	}
 
 	public boolean isDisabled(){
@@ -64,5 +65,14 @@ public class FlashboardModeSelectorControl extends Sendable{
 	@Override
 	public void onConnectionLost() {
 		disabled = true;
+	}
+	
+	public static boolean hasInstance(){
+		return instance != null;
+	}
+	public static FlashboardModeSelectorControl getInstance(){
+		if(instance == null)
+			instance = new FlashboardModeSelectorControl();
+		return instance;
 	}
 }

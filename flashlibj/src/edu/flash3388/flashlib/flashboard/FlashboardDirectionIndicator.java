@@ -1,10 +1,9 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class FlashboardDirectionIndicator extends Sendable{
+public class FlashboardDirectionIndicator extends FlashboardControl{
 
 	private DoubleSource source;
 	private double value = 0.0, lastValue = 0.0;

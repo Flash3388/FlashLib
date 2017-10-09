@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -17,7 +16,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashboardMotorTester extends Sendable{
+public class FlashboardMotorTester extends FlashboardControl{
 	
 	/**
 	 * Represents a tracking wrapper for motors on the Flashboard.
@@ -25,7 +24,7 @@ public class FlashboardMotorTester extends Sendable{
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
 	 */
-	public static class TesterMotor extends Sendable{
+	public static class TesterMotor extends FlashboardControl{
 		
 		public static final byte UPDATE_TESTER_NAME = 0x5;
 		

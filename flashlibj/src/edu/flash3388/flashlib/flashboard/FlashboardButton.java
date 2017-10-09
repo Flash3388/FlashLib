@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.hid.Button;
 import edu.flash3388.flashlib.robot.hid.ManualButton;
@@ -11,7 +10,7 @@ import edu.flash3388.flashlib.robot.hid.ManualButton;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class FlashboardButton extends Sendable{
+public class FlashboardButton extends FlashboardControl{
 	
 	public static final byte DOWN = 0xe;
 	public static final byte UP = 0x5;

@@ -1,12 +1,11 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.StringProperty;
 
-public class FlashboardInput extends Sendable{
+public class FlashboardInput extends FlashboardControl{
 
 	private static interface InputData{
 		boolean changed();

@@ -3,17 +3,19 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.FlashboardModeSelectorControl;
 
-public class FlashboardModeSelector extends FlashboardModeSelectorControl implements ModeSelector{
+public class FlashboardModeSelector implements ModeSelector{
 
+	private FlashboardModeSelectorControl modeselector = FlashboardModeSelectorControl.getInstance();
+	
 	public void attachToFlashboard(){
-		if(Flashboard.flashboardInit())
-			Flashboard.attach(this);
+		if(!modeselector.attached() && Flashboard.flashboardInit())
+			Flashboard.attach(modeselector);
 	}
 	
 	@Override
 	public int getMode() {
-		if(!remoteAttached() || isDisabled())
+		if(!modeselector.remoteAttached() || modeselector.isDisabled())
 			return MODE_DISABLED;
-		return getCurrentState();
+		return modeselector.getCurrentState();
 	}
 }

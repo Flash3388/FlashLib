@@ -1,9 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 
-public class FlashboardCheckbox extends Sendable{
+public class FlashboardCheckbox extends FlashboardControl{
 
 	private BooleanProperty prop;
 	private boolean updateValue = false;
