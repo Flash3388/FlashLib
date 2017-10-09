@@ -475,7 +475,7 @@ public class MainWindow {
 		vision.getItems().addAll(loadvision, savevision, visioneditor);
 		
 		Menu monitoring = new Menu("Monitoring");
-		MenuItem logwindow = new MenuItem("Show Log Window");
+		MenuItem logwindow = new MenuItem("Show Logs");
 		logwindow.setOnAction((e)->{
 			GUI.showLogDialog();
 		});
@@ -487,7 +487,11 @@ public class MainWindow {
 		testerwindow.setOnAction((e)->{
 			GUI.showMotorTester();
 		});
-		monitoring.getItems().addAll(logwindow, pdpwindow, testerwindow);
+		MenuItem pidtuner = new MenuItem("Show PID Tuner");
+		pidtuner.setOnAction((e)->{
+			GUI.showPIDTuner();
+		});
+		monitoring.getItems().addAll(logwindow, pdpwindow, testerwindow, pidtuner);
 		
 		Menu tools = new Menu("Tools");
 		MenuItem hidwindow = new MenuItem("Show HID Control");

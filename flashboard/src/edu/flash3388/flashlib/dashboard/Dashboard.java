@@ -608,7 +608,7 @@ public class Dashboard extends Application {
 		log.log("Done", "Dashboard");
 		
 		setupValuePath();
-		log.log("FlashLib version: "+FlashUtil.VERSION);
+		log.log("FlashLib version: "+FlashUtil.VERSION, "Dashboard");
 		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
 		log.log("opencv version: "+Core.VERSION, "Dashboard");

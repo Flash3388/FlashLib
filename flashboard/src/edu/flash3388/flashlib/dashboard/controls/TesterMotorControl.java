@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.flashboard.FlashboardTesterMotor;
+import edu.flash3388.flashlib.flashboard.FlashboardMotorTester.TesterMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 import javafx.beans.property.SimpleBooleanProperty;
@@ -51,7 +51,7 @@ public class TesterMotorControl extends Displayable{
 	
 	@Override
 	public void newData(byte[] data) {
-		if(data[0] == FlashboardTesterMotor.UPDATE_TESTER_NAME){
+		if(data[0] == TesterMotor.UPDATE_TESTER_NAME){
 			testerName = new String(data, 1, data.length - 1);
 			TesterControl.allocateTesterMotor(this);
 		}else{
