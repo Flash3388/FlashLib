@@ -6,6 +6,7 @@
  */
 
 #include <unordered_map>
+#include <vector>
 #include <pthread.h>
 #include <chrono>
 #include <memory>
@@ -31,22 +32,22 @@ namespace flashlib{
 
 namespace hal{
 
-std::unordered_map<hal_handle_t, std::shared_ptr<dio_pulse_t>> pulse_map;
-std::unordered_map<hal_handle_t, std::shared_ptr<dio_port_t>> dio_map;
+std::unordered_map<hal_handle_t, std::shared_ptr<dio_port_t>> dio_ports;
+std::unordered_map<hal_handle_t, std::shared_ptr<pulse_counter_t>> dio_pulse_counters;
+std::vector<std::shared_ptr<dio_pulse_t>> dio_pulses;
 
-std::unordered_map<hal_handle_t, std::shared_ptr<pulse_counter_t>> pulse_counter_map;
-
-pwm_port_t pwm_map[BBB_PWMSS_MODULE_COUNT];
-adc_port_t adc_map[BBB_ADC_CHANNEL_COUNT];
+pwm_port_t pwm_ports[BBB_PWMSS_MODULE_COUNT];
+adc_port_t adc_ports[BBB_ADC_CHANNEL_COUNT];
 
 typedef struct thread_data{
 	bool run = true;
 } thread_data_t;
 
-pthread_t io_thread;
+pthread_t pulse_thread;
+pthread_t adc_thread;
 thread_data_t thread_data;
 
-pthread_mutex_t pulse_map_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t dio_pulsing_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t thread_param_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t io_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t adc_sampling_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -72,6 +73,41 @@ const char* resolveFilepath(dio_port_t* dio){
 	return path.c_str();
 }
 
+void stopDIOPulse(dio_port_t* dio){
+	if(dio->pulsing){
+#ifdef HAL_BBB_DEBUG
+		printf("DIO, stopping pulse: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+#endif
+
+		pthread_mutex_lock(&dio_pulsing_mutex);
+		dio_pulse_t* pulse = dio->pulse.get();
+		pulse->remaining_time = 0;
+		pulse->dio_handle = HAL_INVALID_HANDLE;
+		pthread_mutex_unlock(&dio_pulsing_mutex);
+
+		dio->pulsing = false;
+		dio->pulse = nullptr;
+	}
+}
+void stopDIOPulse(dio_pulse_t* pulse){
+	if(pulse->dio_handle != HAL_INVALID_HANDLE){
+		pthread_mutex_lock(&io_mutex);
+		if(dio_ports.count(pulse->dio_handle)){
+			dio_port_t* dio = dio_ports[pulse->dio_handle].get();
+
+#ifdef HAL_BBB_DEBUG
+		printf("DIO, stopping pulse: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+#endif
+
+			dio->pulsing = false;
+			dio->pulse = nullptr;
+		}
+		pthread_mutex_unlock(&io_mutex);
+
+		pulse->dio_handle = HAL_INVALID_HANDLE;
+	}
+}
+
 void limitPWMDuty(float* duty){
 	if(*duty > 1.0f)
 		*duty = 1.0f;
@@ -81,7 +117,12 @@ void limitPWMDuty(float* duty){
 
 void* counter_thread_function(void* param){
 
-	pulse_counter_t* counter = (pulse_counter_t*)param;
+	std::shared_ptr<pulse_counter_t> shared = *((std::shared_ptr<pulse_counter_t>*)param);
+	pulse_counter_t* counter = shared.get();
+
+#ifdef HAL_BBB_DEBUG
+	printf("DIO counter thread start: %d \n", counter->dio_port);
+#endif
 
 	epoll_event epoll_events;
 	int epoll_r = 0;
@@ -96,6 +137,8 @@ void* counter_thread_function(void* param){
 	bool rise = false, fall = false;
 	bool run = true;
 
+	uint8_t run_check_counter = 0;
+
 	while(run){
 		//TODO: USE EPOLL TO WAIT FOR VALUE CHANGES!!!!
 		epoll_r = epoll_wait(counter->epoll_fd, &epoll_events, 1, HAL_PCOUNTER_TIMEOUT);
@@ -105,6 +148,7 @@ void* counter_thread_function(void* param){
 			printf("Pulse counter epoll error \n");
 #endif
 			run = false;
+			counter->release = true;
 		}else{
 			current_value = BBB_getDIO(counter->dio_port);
 			if(current_value == BBB_GPIO_HIGH && last_value == BBB_GPIO_LOW){
@@ -128,25 +172,103 @@ void* counter_thread_function(void* param){
 
 			last_value = current_value;
 
-			pthread_mutex_lock(&counter->mutex);
-			if(fall){
-				counter->length = us_passed;
-			}
-			if(rise){
-				counter->period = us_passed;
-				++(counter->count);
-			}
+			if((++run_check_counter) >= HAL_THREAD_RUN_CHECK || fall || rise){
+				run_check_counter = 0;
 
-			run = !counter->release;
-			pthread_mutex_unlock(&counter->mutex);
+				pthread_mutex_lock(&counter->mutex);
+				if(fall){
+					counter->length = us_passed;
+				}
+				if(rise){
+					counter->period = us_passed;
+					++(counter->count);
+				}
 
-			rise = fall = false;
+				run = !counter->release;
+				pthread_mutex_unlock(&counter->mutex);
+
+				rise = fall = false;
+			}
 		}
 	}
 
+#ifdef HAL_BBB_DEBUG
+	printf("DIO counter thread end: %d \n", counter->dio_port);
+#endif
+
 	return NULL;
 }
-void* io_thread_function(void* param){
+void* pulse_thread_function(void* param){
+
+#ifdef HAL_BBB_DEBUG
+	printf("DIO pulse thread start \n");
+#endif
+
+	thread_data_t data;
+
+	long long pulse_us_passed;
+	auto pulse_start = std::chrono::high_resolution_clock::now();
+	int32_t pulse_min_time;
+
+	uint8_t run_check_counter = 0;
+
+	while(data.run){
+
+		//run pulses
+		pulse_min_time = HAL_PULSE_THREAD_DELAY;
+
+		pthread_mutex_lock(&dio_pulsing_mutex);
+		if(dio_pulses.size() > 0){
+			auto pulse_elapsed = std::chrono::high_resolution_clock::now() - pulse_start;
+			pulse_us_passed = std::chrono::duration_cast<std::chrono::microseconds>(pulse_elapsed).count();
+
+			for(auto it = dio_pulses.begin(); it != dio_pulses.end(); ){
+				dio_pulse_t* pulse = it->get();
+				pulse->remaining_time -= pulse_us_passed;
+				if(pulse->remaining_time <= 0 || pulse->dio_handle == HAL_INVALID_HANDLE){
+#ifdef HAL_BBB_DEBUG
+					printf("DIO pulse ended: TIME= %d, PORT= %d \n", pulse->remaining_time, pulse->dio_handle);
+#endif
+
+					//TODO: SET DIO LOW
+					stopDIOPulse(pulse);
+
+					it = dio_pulses.erase(it);
+				}else{
+					++it;
+					if(pulse->remaining_time < pulse_min_time)
+						pulse_min_time = pulse->remaining_time;
+				}
+			}
+		}
+		pthread_mutex_unlock(&dio_pulsing_mutex);
+		pulse_start = std::chrono::high_resolution_clock::now();
+
+		if((++run_check_counter) >= HAL_THREAD_RUN_CHECK){
+			//get thread data
+			pthread_mutex_lock(&thread_param_mutex);
+			data.run = thread_data.run;
+			pthread_mutex_unlock(&thread_param_mutex);
+
+			run_check_counter = 0;
+		}
+
+		if(data.run){
+			usleep(pulse_min_time);
+		}
+	}
+
+#ifdef HAL_BBB_DEBUG
+	printf("DIO pulse thread end \n");
+#endif
+
+	return NULL;
+}
+void* adc_thread_function(void* param){
+
+#ifdef HAL_BBB_DEBUG
+	printf("ADC thread start \n");
+#endif
 
 	thread_data_t data;
 
@@ -156,67 +278,51 @@ void* io_thread_function(void* param){
 	auto adc_start = std::chrono::high_resolution_clock::now();
 	long long adc_ms_passed;
 
-	long long pulse_us_passed;
-	auto pulse_start = std::chrono::high_resolution_clock::now();
-	int32_t pulse_min_time = 10000;
+	uint8_t run_check_counter = 0;
 
 	while(data.run){
-
-		//run pulses
-		pulse_min_time = 10000;
-
-		pthread_mutex_lock(&pulse_map_mutex);
-		auto pulse_elapsed = std::chrono::high_resolution_clock::now() - pulse_start;
-		pulse_us_passed = std::chrono::duration_cast<std::chrono::microseconds>(pulse_elapsed).count();
-		for(auto it = pulse_map.begin(); it != pulse_map.end(); ){
-			dio_pulse_t* pulse = it->second.get();
-			pulse->remaining_time -= pulse_us_passed;
-			if(pulse->remaining_time <= 0){
-				//TODO: SET DIO LOW
-				BBB_setDIO(it->first, BBB_GPIO_LOW);
-
-				it = pulse_map.erase(it);
-			}else{
-				++it;
-				if(pulse->remaining_time < pulse_min_time)
-					pulse_min_time = pulse->remaining_time;
-			}
-		}
-		pulse_start = std::chrono::high_resolution_clock::now();
-		pthread_mutex_unlock(&pulse_map_mutex);
-
 		//sample adc channels
 		auto adc_elapsed = std::chrono::high_resolution_clock::now() - adc_start;
 		adc_ms_passed = std::chrono::duration_cast<std::chrono::milliseconds>(adc_elapsed).count();
 		if(adc_ms_passed >= HAL_AIN_SMAPLING_RATE){
-#ifdef HAL_USE_IO
+	#ifdef HAL_USE_IO
 			BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
-#endif
+	#endif
 
 			pthread_mutex_lock(&adc_sampling_mutex);
 			for(adc_idx = 0; adc_idx < BBB_ADC_CHANNEL_COUNT; ++adc_idx){
-				adc_port_t adc = adc_map[adc_idx];
+				adc_port_t adc = adc_ports[adc_idx];
 				if(adc.enabled){
-#ifdef HAL_USE_IO
+	#ifdef HAL_USE_IO
 					adc_smpl_val = 0;
 					for(adc_smpl_idx = 0; adc_smpl_idx < HAL_AIN_SAMPLING_SIZE; ++adc_smpl_idx){
 						adc_smpl_val += adc.sample_buffer[adc_smpl_idx];
 					}
 					adc_smpl_val /= HAL_AIN_SAMPLING_SIZE;
-#endif
+	#endif
 				}
 			}
 			pthread_mutex_unlock(&adc_sampling_mutex);
 			adc_start = std::chrono::high_resolution_clock::now();
 		}
 
-		usleep(pulse_min_time);
+		if((++run_check_counter) >= HAL_THREAD_RUN_CHECK){
+			//get thread data
+			pthread_mutex_lock(&thread_param_mutex);
+			data.run = thread_data.run;
+			pthread_mutex_unlock(&thread_param_mutex);
 
-		//get thread data
-		pthread_mutex_lock(&thread_param_mutex);
-		data.run = thread_data.run;
-		pthread_mutex_unlock(&thread_param_mutex);
+			run_check_counter = 0;
+		}
+
+		if(data.run){
+			usleep(HAL_AIN_SMAPLING_RATE * 1000);
+		}
 	}
+
+#ifdef HAL_BBB_DEBUG
+	printf("ADC thread end \n");
+#endif
 
 	return NULL;
 }
@@ -228,6 +334,9 @@ void* io_thread_function(void* param){
 int BBB_initialize(int mode){
 	if(init){
 		//TODO: ALREADY INITIALIZED
+#ifdef HAL_BBB_DEBUG
+		printf("Initialization failed, HAL already initialized \n");
+#endif
 		return -1;
 	}
 
@@ -255,17 +364,31 @@ int BBB_initialize(int mode){
 #endif
 
 #ifdef HAL_USE_THREAD
-	status = pthread_create(&io_thread, NULL, &io_thread_function, NULL);
+	status = pthread_create(&pulse_thread, NULL, &pulse_thread_function, NULL);
 	if(status){
 		//TODO: ERROR
 #ifdef HAL_BBB_DEBUG
-		printf("Failed to initializing IO thread \n");
+		printf("Failed to initialize DIO pulse thread \n");
+#endif
+		return -1;
+	}
+
+	status = pthread_create(&adc_thread, NULL, &adc_thread_function, NULL);
+	if(status){
+		//TODO: ERROR
+#ifdef HAL_BBB_DEBUG
+		printf("Failed to initialize ADC sampling thread \n");
 #endif
 		return -1;
 	}
 #endif
 
 	init = true;
+
+#ifdef HAL_BBB_DEBUG
+		printf("HAL initialization complete \n");
+#endif
+
 	return 0;
 }
 void BBB_shutdown(){
@@ -277,7 +400,7 @@ void BBB_shutdown(){
 		return;
 	}
 
-	pthread_mutex_lock(&io_mutex);
+	//pthread_mutex_lock(&io_mutex);
 
 #ifdef HAL_BBB_DEBUG
 	printf("Shutting down threads \n");
@@ -289,11 +412,12 @@ void BBB_shutdown(){
 	pthread_mutex_unlock(&thread_param_mutex);
 
 #ifdef HAL_USE_THREAD
-	pthread_join(io_thread, NULL);
+	pthread_join(pulse_thread, NULL);
+	pthread_join(adc_thread, NULL);
 #endif
 
 	//clear pulse counter handles
-	for(auto it = pulse_counter_map.begin(); it != pulse_counter_map.end();){
+	for(auto it = dio_pulse_counters.begin(); it != dio_pulse_counters.end();){
 		pulse_counter_t* counter = it->second.get();
 
 		pthread_mutex_lock(&counter->mutex);
@@ -307,11 +431,10 @@ void BBB_shutdown(){
 		close(counter->epoll_fd);
 		pthread_mutex_destroy(&counter->mutex);
 
-		it = pulse_counter_map.erase(it);
+		it = dio_pulse_counters.erase(it);
 	}
 
-	pulse_map.clear();
-	pulse_counter_map.clear();
+	dio_pulse_counters.clear();
 
 #ifdef HAL_BBB_DEBUG
 	printf("Clearing PWM handles \n");
@@ -319,7 +442,7 @@ void BBB_shutdown(){
 
 	//clear pwm handles
 	for(int i = 0; i < BBB_PWMSS_MODULE_COUNT; ++i){
-		pwm_port_t* pwm = &pwm_map[i];
+		pwm_port_t* pwm = &pwm_ports[i];
 
 		BBB_freePWMPort(BBB_PWMSS_PORT(i, 0));
 		BBB_freePWMPort(BBB_PWMSS_PORT(i, 1));
@@ -343,18 +466,24 @@ void BBB_shutdown(){
 #endif
 
 	//clear dio handles
-	for(auto it = dio_map.begin(); it != dio_map.end();){
+	for(auto it = dio_ports.begin(); it != dio_ports.end();){
 		dio_port_t* dio = it->second.get();
+		stopDIOPulse(dio);
 
 #ifdef HAL_USE_IO
 		pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
 
-		it = dio_map.erase(it);
-	}
-	dio_map.clear();
+#ifdef HAL_BBB_DEBUG
+		printf("DIO handle freed: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
+#endif
 
-	pthread_mutex_destroy(&pulse_map_mutex);
+		it = dio_ports.erase(it);
+	}
+	dio_ports.clear();
+	dio_pulses.clear();
+
+	pthread_mutex_destroy(&dio_pulsing_mutex);
 	pthread_mutex_destroy(&adc_sampling_mutex);
 	pthread_mutex_destroy(&thread_param_mutex);
 
@@ -367,10 +496,14 @@ void BBB_shutdown(){
 	iolib_free();
 #endif
 
-	pthread_mutex_unlock(&io_mutex);
+	//pthread_mutex_unlock(&io_mutex);
 	pthread_mutex_destroy(&io_mutex);
 
 	init = false;
+
+#ifdef HAL_BBB_DEBUG
+		printf("HAL shutdown complete \n");
+#endif
 }
 
 /***********************************************************************\
@@ -388,8 +521,8 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 
 	pthread_mutex_lock(&io_mutex);
 	hal_handle_t handle = (hal_handle_t)port;
-	if(dio_map.count(handle)){
-		dio_port_t* dio = dio_map[handle].get();
+	if(dio_ports.count(handle)){
+		dio_port_t* dio = dio_ports[handle].get();
 
 #ifdef HAL_BBB_DEBUG
 		printf("DIO handle already exists: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
@@ -402,12 +535,14 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 			printf("Wanted direction doesn't match already used direction: %d != %d \n", dir, dio->dir);
 #endif
 		}
-	}else if(port > 0){
+	}else if(port >= 0){
 		//TODO: CREATE DIO HANDLE AND ADD TO MAP. ALSO CHECK IF PORT MATCHES
 		dio_port_t dio;
-		dio.header = BBB_GPIO_PORT_TO_HEADER(port);
-		dio.pin = BBB_GPIO_PORT_TO_PIN(port);
+		dio.header = BBB_GPIO_PORT_TO_HEADER(port + 1);
+		dio.pin = BBB_GPIO_PORT_TO_PIN(port + 1);
 		dio.dir = dir;
+		dio.pulsing = false;
+		dio.pulse = nullptr;
 
 		int result;
 
@@ -421,7 +556,7 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 #ifdef HAL_USE_IO
 			pin_low(HAL_HEADER(dio.header + 8), dio.pin);
 #endif
-			dio_map.emplace(handle, std::make_shared<dio_port_t>(dio));
+			dio_ports.emplace(handle, std::make_shared<dio_port_t>(dio));
 
 #ifdef HAL_BBB_DEBUG
 			printf("DIO handle created: DIR= %d HEADER= %d, PIN= %d \n", dir, dio.header, dio.pin);
@@ -450,23 +585,20 @@ void BBB_freeDIOPort(hal_handle_t portHandle){
 	}
 
 	pthread_mutex_lock(&io_mutex);
-	if(dio_map.count(portHandle)){
-		pthread_mutex_lock(&pulse_map_mutex);
-		if(pulse_map.count(portHandle)){
-			dio_pulse_t* pulse = pulse_map[portHandle].get();
-			pulse->remaining_time = 0;
-		}
-		pthread_mutex_unlock(&pulse_map_mutex);
-		if(pulse_counter_map.count(portHandle)){
+	if(dio_ports.count(portHandle)){
+		if(dio_pulse_counters.count(portHandle)){
 			BBB_freePulseCounter(portHandle);
 		}
 
-		dio_port_t* dio = dio_map[portHandle].get();
+		dio_port_t* dio = dio_ports[portHandle].get();
+
+		stopDIOPulse(dio);
+
 #ifdef HAL_USE_IO
 		pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
 		//TODO: REMOVE DIO FROM MAP AND DESTROY OBJECT...
-		dio_map.erase(portHandle);
+		dio_ports.erase(portHandle);
 
 #ifdef HAL_BBB_DEBUG
 		printf("DIO handle freed: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
@@ -485,8 +617,8 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 	}
 
 	pthread_mutex_lock(&io_mutex);
-	if(dio_map.count(portHandle)){
-		dio_port_t* dio = dio_map[portHandle].get();
+	if(dio_ports.count(portHandle)){
+		dio_port_t* dio = dio_ports[portHandle].get();
 		if(dio->dir == BBB_DIR_OUTPUT){
 			if(dio->val != high){
 				dio->val = high;
@@ -501,16 +633,7 @@ void BBB_setDIO(hal_handle_t portHandle, uint8_t high){
 #endif
 				}else if(high == BBB_GPIO_LOW){
 					//TODO: CHECK IF PULSING
-					pthread_mutex_lock(&pulse_map_mutex);
-					if(pulse_map.count(portHandle)){
-#ifdef HAL_BBB_DEBUG
-						printf("DIO, stopping pulse: HEADER= %d, PIN= %d \n", dio->header, dio->pin);
-#endif
-						dio_pulse_t* pulse = pulse_map[portHandle].get();
-						pulse->remaining_time = 0;
-					}
-					pthread_mutex_unlock(&pulse_map_mutex);
-
+					stopDIOPulse(dio);
 #ifdef HAL_USE_IO
 					pin_low(HAL_HEADER(dio->header), dio->pin);
 #endif
@@ -542,20 +665,20 @@ void BBB_pulseDIO(hal_handle_t portHandle, float length){
 	uint32_t pulseus = (uint32_t)(length * 1000000);
 
 	pthread_mutex_lock(&io_mutex);
-	if(dio_map.count(portHandle)){
-		//TODO: use mutex here because of thread
-		pthread_mutex_lock(&pulse_map_mutex);
+	if(dio_ports.count(portHandle)){
+		dio_port_t* dio = dio_ports[portHandle].get();
 
-		if(pulse_map.count(portHandle)){
-			dio_pulse_t* pulse = pulse_map[portHandle].get();
+		//TODO: use mutex here because of thread
+		pthread_mutex_lock(&dio_pulsing_mutex);
+
+		if(dio->pulsing){
+			dio_pulse_t* pulse = dio->pulse.get();
 			pulse->remaining_time += pulseus;
 #ifdef HAL_BBB_DEBUG
-			dio_port_t* dio = dio_map[portHandle].get();
 			printf("Pulse handle already in use, adding time: LEN= %d, HEADER= %d, PIN= %d \n",
 					pulse->remaining_time,dio->header, dio->pin);
 #endif
 		}else{
-			dio_port_t* dio = dio_map[portHandle].get();
 			if(dio->dir == BBB_DIR_OUTPUT){
 				dio->val = BBB_GPIO_HIGH;
 
@@ -564,11 +687,18 @@ void BBB_pulseDIO(hal_handle_t portHandle, float length){
 #endif
 
 				dio_pulse_t pulse;
+				pulse.dio_handle = portHandle;
 				pulse.remaining_time = pulseus;
-				pulse_map.emplace(portHandle, std::make_shared<dio_pulse_t>(pulse));
+
+				std::shared_ptr<dio_pulse_t> shared = std::make_shared<dio_pulse_t>(pulse);
+
+				dio_pulses.push_back(shared);
+
+				dio->pulsing = true;
+				dio->pulse = shared;
 
 #ifdef HAL_BBB_DEBUG
-				printf("Created pulse handle: LEN= %d, HEADER= %d, PIN= %d \n", length, dio->header, dio->pin);
+				printf("Created pulse handle: LEN= %d, HEADER= %d, PIN= %d \n", pulseus, dio->header, dio->pin);
 #endif
 			}else{
 #ifdef HAL_BBB_DEBUG
@@ -577,7 +707,7 @@ void BBB_pulseDIO(hal_handle_t portHandle, float length){
 			}
 		}
 
-		pthread_mutex_unlock(&pulse_map_mutex);
+		pthread_mutex_unlock(&dio_pulsing_mutex);
 	}else{
 #ifdef HAL_BBB_DEBUG
 		printf("Cannot pulse out, DIO not initialized \n");
@@ -593,8 +723,8 @@ uint8_t BBB_getDIO(hal_handle_t portHandle){
 
 	pthread_mutex_lock(&io_mutex);
 	uint8_t val = 0;
-	if(dio_map.count(portHandle)){
-		dio_port_t* dio = dio_map[portHandle].get();
+	if(dio_ports.count(portHandle)){
+		dio_port_t* dio = dio_ports[portHandle].get();
 		if(dio->dir == BBB_DIR_OUTPUT){
 			val = dio->val;
 #ifdef HAL_BBB_DEBUG
@@ -639,7 +769,7 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 	else{
 		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
-		adc_port_t* adc = &adc_map[port];
+		adc_port_t* adc = &adc_ports[port];
 		if(adc->enabled == 0){
 			//TODO: INITIALIZE ADC PORT
 
@@ -673,7 +803,7 @@ void BBB_freeAnalogInput(hal_handle_t portHandle){
 	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
 		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
-		adc_port_t* adc = &adc_map[portHandle];
+		adc_port_t* adc = &adc_ports[portHandle];
 		if(adc->enabled){
 			adc->enabled = 0;
 			//TODO: STOP ADC CHANNEL
@@ -710,7 +840,7 @@ uint32_t BBB_getAnalogValue(hal_handle_t portHandle){
 	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
 		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
-		adc_port_t* adc = &adc_map[portHandle];
+		adc_port_t* adc = &adc_ports[portHandle];
 		if(adc->enabled){
 			val = adc->value;
 
@@ -761,7 +891,7 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(port);
 		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(port);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 
 #ifdef HAL_USE_IO
 		if(pwm->enabledA == 0 && pwm->enabledB == 0){
@@ -813,7 +943,7 @@ void BBB_freePWMPort(hal_handle_t portHandle){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
 		uint8_t pin = BBB_PWMSS_PORT_TO_PIN(portHandle);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 
 		bool freed = false;
 
@@ -867,7 +997,7 @@ float BBB_getPWMDuty(hal_handle_t portHandle){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
 		uint8_t port = BBB_PWMSS_PORT_TO_PIN(portHandle);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 
 		if(port == BBB_PWMSSA && pwm->enabledA)
 			val = pwm->dutyA;
@@ -912,7 +1042,7 @@ void BBB_setPWMDuty(hal_handle_t portHandle, float duty){
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 		if(pwm->enabledA || pwm->enabledB){
 			limitPWMDuty(&duty);
 
@@ -961,7 +1091,7 @@ void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency){
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 		if(pwm->enabledA || pwm->enabledB){
 			//TODO: LIMIT FREQUENCY
 			pwm->frequency = frequency;
@@ -971,7 +1101,7 @@ void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency){
 #endif
 
 #ifdef HAL_BBB_DEBUG
-			printf("PWM port set frequency: %f - MODULE= %d, PIN= %d \n", frequency, module, port);
+			printf("PWM port set frequency: %f - MODULE= %d \n", frequency, module);
 #endif
 		}else{
 #ifdef HAL_BBB_DEBUG
@@ -994,13 +1124,13 @@ float BBB_getPWMFrequency(hal_handle_t portHandle){
 	if(portHandle >= 0 && portHandle < HAL_PWMSS_PORTS_COUNT){
 		pthread_mutex_lock(&io_mutex);
 		uint8_t module = BBB_PWMSS_PORT_TO_MODULE(portHandle);
-		pwm_port_t* pwm = &pwm_map[module];
+		pwm_port_t* pwm = &pwm_ports[module];
 		if(pwm->enabledA || pwm->enabledB){
 
 			frequency = pwm->frequency;
 
 #ifdef HAL_BBB_DEBUG
-			printf("PWM port get frequency: MODULE= %d, PIN= %d \n", frequency, module, port);
+			printf("PWM port get frequency: FREQ= %f, MODULE= %d\n", frequency, module);
 #endif
 		}else{
 #ifdef HAL_BBB_DEBUG
@@ -1027,7 +1157,7 @@ hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
 	}
 
 	hal_handle_t handle = (hal_handle_t)dioPort;
-	if(pulse_counter_map.count(handle)){
+	if(dio_pulse_counters.count(handle)){
 #ifdef HAL_BBB_DEBUG
 		printf("Pulse counter for port exists: %d \n", dioPort);
 #endif
@@ -1041,7 +1171,7 @@ hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
 
 		if(counter.dio_port != HAL_INVALID_HANDLE){
 			pthread_mutex_lock(&io_mutex);
-			dio_port_t* dio = dio_map[counter.dio_port].get();
+			dio_port_t* dio = dio_ports[counter.dio_port].get();
 			const char* filepath = resolveFilepath(dio);
 			pthread_mutex_unlock(&io_mutex);
 
@@ -1087,14 +1217,15 @@ hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
 			}
 
 			if(epoll_fd >= 0){
-				pulse_counter_map.emplace(handle, std::make_shared<pulse_counter_t>(counter));
+				std::shared_ptr<pulse_counter_t> shared = std::make_shared<pulse_counter_t>(counter);
+				dio_pulse_counters.emplace(handle, shared);
 
 				counter.epoll_fd = epoll_fd;
 				counter.mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef HAL_USE_THREAD
 				pthread_create(&counter.pthread, NULL, &counter_thread_function,
-						(void *)(&counter));
+						(void *)(&shared));
 #endif
 
 #ifdef HAL_BBB_DEBUG
@@ -1120,8 +1251,8 @@ void BBB_freePulseCounter(hal_handle_t counterHandle){
 		return;
 	}
 
-	if(pulse_counter_map.count(counterHandle)){
-		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
 		pthread_mutex_lock(&counter->mutex);
 		counter->release = true;
 		pthread_mutex_unlock(&counter->mutex);
@@ -1133,7 +1264,7 @@ void BBB_freePulseCounter(hal_handle_t counterHandle){
 		pthread_mutex_destroy(&counter->mutex);
 		close(counter->epoll_fd);
 
-		pulse_counter_map.erase(counterHandle);
+		dio_pulse_counters.erase(counterHandle);
 
 #ifdef HAL_BBB_DEBUG
 		printf("Pulse counter is set for release: %d \n", counterHandle);
@@ -1150,8 +1281,8 @@ void BBB_resetPulseCounter(hal_handle_t counterHandle){
 		return;
 	}
 
-	if(pulse_counter_map.count(counterHandle)){
-		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
 		pthread_mutex_lock(&counter->mutex);
 		counter->count = 0;
 		counter->period = 0;
@@ -1174,8 +1305,8 @@ uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle){
 	}
 
 	uint32_t count = 0;
-	if(pulse_counter_map.count(counterHandle)){
-		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
 		pthread_mutex_lock(&counter->mutex);
 		count = counter->count;
 		pthread_mutex_unlock(&counter->mutex);
@@ -1193,12 +1324,12 @@ uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle){
 }
 float BBB_getPulseCounterPeriod(hal_handle_t counterHandle){
 	if(!init){
-		return 0.0;
+		return 0.0f;
 	}
 
 	uint32_t period = 0;
-	if(pulse_counter_map.count(counterHandle)){
-		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
 		pthread_mutex_lock(&counter->mutex);
 		period = counter->period;
 		pthread_mutex_unlock(&counter->mutex);
@@ -1218,18 +1349,18 @@ float BBB_getPulseCounterPeriod(hal_handle_t counterHandle){
 }
 float BBB_getPulseCounterLength(hal_handle_t counterHandle){
 	if(!init){
-		return 0.0;
+		return 0.0f;
 	}
 
 	uint32_t length = 0;
-	if(pulse_counter_map.count(counterHandle)){
-		pulse_counter_t* counter = pulse_counter_map[counterHandle].get();
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
 		pthread_mutex_lock(&counter->mutex);
 		length = counter->length;
 		pthread_mutex_unlock(&counter->mutex);
 
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter length get: %d, %d \n", counterHandle, period);
+		printf("Pulse counter length get: %d, %d \n", counterHandle, length);
 #endif
 	}else{
 #ifdef HAL_BBB_DEBUG

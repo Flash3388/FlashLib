@@ -127,8 +127,8 @@ void pru_handles_update(volatile unsigned int* shared_memory){
 
 							unsigned long time = pru_clock_us();
 
-							//shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3)] = dio_port->counter->count;
-							//shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 1] = (time - dio_port->counter->start_time);
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3)] = dio_port->counter->count;
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 1] = (time - dio_port->counter->start_time);
 
 							dio_port->counter->start_time = time;
 						}else{
@@ -136,7 +136,7 @@ void pru_handles_update(volatile unsigned int* shared_memory){
 
 							unsigned long time = pru_clock_us();
 
-							//shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 2] = (time - dio_port->counter->start_time);
+							shared_memory[PRU_MEM_COUNTER_OFFSET + (i * 3) + 2] = (time - dio_port->counter->start_time);
 
 							dio_port->counter->start_time = time;
 						}

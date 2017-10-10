@@ -1,9 +1,10 @@
-package edu.flash3388.flashlib.robot.hal.bbb;
+package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.hal.HALAnalogInput;
-import edu.flash3388.flashlib.robot.hal.HALDigitalInput;
-import edu.flash3388.flashlib.robot.hal.HALDigitalOutput;
-import edu.flash3388.flashlib.robot.hal.HALPWM;
+import edu.flash3388.flashlib.robot.devices.AnalogInput;
+import edu.flash3388.flashlib.robot.devices.DigitalOutput;
+import edu.flash3388.flashlib.robot.devices.DigitalInput;
+import edu.flash3388.flashlib.robot.devices.PWM;
+import edu.flash3388.flashlib.robot.devices.PulseCounter;
 
 /**
  * Provides utilities for the Hardware Abstraction Layer implementation 
@@ -23,6 +24,13 @@ public final class BeagleboneBlack {
 	
 	public static final int P8_HEADER = 0;
 	public static final int P9_HEADER = 1;
+	
+	public static final int PWMSS_MODULE_0 = 0;
+	public static final int PWMSS_MODULE_1 = 1;
+	public static final int PWMSS_MODULE_2 = 2;
+	
+	public static final int PWMSS_PORT_A = 0;
+	public static final int PWMSS_PORT_B = 1;
 	
 	private static int[][] notValidDIOs = {
 			{//P8
@@ -95,7 +103,7 @@ public final class BeagleboneBlack {
 	 * @return a valid HAL port number
 	 */
 	public static int convertDIOToHALPort(int header, int pin){
-		return header * HEADER_PIN_COUNT + pin;
+		return (header * HEADER_PIN_COUNT + pin) - 1;
 	}
 	
 	/**
@@ -107,7 +115,7 @@ public final class BeagleboneBlack {
 	 * @param pin DIO pin
 	 * @return a digital input port, or null if port is not valid
 	 */
-	public static HALDigitalInput createDigitalInputPort(int header, int pin){
+	public static DigitalInput createDigitalInputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
 		return new HALDigitalInput(convertDIOToHALPort(header, pin));
@@ -121,7 +129,7 @@ public final class BeagleboneBlack {
 	 * @param pin DIO pin
 	 * @return a digital output port, or null if port is not valid
 	 */
-	public static HALDigitalOutput createDigitalOutputPort(int header, int pin){
+	public static DigitalOutput createDigitalOutputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
 		return new HALDigitalOutput(convertDIOToHALPort(header, pin));
@@ -136,7 +144,7 @@ public final class BeagleboneBlack {
 	 * @param port PWM port
 	 * @return a PWM port, or null if port is not valid
 	 */
-	public static HALPWM createPWMPort(int module, int port){
+	public static PWM createPWMPort(int module, int port){
 		if(!checkValidPWMPort(module, port))
 			return null;
 		return new HALPWM(convertPWMToHALPort(module, port));
@@ -150,9 +158,24 @@ public final class BeagleboneBlack {
 	 * @param channel the analog channel
 	 * @return an analog input port, or null if port is not valid
 	 */
-	public static HALAnalogInput createAnalogInputPort(int channel){
+	public static AnalogInput createAnalogInputPort(int channel){
 		if(!checkValidADCChannel(channel))
 			return null;
 		return new HALAnalogInput(channel);
+	}
+	
+	/**
+	 * Creates a new pulse counter for a given digital input port. If {@link #checkValidDIOPort(int, int)}
+	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
+	 * an pulse counter is created and returned.
+	 * 
+	 * @param header DIO header
+	 * @param pin DIO pin
+	 * @return a pulse counter, or null if port is not valid
+	 */
+	public static PulseCounter createPulseCounterPort(int header, int pin){
+		if(!checkValidDIOPort(header, pin))
+			return null;
+		return new HALPulseCounter(convertDIOToHALPort(header, pin));
 	}
 }

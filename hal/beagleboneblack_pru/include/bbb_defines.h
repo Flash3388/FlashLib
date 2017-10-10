@@ -20,12 +20,12 @@
 
 #define BBB_HEADER_PIN_COUNT         (46)
 
-#define BBB_P8_HEADER                (8)
-#define BBB_P9_HEADER                (9)
+#define BBB_P8_HEADER                (0)
+#define BBB_P9_HEADER                (1)
 
-#define BBB_GPIO_PORT_TO_HEADER(p)   (p / BBB_HEADER_PIN_COUNT)
-#define BBB_GPIO_PORT_TO_PIN(p)      (p % BBB_HEADER_PIN_COUNT)
-#define BBB_GPIO_PORT(h, p)          (h * BBB_HEADER_PIN_COUNT + p)
+#define BBB_GPIO_PORT_TO_HEADER(p)   ((p) / BBB_HEADER_PIN_COUNT)
+#define BBB_GPIO_PORT_TO_PIN(p)      ((p) % BBB_HEADER_PIN_COUNT)
+#define BBB_GPIO_PORT(h, p)          ((h) * BBB_HEADER_PIN_COUNT + (p))
 
 /***********************************************************************\
  * PWMSS

@@ -154,8 +154,8 @@ void pru_shutdown(){
 hal_handle_t pru_dio_initialize(uint16_t port, uint8_t dir, dio_port_t* dio){
 	uint8_t handle_type = dir == BBB_DIR_OUTPUT? PRU_HANDLE_DO : PRU_HANDLE_DI;
 
-	unsigned char header = BBB_GPIO_PORT_TO_HEADER(port);
-	unsigned char pin = BBB_GPIO_PORT_TO_PIN(port);
+	unsigned char header = BBB_GPIO_PORT_TO_HEADER(port + 1);
+	unsigned char pin = BBB_GPIO_PORT_TO_PIN(port + 1);
 
 	unsigned char module = gpio_module_get(header, pin);
 	pin = gpio_pin_get(header, pin);
@@ -488,7 +488,7 @@ hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
 			printf("DIO direction does not match initialized direction: %d != %d \n", dir, dio->dir);
 #endif
 		}
-	}else if(port > 0){
+	}else if(port >= 0){
 		dio_port_t dio;
 		dio.dir = dir;
 

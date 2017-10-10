@@ -11,9 +11,15 @@
 #include <stdint.h>
 #include <haltypes.h>
 #include <pthread.h>
+#include <memory>
 #include <sys/epoll.h>
 
 #include "hal_defines.h"
+
+typedef struct dio_pulse{
+	hal_handle_t dio_handle;
+	int32_t remaining_time;
+} dio_pulse_t;
 
 typedef struct dio_port{
 	uint8_t header;
@@ -21,11 +27,10 @@ typedef struct dio_port{
 
 	uint8_t dir;
 	uint8_t val;
-} dio_port_t;
 
-typedef struct dio_pulse{
-	int32_t remaining_time;
-} dio_pulse_t;
+	std::shared_ptr<dio_pulse_t> pulse;
+	bool pulsing;
+} dio_port_t;
 
 typedef struct pwm_port{
 	uint8_t enabledA = 0;
@@ -57,5 +62,9 @@ typedef struct pulse_counter{
 
 	bool release;
 } pulse_counter_t;
+
+typedef std::shared_ptr<dio_port_t> dio_port_shared_ptr;
+typedef std::shared_ptr<dio_pulse_t> dio_pulse_shared_ptr;
+typedef std::shared_ptr<pulse_counter_t> pulse_counter_shared_ptr;
 
 #endif /* BBB_HANDLES_H_ */
