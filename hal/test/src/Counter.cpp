@@ -12,11 +12,11 @@ namespace flashlib{
 
 namespace hal{
 
-hal_handle_t HAL_initializePulseCounter(int8_t port){
+hal_handle_t HAL_initializePulseCounter(hal_handle_t port){
 	printf("INIT PULSE COUNTER: %d \n", port);
 	return HAL_INVALID_HANDLE;
 }
-hal_handle_t HAL_initializeQuadPulseCounter(int8_t upPort, int8_t downPort){
+hal_handle_t HAL_initializeQuadPulseCounter(hal_handle_t upPort, hal_handle_t downPort){
 	printf("INIT QUAD PULSE COUNTER: %d, %d \n", upPort, downPort);
 	return HAL_INVALID_HANDLE;
 }

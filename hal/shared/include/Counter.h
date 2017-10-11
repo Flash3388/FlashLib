@@ -19,8 +19,8 @@ namespace flashlib{
 
 namespace hal{
 
-hal_handle_t HAL_initializePulseCounter(int8_t port);
-hal_handle_t HAL_initializeQuadPulseCounter(int8_t upPort, int8_t downPort);
+hal_handle_t HAL_initializePulseCounter(hal_handle_t port);
+hal_handle_t HAL_initializeQuadPulseCounter(hal_handle_t upPort, hal_handle_t downPort);
 void HAL_freePulseCounter(hal_handle_t counterHandle);
 
 void HAL_resetPulseCounter(hal_handle_t counterHandle);

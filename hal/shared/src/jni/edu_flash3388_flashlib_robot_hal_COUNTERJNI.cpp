@@ -26,7 +26,7 @@ extern "C" {
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_initializePulseCounter
 	(JNIEnv *env, jclass obj, jint dioPort){
-	hal_handle_t handle = HAL_initializePulseCounter((int8_t)dioPort);
+	hal_handle_t handle = HAL_initializePulseCounter((hal_handle_t)dioPort);
 	return (jint)handle;
 }
 
@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_initiali
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_initializeQuadPulseCounter
   (JNIEnv *env, jclass obj, jint upPort, jint downPort){
-	hal_handle_t handle = HAL_initializeQuadPulseCounter((int8_t)upPort, (int8_t)downPort);
+	hal_handle_t handle = HAL_initializeQuadPulseCounter((hal_handle_t)upPort, (hal_handle_t)downPort);
 	return (jint)handle;
 }
 

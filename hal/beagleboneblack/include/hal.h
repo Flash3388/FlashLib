@@ -83,8 +83,8 @@ float BBB_getPWMFrequency(hal_handle_t portHandle);
  * Pulse Counter
 \***********************************************************************/
 
-hal_handle_t BBB_initializePulseCounter(int8_t dioPort);
-hal_handle_t BBB_initializePulseCounter(int8_t upPort, int8_t downPort);
+hal_handle_t BBB_initializePulseCounter(hal_handle_t dioPort);
+hal_handle_t BBB_initializePulseCounter(hal_handle_t upPort, hal_handle_t downPort);
 void BBB_freePulseCounter(hal_handle_t counterHandle);
 
 void BBB_resetPulseCounter(hal_handle_t counterHandle);

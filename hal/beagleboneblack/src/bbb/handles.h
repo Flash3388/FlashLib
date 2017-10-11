@@ -16,6 +16,28 @@
 
 #include "hal_defines.h"
 
+typedef struct pulse_counter{
+	hal_handle_t up_port;
+	hal_handle_t down_port;
+
+	uint32_t count;
+	uint32_t period;
+	uint32_t length;
+	bool direction;
+
+	bool quadrature;
+
+	pthread_t pthread;
+	pthread_mutex_t mutex;
+
+	int up_fd;
+	int down_fd;
+
+	int epoll_fd;
+
+	bool release;
+} pulse_counter_t;
+
 typedef struct dio_pulse{
 	hal_handle_t dio_handle;
 	int32_t remaining_time;
@@ -30,6 +52,9 @@ typedef struct dio_port{
 
 	std::shared_ptr<dio_pulse_t> pulse;
 	bool pulsing;
+
+	std::shared_ptr<pulse_counter_t> counter;
+	bool has_counter;
 } dio_port_t;
 
 typedef struct pwm_port{
@@ -55,25 +80,6 @@ typedef struct adc_port{
 	bool accumulator_enabled;
 	adc_accumulator_t accumulator;
 } adc_port_t;
-
-typedef struct pulse_counter{
-	hal_handle_t up_port;
-	hal_handle_t down_port;
-
-	uint32_t count;
-	uint32_t period;
-	uint32_t length;
-	uint8_t direction;
-
-	bool quadrature;
-
-	pthread_t pthread;
-	pthread_mutex_t mutex;
-
-	int epoll_fd;
-
-	bool release;
-} pulse_counter_t;
 
 typedef std::shared_ptr<dio_port_t> dio_port_shared_ptr;
 typedef std::shared_ptr<dio_pulse_t> dio_pulse_shared_ptr;

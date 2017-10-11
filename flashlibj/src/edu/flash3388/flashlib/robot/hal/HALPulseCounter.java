@@ -28,9 +28,20 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 	public HALPulseCounter(int port) {
 		upSource = initialzeInputSource(port);
 		
-		handle = COUNTERJNI.initializePulseCounter(port);
-		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", port);
+		init();
+	}
+	/**
+	 * Creates a new pulse counter for the given DIO port using FlashLib's Hardware Abstraction Layer.
+	 * If the counter initialization failed, for whatever reason, {@link HALException}
+	 * is thrown.
+	 * 
+	 * @param port the HAL port of the desired digital input
+	 * @throws HALException if counter initialization failed.
+	 */
+	public HALPulseCounter(HALDigitalInput port) {
+		upSource = port;
+		
+		init();
 	}
 	/**
 	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
@@ -46,11 +57,38 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 		upSource = initialzeInputSource(upPort);
 		downSource = initialzeInputSource(downPort);
 		
-		handle = COUNTERJNI.initializeQuadPulseCounter(upPort, downPort);
-		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", HAL_INVALID_HANDLE);
+		init();
+	}
+	/**
+	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
+	 * If the counter initialization failed, for whatever reason, {@link HALException}
+	 * is thrown. This initializes the counter to quadrature mode, counting pulses from 2 sources: 
+	 * one forward, one backward.
+	 * 
+	 * @param upPort the HAL port of the desired forward digital input
+	 * @param downPort the HAL port of the desired backward digital input
+	 * @throws HALException if counter initialization failed.
+	 */
+	public HALPulseCounter(HALDigitalInput upPort, HALDigitalInput downPort) {
+		upSource = upPort;
+		downSource = downPort;
+		
+		init();
 	}
 	
+	private void init(){
+		if(downSource == null){
+			handle = COUNTERJNI.initializePulseCounter(upSource.getHandle());
+			if(handle == HAL_INVALID_HANDLE)
+				throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", 
+						upSource.getHandle());
+		}else{
+			handle = COUNTERJNI.initializeQuadPulseCounter(upSource.getHandle(), downSource.getHandle());
+			if(handle == HAL_INVALID_HANDLE)
+				throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", 
+						HAL_INVALID_HANDLE);
+		}
+	}
 	private HALDigitalInput initialzeInputSource(int port){
 		if(!DIOJNI.checkDigitalInputPortValid(port))
 			throw new IllegalArgumentException("PulseCounter: Invalid DigitalInput port "+port);
