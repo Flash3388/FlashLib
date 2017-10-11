@@ -279,7 +279,10 @@ void* counter_thread_function(void* param){
 				}
 				if(rise){
 					counter->period = us_passed;
-					++(counter->count);
+					if(quadrature && !direction){
+						--(counter->count);
+					}else
+						++(counter->count);
 				}
 				if(quadrature){
 					counter->direction = direction;

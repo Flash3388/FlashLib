@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot.devices;
 
-public class IndexEncoder implements Encoder{
+public class IndexEncoder extends EncoderBase{
 
 	private PulseCounter counter;
-	private EncoderDataType pidType;
+	
 	private double distancePerPulse;
 	
 	public IndexEncoder(int port) {
@@ -15,6 +15,8 @@ public class IndexEncoder implements Encoder{
 		
 		if(counter.isQuadrature())
 			throw new IllegalArgumentException("Expected a non-quadrature counter, isQuadrature returned true");
+		
+		reset();
 	}
 	public IndexEncoder(PulseCounter counter) {
 		this(counter, 0.0);
@@ -25,6 +27,8 @@ public class IndexEncoder implements Encoder{
 		
 		if(counter.isQuadrature())
 			throw new IllegalArgumentException("Expected a non-quadrature counter, isQuadrature returned true");
+		
+		reset();
 	}
 	
 	public void setDistancePerPulse(double distancePerPulse){
@@ -42,6 +46,7 @@ public class IndexEncoder implements Encoder{
 	}
 	@Override
 	public void reset() {
+		super.reset();
 		counter.reset();
 	}
 	
@@ -51,19 +56,18 @@ public class IndexEncoder implements Encoder{
 	}
 	@Override
 	public double getRate() {
+		checkRest();
+		
+		if(counter.get() == 0)
+			return 0.0;
 		return 60.0 / counter.getPulsePeriod();
 	}
 	@Override
 	public double getDistance() {
 		return counter.get() * distancePerPulse;
 	}
-	
 	@Override
-	public EncoderDataType getDataType() {
-		return pidType;
-	}
-	@Override
-	public void setDataType(EncoderDataType type) {
-		pidType = type;
+	public int getRaw() {
+		return counter.get();
 	}
 }

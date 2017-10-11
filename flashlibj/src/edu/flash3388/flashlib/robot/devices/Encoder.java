@@ -21,6 +21,12 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	void reset();
 	
 	/**
+	 * Gets the raw count of pulses measured by the encoder.
+	 * 
+	 * @return pulse count.
+	 */
+	int getRaw();
+	/**
 	 * Gets the rate of rotation measured by the encoder.
 	 * 
 	 * @return rate of rotation in RPM.

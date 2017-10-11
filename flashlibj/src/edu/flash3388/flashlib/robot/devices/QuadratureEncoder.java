@@ -1,9 +1,8 @@
 package edu.flash3388.flashlib.robot.devices;
 
-public class QuadratureEncoder implements Encoder{
+public class QuadratureEncoder extends EncoderBase{
 
 	private PulseCounter counter;
-	private EncoderDataType pidType;
 	
 	private double distancePerPulse;
 	private int pulsesPerRevolution;
@@ -18,6 +17,8 @@ public class QuadratureEncoder implements Encoder{
 		
 		if(!counter.isQuadrature())
 			throw new IllegalArgumentException("Expected a quadrature counter, isQuadrature returned false");
+		
+		reset();
 	}
 	public QuadratureEncoder(PulseCounter counter) {
 		this(counter, 0.0, 1);
@@ -29,6 +30,8 @@ public class QuadratureEncoder implements Encoder{
 		
 		if(!counter.isQuadrature())
 			throw new IllegalArgumentException("Expected a quadrature counter, isQuadrature returned false");
+		
+		reset();
 	}
 	
 	public void setDistancePerPulse(double distancePerPulse){
@@ -53,11 +56,16 @@ public class QuadratureEncoder implements Encoder{
 	}
 	@Override
 	public void reset() {
+		super.reset();
 		counter.reset();
 	}
 
 	@Override
-	public double getRate() {
+	public double getRate() {	
+		checkRest();
+		
+		if(counter.get() == 0)
+			return 0.0;
 		return ((360.0 / pulsesPerRevolution) * 60.0) / counter.getPulsePeriod();
 	}
 	@Override
@@ -71,13 +79,8 @@ public class QuadratureEncoder implements Encoder{
 	public boolean getDirection(){
 		return counter.getDirection();
 	}
-
 	@Override
-	public EncoderDataType getDataType() {
-		return pidType;
-	}
-	@Override
-	public void setDataType(EncoderDataType type) {
-		pidType = type;
+	public int getRaw() {
+		return counter.get();
 	}
 }
