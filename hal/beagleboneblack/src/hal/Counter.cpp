@@ -39,11 +39,8 @@ float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle){
 	return BBB_getPulseCounterLength(counterHandle);
 }
 
-uint8_t HAL_isPulseCounterQuadrature(hal_handle_t counterHandle){
-	bool quad = BBB_isPulseCounterQuadrature(counterHandle);
-	if(quad)
-		return 1;
-	return 0;
+bool HAL_isPulseCounterQuadrature(hal_handle_t counterHandle){
+	return BBB_isPulseCounterQuadrature(counterHandle);
 }
 
 

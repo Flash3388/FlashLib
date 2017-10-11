@@ -23,9 +23,15 @@ public class HALDigitalOutput extends HALPort implements DigitalOutput{
 	 * @throws HALException if port initialization failed.
 	 */
 	public HALDigitalOutput(int port) {
+		if(!DIOJNI.checkDigitalOutputPortValid(port))
+			throw new IllegalArgumentException("Invalid DigitalOutput port "+port);
+		
+		if(DIOJNI.checkDigitalOutputPortTaken(port))
+			throw new HALAllocationException("DigitalOutput port taken", port);
+		
 		handle = DIOJNI.initializeDigitalOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize DigitalOutput: invalid HAL handle");
+			throw new HALException("Unable to initialize DigitalOutput: invalid HAL handle", port);
 	}
 	
 	/**

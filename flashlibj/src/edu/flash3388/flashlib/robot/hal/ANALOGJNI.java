@@ -9,6 +9,10 @@ public final class ANALOGJNI {
 	public static native float convertAnalogValueToVoltage(int value);
 	public static native int convertAnalogVoltageToValue(float voltage);
 	
+	public static native boolean checkAnalogInputPortValid(int port);
+	public static native boolean checkAnalogInputPortTaken(int port);
+	public static native boolean checkAnalogOutputPortValid(int port);
+	public static native boolean checkAnalogOutputPortTaken(int port);
 	
 	public static native int initializeAnalogInputPort(int port);
 	public static native int initializeAnalogOutputPort(int port);

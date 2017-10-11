@@ -28,6 +28,24 @@ uint32_t HAL_getAnalogMaxValue(){
 }
 
 /***********************************************************************\
+ * Port validation
+\***********************************************************************/
+
+bool HAL_checkAnalogInputPortValid(int8_t port){
+	return BBB_checkAnalogInputPortValid(port);
+}
+bool HAL_checkAnalogInputPortTaken(int8_t port){
+	return BBB_checkAnalogInputPortTaken(port);
+}
+
+bool HAL_checkAnalogOutputPortValid(int8_t port){
+	return false;
+}
+bool HAL_checkAnalogOutputPortTaken(int8_t port){
+	throw platform_exception();
+}
+
+/***********************************************************************\
  * Analog initialization
 \***********************************************************************/
 

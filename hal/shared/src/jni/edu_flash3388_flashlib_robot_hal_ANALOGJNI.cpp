@@ -50,6 +50,45 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getMaxAna
 	return (jint)HAL_getAnalogMaxValue();
 }
 
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    checkAnalogInputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_checkAnalogInputPortValid
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkAnalogInputPortValid((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    checkAnalogInputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_checkAnalogInputPortTaken
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkAnalogInputPortTaken((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    checkAnalogOutputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_checkAnalogOutputPortValid
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkAnalogOutputPortValid((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    checkAnalogOutputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_checkAnalogOutputPortTaken
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkAnalogOutputPortTaken((int8_t)port);
+}
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI

@@ -26,9 +26,15 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 * @throws HALException if port initialization failed.
 	 */
 	public HALAnalogInput(int port) {
+		if(!ANALOGJNI.checkAnalogInputPortValid(port))
+			throw new IllegalArgumentException("Invalid AnalogInput port "+port);
+		
+		if(ANALOGJNI.checkAnalogInputPortTaken(port))
+			throw new HALAllocationException("AnalogInput port taken", port);
+		
 		handle = ANALOGJNI.initializeAnalogInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize AnalogInput: invalid HAL handle");
+			throw new HALException("Unable to initialize AnalogInput: invalid HAL handle", port);
 		
 		accumulator = new HALAnalogAccumulator(this);
 	}
@@ -56,7 +62,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		
 		if(result != 0){
 			throw new HALException("Unable to "+(enable? "enable" : "disable")+
-					" accumulator for analog input port: "+handle);
+					" accumulator for analog input port", handle);
 		}
 	}
 	public void resetAccumulator(){

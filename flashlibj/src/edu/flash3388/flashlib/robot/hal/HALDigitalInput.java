@@ -23,9 +23,15 @@ public class HALDigitalInput extends HALPort implements DigitalInput{
 	 * @throws HALException if port initialization failed.
 	 */
 	public HALDigitalInput(int port) {
+		if(!DIOJNI.checkDigitalInputPortValid(port))
+			throw new IllegalArgumentException("Invalid DigitalInput port "+port);
+		
+		if(DIOJNI.checkDigitalInputPortTaken(port))
+			throw new HALAllocationException("DigitalInput port taken", port);
+		
 		handle = DIOJNI.initializeDigitalInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize DigitalInput: invalid HAL handle");
+			throw new HALException("Unable to initialize DigitalInput: invalid HAL handle", port);
 	}
 	
 	/**

@@ -24,6 +24,16 @@ float HAL_getAnalogMaxVoltage();
 uint32_t HAL_getAnalogMaxValue();
 
 /***********************************************************************\
+ * Port validation
+\***********************************************************************/
+
+bool HAL_checkAnalogInputPortValid(int8_t port);
+bool HAL_checkAnalogInputPortTaken(int8_t port);
+
+bool HAL_checkAnalogOutputPortValid(int8_t port);
+bool HAL_checkAnalogOutputPortTaken(int8_t port);
+
+/***********************************************************************\
  * Analog initialization
 \***********************************************************************/
 

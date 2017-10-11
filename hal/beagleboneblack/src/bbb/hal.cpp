@@ -520,6 +520,37 @@ void BBB_shutdown(){
  * DIO
 \***********************************************************************/
 
+bool BBB_checkDigitalPortValid(int8_t port){
+	int header = BBB_GPIO_PORT_TO_HEADER(port + 1);
+	int pin = BBB_GPIO_PORT_TO_PIN(port + 1);
+
+	char bank = pin_bank(header, pin);
+	if(bank < 0)
+		return false;
+
+	char offset = pin_offset(header, pin);
+	if(offset <= 0)
+		return false;
+
+	return true;
+}
+bool BBB_checkDigitalPortTaken(int8_t port){
+	if(!init){
+		return false;
+	}
+
+	bool res = false;
+
+	pthread_mutex_lock(&io_mutex);
+	hal_handle_t handle = (hal_handle_t)port;
+	if(dio_ports.count(handle)){
+		res = true;
+	}
+	pthread_mutex_unlock(&io_mutex);
+
+	return res;
+}
+
 hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir){
 	if(!init){
 		return HAL_INVALID_HANDLE;
@@ -762,6 +793,28 @@ uint8_t BBB_getDIO(hal_handle_t portHandle){
 /***********************************************************************\
  * ANALOG
 \***********************************************************************/
+
+bool BBB_checkAnalogInputPortValid(int8_t port){
+	return port >= 0 && port < BBB_ADC_CHANNEL_COUNT;
+}
+bool BBB_checkAnalogInputPortTaken(int8_t port){
+	if(!init){
+		return false;
+	}
+
+	bool taken = false;
+	if(BBB_checkAnalogInputPortValid(port)){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+
+		adc_port_t* adc = &adc_ports[port];
+		taken = adc->enabled;
+
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}
+	return taken;
+}
 
 hal_handle_t BBB_initializeAnalogInput(int8_t port){
 	if(!init){
@@ -1068,6 +1121,30 @@ uint32_t BBB_getAnalogMaxValue(){
 /***********************************************************************\
  * PWM
 \***********************************************************************/
+
+bool BBB_checkPWMPortValid(int8_t port){
+	return port >= 0 && port < HAL_PWMSS_PORTS_COUNT;
+}
+bool BBB_checkPWMPortTaken(int8_t port){
+	if(!init || !BBB_checkPWMPortValid(port)){
+		return false;
+	}
+
+	bool taken = false;
+
+	pthread_mutex_lock(&io_mutex);
+	uint8_t module = BBB_PWMSS_PORT_TO_MODULE(port);
+	uint8_t portv = BBB_PWMSS_PORT_TO_PIN(port);
+
+	pwm_port_t* pwm = &pwm_ports[module];
+
+	if((pwm->enabledA && portv == BBB_PWMSSA) || (pwm->enabledB && portv == BBB_PWMSSB))
+		taken = true;
+
+	pthread_mutex_unlock(&io_mutex);
+
+	return taken;
+}
 
 hal_handle_t BBB_initializePWMPort(int8_t port){
 	if(!init){

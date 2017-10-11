@@ -7,6 +7,39 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalInputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalInputPortValid
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalInputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalInputPortTaken
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalOutputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalOutputPortValid
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalOutputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalOutputPortTaken
+  (JNIEnv *, jclass, jint);
+
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
  * Method:    initializeDigitalInputPort

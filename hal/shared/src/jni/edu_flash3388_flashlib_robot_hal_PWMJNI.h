@@ -7,6 +7,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
+ * Method:    checkPWMPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkPWMPortValid
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
+ * Method:    checkPWMPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkPWMPortTaken
+  (JNIEnv *, jclass, jint);
+
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
  * Method:    initializePWMPort

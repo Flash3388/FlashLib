@@ -2,6 +2,9 @@ package edu.flash3388.flashlib.robot.hal;
 
 public final class PWMJNI {
 	
+	public static native boolean checkPWMPortValid(int port);
+	public static native boolean checkPWMPortTaken(int port);
+	
 	public static native int initializePWMPort(int port);
 	
 	public static native void freePWMPort(int handle);

@@ -13,6 +13,28 @@ namespace flashlib{
 namespace hal{
 
 /***********************************************************************\
+ * Port validation
+\***********************************************************************/
+
+bool HAL_checkDigitalInputPortValid(int8_t port){
+	printf("DIGITAL INPUT VALID: %d \n", port);
+	return true;
+}
+bool HAL_checkDigitalInputPortTaken(int8_t port){
+	printf("DIGITAL INPUT TAKEN: %d \n", port);
+	return false;
+}
+
+bool HAL_checkDigitalOutputPortValid(int8_t port){
+	printf("DIGITAL OUTPUT VALID: %d \n", port);
+	return true;
+}
+bool HAL_checkDigitalOutputPortTaken(int8_t port){
+	printf("DIGITAL OUTPUT TAKEN: %d \n", port);
+	return false;
+}
+
+/***********************************************************************\
  * DIO initialization
 \***********************************************************************/
 
@@ -36,13 +58,13 @@ void HAL_freeDigitalOutputPort(hal_handle_t portHandle){
  * DIO data io
 \***********************************************************************/
 
-uint8_t HAL_getDIOHigh(hal_handle_t portHandle){
+bool HAL_getDIOHigh(hal_handle_t portHandle){
 	printf("GET DIGITAL HIGH: %d \n", portHandle);
-	return 0;
+	return false;
 }
-uint8_t HAL_getDIOLow(hal_handle_t portHandle){
+bool HAL_getDIOLow(hal_handle_t portHandle){
 	printf("GET DIGITAL LOW: %d \n", portHandle);
-	return 0;
+	return false;
 }
 void HAL_setDIOHigh(hal_handle_t portHandle){
 	printf("SET DIGITAL HIGH: %d \n", portHandle);

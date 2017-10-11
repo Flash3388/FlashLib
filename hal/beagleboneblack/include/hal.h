@@ -23,6 +23,9 @@ void BBB_shutdown();
  * DIO
 \***********************************************************************/
 
+bool BBB_checkDigitalPortValid(int8_t port);
+bool BBB_checkDigitalPortTaken(int8_t port);
+
 hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir);
 void BBB_freeDIOPort(hal_handle_t portHandle);
 
@@ -34,6 +37,9 @@ uint8_t BBB_getDIO(hal_handle_t portHandle);
 /***********************************************************************\
  * ANALOG
 \***********************************************************************/
+
+bool BBB_checkAnalogInputPortValid(int8_t port);
+bool BBB_checkAnalogInputPortTaken(int8_t port);
 
 hal_handle_t BBB_initializeAnalogInput(int8_t port);
 void BBB_freeAnalogInput(hal_handle_t portHandle);
@@ -57,6 +63,9 @@ uint32_t BBB_getAnalogMaxValue();
 /***********************************************************************\
  * PWM
 \***********************************************************************/
+
+bool BBB_checkPWMPortValid(int8_t port);
+bool BBB_checkPWMPortTaken(int8_t port);
 
 hal_handle_t BBB_initializePWMPort(int8_t port);
 void BBB_freePWMPort(hal_handle_t portHandle);

@@ -23,6 +23,26 @@ extern "C" {
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
+ * Method:    checkPWMPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkPWMPortValid
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkPWMPortValid((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
+ * Method:    checkPWMPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkPWMPortTaken
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkPWMPortTaken((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_PWMJNI
  * Method:    initializePWMPort
  * Signature: (I)I
  */

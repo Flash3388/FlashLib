@@ -4,7 +4,14 @@ public class HALException extends RuntimeException{
 
 	private static final long serialVersionUID = 1L;
 
-	public HALException(String msg) {
-		super(msg);
+	private int port;
+	
+	public HALException(String msg, int port) {
+		super(msg + " :: Port = "+port);
+		this.port = port;
+	}
+	
+	public int getPort(){
+		return port;
 	}
 }

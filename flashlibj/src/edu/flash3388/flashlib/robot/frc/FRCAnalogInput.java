@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.frc;
 
+import edu.flash3388.flashlib.robot.devices.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.devices.AnalogInput;
 
 public class FRCAnalogInput implements AnalogInput{
@@ -27,5 +28,25 @@ public class FRCAnalogInput implements AnalogInput{
 	@Override
 	public double getVoltage() {
 		return port.getVoltage();
+	}
+	@Override
+	public AnalogAccumulator getAccumulator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public double getSampleRate() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public double getMaxVoltage() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int getMaxValue() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

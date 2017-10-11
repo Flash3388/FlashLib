@@ -30,7 +30,7 @@ uint32_t HAL_getPulseCounterPulseCount(hal_handle_t counterHandle);
 float HAL_getPulseCounterPulseLength(hal_handle_t counterHandle);
 float HAL_getPulseCounterPulsePeriod(hal_handle_t counterHandle);
 
-uint8_t HAL_isPulseCounterQuadrature(hal_handle_t counterHandle);
+bool HAL_isPulseCounterQuadrature(hal_handle_t counterHandle);
 
 } /* namespace hal */
 

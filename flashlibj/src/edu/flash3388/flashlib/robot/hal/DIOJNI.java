@@ -2,6 +2,11 @@ package edu.flash3388.flashlib.robot.hal;
 
 public final class DIOJNI {
 	
+	public static native boolean checkDigitalInputPortValid(int port);
+	public static native boolean checkDigitalInputPortTaken(int port);
+	public static native boolean checkDigitalOutputPortValid(int port);
+	public static native boolean checkDigitalOutputPortTaken(int port);
+	
 	public static native int initializeDigitalInputPort(int port);
 	public static native int initializeDigitalOutputPort(int port);
 	

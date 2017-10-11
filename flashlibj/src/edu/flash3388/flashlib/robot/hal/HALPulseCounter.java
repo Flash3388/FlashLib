@@ -15,6 +15,8 @@ import edu.flash3388.flashlib.robot.devices.PulseCounter;
  */
 public class HALPulseCounter extends HALPort implements PulseCounter{
 	
+	private HALDigitalInput upSource, downSource;
+	
 	/**
 	 * Creates a new pulse counter for the given DIO port using FlashLib's Hardware Abstraction Layer.
 	 * If the counter initialization failed, for whatever reason, {@link HALException}
@@ -24,9 +26,11 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 	 * @throws HALException if counter initialization failed.
 	 */
 	public HALPulseCounter(int port) {
+		upSource = initialzeInputSource(port);
+		
 		handle = COUNTERJNI.initializePulseCounter(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle");
+			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", port);
 	}
 	/**
 	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
@@ -39,9 +43,22 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 	 * @throws HALException if counter initialization failed.
 	 */
 	public HALPulseCounter(int upPort, int downPort) {
+		upSource = initialzeInputSource(upPort);
+		downSource = initialzeInputSource(downPort);
+		
 		handle = COUNTERJNI.initializeQuadPulseCounter(upPort, downPort);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle");
+			throw new HALException("Unable to initialize PulseCounter: invalid HAL handle", HAL_INVALID_HANDLE);
+	}
+	
+	private HALDigitalInput initialzeInputSource(int port){
+		if(!DIOJNI.checkDigitalInputPortValid(port))
+			throw new IllegalArgumentException("PulseCounter: Invalid DigitalInput port "+port);
+		
+		if(DIOJNI.checkDigitalInputPortTaken(port))
+			throw new HALAllocationException("PulseCounter: DigitalInput port taken", port);
+		
+		return new HALDigitalInput(port);
 	}
 	
 	/**
@@ -57,6 +74,9 @@ public class HALPulseCounter extends HALPort implements PulseCounter{
 		
 		COUNTERJNI.freePulseCounter(handle);
 		handle = HAL_INVALID_HANDLE;
+		
+		upSource.free();
+		downSource.free();
 	}
 	
 	

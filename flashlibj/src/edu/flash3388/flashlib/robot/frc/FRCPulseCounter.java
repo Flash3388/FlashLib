@@ -49,5 +49,15 @@ public class FRCPulseCounter implements PulseCounter{
 	public double getPulsePeriod() {
 		return counter.getPeriod();
 	}
+	@Override
+	public boolean getDirection() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean isQuadrature() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }

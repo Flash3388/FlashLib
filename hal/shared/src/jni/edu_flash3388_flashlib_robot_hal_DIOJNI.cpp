@@ -23,6 +23,46 @@ extern "C" {
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalInputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalInputPortValid
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkDigitalInputPortValid((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalInputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalInputPortTaken
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkDigitalInputPortTaken((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalOutputPortValid
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalOutputPortValid
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkDigitalOutputPortValid((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
+ * Method:    checkDigitalOutputPortTaken
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_checkDigitalOutputPortTaken
+  (JNIEnv *env, jclass obj, jint port){
+	return HAL_checkDigitalOutputPortTaken((int8_t)port);
+}
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_DIOJNI
  * Method:    initializeDigitalInputPort
  * Signature: (I)I
  */
