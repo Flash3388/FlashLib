@@ -23,10 +23,10 @@ void BBB_shutdown();
  * DIO
 \***********************************************************************/
 
-hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir);
+hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir);
 void BBB_freeDIOPort(hal_handle_t portHandle);
 
-void BBB_setDIO(hal_handle_t portHandle, uint8_t high);
+void BBB_setDIO(hal_handle_t portHandle, int8_t high);
 void BBB_pulseDIO(hal_handle_t portHandle, float length);
 
 uint8_t BBB_getDIO(hal_handle_t portHandle);
@@ -35,23 +35,36 @@ uint8_t BBB_getDIO(hal_handle_t portHandle);
  * ANALOG
 \***********************************************************************/
 
-hal_handle_t BBB_initializeAnalogInput(int16_t port);
+hal_handle_t BBB_initializeAnalogInput(int8_t port);
 void BBB_freeAnalogInput(hal_handle_t portHandle);
 
 uint32_t BBB_getAnalogValue(hal_handle_t portHandle);
 float BBB_getAnalogVoltage(hal_handle_t portHandle);
 
+float BBB_convertAnalogValueToVoltage(uint32_t value);
+uint32_t BBB_convertAnalogVoltageToValue(float voltage);
+
+int BBB_enableAnalogInputAccumulator(hal_handle_t portHandle, bool enable);
+void BBB_resetAnalogInputAccumulator(hal_handle_t portHandle);
+void BBB_setAnalogInputAccumulatorCenter(hal_handle_t portHandle, uint32_t center);
+int64_t BBB_getAnalogInputAccumulatorValue(hal_handle_t portHandle);
+uint32_t BBB_getAnalogInputAccumulatorCount(hal_handle_t portHandle);
+
+float BBB_getGlobalAnalogSampleRate();
+float BBB_getAnalogMaxVoltage();
+uint32_t BBB_getAnalogMaxValue();
+
 /***********************************************************************\
  * PWM
 \***********************************************************************/
 
-hal_handle_t BBB_initializePWMPort(int16_t port);
+hal_handle_t BBB_initializePWMPort(int8_t port);
 void BBB_freePWMPort(hal_handle_t portHandle);
 
 uint8_t BBB_getPWMValue(hal_handle_t portHandle);
 float BBB_getPWMDuty(hal_handle_t portHandle);
 
-void BBB_setPWMValue(hal_handle_t portHandle, uint8_t value);
+void BBB_setPWMValue(hal_handle_t portHandle, int8_t value);
 void BBB_setPWMDuty(hal_handle_t portHandle, float duty);
 
 void BBB_setPWMFrequency(hal_handle_t portHandle, float frequency);
@@ -61,14 +74,18 @@ float BBB_getPWMFrequency(hal_handle_t portHandle);
  * Pulse Counter
 \***********************************************************************/
 
-hal_handle_t BBB_initializePulseCounter(int16_t dioPort);
+hal_handle_t BBB_initializePulseCounter(int8_t dioPort);
+hal_handle_t BBB_initializePulseCounter(int8_t upPort, int8_t downPort);
 void BBB_freePulseCounter(hal_handle_t counterHandle);
 
 void BBB_resetPulseCounter(hal_handle_t counterHandle);
 
+uint8_t BBB_getPulseCounterDirection(hal_handle_t counterHandle);
 uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle);
 float BBB_getPulseCounterPeriod(hal_handle_t counterHandle);
 float BBB_getPulseCounterLength(hal_handle_t counterHandle);
+
+bool BBB_isPulseCounterQuadrature(hal_handle_t counterHandle);
 
 } /* namespace hal */
 

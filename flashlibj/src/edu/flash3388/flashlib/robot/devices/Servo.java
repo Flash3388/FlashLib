@@ -6,17 +6,30 @@ public class Servo extends SafePWM implements FlashSpeedController{
 
 	private double minAngle, maxAngle;
 	
+	public Servo(int port, double minAngle, double maxAngle) {
+		super(port);
+		
+		init(minAngle, maxAngle);
+	}
+	public Servo(int port){
+		this(port, 0.0, 180.0);
+	}
+	
 	public Servo(PWM port, double minAngle, double maxAngle) {
 		super(port);
 		
+		init(minAngle, maxAngle);
+	}
+	public Servo(PWM port){
+		this(port, 0.0, 180.0);
+	}
+	
+	private void init(double minAngle, double maxAngle){
 		this.maxAngle = maxAngle;
 		this.minAngle = minAngle;
 		
 		setBounds(2.4, 0, 0, 0, 0.6);
 		setFrequency(getFrequency() * 0.25f);
-	}
-	public Servo(PWM port){
-		this(port, 0.0, 180.0);
 	}
 
 	@Override

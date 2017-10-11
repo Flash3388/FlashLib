@@ -114,6 +114,10 @@ void limitPWMDuty(float* duty){
 	else if(*duty < 0.0f)
 		*duty = 0.0f;
 }
+void limitADCValue(uint32_t* value){
+	if(*value > HAL_AIN_MAX_VALUE)
+		*value = HAL_AIN_MAX_VALUE;
+}
 
 void* counter_thread_function(void* param){
 
@@ -150,7 +154,7 @@ void* counter_thread_function(void* param){
 			run = false;
 			counter->release = true;
 		}else{
-			current_value = BBB_getDIO(counter->dio_port);
+			current_value = BBB_getDIO(counter->up_port);
 			if(current_value == BBB_GPIO_HIGH && last_value == BBB_GPIO_LOW){
 				//TODO: RISING
 				rise = true;
@@ -285,21 +289,27 @@ void* adc_thread_function(void* param){
 		auto adc_elapsed = std::chrono::high_resolution_clock::now() - adc_start;
 		adc_ms_passed = std::chrono::duration_cast<std::chrono::milliseconds>(adc_elapsed).count();
 		if(adc_ms_passed >= HAL_AIN_SMAPLING_RATE){
-	#ifdef HAL_USE_IO
+#ifdef HAL_USE_IO
 			BBBIO_ADCTSC_work(HAL_AIN_SAMPLING_SIZE);
-	#endif
+#endif
 
 			pthread_mutex_lock(&adc_sampling_mutex);
 			for(adc_idx = 0; adc_idx < BBB_ADC_CHANNEL_COUNT; ++adc_idx){
-				adc_port_t adc = adc_ports[adc_idx];
-				if(adc.enabled){
-	#ifdef HAL_USE_IO
+				adc_port_t* adc = &adc_ports[adc_idx];
+				if(adc->enabled){
 					adc_smpl_val = 0;
+#ifdef HAL_USE_IO
+
 					for(adc_smpl_idx = 0; adc_smpl_idx < HAL_AIN_SAMPLING_SIZE; ++adc_smpl_idx){
-						adc_smpl_val += adc.sample_buffer[adc_smpl_idx];
+						adc_smpl_val += adc->sample_buffer[adc_smpl_idx];
 					}
 					adc_smpl_val /= HAL_AIN_SAMPLING_SIZE;
-	#endif
+#endif
+					adc->value = adc_smpl_val;
+					if(adc->accumulator_enabled){
+						adc->accumulator.value += (adc_smpl_val - adc->accumulator.center);
+						++(adc->accumulator.count);
+					}
 				}
 			}
 			pthread_mutex_unlock(&adc_sampling_mutex);
@@ -510,7 +520,7 @@ void BBB_shutdown(){
  * DIO
 \***********************************************************************/
 
-hal_handle_t BBB_initializeDIOPort(int16_t port, uint8_t dir){
+hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir){
 	if(!init){
 		return HAL_INVALID_HANDLE;
 	}
@@ -753,7 +763,7 @@ uint8_t BBB_getDIO(hal_handle_t portHandle){
  * ANALOG
 \***********************************************************************/
 
-hal_handle_t BBB_initializeAnalogInput(int16_t port){
+hal_handle_t BBB_initializeAnalogInput(int8_t port){
 	if(!init){
 		return HAL_INVALID_HANDLE;
 	}
@@ -770,7 +780,7 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
 		adc_port_t* adc = &adc_ports[port];
-		if(adc->enabled == 0){
+		if(adc->enabled){
 			//TODO: INITIALIZE ADC PORT
 
 #ifdef HAL_USE_IO
@@ -779,7 +789,12 @@ hal_handle_t BBB_initializeAnalogInput(int16_t port){
 			BBBIO_ADCTSC_channel_enable(port);
 #endif
 
-			adc->enabled = 1;
+			adc->enabled = true;
+			adc->value = 0;
+			adc->accumulator.value = 0;
+			adc->accumulator.count = 0;
+			adc->accumulator.center = 0;
+			adc->accumulator_enabled = false;
 
 #ifdef HAL_BBB_DEBUG
 			printf("Initialized ADC channel: %d \n", port);
@@ -807,7 +822,7 @@ void BBB_freeAnalogInput(hal_handle_t portHandle){
 		if(adc->enabled){
 			adc->enabled = 0;
 			//TODO: STOP ADC CHANNEL
-			adc->value = 0;
+			adc->accumulator_enabled = false;
 
 #ifdef HAL_USE_IO
 			BBBIO_ADCTSC_channel_disable(portHandle);
@@ -867,14 +882,194 @@ float BBB_getAnalogVoltage(hal_handle_t portHandle){
 	}
 
 	uint32_t value = BBB_getAnalogValue(portHandle);
-	return HAL_AIN_VALUE_TO_VOLTAGE(value);
+	return (float)HAL_AIN_VALUE_TO_VOLTAGE(value);
+}
+
+float BBB_convertAnalogValueToVoltage(uint32_t value){
+	return (float)HAL_AIN_VALUE_TO_VOLTAGE(value);
+}
+uint32_t BBB_convertAnalogVoltageToValue(float voltage){
+	return (uint32_t)HAL_AIN_VOLTAGE_TO_VALUE(voltage);
+}
+
+int BBB_enableAnalogInputAccumulator(hal_handle_t portHandle, bool enable){
+	if(!init){
+		return -1;
+	}
+
+	int retval = 0;
+	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t* adc = &adc_ports[portHandle];
+		if(adc->enabled){
+			if(enable != adc->accumulator_enabled){
+				if(enable){
+					adc->accumulator.count = 0;
+					adc->accumulator.value = 0;
+				}
+				adc->accumulator_enabled = enable;
+
+#ifdef HAL_BBB_DEBUG
+				printf("ADC channel accumulator enabled: %d, %d \n", portHandle, enable);
+#endif
+			}else{
+#ifdef HAL_BBB_DEBUG
+				printf("ADC channel accumulator already at state: %d, %d \n", portHandle, enable);
+#endif
+			}
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel was not enabled: %d \n", portHandle);
+#endif
+			retval = -1;
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("ADC port is invalid, out of range: %d \n", portHandle);
+#endif
+		retval = -1;
+	}
+
+	return retval;
+}
+void BBB_resetAnalogInputAccumulator(hal_handle_t portHandle){
+	if(!init){
+		return;
+	}
+
+	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t* adc = &adc_ports[portHandle];
+		if(adc->enabled && adc->accumulator_enabled){
+			adc->accumulator.value = 0;
+			adc->accumulator.count = 0;
+
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel accumulator reset: %d \n", portHandle);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel or accumulator are not enabled: %d \n", portHandle);
+#endif
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("ADC port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+}
+void BBB_setAnalogInputAccumulatorCenter(hal_handle_t portHandle, uint32_t center){
+	if(!init){
+		return;
+	}
+
+	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t* adc = &adc_ports[portHandle];
+		if(adc->enabled && adc->accumulator_enabled){
+			limitADCValue(&center);
+			adc->accumulator.center = center;
+
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel accumulator center: %d, %d \n", portHandle, center);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel or accumulator are not enabled: %d \n", portHandle);
+#endif
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("ADC port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+}
+int64_t BBB_getAnalogInputAccumulatorValue(hal_handle_t portHandle){
+	if(!init){
+		return 0;
+	}
+
+	int64_t value = 0;
+	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t* adc = &adc_ports[portHandle];
+		if(adc->enabled && adc->accumulator_enabled){
+			value = adc->accumulator.value;
+
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel accumulator get value: %d \n", portHandle);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel or accumulator are not enabled: %d \n", portHandle);
+#endif
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("ADC port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+	return value;
+}
+uint32_t BBB_getAnalogInputAccumulatorCount(hal_handle_t portHandle){
+	if(!init){
+		return 0;
+	}
+
+	uint32_t value = 0;
+	if(portHandle >= 0 && portHandle < BBB_ADC_CHANNEL_COUNT){
+		pthread_mutex_lock(&io_mutex);
+		pthread_mutex_lock(&adc_sampling_mutex);
+		adc_port_t* adc = &adc_ports[portHandle];
+		if(adc->enabled && adc->accumulator_enabled){
+			value = adc->accumulator.count;
+
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel accumulator get count: %d \n", portHandle);
+#endif
+		}else{
+#ifdef HAL_BBB_DEBUG
+			printf("ADC channel or accumulator are not enabled: %d \n", portHandle);
+#endif
+		}
+		pthread_mutex_unlock(&adc_sampling_mutex);
+		pthread_mutex_unlock(&io_mutex);
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("ADC port is invalid, out of range: %d \n", portHandle);
+#endif
+	}
+	return value;
+}
+
+float BBB_getGlobalAnalogSampleRate(){
+	float secs = (HAL_AIN_SMAPLING_RATE * 0.001);
+	return secs;
+}
+float BBB_getAnalogMaxVoltage(){
+	return (float)BBB_ADC_MAX_VOLTAGE;
+}
+uint32_t BBB_getAnalogMaxValue(){
+	return (uint32_t)HAL_AIN_MAX_VALUE;
 }
 
 /***********************************************************************\
  * PWM
 \***********************************************************************/
 
-hal_handle_t BBB_initializePWMPort(int16_t port){
+hal_handle_t BBB_initializePWMPort(int8_t port){
 	if(!init){
 		return HAL_INVALID_HANDLE;
 	}
@@ -894,7 +1089,7 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 		pwm_port_t* pwm = &pwm_ports[module];
 
 #ifdef HAL_USE_IO
-		if(pwm->enabledA == 0 && pwm->enabledB == 0){
+		if(pwm->enabledA && pwm->enabledB){
 			BBBIO_ehrPWM_Enable(module);
 
 
@@ -906,13 +1101,13 @@ hal_handle_t BBB_initializePWMPort(int16_t port){
 
 		bool initmodule = false;
 
-		if(pin == BBB_PWMSSA && pwm->enabledA == 0){
-			pwm->enabledA = 1;
+		if(pin == BBB_PWMSSA && pwm->enabledA){
+			pwm->enabledA = true;
 			pwm->dutyA = 0.0f;
 			initmodule = true;
 		}
-		else if(pin == BBB_PWMSSB && pwm->enabledB == 0){
-			pwm->enabledB = 1;
+		else if(pin == BBB_PWMSSB && pwm->enabledB){
+			pwm->enabledB = true;
 			pwm->dutyB = 0.0f;
 			initmodule = true;
 		}
@@ -948,12 +1143,12 @@ void BBB_freePWMPort(hal_handle_t portHandle){
 		bool freed = false;
 
 		if(pin == BBB_PWMSSA && pwm->enabledA){
-			pwm->enabledA = 0;
+			pwm->enabledA = false;
 			pwm->dutyA = 0.0f;
 			freed = true;
 		}
 		else if(pin == BBB_PWMSSB && pwm->enabledB){
-			pwm->enabledB = 0;
+			pwm->enabledB = false;
 			pwm->dutyB = 0.0f;
 			freed = true;
 		}
@@ -965,7 +1160,7 @@ void BBB_freePWMPort(hal_handle_t portHandle){
 
 #ifdef HAL_USE_IO
 			BBBIO_PWMSS_Setting(module, pwm->frequency, pwm->dutyA, pwm->dutyB);
-			if(pwm->enabledA == 0 && pwm->enabledB == 0){
+			if(pwm->enabledA && pwm->enabledB){
 				BBBIO_ehrPWM_Disable(module);
 
 
@@ -1151,7 +1346,7 @@ float BBB_getPWMFrequency(hal_handle_t portHandle){
  * Pulse Counter
 \***********************************************************************/
 
-hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
+hal_handle_t BBB_initializePulseCounter(int8_t dioPort){
 	if(!init){
 		return HAL_INVALID_HANDLE;
 	}
@@ -1167,11 +1362,13 @@ hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
 		counter.count = 0;
 		counter.length = 0;
 		counter.release = false;
-		counter.dio_port = BBB_initializeDIOPort(dioPort, BBB_DIR_INPUT);
+		counter.quadrature = false;
+		counter.down_port = HAL_INVALID_HANDLE;
+		counter.up_port = BBB_initializeDIOPort(dioPort, BBB_DIR_INPUT);
 
-		if(counter.dio_port != HAL_INVALID_HANDLE){
+		if(counter.up_port != HAL_INVALID_HANDLE){
 			pthread_mutex_lock(&io_mutex);
-			dio_port_t* dio = dio_ports[counter.dio_port].get();
+			dio_port_t* dio = dio_ports[counter.up_port].get();
 			const char* filepath = resolveFilepath(dio);
 			pthread_mutex_unlock(&io_mutex);
 
@@ -1246,6 +1443,9 @@ hal_handle_t BBB_initializePulseCounter(int16_t dioPort){
 
 	return handle;
 }
+hal_handle_t BBB_initializePulseCounter(int8_t upPort, int8_t downPort){
+	return 0;
+}
 void BBB_freePulseCounter(hal_handle_t counterHandle){
 	if(!init){
 		return;
@@ -1299,6 +1499,29 @@ void BBB_resetPulseCounter(hal_handle_t counterHandle){
 	}
 }
 
+uint8_t BBB_getPulseCounterDirection(hal_handle_t counterHandle){
+	if(!init){
+		return 0;
+	}
+
+	uint8_t direction = 0;
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
+		pthread_mutex_lock(&counter->mutex);
+		direction = counter->direction;
+		pthread_mutex_unlock(&counter->mutex);
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter direction get: %d, %d \n", counterHandle, count);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+
+	return direction;
+}
 uint32_t BBB_getPulseCounterCount(hal_handle_t counterHandle){
 	if(!init){
 		return 0;
@@ -1371,6 +1594,29 @@ float BBB_getPulseCounterLength(hal_handle_t counterHandle){
 	//TODO: CONVERT US TO SEC
 	float lengthSec = (float)(length * 0.000001f);
 	return lengthSec;
+}
+bool BBB_isPulseCounterQuadrature(hal_handle_t counterHandle){
+	if(!init){
+		return false;
+	}
+
+	bool quad = false;
+	if(dio_pulse_counters.count(counterHandle)){
+		pulse_counter_t* counter = dio_pulse_counters[counterHandle].get();
+		pthread_mutex_lock(&counter->mutex);
+		quad = counter->quadrature;
+		pthread_mutex_unlock(&counter->mutex);
+
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter quadrature get: %d, %d \n", counterHandle, count);
+#endif
+	}else{
+#ifdef HAL_BBB_DEBUG
+		printf("Pulse counter is not initialized: %d \n", counterHandle);
+#endif
+	}
+
+	return quad;
 }
 
 } /* namespace hal */

@@ -39,4 +39,19 @@ public interface PulseCounter extends IntegerSource, IOPort{
 	 * @return time in seconds between last 2 pulses.
 	 */
 	double getPulsePeriod();
+	
+	/**
+	 * If the counter is configured for quadrature counting, gets which channel
+	 * pulses first. If up channel pulses first true is returned, false otherwise.
+	 * 
+	 * @return true if up channel pulses first or there is only one channel, false otherwise.
+	 */
+	boolean getDirection();
+	
+	/**
+	 * Gets whether or not this counter is configured for quadrature counting.
+	 * 
+	 * @return true if configured for quadrature, false otherwise.
+	 */
+	boolean isQuadrature();
 }

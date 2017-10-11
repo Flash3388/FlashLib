@@ -4,6 +4,10 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 
 	private MotorSafetyHelper helper;
 	
+	public SafePWM(int port) {
+		super(port);
+		helper = new MotorSafetyHelper(this);
+	}
 	public SafePWM(PWM port) {
 		super(port);
 		helper = new MotorSafetyHelper(this);

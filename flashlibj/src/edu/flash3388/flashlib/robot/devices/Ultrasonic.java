@@ -30,7 +30,6 @@ public class Ultrasonic implements RangeFinder{
 	
 	private PulseCounter counter;
 	private DigitalOutput pingChannel;
-	private DigitalInput echoChannel;
 	
 	private boolean enabled = true;
 	
@@ -38,10 +37,16 @@ public class Ultrasonic implements RangeFinder{
 	
 	private static Ultrasonic headSonic;
 	
-	public Ultrasonic(DigitalOutput pingChannel, DigitalInput echoChannel, PulseCounter counter) {
+	public Ultrasonic(int pingChannel, int echoChannel) {
+		this.counter = IOProvider.createPulseCounter(echoChannel);
+		this.pingChannel = IOProvider.createDigitalOutput(pingChannel);
+		
+		nextSonic = headSonic;
+		headSonic = this;
+	}
+	public Ultrasonic(DigitalOutput pingChannel, PulseCounter counter) {
 		this.counter = counter;
 		this.pingChannel = pingChannel;
-		this.echoChannel = echoChannel;
 		
 		nextSonic = headSonic;
 		headSonic = this;
@@ -61,10 +66,6 @@ public class Ultrasonic implements RangeFinder{
 		if(pingChannel != null)
 			pingChannel.free();
 		pingChannel = null;
-	
-		if(echoChannel != null)
-			echoChannel.free();
-		echoChannel = null;
 		
 		if(this == headSonic){
 			headSonic = nextSonic;

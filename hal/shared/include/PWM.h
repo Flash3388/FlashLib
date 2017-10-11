@@ -15,7 +15,7 @@ namespace flashlib{
 
 namespace hal{
 
-hal_handle_t HAL_initializePWMPort(uint8_t port);
+hal_handle_t HAL_initializePWMPort(int8_t port);
 void HAL_freePWMPort(hal_handle_t portHandle);
 
 void HAL_setPWMDuty(hal_handle_t portHandle, float dutyCycle);

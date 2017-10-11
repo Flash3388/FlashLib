@@ -4,6 +4,9 @@ public class PWMSpeedController extends SafePWM implements FlashSpeedController{
 
 	private boolean inverted = false;
 	
+	public PWMSpeedController(int port) {
+		super(port);
+	}
 	public PWMSpeedController(PWM port) {
 		super(port);
 	}

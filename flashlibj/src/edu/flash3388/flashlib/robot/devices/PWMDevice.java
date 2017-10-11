@@ -8,6 +8,9 @@ public class PWMDevice implements IOPort{
 	private double center, min, max, deadbandMin, deadbandMax;
 	private boolean enableDeadband = false;
 	
+	public PWMDevice(int port) {
+		this.port = IOProvider.createPWM(port);
+	}
 	public PWMDevice(PWM port) {
 		if(port == null)
 			throw new NullPointerException("PWM port is null");

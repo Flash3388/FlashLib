@@ -7,6 +7,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    getGlobalSampleRate
+ * Signature: (V)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getGlobalSampleRate
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    getMaxAnalogPortVoltage
+ * Signature: (V)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getMaxAnalogPortVoltage
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    getMaxAnalogPortValue
+ * Signature: (V)I
+ */
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getMaxAnalogPortValue
+  (JNIEnv *, jclass);
+
+
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
  * Method:    initializeAnalogInputPort
@@ -70,6 +96,62 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_setAnalog
  */
 JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_setAnalogValue
   (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    enableAnalogInputAccumulator
+ * Signature: (IB)I
+ */
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_enableAnalogInputAccumulator
+  (JNIEnv *, jclass, jint, jboolean);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    resetAnalogInputAccumulator
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_resetAnalogInputAccumulator
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    setAnalogInputAccumulatorCenter
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_setAnalogInputAccumulatorCenter
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    getAnalogInputAccumulatorValue
+ * Signature: (I)L
+ */
+JNIEXPORT jlong JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getAnalogInputAccumulatorValue
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    getAnalogInputAccumulatorCount
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_getAnalogInputAccumulatorCount
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    convertAnalogValueToVoltage
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_convertAnalogValueToVoltage
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_ANALOGJNI
+ * Method:    convertAnalogVoltageToValue
+ * Signature: (F)I
+ */
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_ANALOGJNI_convertAnalogVoltageToValue
+  (JNIEnv *, jclass, jfloat);
 
 #ifdef __cplusplus
 }

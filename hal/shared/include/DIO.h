@@ -19,10 +19,10 @@ namespace hal{
  * DIO initialization
 \***********************************************************************/
 
-hal_handle_t HAL_initializeDigitalInputPort(uint8_t port);
+hal_handle_t HAL_initializeDigitalInputPort(int8_t port);
 void HAL_freeDigitalInputPort(hal_handle_t portHandle);
 
-hal_handle_t HAL_initializeDigitalOutputPort(uint8_t port);
+hal_handle_t HAL_initializeDigitalOutputPort(int8_t port);
 void HAL_freeDigitalOutputPort(hal_handle_t portHandle);
 
 /***********************************************************************\

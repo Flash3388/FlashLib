@@ -28,7 +28,7 @@ extern "C" {
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_initializeDigitalInputPort
 	(JNIEnv *env, jclass obj, jint port){
-	hal_handle_t handle = HAL_initializeDigitalInputPort((uint8_t)port);
+	hal_handle_t handle = HAL_initializeDigitalInputPort((int8_t)port);
 	return (jint)handle;
 }
 
@@ -39,7 +39,7 @@ JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_initializeDi
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_DIOJNI_initializeDigitalOutputPort
 	(JNIEnv *env, jclass obj, jint port){
-	hal_handle_t handle = HAL_initializeDigitalOutputPort((uint8_t)port);
+	hal_handle_t handle = HAL_initializeDigitalOutputPort((int8_t)port);
 	return (jint)handle;
 }
 

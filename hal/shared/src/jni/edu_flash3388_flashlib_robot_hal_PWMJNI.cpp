@@ -28,7 +28,7 @@ extern "C" {
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_PWMJNI_initializePWMPort
  	 (JNIEnv *env, jclass obj, jint port){
-	hal_handle_t handle = HAL_initializePWMPort((uint8_t)port);
+	hal_handle_t handle = HAL_initializePWMPort((int8_t)port);
 	return (jint)handle;
 }
 

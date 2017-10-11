@@ -9,6 +9,14 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort{
 	private double zeroGvoltage;
 	private double voltsPerG;
 	
+	public AnalogAccelerometer(int port) {
+		this(port, 2.5, 1.0);
+	}
+	public AnalogAccelerometer(int port, double zeroGVoltage, double voltsPerG) {
+		this.input = IOProvider.createAnalogInput(port);
+		this.zeroGvoltage = zeroGVoltage;
+		this.voltsPerG = voltsPerG;
+	}
 	public AnalogAccelerometer(AnalogInput input) {
 		this(input, 2.5, 1.0);
 	}

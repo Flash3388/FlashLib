@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
+import edu.flash3388.flashlib.robot.devices.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.devices.AnalogInput;
 
 /**
@@ -14,6 +15,8 @@ import edu.flash3388.flashlib.robot.devices.AnalogInput;
  */
 public class HALAnalogInput extends HALPort implements AnalogInput{
 	
+	private HALAnalogAccumulator accumulator;
+	
 	/**
 	 * Creates a new analog input port using FlashLib's Hardware Abstraction Layer.
 	 * If the port initialization failed, for whatever reason, {@link HALException}
@@ -26,6 +29,8 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		handle = ANALOGJNI.initializeAnalogInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
 			throw new HALException("Unable to initialize AnalogInput: invalid HAL handle");
+		
+		accumulator = new HALAnalogAccumulator(this);
 	}
 	
 	/**
@@ -41,8 +46,31 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		
 		ANALOGJNI.freeAnalogInputPort(handle);
 		handle = HAL_INVALID_HANDLE;
+		
+		accumulator = null;
 	}
 	
+	
+	public void enableAccumulator(boolean enable){
+		int result = ANALOGJNI.enableAnalogInputAccumulator(handle, enable);
+		
+		if(result != 0){
+			throw new HALException("Unable to "+(enable? "enable" : "disable")+
+					" accumulator for analog input port: "+handle);
+		}
+	}
+	public void resetAccumulator(){
+		ANALOGJNI.resetAnalogInputAccumulator(handle);
+	}
+	public void setAccumulatorCenter(int value){
+		ANALOGJNI.setAnalogInputAccumulatorCenter(handle, value);
+	}
+	public long getAccumulatorValue(){
+		return ANALOGJNI.getAnalogInputAccumulatorValue(handle);
+	}
+	public int getAccumulatorCount(){
+		return ANALOGJNI.getAnalogInputAccumulatorCount(handle);
+	}
 	
 	/**
 	 * {@inheritDoc}
@@ -61,5 +89,43 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	@Override
 	public double getVoltage(){
 		return (double)ANALOGJNI.getAnalogVoltage(handle);
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns an accumulator wrapper object for this port. If the port was freed, 
+	 * null is returned.
+	 */
+	@Override
+	public AnalogAccumulator getAccumulator() {
+		return accumulator;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This value is constant for all ports.
+	 */
+	@Override
+	public double getSampleRate() {
+		return ANALOGJNI.getGlobalSampleRate();
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This value is constant for all ports.
+	 */
+	@Override
+	public double getMaxVoltage() {
+		return ANALOGJNI.getMaxAnalogPortVoltage();
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This value is constant for all ports.
+	 */
+	@Override
+	public int getMaxValue() {
+		return ANALOGJNI.getMaxAnalogPortValue();
 	}
 }

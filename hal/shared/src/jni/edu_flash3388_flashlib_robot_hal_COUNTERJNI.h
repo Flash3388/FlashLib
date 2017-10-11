@@ -7,6 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
  * Method:    initializePulseCounter
@@ -14,6 +15,14 @@ extern "C" {
  */
 JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_initializePulseCounter
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
+ * Method:    initializeQuadPulseCounter
+ * Signature: (II)I
+ */
+JNIEXPORT jint JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_initializeQuadPulseCounter
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
@@ -30,6 +39,15 @@ JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_freePuls
  */
 JNIEXPORT void JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_resetPulseCounter
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
+ * Method:    getPulseCounterDirection
+ * Signature: (B)I
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterDirection
+  (JNIEnv *, jclass, jint);
+
 
 /*
  * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
@@ -53,6 +71,14 @@ JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPul
  * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_getPulseCounterPulsePeriod
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     edu_flash3388_flashlib_robot_hal_COUNTERJNI
+ * Method:    isPulseCounterQuadrature
+ * Signature: (I)B
+ */
+JNIEXPORT jboolean JNICALL Java_edu_flash3388_flashlib_robot_hal_COUNTERJNI_isPulseCounterQuadrature
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus

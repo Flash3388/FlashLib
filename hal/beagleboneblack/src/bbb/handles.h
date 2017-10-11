@@ -33,27 +33,39 @@ typedef struct dio_port{
 } dio_port_t;
 
 typedef struct pwm_port{
-	uint8_t enabledA = 0;
-	uint8_t enabledB = 0;
+	bool enabledA;
+	bool enabledB;
 
-	float frequency = 0.0f;
-	float dutyA = 0.0f;
-	float dutyB = 0.0f;
+	float frequency;
+	float dutyA;
+	float dutyB;
 } pwm_port_t;
 
+typedef struct adc_accumulator{
+	int64_t value;
+	uint32_t count;
+	uint32_t center;
+} adc_accumulator_t;
 typedef struct adc_port{
-	uint8_t enabled = 0;
-	uint32_t value = 0;
+	bool enabled;
+	uint32_t value;
 
 	unsigned int sample_buffer[HAL_AIN_SAMPLING_SIZE];
+
+	bool accumulator_enabled;
+	adc_accumulator_t accumulator;
 } adc_port_t;
 
 typedef struct pulse_counter{
-	hal_handle_t dio_port;
+	hal_handle_t up_port;
+	hal_handle_t down_port;
 
 	uint32_t count;
 	uint32_t period;
 	uint32_t length;
+	uint8_t direction;
+
+	bool quadrature;
 
 	pthread_t pthread;
 	pthread_mutex_t mutex;

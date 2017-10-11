@@ -22,4 +22,34 @@ public interface AnalogInput extends IOPort{
 	 * @return analog input voltage in volts
 	 */
 	double getVoltage();
+	
+	/**
+	 * Gets the {@link AnalogAccelerometer} accumulator object used by this input port
+	 * to accumulate values.
+	 * 
+	 * @return the accumulator object, or null if none exist.
+	 */
+	AnalogAccumulator getAccumulator();
+	
+	/**
+	 * Gets the port sample rate in second. This value indicates the period
+	 * of value sampling from the port.
+	 * 
+	 * @return sample rate in seconds
+	 */
+	double getSampleRate();
+	
+	/**
+	 * Gets the maximum voltage of the analog input port.
+	 * 
+	 * @return maximum voltage on the port in volts.
+	 */
+	double getMaxVoltage();
+	/**
+	 * Gets the maximum raw value of the port. This value corresponds to
+	 * a voltage value and depends on the used implementation.
+	 * 
+	 * @return maximum raw value.
+	 */
+	int getMaxValue();
 }
