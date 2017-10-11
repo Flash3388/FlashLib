@@ -6,9 +6,12 @@ import edu.flash3388.flashlib.robot.devices.AnalogInput;
 public class FRCAnalogInput implements AnalogInput{
 
 	private edu.wpi.first.wpilibj.AnalogInput port;
+	private FRCAnalogAccumulator accumulator;
 	
 	public FRCAnalogInput(edu.wpi.first.wpilibj.AnalogInput port) {
 		this.port = port;
+		
+		accumulator = new FRCAnalogAccumulator(port);
 	}
 	public FRCAnalogInput(int port) {
 		this(new edu.wpi.first.wpilibj.AnalogInput(port));
@@ -19,6 +22,7 @@ public class FRCAnalogInput implements AnalogInput{
 		if(port != null)
 			port.free();
 		port = null;
+		accumulator = null;
 	}
 
 	@Override
@@ -31,22 +35,19 @@ public class FRCAnalogInput implements AnalogInput{
 	}
 	@Override
 	public AnalogAccumulator getAccumulator() {
-		// TODO Auto-generated method stub
-		return null;
+		return accumulator;
 	}
+	
 	@Override
 	public double getSampleRate() {
-		// TODO Auto-generated method stub
-		return 0;
+		return edu.wpi.first.wpilibj.AnalogInput.getGlobalSampleRate();
 	}
 	@Override
 	public double getMaxVoltage() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 5.0;
 	}
 	@Override
 	public int getMaxValue() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 4096;
 	}
 }

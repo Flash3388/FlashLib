@@ -13,6 +13,7 @@ import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
 import edu.flash3388.flashlib.robot.PowerLogger;
 import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.devices.IOFactory;
 
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
@@ -180,6 +181,8 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		schedulerImpl = Scheduler.getInstance();
 		
 		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
+		
+		IOFactory.setProvider(new FRCIOProvider());
 		
 		FRCVoltagePowerSource voltageSource = new FRCVoltagePowerSource(initializer.minVoltageLevel, 13.7);
 		FlashRobotUtil.setVoltageSource(voltageSource);

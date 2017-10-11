@@ -16,7 +16,7 @@ public class AnalogGyro implements Gyro{
 	private int center;
 	
 	public AnalogGyro(int port){
-		this.inputPort = IOProvider.createAnalogInput(port);
+		this.inputPort = IOFactory.createAnalogInputPort(port);
 		this.accumulator = inputPort.getAccumulator();
 		if(accumulator == null)
 			throw new IllegalStateException("Failed to retreive accumulator for port, cannot use analog gyro");
@@ -27,7 +27,7 @@ public class AnalogGyro implements Gyro{
 		this(port, DEFAULT_SENSITIVITY, center, offset);
 	}
 	public AnalogGyro(int port, double sensetivity, int center, double offset) {
-		this.inputPort = IOProvider.createAnalogInput(port);
+		this.inputPort = IOFactory.createAnalogInputPort(port);
 		this.sensitivity = sensetivity;
 		this.center = center;
 		this.offset = offset;

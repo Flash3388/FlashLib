@@ -38,8 +38,8 @@ public class Ultrasonic implements RangeFinder{
 	private static Ultrasonic headSonic;
 	
 	public Ultrasonic(int pingChannel, int echoChannel) {
-		this.counter = IOProvider.createPulseCounter(echoChannel);
-		this.pingChannel = IOProvider.createDigitalOutput(pingChannel);
+		this.counter = IOFactory.createPulseCounter(echoChannel);
+		this.pingChannel = IOFactory.createDigitalOutputPort(pingChannel);
 		
 		nextSonic = headSonic;
 		headSonic = this;

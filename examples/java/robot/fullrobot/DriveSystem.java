@@ -2,9 +2,9 @@ package examples.robot.fullrobot;
 
 import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.devices.IOFactory;
 import edu.flash3388.flashlib.robot.devices.PWM;
 import edu.flash3388.flashlib.robot.devices.Talon;
-import edu.flash3388.flashlib.robot.hal.HALPWM;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 
 /*
@@ -17,8 +17,9 @@ import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
  * Because this is a tank drive system, we implement the TankDriveSystem to receive 
  * a built control for our system.
  * 
- * For our speed controllers, we use FlashLib's Talon class with HAL's PWM
- * ports. 
+ * For our speed controllers, we use FlashLib's Talon class.
+ * 
+ * Our PWM ports will be retrieved from the IOFactory.
  */
 public class DriveSystem extends Subsystem implements TankDriveSystem{
 
@@ -30,10 +31,10 @@ public class DriveSystem extends Subsystem implements TankDriveSystem{
 	public DriveSystem() {
 		//initialize the PWM port for the right speed controller.
 		//the port is saved as a constant in RobotMap 
-		PWM pwmR = new HALPWM(RobotMap.DRIVE_RIGHT);
+		PWM pwmR = IOFactory.createPWMPort(RobotMap.DRIVE_RIGHT);
 		//initialize the PWM port for the left speed controller.
 		//the port is saved as a constant in RobotMap 
-		PWM pwmL = new HALPWM(RobotMap.DRIVE_LEFT);
+		PWM pwmL = IOFactory.createPWMPort(RobotMap.DRIVE_LEFT);
 		
 		//initialize our right speed controller
 		controllerR = new Talon(pwmR);

@@ -1,44 +1,44 @@
-package edu.flash3388.flashlib.robot.hal;
+package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.devices.AnalogInput;
 import edu.flash3388.flashlib.robot.devices.AnalogOutput;
 import edu.flash3388.flashlib.robot.devices.DigitalInput;
 import edu.flash3388.flashlib.robot.devices.DigitalOutput;
-import edu.flash3388.flashlib.robot.devices.IOProviderInterface;
+import edu.flash3388.flashlib.robot.devices.IOProvider;
 import edu.flash3388.flashlib.robot.devices.PWM;
 import edu.flash3388.flashlib.robot.devices.PulseCounter;
 
-public class HALProvider implements IOProviderInterface{
+public class FRCIOProvider implements IOProvider{
 
 	@Override
 	public DigitalInput createDigitalInput(int port) {
-		return new HALDigitalInput(port);
+		return new FRCDigitalInput(port);
 	}
 	@Override
 	public DigitalOutput createDigitalOutput(int port) {
-		return new HALDigitalOutput(port);
+		return new FRCDigitalOutput(port);
 	}
-	
+
 	@Override
 	public AnalogInput createAnalogInput(int port) {
-		return new HALAnalogInput(port);
+		return new FRCAnalogInput(port);
 	}
 	@Override
 	public AnalogOutput createAnalogOutput(int port) {
-		return new HALAnalogOutput(port);
+		return new FRCAnalogOutput(port);
 	}
 
 	@Override
 	public PWM createPWM(int port) {
-		return new HALPWM(port);
+		return new FRCPWM(port);
 	}
 
 	@Override
 	public PulseCounter createPulseCounter(int port) {
-		return new HALPulseCounter(port);
+		return new FRCPulseCounter(port, false);
 	}
 	@Override
-	public PulseCounter createPulseCounter(int upPort, int downPort){
-		return new HALPulseCounter(upPort, downPort);
+	public PulseCounter createPulseCounter(int upPort, int downPort) {
+		return new FRCPulseCounter(upPort, downPort);
 	}
 }

@@ -6,7 +6,7 @@ public class AnalogRangeFinder implements RangeFinder{
 	private double voltageToCM;
 	
 	public AnalogRangeFinder(int port, double vtocm) {
-		this.input = IOProvider.createAnalogInput(port);
+		this.input = IOFactory.createAnalogInputPort(port);
 		this.voltageToCM = vtocm;
 	}
 	public AnalogRangeFinder(AnalogInput input, double vtocm) {

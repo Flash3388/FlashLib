@@ -9,7 +9,7 @@ public class PWMDevice implements IOPort{
 	private boolean enableDeadband = false;
 	
 	public PWMDevice(int port) {
-		this.port = IOProvider.createPWM(port);
+		this.port = IOFactory.createPWMPort(port);
 	}
 	public PWMDevice(PWM port) {
 		if(port == null)

@@ -10,7 +10,7 @@ public class IndexEncoder implements Encoder{
 		this(port, 0.0);
 	}
 	public IndexEncoder(int port, double distancePerPulse) {
-		this.counter = IOProvider.createPulseCounter(port);
+		this.counter = IOFactory.createPulseCounter(port);
 		this.distancePerPulse = distancePerPulse;
 		
 		if(counter.isQuadrature())

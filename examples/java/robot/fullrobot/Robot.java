@@ -66,7 +66,8 @@ public class Robot extends IterativeRobot{
 		initializer.hidInterface = hidInterface;
 		
 		//since we use HAL PWM ports for controlling our drive system, we need to allow
-		//initialization of the FlashLib HAL
+		//initialization of the FlashLib HAL.
+		//By allowing HAL initialization the IOFactory implementation is set to an HAL provider.
 		initializer.initHAL = true;
 		
 		//in IterativeRobot we can insure that controllers are automatically updated. This insures

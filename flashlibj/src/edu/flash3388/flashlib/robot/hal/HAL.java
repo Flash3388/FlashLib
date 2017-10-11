@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.robot.hal;
 
+import edu.flash3388.flashlib.robot.devices.IOProvider;
+
 /**
  * The main class for controlling FlashLib's Hardware Abstraction Layer.
  * 
@@ -13,6 +15,15 @@ public final class HAL {
 	 * The expected name of the HAL's native library.
 	 */
 	public static final String NATIVE_LIBRARY_NAME = "flashlib_hal";
+	
+	/**
+	 * Creates an {@link IOProvider} implementation using HAL.
+	 * 
+	 * @return a new {@link IOProvider} for HAL ports.
+	 */
+	public static IOProvider createIOProvider(){
+		return new HALIOProvider();
+	}
 	
 	/**
 	 * Initialized the HAL for a given initialization mode. Loads the

@@ -8,6 +8,7 @@ import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.actions.OmniDriveAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.devices.IOFactory;
 import edu.flash3388.flashlib.robot.devices.Talon;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -55,7 +56,8 @@ public class ExampleQuickRobot extends IterativeRobot{
 	@Override
 	protected void preInit(IterativeRobotInitializer initializer) {
 		//since we use HAL PWM ports for controlling our drive system, we need to allow
-		//initialization of the FlashLib HAL
+		//initialization of the FlashLib HAL.
+		//By allowing HAL initialization the IOFactory implementation is set to an HAL provider.
 		initializer.initHAL = true;
 		
 		//indicate that we want to initialize flashboard
@@ -86,12 +88,14 @@ public class ExampleQuickRobot extends IterativeRobot{
 		
 		//We need to create our drive system here. For that we will
 		//initialize speed controllers and than create.
-		//We will use the Talon speed controller class with HAL PWM ports.
+		//We will use the Talon speed controller class.
+		//Because we initialized HAL in preInit, the IOFactory class will
+		//now provide us with HAL ports.
 		
-		FlashSpeedController motorRight = new Talon(new HALPWM(MOTOR_RIGHT));
-		FlashSpeedController motorLeft = new Talon(new HALPWM(MOTOR_LEFT));
-		FlashSpeedController motorFront = new Talon(new HALPWM(MOTOR_FRONT));
-		FlashSpeedController motorRear = new Talon(new HALPWM(MOTOR_REAR));
+		FlashSpeedController motorRight = new Talon(IOFactory.createPWMPort(MOTOR_RIGHT));
+		FlashSpeedController motorLeft = new Talon(IOFactory.createPWMPort(MOTOR_LEFT));
+		FlashSpeedController motorFront = new Talon(IOFactory.createPWMPort(MOTOR_FRONT));
+		FlashSpeedController motorRear = new Talon(IOFactory.createPWMPort(MOTOR_REAR));
 		
 		//creating an instance of FlashDrive with our speed controllers
 		driveTrain = new FlashDrive(motorRight, motorLeft, motorFront, motorRear);

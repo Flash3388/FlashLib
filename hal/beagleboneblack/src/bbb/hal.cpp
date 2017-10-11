@@ -511,7 +511,7 @@ hal_handle_t initializeCounter(pulse_counter_t* counter, hal_handle_t handle,
 		}
 	}else{
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter failed to get file %d \n");
+		printf("Pulse counter failed to get file \n");
 #endif
 	}
 

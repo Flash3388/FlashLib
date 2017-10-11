@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class FRCPulseCounter implements PulseCounter{
 	
 	private Counter counter;
+	private boolean quadrature;
 
 	public FRCPulseCounter(DigitalInput port, boolean pulseLength) {
 		counter = new Counter();
@@ -18,9 +19,25 @@ public class FRCPulseCounter implements PulseCounter{
 			counter.setUpDownCounterMode();
 			counter.setSemiPeriodMode(false);
 		}
+		
+		quadrature = false;
 	}
 	public FRCPulseCounter(int port, boolean pulseLength){
 		this(new DigitalInput(port), pulseLength);
+	}
+	
+	public FRCPulseCounter(DigitalInput upPort, DigitalInput downPort) {
+		counter = new Counter();
+		
+		counter.setUpSource(upPort);
+		counter.setDownSource(downPort);
+		counter.setUpDownCounterMode();
+		counter.setSemiPeriodMode(false);
+		
+		quadrature = true;
+	}
+	public FRCPulseCounter(int upPort, int downPort){
+		this(new DigitalInput(upPort), new DigitalInput(downPort));
 	}
 	
 	@Override
@@ -51,13 +68,10 @@ public class FRCPulseCounter implements PulseCounter{
 	}
 	@Override
 	public boolean getDirection() {
-		// TODO Auto-generated method stub
-		return false;
+		return counter.getDirection();
 	}
 	@Override
 	public boolean isQuadrature() {
-		// TODO Auto-generated method stub
-		return false;
+		return quadrature;
 	}
-	
 }

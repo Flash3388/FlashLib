@@ -12,6 +12,7 @@ import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.robot.devices.IOFactory;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -249,6 +250,8 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			}
 			log.log("HAL initialized: "+HAL.boardName(), "RobotBase");
 			halInitialized = true;
+			
+			IOFactory.setProvider(HAL.createIOProvider());
 		}
 		
 		//initializing communications if the user wants to

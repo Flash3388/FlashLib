@@ -12,7 +12,7 @@ public class QuadratureEncoder implements Encoder{
 		this(upPort, downPort, 0.0, 1);
 	}
 	public QuadratureEncoder(int upPort, int downPort, double distancePerPulse, int pulsesPerRevolution) {
-		this.counter = IOProvider.createPulseCounter(upPort, downPort);
+		this.counter = IOFactory.createPulseCounter(upPort, downPort);
 		this.distancePerPulse = distancePerPulse;
 		this.pulsesPerRevolution = pulsesPerRevolution;
 		
