@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  */
 public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	
-	public static enum PIDType{
+	public static enum EncoderDataType{
 		Distance, Rate, Velocity
 	}
 	
@@ -47,8 +47,8 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 */
 	double getDistance();
 	
-	PIDType getPIDType();
-	void setPIDType(PIDType type);
+	EncoderDataType getDataType();
+	void setDataType(EncoderDataType type);
 	
 	@Override
 	default double get() {
@@ -56,7 +56,7 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	}
 	@Override
 	default double pidGet() {
-		switch (getPIDType()) {
+		switch (getDataType()) {
 			case Distance: return getDistance();
 			case Rate: return getRate();
 			case Velocity: return getVelocity();

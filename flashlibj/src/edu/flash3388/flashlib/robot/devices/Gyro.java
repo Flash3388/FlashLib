@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  */
 public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	
-	public static enum PIDType{
+	public static enum GyroDataType{
 		Angle, Rate
 	}
 	
@@ -35,8 +35,8 @@ public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	
 	
 	
-	PIDType getPIDType();
-	void setPIDType(PIDType type);
+	GyroDataType getDataType();
+	void setDataType(GyroDataType type);
 	
 	@Override
 	default double get() {
@@ -44,7 +44,7 @@ public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	}
 	@Override
 	default double pidGet() {
-		switch (getPIDType()) {
+		switch (getDataType()) {
 			case Angle: return getAngle();
 			case Rate: return getRate();
 		}

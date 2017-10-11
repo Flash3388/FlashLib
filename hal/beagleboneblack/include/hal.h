@@ -29,7 +29,7 @@ bool BBB_checkDigitalPortTaken(int8_t port);
 hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir);
 void BBB_freeDIOPort(hal_handle_t portHandle);
 
-void BBB_setDIO(hal_handle_t portHandle, int8_t high);
+void BBB_setDIO(hal_handle_t portHandle, uint8_t high);
 void BBB_pulseDIO(hal_handle_t portHandle, float length);
 
 uint8_t BBB_getDIO(hal_handle_t portHandle);

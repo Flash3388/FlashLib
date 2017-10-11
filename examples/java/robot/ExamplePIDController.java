@@ -6,12 +6,11 @@ import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.PIDController;
 import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.devices.Encoder;
+import edu.flash3388.flashlib.robot.devices.Encoder.EncoderDataType;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.IndexEncoder;
-import edu.flash3388.flashlib.robot.devices.PulseCounter;
 import edu.flash3388.flashlib.robot.devices.Talon;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
-import edu.flash3388.flashlib.robot.hal.HALPulseCounter;
 import edu.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -63,6 +62,7 @@ public class ExamplePIDController extends IterativeRobot{
 	protected void preInit(IterativeRobotInitializer initializer) {
 		//since we use HAL PWM ports for controlling our drive system, we need to allow
 		//initialization of the FlashLib HAL
+		//By allowing HAL initialization the IOFactory implementation is set to an HAL provider.
 		initializer.initHAL = true;
 		
 		//indicate that we want to initialize flashboard
@@ -79,8 +79,10 @@ public class ExamplePIDController extends IterativeRobot{
 		//let's initialize our subsystem. We will use a PWM speed controller
 		//to control the shooter's motor. In this example we will use the Talon
 		//speed controller with the built in FlashLib class. For PWM port, we will
-		//use FlashLib's HAL:
-		FlashSpeedController speedController = new Talon(new HALPWM(SHOOTER_MOTOR));
+		//use FlashLib's HAL. Since HAL was initialized, IOFactory
+		//will provide ports from HAL, so we can just pass the port number to our controller
+		//and it will use IOFactory to create the PWM port.
+		FlashSpeedController speedController = new Talon(SHOOTER_MOTOR);
 		shooter = new SingleMotorSystem(speedController);
 		
 		//let's initialize our encoder. We will use the IndexEncoder class from FlashLib.
@@ -89,9 +91,10 @@ public class ExamplePIDController extends IterativeRobot{
 		//pulse per revolution, so our distance per pulse is the wheel circumference:
 		double distancePerPulse = 2 * Math.PI * SHOOTER_WHEEL_RADIUS;
 		
-		//For encoder ports, we will use FlashLib HAL:
-		PulseCounter encoderCounter = new HALPulseCounter(SHOOTER_ENCODER);
-		encoder = new IndexEncoder(encoderCounter, distancePerPulse);
+		//For encoder ports, we will use FlashLib HAL. Since HAL was initialized, IOFactory
+		//will provide ports from HAL, so we can just pass the port number to our encoder
+		//and it will use IOFactory to create the pulse counter.
+		encoder = new IndexEncoder(SHOOTER_ENCODER, distancePerPulse);
 		
 		/*
 		 * The PIDController class allows us to control a system using a PID control loop.
@@ -133,7 +136,7 @@ public class ExamplePIDController extends IterativeRobot{
 		
 		//We should insure that the encoder returns a rate value and not distance value when 
 		//used by PIDSource:
-		encoder.setPIDType(Encoder.PIDType.Rate);
+		encoder.setDataType(EncoderDataType.Rate);
 		
 		//For the set point source, we will use a DoubleProperty (extends DoubleSource) created
 		//from the constants handler: pidSetPoint

@@ -2,8 +2,6 @@ package examples.robot.fullrobot;
 
 import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.IOFactory;
-import edu.flash3388.flashlib.robot.devices.PWM;
 import edu.flash3388.flashlib.robot.devices.Talon;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 
@@ -29,17 +27,16 @@ public class DriveSystem extends Subsystem implements TankDriveSystem{
 	private FlashSpeedController controllerL;
 	
 	public DriveSystem() {
-		//initialize the PWM port for the right speed controller.
-		//the port is saved as a constant in RobotMap 
-		PWM pwmR = IOFactory.createPWMPort(RobotMap.DRIVE_RIGHT);
-		//initialize the PWM port for the left speed controller.
-		//the port is saved as a constant in RobotMap 
-		PWM pwmL = IOFactory.createPWMPort(RobotMap.DRIVE_LEFT);
+		//Since HAL was initialized, IOFactory
+		//will provide ports from HAL, so we can just pass the port numbers to our controllers
+		//and it will use IOFactory to create the PWM ports.
+		//It is always recommended to use IOFactory for port creation, just make sure IOFactory 
+		//has a provider
 		
 		//initialize our right speed controller
-		controllerR = new Talon(pwmR);
+		controllerR = new Talon(RobotMap.DRIVE_RIGHT);
 		//initialize our left speed controller
-		controllerL = new Talon(pwmL);
+		controllerL = new Talon(RobotMap.DRIVE_LEFT);
 	}
 	
 	@Override

@@ -8,9 +8,7 @@ import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.actions.OmniDriveAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.IOFactory;
 import edu.flash3388.flashlib.robot.devices.Talon;
-import edu.flash3388.flashlib.robot.hal.HALPWM;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.systems.FlashDrive;
 
@@ -90,12 +88,14 @@ public class ExampleQuickRobot extends IterativeRobot{
 		//initialize speed controllers and than create.
 		//We will use the Talon speed controller class.
 		//Because we initialized HAL in preInit, the IOFactory class will
-		//now provide us with HAL ports.
+		//now provide us with HAL ports. Since HAL was initialized, IOFactory
+		//will provide ports from HAL, so we can just pass the port numbers to our controllers
+		//and it will use IOFactory to create the PWM ports.
 		
-		FlashSpeedController motorRight = new Talon(IOFactory.createPWMPort(MOTOR_RIGHT));
-		FlashSpeedController motorLeft = new Talon(IOFactory.createPWMPort(MOTOR_LEFT));
-		FlashSpeedController motorFront = new Talon(IOFactory.createPWMPort(MOTOR_FRONT));
-		FlashSpeedController motorRear = new Talon(IOFactory.createPWMPort(MOTOR_REAR));
+		FlashSpeedController motorRight = new Talon(MOTOR_RIGHT);
+		FlashSpeedController motorLeft = new Talon(MOTOR_LEFT);
+		FlashSpeedController motorFront = new Talon(MOTOR_FRONT);
+		FlashSpeedController motorRear = new Talon(MOTOR_REAR);
 		
 		//creating an instance of FlashDrive with our speed controllers
 		driveTrain = new FlashDrive(motorRight, motorLeft, motorFront, motorRear);

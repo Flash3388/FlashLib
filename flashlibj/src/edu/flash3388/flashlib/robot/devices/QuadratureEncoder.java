@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.devices;
 public class QuadratureEncoder implements Encoder{
 
 	private PulseCounter counter;
-	private PIDType pidType;
+	private EncoderDataType pidType;
 	
 	private double distancePerPulse;
 	private int pulsesPerRevolution;
@@ -73,11 +73,11 @@ public class QuadratureEncoder implements Encoder{
 	}
 
 	@Override
-	public PIDType getPIDType() {
+	public EncoderDataType getDataType() {
 		return pidType;
 	}
 	@Override
-	public void setPIDType(PIDType type) {
+	public void setDataType(EncoderDataType type) {
 		pidType = type;
 	}
 }

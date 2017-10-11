@@ -126,6 +126,8 @@ void stopDIOPulse(dio_pulse_t* pulse){
 		}
 		pthread_mutex_unlock(&io_mutex);
 
+
+		BBB_setDIO(pulse->dio_handle, BBB_GPIO_LOW);
 		pulse->dio_handle = HAL_INVALID_HANDLE;
 	}
 }
@@ -205,7 +207,6 @@ void* counter_thread_function(void* param){
 	uint8_t current_value_up;
 	uint8_t last_value_up;
 	uint8_t current_value_down;
-	uint8_t last_value_down;
 
 	hal_handle_t up_port = counter->up_port;
 	hal_handle_t down_port = counter->down_port;
@@ -223,7 +224,6 @@ void* counter_thread_function(void* param){
 
 	uint8_t run_check_counter = 0;
 
-	last_value_down = BBB_getDIO(down_port);
 	last_value_up = BBB_getDIO(up_port);
 
 	while(run){
@@ -269,8 +269,6 @@ void* counter_thread_function(void* param){
 			}
 
 			last_value_up = current_value_up;
-			if(quadrature)
-				last_value_down = current_value_down;
 
 			if((++run_check_counter) >= HAL_THREAD_RUN_CHECK || fall || rise){
 				run_check_counter = 0;

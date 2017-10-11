@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.devices;
 public class IndexEncoder implements Encoder{
 
 	private PulseCounter counter;
-	private PIDType pidType;
+	private EncoderDataType pidType;
 	private double distancePerPulse;
 	
 	public IndexEncoder(int port) {
@@ -59,11 +59,11 @@ public class IndexEncoder implements Encoder{
 	}
 	
 	@Override
-	public PIDType getPIDType() {
+	public EncoderDataType getDataType() {
 		return pidType;
 	}
 	@Override
-	public void setPIDType(PIDType type) {
+	public void setDataType(EncoderDataType type) {
 		pidType = type;
 	}
 }

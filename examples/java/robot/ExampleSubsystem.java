@@ -49,16 +49,14 @@ public class ExampleSubsystem extends Subsystem implements Rotatable{
 		 */
 		
 		/*
-		 * Initializing our PWM port. Let's use port 0, this will refer to different ports
-		 * depending on the used platform.
+		 * When working with devices, it is recommended to use the IOFactory to provide port implementations.
+		 * Using this method, we can just pass the port number to the device and the port implementation will
+		 * be created from IOFactory.
+		 * The only thing we need to make sure is that IOFactory has a provider which creates the ports. Because 
+		 * we initialized HAL in RobotBase, IOFactory will receive an implementation for using FlashLib's HAL. But
+		 * for other cases, setting the implementation manually is required.
 		 */
-		PWM pwmPort = new HALPWM(0);
-		
-		/*
-		 * Let's create a Talon speed controller using the PWM port we just initialized. Note that
-		 * FlashLib already provides a class for it.
-		 */
-		speedController = new Talon(pwmPort);
+		speedController = new Talon(0);
 	}
 	
 	/*

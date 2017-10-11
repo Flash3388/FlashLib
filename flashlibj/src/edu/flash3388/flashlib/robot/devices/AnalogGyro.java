@@ -7,7 +7,7 @@ public class AnalogGyro implements Gyro{
 	private static final double DEFAULT_SENSITIVITY = 0.007;
 	private static final double CALIBRATION_TIME = 0.5;
 	
-	private PIDType pidType;
+	private GyroDataType pidType;
 	private AnalogInput inputPort;
 	private AnalogAccumulator accumulator;
 	
@@ -126,11 +126,11 @@ public class AnalogGyro implements Gyro{
 	}
 
 	@Override
-	public PIDType getPIDType() {
+	public GyroDataType getDataType() {
 		return pidType;
 	}
 	@Override
-	public void setPIDType(PIDType type) {
+	public void setDataType(GyroDataType type) {
 		pidType = type;
 	}
 }
