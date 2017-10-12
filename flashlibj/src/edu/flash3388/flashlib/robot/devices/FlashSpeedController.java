@@ -58,9 +58,13 @@ public interface FlashSpeedController extends DoubleSource{
 	}
 	
 	/**
-	 * Stops the motor by setting the speed controller to a stop value. Usually 0.
+	 * Stops the motor by setting the speed controller to a stop value.
+	 * <p>
+	 * Default implementation calls {@link #set(double)}, passing it 0.0.
 	 */
-	void stop();
+	default void stop(){
+		set(0.0);
+	}
 	
 	/**
 	 * Gets the currently set percent vbus in the motor controller.

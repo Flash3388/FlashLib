@@ -52,12 +52,16 @@ public class ChooserControl extends Displayable{
 			});
 			return;
 		}
-		String s = new String(bytes, 1, bytes.length - 1);
-		String[] str = s.split(":");
-		FlashFXUtils.onFXThread(()->{
-			box.getItems().clear();
-			box.getItems().addAll(str);
-		});
+		else if(bytes[0] == 0){
+			final int index = bytes[1];
+			final String s = new String(bytes, 2, bytes.length - 2);
+			FlashFXUtils.onFXThread(()->{
+				if(box.getItems().size() <= index)
+					box.getItems().add(index, s);
+				else
+					box.getItems().set(index, s);
+			});
+		}
 	}
 	@Override
 	public byte[] dataForTransmition() {

@@ -11,9 +11,11 @@ public class FRCAnalogAccumulator implements AnalogAccumulator{
 	}
 	
 	@Override
-	public void setEnabled(boolean enabled) {
-		if(enabled)
-			port.initAccumulator();
+	public void enable() {
+		port.initAccumulator();
+	}
+	@Override
+	public void disable() {
 	}
 	@Override
 	public void reset() {

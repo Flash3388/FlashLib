@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.flashboard;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -42,6 +41,10 @@ public class FlashboardChooser<T> extends FlashboardControl{
 	private int defaultIndex = -1;
 	
 	private boolean changed = false, changedIndex = false;
+	private int currentChangedIndex = 0;
+	
+	private Object optionsMutex = new Object();
+	private Object selectionMutex = new Object();
 	
 	@SafeVarargs
 	public FlashboardChooser(String name, Option<T>...options) {
@@ -70,18 +73,29 @@ public class FlashboardChooser<T> extends FlashboardControl{
 	}
 	
 	public FlashboardChooser<T> addDefault(Option<T> option){
-		this.options.addElement(option);
-		select(options.size() - 1);
-		defaultIndex = selected.get();
-		changed = true;
+		synchronized (optionsMutex) {
+			this.options.addElement(option);
+			
+			select(options.size() - 1);
+			defaultIndex = selected.get();
+			
+			currentChangedIndex = 0;
+			changed = true;	
+		}
+		
 		return this;
 	}
 	public FlashboardChooser<T> addDefault(String name, T option){
 		return this.addDefault(new Option<T>(name, option));
 	}
 	public FlashboardChooser<T> addOption(Option<T> option){
-		this.options.addElement(option);
-		changed = true;
+		synchronized (optionsMutex) {
+			this.options.addElement(option);
+			
+			currentChangedIndex = 0;
+			changed = true;	
+		}
+		
 		return this;
 	}
 	public FlashboardChooser<T> addOption(String name, T option){
@@ -91,16 +105,20 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		if(index < 0) 
 			throw new IllegalArgumentException("Index must be non-negative");
 
-		options.remove(index);
-		
-		if(options.size() == 0){
-			if(index == defaultIndex)
-				defaultIndex = -1;
-			if(index == selected.get())
-				select(-1);
+		synchronized (optionsMutex) {
+			options.remove(index);
+			
+			if(options.size() == 0){
+				if(index == defaultIndex)
+					defaultIndex = -1;
+				if(index == selected.get())
+					select(-1);
+			}
+			
+			currentChangedIndex = 0;
+			changed = true;	
 		}
 		
-		changed = true;
 		return this;
 	}
 	public FlashboardChooser<T> removeLast(){
@@ -111,15 +129,29 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		if(index < 0) 
 			throw new IllegalArgumentException("Index must be non-negative");
 		
-		return options.get(index);
+		Option<T> option = null;
+		
+		synchronized (optionsMutex) {
+			if(index < options.size())
+				option = options.get(index);
+		}
+		
+		return option;
 	}
 	public int indexOf(T object){
-		for (int i = 0; i < options.size(); i++) {
-			Option<T> option = options.get(i);
-			if(option.getOption().equals(object))
-				return i;
+		int idx = -1;
+		
+		synchronized (optionsMutex) {
+			for (int i = 0; i < options.size(); i++) {
+				Option<T> option = options.get(i);
+				if(option.getOption().equals(object)){
+					idx = i;
+					break;
+				}
+			}	
 		}
-		return -1;
+		
+		return idx;
 	}
 	
 	public IntegerProperty selectedIndexProperty(){
@@ -136,15 +168,22 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		return selected.get();
 	}
 	public void select(int index){
-		if(index < 0)
-			selectedValue.setValue(null);
-		else
-			selectedValue.setValue(options.get(index).option);
+		synchronized (selectionMutex) {
+			if(index != selected.get()){
+				synchronized (optionsMutex) {
+					if(index < 0 || index >= options.size())
+						selectedValue.setValue(null);
+					else
+						selectedValue.setValue(options.get(index).option);		
+				}
+			}
+		}
 	}
 
 	@Override
 	public void newData(byte[] data) {
 		if(data.length < 4) return;
+		
 		int sel = FlashUtil.toInt(data);
 		if(sel >= 0 && sel < options.size() && sel != selected.get()){
 			select(sel);
@@ -156,20 +195,29 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		if(changedIndex && !changed){
 			changedIndex = false;
 			byte[] bytes = {1, 0, 0, 0, 0};
-			FlashUtil.fillByteArray(selected.get(), 1, bytes);
+			synchronized (selectionMutex) {
+				FlashUtil.fillByteArray(selected.get(), 1, bytes);	
+			}
 			return bytes;
 		}
-		changed = false;
 		if(!changedIndex) 
 			changedIndex = true;
 		
-		String all = "";
-		for(Enumeration<Option<T>> opEnum = options.elements(); opEnum.hasMoreElements();)
-			all += opEnum.nextElement().name + ":";
-		all = all.substring(0, all.length() - 1);
-		byte[] bytes = new byte[all.length() + 1];
-		bytes[0] = 2;
-		System.arraycopy(all.getBytes(), 0, bytes, 1, all.length());
+		byte[] bytes;
+		
+		synchronized (optionsMutex) {
+			Option<T> op = options.get(currentChangedIndex);
+			
+			String name = op.name;
+			bytes = new byte[2 + name.length()];
+			bytes[0] = 0;
+			bytes[1] = (byte) currentChangedIndex;
+			System.arraycopy(name.getBytes(), 0, bytes, 2, name.length());
+					
+			if((++currentChangedIndex) >= options.size())
+				changed = false;
+		}
+		
 		return bytes;
 	}
 	@Override
@@ -178,6 +226,7 @@ public class FlashboardChooser<T> extends FlashboardControl{
 	}
 	@Override
 	public void onConnection() {
+		currentChangedIndex = 0;
 		changed = true;
 		changedIndex = true;
 	}

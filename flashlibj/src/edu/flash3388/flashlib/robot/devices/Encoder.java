@@ -4,13 +4,25 @@ import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
- * Interface for encoder sensors. Encoders are used for measuring angular rotation of axes or wheels.
+ * Interface for relative encoder sensors. Relative encoders measure the rotation of wheels axes and are used to get the 
+ * rotation rate of axes, distance passed by wheels or even linear velocity.
+ * <p>
+ * In reality, relative encoder simply measure parts of rotations and send a pulse through a digital channel, 
+ * but use those it is possible to calculate a lot of data. For example, to calculate rotation rate, the time between
+ * 2 pulses is calculated and then the amount of degrees passed during those 2 pulses is divided by the time.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	
+	/**
+	 * Enumeration of encoder data types. Using this, it is possible to indicate
+	 * which values will be returned when {@link #pidGet()} and {@link #get()} are called.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.2.0
+	 */
 	public static enum EncoderDataType{
 		Distance, Rate, Velocity
 	}
@@ -52,14 +64,52 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 * @return distance passed in meters.
 	 */
 	double getDistance();
+	/**
+	 * Gets the rotation direction measured by the encoder. If the encoder is not quadrature, rotation direction
+	 * cannot be determined and the value returned will always be true.
+	 * 
+	 * @return true for clockwise rotation, false for counter-clockwise rotation.
+	 */
+	boolean getDirection();
 	
+	/**
+	 * Gets the {@link EncoderDataType} value for this sensor.
+	 * <p>
+	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * gyroscope data will be returned when they are called.
+	 * 
+	 * @return the current data type
+	 */
 	EncoderDataType getDataType();
+	/**
+	 * Sets the {@link EncoderDataType} value for this sensor.
+	 * <p>
+	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * gyroscope data will be returned when they are called.
+	 * 
+	 * @param type the current data type
+	 */
 	void setDataType(EncoderDataType type);
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Returns the value of {@link #pidGet()}.
+	 */
 	@Override
 	default double get() {
 		return pidGet();
 	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Depending on the value of {@link #getDataType()}, the following values will be returned:
+	 * <ul>
+	 * 	<li> {@link EncoderDataType#Distance}: {@link #getDistance()} </li>
+	 * 	<li> {@link EncoderDataType#Rate}: {@link #getRate()} </li>
+	 *  <li> {@link EncoderDataType#Velocity}: {@link #getVelocity()} </li>
+	 * </ul>
+	 */
 	@Override
 	default double pidGet() {
 		switch (getDataType()) {

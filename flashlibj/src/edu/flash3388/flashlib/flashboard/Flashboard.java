@@ -2,6 +2,8 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.Map;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
@@ -402,6 +404,22 @@ public final class Flashboard {
 		checkInit();
 		
 		FlashboardChooser<T> chooser = new FlashboardChooser<T>(name, options);
+		Flashboard.attach(chooser);
+		return chooser;
+	}
+	@SuppressWarnings("unchecked")
+	public static <T> FlashboardChooser<T> putChooser(String name, Map<String, T> options){
+		checkInit();
+		
+		Object[] objs = new Object[options.size()];
+		int idx = 0;
+		for (Iterator<Map.Entry<String, T>> iterator = options.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, T> entry = iterator.next();
+			
+			objs[idx++] = new FlashboardChooser.Option<T>(entry.getKey(), entry.getValue());
+		}
+		
+		FlashboardChooser<T> chooser = new FlashboardChooser<T>(name, (FlashboardChooser.Option<T>[])objs);
 		Flashboard.attach(chooser);
 		return chooser;
 	}

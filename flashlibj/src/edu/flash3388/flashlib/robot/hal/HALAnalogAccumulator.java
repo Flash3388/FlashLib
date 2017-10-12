@@ -11,8 +11,12 @@ public class HALAnalogAccumulator implements AnalogAccumulator{
 	}
 	
 	@Override
-	public void setEnabled(boolean enabled) {
-		inputPort.enableAccumulator(enabled);
+	public void enable() {
+		inputPort.enableAccumulator(true);
+	}
+	@Override
+	public void disable() {
+		inputPort.enableAccumulator(false);
 	}
 	@Override
 	public void reset() {
