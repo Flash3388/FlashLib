@@ -8,6 +8,8 @@ The latest version of FlashLib is 1.2.0
 - [Building](#building)
 - [Code Of Conduct](#code-of-conduct)
 - [Contributing](#contributing)
+- [Wiki](#wiki)
+- [Examples](#examples)
 
 ## Features
 
@@ -20,10 +22,11 @@ The library provides several different tools that can be both used for a robot d
 - Action Scheduler: An action scheduling system to allow simple managment of robot system functionalities.
 - Algorithms: Built-In sensor-based motion algorithms and vision-based motion algorithms.
 - Generic Drive Systems: Built-in generic drive systems, including: Tank drive, Mecanum drive and Omni-Directional drive.
-- Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
+- Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for monitoring and
+operating robots.
 - HAL: An Hardware Abstraction Layer with several built-in implementations.
-- Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors for non-FRC platforms. (WIP)
-- Control Station: Pre-Made control software for non-FRC robots. (WIP)
+- Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors.
+- Control Station: Control software for non-FRC robots (integrated with Flashboard). 
 
 ## Dependencies
 
@@ -64,3 +67,13 @@ As an open-source project we readily welcome anyone wanting to contribute. But i
 rules and guidelines for contributions.
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contributing to this project.
+
+## Wiki
+
+We are working tirelessly to provide has much documentations and guides for anyone who wants to use or learn about FlashLib. The FlashLib wiki contains information from features and how they work to guides for getting started. It is highly recommended to visit the wiki before starting to work with FlashLib.
+
+The wiki is hosted with this repository and can be found [here](https://github.com/Flash3388/FlashLib/wiki).
+
+## Examples
+
+The source code contains several examples for using different features of FlashLib, we recommend [checking them out](https://github.com/Flash3388/FlashLib/tree/master/examples/java).
