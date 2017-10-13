@@ -80,7 +80,7 @@ int openGPIOFile(char header, char pin){
 
 	if(path){
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter filepath resolved: (%d,%d) %s\n", header, pin, filepath);
+		printf("Pulse counter filepath resolved: (%d,%d) %s\n", header, pin, path);
 #endif
 
 		file_fd = open(path, O_RDONLY);
@@ -198,7 +198,7 @@ void* counter_thread_function(void* param){
 	pulse_counter_t* counter = shared.get();
 
 #ifdef HAL_BBB_DEBUG
-	printf("DIO counter thread start: %d \n", counter->dio_port);
+	printf("DIO counter thread start: %d, %d \n", counter->up_port, counter->down_port);
 #endif
 
 	epoll_event epoll_events;
@@ -299,7 +299,7 @@ void* counter_thread_function(void* param){
 	stopDIOCounter(counter);
 
 #ifdef HAL_BBB_DEBUG
-	printf("DIO counter thread end: %d \n", counter->dio_port);
+	printf("DIO counter thread end: %d, %d \n", counter->up_port, counter->down_port);
 #endif
 
 	return NULL;
@@ -461,7 +461,7 @@ hal_handle_t initializeCounter(pulse_counter_t* counter, hal_handle_t handle, di
 		}
 	}else{
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter failed to get file %d \n");
+		printf("Pulse counter failed to get file \n");
 #endif
 	}
 
@@ -479,7 +479,7 @@ hal_handle_t initializeCounter(pulse_counter_t* counter, hal_handle_t handle, di
 #endif
 	}else{
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter failed to initialize epoll: %d \n", dioPort);
+		printf("Pulse counter failed to initialize epoll \n");
 #endif
 		handle = HAL_INVALID_HANDLE;
 
@@ -531,7 +531,7 @@ hal_handle_t initializeCounter(pulse_counter_t* counter, hal_handle_t handle,
 #endif
 	}else{
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter failed to initialize epoll: %d \n", dioPort);
+		printf("Pulse counter failed to initialize epoll \n");
 #endif
 		handle = HAL_INVALID_HANDLE;
 
@@ -616,6 +616,9 @@ void BBB_shutdown(){
 		return;
 	}
 
+#ifdef HAL_BBB_DEBUG
+		printf("HAL Shutdown \n");
+#endif
 	//pthread_mutex_lock(&io_mutex);
 
 #ifdef HAL_BBB_DEBUG
@@ -730,13 +733,15 @@ bool BBB_checkDigitalPortValid(int8_t port){
 	int header = BBB_GPIO_PORT_TO_HEADER(port + 1);
 	int pin = BBB_GPIO_PORT_TO_PIN(port + 1);
 
-	char bank = pin_bank(header, pin);
+#ifdef HAL_USE_IO
+	char bank = pin_bank(HAL_HEADER(header), pin);
 	if(bank < 0)
 		return false;
 
-	char offset = pin_offset(header, pin);
+	char offset = pin_offset(HAL_HEADER(header), pin);
 	if(offset <= 0)
 		return false;
+#endif
 
 	return true;
 }
@@ -1038,7 +1043,7 @@ hal_handle_t BBB_initializeAnalogInput(int8_t port){
 		pthread_mutex_lock(&io_mutex);
 		pthread_mutex_lock(&adc_sampling_mutex);
 		adc_port_t* adc = &adc_ports[port];
-		if(adc->enabled){
+		if(!adc->enabled){
 			//TODO: INITIALIZE ADC PORT
 
 #ifdef HAL_USE_IO
@@ -1383,12 +1388,12 @@ hal_handle_t BBB_initializePWMPort(int8_t port){
 
 		bool initmodule = false;
 
-		if(pin == BBB_PWMSSA && pwm->enabledA){
+		if(pin == BBB_PWMSSA && !pwm->enabledA){
 			pwm->enabledA = true;
 			pwm->dutyA = 0.0f;
 			initmodule = true;
 		}
-		else if(pin == BBB_PWMSSB && pwm->enabledB){
+		else if(pin == BBB_PWMSSB && !pwm->enabledB){
 			pwm->enabledB = true;
 			pwm->dutyB = 0.0f;
 			initmodule = true;
@@ -1799,7 +1804,7 @@ uint8_t BBB_getPulseCounterDirection(hal_handle_t counterHandle){
 		pthread_mutex_unlock(&counter->mutex);
 
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter direction get: %d, %d \n", counterHandle, count);
+		printf("Pulse counter direction get: %d, %d \n", counterHandle, direction);
 #endif
 	}else{
 #ifdef HAL_BBB_DEBUG
@@ -1895,7 +1900,7 @@ bool BBB_isPulseCounterQuadrature(hal_handle_t counterHandle){
 		pthread_mutex_unlock(&counter->mutex);
 
 #ifdef HAL_BBB_DEBUG
-		printf("Pulse counter quadrature get: %d, %d \n", counterHandle, count);
+		printf("Pulse counter quadrature get: %d, %d \n", counterHandle, quad);
 #endif
 	}else{
 #ifdef HAL_BBB_DEBUG

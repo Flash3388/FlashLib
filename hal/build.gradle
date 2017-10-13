@@ -13,9 +13,6 @@ subprojects {
 			}
 		}
 		toolChains{
-			gcc(Gcc){
-				target("arm")
-			}
 		}
 
 		repositories {
