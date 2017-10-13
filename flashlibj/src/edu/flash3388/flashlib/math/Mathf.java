@@ -46,9 +46,10 @@ public class Mathf {
 	public static boolean validDouble(double d){
 		return !Double.isNaN(d) && Double.isFinite(d);
 	}
+	
 	/**
 	 * Limits a given degree to a range of 0 to 360. The given angle must be in degrees.
-	 * 
+	 * <p>
 	 * If the angle is between 0 and 360 it will be returned. Otherwise, if its absolute value is bigger 
 	 * than 360, the angle will be reduced to the corresponding value between 0 and 360 according to the unit
 	 * circle. If the angle is negative, its value will be changed to a corresponding positive angle according
@@ -64,7 +65,30 @@ public class Mathf {
 		return value;
 	}
 	/**
-	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
+	 * Translates a given value to within an enclosed range. This translation insures that values
+	 * are repeated within a range instead of overflowing.
+	 * <p>
+	 * The translation is done by finding the remainder of the division between the value and
+	 * the range. 
+	 * <p>
+	 * It is possible to force the value into staying in a positive scale, making the range
+	 * between 0 and the given range value. If positive values are not force, the actual range
+	 * is -range - range.
+	 * 
+	 * @param value a value to be translated
+	 * @param range the translation range value (maximum value in range)
+	 * @param forcePositive true if actual range is 0 - range, false if -range - range.
+	 * @return the value after translation
+	 */
+	public static double translate(double value, double range, boolean forcePositive){
+		value %= range;
+		if(forcePositive && value < 0)
+			value += range;
+		return value;
+	}
+	
+	/**
+	 * Insures that a given value is within a given limit. If the value is outside that limit, its value
 	 * will be changed to meet the limit accordingly:
 	 * <ul>
 	 * 	<li>value bigger than max : value = max</li>

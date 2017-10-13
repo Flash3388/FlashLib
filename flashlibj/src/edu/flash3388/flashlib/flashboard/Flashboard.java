@@ -14,7 +14,10 @@ import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.PIDSource;
+import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -25,8 +28,11 @@ import edu.flash3388.flashlib.vision.RemoteVision;
 import edu.flash3388.flashlib.vision.Vision;
 
 /**
- * Control class for the Flashboard. Can be used to attach controls to the Flashboard, cameras, control
- * vision, etc.
+ * Provides remote control and communications with the Flashboard software. From this class it is
+ * possible to access the camera server, Flashboard vision and display controls on the flashboard.
+ * <p>
+ * Before using control it is necessary to perform initialization using {@link #init(int, byte[], int, int, boolean)} or
+ * {@link #init(FlashboardInitData)}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -485,6 +491,49 @@ public final class Flashboard {
 		FlashboardBarChart chart = new FlashboardBarChart(name, minY, maxY);
 		Flashboard.attach(chart);
 		return chart;
+	}
+	
+	public static FlashboardPIDTuner putPIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd,
+			DoubleProperty kf, DoubleProperty setpoint, PIDSource output, double maxKValue, int kSliderTicks){
+		checkInit();
+		
+		FlashboardPIDTuner tuner = new FlashboardPIDTuner(name, kp, ki, kd, kf, setpoint, output, maxKValue, kSliderTicks);
+		Flashboard.attach(tuner);
+		return tuner;
+	}
+	
+	public static FlashboardRemoteLog putLog(Log log){
+		checkInit();
+		
+		FlashboardRemoteLog rlog = new FlashboardRemoteLog(log);
+		Flashboard.attach(rlog);
+		return rlog;
+	}
+	
+	public static FlashboardMotorTester putMotorTester(String name, FlashboardMotorTester.TesterMotor...motors){
+		checkInit();
+		
+		FlashboardMotorTester tester = new FlashboardMotorTester(name);
+		tester.addMotors(motors);
+		Flashboard.attach(tester);
+		return tester;
+	}
+	public static FlashboardMotorTester putMotorTester(String name, Map<String, FlashSpeedController> motorMap){
+		checkInit();
+		
+		FlashboardMotorTester tester = new FlashboardMotorTester(name);
+		
+		FlashboardMotorTester.TesterMotor[] motors = new FlashboardMotorTester.TesterMotor[motorMap.size()];
+		int idx = 0;
+		for (Iterator<Map.Entry<String, FlashSpeedController>> iterator = motorMap.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, FlashSpeedController> entry = iterator.next();
+			motors[idx++] = new FlashboardMotorTester.TesterMotor(entry.getKey(), entry.getValue(), tester);
+		}
+		
+		tester.addMotors(motors);
+		
+		Flashboard.attach(tester);
+		return tester;
 	}
 }
 

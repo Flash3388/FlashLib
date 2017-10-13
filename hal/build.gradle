@@ -3,9 +3,18 @@ subprojects {
 	
 	model{
 		platforms{
-			robot_platform{
+			linux{
 				operatingSystem "linux"
 				//architecture "arm"
+			}
+			arm{
+				operatingSystem "linux"
+				architecture "arm"
+			}
+		}
+		toolChains{
+			gcc(Gcc){
+				target("arm")
 			}
 		}
 
@@ -21,7 +30,9 @@ subprojects {
 		}
 		components {
 			flashlib_hal(NativeLibrarySpec) {
-				targetPlatform "robot_platform"
+				targetPlatform "linux"
+				targetPlatform "arm"
+
 				sources {
 					cpp {
 						source {
