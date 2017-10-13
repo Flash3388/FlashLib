@@ -191,5 +191,3 @@ Example for running image processing using a `VisionRunner` object.
 #### ExampleTemplateMatching
 
 Example for performing template matching with FlashLib's vision library.
-
-### filters
