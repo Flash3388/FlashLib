@@ -18,9 +18,9 @@
 #include <bbb_defines.h>
 #include <hal.h>
 
-#include "iolib/BBBiolib.h"
-#include "iolib/BBBiolib_ADCTSC.h"
-#include "iolib/BBBiolib_PWMSS.h"
+#include "BBBio_lib/BBBiolib.h"
+#include "BBBio_lib/BBBiolib_ADCTSC.h"
+#include "BBBio_lib/BBBiolib_PWMSS.h"
 #include "handles.h"
 #include "hal_defines.h"
 
@@ -567,7 +567,7 @@ int BBB_initialize(int mode){
 	if(status){
 		//TODO: ERROR
 #ifdef HAL_BBB_DEBUG
-		printf("Failed to initializing BBBIOLib \n");
+		printf("Failed to initialize BBBIOLib %d\n",status);
 #endif
 		return -1;
 	}
@@ -735,7 +735,7 @@ bool BBB_checkDigitalPortValid(int8_t port){
 
 #ifdef HAL_USE_IO
 	char bank = pin_bank(HAL_HEADER(header), pin);
-	if(bank < 0)
+	if(bank < 0 || bank > 3)
 		return false;
 
 	char offset = pin_offset(HAL_HEADER(header), pin);
@@ -801,14 +801,14 @@ hal_handle_t BBB_initializeDIOPort(int8_t port, uint8_t dir){
 		int result;
 
 #ifdef HAL_USE_IO
-		result = iolib_setdir(HAL_HEADER(dio.header + 8), dio.pin, dir);
+		result = iolib_setdir(HAL_HEADER(dio.header), dio.pin, dir);
 #else
 		result = 0;
 #endif
 
 		if(result == 0){
 #ifdef HAL_USE_IO
-			pin_low(HAL_HEADER(dio.header + 8), dio.pin);
+			pin_low(HAL_HEADER(dio.header), dio.pin);
 #endif
 			dio_ports.emplace(handle, std::make_shared<dio_port_t>(dio));
 

@@ -51,7 +51,7 @@
 /*-----------------------------------------------------------------------------------------------*/
 extern int memh;
 extern volatile unsigned int *CM_ptr;	/*c ontrol module */
-volatile unsigned int *pwm_cm_per_addr;
+volatile unsigned int *cm_per_addr;
 
 
 const unsigned int PWMSS_AddressOffset[]={PWMSS0_MMAP_ADDR,
@@ -80,7 +80,7 @@ static int PWMSS_TB_clock_check(unsigned int PWMSS_ID)
 	unsigned int reg_value ;
 
 	/* Control module check */
-	reg =CM_ptr + BBBIO_PWMSS_CTRL;
+	reg =(volatile unsigned int*)((void *)CM_ptr + BBBIO_PWMSS_CTRL);
 	reg_value = *reg ;
 
 	return (reg_value & (1 << PWMSS_ID)) ;
@@ -102,7 +102,7 @@ static int PWMSS_module_ctrl(unsigned int PWMSS_ID, int enable)
 	unsigned int module_clk_set[] = {BBBIO_CM_PER_EPWMSS0_CLKCTRL, BBBIO_CM_PER_EPWMSS1_CLKCTRL, BBBIO_CM_PER_EPWMSS2_CLKCTRL};
 	int ret = 1;
 
-	reg = pwm_cm_per_addr + module_clk_set[PWMSS_ID];
+	reg = (volatile unsigned int*)((void*)cm_per_addr + module_clk_set[PWMSS_ID]);
 	if(enable) {
 		if(PWMSS_TB_clock_check(module_set[PWMSS_ID])) {
 			/* Enable module clock */
@@ -147,9 +147,9 @@ int BBBIO_PWM_Init()
 #endif
 			goto INIT_ERROR ;
 		}
-		ecap_ptr[i] = pwmss_ptr[i] + 0x100 ;
-		eqep_ptr[i] = pwmss_ptr[i] + 0x180 ;
-		epwm_ptr[i] = pwmss_ptr[i] + 0x200 ;
+		ecap_ptr[i] = (volatile unsigned int*)((void *)pwmss_ptr[i] + 0x100);
+		eqep_ptr[i] = (volatile unsigned int*)((void *)pwmss_ptr[i] + 0x180);
+		epwm_ptr[i] = (volatile unsigned int*)((void *)pwmss_ptr[i] + 0x200);
 
 		if(!PWMSS_module_ctrl(i, 1)) {
 #ifdef BBBIO_LIB_DBG
@@ -207,14 +207,14 @@ int BBBIO_PWMSS_Status(unsigned int PWMID)
 		return 0;
 	}
 
-	reg = CM_ptr + BBBIO_PWMSS_CTRL;
+	reg =(void *)CM_ptr + BBBIO_PWMSS_CTRL;
 
 	reg_value = *reg >> PWMID & 0x01 ;
 	if(reg_value == 0) {
 		printf("PWMSS [%d] Timebase clock Disable , Control Module [pwmss_ctrl register]\n", PWMID);
 	}
 	else {
-		reg=pwmss_ptr[PWMID] + PWMSS_CLKSTATUS;
+		reg=(void *)pwmss_ptr[PWMID] + PWMSS_CLKSTATUS;
 		reg_value = *reg ;
 
 		printf("PWMSS [%d] :\tCLKSTOP_ACK %d , CLK_EN_ACK %d , CLKSTOP_ACK %d , CLK_EN_ACK %d , CLKSTOP_ACK %d , CLK_EN_ACK %d\n",
@@ -265,14 +265,14 @@ int BBBIO_PWMSS_Status(unsigned int PWMID)
 int BBBIO_PWMSS_Setting(unsigned int PWMID , float HZ ,float dutyA ,float dutyB)
 {
 	int param_error = 1;
-	volatile unsigned short* reg16;
+	volatile unsigned short* reg16 ;
         if (memh == 0)
             param_error = 0;
         if (PWMID > 2)              // if input is not EPWMSS 0~ WPEMSS 2
             param_error = 0;
 	if (HZ < 0 )
 	    param_error = 0;
-	if(dutyA < 0.0f || dutyA > 1.0f || dutyB < 0.0f || dutyB > 1.0f)
+	if(dutyA < 0.0f || dutyA > 100.0f || dutyB < 0.0f || dutyB > 100.0f)
 	    param_error = 0;
 
         if (param_error == 0) {
@@ -281,6 +281,9 @@ int BBBIO_PWMSS_Setting(unsigned int PWMID , float HZ ,float dutyA ,float dutyB)
 #endif
 		return 0;
         }
+
+	dutyA /= 100.0f ;
+	dutyB /= 100.0f ;
 
 	/* compute neccessary TBPRD */
 	float Cyclens =0.0f ;
@@ -329,21 +332,21 @@ int BBBIO_PWMSS_Setting(unsigned int PWMID , float HZ ,float dutyA ,float dutyB)
 #endif
 
 		/* setting clock diver and freeze time base */
-		reg16= (volatile unsigned short*)epwm_ptr[PWMID] + EPWM_TBCTL;
+		reg16=(void*)epwm_ptr[PWMID] +EPWM_TBCTL;
 		*reg16 = TBCTL_CTRMODE_FREEZE | (NearCLKDIV << 10) | (NearHSPCLKDIV << 7);
 
 		/*  setting duty A and duty B */
-		reg16= (volatile unsigned short*)epwm_ptr[PWMID] +EPWM_CMPB;
+		reg16=(void*)epwm_ptr[PWMID] +EPWM_CMPB;
 		*reg16 =(unsigned short)((float)NearTBPRD * dutyB);
 
-		reg16= (volatile unsigned short*)epwm_ptr[PWMID] +EPWM_CMPA;
+		reg16=(void*)epwm_ptr[PWMID] +EPWM_CMPA;
 		*reg16 =(unsigned short)((float)NearTBPRD * dutyA);
 
-		reg16= (volatile unsigned short*)epwm_ptr[PWMID] +EPWM_TBPRD;
+		reg16=(void*)epwm_ptr[PWMID] +EPWM_TBPRD;
 		*reg16 =(unsigned short)NearTBPRD;
 
 		/* reset time base counter */
-		reg16 = (volatile unsigned short*)epwm_ptr[PWMID] + EPWM_TBCNT;
+		reg16 = (void *)epwm_ptr[PWMID] + EPWM_TBCNT;
 		*reg16 = 0;
 	}
 	return 1;
@@ -361,32 +364,32 @@ void BBBIO_ehrPWM_Enable(unsigned int PWMSS_ID)
 {
 	volatile unsigned short *reg16 ;
 
-	reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLA;
+	reg16=(void*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLA;
 	*reg16 = 0x2 | ( 0x3 << 4) ;
 		
-	reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLB;
+	reg16=(void*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLB;
 	*reg16 = 0x2 | ( 0x3 << 8) ;
 
-	reg16 = (volatile unsigned short*)epwm_ptr[PWMSS_ID] + EPWM_TBCNT;
+	reg16 = (void *)epwm_ptr[PWMSS_ID] + EPWM_TBCNT;
 	*reg16 = 0;
 
-        reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] + EPWM_TBCTL;
+        reg16=(void *)epwm_ptr[PWMSS_ID] + EPWM_TBCTL;
 	*reg16 &= ~0x3;
 }
 
 void BBBIO_ehrPWM_Disable(unsigned int PWMSS_ID)
 {
  	volatile unsigned short *reg16 ;
-        reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] + EPWM_TBCTL;
+        reg16=(void *)epwm_ptr[PWMSS_ID] + EPWM_TBCTL;
         *reg16 |= 0x3;
 
-	reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLA;
+	reg16=(void*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLA;
 	*reg16 = 0x1 | ( 0x3 << 4) ;
 		
-	reg16= (volatile unsigned short*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLB;
+	reg16=(void*)epwm_ptr[PWMSS_ID] +EPWM_AQCTLB;
 	*reg16 = 0x1 | ( 0x3 << 8) ;
 
-	reg16 = (volatile unsigned short*)epwm_ptr[PWMSS_ID] + EPWM_TBCNT;
+	reg16 = (void *)epwm_ptr[PWMSS_ID] + EPWM_TBCNT;
 	*reg16 = 0;
 }
 //--------------------------------------------------------

@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'cpp'
+    apply plugin: 'c'
 	
 	model{
 		platforms{
@@ -34,12 +35,18 @@ subprojects {
 					cpp {
 						source {
 							srcDirs = ["src", "../shared/src"]
-							include "**/*.*"
+							include "**/*.cpp", "**/*.h"
 						}
 						exportedHeaders {
 							srcDirs = ["include", "../shared/include"]
 						}
 						lib library: 'jni', linkage: 'api'
+					}
+					c {
+						source {
+							srcDirs = ["src", "../shared/src"]
+							include "**/*.c"
+						}
 					}
 				}
 				binaries.all {

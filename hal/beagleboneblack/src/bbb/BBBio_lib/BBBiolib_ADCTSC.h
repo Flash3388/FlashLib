@@ -1,10 +1,5 @@
 #ifndef BBBIO_ADCTSC_H
 #define BBBIO_ADCTSC_H
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 /*-------------------------------------------------------------------------- */
 #define BBBIO_ADC_AIN0	0
 #define BBBIO_ADC_AIN1	1
@@ -29,6 +24,10 @@ extern "C" {
 
 #define BBBIO_ADC_WORK_MODE_BUSY_POLLING	0x1
 #define BBBIO_ADC_WORK_MODE_TIMER_INT	0x2
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 /* ------------------------------------------------------------------------- */
 int BBBIO_ADCTSC_Init();

@@ -58,7 +58,7 @@ public final class BeagleboneBlack {
 			return false;
 		//TODO: CONSIDER SPECIAL PORTS
 		for (int i = 0; i < notValidDIOs[header].length; i++) {
-			if(pin == notValidDIOs[header][pin])
+			if(pin == notValidDIOs[header][i])
 				return false;
 		}
 		return true;

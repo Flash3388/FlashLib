@@ -23,7 +23,9 @@ extern "C" {
 
 /* ----------------------------------------------------------------------- */
 #include "BBBiolib_PWMSS.h"
+#include "BBBiolib_McSPI.h"
 #include "BBBiolib_ADCTSC.h"
+#include "../hal_defines.h"
 
 
 #define BBBIO_GPIO_MODULE	0x1
@@ -36,8 +38,10 @@ extern "C" {
 
 
 
+#ifdef HAL_BBB_DEBUG
+#define BBBIO_LIB_DBG
+#endif
 
-//#define BBBIO_LIB_DBG
 #define BBBIO_DIR_IN 0
 #define BBBIO_DIR_OUT 1
 
@@ -345,9 +349,9 @@ int BBBIO_sys_Disable_GPIO(unsigned int gpio);
  *	BBBIO_get : get pin logic levels.
  */
 int BBBIO_set_dir(char port, char pin, char dir);
-//inline void BBBIO_set_high(char port, char pin);
-//inline void BBBIO_set_low(char port, char pin);
-//inline char BBBIO_get(char port, char pin);
+inline void BBBIO_set_high(char port, char pin);
+inline void BBBIO_set_low(char port, char pin);
+inline char BBBIO_get(char port, char pin);
 
 
 /* GPIO unit , control "Whole" GPIO pin one time
