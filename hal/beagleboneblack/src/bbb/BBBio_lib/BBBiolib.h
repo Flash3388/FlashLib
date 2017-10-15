@@ -25,7 +25,6 @@ extern "C" {
 #include "BBBiolib_PWMSS.h"
 #include "BBBiolib_McSPI.h"
 #include "BBBiolib_ADCTSC.h"
-#include "../hal_defines.h"
 
 
 #define BBBIO_GPIO_MODULE	0x1
@@ -38,9 +37,7 @@ extern "C" {
 
 
 
-#ifdef HAL_BBB_DEBUG
-#define BBBIO_LIB_DBG
-#endif
+//#define BBBIO_LIB_DBG
 
 #define BBBIO_DIR_IN 0
 #define BBBIO_DIR_OUT 1
