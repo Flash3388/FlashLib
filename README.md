@@ -31,10 +31,11 @@ operating robots.
 ## Dependencies
 
 FlashLib depends on several libraries for its functionalities:
-- The openCV implementation of the vision system uses openCV
-- The openCV implementation for camera interfacing uses openCV
-- FRC robots using FlashLib require WPILib
-- Flashboard requires openCV for its vision functionalities
+- The openCV implementation of the vision system uses `openCV`
+- The openCV implementation for camera interfacing uses `openCV`
+- FRC robots using FlashLib require `WPILib`
+- Flashboard requires `openCV` for its vision functionalities
+- Flashboard uses `jinput` for reading controller data.
 
 All of those libraries are available in the "libs" folder.
 
@@ -43,6 +44,7 @@ All of those libraries are available in the "libs" folder.
 The versions used for dependencies by FlashLib are:
 - [OpenCV](https://github.com/opencv/opencv): 3.1.0
 - [WPILib](https://github.com/wpilibsuite/allwpilib): 2017.3.1
+- [JInput](https://github.com/jinput/jinput): 2.0.7
 
 ## Building
 
@@ -53,6 +55,8 @@ You can find the binary files in the `build/libs` folder. Flashboard distributio
 used. To run flashboard, run `run.bat` for windows or `run` for linux which are located in the distribution folder.
 
 The HAL binaries are located under `build/{HAL NAME}/libs`. Each HAL builds a shared library and a static library.
+
+For further information, checkout the Wiki [main page](https://github.com/Flash3388/FlashLib/wiki).
 
 ## Code Of Conduct
 
