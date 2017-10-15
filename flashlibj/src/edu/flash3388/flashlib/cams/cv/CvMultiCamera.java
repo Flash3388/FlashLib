@@ -63,9 +63,11 @@ public class CvMultiCamera extends CameraView{
 		this.width = width;
 		this.quality = quality;
 		
+		Camera nullcam = null;
+		
 		for (int i = 0; i < cams.length; i++) {
 			if(cams[i] >= 0){
-				add(null);
+				add(nullcam);
 			}
 		}
 	}

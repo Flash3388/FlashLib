@@ -27,13 +27,28 @@ import org.xml.sax.SAXException;
  */
 public abstract class Interpolation {
 
-	private HashMap<Double, Double> map = new HashMap<Double, Double>();
+	private Map<Double, Double> map;
 	
 	/**
 	 * Creates a base for interpolation.
+	 * 
+	 * @param valuesMap the map of know function values
 	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
 	 */
-	public Interpolation(){}
+	public Interpolation(Map<Double, Double> valuesMap){
+		this.map = valuesMap;
+	}
+	/**
+	 * Creates a base for interpolation.
+	 * <p>
+	 * Initialized an empty {@link HashMap} for function values.
+	 * 
+	 * @see <a href="https://en.wikipedia.org/wiki/Interpolation">https://en.wikipedia.org/wiki/Interpolation</a>
+	 */
+	public Interpolation(){
+		this(new HashMap<Double, Double>());
+	}
+	
 	
 	/**
 	 * Gets the value map used to hold the data points.

@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.PidController;
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDController;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
@@ -36,7 +36,7 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * @see <a href="https://en.wikipedia.org/wiki/Mecanum_wheel">https://en.wikipedia.org/wiki/Mecanum_wheel</a>
  * @see <a href="http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf">http://thinktank.wpi.edu/resources/346/ControllingMecanumDrive.pdf</a>
  */
-public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
+public class MecanumDrive extends Subsystem implements HolonomicDriveSystem, ModableMotor, VoltageScalable {
 
 	/**
 	 * Because the Mecanum drive is so sensitive to weight distributions and motor output differences, it
@@ -66,21 +66,21 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.1
 	 */
-	public static class PidMecanumStabilizer implements MecanumStabilizer{
+	public static class PIDMecanumStabilizer implements MecanumStabilizer{
 
-		private PidController pidcontroller;
+		private PIDController pidcontroller;
 		private Gyro gyro;
 		private DoubleProperty setPoint = new SimpleDoubleProperty();
 		private double[] values = new double[3];
 		
-		public PidMecanumStabilizer(double kp, double ki, double kd, double kf, Gyro gyro){
-			this.pidcontroller = new PidController(kp, ki, kd, kf);
-			this.pidcontroller.setPIDSource(new PidSource.GyroPidSource(gyro));
+		public PIDMecanumStabilizer(double kp, double ki, double kd, double kf, Gyro gyro){
+			this.pidcontroller = new PIDController(kp, ki, kd, kf);
+			this.pidcontroller.setPIDSource(new PIDSource.GyroPIDSource(gyro));
 			this.pidcontroller.setEnabled(true);
 			this.gyro = gyro;
 		}
 		
-		public PidController getPidController(){
+		public PIDController getPidController(){
 			return pidcontroller;
 		}
 		
@@ -99,15 +99,15 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 		}
 	}
 
-	private FlashSpeedController front_left;
-	private FlashSpeedController rear_left;
-	private FlashSpeedController front_right;
-	private FlashSpeedController rear_right;
+	private FlashSpeedController frontLeft;
+	private FlashSpeedController rearLeft;
+	private FlashSpeedController frontRight;
+	private FlashSpeedController rearRight;
 
 	private MecanumStabilizer stabilizer;
 	private boolean stabilizing = false, voltageScaling = false;
 	private double sensitivityLimit = 0;
-	private double speed_limit = 1.0;
+	private double speedLimit = 1.0;
 	private double minSpeed = 0.0;
 	private int angleRound = 0;
 
@@ -121,11 +121,11 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 */
 	public MecanumDrive(FlashSpeedController right_front, FlashSpeedController right_back, FlashSpeedController left_front,
 			FlashSpeedController left_back) {
-		super("");
-		front_right = right_front;
-		rear_right = right_back;
-		front_left = left_front;
-		rear_left = left_back;
+		frontRight = right_front;
+		rearRight = right_back;
+		frontLeft = left_front;
+		rearLeft = left_back;
+		
 		enableBrakeMode(false);
 	}
 	
@@ -179,14 +179,14 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * @param limit speed limit [0...1]
 	 */
 	public void setSpeedLimit(double limit){
-		speed_limit = Math.abs(limit);
+		speedLimit = Math.abs(limit);
 	}
 	/**
 	 * Gets the speed limit of the system. If the set speed for a motor exceeds this value, it is decreased to that value.
 	 * @return speed limit [0...1]
 	 */
 	public double getSpeedLimit(){
-		return speed_limit;
+		return speedLimit;
 	}
 	/**
 	 * Sets the minimum speed of the system. If the set speed for a motor does not exceeds this value, 
@@ -235,10 +235,10 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 		fl = limit(fl);
 		rl = limit(rl);
 		
-		front_right.set(fr);
-		front_left.set(fl);
-		rear_right.set(rr);
-		rear_left.set(rl);
+		frontRight.set(fr);
+		frontLeft.set(fl);
+		rearRight.set(rr);
+		rearLeft.set(rl);
 	}
 	
 	/**
@@ -250,7 +250,7 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 * @param rotation rotation value [-1...1], -1 for left, 1 for right
 	 */
 	public void mecanumDrive_cartesian(double x, double y, double rotation) {
-		mecanumDrive_polar(Math.sqrt(x * x + y * y), Math.toDegrees(Math.atan2(x, y)), rotation);
+		mecanumDrive_polar(Mathf.vecMagnitude(x, y), Mathf.vecAzimuth(y, x), rotation);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -284,20 +284,8 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 			}
 		}
 		
-		double dirInRad = Math.toRadians(direction + 45.0);
-		double cosD = Math.cos(dirInRad);
-		double sinD = Math.sin(dirInRad);
-		
-		double wheelSpeeds[] = { 
-				(sinD * magnitude + rotation), // front left
-				(cosD * magnitude - rotation), // front right
-				(cosD * magnitude + rotation), // rear left
-				(sinD * magnitude - rotation),// rear right
-		};
-
-		normalize(wheelSpeeds);
-
-		setMotors(-wheelSpeeds[1], -wheelSpeeds[3], wheelSpeeds[0], wheelSpeeds[2]);
+		double[] wheelSpeeds = calculate_mecanumDrive_Polar(magnitude, direction, rotation);
+		setMotors(wheelSpeeds[0], wheelSpeeds[2], wheelSpeeds[1], wheelSpeeds[3]);
 	}
 	/**
 	 * Drives the mecanum system using a polar vector. Calculates the motor outputs and 
@@ -430,43 +418,25 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 		if(Math.abs(speed) < minSpeed)
 			return 0.0;
 			
-		if(speed_limit != 1.0)
-			speed = Mathf.constrain(speed * speed_limit, -speed_limit, speed_limit);
+		if(speedLimit != 1.0)
+			speed = Mathf.constrain(speed * speedLimit, -speedLimit, speedLimit);
 		return speed;
-	}
-	private void normalize(double wheelSpeeds[]) {
-		double maxMagnitude = Math.abs(wheelSpeeds[0]);
-		for (int i = 1; i < 4; i++) {
-			double temp = Math.abs(wheelSpeeds[i]);
-			if (maxMagnitude < temp)
-				maxMagnitude = temp;
-		}
-		if (maxMagnitude > 1.0) {
-			for (int i = 0; i < 4; i++)
-				wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
-		}
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void rotate(double speed, boolean direction) {
-		mecanumDrive_polar(0, 0, direction? speed : -speed);
+	public void rotate(double speed) {
+		mecanumDrive_polar(0.0, 0.0, speed);
 	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void rotateRight(double speed) {
-		mecanumDrive_polar(0, 0, speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void rotateLeft(double speed) {
-		mecanumDrive_polar(0, 0, -speed);
+	public void moveY(double speed) {
+		moveY(Math.abs(speed), speed > 0.0);
 	}
 	/**
 	 * {@inheritDoc}
@@ -491,6 +461,14 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	@Override
 	public void backward(double speed) {
 		mecanumDrive_polar(speed, 180, 0);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void moveX(double speed) {
+		moveX(Math.abs(speed), speed > 0.0);
 	}
 	/**
 	 * {@inheritDoc}
@@ -535,20 +513,10 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 */
 	@Override
 	public void stop() {
-		front_left.set(0);
-		front_right.set(0);
-		rear_right.set(0);
-		rear_left.set(0);
-	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns this instance.
-	 * </p>
-	 */
-	@Override
-	public Subsystem getSystem() {
-		return this;
+		frontLeft.set(0);
+		frontRight.set(0);
+		rearRight.set(0);
+		rearLeft.set(0);
 	}
 
 	/**
@@ -556,24 +524,24 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	 */
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		if(front_left instanceof ModableMotor)
-			((ModableMotor)front_left).enableBrakeMode(mode);
-		if(front_right instanceof ModableMotor)
-			((ModableMotor)front_right).enableBrakeMode(mode);
-		if(rear_right instanceof ModableMotor)
-			((ModableMotor)rear_right).enableBrakeMode(mode);
-		if(rear_left instanceof ModableMotor)
-			((ModableMotor)rear_left).enableBrakeMode(mode);
+		if(frontLeft instanceof ModableMotor)
+			((ModableMotor)frontLeft).enableBrakeMode(mode);
+		if(frontRight instanceof ModableMotor)
+			((ModableMotor)frontRight).enableBrakeMode(mode);
+		if(rearRight instanceof ModableMotor)
+			((ModableMotor)rearRight).enableBrakeMode(mode);
+		if(rearLeft instanceof ModableMotor)
+			((ModableMotor)rearLeft).enableBrakeMode(mode);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean inBrakeMode() {
-		return (front_left instanceof ModableMotor && ((ModableMotor)front_left).inBrakeMode()) && 
-			   (front_right instanceof ModableMotor && ((ModableMotor)front_right).inBrakeMode()) &&
-			   (rear_right instanceof ModableMotor && ((ModableMotor)rear_right).inBrakeMode()) && 
-			   (rear_left instanceof ModableMotor && ((ModableMotor)rear_left).inBrakeMode());
+		return (frontLeft instanceof ModableMotor && ((ModableMotor)frontLeft).inBrakeMode()) && 
+			   (frontRight instanceof ModableMotor && ((ModableMotor)frontRight).inBrakeMode()) &&
+			   (rearRight instanceof ModableMotor && ((ModableMotor)rearRight).inBrakeMode()) && 
+			   (rearLeft instanceof ModableMotor && ((ModableMotor)rearLeft).inBrakeMode());
 	}
 	/**
 	 * {@inheritDoc}
@@ -588,5 +556,56 @@ public class MecanumDrive extends Subsystem implements HolonomicDriveSystem {
 	@Override
 	public void enableVoltageScaling(boolean en) {
 		voltageScaling = en;
+	}
+	
+	
+	private static void normalize(double wheelSpeeds[]) {
+		double maxMagnitude = Math.abs(wheelSpeeds[0]);
+		for (int i = 1; i < 4; i++) {
+			double temp = Math.abs(wheelSpeeds[i]);
+			if (maxMagnitude < temp)
+				maxMagnitude = temp;
+		}
+		if (maxMagnitude > 1.0) {
+			for (int i = 0; i < 4; i++)
+				wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
+		}
+	}
+	
+	/**
+	 * Mecanum drive is a type of holonomic drive base; meaning that it applies the force of the wheel at
+	 * a 45 angle to the robot instead of on one of its axes. By applying the force at an angle to the robot, you
+	 * can vary the magnitude of the force vectors to gain translational control of the robot; aka, the robot can
+	 * move in any direction while keeping the front of the robot in a constant compass direction. This differs
+	 * from the basic robot drive systems like arcade drive, tank drive, or shopping cart drive require you to
+	 * turn the front of the robot to travel in another direction.
+	 * 
+	 * <p>
+	 * This method calculates the outputs to the motors and returns them as an array. They array will contain
+	 * values for 4 sides in the following order: front right, front left, rear right, rear left.
+	 * </p>
+	 *
+	 * @param magnitude the magnitude of the vector [0...1]
+	 * @param direction the direction of the vector in degrees [0...360]
+	 * @param rotation rotation value [-1...1], -1 for left, 1 for right
+	 * 
+	 * @return returns an array of 4 with the motor output values in this order: front right, front left, rear right, rear left.
+	 */
+	public static double[] calculate_mecanumDrive_Polar(double magnitude, double direction, double rotation){
+		
+		double dirInRad = Math.toRadians(direction + 45.0);
+		double cosD = Math.cos(dirInRad);
+		double sinD = Math.sin(dirInRad);
+
+		double wheelSpeeds[] = { 
+				(cosD * magnitude - rotation), // front right
+				(sinD * magnitude + rotation), // front left
+				(sinD * magnitude - rotation),// rear right
+				(cosD * magnitude + rotation), // rear left
+		};
+
+		normalize(wheelSpeeds);
+		
+		return wheelSpeeds;
 	}
 }

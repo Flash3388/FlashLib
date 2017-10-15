@@ -1,0 +1,47 @@
+apply plugin: 'java'
+
+sourceSets{
+	main{
+		java{
+			srcDir 'src'
+		}
+		
+	}
+}
+dependencies {
+    compile name: 'WPILib'
+	compile name: 'opencv'
+	compile name: 'RXTXcomm'
+	compile name: 'niVisionWPI'
+	compile name: 'TalonSRXLibJava'
+}
+jar {
+	baseName 'flashlib'
+	//destinationDir project.file('../build')
+}
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	baseName 'flashlib'
+	from sourceSets.main.allSource
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	baseName 'flashlib'
+	from javadoc.destinationDir
+}
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+task copyManeditor{		
+	doLast{
+		copy {
+			from fileTree("maneditor")
+			into projectOutputFolder + "maneditor"
+		}
+		println ('added maneditor')
+	}
+}
+
+build.finalizedBy(copyManeditor)

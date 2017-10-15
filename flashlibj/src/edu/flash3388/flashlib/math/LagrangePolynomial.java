@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.math;
 
+import java.util.Map;
+
 /**
  * <p>
  * In numerical analysis, Lagrange polynomials are used for polynomial interpolation. For a given set of distinct
@@ -14,6 +16,13 @@ package edu.flash3388.flashlib.math;
  */
 public class LagrangePolynomial extends PolynomialInterpolation{
 
+	public LagrangePolynomial(Map<Double, Double> valuesMap) {
+		super(valuesMap);
+	}
+	public LagrangePolynomial(){
+		super();
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

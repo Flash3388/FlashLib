@@ -21,6 +21,11 @@ public interface Camera {
 	public static final int DEFAULT_QUALITY = 30;
 	
 	/**
+	 * Reads a new image from the camera and returns it.
+	 * @return a new image from the camera.
+	 */
+	Object read();
+	/**
 	 * Gets a frame from the camera and returns a compressed data format
 	 * in a byte array in order to send.
 	 * 

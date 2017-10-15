@@ -19,6 +19,7 @@ package edu.flash3388.flashlib.vision;
  * @see VisionRunner
  */
 public interface Vision {
+	
 	/**
 	 * Gets whether or not a new analysis is available. 
 	 * <p>
@@ -28,6 +29,11 @@ public interface Vision {
 	 * @return true if a new analysis is available
 	 */
 	boolean hasNewAnalysis();
+	/**
+	 * Sets the current analysis to be considered old and not new. Could be used to ensure that the same analysis
+	 * is not retrieved multiple times.
+	 */
+	void setNewAnalysisAsOld();
 	/**
 	 * Gets whether or not an analysis is available. Unlike {@link #hasNewAnalysis()},
 	 * this method does not care how long has passed since the analysis was received.

@@ -17,7 +17,7 @@ import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
  * @see RemoteVision
  * @see Vision
  */
-public abstract class VisionRunner extends Sendable implements Vision{
+public abstract class VisionRunner extends Sendable implements Vision, ImagePipeline{
 	
 	private boolean newSelection = false, newProcessing = false;
 	
@@ -26,8 +26,17 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	
 	private int currentProcessing = -1;
 	private int recTimeout = 1000, lastRec;
-	private boolean running = false;
+	private boolean running = false, considerNew = true;
 	
+	/**
+	 * Creates a base for running vision. 
+	 * 
+	 * @param name the name of the runner
+	 * @param type the sendable type of the vision runner
+	 */
+	public VisionRunner(String name, byte type) {
+		super(name, type);
+	}
 	/**
 	 * Creates a base for running vision. 
 	 * Uses {@link FlashboardSendableType#VISION} as a sendable type.
@@ -36,8 +45,6 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	 */
 	public VisionRunner(String name) {
 		super(name, FlashboardSendableType.VISION);
-		
-		
 	}
 	/**
 	 * Creates a base for running vision. When using the runner for local vision and not remote, this constructor is
@@ -52,7 +59,14 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	 */
 	@Override
 	public boolean hasNewAnalysis() {
-		return hasAnalysis() && FlashUtil.millisInt() - lastRec < recTimeout;
+		return hasAnalysis() && considerNew && FlashUtil.millisInt() - lastRec < recTimeout;
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setNewAnalysisAsOld(){
+		considerNew = false;
 	}
 	/**
 	 * {@inheritDoc}
@@ -175,6 +189,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 			return new byte[]{RemoteVision.REMOTE_SELECT_MODE, (byte) currentProcessing};
 		}
 		
+		//considerNew = true;
 		byte[] data = getAnalysis().transmit();
 		byte[] send = new byte[data.length+1];
 		send[0] = RemoteVision.REMOTE_ANALYSIS_MODE;
@@ -255,6 +270,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 				}
 				
 				newAnalysis(an);
+				considerNew = true;
 				lastRec = FlashUtil.millisInt();
 				return true;
 			}
@@ -262,6 +278,13 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		return false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void newImage(Object frame, byte type){
+		setFrame(frame);
+	}
 	/**
 	 * Sets the value of {@link #frameProperty()}.
 	 * 

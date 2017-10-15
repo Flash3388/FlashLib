@@ -27,9 +27,8 @@ public class HolonomicCombinedAction extends CombinedAction{
 		add(rotation);
 		add(positioning);
 		
-		Subsystem s = driveTrain.getSystem();
-		if(s != null)
-			requires(s);
+		if(driveTrain instanceof Subsystem)
+			requires((Subsystem)driveTrain);
 	}
 	public HolonomicCombinedAction(HolonomicDriveSystem driveTrain, 
 			SourceAction positioning, SourceAction rotation, boolean rotate){
@@ -45,13 +44,13 @@ public class HolonomicCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathf.constrain2(positioning.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathf.constrain2(positioning.get(), minSpeed, maxSpeed) : 0;
 		double speedX = rotation != null? 
-				Mathf.constrain2(rotation.getSource().get(), minSpeed, maxSpeed) : 0;
+				Mathf.constrain2(rotation.get(), minSpeed, maxSpeed) : 0;
 		
 		if(rotate)
-			driveTrain.holonomicCartesian(0, speedY, speedX);
-		else driveTrain.holonomicCartesian(speedX, speedY, 0);
+			driveTrain.holonomicCartesian(speedY, 0.0, speedX);
+		else driveTrain.holonomicCartesian(speedY, speedX, 0.0);
 	}
 	@Override
 	protected void end() {

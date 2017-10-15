@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.Subsystem;
-
 /**
  * Interface for object with the capability to move along the y-axis.
  * 
@@ -9,12 +7,20 @@ import edu.flash3388.flashlib.robot.Subsystem;
  * @since FlashLib 1.0.0
  */
 public interface YAxisMovable {
+	
+	/**
+	 * Moves the system at a speed to a given direction along the y-axis.
+	 * @param speed speed [-1...1]
+	 */
+	void moveY(double speed);
 	/**
 	 * Moves the system at a speed to a given direction along the y-axis.
 	 * @param speed speed [0...1]
-	 * @param direction forward - true, backward - false
+	 * @param direction right - true, left - false
 	 */
-	void moveY(double speed, boolean direction);
+	default void moveY(double speed, boolean direction){
+		moveY(direction? speed : -speed);
+	}
 	/**
 	 * Moves the system at a speed forwards.
 	 * 
@@ -35,11 +41,6 @@ public interface YAxisMovable {
 	default void backward(double speed){
 		moveY(speed, false);
 	}
-	/**
-	 * Gets the {@link Subsystem} object for this system to use with actions.
-	 * @return the system object
-	 */
-	Subsystem getSystem();
 	/**
 	 * Stops the system
 	 */

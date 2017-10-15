@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.flashboard;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.net.InetAddress;
+import java.util.Iterator;
 import java.util.Map;
 
 import edu.flash3388.flashlib.cams.Camera;
@@ -10,10 +11,13 @@ import edu.flash3388.flashlib.communications.CameraServer;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
-import edu.flash3388.flashlib.communications.UdpCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
+import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.PIDSource;
+import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -24,8 +28,11 @@ import edu.flash3388.flashlib.vision.RemoteVision;
 import edu.flash3388.flashlib.vision.Vision;
 
 /**
- * Control class for the Flashboard. Can be used to attach controls to the Flashboard, cameras, control
- * vision, etc.
+ * Provides remote control and communications with the Flashboard software. From this class it is
+ * possible to access the camera server, Flashboard vision and display controls on the flashboard.
+ * <p>
+ * Before using control it is necessary to perform initialization using {@link #init(int, byte[], int, int, boolean)} or
+ * {@link #init(FlashboardInitData)}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -36,9 +43,43 @@ public final class Flashboard {
 	
 	public static class FlashboardInitData{
 		public int initMode = INIT_FULL;
+		
 		public int camPort = CAMERA_PORT_ROBOT;
 		public int commPort = PORT_ROBOT;
+		
 		public boolean tcp = true;
+		public byte[] ipAddress = null;
+		
+		public void enableCameraServer(boolean enable){
+			if(enable)
+				initMode |= INIT_CAM;
+			else
+				initMode &= ~(INIT_CAM);
+		}
+		public void setCameraServerPort(int port){
+			camPort = port;
+		}
+		
+		public void enableCommunications(boolean enable){
+			if(enable)
+				initMode |= INIT_COMM;
+			else
+				initMode &= ~(INIT_COMM);
+		}
+		public void setCommunicationsPort(int port){
+			commPort = port;
+		}
+		
+		public void setLocalIPAddress(byte[] ipaddr){
+			this.ipAddress = ipaddr;
+		}
+		
+		public void setProtocolTCP(){
+			tcp = true;
+		}
+		public void setProtocolUDP(){
+			tcp = false;
+		}
 	}
 	
 	/**
@@ -79,53 +120,67 @@ public final class Flashboard {
 	private static CameraServer camServer;
 	private static Vision vision;
 	private static Communications communications;
-	private static Map<String, Sendable> sendables;
 	
 	private static void checkInit(){
 		if(!instance || (initMode & INIT_COMM) == 0)
 			throw new IllegalStateException("Flashboard was not initialized");
-		if(sendables == null)
-			sendables = new HashMap<String, Sendable>();
 	}
 	
 	/**
 	 * Attaches a new control sendable to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
-	 * @param sendable control to attach
+	 * 
+	 * @param control control to attach
+	 * 
 	 * @see Communications#attach(Sendable)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static void attach(Sendable sendable){
+	public static void attach(FlashboardControl control){
 		checkInit();
-		communications.attach(sendable);
+		communications.attach(control);
 	}
 	/**
 	 * Attaches new control sendables to the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
-	 * @param sendables controls to attach
+	 * 
+	 * @param controls controls to attach
+	 * 
 	 * @see Communications#attach(Sendable...)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static void attach(Sendable... sendables){
+	public static void attach(FlashboardControl... controls){
 		checkInit();
-		for (Sendable sendable : sendables) 
-			communications.attach(sendable);
+		communications.attach(controls);
 	}
 	/**
 	 * Detaches control sendable from the Flashboard. Flashboard should be initialized first for it 
 	 * to work.
-	 * @param sendable control to detach
+	 * 
+	 * @param control control to detach
+	 * 
 	 * @return true if the control was successfully detached, false otherwise
+	 * 
 	 * @see Communications#detach(Sendable)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static boolean detach(Sendable sendable){
+	public static boolean detach(FlashboardControl control){
 		checkInit();
-		return communications.detach(sendable);
+		return communications.detach(control);
 	}
 	/**
 	 * Detaches control sendable from the Flashboard by its id. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param id id of the control to detach
+	 * 
 	 * @return true if the control was successfully detached, false otherwise
+	 * 
 	 * @see Communications#detach(int)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static boolean detach(int id){
 		checkInit();
@@ -134,20 +189,27 @@ public final class Flashboard {
 	/**
 	 * Gets a control from the Flashboard by its ID. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @param id the id of the control
-	 * @return the sendable object with the given id, null if not found.
+	 * @return the flashboard control object with the given id, null if not found.
 	 * @see Communications#getLocalyAttachedByID(int)
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static Sendable getLocalByID(int id){
+	public static FlashboardControl getLocalByID(int id){
 		checkInit();
-		return communications.getLocalyAttachedByID(id);
+		return (FlashboardControl) communications.getLocalyAttachedByID(id);
 	}
 	
 	/**
 	 * Gets whether or not this controller is connected to the remote Flashboard. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
 	 * @return true if connected, false otherwise
+	 * 
 	 * @see Communications#isConnected()
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 */
 	public static boolean isConnected(){
 		checkInit();
@@ -156,20 +218,19 @@ public final class Flashboard {
 	/**
 	 * Starts the communications thread. Flashboard should be initialized first for it 
 	 * to work.
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
 	 * @see Communications#start()
 	 */
 	public static void start(){
 		checkInit();
+		
+		if(FlashboardHIDControl.hasInstance())
+			attach(FlashboardHIDControl.getInstance());
+		if(FlashboardModeSelectorControl.hasInstance())
+			attach(FlashboardModeSelectorControl.getInstance());
+		
 		communications.start();
-	}
-	/**
-	 * Closes the communications thread and interface. Flashboard should be initialized first for it 
-	 * to work.
-	 * @see Communications#close()
-	 */
-	public static void close(){
-		checkInit();
-		communications.close();
 	}
 	
 	/**
@@ -178,6 +239,8 @@ public final class Flashboard {
 	 * @return the camera view on the flashboard. Null if not initialized.
 	 */
 	public static CameraView getCameraView(){
+		if(!instance)
+			return null;
 		return camViewer;
 	}
 	/**
@@ -186,6 +249,8 @@ public final class Flashboard {
 	 * @return the vision control to the flashboard. Null if not initialized. 
 	 */
 	public static Vision getVision(){
+		if(!instance)
+			return null;
 		return vision;
 	}
 	/**
@@ -194,17 +259,21 @@ public final class Flashboard {
 	 * @return the camera server to the flashboard. Null if not initialized. 
 	 */
 	public static CameraServer getCameraServer(){
+		if(!instance)
+			return null;
 		return camServer;
 	}
 	
 	/**
 	 * Initializes Flashboard control with parameters set in {@link FlashboardInitData} and passes them to
-	 * {@link #init(int, int, int, boolean)}.
+	 * {@link #init(int, byte[], int, int, boolean)}.
 	 * 
 	 * @param initData initialization data
+	 * 
+	 * @throws IllegalStateException if flashboard was initialized
 	 */
 	public static void init(FlashboardInitData initData){
-		init(initData.initMode, initData.commPort, initData.camPort, initData.tcp);
+		init(initData.initMode, initData.ipAddress, initData.commPort, initData.camPort, initData.tcp);
 	}
 	/**
 	 * Intializes Flashboard control for a given mode. Uses given parameters for ports and protocol in initialization.
@@ -213,39 +282,66 @@ public final class Flashboard {
 	 * software is set to use the same ports instead of the defaults.
 	 * </p>
 	 * @param mode indicates how to initialize the flashboard control.
+	 * @param ipaddress the ipaddress to bind the local socket to (only for TCP), or null for default
 	 * @param port standard communications port
 	 * @param camport camera communications port
 	 * @param tcp protocol to use: True for TCP, false for UDP.
+	 * 
+	 * @throws IllegalStateException if flashboard was initialized
 	 */
-	public static void init(int mode, int port, int camport, boolean tcp){
-		if(!instance){
-			try {
-				if(vision == null && (initMode & INIT_COMM) != 0)
-					vision = new RemoteVision("FlashboardVision");
-				if(camViewer == null && (initMode & INIT_CAM) != 0)
-					camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
-				
-				if(communications == null && (initMode & INIT_COMM) != 0){
-					CommInterface readi;
-					if(tcp)
-						readi = new TcpCommInterface(port);
-					else readi = new UdpCommInterface(port);
-					
-					communications = new Communications("Flashboard", readi);
-					if(vision instanceof Sendable)
-						communications.attach((Sendable)vision);
+	public static void init(int mode, byte[] ipaddress, int port, int camport, boolean tcp){
+		if(instance)
+			throw new IllegalStateException("Flashboard control was already initialized");
+		
+		try {
+			if(vision == null && (initMode & INIT_COMM) != 0)
+				vision = new RemoteVision("FlashboardVision");
+			if(camViewer == null && (initMode & INIT_CAM) != 0)
+				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+			
+			if(communications == null && (initMode & INIT_COMM) != 0){
+				CommInterface readi;
+				if(tcp){
+					if(ipaddress == null)
+						readi = new TCPCommInterface(port);
+					else {
+						InetAddress addr = InetAddress.getByAddress(ipaddress);
+						readi = new TCPCommInterface(addr, port);
+					}
 				}
+				else readi = new UDPCommInterface(port);
 				
-				if(camServer == null && (initMode & INIT_CAM) != 0)
-					camServer = new CameraServer("Flashboard", camport, camViewer);
-				
-				initMode = mode;
-				instance = true;
-				FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
-			} catch (IOException e) {
-				FlashUtil.getLog().reportError(e.getMessage());
+				communications = new Communications("Flashboard", readi);
+				if(vision instanceof Sendable)
+					communications.attach((Sendable)vision);
 			}
+			
+			if(camServer == null && (initMode & INIT_CAM) != 0)
+				camServer = new CameraServer("Flashboard", camport, camViewer);
+			
+			initMode = mode;
+			instance = true;
+			FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
+		} catch (IOException e) {
+			FlashUtil.getLog().reportError(e.getMessage());
+			e.printStackTrace();
 		}
+	}
+	/**
+	 * Closes flashboard control. If the camera server was initialized, it is closed by
+	 * calling {@link CameraServer#close()}. If communications was initialized, it is closed
+	 * by calling {@link Communications#close()}.
+	 * 
+	 * @throws IllegalStateException if flashboard was not initialized
+	 */
+	public static void close(){
+		if(!instance)
+			throw new IllegalStateException("Flashboard control was not initialized");
+		
+		if(camServer != null)
+			camServer.close();
+		if(communications != null)
+			communications.close();
 	}
 	/**
 	 * Gets whether or not Flashboard was initialized. 
@@ -264,130 +360,180 @@ public final class Flashboard {
 	}
 	
 	
-	public static DashboardDoubleInput putInputField(String name, DoubleProperty prop){
+	public static FlashboardInput putInputField(String name, DoubleProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardDoubleInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardDoubleInput) sen;
-		}
-		DashboardDoubleInput input = new DashboardDoubleInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardBooleanInput putInputField(String name, BooleanProperty prop){
+	public static FlashboardInput putInputField(String name, BooleanProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardBooleanInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardBooleanInput) sen;
-		}
-		DashboardBooleanInput input = new DashboardBooleanInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	public static DashboardStringInput putInputField(String name, StringProperty prop){
+	public static FlashboardInput putInputField(String name, StringProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardStringInput))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardStringInput) sen;
-		}
-		DashboardStringInput input = new DashboardStringInput(name, prop);
-		sendables.put(name, input);
+		
+		FlashboardInput input = new FlashboardInput(name, prop);
 		Flashboard.attach(input);
 		return input;
 	}
-	
-	public static DashboardSlider putSlider(String name, DoubleProperty prop, double min, double max, int ticks){
+	public static FlashboardCheckbox putCheckBox(String name, BooleanProperty prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardSlider))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardSlider) sen;
-		}
-		DashboardSlider input = new DashboardSlider(name, prop, min, max, ticks);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+		
+		FlashboardCheckbox checkbox = new FlashboardCheckbox(name, prop);
+		Flashboard.attach(checkbox);
+		return checkbox;
 	}
-	public static DashboardButton putButton(String name, Action... actions){
+	public static FlashboardSlider putSlider(String name, DoubleProperty prop, double min, double max, int ticks){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardButton))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardButton) sen;
-		}
-		DashboardButton input = new DashboardButton(name);
+		
+		FlashboardSlider slider = new FlashboardSlider(name, prop, min, max, ticks);
+		Flashboard.attach(slider);
+		return slider;
+	}
+	public static FlashboardButton putButton(String name, Action... actions){
+		checkInit();
+		
+		FlashboardButton button = new FlashboardButton(name);
 		for (int i = 0; i < actions.length; i++)
-			input.whenPressed(actions[i]);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+			button.whenPressed(actions[i]);
+		Flashboard.attach(button);
+		return button;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@SafeVarargs
-	public static <T> DashboardChooser<T> putChooser(String name, DashboardChooser.Option<T>...options){
+	public static <T> FlashboardChooser<T> putChooser(String name, FlashboardChooser.Option<T>...options){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardChooser))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardChooser<T>) sen;
+		
+		FlashboardChooser<T> chooser = new FlashboardChooser<T>(name, options);
+		Flashboard.attach(chooser);
+		return chooser;
+	}
+	@SuppressWarnings("unchecked")
+	public static <T> FlashboardChooser<T> putChooser(String name, Map<String, T> options){
+		checkInit();
+		
+		Object[] objs = new Object[options.size()];
+		int idx = 0;
+		for (Iterator<Map.Entry<String, T>> iterator = options.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, T> entry = iterator.next();
+			
+			objs[idx++] = new FlashboardChooser.Option<T>(entry.getKey(), entry.getValue());
 		}
-		DashboardChooser<T> input = new DashboardChooser<T>(name, options);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+		
+		FlashboardChooser<T> chooser = new FlashboardChooser<T>(name, (FlashboardChooser.Option<T>[])objs);
+		Flashboard.attach(chooser);
+		return chooser;
 	}
 	
 	
-	public static DashboardDoubleProperty putData(String name, DoubleSource prop){
+	public static FlashboardLabel putLabel(String name, DoubleSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardDoubleProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardDoubleProperty) sen;
-		}
-		DashboardDoubleProperty input = new DashboardDoubleProperty(name, prop);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+		
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
 	}
-	public static DashboardBooleanProperty putData(String name, BooleanSource prop){
+	public static FlashboardLabel putLabel(String name, BooleanSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardBooleanProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardBooleanProperty) sen;
-		}
-		DashboardBooleanProperty input = new DashboardBooleanProperty(name, prop);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+		
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
 	}
-	public static DashboardStringProperty putData(String name, StringSource prop){
+	public static FlashboardLabel putLabel(String name, StringSource prop){
 		checkInit();
-		Sendable sen = sendables.get(name);
-		if(sen != null){
-			if(!(sen instanceof DashboardStringProperty))
-				throw new IllegalArgumentException("The name is already used for a different sendable");
-			return (DashboardStringProperty) sen;
+		
+		FlashboardLabel label = new FlashboardLabel(name, prop);
+		Flashboard.attach(label);
+		return label;
+	}
+	
+	public static FlashboardDirectionIndicator putDirectionIndicator(String name, DoubleSource prop){
+		checkInit();
+		
+		FlashboardDirectionIndicator indicator = new FlashboardDirectionIndicator(name, prop);
+		Flashboard.attach(indicator);
+		return indicator;
+	}
+	public static FlashboardBooleanIndicator putBooleanIndicator(String name, BooleanSource prop){
+		checkInit();
+		
+		FlashboardBooleanIndicator indicator = new FlashboardBooleanIndicator(name, prop);
+		Flashboard.attach(indicator);
+		return indicator;
+	}
+	public static FlashboardXYChart putLineChart(String name, DoubleSource xsource, DoubleSource ysource, 
+			double minX, double maxX, double minY, double maxY){
+		checkInit();
+		
+		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Line,
+				xsource, ysource, minX, maxX, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
+	public static FlashboardXYChart putAreaChart(String name, DoubleSource xsource, DoubleSource ysource, 
+			double minX, double maxX, double minY, double maxY){
+		checkInit();
+		
+		FlashboardXYChart chart = new FlashboardXYChart(name, FlashboardXYChart.ChartType.Area,
+				xsource, ysource, minX, maxX, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
+	public static FlashboardBarChart putBarChart(String name, double minY, double maxY){
+		checkInit();
+		
+		FlashboardBarChart chart = new FlashboardBarChart(name, minY, maxY);
+		Flashboard.attach(chart);
+		return chart;
+	}
+	
+	public static FlashboardPIDTuner putPIDTuner(String name, DoubleProperty kp, DoubleProperty ki, DoubleProperty kd,
+			DoubleProperty kf, DoubleProperty setpoint, PIDSource output, double maxKValue, int kSliderTicks){
+		checkInit();
+		
+		FlashboardPIDTuner tuner = new FlashboardPIDTuner(name, kp, ki, kd, kf, setpoint, output, maxKValue, kSliderTicks);
+		Flashboard.attach(tuner);
+		return tuner;
+	}
+	
+	public static FlashboardRemoteLog putLog(Log log){
+		checkInit();
+		
+		FlashboardRemoteLog rlog = new FlashboardRemoteLog(log);
+		Flashboard.attach(rlog);
+		return rlog;
+	}
+	
+	public static FlashboardMotorTester putMotorTester(String name, FlashboardMotorTester.TesterMotor...motors){
+		checkInit();
+		
+		FlashboardMotorTester tester = new FlashboardMotorTester(name);
+		tester.addMotors(motors);
+		Flashboard.attach(tester);
+		return tester;
+	}
+	public static FlashboardMotorTester putMotorTester(String name, Map<String, FlashSpeedController> motorMap){
+		checkInit();
+		
+		FlashboardMotorTester tester = new FlashboardMotorTester(name);
+		
+		FlashboardMotorTester.TesterMotor[] motors = new FlashboardMotorTester.TesterMotor[motorMap.size()];
+		int idx = 0;
+		for (Iterator<Map.Entry<String, FlashSpeedController>> iterator = motorMap.entrySet().iterator(); iterator.hasNext();) {
+			Map.Entry<String, FlashSpeedController> entry = iterator.next();
+			motors[idx++] = new FlashboardMotorTester.TesterMotor(entry.getKey(), entry.getValue(), tester);
 		}
-		DashboardStringProperty input = new DashboardStringProperty(name, prop);
-		sendables.put(name, input);
-		Flashboard.attach(input);
-		return input;
+		
+		tester.addMotors(motors);
+		
+		Flashboard.attach(tester);
+		return tester;
 	}
 }
 

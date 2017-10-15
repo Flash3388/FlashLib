@@ -5,7 +5,7 @@ package edu.flash3388.flashlib.robot.devices;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Accelerometer {
+public interface Accelerometer extends IOPort{
 	/**
 	 * Gets the x-axis acceleration
 	 * @return acceleration along the x-axis

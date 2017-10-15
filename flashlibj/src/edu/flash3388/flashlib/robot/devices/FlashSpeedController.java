@@ -1,12 +1,14 @@
 package edu.flash3388.flashlib.robot.devices;
 
+import edu.flash3388.flashlib.util.beans.DoubleSource;
+
 /**
  * Interface for speed controllers.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface FlashSpeedController{
+public interface FlashSpeedController extends DoubleSource{
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
@@ -25,33 +27,50 @@ public interface FlashSpeedController{
 	 * <p>
 	 * If the motor controller is set to inverted directions, the directions are switched.
 	 * </p>
+	 * <p>
+	 * The default implementation calls {@link #set(double)} and passes it the speed value. If direction is backwards,
+	 * the speed value is reversed and then passed.
+	 * </p>
 	 * 
 	 * @param speed [0 to 1] describing the absolute percent vbus
-	 * @param direction the direction of rotation [-1/1]
+	 * @param direction true - forwards, false - backwards
 	 */
-	void set(double speed, int direction);
+	default void set(double speed, boolean direction){
+		set(direction? speed : -speed);
+	}
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
 	 * be supplied to the motor. 
 	 * <p>
 	 * If the motor controller is set to inverted directions, the directions are switched.
+	 * </p>	
+	 * <p>
+	 * The default implementation calls {@link #set(double)} and passes it the speed value multiplied by the direction
+	 * value.
 	 * </p>
 	 * 
 	 * @param speed [0 to 1] describing the absolute percent vbus
-	 * @param direction true - forwards, false - backwards
+	 * @param direction the direction of motion [-1/1]
 	 */
-	void set(double speed, boolean direction);
+	default void set(double speed, int direction){
+		set(speed * direction);
+	}
 	
 	/**
-	 * Stops the motor by setting the speed controller to a stop value. Usually 0.
+	 * Stops the motor by setting the speed controller to a stop value.
+	 * <p>
+	 * Default implementation calls {@link #set(double)}, passing it 0.0.
 	 */
-	void stop();
+	default void stop(){
+		set(0.0);
+	}
 	
 	/**
 	 * Gets the currently set percent vbus in the motor controller.
 	 * @return used percent vbus
 	 */
+	@Override
 	double get();
 	
 	/**

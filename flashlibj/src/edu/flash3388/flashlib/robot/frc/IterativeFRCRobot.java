@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.frc;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
@@ -7,9 +8,12 @@ import static edu.flash3388.flashlib.util.FlashUtil.*;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.HIDUpdateTask;
-import edu.flash3388.flashlib.robot.Robot;
+import edu.flash3388.flashlib.robot.PowerLogger;
 import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.devices.IOFactory;
 
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
@@ -17,36 +21,157 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
 /**
- * The base for FRC robots wanting to use FlashLib in its fullest. Provides a control loop with power
- * tracking and control modes. Manually initializes FlashLib to its full extent. Extends SampleRobot. 
+ * IterativeFRCRobot provides the recommended base for FRC robots using FlashLib's robot framework.
+ * This base provides a similar robot loop to WPILib's {@link edu.wpi.first.wpilibj.IterativeRobot IterativeRobot} 
+ * and FlashLib's {@link edu.flash3388.flashlib.robot.IterativeRobot IterativeRobot}.
+ * <p>
+ * The control loop divides each operation mode into two types
+ * <ul>
+ * 	<li> init: initialization of the operation mode</li>
+ *  <li> periodic: execution of the operation mode</li>
+ * </ul>
+ * `init` is called every time the robot enters a new mode. `periodic` is called every ~10ms while the robot
+ * is in the operation mode.
+ * <p>
+ * Users extending this class must implement:
+ * <ul>
+ * 	<li> {@link #initRobot()}: initialization of robot systems
+ * 	<li> {@link #disabledInit()}: initialization for disabled mode </li>
+ * 	<li> {@link #disabledPeriodic()}: execution of disabled mode </li>
+ *  <li> {@link #autonomousInit()}: initialization for autonomous operation mode </li>
+ * 	<li> {@link #autonomousPeriodic()}: execution of a autonomous operation mode </li>
+ *  <li> {@link #teleopInit()}: initialization for teleop operation mode </li>
+ * 	<li> {@link #teleopPeriodic()}: execution of a teleop operation mode </li>
+ * </ul>
+ * {@link #initRobot()} is called after FlashLib systems finished initialization and are ready to be used.
+ * Use this to initialize robot systems.
+ * <p>
+ * {@link #testInit()} and {@link #testPeriodic()} are provided for FRC's test mode. They have a default empty 
+ * implementation and can be overridden if necessary.
+ * <p>
+ * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY} milliseconds.
+ * <p>
+ * The scheduling system is updated by the control loop to allow operation of that system. While the robot
+ * is in a mode, the {@link Scheduler#run()} method is executed periodically, insuring correct operation
+ * of that system. When operation modes change, all {@link Action} objects are interrupted by calling 
+ * {@link Scheduler#removeAllActions()} so that unwanted execution will not remain and cause issues. In
+ * addition, when in disabled mode the scheduling enters {@link Scheduler#MODE_TASKS} mode so {@link Action} objects
+ * are not executed, only tasks are, this is for safety of operation.
+ * <p>
+ * IterativeFRCRobot features power tracking using a {@link PowerLogger} object. If initialized, this object
+ * tracks power issues in the robot's power supply. By default, the tracked values are the robot's voltage level
+ * from {@link DriverStation#getBatteryVoltage()} and the total PDP power from {@link PDP#getTotalCurrent()} using
+ * {@link FlashFRCUtil#getPDP()}. If issues are detected with the values of either ones, data is logged into a power
+ * log. Issues refer to the values been too low or high.
+ * <p>
+ * This class provides custom initialization. When the robot is initializing, {@link #preInit(RobotInitializer)}
+ * is called for custom initialization. The passed object, {@link RobotInitializer} provides variables whose
+ * values are used to initialize FlashLib and control loop operations.
+ * <p>
+ * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
+ * 
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
+ * 
  * @see SampleRobot
  */
-public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
+public abstract class IterativeFRCRobot extends FRCRobotBase{
 	
+	/**
+	 * This class contains initialization parameters for {@link IterativeFRCRobot}.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.0.1
+	 */
 	protected static class RobotInitializer{
+		/**
+		 * Indicates whether or not the control loop should run the {@link Scheduler}.
+		 * <p>
+		 * The default value is `false`.
+		 */
 		public boolean runScheduler = true;
-		public boolean logsEnabled = false;
-		public boolean autoUpdateHid = true;
-		public boolean logPower = true;
-		public double warningVoltage = WARNING_VOLTAGE;
-		public double warningPowerDraw = POWER_DRAW_WARNING;
 		
-		public boolean initFlashboard = true;
+		/**
+		 * Indicates whether or not to add an auto HID update task to the {@link Scheduler}. This will
+		 * refresh HID data automatically, allowing for HID-activated actions. The task will update 
+		 * controllers only if the current operation mode is teleop.
+		 * <p>
+		 * The default value is `false`.
+		 */
+		public boolean autoUpdateHid = true;
+		
+		/**
+		 * Indicates whether or not the control loop should check robot's power
+		 * status and log any problems into the power log. Uses an instance of {@link PowerLogger}.
+		 * <p>
+		 * The default value is `false`.
+		 */
+		public boolean logPower = false;
+		/**
+		 * Indicates to the power tracker what current draw in Ampre to consider high enough to warrant
+		 * a warning.
+		 * <p>
+		 * The default value is 120A
+		 */
+		public double maxTotalCurrentDraw = PowerLogger.DEFAULT_WARNING_CURRENT_DRAW;
+		/**
+		 * Indicates to the power tracker what voltage level in volts to consider low enough to warrant
+		 * a warning. 
+		 * <p>
+		 * Rge default value is 8.0v
+		 */
+		public double minVoltageLevel = PowerLogger.DEFAULT_WARNING_VOLTAGE;
+		
+		/**
+		 * Indicates whether or not the robot should log operations into FlashLib's standard logs.
+		 * If this value is false, FlashLib's main log's file writing is disabled and the file
+		 * is deleted. The main log is retrieved from {@link FlashUtil#getLog()}.
+		 * <p>
+		 * The default value is `false`.
+		 */
+		public boolean standardLogs = false;
+		
+		/**
+		 * Contains initialization data for Flashboard in the form of {@link FlashboardInitData}.
+		 * If this value is `null`, Flashboard control will not be initialized.
+		 * <p>
+		 * The default value is an instance of {@link FlashboardInitData}.
+		 */
 		public FlashboardInitData flashboardInitData = new FlashboardInitData();
+		/**
+		 * Inidicates whether or not to initialize flashboard. If true, flashboard will 
+		 * be initialize. If false, flashboard will be initialized.
+		 * <p>
+		 * The default value is `true`.
+		 */
+		public boolean initFlashboard = true;
 	}
 	
-	private static final double WARNING_VOLTAGE = 8.5;
-	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final int ITERATION_DELAY = 10;
+	private static final int ITERATION_DELAY = 5;
 	
-	private Log log, powerLog;
-	private double warningVoltage, warningPowerDraw;
-	private boolean logPower, logsEnabled, runScheduler;
-	
+	private Log log;
+	private PowerLogger powerLogger;
 	private Scheduler schedulerImpl = Scheduler.getInstance();
+	
+	private boolean runScheduler;
+	private boolean logPower;
+	private boolean stdLog;
+	
+	private void runScheduler(){
+		if(runScheduler)
+			schedulerImpl.run();
+	}
+	private void logPower(){
+		if(logPower)
+			powerLogger.logPower();
+	}
+	private void logNewState(String state){
+		if(!stdLog)
+			return;
+		log.logTime("NEW STATE - "+state, "Robot");
+		log.save();
+	}
 	
 	@Override
 	protected final void robotInit(){
@@ -57,25 +182,29 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		
 		FlashFRCUtil.initFlashLib(this, initializer.initFlashboard? initializer.flashboardInitData : null);
 		
+		IOFactory.setProvider(new FRCIOProvider());
+		
+		FRCVoltagePowerSource voltageSource = new FRCVoltagePowerSource(initializer.minVoltageLevel, 13.7);
+		FlashRobotUtil.setVoltageSource(voltageSource);
+		
 		log = FlashUtil.getLog();
+		
+		stdLog = initializer.standardLogs;
 		logPower = initializer.logPower;
-		logsEnabled = initializer.logsEnabled;
-		if(initializer.logsEnabled){
-			powerLog = Log.createBufferedLog("power");
-			if(!logPower)
-				powerLog.disable();
-		}else{
-			logPower = false;
+		
+		if(!stdLog){
 			log.disable();
 			log.delete();
 		}
-		
-		if(initializer.autoUpdateHid)
+		if(logPower){
+			powerLogger = new PowerLogger("powerLog", voltageSource,
+					new FRCTotalCurrentPowerSource(-1.0, initializer.maxTotalCurrentDraw));
+		}
+		if(initializer.autoUpdateHid){
 			schedulerImpl.addTask(new HIDUpdateTask());
+		}
 		
 		runScheduler = initializer.runScheduler;
-		warningPowerDraw = initializer.warningPowerDraw;
-		warningVoltage = initializer.warningVoltage;
 		
 		initRobot();
 		log.logTime("Robot initialized", "Robot");
@@ -86,10 +215,8 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		
 		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
 			Flashboard.start();
-		LiveWindow.setEnabled(false);
 		
-		if(logPower)
-			powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), "Robot", powerLogTime());
+		LiveWindow.setEnabled(false);
 		
 		while(true){
 			if(inEmergencyStop()){
@@ -112,7 +239,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				while(isDisabled() && !inEmergencyStop()){
 					runScheduler();
 					disabledPeriodic();
-					logLowVoltage();
+					logPower();
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InDisabled(false);
@@ -127,7 +254,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				while(isEnabled() && isAutonomous() && !inEmergencyStop()){
 					runScheduler();
 					autonomousPeriodic();
-					logLowVoltage();
+					logPower();
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InAutonomous(false);
@@ -142,7 +269,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				while(isEnabled() && isTest() && !inEmergencyStop()){
 					runScheduler();
 					testPeriodic();
-					logLowVoltage();
+					logPower();
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InTest(false);
@@ -157,7 +284,7 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 				while(isEnabled() && isOperatorControl() && !inEmergencyStop()){
 					runScheduler();
 					teleopPeriodic();
-					logLowVoltage();
+					logPower();
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InOperatorControl(false);
@@ -165,87 +292,19 @@ public abstract class IterativeFRCRobot extends SampleRobot implements Robot{
 		}
 	}
 	
-	private void runScheduler(){
-		if(runScheduler)
-			schedulerImpl.run();
-	}
-	private double powerLogTime(){
-		double matchTime = m_ds.getMatchTime();
-		return matchTime > 0? matchTime : FlashUtil.secs();
-	}
-	private void logLowVoltage(){
-		if(!logPower) return;
-		
-		double volts = m_ds.getBatteryVoltage();
-		double matchTime = powerLogTime();
-		double powerDraw = FlashFRCUtil.getPDP().getTotalCurrent();
-		boolean emergencySave = false;
-		if(volts < warningVoltage){
-			powerLog.logTime("Low Voltage: "+volts, "Robot", matchTime);
-			emergencySave = true;
-		}
-		if(m_ds.isBrownedOut()){
-			powerLog.logTime("Browned Out", "Robot", matchTime);
-			emergencySave = true;
-		}
-		if(powerDraw >= warningPowerDraw){
-			powerLog.logTime("High Draw: "+powerDraw, "Robot", matchTime);
-		}
-		if(emergencySave){
-			powerLog.save();
-			log.save();
-		}
-	}
-	private void logNewState(String state){
-		if(!logsEnabled)
-			return;
-		log.logTime("NEW STATE - "+state, "Robot");
-		powerLog.logTime("New State: "+state+" >> Voltage: "+m_ds.getBatteryVoltage(), "Robot",
-				powerLogTime());
-		log.save();
-		powerLog.save();
-	}
-	
 	/**
-	 * Sets whether or not to log data about power usage into a log.
-	 * @param log true to log data, false otherwise
+	 * Gets the {@link PowerLogger} object used by this class to log power issues. If
+	 * the power logger was not initialized, this method will throw a {@link IllegalStateException}.
+	 * Whether or not power logging is specified by {@link RobotInitializer#logPower}.
+	 * 
+	 * @return the {@link PowerLogger} object
+	 * @throws IllegalStateException if power logging was not initialized
 	 */
-	protected final void setPowerLogging(boolean log) {
-		logPower = log;
-		if(powerLog != null){
-			if(!log)
-				powerLog.disable();
-			else 
-				powerLog.setLoggingMode(Log.MODE_FULL);
-		}
+	protected PowerLogger getPowerLogger(){
+		if(!logPower)
+			throw new IllegalStateException("PowerLogger was not initialized");
+		return powerLogger;
 	}
-	/**
-	 * Sets the total power draw which should prompt a warning from the power log.
-	 * @param current total current in Ampere
-	 */
-	protected final void setPowerDrawWarning(double current){
-		warningPowerDraw = current;
-	}
-	/**
-	 * Sets the voltage level which should prompt a warning from the power log.
-	 * @param volts voltage in Volts
-	 */
-	protected final void setVoltageDropWarning(double volts){
-		warningVoltage = volts;
-	}
-	/**
-	 * Gets the log used to log power data. If logs were not enabled, this will return null.
-	 * @return the power log
-	 */
-	protected final Log getPowerLog(){
-		return powerLog;
-	}
-
-	@Override
-	public boolean isFRC() {
-		return true;
-	}
-	
 	
 	/**
 	 * Called just before initialization of FlashLib. Useful to perform pre-initialization settings.

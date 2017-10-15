@@ -3,8 +3,9 @@ package edu.flash3388.flashlib.dashboard;
 import java.io.File;
 import java.util.Enumeration;
 
-import edu.flash3388.flashlib.dashboard.controls.PDP;
-
+import edu.flash3388.flashlib.dashboard.controls.PDPControl;
+import edu.flash3388.flashlib.robot.PeriodicRunnable;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -24,14 +25,17 @@ public class PDPWindow extends Stage{
 	private static final String IMAGE_PATH = "data/res/pdp.png";
 	
 	private static PDPWindow instance = null;
+	
 	private ImageView pdpView;
 	private Label volt, temp, tCurrent;
 	private VBox channelsRight, channelsLeft;
 	private ComboBox<String> pdpBox;
 	
-	private PDP selectedPDP;
+	private PDPControl selectedPDP;
 	private boolean reset = false;
 	private Label[] channelLabels;
+	
+	private Runnable updateRunnable;
 	
 	private PDPWindow(){
 		setTitle("FLASHBoard - PDP");
@@ -41,7 +45,15 @@ public class PDPWindow extends Stage{
         setScene(loadScene());
         setOnCloseRequest((v)->{
         	deselect();
+        	instance = null;
+        	
+        	Dashboard.getUpdater().removeTask(updateRunnable);
         });
+        
+        updateRunnable = new PeriodicRunnable(()->{
+        	Platform.runLater(()->update());
+        }, 50);
+        Dashboard.getUpdater().addTask(updateRunnable);
 	}
 	
 	private Scene loadScene(){
@@ -55,7 +67,7 @@ public class PDPWindow extends Stage{
 		
 		pdpBox = new ComboBox<String>();
 		pdpBox.getItems().add("--Choose PDP--");
-		for(Enumeration<PDP> pdpEnum = PDP.getBoards(); pdpEnum.hasMoreElements();)
+		for(Enumeration<PDPControl> pdpEnum = PDPControl.getBoards(); pdpEnum.hasMoreElements();)
 			pdpBox.getItems().add(pdpEnum.nextElement().getName());
 		pdpBox.getSelectionModel().select(0);
 		pdpBox.getSelectionModel().selectedIndexProperty().addListener((obse, o, n)->{
@@ -108,7 +120,7 @@ public class PDPWindow extends Stage{
 	}
 	
 	public void select(int index){
-		selectedPDP = PDP.get(index);
+		selectedPDP = PDPControl.get(index);
 		selectedPDP.updateSend(true);
 		reset = false;
 		

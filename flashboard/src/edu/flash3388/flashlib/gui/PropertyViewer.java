@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.gui;
 
 import java.util.ArrayList;
 
-import edu.flash3388.flashlib.util.ConstantsHandler;
+import edu.flash3388.flashlib.util.beans.PropertyHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -36,22 +36,22 @@ public class PropertyViewer extends Stage{
 		public String getValue(){
 			switch(type){
 				case Boolean: 
-					return String.valueOf(ConstantsHandler.getBooleanValue(name));
+					return String.valueOf(PropertyHandler.getBooleanValue(name));
 				case Number: 
-					return String.valueOf(ConstantsHandler.getNumberValue(name));
+					return String.valueOf(PropertyHandler.getNumberValue(name));
 				case String: 
-					return ConstantsHandler.getStringValue(name);
+					return PropertyHandler.getStringValue(name);
 				default: return "";
 			}
 		}
 		
 		public void remove(){
 			switch(type){
-				case Boolean: ConstantsHandler.removeBoolean(name);
+				case Boolean: PropertyHandler.removeBoolean(name);
 					break;
-				case Number: ConstantsHandler.removeNumber(name);
+				case Number: PropertyHandler.removeNumber(name);
 					break;
-				case String: ConstantsHandler.removeString(name);
+				case String: PropertyHandler.removeString(name);
 					break;
 			}
 		}
@@ -59,19 +59,19 @@ public class PropertyViewer extends Stage{
 			if(type == Type.Boolean){
 				try {
 					boolean b = Boolean.parseBoolean(value);
-					ConstantsHandler.putBoolean(name, b);
+					PropertyHandler.putBoolean(name, b);
 					return true;
 				} catch (NumberFormatException e) { return false;}
 			}
 			if(type == Type.Number){
 				try {
 					double d = Double.parseDouble(value);
-					ConstantsHandler.putNumber(name, d);
+					PropertyHandler.putNumber(name, d);
 					return true;
 				} catch (NumberFormatException e) { return false;}
 			}
 			if(type == Type.String){
-				ConstantsHandler.putString(name, value);
+				PropertyHandler.putString(name, value);
 				return true;
 			}
 			return true;
@@ -98,18 +98,18 @@ public class PropertyViewer extends Stage{
 		props = new ArrayList<Property>();
 		ArrayList<String> keys = new ArrayList<String>();
 		
-		String[] pKeys = ConstantsHandler.getStringMapNames();
+		String[] pKeys = PropertyHandler.getStringMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
 			props.add(new Property(pKeys[i], Property.Type.String));
 		}
-		pKeys = ConstantsHandler.getNumberMapNames();
+		pKeys = PropertyHandler.getNumberMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
 			props.add(new Property(String.valueOf(pKeys[i]), 
 					Property.Type.Number));
 		}
-		pKeys = ConstantsHandler.getBooleanMapNames();
+		pKeys = PropertyHandler.getBooleanMapNames();
 		for (int i = 0; i < pKeys.length; i++){
 			keys.add(pKeys[i]);
 			props.add(new Property(String.valueOf(pKeys[i])
@@ -161,7 +161,7 @@ public class PropertyViewer extends Stage{
 		save.setOnAction((e)->{
 			String newVal = valField.getText();
 			if(!newProp(cProp, newVal))
-				FlashFxUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
+				FlashFXUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
 			save.setDisable(true);
 		});
 		newProp.setOnAction((e)->{
@@ -217,7 +217,7 @@ public class PropertyViewer extends Stage{
 			
 			cProp = new Property(keyName, t);
 			if(!newProp(cProp, newVal))
-				FlashFxUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
+				FlashFXUtils.showErrorDialog(this, "Error", "Value is incompatible with property type");
 			else close();
 		});
 		cancel.setOnAction((e)->{

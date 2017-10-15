@@ -14,36 +14,36 @@ import edu.flash3388.flashlib.robot.frc.FRCRobot;
 public final class RobotFactory {
 	private RobotFactory(){}
 	
-	private static Robot robotImpl;
+	private static RobotInterface robotImpl;
 	private static HIDInterface hidImpl;
 	
 	/**
-	 * Creates a {@link Robot} implementation to be used for FRC robots.
-	 * @return a {@link Robot} implementation for FRC
+	 * Creates a {@link RobotInterface} implementation to be used for FRC robots.
+	 * @return a {@link RobotInterface} implementation for FRC
 	 */
-	public static Robot createFRCImplementation(){
+	public static RobotInterface createFRCImplementation(){
 		return new FRCRobot();
 	}
 	
 	/**
-	 * Sets the implementation of {@link Robot} stored by this factory. This implementation will
+	 * Sets the implementation of {@link RobotInterface} stored by this factory. This implementation will
 	 * be used throughout the robot code to access the {@link HIDInterface} provided and the {@link Scheduler}
 	 * provided.
 	 * @param robot implementation
 	 */
-	public static void setImplementation(Robot robot){
+	public static void setImplementation(RobotInterface robot){
 		robotImpl = robot;
 	}
 	/**
-	 * Gets the {@link Robot} implementation stored by this factory. This implementation will
+	 * Gets the {@link RobotInterface} implementation stored by this factory. This implementation will
 	 * be used throughout the robot code to access robot related data.
 	 * @return implementation
 	 */
-	public static Robot getImplementation(){
+	public static RobotInterface getImplementation(){
 		return robotImpl;
 	}
 	/**
-	 * Gets whether or not a {@link Robot} implementation is stored by this factory. This implementation will
+	 * Gets whether or not a {@link RobotInterface} implementation is stored by this factory. This implementation will
 	 * be used throughout the robot code to access robot related data.
 	 * @return true if an implementation exists, false otherwise
 	 */

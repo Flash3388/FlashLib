@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -75,6 +76,10 @@ public class LogWindow extends Stage{
         });
 	}
 	
+	private void resetAll(){
+		tabs.getTabs().clear();
+		textArea.clear();
+	}
 	private void updateTabs(RemoteLog log){
 		Tab tab = new Tab(log.getName());
 		tab.setClosable(false);
@@ -133,14 +138,28 @@ public class LogWindow extends Stage{
 	
 	private static void newLog(RemoteLog log){
 		logs.add(log);
-		if(currentInstance != null)
-			currentInstance.updateTabs(log);
+		if(currentInstance != null){
+			Platform.runLater(()->{
+				currentInstance.updateTabs(log);
+			});
+		}
 	}
 	
 	public static void showLog(){
-		currentInstance = new LogWindow();
-		currentInstance.show();
-		if(logs.size() < 1)
-			FlashFxUtils.showErrorDialog(currentInstance, "Error", "No logs located");
+		if(currentInstance == null)
+			currentInstance = new LogWindow();
+		if(!currentInstance.isShowing()){
+			currentInstance.show();
+			if(logs.size() < 1)
+				FlashFXUtils.showErrorDialog(currentInstance, "Error", "No logs located");
+		}
+	}
+	
+	public static void resetLogs(){
+		logs.clear();
+		if(currentInstance != null){
+			currentInstance.currentLog = null;
+			currentInstance.resetAll();
+		}
 	}
 }

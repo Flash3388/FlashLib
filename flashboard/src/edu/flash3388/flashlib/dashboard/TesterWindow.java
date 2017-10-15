@@ -2,9 +2,9 @@ package edu.flash3388.flashlib.dashboard;
 
 import java.util.Enumeration;
 
-import edu.flash3388.flashlib.dashboard.controls.FlashboardTester;
-import edu.flash3388.flashlib.dashboard.controls.FlashboardTesterMotor;
-import edu.flash3388.flashlib.gui.FlashFxUtils;
+import edu.flash3388.flashlib.dashboard.controls.TesterControl;
+import edu.flash3388.flashlib.dashboard.controls.TesterMotorControl;
+import edu.flash3388.flashlib.gui.FlashFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -20,7 +20,7 @@ import javafx.stage.StageStyle;
 public class TesterWindow extends Stage{
 
 	private static TesterWindow instance;
-	private FlashboardTester tester;
+	private TesterControl tester;
 	private ComboBox<String> keysBox;
 	
 	private TesterWindow(){
@@ -34,27 +34,32 @@ public class TesterWindow extends Stage{
         });
 	}
 	
+	private void refresh(){
+		keysBox.getItems().clear();
+		keysBox.getItems().add("-- Choose Tester --");
+		keysBox.getSelectionModel().select(0);
+	}
 	@SuppressWarnings("unchecked")
 	private Scene loadScene(){
 		VBox root = new VBox();
 		
-		TableView<FlashboardTesterMotor> motorsView = new TableView<FlashboardTesterMotor>();
-		TableColumn<FlashboardTesterMotor, String> nameCol = new TableColumn<FlashboardTesterMotor, String>();
+		TableView<TesterMotorControl> motorsView = new TableView<TesterMotorControl>();
+		TableColumn<TesterMotorControl, String> nameCol = new TableColumn<TesterMotorControl, String>();
 		nameCol.setText("Name");
-		TableColumn<FlashboardTesterMotor, Boolean> brakeCol = new TableColumn<FlashboardTesterMotor, Boolean>();
+		TableColumn<TesterMotorControl, Boolean> brakeCol = new TableColumn<TesterMotorControl, Boolean>();
 		brakeCol.setText("Brake Mode");
-		TableColumn<FlashboardTesterMotor, Double> speedCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> speedCol = new TableColumn<TesterMotorControl, Double>();
 		speedCol.setText("Speed");
-		TableColumn<FlashboardTesterMotor, Double> voltageCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> voltageCol = new TableColumn<TesterMotorControl, Double>();
 		voltageCol.setText("Voltage");
-		TableColumn<FlashboardTesterMotor, Double> currentCol = new TableColumn<FlashboardTesterMotor, Double>();
+		TableColumn<TesterMotorControl, Double> currentCol = new TableColumn<TesterMotorControl, Double>();
 		currentCol.setText("Current");
 		
-		nameCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, String>("name"));
-		brakeCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Boolean>("brakeMode"));
-		speedCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("speed"));
-		voltageCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("voltage"));
-		currentCol.setCellValueFactory(new PropertyValueFactory<FlashboardTesterMotor, Double>("current"));
+		nameCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, String>("name"));
+		brakeCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Boolean>("brakeMode"));
+		speedCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("speed"));
+		voltageCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("voltage"));
+		currentCol.setCellValueFactory(new PropertyValueFactory<TesterMotorControl, Double>("current"));
 		
 		motorsView.getColumns().addAll(nameCol, brakeCol, speedCol, voltageCol, currentCol);
 		
@@ -62,7 +67,7 @@ public class TesterWindow extends Stage{
 		VBox.setMargin(keysBox, new Insets(5.0, 0.0, 0.0, 0.0));
 		keysBox.getItems().add("-- Choose Tester --");
 		keysBox.getSelectionModel().select(0);
-		keysBox.getItems().addAll(FlashboardTester.getTestersNames());
+		keysBox.getItems().addAll(TesterControl.getTestersNames());
 		keysBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue)->{
 			motorsView.getItems().clear();
 			if(tester != null){
@@ -73,12 +78,12 @@ public class TesterWindow extends Stage{
 				return;
 			}
 			
-			tester = FlashboardTester.getTester(newValue);
+			tester = TesterControl.getTester(newValue);
 			if(tester == null){
 				keysBox.getSelectionModel().select(0);
 				return;
 			}
-			Enumeration<FlashboardTesterMotor> motors = tester.getMotors();
+			Enumeration<TesterMotorControl> motors = tester.getMotors();
 			for(; motors.hasMoreElements();)
 				motorsView.getItems().add(motors.nextElement());
 			tester.enable(true);
@@ -93,17 +98,17 @@ public class TesterWindow extends Stage{
 	
 	public static void showTester(){
 		if(instance != null){
-			FlashFxUtils.showErrorDialog(Dashboard.getPrimary(), "Error", "Tester is already open!");
+			FlashFXUtils.showErrorDialog(GUI.getPrimary(), "Error", "Tester is already open!");
 			return;
 		}
 		instance = new TesterWindow();
 		instance.show();
 	}
-	public static void closeTester(){
+	public static void resetTester(){
 		if(instance != null){
 			if(instance.tester != null)
 				instance.tester.enable(false);
-			instance.close();
+			instance.refresh();
 		}
 	}
 }

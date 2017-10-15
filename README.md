@@ -1,13 +1,15 @@
 # FlashLib
 FlashLib is a robotics software development library for Java, originaly designed to improve and help FRC teams, but can work on other non-FRC platforms. Although currently available only for Java, we aim to make FlashLib available for C++ as well.
 
-The latest version of FlashLib is 1.0.2
+The latest version of FlashLib is 1.2.0
 
 - [Features](#features)
 - [Dependencies](#dependencies)
 - [Building](#building)
 - [Code Of Conduct](#code-of-conduct)
 - [Contributing](#contributing)
+- [Wiki](#wiki)
+- [Examples](#examples)
 
 ## Features
 
@@ -20,18 +22,20 @@ The library provides several different tools that can be both used for a robot d
 - Action Scheduler: An action scheduling system to allow simple managment of robot system functionalities.
 - Algorithms: Built-In sensor-based motion algorithms and vision-based motion algorithms.
 - Generic Drive Systems: Built-in generic drive systems, including: Tank drive, Mecanum drive and Omni-Directional drive.
-- Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for working with linux computer platforms.
-- HAL: An Hardware Abstraction Layer with several built-in implementations. (WIP)
-- Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors for non-FRC platforms. (WIP)
-- Control Station: Pre-Made control software for non-FRC robots. (WIP)
+- Flashboard: A robot operator's sophisticated dashboard with build-in image processing and several tools for monitoring and
+operating robots.
+- HAL: An Hardware Abstraction Layer with several built-in implementations.
+- Sensor and Motor Controllers Interfacing: Interfaing with motor controllers and sensors.
+- Control Station: Control software for non-FRC robots (integrated with Flashboard). 
 
 ## Dependencies
 
 FlashLib depends on several libraries for its functionalities:
-- The openCV implementation of the vision system uses openCV
-- The openCV implementation for camera interfacing uses openCV
-- FRC robots using FlashLib require WPILib
-- Flashboard requires openCV for its vision functionalities
+- The openCV implementation of the vision system uses `openCV`
+- The openCV implementation for camera interfacing uses `openCV`
+- FRC robots using FlashLib require `WPILib`
+- Flashboard requires `openCV` for its vision functionalities
+- Flashboard uses `jinput` for reading controller data.
 
 All of those libraries are available in the "libs" folder.
 
@@ -40,6 +44,7 @@ All of those libraries are available in the "libs" folder.
 The versions used for dependencies by FlashLib are:
 - [OpenCV](https://github.com/opencv/opencv): 3.1.0
 - [WPILib](https://github.com/wpilibsuite/allwpilib): 2017.3.1
+- [JInput](https://github.com/jinput/jinput): 2.0.7
 
 ## Building
 
@@ -48,6 +53,10 @@ If you don't, run the gradle wrapper added to this project `gradlew build`.
 
 You can find the binary files in the `build/libs` folder. Flashboard distribution folder is in `build/flashboard` ready to be
 used. To run flashboard, run `run.bat` for windows or `run` for linux which are located in the distribution folder.
+
+The HAL binaries are located under `build/{HAL NAME}/libs`. Each HAL builds a shared library and a static library.
+
+For further information, checkout the Wiki [main page](https://github.com/Flash3388/FlashLib/wiki).
 
 ## Code Of Conduct
 
@@ -62,3 +71,13 @@ As an open-source project we readily welcome anyone wanting to contribute. But i
 rules and guidelines for contributions.
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) if you are interested in contributing to this project.
+
+## Wiki
+
+We are working tirelessly to provide has much documentations and guides for anyone who wants to use or learn about FlashLib. The FlashLib wiki contains information from features and how they work to guides for getting started. It is highly recommended to visit the wiki before starting to work with FlashLib.
+
+The wiki is hosted with this repository and can be found [here](https://github.com/Flash3388/FlashLib/wiki).
+
+## Examples
+
+The source code contains several examples for using different features of FlashLib, we recommend [checking them out](https://github.com/Flash3388/FlashLib/tree/master/examples/java).

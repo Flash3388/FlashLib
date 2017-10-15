@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.flashboard.FlashboardControl;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class PDP extends Sendable{
+public class PDP extends FlashboardControl{
 	
 	public static final int CHANNELS = 16;
 	

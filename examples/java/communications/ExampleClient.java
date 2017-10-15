@@ -5,7 +5,7 @@ import java.net.InetAddress;
 
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.EchoSendable;
-import edu.flash3388.flashlib.communications.TcpCommInterface;
+import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /*
@@ -34,7 +34,7 @@ public class ExampleClient {
 		/*
 		 * Creates a TCP client communications interface for the address and ports we got earlier.
 		 */
-		TcpCommInterface clientInterface = new TcpCommInterface(localAddress, remoteAddress, localPort, remotePort);
+		TCPCommInterface clientInterface = new TCPCommInterface(localAddress, remoteAddress, localPort, remotePort);
 		
 		/*
 		 * Creates a communications manager for the TCP communications interface 

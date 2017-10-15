@@ -244,6 +244,8 @@ public class Communications {
 			sen.setRemoteInit(true);
 			return;
 		}
+		if(!sen.remoteAttached())
+			return;
 		
 		byte[] dataB;
 		if(!sen.hasChanged() || (dataB = sen.dataForTransmition()) == null) 

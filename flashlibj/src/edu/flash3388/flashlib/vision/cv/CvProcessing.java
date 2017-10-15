@@ -142,7 +142,7 @@ public class CvProcessing {
 		Imgproc.findContours(threshold, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 		return contours;
 	}
-	/**
+	/**1
 	 * Detects contours within a binary image.
 	 * 
 	 * @param threshold the binary image

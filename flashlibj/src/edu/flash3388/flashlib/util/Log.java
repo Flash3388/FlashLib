@@ -146,7 +146,7 @@ public abstract class Log{
 		byte counter = 0;
 		logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(name + (++counter) + EXTENSION);
+			logFile = new File(name + "_" + (++counter) + EXTENSION);
 		
 		try {
 			if(isLoggingMode(MODE_PRINT))
@@ -561,6 +561,24 @@ public abstract class Log{
 		printError(error, time);
 		listenersReportError(error, time);
 	}
+	/**
+	 * Reports an error. The data output depends on the logging mode currently set:
+	 * <ul>
+	 * 		<li> If the logging mode includes {@link #MODE_WRITE} than data is written to both the standard and error files or buffers. A stack trace of the error is added as well. </li>
+	 * 		<li> If the logging mode includes {@link #MODE_PRINT} than data is printed to the set {@link PrintStream}</li>
+	 * 		<li> If the logging mode includes {@link #MODE_INTERFACES} than data is passed to all the attached {@link LogListener} to {@link LogListener#reportError(String, double)} </li>
+	 * </ul>
+	 * @param t a {@link Throwable} object containing the exception.
+	 */
+	public void reportError(Throwable t){
+		if(isDisabled()) return;
+		
+		double time = Mathf.roundDecimal(getTime());
+		
+		writeError(t.getClass().getName(), getErrorStackTrace(t), time);
+		printError(t.getMessage(), time);
+		listenersReportError(t.getMessage(), time);
+	}
 	
 	/**
 	 * Reports a warning. The data output depends on the logging mode currently set:
@@ -678,7 +696,14 @@ public abstract class Log{
 	private static String getErrorStackTrace(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
 		String trace = "";
-		for(byte i = 3; i < traces.length; i++)
+		for(int i = 3; i < traces.length; i++)
+			trace += "\t"+traces[i].toString()+"\n";
+		return trace;
+	}
+	private static String getErrorStackTrace(Throwable t){
+		StackTraceElement[] traces = t.getStackTrace();
+		String trace = "";
+		for(int i = 0; i < traces.length; i++)
 			trace += "\t"+traces[i].toString()+"\n";
 		return trace;
 	}

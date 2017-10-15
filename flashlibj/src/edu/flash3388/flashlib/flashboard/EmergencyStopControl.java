@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.flashboard;
 
-import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -10,7 +9,7 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class EmergencyStopControl extends Sendable implements BooleanSource{
+public class EmergencyStopControl extends FlashboardControl implements BooleanSource{
 
 	private static final byte EMERGENCY = 0xe;
 	private static final byte NORMAL = 0x5;

@@ -25,9 +25,8 @@ public class TankCombinedAction extends CombinedAction{
 		add(rotation);
 		add(positioning);
 		
-		Subsystem s = driveTrain.getSystem();
-		if(s != null)
-			requires(s);
+		if(driveTrain instanceof Subsystem)
+			requires((Subsystem)driveTrain);
 	}
 	public TankCombinedAction(TankDriveSystem driveTrain, 
 			SourceAction positioning, SourceAction rotation){
@@ -43,9 +42,9 @@ public class TankCombinedAction extends CombinedAction{
 		super.execute();
 		
 		double speedY = positioning != null? 
-				Mathf.constrain2(positioning.getSource().get(), minSpeed, maxSpeed) : 0.0;
+				Mathf.constrain2(positioning.get(), minSpeed, maxSpeed) : 0.0;
 		double speedX = rotation != null? 
-				Mathf.constrain2(rotation.getSource().get(), minSpeed, maxSpeed) : 0.0;
+				Mathf.constrain2(rotation.get(), minSpeed, maxSpeed) : 0.0;
 		
 		driveTrain.arcadeDrive(speedY, speedX);
 	}

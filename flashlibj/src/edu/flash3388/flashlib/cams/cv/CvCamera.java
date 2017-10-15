@@ -100,6 +100,7 @@ public class CvCamera implements Camera{
 	 * @return a new frame
 	 * @see VideoCapture#read(Mat)
 	 */
+	@Override
 	public Mat read(){
 		if(!capture.isOpened()) return null;
 		capture.read(image);

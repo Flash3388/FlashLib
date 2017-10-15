@@ -15,7 +15,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * sending an handshake; upon such event, camera data is read from a defined camera by calling {@link Camera#getData()} 
  * and sent to the client. The sending interval is defined by the defined camera FPS. If the defined FPS is not valid,
  * the default 30 FPS value is used instead. Data is sent and received in a 
- * separate thread which can be stopped by calling {@link #stop()}.
+ * separate thread which can be stopped by calling {@link #close()}.
  * <p>
  * Every 3 seconds, the server performs an handshake check to make sure the connection still exists. If it does not, the server
  * waits for a new connection.
@@ -195,7 +195,7 @@ public class CameraServer {
 	/**
 	 * Stops the operation of the server. Closes the socket and waits for termination of the reading thread.
 	 */
-	public void stop(){
+	public void close(){
 		stop = true;
 		socket.close();
 		

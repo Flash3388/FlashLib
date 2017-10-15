@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.flashboard.HIDSendable;
 import edu.flash3388.flashlib.robot.RobotFactory;
 
 /**
@@ -9,7 +8,7 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class XboxController extends HIDSendable implements HID, Runnable{
+public class XboxController implements HID, Runnable{
 	
 	//private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
 	
@@ -45,16 +44,6 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 	 * @param channel the device index
 	 */
 	public XboxController(int channel){
-		this(channel, "XBox "+ channel);
-	}
-	/**
-	 * Creates a new Xbox controller.
-	 * 
-	 * @param channel the device index
-	 * @param name the name of the controller
-	 */
-	public XboxController(int channel, String name){
-		super(name);
 		this.channel = channel;
 		
 		LeftStick = new Stick(this, 0, 1);
@@ -199,10 +188,6 @@ public class XboxController extends HIDSendable implements HID, Runnable{
 				buttons[i].run();
 		}
 		DPad.run();
-	}
-	@Override
-	protected HID getHID() {
-		return this;
 	}
 }
 

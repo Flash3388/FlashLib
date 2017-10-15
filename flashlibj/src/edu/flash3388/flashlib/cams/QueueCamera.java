@@ -19,4 +19,9 @@ public abstract class QueueCamera<T> implements Camera{
 	public T dequeue(){
 		return frames.dequeue();
 	}
+	
+	@Override
+	public Object read() {
+		return dequeue();
+	}
 }

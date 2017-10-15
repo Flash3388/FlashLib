@@ -21,22 +21,22 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public abstract class ManualConnectionVerifier implements CommInterface{
 
 	/**
-	 * An handshake byte array. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
+	 * An handshake byte array. Used by {@link UDPCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE = {0x01, 0xe, 0x07};
 	/**
-	 * A server connection handshake. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
+	 * A server connection handshake. Used by {@link UDPCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE_CONNECT_SERVER = {0xb, 0x02, 0xa};
 	/**
-	 * A client connection handshake. Used by {@link UdpCommInterface} and {@link SerialCommInterface}
+	 * A client connection handshake. Used by {@link UDPCommInterface} and {@link SerialCommInterface}
 	 */
 	public static final byte[] HANDSHAKE_CONNECT_CLIENT = {0xc, 0x10, 0x06};
 	
 	/**
 	 * A default connection timeout for protocols which need to manually check for connection, like: UDP.
 	 */
-	public static final int CONNECTION_TIMEOUT = 1500;
+	public static final int CONNECTION_TIMEOUT = 1000;
 	
 	private int lastRead = -1, timeLastTimeout = -1, lastSend = -1;
 	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
@@ -53,17 +53,6 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 */
 	@Override
 	public void update(int millis){
-		/*if(outInet != null && millis - lastRemoteReachCheck > CONNECTION_TIMEOUT){
-			System.out.println("Checking network reachable");
-			try {
-				if (!outInet.isReachable(CONNECTION_TIMEOUT)){
-					disconnect();
-					System.out.println("Network not reachable");
-				}
-			} catch (IOException e) {
-			}
-			lastRemoteReachCheck = millis;
-		}*/
 		if(!verifyConnection)
 			return;
 		if(millis - lastRead >= connectionTimeout){
@@ -79,8 +68,9 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 			timeouts = 0;
 			timeLastTimeout = -1;
 		}
-		if(millis - lastSend >= connectionTimeout / 2)
+		if(millis - lastSend >= connectionTimeout / 2){
 			writeHandshake();
+		}
 	}
 	
 	/**
@@ -93,7 +83,7 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * Updates the send verifiers of new data that has been sent. Should be called when new data was sent.
 	 */
 	protected void newDataSent(){
-		lastRead = FlashUtil.millisInt();
+		lastSend = FlashUtil.millisInt();
 	}
 	/**
 	 * Resets the connection verification data handlers. Should be called on connection.

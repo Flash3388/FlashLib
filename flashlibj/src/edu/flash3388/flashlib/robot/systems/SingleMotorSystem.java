@@ -88,7 +88,20 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 		return controller.get();
 	}
 	
-	
+	/**
+	 * Gets the default speed to move the system forward. Used when calling {@link #forward()}.
+	 * @return the default forward speed
+	 */
+	public double getForwardDefaultSpeed(){
+		return default_speed_forward;
+	}
+	/**
+	 * Gets the default speed to move the system backward. Used when calling {@link #backward()}.
+	 * @return the default backward speed
+	 */
+	public double getBackwardDefaultSpeed(){
+		return default_speed_backward;
+	}
 	/**
 	 * Sets the default speed to move the system. Used when calling {@link #forward()} and {@link #backward()}.
 	 * @param speed the default speed
@@ -126,12 +139,16 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 		controller.set(speed);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public void forward(double speed){
-		if(speed < 0) speed *= -1;
+	public void moveY(double speed) {
+		set(speed);
+	}
+	@Override
+	public void moveX(double speed) {
+		set(speed);
+	}
+	@Override
+	public void rotate(double speed) {
 		set(speed);
 	}
 	/**
@@ -139,14 +156,6 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	 */
 	public void forward(){
 		forward(default_speed_forward);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void backward(double speed){
-		if(speed < 0) speed *= -1;
-		set(-speed);
 	}
 	/**
 	 * Moves the system backwards at the default speed.
@@ -162,66 +171,6 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 		controller.set(0);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void rotate(double speed, boolean direction) {
-		moveY(speed, direction);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void rotateRight(double speed) {
-		forward(speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void rotateLeft(double speed) {
-		backward(speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void moveX(double speed, boolean direction) {
-		moveY(speed, direction);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void right(double speed) {
-		forward(speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void left(double speed) {
-		backward(speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void moveY(double speed, boolean direction) {
-		if(direction) forward(speed);
-		else backward(speed);
-	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns this instance.
-	 * </p>
-	 */
-	@Override
-	public Subsystem getSystem() {
-		return this;
-	}
 	/**
 	 * {@inheritDoc}
 	 */

@@ -1,0 +1,59 @@
+subprojects {
+    apply plugin: 'cpp'
+    apply plugin: 'c'
+	
+	model{
+		platforms{
+			linux{
+				operatingSystem "linux"
+				//architecture "arm"
+			}
+			arm{
+				operatingSystem "linux"
+				architecture "arm"
+			}
+		}
+		toolChains{
+		}
+
+		repositories {
+			libs(PrebuiltLibraries) {
+				jni {
+					headers.srcDirs "${System.properties['java.home']}/../include",
+						"${System.properties['java.home']}/../include/win32",
+						"${System.properties['java.home']}/../include/darwin",
+						"${System.properties['java.home']}/../include/linux"
+				}
+			}
+		}
+		components {
+			flashlib_hal(NativeLibrarySpec) {
+				targetPlatform "linux"
+				targetPlatform "arm"
+
+				sources {
+					cpp {
+						source {
+							srcDirs = ["src", "../shared/src"]
+							include "**/*.cpp", "**/*.h"
+						}
+						exportedHeaders {
+							srcDirs = ["include", "../shared/include"]
+						}
+						lib library: 'jni', linkage: 'api'
+					}
+					c {
+						source {
+							srcDirs = ["src", "../shared/src"]
+							include "**/*.c"
+						}
+					}
+				}
+				binaries.all {
+					cppCompiler.args "-std=c++11", "-fPIC", "-Wno-narrowing"
+				}
+			}
+		}
+	}
+}
+

@@ -3,10 +3,10 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.flashboard.SendableLog;
+import edu.flash3388.flashlib.flashboard.FlashboardRemoteLog;
+import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
-import edu.flash3388.flashlib.robot.sbc.MotorSafetyHelper;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
@@ -132,7 +132,7 @@ public class FlashRobotUtil {
 		return init;
 	}
 	/**
-	 * Initializes FlashLib for robotics use. Sets the {@link Robot} implementation given to {@link RobotFactory}
+	 * Initializes FlashLib for robotics use. Sets the {@link RobotInterface} implementation given to {@link RobotFactory}
 	 * and initializes {@link Flashboard} according to the given initialization data.
 	 * 
 	 * @param robot the robot implementation
@@ -141,7 +141,7 @@ public class FlashRobotUtil {
 	 * 
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(Robot robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
+	public static void initFlashLib(RobotInterface robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
@@ -151,8 +151,10 @@ public class FlashRobotUtil {
 		
 		if(flashboardInitData != null){
 			Flashboard.init(flashboardInitData);
-			Flashboard.attach(estopControl,
-						      new SendableLog(FlashUtil.getLog()));
+			if(Flashboard.flashboardInit()){
+				Flashboard.attach(estopControl,
+					      new FlashboardRemoteLog(FlashUtil.getLog()));
+			}
 		}
 		
 		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE", "Robot");

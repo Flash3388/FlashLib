@@ -1,12 +1,12 @@
 package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.PidSource;
+import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class GyroRotationActionPart extends PidRotationActionPart{
+public class GyroRotationActionPart extends PIDRotationActionPart{
 
 	private Gyro gyro;
 	private DoubleSource rotationThreshold;
@@ -16,15 +16,15 @@ public class GyroRotationActionPart extends PidRotationActionPart{
 	public GyroRotationActionPart(Gyro gyro,DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, 
 			DoubleProperty kf, DoubleSource rotationThreshold,
 			double rotationMargin) {
-		super(new PidSource.DoubleSourcePidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
-		((PidSource.DoubleSourcePidSource)getPIDController().getPIDSource()).setSource(()->getValue());
+		super(new PIDSource.DoubleSourcePIDSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
+		((PIDSource.DoubleSourcePIDSource)getPIDController().getPIDSource()).setSource(()->getValue());
 		this.gyro = gyro;
 		this.rotationThreshold = rotationThreshold;
 	}
 	public GyroRotationActionPart(Gyro gyro, double kp, double ki, double kd, double kf, DoubleSource rotationThreshold,
 			double rotationMargin) {
-		super(new PidSource.DoubleSourcePidSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
-		((PidSource.DoubleSourcePidSource)getPIDController().getPIDSource()).setSource(()->getValue());
+		super(new PIDSource.DoubleSourcePIDSource(null), kp, ki, kd, kf, ()->0, rotationMargin);
+		((PIDSource.DoubleSourcePIDSource)getPIDController().getPIDSource()).setSource(()->getValue());
 		this.gyro = gyro;
 		this.rotationThreshold = rotationThreshold;
 	}

@@ -16,7 +16,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
 /**
  * CameraClient provides a UDP communications client for camera data. It connects with a remote {@link CameraServer},
  * receives byte arrays holding image data and passes them on to attached {@link DataListener}s. Data reading runs in
- * a separate thread which starts immediately and can be stopped by calling {@link #stop()}.
+ * a separate thread which starts immediately and can be stopped by calling {@link #close()}.
  * <p>
  * To receive image data, implement {@link DataListener} and add it using {@link #addListener(DataListener)}. Data will be
  * passed automatically on arrival. But the data is passed as bytes, so the image will need to be created manually. This allows
@@ -77,19 +77,19 @@ public class CameraClient {
 	 * @param remoteAdd remote server address
 	 * @param remotePort remote server port
 	 * @param maxBytes maximum buffer size
+	 * 
+	 * @throws SocketException if failed to create the socket
 	 */
-	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes){
+	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes) throws SocketException{
 		port = localPort;
 		sendPort = remotePort;
 		sendAddress = remoteAdd;
 		this.name = name;
 		logName = name+"-CameraClient";
-		try {
-			socket = new DatagramSocket(new InetSocketAddress(localPort));
-			socket.setSoTimeout(READ_TIMEOUT);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		
+		socket = new DatagramSocket(new InetSocketAddress(localPort));
+		socket.setSoTimeout(READ_TIMEOUT);
+		
 		recBytes = new byte[maxBytes];
 		 
 		runThread = new Thread(new Task(this));
@@ -105,8 +105,10 @@ public class CameraClient {
 	 * @param localPort local port for data listening
 	 * @param remoteAdd remote server address
 	 * @param remotePort remote server port
+	 * 
+	 * @throws SocketException if failed to create the socket
 	 */
-	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort){
+	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort) throws SocketException{
 		this(name, localPort, remoteAdd, remotePort, DEFAULT_MAX_BYTES);
 	}
 	
@@ -207,7 +209,7 @@ public class CameraClient {
 	/**
 	 * Stops the operation of the client. Closes the socket and waits for termination of the reading thread.
 	 */
-	public void stop(){
+	public void close(){
 		stop = true;
 		connected = false;
 		socket.close();
