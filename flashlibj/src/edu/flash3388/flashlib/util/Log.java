@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -244,30 +243,45 @@ public abstract class Log{
 	}
 	
 	/**
-	 * Prints a warning logage to the used {@link PrintStream}.
+	 * Prints a warning log to the used {@link PrintStream}.
 	 * @param warning a warning
 	 * @param time the current timestamp
 	 */
-	public abstract void printWarning(String warning, double time);
+	public void printWarning(String warning, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] <WARNING> : %s", getName(), time, warning));
+	}
+	
 	/**
-	 * Prints an error logage to the used {@link PrintStream}.
+	 * Prints an error log to the used {@link PrintStream}.
 	 * @param error an error
 	 * @param time the current timestamp
 	 */
-	public abstract void printError(String error, double time);
+	public void printError(String error, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] <ERROR> : %s", getName(), time, error));
+	}
+	
 	/**
-	 * Prints a logage to the used {@link PrintStream}.
+	 * Prints a log to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 */
-	public abstract void print(String log, String caller);
+	public void print(String log, String caller){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> (%s) : %s", getName(), caller, log));
+	}
+	
 	/**
-	 * Prints a logage to the used {@link PrintStream}.
+	 * Prints a log to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 * @param time the current timestamp
 	 */
-	public abstract void print(String log, String caller, double time);
+	public void print(String log, String caller, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] (%s) : %s", getName(), time, caller, log));
+	}
 	
 	/**
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
@@ -556,9 +570,9 @@ public abstract class Log{
 	public void reportError(String error){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
-		writeError(error, time, Thread.currentThread().getStackTrace(), 1);
+		writeError(error, time, Thread.currentThread().getStackTrace(), 2);
 		printError(error, time);
 		listenersReportError(error, time);
 	}
@@ -574,7 +588,7 @@ public abstract class Log{
 	public void reportError(Throwable t){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
 		writeError(t.getClass().getName(), time, t.getStackTrace(), 0);
 		printError(t.getMessage(), time);
@@ -593,7 +607,7 @@ public abstract class Log{
 	public void reportWarning(String warning){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
 		printWarning(warning, time);
 		writeWarning(warning, time);
@@ -680,8 +694,6 @@ public abstract class Log{
 	 */
 	public void logTime(String msg, String caller, double time){
 		if(isDisabled()) return;
-		
-		time = Mathf.roundDecimal(time);
 		
 		write(msg, caller, time);
 		print(msg, caller, time);

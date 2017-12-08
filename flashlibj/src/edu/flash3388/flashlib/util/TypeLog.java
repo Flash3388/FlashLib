@@ -160,39 +160,6 @@ public abstract class TypeLog extends Log{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void printWarning(String warning, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <WARNING> : "+warning);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void printError(String error, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <ERROR> : "+error);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ("+caller+") : "+log);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		writeToStandardLog(new LogData(log, caller));

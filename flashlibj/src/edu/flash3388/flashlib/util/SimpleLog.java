@@ -121,39 +121,6 @@ public abstract class SimpleLog extends Log{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void printWarning(String warning, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> [%f] <WARNING> : %s", getName(), time, warning));
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void printError(String error, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> [%f] <ERROR> : %s", getName(), time, error));
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> (%s) : %s", getName(), caller, log));
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> [%f] (%s) : %s", getName(), time, caller, log));
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		writeToStandardLog(String.format("(%s) : %s", caller, log));
@@ -164,7 +131,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String log, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(String.format("[%f] (%s) : %s", time, caller, log));
+		writeToStandardLog(String.format("[%.3f] (%s) : %s", time, caller, log));
 	}
 	/**
 	 * {@inheritDoc}
@@ -172,7 +139,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void writeError(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log));
+		writeToErrorLog(String.format("[%.3f] <ERROR> : %s", time, log));
 	}
 	/**
 	 * {@inheritDoc}
@@ -181,7 +148,7 @@ public abstract class SimpleLog extends Log{
 	public synchronized void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		write(log, "ERROR");
-		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log), stackTraceToString(stacktrace, traceIndex));
+		writeToErrorLog(String.format("[%.3f] <ERROR> : %s", time, log), stackTraceToString(stacktrace, traceIndex));
 	}
 	/**
 	 * {@inheritDoc}
@@ -190,6 +157,6 @@ public abstract class SimpleLog extends Log{
 	public synchronized void writeWarning(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		write(log, "WARNING");
-		writeToErrorLog(String.format("[%f] <WARNING> : %s", time, log));
+		writeToErrorLog(String.format("[%.3f] <WARNING> : %s", time, log));
 	}
 }
