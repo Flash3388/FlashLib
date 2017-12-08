@@ -123,7 +123,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void printWarning(String warning, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <WARNING> : "+warning);
+		getPrintStream().println(String.format("%s> [%f] <WARNING> : %s", getName(), time, warning));
 	}
 	/**
 	 * {@inheritDoc}
@@ -131,7 +131,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void printError(String error, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <ERROR> : "+error);
+		getPrintStream().println(String.format("%s> [%f] <ERROR> : %s", getName(), time, error));
 	}
 	/**
 	 * {@inheritDoc}
@@ -139,7 +139,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void print(String log, String caller){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ("+caller+") : "+log);
+		getPrintStream().println(String.format("%s> (%s) : %s", getName(), caller, log));
 	}
 	/**
 	 * {@inheritDoc}
@@ -147,52 +147,49 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public void print(String log, String caller, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
+		getPrintStream().println(String.format("%s> [%f] (%s) : %s", getName(), time, caller, log));
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void write(String mess, String caller){
+	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("("+caller+") : "+mess);
+		writeToStandardLog(String.format("(%s) : %s", caller, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void write(String mess, String caller, double time){
+	public synchronized void write(String log, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("["+time+"] ("+caller+") : "+mess);
+		writeToStandardLog(String.format("[%f] (%s) : %s", time, caller, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, double time){
+	public synchronized void writeError(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		mess = "["+time+"] : " + mess;
-		writeToErrorLog(mess);
+		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, String stacktrace, double time){
+	public synchronized void writeError(String log, String stacktrace, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "ERROR");
-		mess = "["+time+"] <ERROR> : " + mess;
-		writeToErrorLog(mess, stacktrace);
+		write(log, "ERROR");
+		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log), stacktrace);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeWarning(String mess, double time){
+	public synchronized void writeWarning(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "WARNING");
-		mess = "["+time+"] <WARNING> : " + mess;
-		writeToErrorLog(mess);
+		write(log, "WARNING");
+		writeToErrorLog(String.format("[%f] <WARNING> : %s", time, log));
 	}
 }

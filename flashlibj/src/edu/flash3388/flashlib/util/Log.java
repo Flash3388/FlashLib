@@ -135,18 +135,18 @@ public abstract class Log{
 		
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
+		directory += String.format("%s/log_%s/", name, dateFormat.format(date));
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
 		
 		dateFormat.applyPattern("_hh_mm");
 		
-		name = directory + name + dateFormat.format(date);
-		byte counter = 0;
+		name = String.join("", directory, name, dateFormat.format(date));
+		int counter = 0;
 		logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(name + "_" + (++counter) + EXTENSION);
+			logFile = new File(String.format("%s_%d%s", name, counter, EXTENSION));
 		
 		try {
 			if(isLoggingMode(MODE_PRINT))
@@ -693,19 +693,23 @@ public abstract class Log{
 			return traces[3].getClassName();
 		return "";
 	}
+	
 	private static String getErrorStackTrace(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
-		String trace = "";
-		for(int i = 3; i < traces.length; i++)
-			trace += "\t"+traces[i].toString()+"\n";
-		return trace;
+		return stackTraceToString(traces, 3);
 	}
 	private static String getErrorStackTrace(Throwable t){
 		StackTraceElement[] traces = t.getStackTrace();
-		String trace = "";
-		for(int i = 0; i < traces.length; i++)
-			trace += "\t"+traces[i].toString()+"\n";
-		return trace;
+		return stackTraceToString(traces, 0);
+	}
+	private static String stackTraceToString(StackTraceElement[] traces, int startIndex){
+		StringBuffer traceBuff = new StringBuffer();
+		for(int i = startIndex; i < traces.length; i++){
+			traceBuff.append('\t');
+			traceBuff.append(traces[i].toString());
+			traceBuff.append('\n');
+		}
+		return traceBuff.toString();
 	}
 	
 	/**
