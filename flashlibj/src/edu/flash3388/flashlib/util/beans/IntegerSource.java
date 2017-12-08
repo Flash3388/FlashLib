@@ -9,7 +9,7 @@ package edu.flash3388.flashlib.util.beans;
  */
 @FunctionalInterface
 public interface IntegerSource {
-
+	
 	/**
 	 * Gets the value of this source. Implementation is user dependent.
 	 * @return value
