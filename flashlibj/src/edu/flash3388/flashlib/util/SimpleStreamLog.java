@@ -161,8 +161,10 @@ public class SimpleStreamLog extends SimpleLog{
 	@Override
 	protected void writeToErrorLog(String log, String stacktrace) {
 		try {
-			errWriter.write(log + "\n");
-			errWriter.write(stacktrace + "\n");
+			errWriter.write(log);
+			errWriter.write("\n");
+			errWriter.write(stacktrace);
+			errWriter.write("\n");
 		} catch (IOException e) {
 			close();
 		}
