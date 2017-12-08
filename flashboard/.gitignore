@@ -2,3 +2,5 @@
 /logs/
 /libs/
 /data/
+.project
+.classpath
