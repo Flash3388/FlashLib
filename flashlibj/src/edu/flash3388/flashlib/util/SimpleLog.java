@@ -178,10 +178,10 @@ public abstract class SimpleLog extends Log{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String log, String stacktrace, double time){
+	public synchronized void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
 		write(log, "ERROR");
-		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log), stacktrace);
+		writeToErrorLog(String.format("[%f] <ERROR> : %s", time, log), stackTraceToString(stacktrace, traceIndex));
 	}
 	/**
 	 * {@inheritDoc}

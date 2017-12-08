@@ -244,25 +244,25 @@ public abstract class Log{
 	}
 	
 	/**
-	 * Prints a warning message to the used {@link PrintStream}.
+	 * Prints a warning logage to the used {@link PrintStream}.
 	 * @param warning a warning
 	 * @param time the current timestamp
 	 */
 	public abstract void printWarning(String warning, double time);
 	/**
-	 * Prints an error message to the used {@link PrintStream}.
+	 * Prints an error logage to the used {@link PrintStream}.
 	 * @param error an error
 	 * @param time the current timestamp
 	 */
 	public abstract void printError(String error, double time);
 	/**
-	 * Prints a message to the used {@link PrintStream}.
+	 * Prints a logage to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 */
 	public abstract void print(String log, String caller);
 	/**
-	 * Prints a message to the used {@link PrintStream}.
+	 * Prints a logage to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 * @param time the current timestamp
@@ -273,44 +273,45 @@ public abstract class Log{
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the standard log file or buffer
+	 * @param log A line to log to the standard log file or buffer
 	 * @param caller the logger
 	 */
-	public abstract void write(String mess, String caller);
+	public abstract void write(String log, String caller);
 	/**
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the standard log file or buffer
+	 * @param log A line to log to the standard log file or buffer
 	 * @param caller the logger
 	 * @param time the current timestamp
 	 */
-	public abstract void write(String mess, String caller, double time);
+	public abstract void write(String log, String caller, double time);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
 	 * @param time current timestamp
 	 */
-	public abstract void writeError(String mess, double time);
+	public abstract void writeError(String log, double time);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
+	 * @param time current timestamp
 	 * @param stacktrace A stack trace of the error
-	 * @param time current timestamp
+	 * @param traceIndex index from which to read the stacktrace.
 	 */
-	public abstract void writeError(String mess, String stacktrace, double time);
+	public abstract void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
 	 * @param time current timestamp
 	 */
-	public abstract void writeWarning(String mess, double time);
+	public abstract void writeWarning(String log, double time);
 	
 	
 	
@@ -557,7 +558,7 @@ public abstract class Log{
 		
 		double time = Mathf.roundDecimal(getTime());
 		
-		writeError(error, getErrorStackTrace(), time);
+		writeError(error, time, Thread.currentThread().getStackTrace(), 1);
 		printError(error, time);
 		listenersReportError(error, time);
 	}
@@ -575,7 +576,7 @@ public abstract class Log{
 		
 		double time = Mathf.roundDecimal(getTime());
 		
-		writeError(t.getClass().getName(), getErrorStackTrace(t), time);
+		writeError(t.getClass().getName(), time, t.getStackTrace(), 0);
 		printError(t.getMessage(), time);
 		listenersReportError(t.getMessage(), time);
 	}
@@ -694,15 +695,15 @@ public abstract class Log{
 		return "";
 	}
 	
-	private static String getErrorStackTrace(){
+	protected static String getErrorStackTrace(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
 		return stackTraceToString(traces, 3);
 	}
-	private static String getErrorStackTrace(Throwable t){
+	protected static String getErrorStackTrace(Throwable t){
 		StackTraceElement[] traces = t.getStackTrace();
 		return stackTraceToString(traces, 0);
 	}
-	private static String stackTraceToString(StackTraceElement[] traces, int startIndex){
+	protected static String stackTraceToString(StackTraceElement[] traces, int startIndex){
 		StringBuffer traceBuff = new StringBuffer();
 		for(int i = startIndex; i < traces.length; i++){
 			traceBuff.append('\t');
