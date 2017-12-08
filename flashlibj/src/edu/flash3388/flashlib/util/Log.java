@@ -269,7 +269,7 @@ public abstract class Log{
 	 */
 	public void print(String log, String caller){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> (%s) : %s", getName(), caller, log));
+		getPrintStream().println(String.format("%s> <%s> : %s", getName(), caller, log));
 	}
 	
 	/**
@@ -280,7 +280,7 @@ public abstract class Log{
 	 */
 	public void print(String log, String caller, double time){
 		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(String.format("%s> [%.3f] (%s) : %s", getName(), time, caller, log));
+		getPrintStream().println(String.format("%s> [%.3f] <%s> : %s", getName(), time, caller, log));
 	}
 	
 	/**

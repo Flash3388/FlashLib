@@ -123,7 +123,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(String.format("(%s) : %s", caller, log));
+		writeToStandardLog(String.format("<%s> : %s", caller, log));
 	}
 	/**
 	 * {@inheritDoc}
@@ -131,7 +131,7 @@ public abstract class SimpleLog extends Log{
 	@Override
 	public synchronized void write(String log, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(String.format("[%.3f] (%s) : %s", time, caller, log));
+		writeToStandardLog(String.format("[%.3f] <%s> : %s", time, caller, log));
 	}
 	/**
 	 * {@inheritDoc}
