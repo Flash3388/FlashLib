@@ -110,12 +110,12 @@ public class XMLStreamLog extends TypeLog{
 	private void init(){
 		try {
 			stdWriter = new FileWriter(getStandardLogFile(), false);
-			stdWriter.write("<?xml version=\"1.0\" ?>");
-			stdWriter.write("<xmlog>");
+			stdWriter.write("<?xml version=\"1.0\" ?>\n");
+			stdWriter.write("<xmlog>\n");
 			
 			errWriter = new FileWriter(getErrorLogFile(), false);
-			errWriter.write("<?xml version=\"1.0\" ?>");
-			errWriter.write("<xmlog>");
+			errWriter.write("<?xml version=\"1.0\" ?>\n");
+			errWriter.write("<xmlog>\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 			close();
@@ -153,8 +153,8 @@ public class XMLStreamLog extends TypeLog{
 	@Override
 	protected void writeToErrorLog(ErrorLogData data) {
 		try {
-			errWriter.write(String.format("\t<error caller=\"%s\" time=\"%.3f\">\n\t\t<value>%s</value>\n</error>\n", 
-					data.caller, data.time, data.log));
+			errWriter.write(String.format("\t<%s time=\"%.3f\">\n\t\t<value>%s</value>\n\t</%s>\n", 
+					data.caller, data.time, data.log, data.caller));
 		} catch (IOException e) {
 			e.printStackTrace();
 			close();
@@ -168,14 +168,14 @@ public class XMLStreamLog extends TypeLog{
 		try {
 			StringBuffer writeBuffer = new StringBuffer();
 			
-			writeBuffer.append(String.format("\t<error caller=\"%s\" time=\"%.3f\">\n\t\t<value>%s</value>\n", 
+			writeBuffer.append(String.format("\t<%s time=\"%.3f\">\n\t\t<value>%s</value>\n", 
 					data.caller, data.time, data.log));
 			writeBuffer.append("\t\t<stacktrace>\n");
 			for (int i = data.traceIndex; i < data.stacktrace.length; i++) {
 				writeBuffer.append(String.format("\t\t\t<element>%s</element>\n", data.stacktrace[i].toString()));
 			}
 			writeBuffer.append("\t\t</stacktrace>\n");
-			writeBuffer.append("\t</error>\n");
+			writeBuffer.append(String.format("\t</%s>\n", data.caller));
 			
 			errWriter.write(writeBuffer.toString());
 		} catch (IOException e) {
