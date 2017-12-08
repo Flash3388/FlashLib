@@ -3,6 +3,20 @@ package edu.flash3388.flashlib.util;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * A stream log using {@link FileWriter}s to write data to the log files.
+ * <p>
+ * Data is printed and saved in XML format.
+ * </p>
+ * <p>
+ * Stream log uses a simple file writer to immediately write logs into the created file. It cannot be saved while open and 
+ * should be closed when finished to avoid data loss. This type is most useful for desktop applications or other softwares
+ * who do not require logs for emergency situations like power outs, where the log data might be lost.
+ * </p>
+ * 
+ * @author Tom Tzook
+ * @since FlashLib 1.2.1
+ */
 public class XMLStreamLog extends TypeLog{
 	
 	private FileWriter stdWriter;
