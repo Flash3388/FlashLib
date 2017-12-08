@@ -240,7 +240,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	protected void writeData(byte[] data, int start, int length) {
+	protected void writeRaw(byte[] data, int start, int length) {
 		try {
 			out.write(data, start, length);
 		} catch (IOException e) {
@@ -254,15 +254,29 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	protected int readData(byte[] buffer) {
+	protected int readRaw(byte[] buffer, int start, int length) {
 		try {
-			return in.read(buffer);
+			return in.read(buffer, start, length);
 		} catch (SocketTimeoutException e) {
 			return 0;
 		} catch (IOException e) {
 			disconnect();
 			return 0;
 		} 
+	}
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Gets the amount of bytes in the TCP buffer.
+	 */
+	@Override
+	protected int availableData() {
+		try {
+			return in.available();
+		} catch (IOException e) {
+			disconnect();
+			return 0;
+		}
 	}
 	
 	/**

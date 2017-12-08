@@ -20,7 +20,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * does not exist in its entirety, the data is saved to a secondary buffer which is updated next time data is read.
  * </p>
  * <p>
- * It is necessary to implement {@link #readData(byte[])} for reading data from the port and {@link #writeData(byte[], int, int)} 
+ * It is necessary to implement {@link #readRaw(byte[], int, int)} for reading data from the port and {@link #writeRaw(byte[], int, int)} 
  * for writing data to the port used.
  * </p>
  * 
@@ -29,8 +29,12 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public abstract class StreamCommInterface extends ManualConnectionVerifier{
 
+	private static final int PACKET_LENGTH_BYTE_COUNT = 4;
+	
 	private CRC32 crc;
-	private byte[] dataBuffer = new byte[BUFFER_SIZE], leftoverData = new byte[0];
+	private byte[] dataBuffer = new byte[BUFFER_SIZE];
+	private byte[] sizeBuffer = new byte[PACKET_LENGTH_BYTE_COUNT];
+	private int nextPacketLength = -1;
 	private byte crclen = 0;
 	
 	/**
@@ -46,6 +50,13 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		}
 	}
 	
+	private boolean readError(int lengthRead){
+		if(lengthRead < 0){
+			disconnect();
+		}
+		return lengthRead < 1;
+	}
+	
 	private boolean checkCrc(byte[] data, long expected){
 		crc.reset();
 		crc.update(data);
@@ -58,7 +69,6 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		if(crclen > 0){
 			if((data.length - start - datalen - 1) < 8 || 
 					!checkCrc(datarec, FlashUtil.toLong(data, start + datalen + 1))){
-				System.out.println("data corruption?");
 				packet.length = 0;
 				return false;
 			}
@@ -69,28 +79,21 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		return true;
 	}
 	private byte[] assemblePacket(byte[] data, int start, int len){
-		byte[] sdata = new byte[len + 4 + crclen];
+		byte[] sdata = new byte[len + PACKET_LENGTH_BYTE_COUNT + crclen - start];
 		FlashUtil.fillByteArray(len, 0, sdata);
-		System.arraycopy(data, start, sdata, 4, len);
+		System.arraycopy(data, start, sdata, PACKET_LENGTH_BYTE_COUNT, len);
 		
 		if(crclen > 0){
 			crc.reset();
 			crc.update(data);
 			long crcd = crc.getValue();
-			FlashUtil.fillByteArray(crcd, 4 + len, sdata);
+			FlashUtil.fillByteArray(crcd, PACKET_LENGTH_BYTE_COUNT + len, sdata);
 		}
 		
 		return sdata;
 	}
 	private boolean handleData(Packet packet){
-		if(leftoverData.length < 4)
-			return false;
-		int datalen = FlashUtil.toInt(leftoverData);
-		if(leftoverData.length < 4 + datalen)
-			return false;
-		
-		boolean ret = disassemblePacket(leftoverData, 4, datalen - crclen, packet);
-		leftoverData = Arrays.copyOfRange(leftoverData, 4 + datalen, leftoverData.length);
+		boolean ret = disassemblePacket(dataBuffer, 0, nextPacketLength - crclen, packet);
 		
 		if(ret && isHandshake(packet.data, packet.length))
 			return false;
@@ -108,23 +111,33 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		if(!isOpened())
 			return false;
 		
-		if(handleData(packet))
-			return true;
-		
-		int len = readData(dataBuffer);
-		if(len < 1){
-			if(len < 0)
-				disconnect();
-			packet.length = 0;
+		int availabe = availableData();
+		if(nextPacketLength < 0 && availabe < PACKET_LENGTH_BYTE_COUNT)
 			return false;
+		
+		if(nextPacketLength < 0 && availabe >= PACKET_LENGTH_BYTE_COUNT){
+			int len = readRaw(sizeBuffer, 0, PACKET_LENGTH_BYTE_COUNT);
+			if(readError(len)){
+				packet.length = 0;
+				return false;
+			}
+			nextPacketLength = FlashUtil.toInt(sizeBuffer);
+			newDataRead();
 		}
-		newDataRead();
 		
-		leftoverData = Arrays.copyOf(leftoverData, leftoverData.length + len);
-		System.arraycopy(dataBuffer, 0, leftoverData, leftoverData.length - len, len);
-		
-		if(handleData(packet))
-			return true;
+		if(nextPacketLength > 0 && availabe >= nextPacketLength){
+			int len = readRaw(dataBuffer, 0, nextPacketLength);
+			if(readError(len)){
+				packet.length = 0;
+				return false;
+			}
+			newDataRead();
+			
+			if(handleData(packet)){
+				nextPacketLength = -1;
+				return true;
+			}
+		}
 		
 		return false;
 	}
@@ -141,7 +154,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	@Override
 	public void write(byte[] data, int start, int length) {
 		data = assemblePacket(data, start, length);
-		writeData(data, 0, data.length);
+		writeRaw(data, 0, data.length);
 		newDataSent();
 	}
 	
@@ -164,7 +177,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * Resets the data buffers used by this interface for data reading.
 	 */
 	protected void resetBuffers(){
-		leftoverData = new byte[0];
+		nextPacketLength = -1;
 		for (int i = 0; i < dataBuffer.length; i++)
 			dataBuffer[i] = 0;
 	}
@@ -177,13 +190,22 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * @param start the start index to send data from
 	 * @param length the amount of bytes to send
 	 */
-	protected abstract void writeData(byte[] data, int start, int length);
+	protected abstract void writeRaw(byte[] data, int start, int length);
 	/**
-	 * Reads raw data from the IO port used for communications. Unlike {@link #readData(byte[])}, this method does not 
+	 * Reads raw data from the IO port used for communications. Unlike {@link #read(Packet)}, this method does not 
 	 * handle packet and data logic.
 	 * 
 	 * @param buffer data buffer to store read data into
+	 * @param start start index in the buffer to save data from.
+	 * @param length amount of bytes to read.
+	 * 
 	 * @return the amount of bytes read
 	 */
-	protected abstract int readData(byte[] buffer);
+	protected abstract int readRaw(byte[] buffer, int start, int length);
+	/**
+	 * Gets the amount of bytes available to be read from the port.
+	 * 
+	 * @return bytes ready to be read.
+	 */
+	protected abstract int availableData();
 }

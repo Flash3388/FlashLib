@@ -115,7 +115,7 @@ public class RXTXCommInterface extends SerialCommInterface {
 	}
 
 	@Override
-	protected void writeData(byte[] data, int start, int length) {
+	protected void writeRaw(byte[] data, int start, int length) {
 		try {
 			out.write(data, start, length);
 		} catch (IOException e) {
@@ -124,13 +124,22 @@ public class RXTXCommInterface extends SerialCommInterface {
 			
 	}
 	@Override
-	protected int readData(byte[] buffer) {
+	protected int readRaw(byte[] buffer, int start, int length) {
 		try {
-			return in.read(buffer);
+			return in.read(buffer, start, length);
 		} catch (IOException e) {
 			e.printStackTrace();
+			return 0;
 		}
-		return 0;
+	}
+	@Override
+	protected int availableData() {
+		try {
+			return in.available();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 	
 	/**
