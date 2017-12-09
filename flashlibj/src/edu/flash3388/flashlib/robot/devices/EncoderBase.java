@@ -206,16 +206,16 @@ public abstract class EncoderBase implements Encoder{
 	 * {@inheritDoc}
 	 * <p>
 	 * The rotation rate is calculated by dividing the angular distance passed between two pulses by the time
-	 * measured between the last two pulses. This value is then conveRted to RPM. In this case, the angular distance
+	 * measured between the last two pulses. This value is then converted to RPM. In this case, the angular distance
 	 * is 360 degrees since there only one pulse per revolution.
 	 */
 	@Override
 	public double getRate() {
 		checkRest();
 		
-		if(counter.get() == 0)
+		if(getRaw() == 0)
 			return 0.0;
-		return ((360.0 / pulsesPerRevolution) * 60.0) / counter.getPulsePeriod();
+		return (60.0 / pulsesPerRevolution) / counter.getPulsePeriod();
 	}
 	/**
 	 * {@inheritDoc}
