@@ -215,7 +215,7 @@ public abstract class EncoderBase implements Encoder{
 		
 		if(getRaw() == 0)
 			return 0.0;
-		return (60.0 / pulsesPerRevolution) / counter.getPulsePeriod();
+		return (60.0 * pulsesPerRevolution) / counter.getPulsePeriod();
 	}
 	/**
 	 * {@inheritDoc}
