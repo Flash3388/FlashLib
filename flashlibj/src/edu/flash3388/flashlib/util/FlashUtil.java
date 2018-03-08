@@ -52,7 +52,7 @@ public final class FlashUtil {
 	private static final String version = System.getProperty("os.version");
 	
 	static{
-		setStartTime(System.currentTimeMillis());
+		setStartTime(System.nanoTime());
 	}
 	
 	//--------------------------------------------------------------------
@@ -174,7 +174,7 @@ public final class FlashUtil {
 	 * @return the difference, measured in milliseconds, between the current time and the time when the program was started.
 	 */
 	public static long millis(){
-		return System.currentTimeMillis() - startTime;
+		return (long) ((System.nanoTime() - startTime) * 1e-6);
 	}
 	/**
 	 * Returns the time since the program was started in milliseconds. The data is returned as an integer and not a long.
