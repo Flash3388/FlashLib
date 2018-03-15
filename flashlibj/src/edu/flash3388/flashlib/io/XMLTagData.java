@@ -26,14 +26,26 @@ public class XMLTagData {
 	
 	static final String TAG_MAP_KEY = "key";
 	static final String TAG_MAP_VALUE = "value";
-	static final String NAME_ATTRIBUTE = "name";
 	
-	static Type getValueType(Object object) {
+	static final String NAME_ATTRIBUTE = "name";
+	static final String CLASS_ATTRIBUTE = "class";
+	
+	static Type getObjectType(Object object) {
 		if (object.getClass().isEnum()) 
 			return Type.ENUM;
 		
 		for (Type type : Type.values()) {
 			if (type.type.isInstance(object)) {
+				return type;
+			}
+		}
+		
+		throw new IllegalArgumentException("Should not happen");
+	}
+	
+	static Type getTagType(String tag) {
+		for (Type type : Type.values()) {
+			if (type.tag.equals(tag)) {
 				return type;
 			}
 		}

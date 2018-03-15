@@ -34,22 +34,40 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 			return builder.toString();
 		}
 		
-		void writeTag(String tag, String name, String value, int indentationLevel) throws IOException {
+		String getAttributesString(String name, String className) {
+			StringBuilder builder = new StringBuilder();
+			
 			if (name != null) {
-				out.write(String.format("%s<%s %s=%s>%s</%s>\n", 
+				builder.append(String.format("%s=\"%s\"", XMLTagData.NAME_ATTRIBUTE, name));
+			}
+			if (className != null) {
+				if (builder.length() > 0)
+					builder.append(' ');
+				builder.append(String.format("%s=\"%s\"", XMLTagData.CLASS_ATTRIBUTE, className));
+			}
+			
+			return builder.toString();
+		}
+		
+		
+		void writeTag(String tag, String value, String name, String className, int indentationLevel) throws IOException {
+			String attributes = getAttributesString(name, className);
+			if (!attributes.isEmpty()) {
+				out.write(String.format("%s<%s %s>%s</%s>\n", 
 						getIndentationString(indentationLevel),
-						tag, XMLTagData.NAME_ATTRIBUTE, name, value, tag));
+						tag, attributes, value, tag));
 			} else {
 				out.write(String.format("%s<%s>%s</%s>\n", 
 						getIndentationString(indentationLevel),
 						tag, value, tag));
 			}
 		}
-		void writeTagHeader(String tag, String name, int indentationLevel) throws IOException {
-			if (name != null) {
-				out.write(String.format("%s<%s %s=%s>\n", 
+		void writeTagHeader(String tag, String name, String className, int indentationLevel) throws IOException {
+			String attributes = getAttributesString(name, className);
+			if (!attributes.isEmpty()) {
+				out.write(String.format("%s<%s %s>\n", 
 						getIndentationString(indentationLevel),
-						tag, XMLTagData.NAME_ATTRIBUTE, name));
+						tag, attributes));
 			} else {
 				out.write(String.format("%s<%s>\n", 
 						getIndentationString(indentationLevel),
@@ -92,17 +110,18 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 	protected void writeObjectOverride(Object obj) throws IOException {
 		try {
 			writeObject(obj, null, 0);
-		} catch (IllegalArgumentException | IllegalAccessException ex) {
-			ex.printStackTrace();
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new IOException(e);
 		} 
 	}
 	
 	private void writeValue(Type type, String value, String name, int indentationLevel) throws IOException {
-		out.writeTag(type.tag, value, name, indentationLevel);
+		out.writeTag(type.tag, value, name, null, indentationLevel);
 	}
 	
 	private void writeCollection(Collection<Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException {
-		out.writeTagHeader(Type.COLLECTION.tag, name, indentationLevel);
+		out.writeTagHeader(Type.COLLECTION.tag, name, value.getClass().getName(), 
+				indentationLevel);
 		for (Object object : value) {
 			writeObject(object, name, indentationLevel + 1);
 		}
@@ -110,13 +129,14 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 	}
 	
 	private void writeMap(Map<Object, Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException {
-		out.writeTagHeader(Type.MAP.tag, name, indentationLevel);
+		out.writeTagHeader(Type.MAP.tag, name, value.getClass().getName(), 
+				indentationLevel);
 		for (Map.Entry<Object, Object> entry : value.entrySet()) {
-			out.writeTagHeader(XMLTagData.TAG_MAP_KEY, name, indentationLevel + 1);
+			out.writeTagHeader(XMLTagData.TAG_MAP_KEY, name, null, indentationLevel + 1);
 			writeObject(entry.getKey(), name, indentationLevel + 2);
 			out.writeTagFooter(XMLTagData.TAG_MAP_KEY, indentationLevel + 1);
 			
-			out.writeTagHeader(XMLTagData.TAG_MAP_VALUE, name, indentationLevel + 1);
+			out.writeTagHeader(XMLTagData.TAG_MAP_VALUE, name, null, indentationLevel + 1);
 			writeObject(entry.getValue(), name, indentationLevel + 2);
 			out.writeTagFooter(XMLTagData.TAG_MAP_VALUE, indentationLevel + 1);
 		}
@@ -124,8 +144,8 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 	}
 	
 	private void writeEnumValue(Object object, String name, int indentationLevel) throws IOException {
-		out.writeTag(object.getClass().getName(), object.toString(), name,
-				indentationLevel);
+		out.writeTag(Type.ENUM.tag, object.toString(), name,
+				object.getClass().getName(), indentationLevel);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -133,7 +153,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 		if (object == null) 
 			return;
 		
-		Type type = XMLTagData.getValueType(object);
+		Type type = XMLTagData.getObjectType(object);
 		
 		switch (type) {
 			case BYTE:
@@ -158,7 +178,8 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 				break;
 		}
 		
-		out.writeTagHeader(object.getClass().getName(), name, indentationLevel);
+		out.writeTagHeader(Type.OBJECT.tag, name, 
+				object.getClass().getName(), indentationLevel);
 		for (Field field : object.getClass().getDeclaredFields()) {
 			if (Modifier.isTransient(field.getModifiers()))
 				continue;
@@ -176,6 +197,6 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 					field.setAccessible(oldAccess);
 			}
 		}
-		out.writeTagFooter(object.getClass().getName(), indentationLevel);
+		out.writeTagFooter(Type.OBJECT.tag, indentationLevel);
 	}
 }
