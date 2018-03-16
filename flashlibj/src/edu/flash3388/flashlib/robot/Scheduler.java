@@ -173,7 +173,7 @@ public final class Scheduler {
 	public void run(){
 		if(isDisabled()) return;
 		
-		if(triggers.size() > 0){
+		if(!triggers.isEmpty()){
 			Trigger trigger = null;
 			for(Enumeration<Trigger> triggerEnum = triggers.elements(); triggerEnum.hasMoreElements();){
 				trigger = triggerEnum.nextElement();
@@ -182,7 +182,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(isMode(MODE_TASKS) && tasks.size() > 0){
+		if(isMode(MODE_TASKS) && !tasks.isEmpty()){
 			TaskWrapper taskWrapper = null;
 			for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
 				taskWrapper = taskEnum.nextElement();
@@ -191,7 +191,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(isMode(MODE_ACTIONS) && actions.size() > 0){			
+		if(isMode(MODE_ACTIONS) && !actions.isEmpty()){			
 			Action action = null;
 			for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
 				action = actionEnum.nextElement();
@@ -200,7 +200,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(isMode(MODE_ACTIONS) && systems.size() > 0){
+		if(isMode(MODE_ACTIONS) && !systems.isEmpty()){
 			Subsystem system = null;
 			for(Iterator<Subsystem> systemEnum = systems.iterator(); systemEnum.hasNext();){
 				system = systemEnum.next();
