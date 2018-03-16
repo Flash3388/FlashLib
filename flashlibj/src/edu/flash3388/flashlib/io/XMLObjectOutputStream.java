@@ -120,6 +120,14 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 		out.writeTag(type.tag, value, name, null, indentationLevel);
 	}
 	
+	private void writeArray(Object[] value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException, XMLTypeException {
+		out.writeTagHeader(Type.ARRAY.tag, name, null, indentationLevel);
+		for (Object object : value) {
+			writeObject(object, name, indentationLevel + 1);
+		}
+		out.writeTagFooter(Type.ARRAY.tag, indentationLevel);
+	}
+	
 	private void writeCollection(Collection<Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException, XMLTypeException {
 		out.writeTagHeader(Type.COLLECTION.tag, name, value.getClass().getName(), 
 				indentationLevel);
@@ -165,6 +173,9 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 			case DOUBLE:
 			case STRING:
 				writeValue(type, object.toString(), name, indentationLevel);
+				return;
+			case ARRAY:
+				writeArray((Object[])object, name, indentationLevel);
 				return;
 			case COLLECTION:
 				writeCollection((Collection<Object>)object, name, indentationLevel);
