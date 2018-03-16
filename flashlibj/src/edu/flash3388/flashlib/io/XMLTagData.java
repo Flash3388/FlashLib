@@ -15,7 +15,7 @@ public class XMLTagData {
 	}
 	
 	static enum Type {
-		BOOLEAN("boolean", Boolean.class), 
+		BOOLEAN("boolean", Boolean.class), CHAR("char", Character.class),
 		BYTE("byte", Byte.class), SHORT("short", Short.class), 
 		INT("int", Integer.class), LONG("long", Long.class),
 		FLOAT("float", Float.class), DOUBLE("double", Double.class), 
@@ -39,6 +39,7 @@ public class XMLTagData {
 	
 	static final String NAME_ATTRIBUTE = "name";
 	static final String CLASS_ATTRIBUTE = "class";
+	static final String LENGTH_ATTRIBUTE = "length";
 	
 	static Type getObjectType(Object object) throws XMLTypeException {
 		if (object.getClass().isEnum()) 

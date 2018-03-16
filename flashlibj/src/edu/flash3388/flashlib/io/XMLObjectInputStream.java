@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +37,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		} catch (SAXException | ParserConfigurationException e) {
 			throw new IOException(e);
 		}
+		
+		this.in = in;
 		
 		elementsQueue = new ArrayDeque<Element>();
 		NodeList nodeList = xmlDocument.getChildNodes();
@@ -102,8 +105,21 @@ public class XMLObjectInputStream extends ObjectInputStream {
 	
 	private Object parseArray(Element element) 
 			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, XMLTypeException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+		String className = element.getAttribute(XMLTagData.CLASS_ATTRIBUTE);
+		Class<?> classObject = getClass(className);
+		
+		String lengthStr = element.getAttribute(XMLTagData.LENGTH_ATTRIBUTE);
+		int length;
+		try {
+			length = Integer.parseInt(lengthStr);
+		} catch(NumberFormatException e) {
+			throw new IOException(e);
+		}
+		
 		NodeList children = element.getChildNodes();
-		Object[] array = new Object[children.getLength()];
+		Object[] array = (Object[]) Array.newInstance(classObject, length);
+		
+		int index = 0;
 		
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
@@ -114,8 +130,14 @@ public class XMLObjectInputStream extends ObjectInputStream {
 			Element childElement = (Element)node;
 			Object entry = parseElement(childElement);
 			
-			array[i] = entry;
+			array[index++] = entry;
 		}
+		
+		if (index < length) 
+			throw new IOException("Missing array elements");
+		
+		if (isPrimitiveClassName(className))
+			return arrayToPrimitiveArray(array, classObject);
 		
 		return array;
 	}
@@ -202,6 +224,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		
 		try {
 			switch (type) {
+				case CHAR:
+					return element.getTextContent().charAt(0);
 				case BOOLEAN:
 					return Boolean.parseBoolean(element.getTextContent());
 				case BYTE:
@@ -288,5 +312,108 @@ public class XMLObjectInputStream extends ObjectInputStream {
 			if (constructor.isAccessible() != oldAccess)
 				constructor.setAccessible(oldAccess);
 		}
+	}
+	
+	private Class<?> getClass(String className) throws ClassNotFoundException {
+		if (className.equalsIgnoreCase("byte"))
+			return Byte.class;
+		if (className.equalsIgnoreCase("short"))
+			return Short.class;
+		if (className.equalsIgnoreCase("int"))
+			return Integer.class;
+		if (className.equalsIgnoreCase("long"))
+			return Long.class;
+		if (className.equalsIgnoreCase("float"))
+			return Float.class;
+		if (className.equalsIgnoreCase("double"))
+			return Double.class;
+		if (className.equalsIgnoreCase("boolean"))
+			return Boolean.class;
+		if (className.equalsIgnoreCase("char"))
+			return Character.class;
+		
+		return Class.forName(className);
+	}
+	
+	private boolean isPrimitiveClassName(String className) {
+		if (className.equalsIgnoreCase("byte"))
+			return true;
+		if (className.equalsIgnoreCase("short"))
+			return true;
+		if (className.equalsIgnoreCase("int"))
+			return true;
+		if (className.equalsIgnoreCase("long"))
+			return true;
+		if (className.equalsIgnoreCase("float"))
+			return true;
+		if (className.equalsIgnoreCase("double"))
+			return true;
+		if (className.equalsIgnoreCase("boolean"))
+			return true;
+		if (className.equalsIgnoreCase("char"))
+			return true;
+		
+		return false;
+	}
+	
+	private Object arrayToPrimitiveArray(Object[] array, Class<?> type) {
+		if (type.equals(Byte.class)) {
+			byte[] parray = new byte[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (byte) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Short.class)) {
+			short[] parray = new short[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (short) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Integer.class)) {
+			int[] parray = new int[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (int) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Long.class)) {
+			long[] parray = new long[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (long) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Float.class)) {
+			float[] parray = new float[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (float) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Double.class)) {
+			double[] parray = new double[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (double) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Boolean.class)) {
+			boolean[] parray = new boolean[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (boolean) array[i];
+			
+			return parray;
+		}
+		if (type.equals(Character.class)) {
+			char[] parray = new char[array.length];
+			for (int i = 0; i < array.length; i++)
+				parray[i] = (char) array[i];
+			
+			return parray;
+		}
+		
+		return null;
 	}
 }
