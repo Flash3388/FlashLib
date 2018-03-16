@@ -19,7 +19,8 @@ public class XMLTagData {
 		INT("int", Integer.class), LONG("long", Long.class),
 		FLOAT("float", Float.class), DOUBLE("double", Double.class), 
 		STRING("string", String.class), 
-		COLLECTION("collection", Collection.class), MAP("map", Map.class),
+		ARRAY("array", null), COLLECTION("collection", Collection.class), 
+		MAP("map", Map.class),
 		OBJECT("object", Object.class),
 		ENUM("enum", null);
 		
@@ -41,6 +42,8 @@ public class XMLTagData {
 	static Type getObjectType(Object object) throws XMLTypeException {
 		if (object.getClass().isEnum()) 
 			return Type.ENUM;
+		if (object.getClass().isArray())
+			return Type.ARRAY;
 		
 		for (Type type : Type.values()) {
 			if (type.type.isInstance(object)) {
