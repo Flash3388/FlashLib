@@ -10,8 +10,6 @@ import java.io.Serializable;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see VisionProcessing
- * @see FilterCreator
- * @see VisionParam
  */
 public interface VisionFilter extends Serializable {
 	

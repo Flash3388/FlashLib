@@ -218,7 +218,7 @@ public final class Scheduler {
 	 * The {@link Scheduler} must not be disabled in order
 	 * for triggers to be checked.
 	 * 
-	 * @param trigger
+	 * @param trigger a new trigger.
 	 */
 	public void addTrigger(Trigger trigger){
 		triggers.add(trigger);
