@@ -7,7 +7,6 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-@SuppressWarnings("serial")
 public class SimpleDoubleProperty implements DoubleProperty{
 	
 	private double var;

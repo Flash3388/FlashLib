@@ -12,7 +12,6 @@ import edu.flash3388.flashlib.util.beans.IntegerProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-@SuppressWarnings("serial")
 public abstract class ObservableIntegerProperty implements ObservableProperty<Integer>, ObservableIntegerValue, IntegerProperty{
 
 	private ObservableIntegerValue observable = null;

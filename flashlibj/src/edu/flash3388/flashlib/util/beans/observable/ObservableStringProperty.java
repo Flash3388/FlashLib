@@ -12,7 +12,6 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-@SuppressWarnings("serial")
 public abstract class ObservableStringProperty extends ObservablePropertyBase<String> implements ObservableStringValue, StringProperty{
 	
 	@Override
