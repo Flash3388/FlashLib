@@ -15,14 +15,15 @@ public class XMLTagData {
 	}
 	
 	static enum Type {
+		BOOLEAN("boolean", Boolean.class), 
 		BYTE("byte", Byte.class), SHORT("short", Short.class), 
 		INT("int", Integer.class), LONG("long", Long.class),
 		FLOAT("float", Float.class), DOUBLE("double", Double.class), 
 		STRING("string", String.class), 
-		ARRAY("array", null), COLLECTION("collection", Collection.class), 
+		COLLECTION("collection", Collection.class), 
 		MAP("map", Map.class),
 		OBJECT("object", Object.class),
-		ENUM("enum", null);
+		ENUM("enum", null), ARRAY("array", null);
 		
 		final String tag;
 		final Class<?> type;
@@ -46,6 +47,9 @@ public class XMLTagData {
 			return Type.ARRAY;
 		
 		for (Type type : Type.values()) {
+			if (type.type == null)
+				continue;
+			
 			if (type.type.isInstance(object)) {
 				return type;
 			}

@@ -202,6 +202,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		
 		try {
 			switch (type) {
+				case BOOLEAN:
+					return Boolean.parseBoolean(element.getTextContent());
 				case BYTE:
 					return Byte.parseByte(element.getTextContent());
 				case SHORT:

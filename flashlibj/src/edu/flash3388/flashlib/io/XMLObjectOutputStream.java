@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -165,6 +166,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 		Type type = XMLTagData.getObjectType(object);
 		
 		switch (type) {
+			case BOOLEAN:
 			case BYTE:
 			case SHORT:
 			case INT:
@@ -175,7 +177,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 				writeValue(type, object.toString(), name, indentationLevel);
 				return;
 			case ARRAY:
-				writeArray((Object[])object, name, indentationLevel);
+				writeArray(primitiveArrayToObjectArray(object), name, indentationLevel);
 				return;
 			case COLLECTION:
 				writeCollection((Collection<Object>)object, name, indentationLevel);
@@ -210,5 +212,16 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 			}
 		}
 		out.writeTagFooter(Type.OBJECT.tag, indentationLevel);
+	}
+	
+	private Object[] primitiveArrayToObjectArray(Object array) {
+	    int arrlength = Array.getLength(array);
+	    Object[] outputArray = new Object[arrlength];
+	    
+	    for(int i = 0; i < arrlength; ++i){
+	       outputArray[i] = Array.get(array, i);
+	    }
+	    
+	    return outputArray;
 	}
 }
