@@ -3,7 +3,9 @@ package edu.flash3388.flashlib.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Map;
@@ -19,10 +21,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.io.XMLTagData.Type;
+import edu.flash3388.flashlib.io.XMLTagData.XMLTypeException;
 
 public class XMLObjectInputStream extends ObjectInputStream {
 
 	private Queue<Element> elementsQueue;
+	private InputStream in;
 	
 	public XMLObjectInputStream(InputStream in) throws IOException {
 		Document xmlDocument;
@@ -47,19 +51,21 @@ public class XMLObjectInputStream extends ObjectInputStream {
 	
 	@Override
 	public void close() throws IOException {
-		
+		in.close();
 	}
 	
 	@Override
 	protected Object readObjectOverride() throws IOException, ClassNotFoundException {
 		try {
 			return readNextElement();
-		} catch (NoSuchFieldException | SecurityException | InstantiationException | IllegalAccessException e) {
+		} catch (NoSuchFieldException | SecurityException | InstantiationException | 
+				IllegalAccessException | XMLTypeException | IllegalArgumentException | 
+				InvocationTargetException | NoSuchMethodException e) {
 			throw new IOException(e);
-		}
+		} 
 	}
 	
-	private Object readNextElement() throws IOException, ClassNotFoundException, NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException {
+	private Object readNextElement() throws IOException, ClassNotFoundException, NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException, XMLTypeException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		Element nextRoot = elementsQueue.poll();
 		if (nextRoot == null) {
 			throw new IOException("Stream empty of element");
@@ -70,16 +76,11 @@ public class XMLObjectInputStream extends ObjectInputStream {
 	
 	@SuppressWarnings("unchecked")
 	private Object parseCollection(Element element) 
-			throws ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, XMLTypeException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		String className = element.getAttribute(XMLTagData.CLASS_ATTRIBUTE);
 		Class<?> classObject = Class.forName(className);
 		
-		Object objectInstance;
-		try {
-			objectInstance = classObject.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IOException(e);
-		}
+		Object objectInstance = createInstance(classObject);
 		
 		Collection<Object> collection = (Collection<Object>) objectInstance;
 		
@@ -91,12 +92,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
 				continue;
 			
 			Element childElement = (Element)node;
-			Object entry;
-			try {
-				entry = parseElement(childElement);
-			} catch (IOException e) {
-				throw new IOException(e);
-			}
+			Object entry = parseElement(childElement);
 			
 			collection.add(entry);
 		}
@@ -105,16 +101,12 @@ public class XMLObjectInputStream extends ObjectInputStream {
 	}
 	@SuppressWarnings("unchecked")
 	private Object parseMap(Element element) 
-			throws ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, IllegalAccessException,
+			NoSuchFieldException, SecurityException, InstantiationException, XMLTypeException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		String className = element.getAttribute(XMLTagData.CLASS_ATTRIBUTE);
 		Class<?> classObject = Class.forName(className);
 		
-		Object objectInstance;
-		try {
-			objectInstance = classObject.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IOException(e);
-		}
+		Object objectInstance = createInstance(classObject);
 		
 		Map<Object, Object> map = (Map<Object, Object>) objectInstance;
 		
@@ -181,7 +173,9 @@ public class XMLObjectInputStream extends ObjectInputStream {
 				(Class<? extends Enum>) classObject, value);
 	}
 	private Object parseElement(Element element) 
-			throws ClassNotFoundException, IOException {
+			throws ClassNotFoundException, IOException, XMLTypeException, 
+			IllegalAccessException, NoSuchFieldException, 
+			SecurityException, InstantiationException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		Type type = XMLTagData.getTagType(element.getTagName());
 		
 		try {
@@ -220,12 +214,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		String className = element.getAttribute(XMLTagData.CLASS_ATTRIBUTE);
 		Class<?> classObject = Class.forName(className);
 		
-		Object objectInstance;
-		try {
-			objectInstance = classObject.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new IOException(e);
-		}
+		Object objectInstance = createInstance(classObject);
 		
 		NodeList children = element.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
@@ -238,12 +227,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
 			String name = childElement.getAttribute(XMLTagData.NAME_ATTRIBUTE);
 			
 			Object value = parseElement(childElement);
-			Field field;
-			try {
-				field = classObject.getDeclaredField(name);
-			} catch (NoSuchFieldException | SecurityException e) {
-				throw new IOException(e);
-			}
+			Field field = classObject.getDeclaredField(name);
 			
 			boolean oldAccess = field.isAccessible();
 			
@@ -261,5 +245,22 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		}
 		
 		return objectInstance;
+	}
+	
+	private Object createInstance(Class<?> classObject) 
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		Constructor<?> constructor = classObject.getConstructor();
+		
+		boolean oldAccess = constructor.isAccessible();
+		
+		try {
+			if (!constructor.isAccessible())
+				constructor.setAccessible(true);
+			
+			return constructor.newInstance();
+		} finally {
+			if (constructor.isAccessible() != oldAccess)
+				constructor.setAccessible(oldAccess);
+		}
 	}
 }

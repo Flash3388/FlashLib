@@ -6,6 +6,14 @@ import java.util.Map;
 public class XMLTagData {
 	private XMLTagData() {}
 
+	static class XMLTypeException extends Exception {
+		private static final long serialVersionUID = 1L;
+		
+		public XMLTypeException(String message) {
+			super(message);
+		}
+	}
+	
 	static enum Type {
 		BYTE("byte", Byte.class), SHORT("short", Short.class), 
 		INT("int", Integer.class), LONG("long", Long.class),
@@ -30,7 +38,7 @@ public class XMLTagData {
 	static final String NAME_ATTRIBUTE = "name";
 	static final String CLASS_ATTRIBUTE = "class";
 	
-	static Type getObjectType(Object object) {
+	static Type getObjectType(Object object) throws XMLTypeException {
 		if (object.getClass().isEnum()) 
 			return Type.ENUM;
 		
@@ -40,16 +48,19 @@ public class XMLTagData {
 			}
 		}
 		
-		throw new IllegalArgumentException("Should not happen");
+		throw new XMLTypeException(String.format(
+				"Unable to find type for object %s. Should not happen", object.getClass()));
 	}
 	
-	static Type getTagType(String tag) {
+	static Type getTagType(String tag) throws XMLTypeException {
 		for (Type type : Type.values()) {
 			if (type.tag.equals(tag)) {
 				return type;
 			}
 		}
 		
-		throw new IllegalArgumentException("Should not happen");
+
+		throw new XMLTypeException(String.format(
+				"Unable to find type for tag %s. Invalid tag", tag));
 	}
 }

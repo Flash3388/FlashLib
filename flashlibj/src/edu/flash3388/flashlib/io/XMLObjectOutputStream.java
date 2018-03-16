@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.io;
 
 import edu.flash3388.flashlib.io.XMLTagData;
 import edu.flash3388.flashlib.io.XMLTagData.Type;
+import edu.flash3388.flashlib.io.XMLTagData.XMLTypeException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -110,7 +111,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 	protected void writeObjectOverride(Object obj) throws IOException {
 		try {
 			writeObject(obj, null, 0);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException | XMLTypeException e) {
 			throw new IOException(e);
 		} 
 	}
@@ -119,7 +120,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 		out.writeTag(type.tag, value, name, null, indentationLevel);
 	}
 	
-	private void writeCollection(Collection<Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private void writeCollection(Collection<Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException, XMLTypeException {
 		out.writeTagHeader(Type.COLLECTION.tag, name, value.getClass().getName(), 
 				indentationLevel);
 		for (Object object : value) {
@@ -128,7 +129,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 		out.writeTagFooter(Type.COLLECTION.tag, indentationLevel);
 	}
 	
-	private void writeMap(Map<Object, Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private void writeMap(Map<Object, Object> value, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException, XMLTypeException {
 		out.writeTagHeader(Type.MAP.tag, name, value.getClass().getName(), 
 				indentationLevel);
 		for (Map.Entry<Object, Object> entry : value.entrySet()) {
@@ -149,7 +150,7 @@ public class XMLObjectOutputStream extends ObjectOutputStream {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void writeObject(Object object, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException {
+	private void writeObject(Object object, String name, int indentationLevel) throws IOException, IllegalArgumentException, IllegalAccessException, XMLTypeException {
 		if (object == null) 
 			return;
 		
