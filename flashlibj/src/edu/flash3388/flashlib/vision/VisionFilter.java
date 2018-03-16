@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -19,7 +20,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @see FilterCreator
  * @see VisionParam
  */
-public abstract class VisionFilter {
+public abstract class VisionFilter implements Serializable {
 	
 	/**
 	 * Processes data in an image from the vision source and filters out non matching data.

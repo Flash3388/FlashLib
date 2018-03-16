@@ -15,50 +15,35 @@ import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
  */
 public class ShapeFilter extends VisionFilter{
 	
-	private DoubleProperty accuracy = new SimpleDoubleProperty();
-	private IntegerProperty amount = new SimpleIntegerProperty();
-	private IntegerProperty vertecies = new SimpleIntegerProperty();
-
+	/**
+	 * Indicates the accuracy of the shape approximation. Higher values offer less accurate shapes.
+	 * Must be non-negative.
+	 */
+	private double accuracy;
+	/**
+	 * Indicates the amount of vertices and the requested shape to find.
+	 * Must be non-negative.
+	 */
+	private int vertecies;
+	/**
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative.
+	 */
+	private int amount;
+	
 	public ShapeFilter(){}
 	public ShapeFilter(int amount, int vertecies, double accuracy){
-		this.amount.set(amount);
-		this.vertecies.set(vertecies);
-		this.accuracy.set(accuracy);
+		this.amount = amount;
+		this.vertecies = vertecies;
+		this.accuracy = accuracy;
 	}
 	
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the maximum amount of contours to leave after the filter process.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public IntegerProperty amountProperty(){
-		return amount;
-	}
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the amount of vertices and the requested shape to find.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public IntegerProperty verteciesProperty(){
-		return vertecies;
-	}
-	/**
-	 * A {@link DoubleProperty}.
-	 * Indicates the accuracy of the shape approximation. Higher values offer less accurate shapes.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public DoubleProperty accuracyProperty(){
-		return accuracy;
-	}
 	
 	@Override
 	public void process(VisionSource source) {
-		if(amount.get() <= 0)
-			source.detectShapes(vertecies.get(), accuracy.get());
+		if(amount <= 0)
+			source.detectShapes(vertecies, accuracy);
 		else
-			source.detectShapes(amount.get(), vertecies.get(), accuracy.get());
+			source.detectShapes(amount, vertecies, accuracy);
 	}
 }
