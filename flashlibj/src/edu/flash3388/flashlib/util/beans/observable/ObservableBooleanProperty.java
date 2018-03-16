@@ -12,6 +12,7 @@ import edu.flash3388.flashlib.util.beans.BooleanProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
+@SuppressWarnings("serial")
 public abstract class ObservableBooleanProperty implements ObservableProperty<Boolean>, ObservableBooleanValue, BooleanProperty{
 
 	private ObservableBooleanValue observable = null;

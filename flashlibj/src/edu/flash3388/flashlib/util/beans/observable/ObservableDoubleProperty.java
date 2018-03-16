@@ -12,6 +12,7 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
+@SuppressWarnings("serial")
 public abstract class ObservableDoubleProperty implements ObservableProperty<Double>, ObservableDoubleValue, DoubleProperty{
 
 	private ObservableDoubleValue observable = null;

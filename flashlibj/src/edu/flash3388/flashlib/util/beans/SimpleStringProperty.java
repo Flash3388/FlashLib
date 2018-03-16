@@ -7,6 +7,7 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
+@SuppressWarnings("serial")
 public class SimpleStringProperty implements StringProperty{
 	
 	private String var;

@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.util.beans;
 
+import java.io.Serializable;
+
 /**
  * An interface pointing to a primitive boolean value. Such objects are used to point to changeable values and allow 
  * for real time updating of the value instead of a need for set methods.
@@ -8,7 +10,7 @@ package edu.flash3388.flashlib.util.beans;
  * @since FlashLib 1.0.1
  */
 @FunctionalInterface
-public interface BooleanSource{
+public interface BooleanSource extends Serializable {
 	
 	/**
 	 * Gets the value of this source. Implementation is user dependent.

@@ -8,6 +8,7 @@ package edu.flash3388.flashlib.util.beans;
  * @param <T> type of value of this property
  * @since FlashLib 1.0.1
  */
+@SuppressWarnings("serial")
 public class SimpleProperty<T> implements Property<T> {
 
 	private T value;

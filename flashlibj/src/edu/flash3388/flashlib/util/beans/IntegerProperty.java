@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.util.beans;
  * @author tom Tzook
  * @since FlashLib 1.0.1
  */
-public interface IntegerProperty extends Property<Integer>, IntegerSource{
+public interface IntegerProperty extends Property<Integer>, IntegerSource {
 
 	/**
 	 * Sets the value of the property. Implementation is user dependent.

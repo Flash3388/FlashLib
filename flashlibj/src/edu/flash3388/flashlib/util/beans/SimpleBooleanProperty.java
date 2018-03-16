@@ -7,8 +7,10 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class SimpleBooleanProperty implements BooleanProperty{
+public class SimpleBooleanProperty implements BooleanProperty {
 
+	private static final long serialVersionUID = 9116045741389331769L;
+	
 	private boolean var;
 	
 	public SimpleBooleanProperty(boolean initialVal){

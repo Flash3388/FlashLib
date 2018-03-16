@@ -9,7 +9,7 @@ package edu.flash3388.flashlib.util.beans;
  * @param <T> type of value pointed to by this property
  * @since FlashLib 1.0.1
  */
-public interface Property<T> extends ValueSource<T>{
+public interface Property<T> extends ValueSource<T> {
 
 	/**
 	 * Sets the value of the property. Implementation is user dependent.

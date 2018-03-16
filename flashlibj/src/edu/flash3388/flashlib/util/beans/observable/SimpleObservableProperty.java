@@ -9,6 +9,7 @@ package edu.flash3388.flashlib.util.beans.observable;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
+@SuppressWarnings("serial")
 public class SimpleObservableProperty<T> extends ObservablePropertyBase<T>{
 
 	private T value;
