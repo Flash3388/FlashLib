@@ -1,24 +1,8 @@
 package edu.flash3388.flashlib.vision;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
  * VisionProcessing is the basis for the dynamic vision system. It provides you with the ability to load different
@@ -43,35 +27,17 @@ import org.xml.sax.SAXException;
  * @see VisionSource
  * @see AnalysisCreator
  */
-public final class VisionProcessing {
+public final class VisionProcessing implements Serializable {
 	
 	private List<VisionFilter> filters;
 	private AnalysisCreator analysisCreator;
-	
-	private String name;
-	private static byte instances = 0;
 	
 	/**
 	 * Creates a new vision processing objects. 
 	 * @param name the name of the processing
 	 */
-	public VisionProcessing(String name){
-		this.name = name;
-		filters = new ArrayList<VisionFilter>();
-	}
-	/**
-	 * Creates a new vision processing objects. 
-	 */
 	public VisionProcessing(){
-		this("processing"+(++instances));
-	}
-	
-	/**
-	 * Gets the name of the processing
-	 * @return the name
-	 */
-	public String getName(){
-		return name;
+		filters = new ArrayList<VisionFilter>();
 	}
 	
 	/**
@@ -177,259 +143,5 @@ public final class VisionProcessing {
 	public Analysis[] processAndGetAll(VisionSource source){
 		process(source);
 		return source.getResults();
-	}
-	
-	private void loadFilters(byte[] bytes){
-		String filterstr = new String(bytes);
-		String[] filters = filterstr.split("\\|");
-		loadFilters(filters);
-	}
-	private void loadFilters(String[] filters){
-		if(!VisionFilter.hasFilterCreator())
-			throw new IllegalStateException("Missing filter creator");
-		
-		name = filters[0];
-		for (int i = 1; i < filters.length - 1; i++) {
-			String[] splits = filters[i].split(":");
-			if(splits.length < 1) continue;
-			String namestr = splits[0];
-			
-			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
-			
-			for (int j = 1; j < splits.length; j++) {
-				String[] tSpl = splits[j].split(",");
-				if(tSpl.length != 3)
-					continue;
-				
-				try {
-					VisionParam p = VisionParam.createParam(tSpl[0], tSpl[1], tSpl[2]);
-					if(p != null)
-						params.put(tSpl[0], p);
-				} catch (RuntimeException e) {
-					continue;
-				}
-			}
-			
-			addFilter(VisionFilter.createFilter(namestr, params));
-		}
-		String creatorData = filters[filters.length-1];
-		if(!creatorData.isEmpty()){
-			String[] splits = creatorData.split(":");
-			if(splits.length < 1) return;
-			String namestr = splits[0];
-			
-			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
-			
-			for (int j = 1; j < splits.length; j++) {
-				String[] tSpl = splits[j].split(",");
-				if(tSpl.length != 3)
-					continue;
-				
-				try {
-					VisionParam p = VisionParam.createParam(tSpl[0], tSpl[1], tSpl[2]);
-					if(p != null)
-						params.put(tSpl[0], p);
-				} catch (RuntimeException e) {
-					continue;
-				}
-			}
-			setAnalysisCreator(AnalysisCreator.create(namestr, params));
-		}
-	}
-	private void parseXml(String file) throws SAXException, IOException, ParserConfigurationException{
-		if(!VisionFilter.hasFilterCreator())
-			throw new IllegalStateException("Missing filter creator");
-		
-		File infile = new File(file);
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-				.parse(infile);
-		
-		doc.getDocumentElement().normalize();
-		
-		NodeList base = doc.getElementsByTagName("vision");
-		if(base.getLength() != 1)
-			throw new RuntimeException("Missing base tag: vision");
-		name = ((Element)base.item(0)).getAttribute("name");
-		if(name == null)
-			name = infile.getName();
-		
-		NodeList filterList = doc.getElementsByTagName("filter");
-		for (int i = 0; i < filterList.getLength(); i++) {
-			Node node = filterList.item(i);
-			if(node.getNodeType() == Node.ELEMENT_NODE){
-				Element element = (Element) node;
-				
-				String namestr = element.getAttribute("name");
-				
-				NodeList paramsNodeList = element.getElementsByTagName("param");
-				Map<String, VisionParam> params = new HashMap<String, VisionParam>();
-				for (int j = 0; j < paramsNodeList.getLength(); j++) {
-					NamedNodeMap attrs = paramsNodeList.item(j).getAttributes();
-					
-					String val = paramsNodeList.item(j).getTextContent();
-					
-					Node n = attrs.getNamedItem("type");
-					if(n == null)
-						throw new RuntimeException("Type attribute is missing value");
-					String type = n.getTextContent();
-					
-					n = attrs.getNamedItem("name");
-					if(n == null)
-						throw new RuntimeException("Name attribute is missing value");
-					String name = n.getTextContent();
-					
-					VisionParam p = VisionParam.createParam(name, type, val);
-					if(p == null)
-						throw new RuntimeException("Invalid type attribute for param "+name+": "+type);
-					params.put(name, p);
-				}
-				
-				addFilter(VisionFilter.createFilter(namestr, params));
-			}
-		}
-		NodeList creatorList = doc.getElementsByTagName("analysis-creator");
-		if(creatorList.getLength() > 0){
-			Element element = (Element) creatorList.item(0);
-			String namestr = element.getAttribute("name");
-			
-			NodeList paramsNodeList = element.getElementsByTagName("param");
-			Map<String, VisionParam> params = new HashMap<String, VisionParam>();
-			for (int j = 0; j < paramsNodeList.getLength(); j++) {
-				NamedNodeMap attrs = paramsNodeList.item(j).getAttributes();
-				
-				String val = paramsNodeList.item(j).getTextContent();
-				
-				Node n = attrs.getNamedItem("type");
-				if(n == null)
-					throw new RuntimeException("Type attribute is missing value");
-				String type = n.getTextContent();
-				
-				n = attrs.getNamedItem("name");
-				if(n == null)
-					throw new RuntimeException("Name attribute is missing value");
-				String name = n.getTextContent();
-				
-				VisionParam p = VisionParam.createParam(name, type, val);
-				if(p == null)
-					throw new RuntimeException("Invalid type attribute for param "+name+": "+type);
-				params.put(name, p);
-			}
-			
-			setAnalysisCreator(AnalysisCreator.create(namestr, params));
-		}
-	}
-	
-	/**
-	 * Gets a byte array containing all the filter data. Can be used to transmit this processing object for use by 
-	 * a remote source.
-	 * @return a byte array data of this object
-	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
-	 */
-	public byte[] toBytes(){
-		if(!VisionFilter.hasFilterCreator())
-			throw new IllegalStateException("Missing filter creator");
-		
-		VisionFilter[] filters = getFilters();
-		String filterstr = name+"|";
-		for (int i = 0; i < filters.length; i++) {
-			String name = VisionFilter.getSaveName(filters[i]);
-			filterstr += name + ":";
-					
-			VisionParam[] params = VisionParam.getParameters(filters[i]);
-			for (int j = 0; j < params.length; j++) 
-				filterstr += params[j].getName() + "," + params[j].getType() + "," + params[j].getValue() + 
-				(j < params.length - 1? ":" : "");
-			filterstr +=  "|";
-		}
-		if(analysisCreator != null){
-			filterstr += analysisCreator.getClass().getName();
-			VisionParam[] params = VisionParam.getParameters(analysisCreator);
-			for (int j = 0; j < params.length; j++) 
-				filterstr += params[j].getName() + "," + params[j].getType() + "," + params[j].getValue() + 
-				(j < params.length - 1? ":" : "");
-		}
-		return filterstr.getBytes();
-	}
-	
-	/**
-	 * Saves all the filters from this object to an XML file for reuse.
-	 * Uses {@link #getName()} as the file name with an .xml extension.
-	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
-	 */
-	public void saveXml(){
-		saveXml(name+".xml");
-	}
-	/**
-	 * Saves all the filters from this object to an XML file for reuse.
-	 * @param file path to the file for use.
-	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
-	 */
-	public void saveXml(String file){
-		if(!VisionFilter.hasFilterCreator())
-			throw new IllegalStateException("Missing filter creator");
-		
-		VisionFilter[] filters = getFilters();
-		ArrayList<String> lines = new ArrayList<String>();
-		
-		lines.add("<?xml version=\"1.0\" ?>");
-		lines.add("<vision name=\""+name+"\">");
-		for (VisionFilter filter : filters) {
-			lines.add("\t<filter name=\""+VisionFilter.getSaveName(filter)+"\">");
-			VisionParam[] params = VisionParam.getParameters(filter);
-			if(params != null){
-				for (VisionParam d : params) 
-					lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+
-								d.getValue()+"</param>");
-			}
-			lines.add("\t</filter>");
-		}
-		if(analysisCreator != null){
-			lines.add("\t<analysis-creator name=\""+analysisCreator.getClass().getName()+"\">");
-			VisionParam[] params = VisionParam.getParameters(analysisCreator);
-			if(params != null){
-				for (VisionParam d : params) 
-					lines.add("\t\t<param name=\""+d.getName()+"\" type=\""+d.getType()+"\">"+
-								d.getValue()+"</param>");
-			}
-			lines.add("\t</analysis-creator>");
-		}
-		lines.add("</vision>");
-		
-		try {
-			Files.write(Paths.get(file), lines, StandardOpenOption.CREATE);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-
-	/**
-	 * Creates a new processing object from a byte array containing all the filter data. 
-	 * @param bytes a byte array containing all the filter data
-	 * @return a new processing object
-	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
-	 */
-	public static VisionProcessing createFromBytes(byte[] bytes){
-		VisionProcessing proc = new VisionProcessing();
-		proc.loadFilters(bytes);
-		return proc;
-	}
-	/**
-	 * Creates a new processing object from an XML file.
-	 * @param file the xml file
-	 * @return a new processing object, or null if parsing failed
-	 * @throws RuntimeException if an error has occured while parsing
-	 * @throws IllegalStateException if no filter creator exists ({@link VisionFilter#hasFilterCreator()} returns false).
-	 */
-	public static VisionProcessing createFromXml(String file){
-		if(!new File(file).isFile())
-			return null;
-		VisionProcessing proc = new VisionProcessing();
-		try {
-			proc.parseXml(file);
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-		return proc;
 	}
 }

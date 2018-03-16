@@ -1,7 +1,9 @@
 package edu.flash3388.flashlib.vision;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -170,9 +172,19 @@ public abstract class VisionRunner extends Sendable implements Vision, ImagePipe
 		}else if(data[0] == RemoteVision.REMOTE_SELECT_MODE){
 			selectProcessing(data[1]);
 		}else if(data[0] == RemoteVision.REMOTE_PROC_MODE){
-			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 1, data.length));
-			if(proc != null)
-				addProcessing(proc);
+			ByteArrayInputStream procInStream = new ByteArrayInputStream(data, 1, data.length);
+			
+			try {
+				ObjectInputStream objectInputStream = new ObjectInputStream(procInStream);
+				Object deserializedObject = objectInputStream.readObject();
+				
+				if (deserializedObject instanceof VisionProcessing)
+					addProcessing((VisionProcessing) deserializedObject);
+				else 
+					FlashUtil.getLog().reportWarning("Received object is not VisionProcessing object");
+			} catch (IOException | ClassNotFoundException e) {
+				FlashUtil.getLog().reportError(e);
+			} 
 		}
 	}
 	/**

@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToCenterFrame(int)
  */
-public class ClosestToCenterFilter extends VisionFilter{
+public class ClosestToCenterFilter implements VisionFilter{
 	
 	/**
 	 * Indicates the maximum amount of contours to leave after the filter process.

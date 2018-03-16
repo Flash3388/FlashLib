@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see VisionSource#lowestContours(int)
  */
-public class LowestFilter extends VisionFilter{
+public class LowestFilter implements VisionFilter{
 
 	/**
 	 * Indicates the maximum amount of contours to leave after the filter process.

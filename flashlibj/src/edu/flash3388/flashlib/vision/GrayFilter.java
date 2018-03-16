@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.vision;
  * 
  * @see VisionSource#filterColorRange(int, int)
  */
-public class GrayFilter extends VisionFilter{
+public class GrayFilter implements VisionFilter{
 
 	/**
 	 * Indicates the minimum value of the color filter.

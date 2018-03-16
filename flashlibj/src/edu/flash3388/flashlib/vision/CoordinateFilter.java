@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToCoordinate(double, double, int)
  */
-public class CoordinateFilter extends VisionFilter{
+public class CoordinateFilter implements VisionFilter{
 	
 	/**
 	 * Indicates the x coordinate to filter around.

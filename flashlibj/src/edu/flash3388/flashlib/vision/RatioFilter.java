@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see VisionSource#contourRatio(double, double, double, double, double, double, double, double, double, double)
  */
-public class RatioFilter extends VisionFilter{
+public class RatioFilter implements VisionFilter {
 	
 	/**
 	 * Indicates the height ratio between the first contour and the second contour.

@@ -2,11 +2,6 @@ package edu.flash3388.flashlib.vision;
 
 import java.util.List;
 
-import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
-
 /**
  * This creator provides the maximum data available for {@link Analysis}. It can work with a group of
  * contours as well as one. When a group is provided, it is considered as one contour and all data is averaged
@@ -22,52 +17,33 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class GroupedAnalysisCreator implements AnalysisCreator{
+public class GroupedAnalysisCreator implements AnalysisCreator {
 
-	private DoubleProperty targetWidth = new SimpleDoubleProperty(), 
-			targetHeight = new SimpleDoubleProperty(),
-			camFov = new SimpleDoubleProperty();
-	private BooleanProperty distanceHeight = new SimpleBooleanProperty();
+	/**
+	 * Indicates the real life target's width.
+	 */
+	private double targetWidth;
+	/**
+	 * Indicates the real life target's height.
+	 */
+	private double targetHeight;
+	/**
+	 * Indicates the camera's field of view in radians.
+	 */
+	private double camFov;
+	
+	/**
+	 * Indicates whether to use height ratios to calculate distance or width rations.
+	 */
+	private boolean calcDistanceWithHeightRatio;
 	
 	public GroupedAnalysisCreator(){}
-	public GroupedAnalysisCreator(double targetWidth, double targetHeight, double camFov, boolean distanceHeight){
-		this.targetHeight.set(targetHeight);
-		this.targetWidth.set(targetWidth);
-		this.camFov.set(camFov);
-		this.distanceHeight.set(distanceHeight);
-	}
-	
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the real life target's width.
-	 * @return the property
-	 */
-	public DoubleProperty targetWidthProperty(){
-		return targetWidth;
-	}
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the real life target's height.
-	 * @return the property
-	 */
-	public DoubleProperty targetHeightProperty(){
-		return targetHeight;
-	}
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the camera's field of view in radians.
-	 * @return the property
-	 */
-	public DoubleProperty camFovProperty(){
-		return camFov;
-	}
-	/**
-	 * An {@link BooleanProperty}.
-	 * Indicates whether to use height ratios to calculate distance or width rations.
-	 * @return the property
-	 */
-	public BooleanProperty distanceHeightProperty(){
-		return distanceHeight;
+	public GroupedAnalysisCreator(double targetWidth, double targetHeight, double camFov, 
+			boolean calcDistanceWithHeightRatio){
+		this.targetHeight = targetHeight;
+		this.targetWidth = targetWidth;
+		this.camFov = camFov;
+		this.calcDistanceWithHeightRatio = calcDistanceWithHeightRatio;
 	}
 	
 	/**
@@ -80,7 +56,7 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		double centerX = 0, centerY = 0;
 		double sumDimension = 0;
 		for (Contour contour : contours){
-			sumDimension += distanceHeight.get()? contour.getHeight() : contour.getWidth();
+			sumDimension += calcDistanceWithHeightRatio? contour.getHeight() : contour.getWidth();
 			centerX += contour.getX();
 			centerY += contour.getY();
 		}
@@ -95,13 +71,13 @@ public class GroupedAnalysisCreator implements AnalysisCreator{
 		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (centerY - source.getFrameHeight() * 0.5));
 		analysis.setDouble(Analysis.PROP_ANGLE_OFFSET, 
 				VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
-				centerX, centerY, camFov.get()));
+				centerX, centerY, camFov));
 		analysis.setDouble(Analysis.PROP_TARGET_DISTANCE, 
-				distanceHeight.get()? 
-				VisionUtils.measureDistance(source.getFrameHeight(), sumDimension, targetHeight.get(), 
-						camFov.get())  : 
-			VisionUtils.measureDistance(source.getFrameWidth(), sumDimension, targetWidth.get(), 
-					camFov.get()));
+				calcDistanceWithHeightRatio? 
+				VisionUtils.measureDistance(source.getFrameHeight(), sumDimension, targetHeight, 
+						camFov)  : 
+			VisionUtils.measureDistance(source.getFrameWidth(), sumDimension, targetWidth, 
+					camFov));
 		
 		return analysis;
 	}

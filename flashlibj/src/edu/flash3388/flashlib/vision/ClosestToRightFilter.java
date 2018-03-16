@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToRight(int)
  */
-public class ClosestToRightFilter extends VisionFilter{
+public class ClosestToRightFilter implements VisionFilter{
 	
 	/**
 	 * Indicates the maximum amount of contours to leave after the filter process.

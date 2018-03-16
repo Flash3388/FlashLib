@@ -1,11 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-
-
 /**
  * Filers out contours by their shape.
  * 
@@ -13,7 +7,7 @@ import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
  * @since FlashLib 1.0.0
  * @see VisionSource#detectShapes(int, int, double)
  */
-public class ShapeFilter extends VisionFilter{
+public class ShapeFilter implements VisionFilter {
 	
 	/**
 	 * Indicates the accuracy of the shape approximation. Higher values offer less accurate shapes.

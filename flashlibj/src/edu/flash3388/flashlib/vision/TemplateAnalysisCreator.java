@@ -3,16 +3,7 @@ package edu.flash3388.flashlib.vision;
 import java.io.File;
 import java.util.ArrayList;
 
-import edu.flash3388.flashlib.util.beans.BooleanProperty;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.Property;
-import edu.flash3388.flashlib.util.beans.SimpleBooleanProperty;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 import edu.flash3388.flashlib.util.beans.ValueSource;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleStringProperty;
-import edu.flash3388.flashlib.util.beans.StringProperty;
 
 /**
  * Filters for a part of the image which matches a given template.
@@ -20,100 +11,60 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class TemplateAnalysisCreator implements AnalysisCreator{
+public class TemplateAnalysisCreator implements AnalysisCreator {
 
 	private TemplateMatcher matcher;
 	
-	private DoubleProperty scaleFactor = new SimpleDoubleProperty();
-	private IntegerProperty method = new SimpleIntegerProperty();
-	private StringProperty imgDirPath = new SimpleStringProperty();
+	/**
+	 * Indicates the scale factor used to resize the image per iteration.
+	 */
+	private double scaleFactor;
+	/**
+	 * Indicates the method used to perform the template matching with.
+	 * Must be non-negative.
+	 */
+	private int method;
+	/**
+	 * Indicates the path to a folder containing the template images. All images in that folder will be loaded as
+	 * templates.
+	 */
+	private String imgDirPath;
 	
-	private DoubleProperty targetWidth = new SimpleDoubleProperty(), 
-			targetHeight = new SimpleDoubleProperty(),
-			camFov = new SimpleDoubleProperty();
-	private BooleanProperty distanceHeight = new SimpleBooleanProperty();
-	private BooleanProperty loadBinary = new SimpleBooleanProperty(true);
+	/**
+	 * Indicates the real life target's width.
+	 */
+	private double targetWidth;
+	/**
+	 * Indicates the real life target's height.
+	 */
+	private double targetHeight;
+	/**
+	 * Indicates the camera's field of view in radians.
+	 */
+	private double camFov;
+	
+	/**
+	 * Indicates whether to use height ratios to calculate distance or width rations.
+	 */
+	private boolean calcDistanceWithHeightRatio;
+	/**
+	 * Indicates whether to load template images as binaries or not.
+	 */
+	private boolean loadBinary;
 	
 	public TemplateAnalysisCreator(){}
 	public TemplateAnalysisCreator(String imgDirPath, int method, double scaleFactor, 
-			double targetWidth, double targetHeight, double camFov, boolean distanceHeight, boolean loadBinary){
-		this.imgDirPath.setValue(imgDirPath);
-		this.scaleFactor.set(scaleFactor);
-		this.method.set(method);
+			double targetWidth, double targetHeight, double camFov, 
+			boolean calcDistanceWithHeightRatio, boolean loadBinary){
+		this.imgDirPath = imgDirPath;
+		this.scaleFactor = scaleFactor;
+		this.method = method;
 		
-		this.targetHeight.set(targetHeight);
-		this.targetWidth.set(targetWidth);
-		this.camFov.set(camFov);
-		this.distanceHeight.set(distanceHeight);
-		this.loadBinary.set(loadBinary);
-	}
-	
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the real life target's width.
-	 * @return the property
-	 */
-	public DoubleProperty targetWidthProperty(){
-		return targetWidth;
-	}
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the real life target's height.
-	 * @return the property
-	 */
-	public DoubleProperty targetHeightProperty(){
-		return targetHeight;
-	}
-	/**
-	 * An {@link DoubleProperty}.
-	 * Indicates the camera's field of view in radians.
-	 * @return the property
-	 */
-	public DoubleProperty camFovProperty(){
-		return camFov;
-	}
-	/**
-	 * An {@link BooleanProperty}.
-	 * Indicates whether to use height ratios to calculate distance or width rations.
-	 * @return the property
-	 */
-	public BooleanProperty distanceHeightProperty(){
-		return distanceHeight;
-	}
-	/**
-	 * An {@link BooleanProperty}.
-	 * Indicates whether to load template images as binaries or not
-	 * @return the property
-	 */
-	public BooleanProperty loadBinaryProperty(){
-		return loadBinary;
-	}
-	
-	/**
-	 * A {@link DoubleProperty}.
-	 * Indicates the scale factor used to resize the image per iteration.
-	 * @return the property
-	 */
-	public DoubleProperty scaleFactorProperty(){
-		return scaleFactor;
-	}
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the method used to perform the template matching with.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public IntegerProperty methodProperty(){
-		return method;
-	}
-	/**
-	 * A {@link Property} using a String type.
-	 * Indicates the path to a folder containing the template images. All images in that folder will be loaded as
-	 * templates.
-	 * @return the property
-	 */
-	public StringProperty imageDirectoryPathProperty(){
-		return imgDirPath;
+		this.targetHeight = targetHeight;
+		this.targetWidth = targetWidth;
+		this.camFov = camFov;
+		this.calcDistanceWithHeightRatio = calcDistanceWithHeightRatio;
+		this.loadBinary = loadBinary;
 	}
 	
 	@Override
@@ -121,23 +72,23 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 		if(matcher == null){
 			Object[] imgs = null;
 			
-			File dir = new File(imgDirPath.getValue());
+			File dir = new File(imgDirPath);
 			if(!dir.exists() || !dir.isDirectory())
 				return null;
 			File[] files = dir.listFiles();
 			ArrayList<Object> imgList = new ArrayList<Object>();
 			for (int i = 0; i < files.length; i++) {
-				Object img = source.loadImage(files[i].getAbsolutePath(), loadBinary.get());
+				Object img = source.loadImage(files[i].getAbsolutePath(), loadBinary);
 				if(img != null)
 					imgList.add(img);
 			}
 			imgs = new ValueSource[imgList.size()];
 			imgList.toArray(imgs);
 			
-			matcher = source.createTemplateMatcher(imgs, method.get());
+			matcher = source.createTemplateMatcher(imgs, method);
 		}
 		
-		MatchResult result = source.matchTemplate(matcher, scaleFactor.get());
+		MatchResult result = source.matchTemplate(matcher, scaleFactor);
 		return setUpAnalysis(source, result);
 		
 	}
@@ -151,13 +102,13 @@ public class TemplateAnalysisCreator implements AnalysisCreator{
 		analysis.setDouble(Analysis.PROP_VERTICAL_DISTANCE, (result.centery - source.getFrameHeight() * 0.5));
 		analysis.setDouble(Analysis.PROP_ANGLE_OFFSET, 
 				VisionUtils.calculateHorizontalOffset(source.getFrameWidth(), source.getFrameHeight(), 
-						result.centerx , result.centery , camFov.get()));
+						result.centerx , result.centery , camFov));
 		analysis.setDouble(Analysis.PROP_TARGET_DISTANCE, 
-				distanceHeight.get()? 
-				VisionUtils.measureDistance(source.getFrameHeight(), source.getFrameHeight(), targetHeight.get(), 
-						camFov.get())  : 
-			VisionUtils.measureDistance(source.getFrameWidth(), source.getFrameWidth(), targetWidth.get(), 
-					camFov.get()));
+				calcDistanceWithHeightRatio? 
+				VisionUtils.measureDistance(source.getFrameHeight(), source.getFrameHeight(), targetHeight, 
+						camFov)  : 
+			VisionUtils.measureDistance(source.getFrameWidth(), source.getFrameWidth(), targetWidth, 
+					camFov));
 		
 		return analysis;
 	}
