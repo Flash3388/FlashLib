@@ -99,6 +99,27 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		
 		return collection;
 	}
+	
+	private Object parseArray(Element element) 
+			throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, XMLTypeException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+		NodeList children = element.getChildNodes();
+		Object[] array = new Object[children.getLength()];
+		
+		for (int i = 0; i < children.getLength(); i++) {
+			Node node = children.item(i);
+			
+			if (node.getNodeType() != Node.ELEMENT_NODE) 
+				continue;
+			
+			Element childElement = (Element)node;
+			Object entry = parseElement(childElement);
+			
+			array[i] = entry;
+		}
+		
+		return array;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private Object parseMap(Element element) 
 			throws ClassNotFoundException, IOException, IllegalAccessException,
@@ -151,6 +172,7 @@ public class XMLObjectInputStream extends ObjectInputStream {
 		
 		return map;
 	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object parseEnumValue(Element element) throws ClassNotFoundException, IOException {
 		String className = element.getAttribute(XMLTagData.CLASS_ATTRIBUTE);
@@ -194,6 +216,8 @@ public class XMLObjectInputStream extends ObjectInputStream {
 					return Double.parseDouble(element.getTextContent());
 				case STRING:
 					return element.getTextContent();
+				case ARRAY:
+					return parseArray(element);
 				case COLLECTION:
 					return parseCollection(element);
 				case MAP:
