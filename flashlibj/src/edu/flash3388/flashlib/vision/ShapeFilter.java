@@ -32,6 +32,26 @@ public class ShapeFilter implements VisionFilter {
 		this.accuracy = accuracy;
 	}
 	
+	public double getAccuracy() {
+		return accuracy;
+	}
+	public void setAccuracy(double accuracy) {
+		this.accuracy = accuracy;
+	}
+	
+	public int getVertecies() {
+		return vertecies;
+	}
+	public void setVertecies(int vertecies) {
+		this.vertecies = vertecies;
+	}
+	
+	public int getAmount() {
+		return amount;
+	}
+	public void setAmount(int amount) {
+		this.amount = amount;
+	}
 	
 	@Override
 	public void process(VisionSource source) {

@@ -77,21 +77,91 @@ public class RatioFilter implements VisionFilter {
 	public RatioFilter(){}
 	public RatioFilter(double heightRatio, double widthRatio, double dy, double dx, double maxScore, double minScore, 
 			double maxHeight, double minHeight, double maxWidth, double minWidth){
-		this.maxScore = maxScore;
-		this.dx = dx;
-		this.dy = dy;
-		this.heightRatio = heightRatio;
-		this.maxHeight = maxHeight;
-		this.maxWidth = maxWidth;
-		this.minHeight = minHeight;
-		this.minScore = minScore;
+		this.setDx(dx);
+		this.setDy(dy);
+		this.setHeightRatio(heightRatio);
+		this.setWidthRatio(widthRatio);
+		this.setMaxHeight(maxHeight);
+		this.setMaxWidth(maxWidth);
+		this.setMinHeight(minHeight);
+		this.setMaxScore(maxScore);
+		this.setMinScore(minScore);
+		this.setMinWidth(minWidth);
+	}
+	
+	public double getMinWidth() {
+		return minWidth;
+	}
+	public void setMinWidth(double minWidth) {
 		this.minWidth = minWidth;
+	}
+	
+	public double getMaxWidth() {
+		return maxWidth;
+	}
+	public void setMaxWidth(double maxWidth) {
+		this.maxWidth = maxWidth;
+	}
+	
+	public double getMinHeight() {
+		return minHeight;
+	}
+	public void setMinHeight(double minHeight) {
+		this.minHeight = minHeight;
+	}
+	
+	public double getMaxHeight() {
+		return maxHeight;
+	}
+	public void setMaxHeight(double maxHeight) {
+		this.maxHeight = maxHeight;
+	}
+	
+	public double getMinScore() {
+		return minScore;
+	}
+	public void setMinScore(double minScore) {
+		this.minScore = minScore;
+	}
+	
+	public double getMaxScore() {
+		return maxScore;
+	}
+	public void setMaxScore(double maxScore) {
+		this.maxScore = maxScore;
+	}
+	
+	public double getDy() {
+		return dy;
+	}
+	public void setDy(double dy) {
+		this.dy = dy;
+	}
+	
+	public double getDx() {
+		return dx;
+	}
+	public void setDx(double dx) {
+		this.dx = dx;
+	}
+	
+	public double getWidthRatio() {
+		return widthRatio;
+	}
+	public void setWidthRatio(double widthRatio) {
 		this.widthRatio = widthRatio;
+	}
+	
+	public double getHeightRatio() {
+		return heightRatio;
+	}
+	public void setHeightRatio(double heightRatio) {
+		this.heightRatio = heightRatio;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.contourRatio(heightRatio, widthRatio, dy, dx, maxScore, minScore, 
-				maxHeight, minHeight, maxWidth, minWidth);
+		source.contourRatio(getHeightRatio(), getWidthRatio(), getDy(), getDx(), getMaxScore(), getMinScore(), 
+				getMaxHeight(), getMinHeight(), getMaxWidth(), getMinWidth());
 	}
 }

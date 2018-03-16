@@ -15,4 +15,12 @@ public interface StringProperty extends Property<String>, StringSource{
 	 * @param s new value
 	 */
 	void set(String s);
+	
+	
+	default public void setValue(String o) {
+		set(o);
+	}
+	default public String getValue() {
+		return get();
+	}
 }

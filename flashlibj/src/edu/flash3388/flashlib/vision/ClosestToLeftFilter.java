@@ -20,6 +20,13 @@ public class ClosestToLeftFilter implements VisionFilter{
 		this.amount = amount;
 	}
 	
+	public int getAmount() {
+		return amount;
+	}
+	public void setAmount(int amount) {
+		this.amount = amount;
+	}
+	
 	@Override
 	public void process(VisionSource source) {
 		source.closestToLeft(amount);

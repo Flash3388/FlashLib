@@ -1,9 +1,16 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import edu.flash3388.flashlib.dashboard.Displayable.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
+import edu.flash3388.flashlib.io.XMLObjectInputStream;
+import edu.flash3388.flashlib.io.XMLObjectOutputStream;
 import edu.flash3388.flashlib.robot.PeriodicRunnable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
@@ -210,22 +217,52 @@ public class MainWindow {
 		if(colorFilter != null){
 			localVisionChange = true;
 			vision_hsvBox.setDisable(false);
-			vision_hsvBox.setSelected(colorFilter.hsvProperty().get());
+			vision_hsvBox.setSelected(colorFilter.isHsv());
 			localVisionChange = false;
 			
-			changeVisionColorScheme(colorFilter.hsvProperty().get());
+			changeVisionColorScheme(colorFilter.isHsv());
 			
-			vision_min1.bind(colorFilter.min1Property());
+			vision_min1.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMin1();}
+				@Override
+				public void set(int i) {colorFilter.setMin1(i);}
+			});
 			vision_min1.enable();
-			vision_max1.bind(colorFilter.max1Property());
+			vision_max1.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMax1();}
+				@Override
+				public void set(int i) {colorFilter.setMax1(i);}
+			});
 			vision_max1.enable();
-			vision_min2.bind(colorFilter.min2Property());
+			vision_min2.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMin2();}
+				@Override
+				public void set(int i) {colorFilter.setMin2(i);}
+			});
 			vision_min2.enable();
-			vision_max2.bind(colorFilter.max2Property());
+			vision_max2.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMax2();}
+				@Override
+				public void set(int i) {colorFilter.setMax2(i);}
+			});
 			vision_max2.enable();
-			vision_min3.bind(colorFilter.min3Property());
+			vision_min3.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMin3();}
+				@Override
+				public void set(int i) {colorFilter.setMin3(i);}
+			});
 			vision_min3.enable();
-			vision_max3.bind(colorFilter.max3Property());
+			vision_max3.bind(new IntegerProperty() {
+				@Override
+				public int get() {return colorFilter.getMax3();}
+				@Override
+				public void set(int i) {colorFilter.setMax3(i);}
+			});
 			vision_max3.enable();
 		}
 	}
@@ -235,11 +272,31 @@ public class MainWindow {
 		if(file != null){
 			VisionProcessing processing = null;
 			
+			FileInputStream inStream = null;
+			ObjectInputStream objectInputStream = null;
 			try{
-				processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+				inStream = new FileInputStream(file);
+				objectInputStream = new XMLObjectInputStream(inStream);
+				
+				Object deserializedObj = objectInputStream.readObject();
+				
+				if (deserializedObj instanceof VisionProcessing)
+					processing = (VisionProcessing) deserializedObj;
 			}catch(Throwable t){
+				FlashUtil.getLog().log("Failed to parse vision processing file");
 				FlashUtil.getLog().reportError(t);
 				GUI.showMainErrorDialog("Failed to load vision");
+			} finally {
+				if (inStream != null) {
+					try {
+						inStream.close();
+					} catch (IOException e) {}
+				}
+				if (objectInputStream != null) {
+					try {
+						objectInputStream.close();
+					} catch (IOException e) {}
+				}
 			}
 			
 			if(processing != null){
@@ -258,7 +315,27 @@ public class MainWindow {
 			File file = GUI.showVisionSaveDialog();
 			
 			if(file != null){
-				processing.saveXml(file.getAbsolutePath());
+				FileOutputStream fileOutputStream = null;
+				ObjectOutputStream objectOutputStream = null;
+				try {
+					fileOutputStream = new FileOutputStream(file);
+					objectOutputStream = new XMLObjectOutputStream(fileOutputStream);
+					
+					objectOutputStream.writeObject(processing);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if (fileOutputStream != null) {
+						try {
+							fileOutputStream.close();
+						} catch (IOException e) {}
+					}
+					if (objectOutputStream != null) {
+						try {
+							objectOutputStream.close();
+						} catch (IOException e) {}
+					}
+				}
 			}
 		}
 	}
@@ -283,8 +360,8 @@ public class MainWindow {
 			vision_max3.setName("Max Blue");
 		}
 		
-		if(colorFilter != null && colorFilter.hsvProperty().get() != hsv){
-			colorFilter.hsvProperty().set(hsv);
+		if(colorFilter != null && colorFilter.isHsv() != hsv){
+			colorFilter.setHsv(hsv);
 		}
 		if(vision_hsvBox.isSelected() != hsv){
 			localVisionChange = true;
@@ -333,32 +410,32 @@ public class MainWindow {
 			selectParameters(Dashboard.getVision().getSelectedProcessingIndex());
 		}
 		if(colorFilter != null){
-			if(colorFilter.hsvProperty().get() != vision_hsvBox.isSelected()){
+			if(colorFilter.isHsv() != vision_hsvBox.isSelected()){
 				localVisionChange = true;
-				vision_hsvBox.setSelected(colorFilter.hsvProperty().get());
+				vision_hsvBox.setSelected(colorFilter.isHsv());
 				localVisionChange = false;
-				changeVisionColorScheme(colorFilter.hsvProperty().get());
+				changeVisionColorScheme(colorFilter.isHsv());
 			}
 			
-			if(colorFilter.min1Property().get() != vision_min1.getValue()){
-				vision_min1.setValue(colorFilter.min1Property().get());
+			if(colorFilter.getMin1() != vision_min1.getValue()){
+				vision_min1.setValue(colorFilter.getMin1());
 			}
-			if(colorFilter.max1Property().get() != vision_max1.getValue()){
-				vision_max1.setValue(colorFilter.max1Property().get());
-			}
-			
-			if(colorFilter.min2Property().get() != vision_min2.getValue()){
-				vision_min2.setValue(colorFilter.min2Property().get());
-			}
-			if(colorFilter.max2Property().get() != vision_max2.getValue()){
-				vision_max2.setValue(colorFilter.max2Property().get());
+			if(colorFilter.getMax1() != vision_max1.getValue()){
+				vision_max1.setValue(colorFilter.getMax1());
 			}
 			
-			if(colorFilter.min3Property().get() != vision_min3.getValue()){
-				vision_min3.setValue(colorFilter.min3Property().get());
+			if(colorFilter.getMin2() != vision_min2.getValue()){
+				vision_min2.setValue(colorFilter.getMin2());
 			}
-			if(colorFilter.max3Property().get() != vision_max3.getValue()){
-				vision_max3.setValue(colorFilter.max3Property().get());
+			if(colorFilter.getMax2() != vision_max2.getValue()){
+				vision_max2.setValue(colorFilter.getMax2());
+			}
+			
+			if(colorFilter.getMin3() != vision_min3.getValue()){
+				vision_min3.setValue(colorFilter.getMin3());
+			}
+			if(colorFilter.getMax3() != vision_max3.getValue()){
+				vision_max3.setValue(colorFilter.getMax3());
 			}
 		}
 	}
@@ -468,11 +545,7 @@ public class MainWindow {
 		savevision.setOnAction((e)->{
 			saveVisionParameters();
 		});
-		MenuItem visioneditor = new MenuItem("Show Vision Editor");
-		visioneditor.setOnAction((e)->{
-			GUI.showVisionEditor();
-		});
-		vision.getItems().addAll(loadvision, savevision, visioneditor);
+		vision.getItems().addAll(loadvision, savevision);
 		
 		Menu monitoring = new Menu("Monitoring");
 		MenuItem logwindow = new MenuItem("Show Logs");

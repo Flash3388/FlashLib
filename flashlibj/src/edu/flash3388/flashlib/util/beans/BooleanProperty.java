@@ -15,4 +15,12 @@ public interface BooleanProperty extends Property<Boolean>, BooleanSource {
 	 * @param b new value
 	 */
 	void set(boolean b);
+	
+	
+	default public void setValue(Boolean o) {
+		set(o == null? false : o.booleanValue());
+	}
+	default public Boolean getValue() {
+		return get();
+	}
 }

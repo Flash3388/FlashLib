@@ -31,14 +31,6 @@ public class SimpleBooleanProperty implements BooleanProperty {
 	public boolean get() {
 		return var;
 	}
-	@Override
-	public void setValue(Boolean o) {
-		set(o == null? false : o.booleanValue());
-	}
-	@Override
-	public Boolean getValue() {
-		return var;
-	}
 	
 	@Override
 	public String toString() {

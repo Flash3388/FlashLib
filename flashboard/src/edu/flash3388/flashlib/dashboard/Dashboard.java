@@ -1,8 +1,12 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
@@ -18,6 +22,8 @@ import edu.flash3388.flashlib.dashboard.controls.ModeSelectorControl;
 import edu.flash3388.flashlib.dashboard.controls.TesterControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
+import edu.flash3388.flashlib.io.XMLObjectInputStream;
+import edu.flash3388.flashlib.io.XMLObjectOutputStream;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
@@ -543,15 +549,32 @@ public class Dashboard extends Application {
 			}
 		});
 		
-		VisionProcessing processing = null;
 		for (File file : files){
+			
+			FileInputStream inStream = null;
+			ObjectInputStream objectInputStream = null;
 			try{
-				processing = VisionProcessing.createFromXml(file.getAbsolutePath());
+				inStream = new FileInputStream(file);
+				objectInputStream = new XMLObjectInputStream(inStream);
+				
+				Object deserializedObj = objectInputStream.readObject();
+				
+				if (deserializedObj instanceof VisionProcessing)
+					vision.addProcessing((VisionProcessing) deserializedObj);
 			}catch(Throwable t){
-				processing = null;
-			}
-			if(processing != null){
-				vision.addProcessing(processing);
+				FlashUtil.getLog().log("Failed to parse vision processing file");
+				FlashUtil.getLog().reportError(t);
+			} finally {
+				if (inStream != null) {
+					try {
+						inStream.close();
+					} catch (IOException e) {}
+				}
+				if (objectInputStream != null) {
+					try {
+						objectInputStream.close();
+					} catch (IOException e) {}
+				}
 			}
 		}
 		
@@ -720,7 +743,30 @@ public class Dashboard extends Application {
 		if(visionInitialized()){
 			for (int i = 0; i < vision.getProcessingCount(); i++) {
 				VisionProcessing proc = vision.getProcessing(i);
-				proc.saveXml(FOLDER_SAVES+proc.getName()+".xml");
+				
+				String fileName = FOLDER_SAVES + proc.getName() + ".xml";
+				
+				FileOutputStream fileOutputStream = null;
+				ObjectOutputStream objectOutputStream = null;
+				try {
+					fileOutputStream = new FileOutputStream(fileName);
+					objectOutputStream = new XMLObjectOutputStream(fileOutputStream);
+					
+					objectOutputStream.writeObject(proc);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					if (fileOutputStream != null) {
+						try {
+							fileOutputStream.close();
+						} catch (IOException e) {}
+					}
+					if (objectOutputStream != null) {
+						try {
+							objectOutputStream.close();
+						} catch (IOException e) {}
+					}
+				}
 			}
 			
 			log.log("Stopping image processing...", "Dashboard");

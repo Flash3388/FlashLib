@@ -15,4 +15,11 @@ public interface IntegerProperty extends Property<Integer>, IntegerSource {
 	 * @param i new value
 	 */
 	void set(int i);
+	
+	default public void setValue(Integer o) {
+		set(o == null? 0 : o.intValue());
+	}
+	default public Integer getValue() {
+		return get();
+	}
 }

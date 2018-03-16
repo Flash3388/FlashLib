@@ -31,13 +31,21 @@ public final class VisionProcessing implements Serializable {
 	
 	private List<VisionFilter> filters;
 	private AnalysisCreator analysisCreator;
+	private String name;
 	
 	/**
 	 * Creates a new vision processing objects. 
 	 * @param name the name of the processing
 	 */
-	public VisionProcessing(){
+	public VisionProcessing(String name){
 		filters = new ArrayList<VisionFilter>();
+	}
+	public VisionProcessing(){
+		this("");
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	/**

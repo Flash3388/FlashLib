@@ -69,9 +69,6 @@ public class GUI {
 	public static void showPropertiesViewer(){
 		PropertyViewer.showPropertyViewer(primary);
 	}
-	public static void showVisionEditor(){
-		VisionEditorWindow.showEditor(Dashboard.getVision());
-	}
 	public static File showVisionLoadDialog(){
 		FileChooser chooser = new FileChooser();
 		ExtensionFilter extFilter = new ExtensionFilter("Vision File", "*.xml");

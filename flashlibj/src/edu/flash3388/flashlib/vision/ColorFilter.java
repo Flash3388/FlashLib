@@ -52,6 +52,51 @@ public class ColorFilter implements VisionFilter{
 		set(new int[] {min1, min2, min3}, new int[] {max1, max2, max3});
 	}
 	
+	public boolean isHsv() {
+		return hsv;
+	}
+	public void setHsv(boolean hsv) {
+		this.hsv = hsv;
+	}
+	
+	public int getMin1() {
+		return min[0];
+	}
+	public void setMin1(int val) {
+		min[0] = val;
+	}
+	public int getMin2() {
+		return min[1];
+	}
+	public void setMin2(int val) {
+		min[1] = val;
+	}
+	public int getMin3() {
+		return min[2];
+	}
+	public void setMin3(int val) {
+		min[2] = val;
+	}
+	
+	public int getMax1() {
+		return max[0];
+	}
+	public void setMax1(int val) {
+		max[0] = val;
+	}
+	public int getMax2() {
+		return max[1];
+	}
+	public void setMax2(int val) {
+		max[1] = val;
+	}
+	public int getMax3() {
+		return max[2];
+	}
+	public void setMax3(int val) {
+		max[2] = val;
+	}
+	
 	@Override
 	public void process(VisionSource source) {
 		if(hsv)

@@ -15,4 +15,11 @@ public interface DoubleProperty extends Property<Double>, DoubleSource {
 	 * @param d new value
 	 */
 	void set(double d);
+	
+	default public void setValue(Double o) {
+		set(o == null? 0.0 : o.doubleValue());
+	}
+	default public Double getValue() {
+		return get();
+	}
 }

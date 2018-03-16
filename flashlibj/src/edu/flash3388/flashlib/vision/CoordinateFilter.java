@@ -29,6 +29,27 @@ public class CoordinateFilter implements VisionFilter{
 		this.amount = amount;
 	}
 	
+	public double getX() {
+		return x;
+	}
+	public void setX(double x) {
+		this.x = x;
+	}
+	
+	public double getY() {
+		return y;
+	}
+	public void setY(double y) {
+		this.y = y;
+	}
+	
+	public int getAmount() {
+		return amount;
+	}
+	public void setAmount(int amount) {
+		this.amount = amount;
+	}
+	
 	@Override
 	public void process(VisionSource source) {
 		source.closestToCoordinate(x, y, amount);
