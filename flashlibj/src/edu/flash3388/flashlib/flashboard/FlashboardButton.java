@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.hid.Button;
 import edu.flash3388.flashlib.robot.hid.ManualButton;
 
@@ -46,9 +47,13 @@ public class FlashboardButton extends FlashboardControl{
 	public void newData(byte[] data) {
 		if(data[0] == DOWN && !running){
 			running = true;
-			button.setPressed();
+			Scheduler.getInstance().execute(()->{
+				button.setPressed();
+			});
 		}else if(data[0] == UP){
-			button.stopAll();
+			Scheduler.getInstance().execute(()->{
+				button.stopAll();
+			});
 			running = false;
 		}
 	}
