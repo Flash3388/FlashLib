@@ -257,7 +257,19 @@ public final class Scheduler {
 	 * @return true if the task was in execution, false otherwise
 	 */
 	public boolean remove(Runnable runnable){
-		return tasks.remove(runnable);
+		int index;
+		for (index = 0; index < tasks.size(); index++) {
+			if (tasks.get(index).equals(runnable)) {
+				break;
+			}
+		}
+		
+		if (index < tasks.size()) {
+			tasks.remove(index);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
