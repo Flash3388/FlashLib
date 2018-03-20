@@ -63,20 +63,17 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		
 		return expected == crc.getValue();
 	}
-	private boolean disassemblePacket(byte[] data, int start, int datalen, Packet packet){
+	private byte[] disassemblePacket(byte[] data, int start, int datalen){
 		byte[] datarec = Arrays.copyOfRange(data, start, start + datalen);
 		
 		if(crclen > 0){
 			if((data.length - start - datalen - 1) < 8 || 
 					!checkCrc(datarec, FlashUtil.toLong(data, start + datalen + 1))){
-				packet.length = 0;
-				return false;
+				return null;
 			}
 		}
 		
-		packet.length = datalen;
-		packet.data = datarec;
-		return true;
+		return datarec;
 	}
 	private byte[] assemblePacket(byte[] data, int start, int len){
 		byte[] sdata = new byte[len + PACKET_LENGTH_BYTE_COUNT + crclen - start];
@@ -92,34 +89,31 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		
 		return sdata;
 	}
-	private boolean handleData(Packet packet){
-		boolean ret = disassemblePacket(dataBuffer, 0, nextPacketLength - crclen, packet);
+	private byte[] handleData(){
+		byte[] retData = disassemblePacket(dataBuffer, 0, nextPacketLength - crclen);
 		
-		if(ret && isHandshake(packet.data, packet.length))
-			return false;
+		if(retData != null && isHandshake(retData, retData.length))
+			return null;
 		
-		return ret;
+		return retData;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean read(Packet packet) {
-		packet.length = -1;
-		
+	public byte[] read() {
 		if(!isOpened())
-			return false;
+			return null;
 		
 		int availabe = availableData();
 		if(nextPacketLength < 0 && availabe < PACKET_LENGTH_BYTE_COUNT)
-			return false;
+			return null;
 		
 		if(nextPacketLength < 0 && availabe >= PACKET_LENGTH_BYTE_COUNT){
 			int len = readRaw(sizeBuffer, 0, PACKET_LENGTH_BYTE_COUNT);
 			if(readError(len)){
-				packet.length = 0;
-				return false;
+				return null;
 			}
 			nextPacketLength = FlashUtil.toInt(sizeBuffer);
 			newDataRead();
@@ -128,18 +122,18 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		if(nextPacketLength > 0 && availabe >= nextPacketLength){
 			int len = readRaw(dataBuffer, 0, nextPacketLength);
 			if(readError(len)){
-				packet.length = 0;
-				return false;
+				return null;
 			}
 			newDataRead();
 			
-			if(handleData(packet)){
+			byte[] data = handleData();
+			if(data != null){
 				nextPacketLength = -1;
-				return true;
+				return data;
 			}
 		}
 		
-		return false;
+		return null;
 	}
 	/**
 	 * {@inheritDoc}
@@ -192,7 +186,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 */
 	protected abstract void writeRaw(byte[] data, int start, int length);
 	/**
-	 * Reads raw data from the IO port used for communications. Unlike {@link #read(Packet)}, this method does not 
+	 * Reads raw data from the IO port used for communications. Unlike {@link #read()}, this method does not 
 	 * handle packet and data logic.
 	 * 
 	 * @param buffer data buffer to store read data into

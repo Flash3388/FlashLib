@@ -39,7 +39,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a client TCP interface at a local
 	 * address which is received from {@link InetAddress#getLocalHost()}, and port. Address and port for a server are immediately
-	 * saved but used only when {@link #connect(Packet)} is called.
+	 * saved but used only when {@link #connect()} is called.
 	 * 
 	 * @param remote {@link InetAddress} object for the server address
 	 * @param localport local port for data receiving
@@ -53,7 +53,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	}
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a client TCP interface at a local
-	 * address and port. Address and port for a server are immediately saved but used only when {@link #connect(Packet)} 
+	 * address and port. Address and port for a server are immediately saved but used only when {@link #connect()} 
 	 * is called.
 	 * 
 	 * @param remote {@link InetAddress} object for the server address
@@ -80,7 +80,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a server TCP interface at a local
 	 * address which is received from {@link InetAddress#getLocalHost()}, and port. A {@link ServerSocket} is created 
-	 * with a backlog of 1 connection to listen for connections when {@link #connect(Packet)} is called.
+	 * with a backlog of 1 connection to listen for connections when {@link #connect()} is called.
 	 * 
 	 * @param localPort local binding port for listening socket
 	 * 
@@ -92,7 +92,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a server TCP interface at a local
 	 * address and port. A {@link ServerSocket} is created with a backlog of 1 connection to listen for connections 
-	 * when {@link #connect(Packet)} is called.
+	 * when {@link #connect()} is called.
 	 * 
 	 * @param localAddr local binding address for listening socket
 	 * @param localPort local binding port for listening socket
@@ -148,7 +148,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	public void connect(Packet packet){
+	public void connect(){
 		try {
 			if(reset){
 				closeSocket();

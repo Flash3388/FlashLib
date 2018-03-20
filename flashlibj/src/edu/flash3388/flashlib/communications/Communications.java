@@ -35,7 +35,6 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class Communications {
 	private static class CommTask implements Runnable{
-		boolean stop = false;
 		private Communications comm;
 		
 		public CommTask(Communications comm){
@@ -44,21 +43,21 @@ public class Communications {
 		
 		@Override
 		public void run() {
-			while(!stop){
+			while(!Thread.interrupted()){
 				FlashUtil.getLog().log("Openning CommInterface", comm.logName);
-				while(!comm.open() && !stop)
+				while(!comm.open() && !Thread.interrupted())
 					FlashUtil.delay(500);
-				if(stop) break;
+				if(Thread.interrupted()) break;
 				
 				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-				while(!comm.connect() && !stop)
+				while(!comm.connect() && !Thread.interrupted())
 					FlashUtil.delay(500);
-				if(stop) break;
+				if(Thread.interrupted()) break;
 				
 				FlashUtil.getLog().log("Connected", comm.logName);
 				comm.resetAll();
 				
-				while(comm.isConnected() && !stop){
+				while(comm.isConnected() && !Thread.interrupted()){
 					comm.sendAll();
 					comm.read();
 					
@@ -68,9 +67,6 @@ public class Communications {
 				comm.onDisconnect();
 				FlashUtil.getLog().log("Disconnected", comm.logName);
 			}
-		}
-		public void stop(){
-			stop = true;
 		}
 	}
 	
@@ -87,7 +83,6 @@ public class Communications {
 	private int readStart = -1;
 	private boolean allowConnection = true;
 	private int nextId, minIdAlloc = 0;
-	private Packet packet = new Packet();
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
 	private String logName;
@@ -126,31 +121,27 @@ public class Communications {
 		commTask = new CommTask(this);
 		commThread = new Thread(commTask, name+"-Communications");
 	}
-	private Packet receivePacket(){
-		if(!commInterface.read(packet))
-			return null;
-		return packet;
-	}
+
 	private void read(){//ID|VALUE
 		if(!isConnected()) return;
 		readStart = FlashUtil.millisInt();
 		while(!readTimedout()){
-			Packet packet = receivePacket();
+			byte[] packet = commInterface.read();
 			if(packet == null || packet.length < 1)
 				return;
 			if(packet.length < MINIMUM_DATA_BYTES)
 				continue;
 			
-			byte dataType = packet.data[0];
-			int id = FlashUtil.toInt(packet.data, 1);
+			byte dataType = packet[0];
+			int id = FlashUtil.toInt(packet, 1);
 			Sendable sen = getFromAllAttachedByID(id);
 			if(dataType == SENDABLE_DATA && sen != null && sen.remoteAttached() && 
 					packet.length - 6 > 0){
-				sen.newData(Arrays.copyOfRange(packet.data, 6, packet.length));
+				sen.newData(Arrays.copyOfRange(packet, 6, packet.length));
 			}else if(dataType == SENDABLE_INIT){
 				if(sen == null){
-					String str = new String(packet.data, 6, packet.length - 6);
-					createSendable(str, id, packet.data[5]);
+					String str = new String(packet, 6, packet.length - 6);
+					createSendable(str, id, packet[5]);
 				}else{
 					onRemoteAttached(sen, true);
 				}
@@ -466,7 +457,7 @@ public class Communications {
 	}
 	
 	/**
-	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect(Packet)}.
+	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect()}.
 	 * If connection is not allowed, the method will simply return false.
 	 * @return true if connection was established, false otherwise
 	 */
@@ -474,7 +465,7 @@ public class Communications {
 		if(isConnected()) return true;
 		if(!allowConnection) return false;
 		
-		commInterface.connect(packet);
+		commInterface.connect();
 		if(isConnected()){
 			setReadTimeout(CommInterface.READ_TIMEOUT);
 			return true;
@@ -491,7 +482,6 @@ public class Communications {
 	 */
 	public void disconnect(){
 		if(isConnected()){
-			commTask.stop();
 			commInterface.disconnect();
 		}
 	}
@@ -595,7 +585,7 @@ public class Communications {
 	 */
 	public void close() {
 		disconnect();
-		commTask.stop();
+		commThread.interrupt();
 		commInterface.close();
 		detachAll();
 		

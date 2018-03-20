@@ -141,18 +141,17 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * is sent and than waits for another {@link #HANDSHAKE_CONNECT_CLIENT} to be received.
 	 * 
 	 * @param commInterface interface for the communications
-	 * @param packet packet for data storage
 	 * @return true if connection was successful, false otherwise
 	 */
-	public static boolean handshakeServer(CommInterface commInterface, Packet packet){
+	public static boolean handshakeServer(CommInterface commInterface){
 		commInterface.setReadTimeout(READ_TIMEOUT * 4);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
+		byte[] data = commInterface.read();
+		if(!isHandshakeClient(data, data.length))
 			return false;
 		
 		commInterface.write(HANDSHAKE_CONNECT_SERVER);
-		commInterface.read(packet);
-		if(!isHandshakeClient(packet.data, packet.length))
+		data = commInterface.read();
+		if(!isHandshakeClient(data, data.length))
 			return false;
 		return true;
 	}
@@ -162,15 +161,14 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * than {@link #HANDSHAKE_CONNECT_CLIENT} is sent again.
 	 * 
 	 * @param commInterface interface for the communications
-	 * @param packet packet for data storage
 	 * @return true if connection was successful, false otherwise
 	 */
-	public static boolean handshakeClient(CommInterface commInterface, Packet packet){
+	public static boolean handshakeClient(CommInterface commInterface){
 		commInterface.setReadTimeout(READ_TIMEOUT);
 		commInterface.write(HANDSHAKE_CONNECT_CLIENT);
 		
-		commInterface.read(packet);
-		if(!isHandshakeServer(packet.data, packet.length))
+		byte[] data = commInterface.read();
+		if(!isHandshakeServer(data, data.length))
 			return false;
 		
 		commInterface.write(HANDSHAKE_CONNECT_CLIENT);
