@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.flashboard.FlashboardRemoteLog;
 import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -39,7 +38,7 @@ public class FlashRobotUtil {
 	public static void enterEmergencyStop(){
 		if(emergencyStop) return;
 		
-		FlashUtil.getLog().logTime("!EMERGENCY STOP!", "Robot");
+		FlashUtil.getLogger().info("!EMERGENCY STOP!");
 		
 		Scheduler.getInstance().setDisabled(true);
 		if(!RobotFactory.hasImplementation() || !RobotFactory.getImplementation().isFRC())
@@ -54,7 +53,7 @@ public class FlashRobotUtil {
 	public static void exitEmergencyStop(){
 		if(!emergencyStop) return;
 		
-		FlashUtil.getLog().logTime("NORMAL OPERATIONS RESUMED", "Robot");
+		FlashUtil.getLogger().info("NORMAL OPERATIONS RESUMED");
 		
 		Scheduler.getInstance().setDisabled(false);
 		if(!RobotFactory.hasImplementation() || !RobotFactory.getImplementation().isFRC())
@@ -152,12 +151,11 @@ public class FlashRobotUtil {
 		if(flashboardInitData != null){
 			Flashboard.init(flashboardInitData);
 			if(Flashboard.flashboardInit()){
-				Flashboard.attach(estopControl,
-					      new FlashboardRemoteLog(FlashUtil.getLog()));
+				Flashboard.attach(estopControl);
 			}
 		}
 		
-		FlashUtil.getLog().logTime("FlashLib " + FlashUtil.VERSION +" INIT - DONE", "Robot");
+		FlashUtil.getLogger().info("FlashLib " + FlashUtil.VERSION +" INIT - DONE");
 		init = true;
 	}
 }

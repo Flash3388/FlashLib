@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
+import java.util.logging.Logger;
+
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.Action;
@@ -18,7 +20,6 @@ import edu.flash3388.flashlib.robot.devices.IOFactory;
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 /**
  * IterativeFRCRobot provides the recommended base for FRC robots using FlashLib's robot framework.
@@ -126,7 +127,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		/**
 		 * Indicates whether or not the robot should log operations into FlashLib's standard logs.
 		 * If this value is false, FlashLib's main log's file writing is disabled and the file
-		 * is deleted. The main log is retrieved from {@link FlashUtil#getLog()}.
+		 * is deleted. The main log is retrieved from {@link FlashUtil#getLogger()}.
 		 * <p>
 		 * The default value is `false`.
 		 */
@@ -150,7 +151,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	
 	private static final int ITERATION_DELAY = 5;
 	
-	private Log log;
+	private Logger logger;
 	private PowerLogger powerLogger;
 	private Scheduler schedulerImpl = Scheduler.getInstance();
 	
@@ -169,8 +170,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	private void logNewState(String state){
 		if(!stdLog)
 			return;
-		log.logTime("NEW STATE - "+state, "Robot");
-		log.save();
+		logger.info("NEW STATE - "+state);
 	}
 	
 	@Override
@@ -187,14 +187,13 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		FRCVoltagePowerSource voltageSource = new FRCVoltagePowerSource(initializer.minVoltageLevel, 13.7);
 		FlashRobotUtil.setVoltageSource(voltageSource);
 		
-		log = FlashUtil.getLog();
+		logger = FlashUtil.getLogger();
 		
 		stdLog = initializer.standardLogs;
 		logPower = initializer.logPower;
 		
 		if(!stdLog){
-			log.disable();
-			log.delete();
+			//TODO: DISABLE LOGGER
 		}
 		if(logPower){
 			powerLogger = new PowerLogger("powerLog", voltageSource,
@@ -207,11 +206,11 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		runScheduler = initializer.runScheduler;
 		
 		initRobot();
-		log.logTime("Robot initialized", "Robot");
+		logger.info("Robot initialized");
 	}
 	@Override
 	public final void robotMain() {
-		log.logTime("STARTING", "Robot");
+		logger.info("STARTING");
 		
 		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
 			Flashboard.start();

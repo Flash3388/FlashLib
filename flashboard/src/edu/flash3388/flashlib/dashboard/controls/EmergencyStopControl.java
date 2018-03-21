@@ -60,11 +60,11 @@ public class EmergencyStopControl extends Displayable{
 			if(emergency){
 				button.setText("Normal");
 				statusRect.setFill(Color.RED);
-				FlashUtil.getLog().log("!!!EMERGENCY STOP!!!", "EStop Control");
+				FlashUtil.getLogger().info("!!!EMERGENCY STOP!!!");
 			}else{
 				button.setText("Emergency Stop");
 				statusRect.setFill(Color.GREEN);
-				FlashUtil.getLog().log("Normal Operations", "EStop Control");
+				FlashUtil.getLogger().info("Normal Operations");
 			}
 		}
 	}

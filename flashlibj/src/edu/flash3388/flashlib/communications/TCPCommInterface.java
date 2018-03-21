@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -73,6 +74,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 		try {
 			createSocket();
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to create socket", e);
 			closeSocket();
 			throw e;
 		}
@@ -174,7 +176,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 			resetBuffers();
 			resetData();
 		} catch (IOException e) {	
-			FlashUtil.getLog().reportError(e.getMessage());
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to connect", e);
 		}finally{
 			reset = true;
 		}
@@ -190,7 +192,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 		try {
 			closeSocket();
 		} catch (IOException e) {
-			FlashUtil.getLog().reportError(e.getMessage());
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to close socket", e);
 		}
 		if(isServer())
 			outInet = null;
@@ -244,6 +246,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 		try {
 			out.write(data, start, length);
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to write", e);
 			disconnect();
 		}
 	}
@@ -260,6 +263,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 		} catch (SocketTimeoutException e) {
 			return 0;
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to read", e);
 			disconnect();
 			return 0;
 		} 
@@ -274,6 +278,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 		try {
 			return in.available();
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to retreive available data", e);
 			disconnect();
 			return 0;
 		}
@@ -349,6 +354,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 			else 
 				createSocket();
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to create socket", e);
 		}
 	}
 	/**

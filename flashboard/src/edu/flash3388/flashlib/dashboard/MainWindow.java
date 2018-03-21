@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.dashboard.Displayable.DisplayType;
 import edu.flash3388.flashlib.dashboard.controls.CameraViewer;
@@ -282,9 +283,8 @@ public class MainWindow {
 				
 				if (deserializedObj instanceof VisionProcessing)
 					processing = (VisionProcessing) deserializedObj;
-			}catch(Throwable t){
-				FlashUtil.getLog().log("Failed to parse vision processing file");
-				FlashUtil.getLog().reportError(t);
+			}catch(IOException | ClassNotFoundException e){
+				FlashUtil.getLogger().log(Level.SEVERE, "Failed to parse vision processing file", e);
 				GUI.showMainErrorDialog("Failed to load vision");
 			} finally {
 				if (inStream != null) {

@@ -146,12 +146,15 @@ public class CameraView implements Camera{
 	 * @return the currently selected camera
 	 */
 	public Camera currentCamera() {
-		if(cameras.size() < 1) return null;
+		if(cameras.size() < 1) 
+			return null;
+		
 		int index = selector != null? selector.getCameraIndex() : 0;
 		if(index < 0 || index >= cameras.size()){
-			FlashUtil.getLog().reportError("Camera selector index is out of bounds "+index);
+			FlashUtil.getLogger().severe("Camera selector index is out of bounds: "+index);
 			return null;
 		}
+		
 		if(currentIndex != index)
 			currentIndex = index;
 		return cameras.get(currentIndex);
