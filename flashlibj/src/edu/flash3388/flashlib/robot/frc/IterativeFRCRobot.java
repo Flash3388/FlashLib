@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
@@ -193,11 +195,15 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		logPower = initializer.logPower;
 		
 		if(!stdLog){
-			//TODO: DISABLE LOGGER
+			FlashUtil.getLogger().setLevel(Level.OFF);
 		}
 		if(logPower){
-			powerLogger = new PowerLogger("powerLog", voltageSource,
-					new FRCTotalCurrentPowerSource(-1.0, initializer.maxTotalCurrentDraw));
+			try {
+				powerLogger = new PowerLogger("power", voltageSource,
+						new FRCTotalCurrentPowerSource(-1.0, initializer.maxTotalCurrentDraw));
+			} catch (SecurityException | IOException e) {
+				FlashUtil.getLogger().log(Level.SEVERE, "Failed creating power logger", e);
+			}
 		}
 		if(initializer.autoUpdateHid){
 			schedulerImpl.addTask(new HIDUpdateTask());

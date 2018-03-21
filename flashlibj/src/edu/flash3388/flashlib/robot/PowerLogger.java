@@ -1,10 +1,12 @@
 package edu.flash3388.flashlib.robot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.LogUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -71,17 +73,17 @@ public class PowerLogger {
 	public static final double DEFAULT_WARNING_CURRENT_DRAW = 120.0;
 	
 	
-	private Log log;
+	private Logger logger;
 	private List<PowerSource> loggingSources;
 	
 	/**
 	 * Creates a new PowerLogger.
 	 * 
-	 * @param log the log object to use for logging power issues
+	 * @param logger the logger object to use for logging power issues
 	 * @param loggingSources sources to keep track after
 	 */
-	public PowerLogger(Log log, PowerSource...loggingSources) {
-		this.log = log;
+	public PowerLogger(Logger logger, PowerSource...loggingSources) {
+		this.logger = logger;
 		
 		this.loggingSources = new ArrayList<PowerSource>();
 		if(loggingSources != null){
@@ -92,23 +94,26 @@ public class PowerLogger {
 	/**
 	 * Creates a new PowerLogger.
 	 * <p>
-	 * Creates a new {@link Log} object for power logging. Uses {@link Log#createBufferedLog(String)}
+	 * Creates a new {@link Logger} object for power logging. Uses {@link LogUtil#getLogger(String)}
 	 * to create the log and passes the given log name.
 	 * 
 	 * @param logname the name of the log to create
 	 * @param loggingSources sources to keep track after
+	 * 
+	 * @throws IOException if creating a logger has encountered an IO exception
+	 * @throws SecurityException if creating a logger has encountered a security exception
 	 */
-	public PowerLogger(String logname, PowerSource...loggingSources) {
-		this(Log.createBufferedLog(logname), loggingSources);
+	public PowerLogger(String logname, PowerSource...loggingSources) throws SecurityException, IOException {
+		this(LogUtil.getLogger(logname), loggingSources);
 	}
 	
 	/**
-	 * Gets the {@link Log} object used by this class to log power issues.
+	 * Gets the {@link Logger} object used by this class to log power issues.
 	 * 
 	 * @return the log object
 	 */
-	public Log getLog(){
-		return log;
+	public Logger getLogger(){
+		return logger;
 	}
 	
 	public void addSource(PowerSource source){
@@ -130,25 +135,15 @@ public class PowerLogger {
 	 * The check is done by iterating over the collection of {@link PowerSource} objects and for
 	 * each one checking if the value returned from {@link PowerSource#get()} is constrained between
 	 * the minimum wanted value and the maximum wanted value. If not, this event is logged.
-	 * <p>
-	 * If any of the checks warrants a data log, the log is saved by calling {@link Log#save()} insuring that
-	 * the data is saved in case of power loss.
-	 * 
 	 */
 	public void logPower(){
-		boolean save = false;
-		
 		for (PowerSource source : loggingSources) {
 			double val = source.get();
 			
 			if(!Mathf.constrained(val, source.getBoundMin(), source.getBoundMax())){
-				save = true;
-				log.log("Value out of bounds: "+val, source.getName());
+				logger.warning(String.format("Value out of bounds: ", 
+						source.getName(), val));
 			}
-		}
-		
-		if(save){
-			log.save();
 		}
 	}
 }

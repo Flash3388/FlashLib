@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
@@ -17,7 +18,6 @@ import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -270,7 +270,7 @@ public final class Flashboard {
 	 * 
 	 * @param initData initialization data
 	 * 
-	 * 	 * @throws IOException if an IO exception occurs while initializing flashboard.
+	 * @throws IOException if an IO exception occurs while initializing flashboard.
 	 * @throws IllegalStateException if flashboard was initialized
 	 */
 	public static void init(FlashboardInitData initData) throws IOException{
@@ -499,10 +499,10 @@ public final class Flashboard {
 		return tuner;
 	}
 	
-	public static FlashboardRemoteLogger putLog(Log log){
+	public static FlashboardRemoteLogger putLog(Logger logger){
 		checkInit();
 		
-		FlashboardRemoteLogger rlog = new FlashboardRemoteLogger(log);
+		FlashboardRemoteLogger rlog = new FlashboardRemoteLogger(logger);
 		Flashboard.attach(rlog);
 		return rlog;
 	}

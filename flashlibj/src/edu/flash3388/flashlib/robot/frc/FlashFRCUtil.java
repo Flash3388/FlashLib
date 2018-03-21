@@ -6,7 +6,6 @@ import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.RobotInterface;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.LogUtil;
 
 /**
