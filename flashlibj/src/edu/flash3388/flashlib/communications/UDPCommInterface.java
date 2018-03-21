@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -34,7 +35,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	/**
 	 * Constructs a client-type UDP interface. A {@link DatagramSocket} is created and bound to a provided port and
 	 * a {@link InetAddress#isAnyLocalAddress() Wildcard} address provided by the kernel. The remote data is saved and
-	 * used only when {@link #connect(Packet)} is called.
+	 * used only when {@link #connect()} is called.
 	 * 
 	 * @param remote remote server address
 	 * @param localport local port to use
@@ -94,10 +95,10 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * Execute an handshake based on the type of the connection: server or client.
 	 */
 	@Override
-	public void connect(Packet packet) {
+	public void connect() {
 		allowReplacingOfRemote(true);
-		isConnected = server? handshakeServer(this, packet) : 
-			handshakeClient(this, packet);
+		isConnected = server? handshakeServer(this) : 
+			handshakeClient(this);
 		allowReplacingOfRemote(false);
 		resetData();
 	}
@@ -118,8 +119,10 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * </p>
 	 */
 	@Override
-	public boolean read(Packet packet) {
-		if(!isOpened()) return false;
+	public byte[] read() {
+		if(!isOpened()) 
+			return null;
+		
 		try {
 			DatagramPacket recp = new DatagramPacket(data, data.length);
 			socket.receive(recp);
@@ -133,29 +136,18 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 			}
 			
 			newDataRead();
-			packet.data = recp.getData();
-			packet.length = recp.getLength();
+			byte[] data = recp.getData();
+			int length = recp.getLength();
 			
-			if(isHandshake(packet.data, packet.length)){
-				packet.length = 1;
-				return true;
+			if(isHandshake(data, length)){
+				return length != data.length? Arrays.copyOf(data, length) :
+					data;
 			}
-			/*if(server && isHandshakeClient(packet.data, packet.length)){
-				write(HANDSHAKE_CONNECT_SERVER);
-				packet.length = 1;
-				return true;
-			}
-			if(!server && isHandshakeServer(packet.data, packet.length)){
-				write(HANDSHAKE_CONNECT_CLIENT);
-				packet.length = 1;
-				return true;
-			}*/
-
 			
-			return true;
+			return length != data.length? Arrays.copyOf(data, length) :
+				data;
 		} catch (IOException e) {
-			packet.length = 0;
-			return false;
+			return null;
 		}
 	}
 

@@ -42,10 +42,8 @@ public interface CommInterface {
 	
 	/**
 	 * Initiates connection with a remote side. 
-	 * 
-	 * @param packet {@link Packet} object for data receiving
 	 */
-	void connect(Packet packet);
+	void connect();
 	/**
 	 * Closes connection with a remote side.
 	 */
@@ -57,13 +55,12 @@ public interface CommInterface {
 	boolean isConnected();
 	
 	/**
-	 * Reads data from the port and stores the result in a {@link Packet} object. If the port is closed or not connected
+	 * Reads data from the port and returns the data read. If the port is closed or not connected
 	 * nothing will happen. 
 	 * 
-	 * @param packet the packet for storing read data
-	 * @return true if data was read, false otherwise.
+	 * @return byte[] array of bytes read, or null if no data was read.
 	 */
-	boolean read(Packet packet);
+	byte[] read();
 	/**
 	 * Writes data to the communications port to be sent. If the port is closed or not connected nothing will happen. 
 	 * 

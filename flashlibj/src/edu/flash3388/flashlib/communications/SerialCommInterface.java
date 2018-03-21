@@ -36,9 +36,9 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connect(Packet packet) {
-		isConnected = isServer()? handshakeServer(this, packet) : 
-			handshakeClient(this, packet);
+	public void connect() {
+		isConnected = isServer()? handshakeServer(this) : 
+			handshakeClient(this);
 		if(isConnected){
 			resetData();
 			resetBuffers();
