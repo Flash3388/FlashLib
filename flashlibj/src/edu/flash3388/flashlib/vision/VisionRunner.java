@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -163,11 +164,11 @@ public abstract class VisionRunner extends Sendable implements Vision, ImagePipe
 		if(data[0] == RemoteVision.REMOTE_RUN_MODE){
 			if(data[1] == RemoteVision.REMOTE_START){
 				start();
-				FlashUtil.getLog().log("Starting vision");
+				FlashUtil.getLogger().info("Starting vision");
 			}
 			else if(data[1] == RemoteVision.REMOTE_STOP){
 				stop();
-				FlashUtil.getLog().log("Stopping vision");
+				FlashUtil.getLogger().info("Stopping vision");
 			}
 		}else if(data[0] == RemoteVision.REMOTE_SELECT_MODE){
 			selectProcessing(data[1]);
@@ -181,9 +182,9 @@ public abstract class VisionRunner extends Sendable implements Vision, ImagePipe
 				if (deserializedObject instanceof VisionProcessing)
 					addProcessing((VisionProcessing) deserializedObject);
 				else 
-					FlashUtil.getLog().reportWarning("Received object is not VisionProcessing object");
+					FlashUtil.getLogger().warning("Received object is not VisionProcessing object");
 			} catch (IOException | ClassNotFoundException e) {
-				FlashUtil.getLog().reportError(e);
+				FlashUtil.getLogger().log(Level.SEVERE, "Error in deserializing vision processing object", e);
 			} 
 		}
 	}

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -43,29 +44,35 @@ public class Communications {
 		
 		@Override
 		public void run() {
-			while(!Thread.interrupted()){
-				FlashUtil.getLog().log("Openning CommInterface", comm.logName);
-				while(!comm.open() && !Thread.interrupted())
-					FlashUtil.delay(500);
-				if(Thread.interrupted()) break;
-				
-				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-				while(!comm.connect() && !Thread.interrupted())
-					FlashUtil.delay(500);
-				if(Thread.interrupted()) break;
-				
-				FlashUtil.getLog().log("Connected", comm.logName);
-				comm.resetAll();
-				
-				while(comm.isConnected() && !Thread.interrupted()){
-					comm.sendAll();
-					comm.read();
+			try {
+				while(!Thread.interrupted()){
+					comm.logger.info("Openning CommInterface");
+					while(!comm.open() && !Thread.interrupted())
+						Thread.sleep(500);
+					if(Thread.interrupted()) 
+						break;
 					
-					comm.commInterface.update(FlashUtil.millisInt());
-					FlashUtil.delay(10);
+					comm.logger.info("Searching for remote connection");
+					while(!comm.connect() && !Thread.interrupted())
+						Thread.sleep(500);
+					if(Thread.interrupted()) 
+						break;
+					
+					comm.logger.info("Connected");
+					comm.resetAll();
+					
+					while(comm.isConnected() && !Thread.interrupted()){
+						comm.sendAll();
+						comm.read();
+						
+						comm.commInterface.update(FlashUtil.millisInt());
+						FlashUtil.delay(10);
+					}
+					comm.onDisconnect();
+					comm.logger.info("Disconnected");
 				}
-				comm.onDisconnect();
-				FlashUtil.getLog().log("Disconnected", comm.logName);
+			} catch (InterruptedException ex) {
+				comm.logger.info("Communication thread interrupted");
 			}
 		}
 	}
@@ -85,7 +92,7 @@ public class Communications {
 	private int nextId, minIdAlloc = 0;
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
-	private String logName;
+	private Logger logger;
 	
 	private Thread commThread;
 	private CommTask commTask;
@@ -94,15 +101,15 @@ public class Communications {
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
 	 * To start the communications thread, it is necessary to call {@link #start()}.
 	 * 
-	 * @param name logging name
+	 * @param logName logging name
 	 * @param readIn communications interface
 	 */
-	public Communications(String name, CommInterface readIn){
+	public Communications(String logName, CommInterface readIn){
 		this.commInterface = readIn;
-		this.logName = name+"-Comm";
+		logger = Logger.getLogger(logName);
 		
-		initializeConcurrency(name);
-		FlashUtil.getLog().log("Initialized", logName);
+		initializeConcurrency(logName);
+		logger.info("Initialized");
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
@@ -586,7 +593,6 @@ public class Communications {
 	public void close() {
 		disconnect();
 		commThread.interrupt();
-		commInterface.close();
 		detachAll();
 		
 		try {
@@ -594,6 +600,9 @@ public class Communications {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			e.printStackTrace();
+			logger.info("Interruption while joining communication thread");
 		}
+		
+		commInterface.close();
 	}
 }

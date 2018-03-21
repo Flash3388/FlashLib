@@ -6,6 +6,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
@@ -15,7 +18,6 @@ import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.devices.IOFactory;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 /**
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
@@ -139,10 +141,10 @@ public abstract class RobotBase implements SBC, RobotInterface{
 	public static final String MANIFEST_ROBOT_CLASS = "Robot-Class";
 	
 	/**
-	 * FlashLib's main log. Received by calling {@link FlashUtil#getLog()}. Used to log
+	 * FlashLib's main log. Received by calling {@link FlashUtil#getLogger()}. Used to log
 	 * initialization and error data for software operation tracking.
 	 */
-	protected static final Log log = FlashUtil.getLog();
+	protected static final Logger logger = FlashUtil.getLogger();
 	
 	private static RobotBase userImplement;
 	private static boolean halInitialized = false;
@@ -166,7 +168,7 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		//loading user class
 		userImplement = loadUserClass();
 		if(userImplement == null){
-			log.reportError("Failed to initialize user robot implementation");
+			logger.severe("Failed to initialize user robot implementation");
 			shutdown(1);
 		}
 		
@@ -174,18 +176,16 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			//setting up robot systems
 			setupRobot();
 		}catch(Throwable t){
-			log.reportError("Exception occurred in robot setup: "+t.getMessage());
-			log.reportError(t);
+			logger.log(Level.SEVERE, "Exception occurred in robot setup", t);
 			shutdown(1);
 		}
 		
-		log.log("Starting robot", "RobotBase");
+		logger.info("Starting robot");
 		try{
 			//starting robot
 			userImplement.robotMain();
 		}catch(Throwable t){
-			log.reportError("Exception occurred in robot thread: "+t.getMessage());
-			log.reportError(t);
+			logger.log(Level.SEVERE, "Exception occurred in robot setup", t);
 			shutdown(1);
 		}
 	}
@@ -214,12 +214,12 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			}
 	    }
 	    if(robotName != null){
-			log.log("User class found: "+robotName, "RobotBase");
+			logger.info("User class found: "+robotName);
 			
 			try {
 				return (RobotBase) Class.forName(robotName).newInstance();
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				e.printStackTrace();
+				logger.log(Level.SEVERE, "Exception occurred in robot setup", e);
 			}
 	    }
 		return null;
@@ -237,18 +237,18 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		if(initializer.modeSelector != null){
 			userImplement.modeSelector = initializer.modeSelector;
 		}else{
-			log.reportWarning("Mode selector was not provided");
+			logger.warning("Mode selector was not provided");
 		}
 		
 		//initializing HAL if user wants to
 		if(initializer.initHAL){
 			int halmode = initializer.halInitMode;
-			log.log("Initializing HAL: "+halmode, "RobotBase");
+			logger.info("Initializing HAL: "+halmode);
 			int status = HAL.initializeHAL(halmode);
 			if(status != 0){
 				throw new Exception("Failed to initialize HAL: "+status);
 			}
-			log.log("HAL initialized: "+HAL.boardName(), "RobotBase");
+			logger.info("HAL initialized: "+HAL.boardName());
 			halInitialized = true;
 			
 			IOFactory.setProvider(HAL.createIOProvider());
@@ -257,52 +257,55 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		//initializing communications if the user wants to
 		if(initializer.initCommunications){
 			if(initializer.commInterface != null){
-				log.log("Initializing robot communications", "RobotBase");
+				logger.info("Initializing robot communications");
 				userImplement.communications = new Communications("Robot", initializer.commInterface);
-				log.log("Done", "RobotBase");
+				logger.info("Done");
 			}else{
-				log.reportWarning("CommInterface for robot communications is null");
+				logger.warning("CommInterface for robot communications is null");
 			}
 		}
 	}
 	private static void onShutdown(){
-		log.logTime("Shuting down...", "RobotBase");
+		logger.info("Shuting down...");
 		//user shutdown
 		if(userImplement != null){
-			log.log("User shutdown...", "RobotBase");
+			logger.info("User shutdown...");
 			try {
 				userImplement.robotShutdown();
 			} catch (Throwable t) {
-				log.reportError("Exception occurred during user shutdown!!\n"+t.getMessage());
-				log.reportError(t);
+				logger.log(Level.SEVERE, "Exception occurred during user shutdown", t);
 			}
 			
 			//communications shutdown
 			if(userImplement.communications != null){
-				log.log("Shutting down robot communications...", "RobotBase");
+				logger.info("Shutting down robot communications...");
 				userImplement.communications.close();
-				log.log("Done", "RobotBase");
+				logger.info("Done");
 			}
 		}
 		
 		//flashboard shutdown
 		if(Flashboard.flashboardInit()){
-			log.log("Shutting down Flashboard...", "RobotBase");
+			logger.info("Shutting down Flashboard...");
 			Flashboard.close();
-			log.log("Done", "RobotBase");
+			logger.info("Done");
 		}
 		
 		//hal shutdown
 		if(halInitialized){
-			log.log("Shutting down HAL...", "RobotBase");
+			logger.info("Shutting down HAL...");
 			HAL.shutdown();
-			log.log("Done", "RobotBase");
+			logger.info("Done");
 			halInitialized = false;
 		}
 		
 		//done
-		log.logTime("Shutdown successful", "RobotBase");
-		log.close();
+		logger.info("Shutdown successful");
+		
+		for (Handler handler : logger.getHandlers()) {
+			handler.flush();
+			handler.close();
+		}
 	}
 	
 	/**

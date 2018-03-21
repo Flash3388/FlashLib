@@ -45,7 +45,7 @@ public class ConditionalAction extends Action {
 	@Override
 	public void start(){
 		if(condition == null){
-			FlashUtil.getLog().reportError("Missing condition source");
+			FlashUtil.getLogger().severe("Missing condition source");
 			return;
 		}
 		runAction = condition.get()? actionTrue : actionFalse;

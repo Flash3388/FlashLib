@@ -5,7 +5,6 @@ import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.RobotInterface;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
 /**
@@ -53,7 +52,7 @@ public class FlashFRCUtil {
 	public static void initFlashLib(RobotInterface robot, FlashboardInitData flashboardInitData){
 		Log.setParentDirectory("/home/lvuser");
 		FlashRobotUtil.initFlashLib(robot, RobotFactory.createFRCHIDInterface(), flashboardInitData);
-		FlashUtil.getLog().addListener(new DriverStationLogListener());
+		//FlashUtil.getLogger().addListener(new DriverStationLogListener());
 		pdp = new PDP();
 		
 		if(Flashboard.flashboardInit())

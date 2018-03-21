@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -230,7 +231,7 @@ public class RemoteVision extends Sendable implements Vision {
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(procOutStream);
 				objectOutputStream.writeObject(processing.get(sendProc));
 			} catch (IOException e) {
-				FlashUtil.getLog().reportError(e);
+				FlashUtil.getLogger().log(Level.SEVERE, "Error in serializing vision processing object", e);
 				return null;
 			} finally {
 				if((++sendProc) >= processing.size())

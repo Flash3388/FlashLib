@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -132,7 +133,9 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 				portOut = recp.getPort();
 			}else if(recp.getPort() != portOut || 
 					!FlashUtil.equals(outInet.getAddress(), recp.getAddress().getAddress())){
-				FlashUtil.getLog().log("Unknow sender!!");
+				FlashUtil.getLogger().warning(String.format("Unknown sender to socket: %s:%s",
+						recp.getAddress().getHostAddress(), 
+						recp.getPort()));
 			}
 			
 			newDataRead();
@@ -147,6 +150,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 			return length != data.length? Arrays.copyOf(data, length) :
 				data;
 		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to read", e);
 			return null;
 		}
 	}
@@ -158,7 +162,9 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	public void setReadTimeout(int millis) {
 		try {
 			socket.setSoTimeout(millis);
-		} catch (SocketException e) {}
+		} catch (SocketException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to set timeout", e);
+		}
 	}
 	/**
 	 * {@inheritDoc}
@@ -167,7 +173,9 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	public int getTimeout() {
 		try {
 			return socket.getSoTimeout();
-		} catch (SocketException e) {}
+		} catch (SocketException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to get timeout", e);
+		}
 		return -1;
 	}
 	
@@ -201,7 +209,9 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 		try {
 			newDataSent();
 			socket.send(new DatagramPacket(data, start, length, outInet, portOut));
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to send packet", e);
+		}
 	}
 
 	/**
@@ -295,7 +305,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 		try {
 			socket = new DatagramSocket(socket.getLocalPort(), addr);
 		} catch (IOException e) {
-			e.printStackTrace();
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to create socket", e);
 		}
 		
 	}
@@ -319,7 +329,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 		try {
 			socket = new DatagramSocket(port, socket.getLocalAddress());
 		} catch (IOException e) {
-			e.printStackTrace();
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while attempting to create socket", e);
 		}
 	}
 	/**

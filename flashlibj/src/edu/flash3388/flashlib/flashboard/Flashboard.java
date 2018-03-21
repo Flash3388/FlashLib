@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
@@ -321,9 +322,9 @@ public final class Flashboard {
 			
 			initMode = mode;
 			instance = true;
-			FlashUtil.getLog().logTime("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode), "Robot");
+			FlashUtil.getLogger().info("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode));
 		} catch (IOException e) {
-			FlashUtil.getLog().reportError(e.getMessage());
+			FlashUtil.getLogger().log(Level.SEVERE, "Error while initializing flashboard", e);
 			e.printStackTrace();
 		}
 	}

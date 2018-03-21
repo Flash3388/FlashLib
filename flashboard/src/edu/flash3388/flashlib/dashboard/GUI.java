@@ -42,7 +42,7 @@ public class GUI {
 	}
 	
 	public static void showMainErrorDialog(String error){
-		FlashUtil.getLog().reportError(error);
+		FlashUtil.getLogger().severe(error);
 		FlashFXUtils.onFXThread(()->{
 			FlashFXUtils.showErrorDialog(primary, "Error", error);
 		});
