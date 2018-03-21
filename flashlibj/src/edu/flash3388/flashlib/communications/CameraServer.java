@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * CameraClient provides a UDP communications server for camera data. A remote {@link CameraClient} can connect to it by 
@@ -136,19 +137,18 @@ public class CameraServer {
 	 * @param logName for logging data
 	 * @param localPort port to listen for incoming data
 	 * @param camera camera whose data is sent
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraServer(String logName, int localPort, Camera camera){
+	public CameraServer(String logName, int localPort, Camera camera) throws SecurityException, IOException{
 		port = localPort;
-		logger = Logger.getLogger(logName);
+		logger = LogUtil.getLogger(logName);
 		
-		try {
-			socket = new DatagramSocket(new InetSocketAddress(localPort));
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		socket = new DatagramSocket(new InetSocketAddress(localPort));
 		
 		this.camera = camera;
-		runThread = new Thread(new Task(this));
+		runThread = new Thread(new Task(this), logName + "-CamServerThread");
 		runThread.start();
 	}
 	/**
@@ -162,8 +162,11 @@ public class CameraServer {
 	 * 
 	 * @param localPort port to listen for incoming data
 	 * @param camera camera whose data is sent
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraServer(int localPort, Camera camera){
+	public CameraServer(int localPort, Camera camera) throws SecurityException, IOException{
 		this("CamServer", localPort, camera);
 	}
 	

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * Provides a communications management system between to sides. The communications is split into mini communication part
@@ -103,10 +105,13 @@ public class Communications {
 	 * 
 	 * @param logName logging name
 	 * @param readIn communications interface
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public Communications(String logName, CommInterface readIn){
+	public Communications(String logName, CommInterface readIn) throws SecurityException, IOException{
 		this.commInterface = readIn;
-		logger = Logger.getLogger(logName);
+		logger = LogUtil.getLogger(logName);
 		
 		initializeConcurrency(logName);
 		logger.info("Initialized");
@@ -119,14 +124,17 @@ public class Communications {
 	 * To start the communications thread, it is necessary to call {@link #start()}. Uses a generated name for logging data.
 	 * 
 	 * @param readIn communications interface
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public Communications(CommInterface readIn){
+	public Communications(CommInterface readIn) throws SecurityException, IOException{
 		this("Communications", readIn);
 	}
 	
 	private void initializeConcurrency(String name){
 		commTask = new CommTask(this);
-		commThread = new Thread(commTask, name+"-Communications");
+		commThread = new Thread(commTask, name+"-CommThread");
 	}
 
 	private void read(){//ID|VALUE

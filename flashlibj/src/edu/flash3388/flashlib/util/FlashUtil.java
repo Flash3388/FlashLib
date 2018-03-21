@@ -16,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.beans.BooleanSource;
@@ -203,8 +202,7 @@ public final class FlashUtil {
 	}
 
 	private static void initMainLogger() throws SecurityException, IOException {
-		Logger mainLogger = Logger.getLogger("flashlib");
-		mainLogger.addHandler(new FileHandler());
+		Logger mainLogger = LogUtil.getLogger("flashlib");
 		
 		FlashUtil.mainLogger = mainLogger;
 	}

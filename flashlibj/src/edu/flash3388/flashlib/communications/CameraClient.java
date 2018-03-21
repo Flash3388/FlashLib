@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * CameraClient provides a UDP communications client for camera data. It connects with a remote {@link CameraServer},
@@ -82,20 +83,21 @@ public class CameraClient {
 	 * @param remotePort remote server port
 	 * @param maxBytes maximum buffer size
 	 * 
-	 * @throws SocketException if failed to create the socket
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraClient(String logName, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes) throws SocketException{
+	public CameraClient(String logName, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes) throws SecurityException, IOException{
 		port = localPort;
 		sendPort = remotePort;
 		sendAddress = remoteAdd;
-		logger = Logger.getLogger(logName);
+		logger = LogUtil.getLogger(logName);
 		
 		socket = new DatagramSocket(new InetSocketAddress(localPort));
 		socket.setSoTimeout(READ_TIMEOUT);
 		
 		recBytes = new byte[maxBytes];
 		 
-		runThread = new Thread(new Task(this));
+		runThread = new Thread(new Task(this), logName + "-CamClientThread");
 		runThread.start();
 	}
 	/**
@@ -109,9 +111,10 @@ public class CameraClient {
 	 * @param remoteAdd remote server address
 	 * @param remotePort remote server port
 	 * 
-	 * @throws SocketException if failed to create the socket
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort) throws SocketException{
+	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort) throws SecurityException, IOException{
 		this(name, localPort, remoteAdd, remotePort, DEFAULT_MAX_BYTES);
 	}
 	
@@ -119,6 +122,7 @@ public class CameraClient {
 		try {
 			socket.send(new DatagramPacket(bytes, bytes.length, sendAddress, sendPort));
 		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Error while sending packet", e);
 		}
 	}
 	private void read(){
