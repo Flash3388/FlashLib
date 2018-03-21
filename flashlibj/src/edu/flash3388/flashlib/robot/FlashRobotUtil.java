@@ -1,5 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
+import java.io.IOException;
+import java.util.logging.Level;
+
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
@@ -137,10 +140,10 @@ public class FlashRobotUtil {
 	 * @param robot the robot implementation
 	 * @param hidInterface the hid implementation
 	 * @param flashboardInitData the flashboard initialization data
-	 * 
+	 
 	 * @throws IllegalStateException if flashlib was already initialized
 	 */
-	public static void initFlashLib(RobotInterface robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData){
+	public static void initFlashLib(RobotInterface robot, HIDInterface hidInterface, FlashboardInitData flashboardInitData) {
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
@@ -149,7 +152,12 @@ public class FlashRobotUtil {
 		estopControl = new EmergencyStopControl();
 		
 		if(flashboardInitData != null){
-			Flashboard.init(flashboardInitData);
+			try {
+				Flashboard.init(flashboardInitData);
+			} catch (IOException e) {
+				FlashUtil.getLogger().log(Level.SEVERE, "Exception while initializing flashboard", e);
+			}
+			
 			if(Flashboard.flashboardInit()){
 				Flashboard.attach(estopControl);
 			}

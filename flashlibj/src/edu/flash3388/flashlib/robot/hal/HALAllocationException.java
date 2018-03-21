@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-public class HALAllocationException extends HALException{
+public class HALAllocationException extends HALInitialzationException{
 	
 	private static final long serialVersionUID = 1L;
 

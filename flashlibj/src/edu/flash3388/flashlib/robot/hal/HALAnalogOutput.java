@@ -16,11 +16,11 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	
 	/**
 	 * Creates a new analog output port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired analog output
-	 * @throws HALException if port initialization failed.
+	 * @throws HALInitialzationException if port initialization failed.
 	 */
 	public HALAnalogOutput(int port) {
 		if(!ANALOGJNI.checkAnalogOutputPortValid(port))
@@ -31,7 +31,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 		
 		handle = ANALOGJNI.initializeAnalogOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize AnalogOutput: invalid HAL handle", port);
+			throw new HALInitialzationException("Unable to initialize AnalogOutput: invalid HAL handle", port);
 	}
 	
 	/**

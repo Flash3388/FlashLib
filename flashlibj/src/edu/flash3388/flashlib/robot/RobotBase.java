@@ -166,7 +166,11 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
 		
 		//loading user class
-		userImplement = loadUserClass();
+		try {
+			userImplement = loadUserClass();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IOException e) {
+			logger.log(Level.SEVERE, "Exception occurred while loading user class", e);
+		}
 		if(userImplement == null){
 			logger.severe("Failed to initialize user robot implementation");
 			shutdown(1);
@@ -175,8 +179,8 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		try{
 			//setting up robot systems
 			setupRobot();
-		}catch(Throwable t){
-			logger.log(Level.SEVERE, "Exception occurred in robot setup", t);
+		}catch(IOException | SecurityException | InstantiationException e){
+			logger.log(Level.SEVERE, "Exception occurred in robot setup", e);
 			shutdown(1);
 		}
 		
@@ -189,42 +193,30 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			shutdown(1);
 		}
 	}
-	private static RobotBase loadUserClass(){
+	private static RobotBase loadUserClass() throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException{
 		//finding user class and instantiating it.
 		String robotName = null;
-		Enumeration<URL> resources = null;
-	    try {
-	    	resources = RobotBase.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-	    } catch (IOException ex) {
-    		ex.printStackTrace();
-	    }
-	    while (resources != null && resources.hasMoreElements()) {
-			try {
-				Manifest manifest = new Manifest(resources.nextElement().openStream());
-				Attributes attr = manifest.getMainAttributes();
-				for (Iterator<Object> iterator = attr.keySet().iterator(); iterator.hasNext();) {
-					Object key = iterator.next();
-					if(key.toString().equals(MANIFEST_ROBOT_CLASS)){
-						robotName = attr.get(key).toString().trim();
-						break;
-					}
+		Enumeration<URL> resources = RobotBase.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+		
+	    while (resources.hasMoreElements()) {
+			Manifest manifest = new Manifest(resources.nextElement().openStream());
+			Attributes attr = manifest.getMainAttributes();
+			for (Iterator<Object> iterator = attr.keySet().iterator(); iterator.hasNext();) {
+				Object key = iterator.next();
+				if(key.toString().equals(MANIFEST_ROBOT_CLASS)){
+					robotName = attr.get(key).toString().trim();
+					break;
 				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
 			}
 	    }
+	    
 	    if(robotName != null){
 			logger.info("User class found: "+robotName);
-			
-			try {
-				return (RobotBase) Class.forName(robotName).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				logger.log(Level.SEVERE, "Exception occurred in robot setup", e);
-			}
+			return (RobotBase) Class.forName(robotName).newInstance();
 	    }
 		return null;
 	}
-	private static void setupRobot() throws Exception{
+	private static void setupRobot() throws SecurityException, IOException, InstantiationException {
 		RobotInitializer initializer = new RobotInitializer();
 		//allowing user to provide custom configuration before init
 		userImplement.configInit(initializer);
@@ -246,7 +238,7 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			logger.info("Initializing HAL: "+halmode);
 			int status = HAL.initializeHAL(halmode);
 			if(status != 0){
-				throw new Exception("Failed to initialize HAL: "+status);
+				throw new InstantiationException("Failed to initialize HAL: "+status);
 			}
 			logger.info("HAL initialized: "+HAL.boardName());
 			halInitialized = true;

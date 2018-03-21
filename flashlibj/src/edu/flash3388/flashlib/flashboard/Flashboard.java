@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
@@ -271,9 +270,10 @@ public final class Flashboard {
 	 * 
 	 * @param initData initialization data
 	 * 
+	 * 	 * @throws IOException if an IO exception occurs while initializing flashboard.
 	 * @throws IllegalStateException if flashboard was initialized
 	 */
-	public static void init(FlashboardInitData initData){
+	public static void init(FlashboardInitData initData) throws IOException{
 		init(initData.initMode, initData.ipAddress, initData.commPort, initData.camPort, initData.tcp);
 	}
 	/**
@@ -288,45 +288,41 @@ public final class Flashboard {
 	 * @param camport camera communications port
 	 * @param tcp protocol to use: True for TCP, false for UDP.
 	 * 
+	 * @throws IOException if an IO exception occurs while initializing flashboard.
 	 * @throws IllegalStateException if flashboard was initialized
 	 */
-	public static void init(int mode, byte[] ipaddress, int port, int camport, boolean tcp){
+	public static void init(int mode, byte[] ipaddress, int port, int camport, boolean tcp) throws IOException{
 		if(instance)
 			throw new IllegalStateException("Flashboard control was already initialized");
 		
-		try {
-			if(vision == null && (initMode & INIT_COMM) != 0)
-				vision = new RemoteVision("FlashboardVision");
-			if(camViewer == null && (initMode & INIT_CAM) != 0)
-				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
-			
-			if(communications == null && (initMode & INIT_COMM) != 0){
-				CommInterface readi;
-				if(tcp){
-					if(ipaddress == null)
-						readi = new TCPCommInterface(port);
-					else {
-						InetAddress addr = InetAddress.getByAddress(ipaddress);
-						readi = new TCPCommInterface(addr, port);
-					}
+		if(vision == null && (initMode & INIT_COMM) != 0)
+			vision = new RemoteVision("FlashboardVision");
+		if(camViewer == null && (initMode & INIT_CAM) != 0)
+			camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+		
+		if(communications == null && (initMode & INIT_COMM) != 0){
+			CommInterface readi;
+			if(tcp){
+				if(ipaddress == null)
+					readi = new TCPCommInterface(port);
+				else {
+					InetAddress addr = InetAddress.getByAddress(ipaddress);
+					readi = new TCPCommInterface(addr, port);
 				}
-				else readi = new UDPCommInterface(port);
-				
-				communications = new Communications("Flashboard", readi);
-				if(vision instanceof Sendable)
-					communications.attach((Sendable)vision);
 			}
+			else readi = new UDPCommInterface(port);
 			
-			if(camServer == null && (initMode & INIT_CAM) != 0)
-				camServer = new CameraServer("Flashboard", camport, camViewer);
-			
-			initMode = mode;
-			instance = true;
-			FlashUtil.getLogger().info("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode));
-		} catch (IOException e) {
-			FlashUtil.getLogger().log(Level.SEVERE, "Error while initializing flashboard", e);
-			e.printStackTrace();
+			communications = new Communications("Flashboard", readi);
+			if(vision instanceof Sendable)
+				communications.attach((Sendable)vision);
 		}
+		
+		if(camServer == null && (initMode & INIT_CAM) != 0)
+			camServer = new CameraServer("Flashboard", camport, camViewer);
+		
+		initMode = mode;
+		instance = true;
+		FlashUtil.getLogger().info("Flashboard: Initialized for mode: " + Integer.toBinaryString(initMode));
 	}
 	/**
 	 * Closes flashboard control. If the camera server was initialized, it is closed by
