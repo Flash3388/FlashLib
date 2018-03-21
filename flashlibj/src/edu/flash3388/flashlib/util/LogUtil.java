@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,6 +11,15 @@ import java.util.logging.Logger;
 
 public class LogUtil {
 	private LogUtil() {}
+	
+	private static String LOGS_PARENT_DIRECTORY = "";
+	
+	public static void setLogsParentDirectory(String directory) {
+		if (directory.endsWith(File.separator))
+			directory = directory.substring(0, directory.length() - 1);
+		
+		LOGS_PARENT_DIRECTORY = directory;
+	}
 	
 	public static Logger getLogger(String name) throws SecurityException, IOException {
 		Logger logger = Logger.getLogger(name);
@@ -27,7 +37,8 @@ public class LogUtil {
 	private static String getLoggerFileParentPath(String name) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
 		
-		return String.format("logs/%s/%s/", name, dateFormat.format(new Date()));
+		return String.format("%s/logs/%s/%s/", LOGS_PARENT_DIRECTORY, 
+				name, dateFormat.format(new Date()));
 	}
 	
 	private static String getLoggerFileNamePattern() {

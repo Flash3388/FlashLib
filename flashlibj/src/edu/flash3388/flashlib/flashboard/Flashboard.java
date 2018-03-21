@@ -499,10 +499,10 @@ public final class Flashboard {
 		return tuner;
 	}
 	
-	public static FlashboardRemoteLog putLog(Log log){
+	public static FlashboardRemoteLogger putLog(Log log){
 		checkInit();
 		
-		FlashboardRemoteLog rlog = new FlashboardRemoteLog(log);
+		FlashboardRemoteLogger rlog = new FlashboardRemoteLogger(log);
 		Flashboard.attach(rlog);
 		return rlog;
 	}

@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
+import edu.flash3388.flashlib.flashboard.FlashboardRemoteLogger;
 import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -159,7 +160,8 @@ public class FlashRobotUtil {
 			}
 			
 			if(Flashboard.flashboardInit()){
-				Flashboard.attach(estopControl);
+				Flashboard.attach(estopControl, 
+						new FlashboardRemoteLogger(FlashUtil.getLogger()));
 			}
 		}
 		
