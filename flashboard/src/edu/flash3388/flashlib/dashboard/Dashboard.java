@@ -193,6 +193,13 @@ public class Dashboard extends Application {
 		private boolean camInitialized = false;
 		private boolean camSettingError = false;
 		
+		void resetComm() {
+			commInitialized = false;
+		}
+		void resetCam() {
+			camInitialized = false;
+		}
+		
 		private void commUpdate(){
 			if(!commInitialized){
 				String host = PropertyHandler.getStringValue(PROP_HOST_ROBOT);
@@ -476,7 +483,7 @@ public class Dashboard extends Application {
 		if(communications != null){
 			communications.close();
 			communications = null;
-			connectionTask.commInitialized = false;
+			connectionTask.resetComm();
 			
 			hostRetriever.resetComm();
 			
@@ -485,7 +492,7 @@ public class Dashboard extends Application {
 		if(camClient != null){
 			camClient.close();
 			camClient = null;
-			connectionTask.camInitialized = false;
+			connectionTask.resetCam();
 			
 			hostRetriever.resetCam();
 			
@@ -755,7 +762,6 @@ public class Dashboard extends Application {
 			try {
 				updater.forceShutdown();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				logger.warning("Thread interrupted while stopping updater");
 			}
 		}

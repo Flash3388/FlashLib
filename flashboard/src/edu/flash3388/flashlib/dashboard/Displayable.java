@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.dashboard;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import edu.flash3388.flashlib.communications.Sendable;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -10,37 +12,35 @@ public abstract class Displayable extends Sendable implements Runnable {
 		GraphicData, SimpleData, Input, Activatable
 	}
 	
-	private boolean init = true;
+	private AtomicBoolean needInit = new AtomicBoolean(true);
+	private AtomicBoolean shouldUpdate = new AtomicBoolean(true);
 	
 	protected Displayable(String name, byte type) {
 		super(name, type);
 	}
 
-	
 	@Override
 	public void run() {
 		if (!Platform.isFxApplicationThread()) {
-			Platform.runLater(this);
+			if (shouldUpdate.get()) {
+				Platform.runLater(this);
+				shouldUpdate.set(false);
+			}
 		} else {
 			update();
-			if(!init()) {
-				Node root = setDisplay();
+			if(!needInit.get()) {
+				needInit.set(false);
+				Node root = getNode();
 				if(root != null){
 					GUI.getMain().addControlToDisplay(root, getDisplayType());
 				}
 			}
+			shouldUpdate.set(true);
 		}
 	}
 	
 	void reset(){
-		init = true;
-	}
-	Node setDisplay(){ 
-		init = false;
-		return getNode();
-	}
-	boolean init(){
-		return !init;
+		needInit.set(true);
 	}
 	
 	protected void update(){

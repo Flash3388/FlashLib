@@ -37,6 +37,7 @@ import edu.flash3388.flashlib.util.LogUtil;
  * @since FlashLib 1.0.0
  */
 public class Communications {
+	
 	private static class CommTask implements Runnable{
 		private Communications comm;
 		
@@ -68,7 +69,7 @@ public class Communications {
 						comm.read();
 						
 						comm.commInterface.update(FlashUtil.millisInt());
-						FlashUtil.delay(10);
+						Thread.sleep(10);
 					}
 					comm.onDisconnect();
 					comm.logger.info("Disconnected");
