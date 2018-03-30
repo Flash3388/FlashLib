@@ -9,8 +9,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +32,6 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.io.XMLObjectInputStream;
 import edu.flash3388.flashlib.io.XMLObjectOutputStream;
-import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.IPCommInterface;
@@ -43,8 +47,6 @@ import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -58,39 +60,46 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	public static class Updater{
-		private Scheduler scheduler = Scheduler.getInstance();
-		private boolean stop = false;
-		private Runnable task;
+		private static final int EXECUTOR_THREAD_POOL = 5;
+		private static final int EXECUTION_INTERVAL = 5; //ms
+		private ScheduledExecutorService executor;
+		
+		private Map<Runnable, ScheduledFuture<?>> futuresMap;
 		
 		public Updater() {
-			task = ()->{
-				while (!stop) {
-					if(!fxInitialized()){
-						FlashUtil.delay(100);
-						continue;
-					}
-					
-					scheduler.run();
-					FlashUtil.delay(5);
-				}
-			};
+			executor = Executors.newScheduledThreadPool(EXECUTOR_THREAD_POOL);
+			futuresMap = new HashMap<Runnable, ScheduledFuture<?>>();
 		}
 		
 		public void addTask(Runnable runnable){
-			scheduler.addTask(runnable);
+			 ScheduledFuture<?> future = executor.scheduleWithFixedDelay(runnable, EXECUTION_INTERVAL, EXECUTION_INTERVAL, 
+					TimeUnit.MILLISECONDS);
+			 futuresMap.put(runnable, future);
 		}
 		public void execute(Runnable runnable){
-			scheduler.execute(runnable);
+			executor.execute(runnable);
 		}
-		public boolean removeTask(Runnable runnable){
-			return scheduler.remove(runnable);
+		public boolean removeTask(Runnable runnable) {
+			ScheduledFuture<?> future = futuresMap.get(runnable);
+			if (future == null)
+				return false;
+			
+			futuresMap.remove(runnable);
+			return future.cancel(true);
 		}
 		
-		public void stop(){
-			stop = true;
+		void shutdown() {
+			executor.shutdown();
 		}
-		public Runnable getThreadTask(){
-			return task;
+		boolean isTerminated() {
+			return executor.isTerminated();
+		}
+		void forceShutdown() throws InterruptedException{
+			executor.shutdownNow();
+			
+			while (!executor.isTerminated()) {
+				executor.awaitTermination(EXECUTION_INTERVAL, TimeUnit.MILLISECONDS);
+			}
 		}
 	}
 	
@@ -297,36 +306,6 @@ public class Dashboard extends Application {
 			}
 		}
 	}
-	private static class DisplayableUpdater implements Runnable{
-		
-		Runnable dataRunnable = ()->{
-			update();
-		};
-		boolean done = true;
-		
-		void update(){
-			done = false;
-			Enumeration<Displayable> denum = getDisplayables();
-			while(denum.hasMoreElements()){
-				Displayable d = denum.nextElement();
-				d.update();
-				if(!d.init()) {
-					Node root = d.setDisplay();
-					if(root != null){
-						GUI.getMain().addControlToDisplay(root, d.getDisplayType());
-					}
-				}
-			}
-			done = true;
-		}
-		
-		@Override
-		public void run() {
-			if(done){
-				Platform.runLater(dataRunnable);
-			}
-		}
-	}
 	private static class ConnectionTracker implements Runnable{
 		
 		private boolean commConnected = false;
@@ -406,7 +385,7 @@ public class Dashboard extends Application {
 	private static void loadSettings(){
 		try {
 			PropertyHandler.loadPropertyFromXml(SETTINGS_FILE);
-		} catch (Exception e) { //TODO: minimize exception scope
+		} catch (IllegalArgumentException e) { //TODO: minimize exception scope
 			logger.log(Level.SEVERE, "Failed to load settings", e);
 		}
 	}
@@ -423,33 +402,28 @@ public class Dashboard extends Application {
 	
 	private static Vector<Displayable> displayables = new Vector<Displayable>();
 	private static CameraViewer camViewer;
-	private static boolean fxready = false;
 	
-	public static Enumeration<Displayable> getDisplayables(){
-		return displayables.elements();
-	}
-	public static void addDisplayable(Displayable d){
-		displayables.addElement(d);
+	public static void addDisplayable(Displayable displayable){
+		displayables.addElement(displayable);
+		updater.addTask(displayable);
 	}
 	public static void resetDisplaybles(){
-		displayables.clear();
-		addDisplayable(camViewer);
-		addDisplayable(emergencyStop);
+		synchronized (displayables) {
+			for (Displayable displayable : displayables) {
+				updater.removeTask(displayable);
+			}
+			
+			displayables.clear();
+			addDisplayable(camViewer);
+			addDisplayable(emergencyStop);
+		}
 		
 		TesterControl.resetTesters();
 		BarChartControl.resetControls();
 	}
 	
-	private static void fxReady(){
-		fxready = true;
-	}
-	private static boolean fxInitialized(){
-		return fxready;
-	}
-	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
 		Parent root = GUI.initializeMainWindow(primaryStage);
 		
 		Scene scene = new Scene(root, 1300, 680);
@@ -470,7 +444,9 @@ public class Dashboard extends Application {
 		});
 		primaryStage.setTitle("FLASHboard");
 		
-		fxReady();
+		resetDisplaybles();
+		startBaseTasks();
+		
 		primaryStage.show();
 	}
 	
@@ -479,7 +455,6 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	private static Updater updater;
-	private static Thread updateThread;
 	
 	public static Updater getUpdater(){
 		return updater;
@@ -492,7 +467,6 @@ public class Dashboard extends Application {
 	private static ConnectionTask connectionTask;
 	
 	private static HostRetrieverTask hostRetriever;
-	private static Thread hostRetrieverThread;
 	
 	private static IPCommInterface commInterface;
 	private static Communications communications;
@@ -618,6 +592,18 @@ public class Dashboard extends Application {
 		return emergencyStop;
 	}
 	
+	private static void loadModes() {
+	    File file = new File(MODES_FILE);
+	    if(file.exists()){
+	    	try {
+				modeSelectorControl.loadModes(file);
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.log(Level.SEVERE, "Failed to load states", e);
+			}
+	    }
+	}
+	
 	//--------------------------------------------------------------------
 	//-----------------------Init & Shut----------------------------------
 	//--------------------------------------------------------------------
@@ -665,11 +651,11 @@ public class Dashboard extends Application {
 		currentNativesFolder = path;
 	}
 	private static void loadValueLibrary(String libname){
-		String path = currentNativesFolder+"/";
+		String path = currentNativesFolder + File.separator;
 		if(FlashUtil.isWindows())
-			path += libname+".dll";
+			path += libname + ".dll";
 		else if(FlashUtil.isUnix())
-			path += "lib"+libname+".so";
+			path += "lib" + libname + ".so";
 		System.load(path);
 	}
 	private static void initStart(){
@@ -677,44 +663,28 @@ public class Dashboard extends Application {
 		hostRetriever.resetCam();
 		hostRetriever.resetComm();
 		
-		hostRetrieverThread = new Thread(hostRetriever, "HostRetriever");
-		hostRetrieverThread.start();
-		
 		updater = new Updater();
-		updateThread = new Thread(updater.getThreadTask());
-	    updateThread.start();
-	    
 	    camViewer = new CameraViewer("Robot-CamViewer");
-	    addDisplayable(camViewer);
-	    
 	    hidcontrol = new HIDControl();
-	    updater.addTask(hidcontrol);
 	    
 	    modeSelectorControl = new ModeSelectorControl();
-	    File file = new File(MODES_FILE);
-	    if(file.exists()){
-	    	try {
-				modeSelectorControl.loadModes(file);
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.log(Level.SEVERE, "Failed to load states", e);
-			}
-	    }
 	    
 	    connectionTask = new ConnectionTask();
-	    updater.addTask(connectionTask);
-	    
 	    emergencyStop = new EmergencyStopControl();
 	    
 	    vision = new ThreadedVisionRunner("flashboard-vision");
 	    vision.setVisionSource(new CvSource());
 		vision.getVisionSource().setImagePipeline(camViewer);
+	}
+	private static void startBaseTasks() {
+		updater.addTask(hostRetriever);
+		updater.addTask(new ConnectionTracker());
+		updater.addTask(connectionTask);
+		updater.addTask(hidcontrol);
 		updater.execute(()->{
 			loadVisionSaves();
+			loadModes();
 		});
-		
-		updater.addTask(new DisplayableUpdater());
-		updater.addTask(new ConnectionTracker());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);
@@ -737,7 +707,7 @@ public class Dashboard extends Application {
 	public static void close(){
 		logger.info("Shutting down");
 		
-		updater.stop();
+		updater.shutdown();
 		hostRetriever.stop();
 		
 		if(visionInitialized()){
@@ -780,23 +750,13 @@ public class Dashboard extends Application {
 			logger.info("Stopping communications...");
 			communications.close();
 		}
-		if(updateThread.isAlive()){
+		if(!updater.isTerminated()){
 			logger.info("Stopping update thread...");
 			try {
-				updateThread.join();
+				updater.forceShutdown();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				Thread.currentThread().interrupt();
-				logger.warning("Thread interrupted while joining update thread");
-			}
-		}
-		if(hostRetrieverThread.isAlive()){
-			logger.info("Stopping host retriever thread...");
-			try {
-				hostRetrieverThread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				Thread.currentThread().interrupt();
+				logger.warning("Thread interrupted while stopping updater");
 			}
 		}
 		
