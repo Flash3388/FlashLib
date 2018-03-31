@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -27,7 +28,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class StreamCommInterface extends ManualConnectionVerifier{
+public abstract class StreamCommInterface extends ManualConnectionVerifier {
 
 	private static final int PACKET_LENGTH_BYTE_COUNT = 4;
 	
@@ -50,7 +51,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		}
 	}
 	
-	private boolean readError(int lengthRead){
+	private boolean readError(int lengthRead) throws IOException {
 		if(lengthRead < 0){
 			disconnect();
 		}
@@ -102,7 +103,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] read() {
+	public byte[] read() throws IOException {
 		if(!isOpened())
 			return null;
 		
@@ -135,18 +136,12 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		
 		return null;
 	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data) {
-		write(data, 0, data.length);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void write(byte[] data, int start, int length) {
+	public void write(byte[] data, int start, int length) throws IOException {
 		data = assemblePacket(data, start, length);
 		writeRaw(data, 0, data.length);
 		newDataSent();
@@ -156,14 +151,14 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setMaxBufferSize(int bytes) {
+	public void setMaxBufferSize(int bytes) throws IOException {
 		dataBuffer = new byte[bytes];
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getMaxBufferSize() {
+	public int getMaxBufferSize() throws IOException {
 		return dataBuffer.length;
 	}
 
@@ -183,8 +178,10 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * @param data an array of bytes to send
 	 * @param start the start index to send data from
 	 * @param length the amount of bytes to send
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract void writeRaw(byte[] data, int start, int length);
+	protected abstract void writeRaw(byte[] data, int start, int length) throws IOException;
 	/**
 	 * Reads raw data from the IO port used for communications. Unlike {@link #read()}, this method does not 
 	 * handle packet and data logic.
@@ -194,12 +191,16 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * @param length amount of bytes to read.
 	 * 
 	 * @return the amount of bytes read
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract int readRaw(byte[] buffer, int start, int length);
+	protected abstract int readRaw(byte[] buffer, int start, int length) throws IOException;
 	/**
 	 * Gets the amount of bytes available to be read from the port.
 	 * 
 	 * @return bytes ready to be read.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract int availableData();
+	protected abstract int availableData() throws IOException;
 }

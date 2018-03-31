@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
+
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -18,7 +20,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public abstract class ManualConnectionVerifier implements CommInterface{
+public abstract class ManualConnectionVerifier implements CommInterface {
 
 	/**
 	 * An handshake byte array. Used by {@link UDPCommInterface} and {@link SerialCommInterface}
@@ -42,7 +44,7 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	private int connectionTimeout = CONNECTION_TIMEOUT, timeouts = 0, maxTimeouts = 3;
 	private boolean verifyConnection = true;
 	
-	private void writeHandshake(){
+	private void writeHandshake() throws IOException {
 		write(HANDSHAKE);
 	}
 	
@@ -50,9 +52,11 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * {@inheritDoc}
 	 * Checks for timeouts in connection. If such events occur than connection is declared as lost and
 	 * {@link #disconnect()} is called. If the verification is not enabled, nothing occurs.
+	 * 
+	 * @throws IOException If and I/O error occurs
 	 */
 	@Override
-	public void update(int millis){
+	public void update(int millis) throws IOException {
 		if(!verifyConnection)
 			return;
 		if(millis - lastRead >= connectionTimeout){
@@ -142,8 +146,10 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * 
 	 * @param commInterface interface for the communications
 	 * @return true if connection was successful, false otherwise
+	 * 
+	 * @throws IOException If and I/O error occurs
 	 */
-	public static boolean handshakeServer(CommInterface commInterface){
+	public static boolean handshakeServer(CommInterface commInterface) throws IOException{
 		commInterface.setReadTimeout(READ_TIMEOUT * 4);
 		byte[] data = commInterface.read();
 		if(!isHandshakeClient(data, data.length))
@@ -162,8 +168,10 @@ public abstract class ManualConnectionVerifier implements CommInterface{
 	 * 
 	 * @param commInterface interface for the communications
 	 * @return true if connection was successful, false otherwise
+	 * 
+	 * @throws IOException If and I/O error occurs
 	 */
-	public static boolean handshakeClient(CommInterface commInterface){
+	public static boolean handshakeClient(CommInterface commInterface) throws IOException {
 		commInterface.setReadTimeout(READ_TIMEOUT);
 		commInterface.write(HANDSHAKE_CONNECT_CLIENT);
 		

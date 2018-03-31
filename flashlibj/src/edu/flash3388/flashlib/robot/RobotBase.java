@@ -271,7 +271,11 @@ public abstract class RobotBase implements SBC, RobotInterface{
 			//communications shutdown
 			if(userImplement.communications != null){
 				logger.info("Shutting down robot communications...");
-				userImplement.communications.close();
+				try {
+					userImplement.communications.close();
+				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Exception while closing communications", e);
+				}
 				logger.info("Done");
 			}
 		}
@@ -279,7 +283,11 @@ public abstract class RobotBase implements SBC, RobotInterface{
 		//flashboard shutdown
 		if(Flashboard.flashboardInit()){
 			logger.info("Shutting down Flashboard...");
-			Flashboard.close();
+			try {
+				Flashboard.close();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Exception while closing Flashboard", e);
+			}
 			logger.info("Done");
 		}
 		

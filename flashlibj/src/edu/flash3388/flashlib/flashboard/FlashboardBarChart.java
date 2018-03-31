@@ -117,7 +117,7 @@ public class FlashboardBarChart extends FlashboardControl{
 		configUpdate = true;
 		
 		for (FlashboardBarSeries control : controls) {
-			if(!control.attached())
+			if(!control.isAttached())
 				Flashboard.attach(control);
 		}
 	}

@@ -278,7 +278,7 @@ public class HIDControl extends Sendable implements Runnable{
 	
 	@Override
 	public void run() {
-		if(!updateData && !remoteAttached())
+		if(!updateData && !isRemoteAttached())
 			return;
 		
 		if(lastUpdate < 1 || FlashUtil.millis() - lastUpdate >= UPDATE_RATE){
@@ -291,7 +291,7 @@ public class HIDControl extends Sendable implements Runnable{
 			lastUpdate = FlashUtil.millis();
 			
 			
-			if(remoteAttached()){
+			if(isRemoteAttached()){
 				catchDataForSending();
 				sendData = true;
 			}

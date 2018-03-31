@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
+
 /**
  * Provides an IO port interface for communication. Used by {@link Communications}, this interface allows the communication
  * system to manage communication without needing to care for the way the data is sent or received. It allows the system
@@ -28,12 +30,16 @@ public interface CommInterface {
 	
 	/**
 	 * Opens the communications port for usage. Must be done before the port can be used.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void open();
+	void open() throws IOException;
 	/**
 	 * Closes the communications port. Once done, the port can no longer be used for communications.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void close();
+	void close() throws IOException;
 	/**
 	 * Gets whether this port is open and ready for usage.
 	 * @return true if open, false otherwise.
@@ -41,13 +47,17 @@ public interface CommInterface {
 	boolean isOpened();
 	
 	/**
-	 * Initiates connection with a remote side. 
+	 * Initiates connection with the remote side. 
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void connect();
+	void connect() throws IOException;
 	/**
-	 * Closes connection with a remote side.
+	 * Closes connection with the remote side.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void disconnect();
+	void disconnect() throws IOException;
 	/**
 	 * Gets whether this port is connected to a remote communications port.
 	 * @return true if connected, false otherwise.
@@ -59,54 +69,75 @@ public interface CommInterface {
 	 * nothing will happen. 
 	 * 
 	 * @return byte[] array of bytes read, or null if no data was read.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	byte[] read();
+	byte[] read() throws IOException;
 	/**
 	 * Writes data to the communications port to be sent. If the port is closed or not connected nothing will happen. 
+	 * <p>
+	 * Default implementation calls {@link #write(byte[], int, int)}, passing it
+	 * the array, 0, and the array length.
 	 * 
 	 * @param data array of bytes to be sent
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void write(byte[] data);
+	default void write(byte[] data) throws IOException {
+		write(data, 0, data.length);
+	}
 	/**
 	 * Writes data to the communications port to be sent. If the port is closed or not connected nothing will happen. 
 	 * 
 	 * @param data array of bytes to be sent
 	 * @param start start index of data in the array
 	 * @param length amount of data in the array
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void write(byte[] data, int start, int length);
+	void write(byte[] data, int start, int length) throws IOException;
 	
 	/**
 	 * Sets timeout for the reading blocking call in milliseconds.
 	 * 
 	 * @param millis timeout for reading call milliseconds
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void setReadTimeout(int millis);
+	void setReadTimeout(int millis) throws IOException;
 	/**
 	 * Gets the timeout for the reading blocking call in milliseconds.
 	 * @return timeout for reading call in milliseconds.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	int getTimeout();
+	int getReadTimeout() throws IOException;
 	
 	/**
 	 * Sets the maximum size of the reading data buffer. This is the maximum amount of bytes that can
 	 * be read from the port.
 	 * 
 	 * @param bytes maximum amount of bytes in the data buffer.
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void setMaxBufferSize(int bytes);
+	void setMaxBufferSize(int bytes) throws IOException;
 	/**
 	 * Gets the maximum size of the reading data buffer. This is the maximum amount of bytes that can
 	 * be read from the port.
 	 * @return maximum amount of bytes in the data buffer.
+	 * 
+	 * @throws IOException If an IO error occurs
 	 */
-	int getMaxBufferSize();
+	int getMaxBufferSize() throws IOException;
 
 	/**
 	 * Allows for updating data tracking and protocols. Called by {@link Communications} during every iteration of its
 	 * communications thread.
 	 * 
 	 * @param millis the current time in milliseconds
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	void update(int millis);
+	void update(int millis) throws IOException;
 }

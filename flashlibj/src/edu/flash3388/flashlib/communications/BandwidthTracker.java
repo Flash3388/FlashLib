@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
+
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -34,14 +36,14 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void open() {
+	public void open() throws IOException {
 		commInterface.open();
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		commInterface.close();
 	}
 
@@ -49,14 +51,14 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connect() {
+	public void connect() throws IOException {
 		commInterface.connect();
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void disconnect() {
+	public void disconnect() throws IOException {
 		commInterface.disconnect();
 	}
 
@@ -79,7 +81,7 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] read() {
+	public byte[] read() throws IOException {
 		byte[] bytes = commInterface.read();
 		
 		if(infoStart == -1)
@@ -92,28 +94,28 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setReadTimeout(int millis) {
+	public void setReadTimeout(int millis) throws IOException {
 		commInterface.setReadTimeout(millis);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getTimeout() {
-		return commInterface.getTimeout();
+	public int getReadTimeout() throws IOException {
+		return commInterface.getReadTimeout();
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setMaxBufferSize(int bytes) {
+	public void setMaxBufferSize(int bytes) throws IOException {
 		commInterface.setMaxBufferSize(bytes);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getMaxBufferSize() {
+	public int getMaxBufferSize() throws IOException {
 		return commInterface.getMaxBufferSize();
 	}
 
@@ -121,7 +123,7 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data) {
+	public void write(byte[] data) throws IOException {
 		if(infoStart == -1)
 			infoStart = FlashUtil.millis();
 		bytesCount += data.length;
@@ -131,7 +133,7 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data, int start, int length) {
+	public void write(byte[] data, int start, int length) throws IOException {
 		if(infoStart == -1)
 			infoStart = FlashUtil.millis();
 		bytesCount += data.length;
@@ -142,7 +144,7 @@ public class BandwidthTracker implements CommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(int millis) {
+	public void update(int millis) throws IOException {
 		commInterface.update(millis);
 	}
 	

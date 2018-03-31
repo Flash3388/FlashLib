@@ -8,13 +8,13 @@ public class FlashboardModeSelector implements ModeSelector{
 	private FlashboardModeSelectorControl modeselector = FlashboardModeSelectorControl.getInstance();
 	
 	public void attachToFlashboard(){
-		if(!modeselector.attached() && Flashboard.flashboardInit())
+		if(!modeselector.isAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(modeselector);
 	}
 	
 	@Override
 	public int getMode() {
-		if(!modeselector.remoteAttached() || modeselector.isDisabled())
+		if(!modeselector.isRemoteAttached() || modeselector.isDisabled())
 			return MODE_DISABLED;
 		return modeselector.getCurrentState();
 	}

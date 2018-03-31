@@ -481,7 +481,11 @@ public class Dashboard extends Application {
 	
 	public static void restartCommunications(){
 		if(communications != null){
-			communications.close();
+			try {
+				communications.close();
+			} catch (IOException e) {
+				// TODO HANDLE
+			}
 			communications = null;
 			connectionTask.resetComm();
 			
@@ -754,7 +758,11 @@ public class Dashboard extends Application {
 		}
 		if(communications != null){
 			logger.info("Stopping communications...");
-			communications.close();
+			try {
+				communications.close();
+			} catch (IOException e) {
+				// TODO HANDLE
+			}
 		}
 		if(!updater.isTerminated()){
 			logger.info("Stopping update thread...");

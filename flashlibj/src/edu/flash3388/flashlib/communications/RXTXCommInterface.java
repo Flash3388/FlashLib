@@ -50,48 +50,40 @@ public class RXTXCommInterface extends SerialCommInterface {
 
 
 	@Override
-	public void open() {
+	public void open() throws IOException {
 		try{
 			CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
 	        if (portIdentifier.isCurrentlyOwned())
-	            System.out.println("Error: Port is currently in use");
-	        else {
-	            CommPort port = portIdentifier.open(this.getClass().getName(), getTimeout());//for now class name
-	            
-	            if (port instanceof SerialPort){
-	            	serial = (SerialPort) port;
-	            	serial.setSerialPortParams(baudrate, SerialPort.DATABITS_8 
-	                		, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-	                
-	            	serial.enableReceiveTimeout(timeout);
-	            	
-	                this.in = serial.getInputStream();
-	                this.out = serial.getOutputStream();
-	                isOpened = true;
-	            }
-	            else
-	                System.out.println("Error: Only serial ports are handled");
-	        }   
+	            throw new IOException("PortIdentifier already owned");
+
+            CommPort port = portIdentifier.open(this.getClass().getName(), getReadTimeout());
+            
+        	serial = (SerialPort) port;
+        	serial.setSerialPortParams(baudrate, SerialPort.DATABITS_8 
+            		, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            
+        	serial.enableReceiveTimeout(timeout);
+        	
+            this.in = serial.getInputStream();
+            this.out = serial.getOutputStream();
+            isOpened = true;
 		}
-		catch (PortInUseException | UnsupportedCommOperationException | NoSuchPortException | IOException e) {
+		catch (PortInUseException | UnsupportedCommOperationException | NoSuchPortException e) {
+			throw new IOException(e);
+		} finally {
 			if(serial != null)
 				serial.close();
 			serial = null;
-			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void close() {
-		try {
-			out.close();
-			in.close();
-			serial.close();
-			serial = null;
-			isOpened = false;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void close() throws IOException {
+		out.close();
+		in.close();
+		serial.close();
+		serial = null;
+		isOpened = false;
 	}
 
 	@Override
@@ -100,46 +92,33 @@ public class RXTXCommInterface extends SerialCommInterface {
 	}
 
 	@Override
-	public void setReadTimeout(int millis) {
+	public void setReadTimeout(int millis) throws IOException {
 		timeout = millis;
 		if(serial != null){
 			try {
 				serial.enableReceiveTimeout(millis);
 			} catch (UnsupportedCommOperationException e) {
+				throw new IOException(e);
 			}
 		}
 	}
 	@Override
-	public int getTimeout() {
+	public int getReadTimeout() throws IOException {
 		return timeout;
 	}
 
 	@Override
-	protected void writeRaw(byte[] data, int start, int length) {
-		try {
-			out.write(data, start, length);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	protected void writeRaw(byte[] data, int start, int length) throws IOException {
+		out.write(data, start, length);
 			
 	}
 	@Override
-	protected int readRaw(byte[] buffer, int start, int length) {
-		try {
-			return in.read(buffer, start, length);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return 0;
-		}
+	protected int readRaw(byte[] buffer, int start, int length) throws IOException {
+		return in.read(buffer, start, length);
 	}
 	@Override
-	protected int availableData() {
-		try {
-			return in.available();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return 0;
-		}
+	protected int availableData() throws IOException {
+		return in.available();
 	}
 	
 	/**

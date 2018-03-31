@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 public interface IPCommInterface extends CommInterface{
@@ -35,21 +36,29 @@ public interface IPCommInterface extends CommInterface{
 	/**
 	 * Sets the local bin address.
 	 * @param addr address for local binding
+	 * 
+	 * @throws IOException if an IO error occurs
 	 */
-	void setLocalAddress(InetAddress addr);
+	void setLocalAddress(InetAddress addr) throws IOException;
 	/**
 	 * Sets the remote side address.
 	 * @param addr address of remote size
+	 * 
+	 * @throws IOException if an IO error occurs
 	 */
-	void setRemoteAddress(InetAddress addr);
+	void setRemoteAddress(InetAddress addr) throws IOException;
 	/**
 	 * Sets the local port for socket binding.
 	 * @param port port for local data listening
+	 * 
+	 * @throws IOException IOException if an IO error occurs
 	 */
-	void setLocalPort(int port);
+	void setLocalPort(int port) throws IOException;
 	/**
 	 * Sets the remote port for socket connecting.
 	 * @param port port for remote data connecting
+	 * 
+	 * @throws IOException IOException if an IO error occurs
 	 */
-	void setRemotePort(int port);
+	void setRemotePort(int port) throws IOException;
 }

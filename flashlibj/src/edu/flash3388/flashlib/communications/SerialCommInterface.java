@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
+
 /**
  * An abstract logic for IO port {@link CommInterface}s. Extends {@link StreamCommInterface} and adds manual connection
  * tracking to insure the existence of connection. Does not provide any data recovery. 
@@ -7,7 +9,7 @@ package edu.flash3388.flashlib.communications;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class SerialCommInterface extends StreamCommInterface{
+public abstract class SerialCommInterface extends StreamCommInterface {
 	
 	private boolean isConnected = false;
 	private boolean server;
@@ -36,7 +38,7 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connect() {
+	public void connect() throws IOException {
 		isConnected = isServer()? handshakeServer(this) : 
 			handshakeClient(this);
 		if(isConnected){
@@ -48,7 +50,7 @@ public abstract class SerialCommInterface extends StreamCommInterface{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void disconnect() {
+	public void disconnect() throws IOException {
 		isConnected = false;
 	}
 	/**

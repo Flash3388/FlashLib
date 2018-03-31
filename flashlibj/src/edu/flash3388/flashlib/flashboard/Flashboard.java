@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.cams.Camera;
@@ -168,7 +169,12 @@ public final class Flashboard {
 	 */
 	public static boolean detach(FlashboardControl control){
 		checkInit();
-		return communications.detach(control);
+		try {
+			return communications.detach(control);
+		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Exception detaching control from Flashboard", e);
+			return false;
+		}
 	}
 	/**
 	 * Detaches control sendable from the Flashboard by its id. Flashboard should be initialized first for it 
@@ -184,7 +190,12 @@ public final class Flashboard {
 	 */
 	public static boolean detach(int id){
 		checkInit();
-		return communications.detach(id);
+		try {
+			return communications.detach(id);
+		} catch (IOException e) {
+			FlashUtil.getLogger().log(Level.SEVERE, "Exception detaching control from Flashboard", e);
+			return false;
+		}
 	}
 	/**
 	 * Gets a control from the Flashboard by its ID. Flashboard should be initialized first for it 
@@ -329,16 +340,18 @@ public final class Flashboard {
 	 * calling {@link CameraServer#close()}. If communications was initialized, it is closed
 	 * by calling {@link Communications#close()}.
 	 * 
+	 * @throws IOException If an IO error occurs
 	 * @throws IllegalStateException if flashboard was not initialized
 	 */
-	public static void close(){
+	public static void close() throws IOException{
 		if(!instance)
 			throw new IllegalStateException("Flashboard control was not initialized");
 		
 		if(camServer != null)
 			camServer.close();
-		if(communications != null)
+		if(communications != null) {
 			communications.close();
+		}
 	}
 	/**
 	 * Gets whether or not Flashboard was initialized. 

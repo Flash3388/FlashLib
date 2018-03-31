@@ -108,14 +108,14 @@ public abstract class Sendable {
 	 * 
 	 * @return true if attached, false otherwise
 	 */
-	public boolean attached(){
+	public boolean isAttached(){
 		return communicationsAttached;
 	}
 	/**
 	 * Gets whether or not this sendable is connected with a remote sendable
 	 * @return true if connected, false otherwise
 	 */
-	public boolean remoteAttached(){
+	public boolean isRemoteAttached(){
 		return remoteAttached;
 	}
 	

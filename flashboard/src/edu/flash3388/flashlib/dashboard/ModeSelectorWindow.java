@@ -173,7 +173,7 @@ public class ModeSelectorWindow extends Stage{
 		enabled.setTextFill(Color.GREEN);
 		enabled.setMinSize(120, 50);
 		enabled.setOnAction((e)->{
-			if(!Dashboard.getModeSelectorControl().remoteAttached()){
+			if(!Dashboard.getModeSelectorControl().isRemoteAttached()){
 				e.consume();
 				setDisabled(true);
 				FlashFXUtils.showErrorDialog(this, "Error", "Remote mode selector not connected");
