@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,13 +42,12 @@ import edu.flash3388.flashlib.util.LogUtil;
  */
 public class Communications {
 	
-	private static class CommThread extends Thread {
+	private static class CommTask implements Runnable {
 		
 		private Communications comm;
 		
-		CommThread(String name, Communications comm){
+		CommTask(Communications comm){
 			this.comm = comm;
-			setName(name);
 		}
 		
 		private void open() throws InterruptedException {
@@ -109,7 +111,29 @@ public class Communications {
 			}
 		}
 	}
+	private static class SendableNewDataTask implements Runnable {
+		
+		private Logger logger;
+		private byte[] data;
+		private Sendable sendable;
+		
+		public SendableNewDataTask(Sendable sendable, byte[] data, Logger logger) {
+			this.sendable = sendable;
+			this.data = data;
+			this.logger = logger;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				sendable.newData(data);
+			} catch (SendableException e) {
+				logger.log(Level.SEVERE, "Exception thrown from Sendable while handling new data", e);
+			}
+		}
+	}
 	
+	private static final int THREADS_COUNT = 3;
 	private static final int MINIMUM_DATA_BYTES = 5;
 	
 	private static final byte SENDABLE_INIT = 0x0;
@@ -127,7 +151,9 @@ public class Communications {
 	private SendableCreator sendableCreator;
 	private Logger logger;
 	
-	private CommThread commThread;
+	private CommTask commTask;
+	private ExecutorService executor;
+	private boolean running = false;
 	
 	/**
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
@@ -143,7 +169,8 @@ public class Communications {
 		this.commInterface = readIn;
 		logger = LogUtil.getLogger(logName);
 		
-		commThread = new CommThread(logName, this);
+		executor = Executors.newFixedThreadPool(THREADS_COUNT);
+		commTask = new CommTask(this);
 		logger.info("Initialized");
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
@@ -174,27 +201,23 @@ public class Communications {
 			
 			byte dataType = packet[0];
 			int id = FlashUtil.toInt(packet, 1);
-			Sendable sen = getFromAllAttachedByID(id);
-			if(dataType == SENDABLE_DATA && sen != null && sen.isRemoteAttached() && 
+			Sendable sendable = getFromAllAttachedByID(id);
+			if(dataType == SENDABLE_DATA && sendable != null && sendable.isRemoteAttached() && 
 					packet.length - 6 > 0){
 				byte[] userData = Arrays.copyOfRange(packet, 6, packet.length);
-				try {
-					sen.newData(userData);
-				} catch (SendableException e) {
-					logger.log(Level.SEVERE, "Exception thrown from Sendable while handling new data", e);
-				}
+				executor.execute(new SendableNewDataTask(sendable, userData, logger));
 			}else if(dataType == SENDABLE_INIT){
-				if(sen == null){
+				if(sendable == null){
 					String str = new String(packet, 6, packet.length - 6);
 					createSendable(str, id, packet[5]);
 				}else{
-					onRemoteAttached(sen, true);
+					onRemoteAttached(sendable, true);
 				}
-			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sen != null){
-				onRemoteAttached(sen, false);
-			}else if(dataType == SENDABLE_CONFIRM_DETACH && sen != null && sen.isRemoteAttached()){
-				sen.setRemoteAttached(false);
-				sen.onConnectionLost();
+			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sendable != null){
+				onRemoteAttached(sendable, false);
+			}else if(dataType == SENDABLE_CONFIRM_DETACH && sendable != null && sendable.isRemoteAttached()){
+				sendable.setRemoteAttached(false);
+				sendable.onConnectionLost();
 			}
 		}
 	}
@@ -641,8 +664,10 @@ public class Communications {
 	 * Starts the communications thread if it has not started.
 	 */
 	public void start(){
-		if(!commThread.isAlive())
-			commThread.start();
+		if(!running) {
+			executor.execute(commTask);
+			running = true;
+		}
 	}
 	/**
 	 * Closes this communications system. Usage of this system will not be possible after closing.
@@ -651,6 +676,9 @@ public class Communications {
 	 * @throws IOException If an IO error occurs. This might lead to the communication interface not being closed, but the communication thread will be stopped.
 	 */
 	public void close() throws IOException {
+		if (!running)
+			return;
+		
 		setAllowConnection(false);
 		
 		try {
@@ -665,12 +693,14 @@ public class Communications {
 			// not important
 		}
 		
-		commThread.interrupt();
+		executor.shutdownNow();
 		
 		try {
-			commThread.join();
+			while (!executor.isTerminated()) {
+				executor.awaitTermination(10, TimeUnit.MILLISECONDS);
+			}
 		} catch (InterruptedException e) {
-			logger.info("Interruption while joining communication thread");
+			logger.info("Interruption while stopping executor");
 			Thread.currentThread().interrupt();
 		}
 		
