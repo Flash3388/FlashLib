@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 
 public class FlashboardCheckbox extends FlashboardControl{
@@ -15,14 +16,14 @@ public class FlashboardCheckbox extends FlashboardControl{
 	}
 
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		value = data[0] == 1;
 		lastValue = value;
 		prop.set(value);
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		send[0] = (byte) (value? 1 : 0);
 		lastValue = value;
 		updateValue = false;

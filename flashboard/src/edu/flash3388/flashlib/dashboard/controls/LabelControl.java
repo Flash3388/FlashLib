@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 
@@ -51,14 +52,14 @@ public class LabelControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] bytes) {
+	public void newData(byte[] bytes) throws SendableException {
 		synchronized(this){
 			value = new String(bytes);
 			changed = true;
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

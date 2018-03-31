@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 
 import java.util.HashMap;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.FlashboardPIDTuner;
@@ -157,7 +158,7 @@ public class DashboardPIDTuner extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == FlashboardPIDTuner.K_UPDATE){
 			lastkp = FlashUtil.toDouble(data, 1);
 			lastki = FlashUtil.toDouble(data, 9);
@@ -180,7 +181,7 @@ public class DashboardPIDTuner extends Displayable{
 		remoteUpdate = true;
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(setUpdate){
 			setUpdate = false;
 			return new byte[]{FlashboardPIDTuner.RUN_UPDATE, (byte) (update? 1 : 0)};

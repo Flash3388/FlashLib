@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.math.Mathf;
@@ -48,7 +49,7 @@ public class PDPControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] bytes) {
+	public void newData(byte[] bytes) throws SendableException {
 		if(bytes.length < 1) return;
 		if(bytes.length <= 26 && bytes[0] == 0){
 			int pos = 2;
@@ -79,7 +80,7 @@ public class PDPControl extends Displayable{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(maximumSend) sendBytes[0] = 2;
 		else if (minimumSend) sendBytes[1] = 1;
 		else sendBytes[0] = 0;

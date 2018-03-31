@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 
 public class RemoteShell extends Sendable implements Shell{
 	
@@ -97,7 +98,7 @@ public class RemoteShell extends Sendable implements Shell{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(stopProcess){
 			stopProcess = false;
 			return new byte[]{EXECUTE_STOP};

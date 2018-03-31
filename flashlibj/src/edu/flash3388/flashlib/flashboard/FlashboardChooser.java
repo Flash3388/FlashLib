@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.IntegerProperty;
 import edu.flash3388.flashlib.util.beans.Property;
@@ -181,7 +182,7 @@ public class FlashboardChooser<T> extends FlashboardControl{
 	}
 
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 4) return;
 		
 		int sel = FlashUtil.toInt(data);
@@ -191,7 +192,7 @@ public class FlashboardChooser<T> extends FlashboardControl{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(changedIndex && !changed){
 			changedIndex = false;
 			byte[] bytes = {1, 0, 0, 0, 0};

@@ -124,7 +124,7 @@ public class PDP extends FlashboardControl{
 	}
 	
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() {
 		byte[] data = null;
 		if(send){
 			minimumD[0] = 0;

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.gui.CircularDirectionIndicator;
@@ -41,7 +42,7 @@ public class DirectionControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		synchronized (valueMutex) {
 			value = FlashUtil.toDouble(data);
 			update = true;
@@ -49,7 +50,7 @@ public class DirectionControl extends Displayable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

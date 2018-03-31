@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -78,7 +79,7 @@ public class EmergencyStopControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 1)return;
 		
 		if(data[0] == EMERGENCY){
@@ -91,7 +92,7 @@ public class EmergencyStopControl extends Displayable{
 		update = true;
 	} 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
 		return new byte[]{emergency? EMERGENCY : NORMAL};
 	}

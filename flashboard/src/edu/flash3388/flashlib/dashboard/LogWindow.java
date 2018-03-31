@@ -40,7 +40,7 @@ public class LogWindow extends Stage{
 				window.addLine(str);
 		}
 		@Override
-		public byte[] dataForTransmition() {
+		public byte[] dataForTransmission() {
 			return null;
 		}
 

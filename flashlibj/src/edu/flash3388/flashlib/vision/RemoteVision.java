@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -193,7 +193,7 @@ public class RemoteVision extends Sendable implements Vision {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 2) return;
 		
 		if(data[0] == REMOTE_RUN_MODE){
@@ -223,16 +223,14 @@ public class RemoteVision extends Sendable implements Vision {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(sendProps){
 			ByteArrayOutputStream procOutStream = new ByteArrayOutputStream();
-			
 			try {
 				ObjectOutputStream objectOutputStream = new ObjectOutputStream(procOutStream);
 				objectOutputStream.writeObject(processing.get(sendProc));
 			} catch (IOException e) {
-				FlashUtil.getLogger().log(Level.SEVERE, "Error in serializing vision processing object", e);
-				return null;
+				throw new SendableException(e);
 			} finally {
 				if((++sendProc) >= processing.size())
 					sendProps = false;

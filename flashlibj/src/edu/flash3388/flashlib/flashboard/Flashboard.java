@@ -13,6 +13,7 @@ import edu.flash3388.flashlib.communications.CameraServer;
 import edu.flash3388.flashlib.communications.CommInterface;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.robot.Action;
@@ -171,7 +172,7 @@ public final class Flashboard {
 		checkInit();
 		try {
 			return communications.detach(control);
-		} catch (IOException e) {
+		} catch (SendableException e) {
 			FlashUtil.getLogger().log(Level.SEVERE, "Exception detaching control from Flashboard", e);
 			return false;
 		}
@@ -192,7 +193,7 @@ public final class Flashboard {
 		checkInit();
 		try {
 			return communications.detach(id);
-		} catch (IOException e) {
+		} catch (SendableException e) {
 			FlashUtil.getLogger().log(Level.SEVERE, "Exception detaching control from Flashboard", e);
 			return false;
 		}

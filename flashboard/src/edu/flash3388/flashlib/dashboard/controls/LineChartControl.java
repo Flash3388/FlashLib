@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.dashboard.controls;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardXYChart;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -119,7 +120,7 @@ public class LineChartControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == FlashboardXYChart.VALUE_UPDATE){
 			synchronized (dataCollection) {
 				double x = FlashUtil.toDouble(data, 1);
@@ -140,7 +141,7 @@ public class LineChartControl extends Displayable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

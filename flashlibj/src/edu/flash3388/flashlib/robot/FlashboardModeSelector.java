@@ -8,7 +8,7 @@ public class FlashboardModeSelector implements ModeSelector{
 	private FlashboardModeSelectorControl modeselector = FlashboardModeSelectorControl.getInstance();
 	
 	public void attachToFlashboard(){
-		if(!modeselector.isAttached() && Flashboard.flashboardInit())
+		if(!modeselector.isCommunicationAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(modeselector);
 	}
 	

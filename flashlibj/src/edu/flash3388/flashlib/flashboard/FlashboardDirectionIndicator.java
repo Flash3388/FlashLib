@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
@@ -15,11 +16,11 @@ public class FlashboardDirectionIndicator extends FlashboardControl{
 	}
 
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		lastValue = value;
 		forceUpdate = false;
 		return FlashUtil.toByteArray(value);

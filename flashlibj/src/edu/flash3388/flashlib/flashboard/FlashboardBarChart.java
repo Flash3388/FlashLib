@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.flashboard;
 
 import java.util.Vector;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
@@ -32,11 +33,11 @@ public class FlashboardBarChart extends FlashboardControl{
 		}
 		
 		@Override
-		public void newData(byte[] data) {
+		public void newData(byte[] data) throws SendableException {
 		}
 
 		@Override
-		public byte[] dataForTransmition() {
+		public byte[] dataForTransmission() throws SendableException {
 			if(!nameUpdated){
 				nameUpdated = true;
 				byte[] bytes = new byte[parentName.length() + 1];
@@ -100,7 +101,7 @@ public class FlashboardBarChart extends FlashboardControl{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() {
 		configUpdate = false;
 		configBytes[0] = CONFIG_UPDATE;
 		FlashUtil.fillByteArray(min, 1, configBytes);
@@ -117,7 +118,7 @@ public class FlashboardBarChart extends FlashboardControl{
 		configUpdate = true;
 		
 		for (FlashboardBarSeries control : controls) {
-			if(!control.isAttached())
+			if(!control.isCommunicationAttached())
 				Flashboard.attach(control);
 		}
 	}

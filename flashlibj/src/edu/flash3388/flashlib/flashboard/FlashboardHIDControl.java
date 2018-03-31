@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class FlashboardHIDControl extends FlashboardControl implements Runnable{
@@ -153,7 +154,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == JOYSTICK_DATA){
 			synchronized (joystickMutex) {
 				updated = false;
@@ -210,7 +211,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

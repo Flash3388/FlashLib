@@ -12,7 +12,7 @@ public abstract class FlashboardControl extends Sendable{
 	}
 
 	public void attachToFlashboard(){
-		if(!isAttached()){
+		if(!isCommunicationAttached()){
 			Flashboard.attach(this);
 		}
 	}

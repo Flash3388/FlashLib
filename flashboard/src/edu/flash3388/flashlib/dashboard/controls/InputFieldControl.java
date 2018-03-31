@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
@@ -70,14 +71,14 @@ public class InputFieldControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] bytes) {
+	public void newData(byte[] bytes) throws SendableException {
 		value = new String(bytes, 1, bytes.length - 1);
 		FlashFXUtils.onFXThread(()->{
 			field.setText(value);
 		});
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(changed){
 			changed = false;
 			return value.getBytes();

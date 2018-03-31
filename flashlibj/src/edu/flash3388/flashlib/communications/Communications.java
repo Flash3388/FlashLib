@@ -177,7 +177,12 @@ public class Communications {
 			Sendable sen = getFromAllAttachedByID(id);
 			if(dataType == SENDABLE_DATA && sen != null && sen.isRemoteAttached() && 
 					packet.length - 6 > 0){
-				sen.newData(Arrays.copyOfRange(packet, 6, packet.length));
+				byte[] userData = Arrays.copyOfRange(packet, 6, packet.length);
+				try {
+					sen.newData(userData);
+				} catch (SendableException e) {
+					logger.log(Level.SEVERE, "Exception thrown from Sendable while handling new data", e);
+				}
 			}else if(dataType == SENDABLE_INIT){
 				if(sen == null){
 					String str = new String(packet, 6, packet.length - 6);
@@ -269,10 +274,14 @@ public class Communications {
 	private void sendAll() throws IOException {
 		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
 		while(sendablesEnum.hasNext()) {
-			sendFromSendable(sendablesEnum.next());
+			try {
+				sendFromSendable(sendablesEnum.next());
+			} catch (SendableException e) {
+				logger.log(Level.SEVERE, "Exception thrown from Sendable while retreiving data to send", e);
+			}
 		}
 	}
-	private void sendFromSendable(Sendable sen) throws IOException {
+	private void sendFromSendable(Sendable sen) throws IOException, SendableException {
 		if(!sen.remoteInit()){
 			byte[] bytes = sen.getName().getBytes();
 			send(bytes, sen, SENDABLE_INIT);
@@ -283,7 +292,7 @@ public class Communications {
 			return;
 		
 		byte[] dataB;
-		if(!sen.hasChanged() || (dataB = sen.dataForTransmition()) == null) 
+		if(!sen.hasChanged() || (dataB = sen.dataForTransmission()) == null) 
 			return;
 		send(dataB, sen, SENDABLE_DATA);
 	}
@@ -377,7 +386,7 @@ public class Communications {
 	 * @throws IllegalStateException if the sendable is already attached
 	 */
 	public void attach(Sendable sendable) {
-		if(sendable.isAttached())
+		if(sendable.isCommunicationAttached())
 			throw new IllegalStateException("Sendable is already attached to communications");
 			
 		attachedSendables.add(sendable);
@@ -394,7 +403,7 @@ public class Communications {
 	/**
 	 * Attaches a {@link Sendable} object to this communications manager and forces an ID for it instead
 	 * of an automatically allocated ID. If the object is already attached to a communications manager (i.e.
-	 * {@link Sendable#isAttached()} returns true) this will fail. If the ID is already allocated to a different object,
+	 * {@link Sendable#isCommunicationAttached()} returns true) this will fail. If the ID is already allocated to a different object,
 	 * this will fail.
 	 * 
 	 * 
@@ -404,7 +413,7 @@ public class Communications {
 	 * @throws IllegalStateException if the sendable is attached already or the ID requested is already allocated
 	 */
 	public void attachForID(Sendable sendable, int id){
-		if(sendable.isAttached())
+		if(sendable.isCommunicationAttached())
 			throw new IllegalStateException("Sendable is already attached to communications");
 		if(getLocalyAttachedByID(id) != null)
 			throw new IllegalStateException("Sendable with such ID already exists");
@@ -427,14 +436,18 @@ public class Communications {
 	 * @param sendable sendable to remove
 	 * @return true if the sendable was removed, false otherwise
 	 * 
-	 * @throws IOException If an IO error occurs while reporting detachment
+	 * @throws SendableException If an IO error occurs while reporting detachment
 	 */
-	public boolean detach(Sendable sendable) throws IOException {
+	public boolean detach(Sendable sendable) throws SendableException {
 		if(attachedSendables.remove(sendable)){
 			sendable.setAttached(false);
 			if(isConnected()){
-				handleDisconnection(sendable);
 				sendables.remove(sendable.getID());
+				try {
+					handleDisconnection(sendable);
+				} catch (IOException e) {
+					throw new SendableException(e);
+				}
 			}
 			return true;
 		}
@@ -447,26 +460,30 @@ public class Communications {
 	 * @param id id of the sendable to remove
 	 * @return true if the sendable was removed, false otherwise
 	 * 
-	 * @throws IOException If an IO error occurs while reporting detachment
+	 * @throws SendableException If an error occurs while reporting detachment
 	 */
-	public boolean detach(int id) throws IOException {
+	public boolean detach(int id) throws SendableException {
 		Sendable sen = getLocalyAttachedByID(id);
 		if(sen != null) {
 			attachedSendables.remove(sen);
 			sen.setAttached(false);
 			if(isConnected()){
 				sendables.remove(sen.getID());
-				handleDisconnection(sen);
+				try {
+					handleDisconnection(sen);
+				} catch (IOException e) {
+					throw new SendableException(e);
+				}
 			}
 		}
-		return sen != null && !sen.isAttached();
+		return sen != null && !sen.isCommunicationAttached();
 	}
 	/**
 	 * Removes all the locally attached sendables.
 	 * 
-	 * @throws IOException If an IO error occurs while reporting detachment
+	 * @throws SendableException If an error occurs while reporting detachment
 	 */
-	public void detachAll() throws IOException {
+	public void detachAll() throws SendableException {
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements())
 			detach(sendablesEnum.nextElement());
@@ -638,9 +655,14 @@ public class Communications {
 		
 		try {
 			disconnect();
-			detachAll();
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "Error while trying to disconnect", ex);
+		}
+		
+		try {
+			detachAll();
+		} catch (SendableException e) {
+			// not important
 		}
 		
 		commThread.interrupt();

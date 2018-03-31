@@ -159,7 +159,7 @@ public class LocalShell extends Sendable implements Shell{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() {
 		if(updateInputStream){
 			updateInputStream = false;
 			byte[] data = new byte[inputStreamData.length + 1];

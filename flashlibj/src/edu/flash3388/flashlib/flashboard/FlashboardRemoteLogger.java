@@ -5,6 +5,8 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import edu.flash3388.flashlib.communications.SendableException;
+
 /**
  * Sends log data to a remote source.
  * 
@@ -51,10 +53,10 @@ public class FlashboardRemoteLogger extends FlashboardControl {
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		String str = logs.elementAt(0);
 		logs.remove(0);
 		sentLogs.addElement(str);

@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.FlashboardHIDControl;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -298,10 +299,10 @@ public class HIDControl extends Sendable implements Runnable{
 		}
 	}
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		sendData = false;
 		return sendDataBuffer;
 	}
@@ -318,51 +319,3 @@ public class HIDControl extends Sendable implements Runnable{
 	public void onConnectionLost() {
 	}
 }
-
-/*if(controllerCount > 0){
-for (int i = 0; i < hidData.length; i++) {
-	if(hidData[i] == null)
-		continue;
-	
-	boolean inarray = false;
-	for (int j = 0; j < controllers.length; j++) {
-		if(controllers[j] == null)
-			continue;
-		if(!controllers[j].getType().equals(Type.GAMEPAD) && !controllers[j].getType().equals(Type.STICK)){
-			controllers[j] = null;
-			continue;
-		}
-		
-		if(controllers[j].getPortNumber() == hidData[i].port){
-			inarray = true;
-			controllers[j] = null;
-			break;
-		}
-	}
-	
-	if(!inarray){
-		hidData[i] = null;
-		controllerCount--;
-	}
-}
-}
-
-if(controllerCount < hidData.length){
-for (int i = 0; i < controllers.length; i++) {
-	if(controllers[i] == null)
-		continue;
-	if(!controllers[i].getType().equals(Type.GAMEPAD) && !controllers[i].getType().equals(Type.STICK))
-		continue;
-	
-	int index = 0;
-	for (int j = 0; j < hidData.length; j++) {
-		if(hidData[j] == null){
-			index = j;
-			break;
-		}
-	}
-	
-	hidData[index] = loadController(controllers[i]);
-	controllerCount++;
-}
-}*/

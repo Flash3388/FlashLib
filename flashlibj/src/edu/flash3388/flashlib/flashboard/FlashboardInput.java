@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -119,18 +120,20 @@ public class FlashboardInput extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		String str = new String(data);
-		this.data.set(str);
+		this.data.set(str);	
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
-		return data.get().getBytes();
+		byte[] data = this.data.get().getBytes();
+		
+		return data;
 	}
 	@Override
 	public boolean hasChanged() {
-		return data.changed() || changed;
+		return changed || this.data.changed();
 	}
 	@Override
 	public void onConnection() {

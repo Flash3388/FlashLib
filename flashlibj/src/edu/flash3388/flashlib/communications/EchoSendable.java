@@ -32,7 +32,7 @@ public class EchoSendable extends Sendable{
 		rec = true;
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		byte[] data = new byte[byteData.length];
 		System.arraycopy(byteData, 0, data, 0, data.length);
 		rec = false;

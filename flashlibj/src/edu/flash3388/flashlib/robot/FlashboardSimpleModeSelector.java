@@ -18,7 +18,7 @@ public class FlashboardSimpleModeSelector implements ModeSelector{
 	}
 	
 	public void attachToFlashboard(){
-		if(!chooser.isAttached() && Flashboard.flashboardInit())
+		if(!chooser.isCommunicationAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(chooser);
 	}
 	
