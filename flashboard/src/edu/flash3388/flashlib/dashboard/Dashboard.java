@@ -484,7 +484,7 @@ public class Dashboard extends Application {
 			try {
 				communications.close();
 			} catch (IOException e) {
-				// TODO HANDLE
+				logger.log(Level.SEVERE, "Error while closing communications", e);
 			}
 			communications = null;
 			connectionTask.resetComm();
@@ -761,7 +761,7 @@ public class Dashboard extends Application {
 			try {
 				communications.close();
 			} catch (IOException e) {
-				// TODO HANDLE
+				logger.log(Level.SEVERE, "Error while closing communications", e);
 			}
 		}
 		if(!updater.isTerminated()){

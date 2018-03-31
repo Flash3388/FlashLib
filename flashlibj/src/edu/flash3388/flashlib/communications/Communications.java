@@ -238,7 +238,9 @@ public class Communications {
 		if(sen.isRemoteAttached()){
 			sen.setRemoteAttached(false);
 			sen.onConnectionLost();
-			confirmRemoteDetached(sen.getID());
+			
+			if (isConnected())
+				confirmRemoteDetached(sen.getID());
 		}
 		
 		if(!sen.userID())
@@ -629,20 +631,25 @@ public class Communications {
 	 * Closes this communications system. Usage of this system will not be possible after closing.
 	 * Awaits termination of the communications thread.
 	 * 
-	 * @throws IOException If an IO error occurs. This might lead to the communication not being closed
+	 * @throws IOException If an IO error occurs. This might lead to the communication interface not being closed, but the communication thread will be stopped.
 	 */
 	public void close() throws IOException {
-		// TODO: insure closing of thread!
+		setAllowConnection(false);
 		
-		disconnect();
+		try {
+			disconnect();
+			detachAll();
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Error while trying to disconnect", ex);
+		}
+		
 		commThread.interrupt();
-		detachAll();
 		
 		try {
 			commThread.join();
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 			logger.info("Interruption while joining communication thread");
+			Thread.currentThread().interrupt();
 		}
 		
 		commInterface.close();
