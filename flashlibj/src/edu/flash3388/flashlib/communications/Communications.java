@@ -38,11 +38,13 @@ import edu.flash3388.flashlib.util.LogUtil;
  */
 public class Communications {
 	
-	private static class CommTask implements Runnable{
+	private static class CommThread extends Thread {
+		
 		private Communications comm;
 		
-		public CommTask(Communications comm){
+		CommThread(String name, Communications comm){
 			this.comm = comm;
+			setName(name);
 		}
 		
 		@Override
@@ -97,8 +99,7 @@ public class Communications {
 	private SendableCreator sendableCreator;
 	private Logger logger;
 	
-	private Thread commThread;
-	private CommTask commTask;
+	private CommThread commThread;
 	
 	/**
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
@@ -114,7 +115,7 @@ public class Communications {
 		this.commInterface = readIn;
 		logger = LogUtil.getLogger(logName);
 		
-		initializeConcurrency(logName);
+		commThread = new CommThread(logName, this);
 		logger.info("Initialized");
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
@@ -129,13 +130,8 @@ public class Communications {
 	 * @throws IOException If creating a log has thrown an I/O error
 	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public Communications(CommInterface readIn) throws SecurityException, IOException{
+	public Communications(CommInterface readIn) throws SecurityException, IOException {
 		this("Communications", readIn);
-	}
-	
-	private void initializeConcurrency(String name){
-		commTask = new CommTask(this);
-		commThread = new Thread(commTask, name+"-CommThread");
 	}
 
 	private void read(){//ID|VALUE
@@ -608,7 +604,6 @@ public class Communications {
 			commThread.join();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			e.printStackTrace();
 			logger.info("Interruption while joining communication thread");
 		}
 		
