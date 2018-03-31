@@ -604,8 +604,7 @@ public class Dashboard extends Application {
 	    if(file.exists()){
 	    	try {
 				modeSelectorControl.loadModes(file);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Failed to load states", e);
 			}
 	    }
@@ -768,7 +767,11 @@ public class Dashboard extends Application {
 		
 		if(modeSelectorControl != null){
 			 File file = new File(MODES_FILE);
-			 modeSelectorControl.saveModes(file);
+			 try {
+				modeSelectorControl.saveModes(file);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Failed to save modes", e);
+			}
 		}
 		
 		saveSettings();

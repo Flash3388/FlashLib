@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -150,11 +152,16 @@ public class ModeSelectorControl extends Sendable{
 	}
 	
 	
-	public void loadModes(File file) throws Exception{
+	public void loadModes(File file) throws IOException {
 		modes.clear();
 		
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-				.parse(file);
+		Document doc;
+		try {
+			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.parse(file);
+		} catch (SAXException | ParserConfigurationException ex) {
+			throw new IOException(ex);
+		}
 		
 		doc.getDocumentElement().normalize();
 		NodeList stateList = doc.getElementsByTagName("mode");
@@ -166,7 +173,7 @@ public class ModeSelectorControl extends Sendable{
 				String name = element.getAttribute("name");
 				
 				if(getModeForName(name) != null)
-					throw new RuntimeException("Mode name taken: "+name);
+					throw new IOException("Mode name taken: "+name);
 				
 				String value = element.getAttribute("value");
 				int bvalue = -1;
@@ -174,21 +181,21 @@ public class ModeSelectorControl extends Sendable{
 				try{
 					bvalue = Integer.parseInt(value);
 				}catch(NumberFormatException e){
-					throw new RuntimeException("Value for mode "+name+ " is not an int");
+					throw new IOException("Value for mode "+name+ " is not an int");
 				}
 				
 				if(bvalue == 0)
-					throw new RuntimeException("value for mode "+name+" cannot be 0");
+					throw new IOException("value for mode "+name+" cannot be 0");
 				
 				if(getModeForValue(bvalue) != null)
-					throw new RuntimeException("Mode value taken: "+bvalue);
+					throw new IOException("Mode value taken: "+bvalue);
 				
 				OpMode state = new OpMode(name, bvalue);
 				modes.add(state);
 			}
 		}
 	}
-	public void saveModes(File file){
+	public void saveModes(File file) throws IOException{
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		lines.add("<?xml version=\"1.0\" ?>");
@@ -198,10 +205,6 @@ public class ModeSelectorControl extends Sendable{
 		}
 		lines.add("</mode-selector>");
 		
-		try {
-			Files.write(file.toPath(), lines, StandardOpenOption.CREATE);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Files.write(file.toPath(), lines, StandardOpenOption.CREATE);
 	}
 }
