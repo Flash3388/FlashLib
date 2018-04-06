@@ -22,7 +22,7 @@ public class FlashboardCamViewSelector implements CameraViewSelector{
 	}
 	
 	public void attachToFlashboard(){
-		if(!chooser.attached() && Flashboard.flashboardInit())
+		if(!chooser.isCommunicationAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(chooser);
 	}
 	

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -29,7 +30,7 @@ public class EmergencyStopControl extends FlashboardControl implements BooleanSo
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 1)return;
 		
 		if(data[0] == EMERGENCY){
@@ -44,7 +45,7 @@ public class EmergencyStopControl extends FlashboardControl implements BooleanSo
 		changed = true;
 	} 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
 		return new byte[]{emergency? EMERGENCY : NORMAL};
 	}

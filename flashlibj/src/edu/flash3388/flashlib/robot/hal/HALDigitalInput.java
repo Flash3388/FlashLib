@@ -16,11 +16,11 @@ public class HALDigitalInput extends HALPort implements DigitalInput{
 
 	/**
 	 * Creates a new digital input port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired digital input
-	 * @throws HALException if port initialization failed.
+	 * @throws HALInitialzationException if port initialization failed.
 	 */
 	public HALDigitalInput(int port) {
 		if(!DIOJNI.checkDigitalInputPortValid(port))
@@ -31,7 +31,7 @@ public class HALDigitalInput extends HALPort implements DigitalInput{
 		
 		handle = DIOJNI.initializeDigitalInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize DigitalInput: invalid HAL handle", port);
+			throw new HALInitialzationException("Unable to initialize DigitalInput: invalid HAL handle", port);
 	}
 	
 	/**

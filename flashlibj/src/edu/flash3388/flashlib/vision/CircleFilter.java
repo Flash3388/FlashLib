@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.vision;
  * @since FlashLib 1.0.1
  * @see VisionSource#circleDetection()
  */
-public class CircleFilter extends VisionFilter {
+public class CircleFilter implements VisionFilter {
 
 	@Override
 	public void process(VisionSource source) {

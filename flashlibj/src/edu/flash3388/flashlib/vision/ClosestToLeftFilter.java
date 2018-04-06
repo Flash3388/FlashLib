@@ -1,8 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-
 /**
  * Filers out contours by their proximity to the left side of the frame. 
  * 
@@ -10,27 +7,28 @@ import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToLeft(int)
  */
-public class ClosestToLeftFilter extends VisionFilter{
+public class ClosestToLeftFilter implements VisionFilter{
 	
-	private IntegerProperty amount = new SimpleIntegerProperty();
+	/**
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative.
+	 */
+	private int amount;
 
 	public ClosestToLeftFilter(){}
 	public ClosestToLeftFilter(int amount){
-		this.amount.set(amount);
+		this.amount = amount;
 	}
 	
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the maximum amount of contours to leave after the filter process.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public IntegerProperty amountProperty(){
+	public int getAmount() {
 		return amount;
+	}
+	public void setAmount(int amount) {
+		this.amount = amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.closestToLeft(amount.get());
+		source.closestToLeft(amount);
 	}
 }

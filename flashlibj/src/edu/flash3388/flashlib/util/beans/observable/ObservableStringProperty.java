@@ -13,6 +13,7 @@ import edu.flash3388.flashlib.util.beans.StringProperty;
  * @since FlashLib 1.0.1
  */
 public abstract class ObservableStringProperty extends ObservablePropertyBase<String> implements ObservableStringValue, StringProperty{
+	
 	@Override
 	public String get() {
 		return getValue();

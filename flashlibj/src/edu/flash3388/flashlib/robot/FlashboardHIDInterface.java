@@ -8,7 +8,7 @@ public class FlashboardHIDInterface implements HIDInterface, Runnable{
 	private FlashboardHIDControl hidcontrol = FlashboardHIDControl.getInstance();
 
 	public void attachToFlashboard(){
-		if(!hidcontrol.attached() && Flashboard.flashboardInit())
+		if(!hidcontrol.isCommunicationAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(hidcontrol);
 	}
 	

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
@@ -53,14 +54,14 @@ public class FlashboardSlider extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 8) return;
 		double value = FlashUtil.toDouble(data);
 		valData.set(value);
 		lastValue = value;
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(changed){
 			changed = false;
 			FlashUtil.fillByteArray(minValue(), 0, data);

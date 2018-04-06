@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.robot.PIDSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.DoubleProperty;
@@ -71,7 +72,7 @@ public class FlashboardPIDTuner extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == K_UPDATE){
 			lastP = FlashUtil.toDouble(data, 1);
 			lastI = FlashUtil.toDouble(data, 9);
@@ -92,7 +93,7 @@ public class FlashboardPIDTuner extends FlashboardControl{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(sliderValuesUpdated){
 			sliderValuesUpdated = false;
 			byte[] data = new byte[13];

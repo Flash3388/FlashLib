@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
@@ -89,9 +90,11 @@ public class FlashboardLabel extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {}
+	public void newData(byte[] data) throws SendableException {
+		
+	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
 		return data.get().getBytes();
 	}

@@ -41,7 +41,7 @@ public class CvCamera implements Camera{
 		capture = new VideoCapture();
 		capture.open(cam);
 		if(!capture.isOpened())
-			throw new RuntimeException("Unable to open camera " + cam);
+			throw new RuntimeException("Unable to open camera: " + cam);
 		
 		image = new Mat();
 		buffer = new MatOfByte();
@@ -105,7 +105,7 @@ public class CvCamera implements Camera{
 		if(!capture.isOpened()) return null;
 		capture.read(image);
 		if(image.empty()) {
-			FlashUtil.getLog().log("CvCamera image empty "+camIndex);
+			FlashUtil.getLogger().warning("CvCamera image empty: "+camIndex);
 			return null;
 		}
 		return image;

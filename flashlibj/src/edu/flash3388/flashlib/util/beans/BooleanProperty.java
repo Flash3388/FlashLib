@@ -8,11 +8,19 @@ package edu.flash3388.flashlib.util.beans;
  * @author tom Tzook
  * @since FlashLib 1.0.1
  */
-public interface BooleanProperty extends Property<Boolean>, BooleanSource{
+public interface BooleanProperty extends Property<Boolean>, BooleanSource {
 	
 	/**
 	 * Sets the value of the property. Implementation is user dependent.
 	 * @param b new value
 	 */
 	void set(boolean b);
+	
+	
+	default public void setValue(Boolean o) {
+		set(o == null? false : o.booleanValue());
+	}
+	default public Boolean getValue() {
+		return get();
+	}
 }

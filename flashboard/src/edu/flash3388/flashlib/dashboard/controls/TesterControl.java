@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.FlashboardMotorTester;
 
@@ -43,10 +44,10 @@ public class TesterControl extends Sendable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		updateEnable = false;
 		return new byte[]{enable? FlashboardMotorTester.START : FlashboardMotorTester.STOP};
 	}

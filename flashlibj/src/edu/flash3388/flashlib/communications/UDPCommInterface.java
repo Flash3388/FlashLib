@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.util.Arrays;
 
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -26,6 +26,9 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	private DatagramSocket socket;
 	private int portOut = -1;
 	private InetAddress outInet;
+	private int localPort;
+	private InetAddress localInet;
+	private int timeout;
 	
 	private boolean closed = false;
 	private byte[] data = new byte[BUFFER_SIZE];
@@ -34,17 +37,15 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	/**
 	 * Constructs a client-type UDP interface. A {@link DatagramSocket} is created and bound to a provided port and
 	 * a {@link InetAddress#isAnyLocalAddress() Wildcard} address provided by the kernel. The remote data is saved and
-	 * used only when {@link #connect(Packet)} is called.
+	 * used only when {@link #connect()} is called.
 	 * 
 	 * @param remote remote server address
 	 * @param localport local port to use
 	 * @param remoteport remote server port
-	 * 
-	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UDPCommInterface(InetAddress remote, int localport, int remoteport) throws SocketException{
+	public UDPCommInterface(InetAddress remote, int localport, int remoteport) {
 		outInet = remote;
-		socket = new DatagramSocket(localport);
+		this.localPort = localport;
 		portOut = remoteport;
 		server = false;
 	}
@@ -53,10 +54,8 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * a {@link InetAddress#isAnyLocalAddress() Wildcard} address provided by the kernel.
 	 * 
 	 * @param localPort local port to use
-	 * 
-	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UDPCommInterface(int localPort) throws SocketException{
+	public UDPCommInterface(int localPort) {
 		this(null, localPort);
 	}
 	/**
@@ -65,26 +64,27 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * 
 	 * @param localAddr local bind address
 	 * @param localPort local port to use
-	 * 
-	 * @throws SocketException if the socket could not be opened, or the socket could not bind to the specified local port.
 	 */
-	public UDPCommInterface(InetAddress localAddr, int localPort) throws SocketException{
-		socket = new DatagramSocket(localPort, localAddr);
+	public UDPCommInterface(InetAddress localAddr, int localPort) {
+		localInet = localAddr;
+		this.localPort = localPort;
 		server = true;
 	}
 	
 	/**
-	 * Does nothing
+	 * {@inheritDoc}
 	 */
 	@Override
-	public void open() {
+	public void open() throws IOException {
+		socket = new DatagramSocket(localPort, localInet);
+		socket.setSoTimeout(timeout);
 	}
 	/**
 	 * {@inheritDoc}
 	 * Closes the socket. This interface cannot be used after that.
 	 */
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		socket.close();
 		closed = true;
 	}
@@ -94,10 +94,10 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * Execute an handshake based on the type of the connection: server or client.
 	 */
 	@Override
-	public void connect(Packet packet) {
+	public void connect() throws IOException {
 		allowReplacingOfRemote(true);
-		isConnected = server? handshakeServer(this, packet) : 
-			handshakeClient(this, packet);
+		isConnected = server? handshakeServer(this) : 
+			handshakeClient(this);
 		allowReplacingOfRemote(false);
 		resetData();
 	}
@@ -106,7 +106,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void disconnect() {
+	public void disconnect() throws IOException {
 		isConnected = false;
 	}
 	
@@ -118,80 +118,62 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * </p>
 	 */
 	@Override
-	public boolean read(Packet packet) {
-		if(!isOpened()) return false;
-		try {
-			DatagramPacket recp = new DatagramPacket(data, data.length);
-			socket.receive(recp);
-			
-			if(server && ((portOut < 0 && outInet == null) || replace)){
-				outInet = recp.getAddress();
-				portOut = recp.getPort();
-			}else if(recp.getPort() != portOut || 
-					!FlashUtil.equals(outInet.getAddress(), recp.getAddress().getAddress())){
-				FlashUtil.getLog().log("Unknow sender!!");
-			}
-			
-			newDataRead();
-			packet.data = recp.getData();
-			packet.length = recp.getLength();
-			
-			if(isHandshake(packet.data, packet.length)){
-				packet.length = 1;
-				return true;
-			}
-			/*if(server && isHandshakeClient(packet.data, packet.length)){
-				write(HANDSHAKE_CONNECT_SERVER);
-				packet.length = 1;
-				return true;
-			}
-			if(!server && isHandshakeServer(packet.data, packet.length)){
-				write(HANDSHAKE_CONNECT_CLIENT);
-				packet.length = 1;
-				return true;
-			}*/
-
-			
-			return true;
-		} catch (IOException e) {
-			packet.length = 0;
-			return false;
+	public byte[] read() throws IOException {
+		DatagramPacket recp = new DatagramPacket(data, data.length);
+		socket.receive(recp);
+		
+		if(server && ((portOut < 0 && outInet == null) || replace)){
+			outInet = recp.getAddress();
+			portOut = recp.getPort();
+		}else if(recp.getPort() != portOut || 
+				!FlashUtil.equals(outInet.getAddress(), recp.getAddress().getAddress())){
+			FlashUtil.getLogger().warning(String.format("Unknown sender to socket: %s:%s",
+					recp.getAddress().getHostAddress(), 
+					recp.getPort()));
 		}
+		
+		newDataRead();
+		byte[] data = recp.getData();
+		int length = recp.getLength();
+		
+		if(isHandshake(data, length)){
+			return length != data.length? Arrays.copyOf(data, length) :
+				data;
+		}
+		
+		return length != data.length? Arrays.copyOf(data, length) :
+			data;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setReadTimeout(int millis) {
-		try {
+	public void setReadTimeout(int millis) throws IOException {
+		this.timeout = millis;
+		if (isOpened())
 			socket.setSoTimeout(millis);
-		} catch (SocketException e) {}
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getTimeout() {
-		try {
-			return socket.getSoTimeout();
-		} catch (SocketException e) {}
-		return -1;
+	public int getReadTimeout() throws IOException {
+		return isOpened() ? socket.getSoTimeout() : timeout;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data) {
+	public void write(byte[] data) throws IOException {
 		write(data, 0, data.length);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data, int start, int length) {
-		if(!isOpened()) return;
+	public void write(byte[] data, int start, int length) throws IOException {
 		write(data, start, length, outInet, portOut);
 	}
 	
@@ -203,27 +185,26 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * @param length amount of bytes to send
 	 * @param outInet remote address
 	 * @param portOut remote port
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public void write(byte[] data, int start, int length, InetAddress outInet, int portOut){
-		if(!isOpened()) return;
-		try {
-			newDataSent();
-			socket.send(new DatagramPacket(data, start, length, outInet, portOut));
-		} catch (IOException e) {}
+	public void write(byte[] data, int start, int length, InetAddress outInet, int portOut) throws IOException {
+		newDataSent();
+		socket.send(new DatagramPacket(data, start, length, outInet, portOut));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setMaxBufferSize(int bytes) {
+	public void setMaxBufferSize(int bytes) throws IOException {
 		data = new byte[bytes];
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getMaxBufferSize() {
+	public int getMaxBufferSize() throws IOException {
 		return data.length;
 	}
 	
@@ -268,7 +249,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 */
 	@Override
 	public InetAddress getLocalAddress() {
-		return socket.getLocalAddress();
+		return localInet;
 	}
 	/**
 	 * {@inheritDoc}
@@ -282,7 +263,7 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 */
 	@Override
 	public int getLocalPort() {
-		return socket.getLocalPort();
+		return localPort;
 	}
 	/**
 	 * {@inheritDoc}
@@ -295,47 +276,54 @@ public class UDPCommInterface extends ManualConnectionVerifier implements IPComm
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setLocalAddress(InetAddress addr) {
-		if (isConnected() || !isOpened()) return;
+	public void setLocalAddress(InetAddress addr) throws IOException {
+		if (isConnected())
+			throw new IllegalStateException("Cannot change local address while connected");
 		
-		disconnect();
+		localInet = addr;
 		
-		try {
-			socket = new DatagramSocket(socket.getLocalPort(), addr);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (isOpened()) {
+			close();
+			open();
 		}
-		
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setRemoteAddress(InetAddress addr) {
-		if (isConnected() || !isOpened() || isServer()) return;
+	public void setRemoteAddress(InetAddress addr) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change remote address while connected");
+		if (isServer())
+			throw new IllegalStateException("Cannot change remote address for server interface");
+		
 		outInet = addr;
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setLocalPort(int port) {
-		if (isConnected() || !isOpened()) return;
+	public void setLocalPort(int port) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change local port while connected");
 		
-		disconnect();
+		localPort = port;
 		
-		try {
-			socket = new DatagramSocket(port, socket.getLocalAddress());
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (isOpened()) {
+			close();
+			open();
 		}
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setRemotePort(int port) {
-		if (isConnected() || !isOpened() || isServer()) return;
+	public void setRemotePort(int port) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change remote port while connected");
+		if (isServer())
+			throw new IllegalStateException("Cannot change remote port for server interface");
+		
 		portOut = port;
 	}
 }

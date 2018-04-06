@@ -21,7 +21,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class TCPCommInterface extends StreamCommInterface implements IPCommInterface{
+public class TCPCommInterface extends StreamCommInterface implements IPCommInterface {
 	
 	public static final int RECONNECTION_DELAY = 5000;
 	
@@ -30,6 +30,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	private int portOut, localPort;
 	private InetAddress outInet, localInet;
 	
+	private boolean isServer;
 	private boolean closed = false, reset = false;
 	private int readTimeout = 0;
 	
@@ -39,89 +40,93 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a client TCP interface at a local
 	 * address which is received from {@link InetAddress#getLocalHost()}, and port. Address and port for a server are immediately
-	 * saved but used only when {@link #connect(Packet)} is called.
+	 * saved but used only when {@link #connect()} is called.
 	 * 
 	 * @param remote {@link InetAddress} object for the server address
 	 * @param localport local port for data receiving
 	 * @param remoteport server port
 	 * 
 	 * @throws UnknownHostException if the local host name could not be resolved into an address.
-	 * @throws IOException if the bind operation fails, or if the socket is already bound.
 	 */
-	public TCPCommInterface(InetAddress remote, int localport, int remoteport) throws UnknownHostException, IOException{
+	public TCPCommInterface(InetAddress remote, int localport, int remoteport) throws UnknownHostException {
 		this(InetAddress.getLocalHost(), remote, localport, remoteport);
 	}
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a client TCP interface at a local
-	 * address and port. Address and port for a server are immediately saved but used only when {@link #connect(Packet)} 
+	 * address and port. Address and port for a server are immediately saved but used only when {@link #connect()} 
 	 * is called.
 	 * 
 	 * @param remote {@link InetAddress} object for the server address
 	 * @param localport local port for data receiving
 	 * @param remoteport server port
 	 * @param local {@link InetAddress} object for the local binding address
-	 * 
-	 * @throws IOException if the bind operation fails, or if the socket is already bound.
 	 */
-	public TCPCommInterface(InetAddress local, InetAddress remote, int localport, int remoteport) throws IOException{
+	public TCPCommInterface(InetAddress local, InetAddress remote, int localport, int remoteport) {
 		super(false);
 		outInet = remote;
 		portOut = remoteport;
 		localPort = localport;
 		localInet = local;
 		
-		try {
-			createSocket();
-		} catch (IOException e) {
-			closeSocket();
-			throw e;
-		}
+		isServer = false;
 	}
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a server TCP interface at a local
 	 * address which is received from {@link InetAddress#getLocalHost()}, and port. A {@link ServerSocket} is created 
-	 * with a backlog of 1 connection to listen for connections when {@link #connect(Packet)} is called.
+	 * with a backlog of 1 connection to listen for connections when {@link #connect()} is called.
 	 * 
 	 * @param localPort local binding port for listening socket
 	 * 
-	 * @throws IOException if an I/O error occurs when opening the socket.
+	 * @throws UnknownHostException If unable to resolve the local host
 	 */
-	public TCPCommInterface(int localPort) throws IOException{
+	public TCPCommInterface(int localPort) throws UnknownHostException {
 		this(InetAddress.getLocalHost(), localPort);
 	}
 	/**
 	 * Creates a new TCP/IP {@link CommInterface}. This constructor initializes a server TCP interface at a local
 	 * address and port. A {@link ServerSocket} is created with a backlog of 1 connection to listen for connections 
-	 * when {@link #connect(Packet)} is called.
+	 * when {@link #connect()} is called.
 	 * 
 	 * @param localAddr local binding address for listening socket
 	 * @param localPort local binding port for listening socket
-	 * 
-	 * @throws IOException if an I/O error occurs when opening the socket.
 	 */
-	public TCPCommInterface(InetAddress localAddr, int localPort) throws IOException{
+	public TCPCommInterface(InetAddress localAddr, int localPort) {
 		super(false);
 		localInet = localAddr;
 		this.localPort = localPort;
-		serverSocket = new ServerSocket(localPort, 1, localAddr);
+		
+		isServer = true;
 	}
 	
 	private void createSocket() throws IOException{
-		socket = new Socket();
-		socket.bind(new InetSocketAddress(localInet, localPort));
+		if (isServer() && (serverSocket == null || serverSocket.isClosed())) {
+			serverSocket = new ServerSocket(localPort, 1, localInet);
+		} else {
+			socket = new Socket();
+			socket.bind(new InetSocketAddress(localInet, localPort));
+		}
 	}
 	private void closeSocket() throws IOException{
 		if(socket != null && !socket.isClosed()){
 			socket.close();
 			socket = null;
 		}
+		if (serverSocket != null && !serverSocket.isClosed()) {
+			serverSocket.close();
+			serverSocket = null;
+		}
 	}
 	
 	/**
-	 * Does nothing
+	 * {@inheritDoc}
 	 */
 	@Override
-	public void open() {
+	public void open() throws IOException {
+		try {
+			createSocket();
+		} finally {
+			closeSocket();
+		}
 	}
 	/**
 	 * {@inheritDoc}
@@ -131,13 +136,8 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	public void close(){
-		try {
-			if(isServer()) 
-				serverSocket.close();
-			closeSocket();
-		} catch (IOException e) {
-		}
+	public void close() throws IOException {
+		closeSocket();
 		closed = true;
 	}
 	/**
@@ -148,7 +148,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	public void connect(Packet packet){
+	public void connect() throws IOException {
 		try {
 			if(reset){
 				closeSocket();
@@ -173,9 +173,7 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 			setReadTimeout(readTimeout);
 			resetBuffers();
 			resetData();
-		} catch (IOException e) {	
-			FlashUtil.getLog().reportError(e.getMessage());
-		}finally{
+		} finally{
 			reset = true;
 		}
 	}
@@ -186,12 +184,9 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * </p>
 	 */
 	@Override
-	public void disconnect() {
-		try {
-			closeSocket();
-		} catch (IOException e) {
-			FlashUtil.getLog().reportError(e.getMessage());
-		}
+	public void disconnect() throws IOException {
+		closeSocket();
+		
 		if(isServer())
 			outInet = null;
 	}
@@ -200,22 +195,17 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setReadTimeout(int millis) {
-		try {
-			if(socket != null)
-				socket.setSoTimeout(millis);
-			readTimeout = millis;
-		} catch (IOException e) {}
+	public void setReadTimeout(int millis) throws IOException {
+		if(socket != null)
+			socket.setSoTimeout(millis);
+		readTimeout = millis;
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getTimeout() {
-		try {
-			return socket != null? socket.getSoTimeout() : readTimeout;
-		} catch (IOException e) {}
-		return -1;
+	public int getReadTimeout() throws IOException {
+		return socket != null? socket.getSoTimeout() : readTimeout;
 	}
 	
 	/**
@@ -235,34 +225,30 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * If an {@link IOException} occurs during writing, than connection is terminated by calling {@link #disconnect()}.
-	 * </p>
 	 */
 	@Override
-	protected void writeData(byte[] data, int start, int length) {
+	protected void writeRaw(byte[] data, int start, int length) throws IOException {
+		out.write(data, start, length);
+	}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected int readRaw(byte[] buffer, int start, int length) throws IOException {
 		try {
-			out.write(data, start, length);
-		} catch (IOException e) {
-			disconnect();
-		}
+			return in.read(buffer, start, length);
+		} catch (SocketTimeoutException e) {
+			return 0;
+		}  
 	}
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * If an {@link IOException} occurs during reading, than connection is terminated by calling {@link #disconnect()}.
-	 * </p>
+	 * Gets the amount of bytes in the TCP buffer.
 	 */
 	@Override
-	protected int readData(byte[] buffer) {
-		try {
-			return in.read(buffer);
-		} catch (SocketTimeoutException e) {
-			return 0;
-		} catch (IOException e) {
-			disconnect();
-			return 0;
-		} 
+	protected int availableData() throws IOException {
+		return in.available();
 	}
 	
 	/**
@@ -297,52 +283,54 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setLocalAddress(InetAddress addr) {
-		if (isConnected() || !isOpened()) return;
+	public void setLocalAddress(InetAddress addr) throws IOException {
+		if (isConnected())
+			throw new IllegalStateException("Cannot change local address while connected");
 		
-		disconnect();
+		localInet = addr;
 		
-		try {
-			localInet = addr;
-			if(isServer())
-				serverSocket = new ServerSocket(localPort, 1, addr);
-			else 
-				createSocket();
-		} catch (IOException e) {
+		if (isOpened()) {
+			close();
+			open();
 		}
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setRemoteAddress(InetAddress addr) {
-		if (isConnected() || !isOpened() || isServer()) return;
+	public void setRemoteAddress(InetAddress addr) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change remote address while connected");
+		if (isServer())
+			throw new IllegalStateException("Cannot change remote address for server interface");
+		
 		outInet = addr;
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setLocalPort(int port) {
-		if (isConnected() || !isOpened()) return;
+	public void setLocalPort(int port) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change local port while connected");
 		
-		disconnect();
+		localPort = port;
 		
-		try {
-			localPort = port;
-			if(isServer())
-				serverSocket = new ServerSocket(localPort, 1, localInet);
-			else 
-				createSocket();
-		} catch (IOException e) {
+		if (isOpened()) {
+			close();
+			open();
 		}
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setRemotePort(int port) {
-		if (isConnected() || !isOpened() || isServer()) return;
+	public void setRemotePort(int port) throws IOException {
+		if (isConnected()) 
+			throw new IllegalStateException("Cannot change remote port while connected");
+		if (isServer())
+			throw new IllegalStateException("Cannot change remote port for server interface");
+		
 		portOut = port;
 	}
 	/**
@@ -350,6 +338,6 @@ public class TCPCommInterface extends StreamCommInterface implements IPCommInter
 	 */
 	@Override
 	public boolean isServer() {
-		return serverSocket != null;
+		return isServer;
 	}
 }

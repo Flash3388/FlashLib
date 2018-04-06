@@ -34,11 +34,13 @@ public abstract class TypeLog extends Log{
 		}
 	}
 	protected static class TracedErrorLogData extends ErrorLogData{
-		public String stacktrace;
+		public StackTraceElement[] stacktrace;
+		public int traceIndex;
 		
-		public TracedErrorLogData(String log, double time, String stacktrace){
+		public TracedErrorLogData(String log, double time, StackTraceElement[] stacktrace, int traceIndex){
 			super(log, time, true);
 			this.stacktrace = stacktrace;
+			this.traceIndex = traceIndex;
 		}
 	}
 	
@@ -158,73 +160,40 @@ public abstract class TypeLog extends Log{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void printWarning(String warning, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <WARNING> : "+warning);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void printError(String error, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <ERROR> : "+error);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ("+caller+") : "+log);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public synchronized void write(String mess, String caller){
+	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(new LogData(mess, caller));
+		writeToStandardLog(new LogData(log, caller));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void write(String mess, String caller, double time){
+	public synchronized void write(String log, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog(new TimedLogData(mess, caller, time));
+		writeToStandardLog(new TimedLogData(log, caller, time));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, double time){
+	public synchronized void writeError(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToErrorLog(new ErrorLogData(mess, time, true));
+		writeToErrorLog(new ErrorLogData(log, time, true));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, String stacktrace, double time){
+	public synchronized void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToErrorLog(new TracedErrorLogData(mess, time, stacktrace));
+		writeToErrorLog(new TracedErrorLogData(log, time, stacktrace, traceIndex));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeWarning(String mess, double time){
+	public synchronized void writeWarning(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToErrorLog(new ErrorLogData(mess, time, false));
+		writeToErrorLog(new ErrorLogData(log, time, false));
 	}
 }

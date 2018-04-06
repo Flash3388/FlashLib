@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class FlashboardHIDControl extends FlashboardControl implements Runnable{
@@ -62,7 +63,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	public int getAxisCount(int channel){
 		if(channel < 0 || channel >= MAX_PORT_COUNT)
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return 0;
 		
 		int value = 0;
@@ -77,7 +78,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
 		if(axis < 0 || axis > MAX_AXES_COUNT)
 			throw new IllegalArgumentException("Axis index should be between 0-"+MAX_AXES_COUNT);
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return 0.0;
 		
 		double value = 0.0;
@@ -93,7 +94,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	public int getPOVCount(int channel){
 		if(channel < 0 || channel >= MAX_PORT_COUNT)
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return 0;
 		
 		int value = 0;
@@ -108,7 +109,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
 		if(pov < 0 || pov > MAX_POV_COUNT)
 			throw new IllegalArgumentException("POV index should be between 0-"+MAX_POV_COUNT);
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return -1;
 		
 		int value = -1;
@@ -124,7 +125,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	public int getButtonCount(int channel){
 		if(channel < 0 || channel >= MAX_PORT_COUNT)
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return 0;
 		
 		int value = 0;
@@ -139,7 +140,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 			throw new IllegalArgumentException("Channel value should be between 0-"+MAX_PORT_COUNT);
 		if(button < 1)
 			throw new IllegalArgumentException("Button index should be positive");
-		if(!remoteAttached())
+		if(!isRemoteAttached())
 			return false;
 		
 		boolean value = false;
@@ -153,7 +154,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == JOYSTICK_DATA){
 			synchronized (joystickMutex) {
 				updated = false;
@@ -210,7 +211,7 @@ public class FlashboardHIDControl extends FlashboardControl implements Runnable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

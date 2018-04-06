@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class FlashboardModeSelectorControl extends FlashboardControl{
@@ -34,7 +35,7 @@ public class FlashboardModeSelectorControl extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == UPDATE_DISABLED){
 			boolean setd = data[1] != 0;
 			synchronized (stateMutex) {
@@ -50,7 +51,7 @@ public class FlashboardModeSelectorControl extends FlashboardControl{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

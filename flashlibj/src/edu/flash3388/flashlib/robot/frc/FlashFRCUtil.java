@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.RobotInterface;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * Class for specific FRC robot utilities.
@@ -51,9 +51,9 @@ public class FlashFRCUtil {
 	 * @param flashboardInitData initialization data for flashboard, or null to no init
 	 */
 	public static void initFlashLib(RobotInterface robot, FlashboardInitData flashboardInitData){
-		Log.setParentDirectory("/home/lvuser");
+		LogUtil.setLogsParentDirectory("/home/lvuser");
 		FlashRobotUtil.initFlashLib(robot, RobotFactory.createFRCHIDInterface(), flashboardInitData);
-		FlashUtil.getLog().addListener(new DriverStationLogListener());
+		FlashUtil.getLogger().addHandler(new DriverStationLogHandler());
 		pdp = new PDP();
 		
 		if(Flashboard.flashboardInit())

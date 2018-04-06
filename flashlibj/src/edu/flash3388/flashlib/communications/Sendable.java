@@ -93,14 +93,14 @@ public abstract class Sendable {
 	 * Gets the ID of the sendable
 	 * @return the id of the sendable
 	 */
-	public int getID(){
+	public final int getID(){
 		return id;
 	}
 	/**
 	 * Gets the type of the sendable
 	 * @return the type of the sendable
 	 */
-	public byte getType(){
+	public final byte getType(){
 		return type;
 	}
 	/**
@@ -108,14 +108,14 @@ public abstract class Sendable {
 	 * 
 	 * @return true if attached, false otherwise
 	 */
-	public boolean attached(){
+	public final boolean isCommunicationAttached(){
 		return communicationsAttached;
 	}
 	/**
 	 * Gets whether or not this sendable is connected with a remote sendable
 	 * @return true if connected, false otherwise
 	 */
-	public boolean remoteAttached(){
+	public final boolean isRemoteAttached(){
 		return remoteAttached;
 	}
 	
@@ -123,16 +123,20 @@ public abstract class Sendable {
 	 * Called when new data is received by the communications system for this sendable by its counterpart.
 	 * 
 	 * @param data the received data
+	 * 
+	 * @throws SendableException if an error occurs while handling the new received data
 	 */
-	public abstract void newData(byte[] data);
+	public abstract void newData(byte[] data) throws SendableException;
 	/**
 	 * Gets data from this sendable to send to its remote counterpart.
 	 * 
 	 * @return data to send
+	 * 
+	 * @throws SendableException if an error occurs while getting data for transmission
 	 */
-	public abstract byte[] dataForTransmition();
+	public abstract byte[] dataForTransmission() throws SendableException;
 	/**
-	 * Gets whether or not this sendable has new data to send to its counterpart. If it does, {@link #dataForTransmition()}
+	 * Gets whether or not this sendable has new data to send to its counterpart. If it does, {@link #dataForTransmission()}
 	 * is called and data is sent.
 	 * 
 	 * @return true if there is data to send.

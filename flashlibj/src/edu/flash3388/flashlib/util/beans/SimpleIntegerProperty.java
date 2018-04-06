@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.util.beans;
  * @since FlashLib 1.0.1
  */
 public class SimpleIntegerProperty implements IntegerProperty{
-
+	
 	private int var;
 	
 	public SimpleIntegerProperty(int initialVal){
@@ -25,14 +25,6 @@ public class SimpleIntegerProperty implements IntegerProperty{
 	@Override
 	public void set(int i) {
 		this.var = i;
-	}
-	@Override
-	public void setValue(Integer o) {
-		set(o == null? 0 : o.intValue());
-	}
-	@Override
-	public Integer getValue() {
-		return var;
 	}
 	
 	@Override

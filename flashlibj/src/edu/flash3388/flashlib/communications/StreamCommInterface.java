@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -20,17 +21,21 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * does not exist in its entirety, the data is saved to a secondary buffer which is updated next time data is read.
  * </p>
  * <p>
- * It is necessary to implement {@link #readData(byte[])} for reading data from the port and {@link #writeData(byte[], int, int)} 
+ * It is necessary to implement {@link #readRaw(byte[], int, int)} for reading data from the port and {@link #writeRaw(byte[], int, int)} 
  * for writing data to the port used.
  * </p>
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class StreamCommInterface extends ManualConnectionVerifier{
+public abstract class StreamCommInterface extends ManualConnectionVerifier {
 
+	private static final int PACKET_LENGTH_BYTE_COUNT = 4;
+	
 	private CRC32 crc;
-	private byte[] dataBuffer = new byte[BUFFER_SIZE], leftoverData = new byte[0];
+	private byte[] dataBuffer = new byte[BUFFER_SIZE];
+	private byte[] sizeBuffer = new byte[PACKET_LENGTH_BYTE_COUNT];
+	private int nextPacketLength = -1;
 	private byte crclen = 0;
 	
 	/**
@@ -46,102 +51,99 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 		}
 	}
 	
+	private boolean readError(int lengthRead) throws IOException {
+		if(lengthRead < 0){
+			disconnect();
+		}
+		return lengthRead < 1;
+	}
+	
 	private boolean checkCrc(byte[] data, long expected){
 		crc.reset();
 		crc.update(data);
 		
 		return expected == crc.getValue();
 	}
-	private boolean disassemblePacket(byte[] data, int start, int datalen, Packet packet){
+	private byte[] disassemblePacket(byte[] data, int start, int datalen){
 		byte[] datarec = Arrays.copyOfRange(data, start, start + datalen);
 		
 		if(crclen > 0){
 			if((data.length - start - datalen - 1) < 8 || 
 					!checkCrc(datarec, FlashUtil.toLong(data, start + datalen + 1))){
-				System.out.println("data corruption?");
-				packet.length = 0;
-				return false;
+				return null;
 			}
 		}
 		
-		packet.length = datalen;
-		packet.data = datarec;
-		return true;
+		return datarec;
 	}
 	private byte[] assemblePacket(byte[] data, int start, int len){
-		byte[] sdata = new byte[len + 4 + crclen];
+		byte[] sdata = new byte[len + PACKET_LENGTH_BYTE_COUNT + crclen - start];
 		FlashUtil.fillByteArray(len, 0, sdata);
-		System.arraycopy(data, start, sdata, 4, len);
+		System.arraycopy(data, start, sdata, PACKET_LENGTH_BYTE_COUNT, len);
 		
 		if(crclen > 0){
 			crc.reset();
 			crc.update(data);
 			long crcd = crc.getValue();
-			FlashUtil.fillByteArray(crcd, 4 + len, sdata);
+			FlashUtil.fillByteArray(crcd, PACKET_LENGTH_BYTE_COUNT + len, sdata);
 		}
 		
 		return sdata;
 	}
-	private boolean handleData(Packet packet){
-		if(leftoverData.length < 4)
-			return false;
-		int datalen = FlashUtil.toInt(leftoverData);
-		if(leftoverData.length < 4 + datalen)
-			return false;
+	private byte[] handleData(){
+		byte[] retData = disassemblePacket(dataBuffer, 0, nextPacketLength - crclen);
 		
-		boolean ret = disassemblePacket(leftoverData, 4, datalen - crclen, packet);
-		leftoverData = Arrays.copyOfRange(leftoverData, 4 + datalen, leftoverData.length);
+		if(retData != null && isHandshake(retData, retData.length))
+			return null;
 		
-		if(ret && isHandshake(packet.data, packet.length))
-			return false;
-		
-		return ret;
+		return retData;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean read(Packet packet) {
-		packet.length = -1;
-		
+	public byte[] read() throws IOException {
 		if(!isOpened())
-			return false;
+			return null;
 		
-		if(handleData(packet))
-			return true;
+		int availabe = availableData();
+		if(nextPacketLength < 0 && availabe < PACKET_LENGTH_BYTE_COUNT)
+			return null;
 		
-		int len = readData(dataBuffer);
-		if(len < 1){
-			if(len < 0)
-				disconnect();
-			packet.length = 0;
-			return false;
+		if(nextPacketLength < 0 && availabe >= PACKET_LENGTH_BYTE_COUNT){
+			int len = readRaw(sizeBuffer, 0, PACKET_LENGTH_BYTE_COUNT);
+			if(readError(len)){
+				return null;
+			}
+			nextPacketLength = FlashUtil.toInt(sizeBuffer);
+			newDataRead();
 		}
-		newDataRead();
 		
-		leftoverData = Arrays.copyOf(leftoverData, leftoverData.length + len);
-		System.arraycopy(dataBuffer, 0, leftoverData, leftoverData.length - len, len);
+		if(nextPacketLength > 0 && availabe >= nextPacketLength){
+			int len = readRaw(dataBuffer, 0, nextPacketLength);
+			if(readError(len)){
+				return null;
+			}
+			newDataRead();
+			
+			byte[] data = handleData();
+			if(data != null){
+				nextPacketLength = -1;
+				return data;
+			}
+		}
 		
-		if(handleData(packet))
-			return true;
-		
-		return false;
+		return null;
 	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(byte[] data) {
-		write(data, 0, data.length);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void write(byte[] data, int start, int length) {
+	public void write(byte[] data, int start, int length) throws IOException {
 		data = assemblePacket(data, start, length);
-		writeData(data, 0, data.length);
+		writeRaw(data, 0, data.length);
 		newDataSent();
 	}
 	
@@ -149,14 +151,14 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setMaxBufferSize(int bytes) {
+	public void setMaxBufferSize(int bytes) throws IOException {
 		dataBuffer = new byte[bytes];
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getMaxBufferSize() {
+	public int getMaxBufferSize() throws IOException {
 		return dataBuffer.length;
 	}
 
@@ -164,7 +166,7 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * Resets the data buffers used by this interface for data reading.
 	 */
 	protected void resetBuffers(){
-		leftoverData = new byte[0];
+		nextPacketLength = -1;
 		for (int i = 0; i < dataBuffer.length; i++)
 			dataBuffer[i] = 0;
 	}
@@ -176,14 +178,29 @@ public abstract class StreamCommInterface extends ManualConnectionVerifier{
 	 * @param data an array of bytes to send
 	 * @param start the start index to send data from
 	 * @param length the amount of bytes to send
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract void writeData(byte[] data, int start, int length);
+	protected abstract void writeRaw(byte[] data, int start, int length) throws IOException;
 	/**
-	 * Reads raw data from the IO port used for communications. Unlike {@link #readData(byte[])}, this method does not 
+	 * Reads raw data from the IO port used for communications. Unlike {@link #read()}, this method does not 
 	 * handle packet and data logic.
 	 * 
 	 * @param buffer data buffer to store read data into
+	 * @param start start index in the buffer to save data from.
+	 * @param length amount of bytes to read.
+	 * 
 	 * @return the amount of bytes read
+	 * 
+	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract int readData(byte[] buffer);
+	protected abstract int readRaw(byte[] buffer, int start, int length) throws IOException;
+	/**
+	 * Gets the amount of bytes available to be read from the port.
+	 * 
+	 * @return bytes ready to be read.
+	 * 
+	 * @throws IOException if an I/O error occurs.
+	 */
+	protected abstract int availableData() throws IOException;
 }

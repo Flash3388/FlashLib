@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -135,18 +134,18 @@ public abstract class Log{
 		
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
+		directory += String.format("%s/log_%s/", name, dateFormat.format(date));
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
 		
 		dateFormat.applyPattern("_hh_mm");
 		
-		name = directory + name + dateFormat.format(date);
-		byte counter = 0;
+		name = String.join("", directory, name, dateFormat.format(date));
+		int counter = 0;
 		logFile = new File(name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(name + "_" + (++counter) + EXTENSION);
+			logFile = new File(String.format("%s_%d%s", name, counter, EXTENSION));
 		
 		try {
 			if(isLoggingMode(MODE_PRINT))
@@ -244,73 +243,89 @@ public abstract class Log{
 	}
 	
 	/**
-	 * Prints a warning message to the used {@link PrintStream}.
+	 * Prints a warning log to the used {@link PrintStream}.
 	 * @param warning a warning
 	 * @param time the current timestamp
 	 */
-	public abstract void printWarning(String warning, double time);
+	public void printWarning(String warning, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] <WARNING> : %s", getName(), time, warning));
+	}
+	
 	/**
-	 * Prints an error message to the used {@link PrintStream}.
+	 * Prints an error log to the used {@link PrintStream}.
 	 * @param error an error
 	 * @param time the current timestamp
 	 */
-	public abstract void printError(String error, double time);
+	public void printError(String error, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] <ERROR> : %s", getName(), time, error));
+	}
+	
 	/**
-	 * Prints a message to the used {@link PrintStream}.
+	 * Prints a log to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 */
-	public abstract void print(String log, String caller);
+	public void print(String log, String caller){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> <%s> : %s", getName(), caller, log));
+	}
+	
 	/**
-	 * Prints a message to the used {@link PrintStream}.
+	 * Prints a log to the used {@link PrintStream}.
 	 * @param log a log data
 	 * @param caller the logger
 	 * @param time the current timestamp
 	 */
-	public abstract void print(String log, String caller, double time);
+	public void print(String log, String caller, double time){
+		if(!isLoggingMode(MODE_PRINT)) return;
+		getPrintStream().println(String.format("%s> [%.3f] <%s> : %s", getName(), time, caller, log));
+	}
 	
 	/**
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the standard log file or buffer
+	 * @param log A line to log to the standard log file or buffer
 	 * @param caller the logger
 	 */
-	public abstract void write(String mess, String caller);
+	public abstract void write(String log, String caller);
 	/**
 	 * Writes data directly to the standard log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the standard log file or buffer
+	 * @param log A line to log to the standard log file or buffer
 	 * @param caller the logger
 	 * @param time the current timestamp
 	 */
-	public abstract void write(String mess, String caller, double time);
+	public abstract void write(String log, String caller, double time);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
 	 * @param time current timestamp
 	 */
-	public abstract void writeError(String mess, double time);
+	public abstract void writeError(String log, double time);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
+	 * @param time current timestamp
 	 * @param stacktrace A stack trace of the error
-	 * @param time current timestamp
+	 * @param traceIndex index from which to read the stacktrace.
 	 */
-	public abstract void writeError(String mess, String stacktrace, double time);
+	public abstract void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex);
 	/**
 	 * Writes data directly to the error log file. If the {@link LoggingType} is {@link LoggingType#Buffered} than
 	 * the data is saved in a log buffer which is automatically flushed when full. If the log is closed, nothing will happen.
 	 * 
-	 * @param mess A line to log to the error log file or buffer
+	 * @param log A line to log to the error log file or buffer
 	 * @param time current timestamp
 	 */
-	public abstract void writeWarning(String mess, double time);
+	public abstract void writeWarning(String log, double time);
 	
 	
 	
@@ -555,9 +570,9 @@ public abstract class Log{
 	public void reportError(String error){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
-		writeError(error, getErrorStackTrace(), time);
+		writeError(error, time, Thread.currentThread().getStackTrace(), 2);
 		printError(error, time);
 		listenersReportError(error, time);
 	}
@@ -573,9 +588,9 @@ public abstract class Log{
 	public void reportError(Throwable t){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
-		writeError(t.getClass().getName(), getErrorStackTrace(t), time);
+		writeError(t.getClass().getName(), time, t.getStackTrace(), 0);
 		printError(t.getMessage(), time);
 		listenersReportError(t.getMessage(), time);
 	}
@@ -592,7 +607,7 @@ public abstract class Log{
 	public void reportWarning(String warning){
 		if(isDisabled()) return;
 		
-		double time = Mathf.roundDecimal(getTime());
+		double time = getTime();
 		
 		printWarning(warning, time);
 		writeWarning(warning, time);
@@ -680,8 +695,6 @@ public abstract class Log{
 	public void logTime(String msg, String caller, double time){
 		if(isDisabled()) return;
 		
-		time = Mathf.roundDecimal(time);
-		
 		write(msg, caller, time);
 		print(msg, caller, time);
 		listenersLogTime(msg, caller, time);
@@ -693,19 +706,23 @@ public abstract class Log{
 			return traces[3].getClassName();
 		return "";
 	}
-	private static String getErrorStackTrace(){
+	
+	protected static String getErrorStackTrace(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
-		String trace = "";
-		for(int i = 3; i < traces.length; i++)
-			trace += "\t"+traces[i].toString()+"\n";
-		return trace;
+		return stackTraceToString(traces, 3);
 	}
-	private static String getErrorStackTrace(Throwable t){
+	protected static String getErrorStackTrace(Throwable t){
 		StackTraceElement[] traces = t.getStackTrace();
-		String trace = "";
-		for(int i = 0; i < traces.length; i++)
-			trace += "\t"+traces[i].toString()+"\n";
-		return trace;
+		return stackTraceToString(traces, 0);
+	}
+	protected static String stackTraceToString(StackTraceElement[] traces, int startIndex){
+		StringBuffer traceBuff = new StringBuffer();
+		for(int i = startIndex; i < traces.length; i++){
+			traceBuff.append('\t');
+			traceBuff.append(traces[i].toString());
+			traceBuff.append('\n');
+		}
+		return traceBuff.toString();
 	}
 	
 	/**

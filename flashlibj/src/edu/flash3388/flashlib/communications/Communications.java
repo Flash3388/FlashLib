@@ -1,13 +1,20 @@
 package edu.flash3388.flashlib.communications;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * Provides a communications management system between to sides. The communications is split into mini communication part
@@ -34,46 +41,99 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @since FlashLib 1.0.0
  */
 public class Communications {
-	private static class CommTask implements Runnable{
-		boolean stop = false;
+	
+	private static class CommTask implements Runnable {
+		
 		private Communications comm;
 		
-		public CommTask(Communications comm){
+		CommTask(Communications comm){
 			this.comm = comm;
+		}
+		
+		private void open() throws InterruptedException {
+			while(!comm.commInterface.isOpened() && !Thread.interrupted()) {
+				try {
+					comm.open();
+				} catch (IOException ex) {
+					comm.logger.log(Level.SEVERE, "Exception while trying to open interface", ex);
+				}
+				Thread.sleep(500);
+			}
+			if(Thread.interrupted()) 
+				throw new InterruptedException();
+		}
+		private void connect() throws InterruptedException {
+			while(!comm.isConnected() && !Thread.interrupted()) {
+				try {
+					comm.connect();
+				} catch (IOException ex) {
+					comm.logger.log(Level.SEVERE, "Exception while trying to connect", ex);
+				}
+				Thread.sleep(500);
+			}
+			if(Thread.interrupted()) 
+				throw new InterruptedException();
 		}
 		
 		@Override
 		public void run() {
-			while(!stop){
-				FlashUtil.getLog().log("Openning CommInterface", comm.logName);
-				while(!comm.open() && !stop)
-					FlashUtil.delay(500);
-				if(stop) break;
-				
-				FlashUtil.getLog().log("Searching for remote connection", comm.logName);
-				while(!comm.connect() && !stop)
-					FlashUtil.delay(500);
-				if(stop) break;
-				
-				FlashUtil.getLog().log("Connected", comm.logName);
-				comm.resetAll();
-				
-				while(comm.isConnected() && !stop){
-					comm.sendAll();
-					comm.read();
+			try {
+				while(!Thread.interrupted()){
+					comm.logger.info("Openning CommInterface");
+					open();
 					
-					comm.commInterface.update(FlashUtil.millisInt());
-					FlashUtil.delay(10);
+					comm.logger.info("Searching for remote connection");
+					connect();
+					
+					comm.logger.info("Connected");
+					comm.resetAll();
+					
+					while(comm.isConnected() && !Thread.interrupted()){
+						try {
+							comm.sendAll();
+							comm.read();
+							
+							comm.commInterface.update(FlashUtil.millisInt());
+						} catch (IOException ex) {
+							comm.disconnect();
+							break;
+						}
+						
+						Thread.sleep(10);
+					}
+					comm.onDisconnect();
+					comm.logger.info("Disconnected");
 				}
-				comm.onDisconnect();
-				FlashUtil.getLog().log("Disconnected", comm.logName);
+			} catch (InterruptedException ex) {
+				comm.logger.info("Communication thread interrupted");
+			} catch (IOException ex) {
+				comm.logger.log(Level.SEVERE, "Unexpected IO error", ex);
 			}
 		}
-		public void stop(){
-			stop = true;
+	}
+	private static class SendableNewDataTask implements Runnable {
+		
+		private Logger logger;
+		private byte[] data;
+		private Sendable sendable;
+		
+		public SendableNewDataTask(Sendable sendable, byte[] data, Logger logger) {
+			this.sendable = sendable;
+			this.data = data;
+			this.logger = logger;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				sendable.newData(data);
+			} catch (SendableException e) {
+				logger.log(Level.SEVERE, "Exception thrown from Sendable while handling new data", e);
+			}
 		}
 	}
 	
+	private static final int THREADS_COUNT = 3;
 	private static final int MINIMUM_DATA_BYTES = 5;
 	
 	private static final byte SENDABLE_INIT = 0x0;
@@ -87,27 +147,31 @@ public class Communications {
 	private int readStart = -1;
 	private boolean allowConnection = true;
 	private int nextId, minIdAlloc = 0;
-	private Packet packet = new Packet();
 	private CommInterface commInterface;
 	private SendableCreator sendableCreator;
-	private String logName;
+	private Logger logger;
 	
-	private Thread commThread;
 	private CommTask commTask;
+	private ExecutorService executor;
+	private boolean running = false;
 	
 	/**
 	 * Creates a new communications management instance which uses a {@link CommInterface} for data transfer and receive.
 	 * To start the communications thread, it is necessary to call {@link #start()}.
 	 * 
-	 * @param name logging name
+	 * @param logName logging name
 	 * @param readIn communications interface
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public Communications(String name, CommInterface readIn){
+	public Communications(String logName, CommInterface readIn) throws SecurityException, IOException{
 		this.commInterface = readIn;
-		this.logName = name+"-Comm";
+		logger = LogUtil.getLogger(logName);
 		
-		initializeConcurrency(name);
-		FlashUtil.getLog().log("Initialized", logName);
+		executor = Executors.newFixedThreadPool(THREADS_COUNT);
+		commTask = new CommTask(this);
+		logger.info("Initialized");
 		
 		sendables = new ConcurrentHashMap<Integer, Sendable>();
 		attachedSendables = new Vector<Sendable>();
@@ -117,53 +181,48 @@ public class Communications {
 	 * To start the communications thread, it is necessary to call {@link #start()}. Uses a generated name for logging data.
 	 * 
 	 * @param readIn communications interface
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public Communications(CommInterface readIn){
+	public Communications(CommInterface readIn) throws SecurityException, IOException {
 		this("Communications", readIn);
 	}
-	
-	private void initializeConcurrency(String name){
-		commTask = new CommTask(this);
-		commThread = new Thread(commTask, name+"-Communications");
-	}
-	private Packet receivePacket(){
-		if(!commInterface.read(packet))
-			return null;
-		return packet;
-	}
-	private void read(){//ID|VALUE
+
+	private void read() throws IOException {//ID|VALUE
 		if(!isConnected()) return;
 		readStart = FlashUtil.millisInt();
 		while(!readTimedout()){
-			Packet packet = receivePacket();
+			byte[] packet = commInterface.read();
 			if(packet == null || packet.length < 1)
 				return;
 			if(packet.length < MINIMUM_DATA_BYTES)
 				continue;
 			
-			byte dataType = packet.data[0];
-			int id = FlashUtil.toInt(packet.data, 1);
-			Sendable sen = getFromAllAttachedByID(id);
-			if(dataType == SENDABLE_DATA && sen != null && sen.remoteAttached() && 
+			byte dataType = packet[0];
+			int id = FlashUtil.toInt(packet, 1);
+			Sendable sendable = getFromAllAttachedByID(id);
+			if(dataType == SENDABLE_DATA && sendable != null && sendable.isRemoteAttached() && 
 					packet.length - 6 > 0){
-				sen.newData(Arrays.copyOfRange(packet.data, 6, packet.length));
+				byte[] userData = Arrays.copyOfRange(packet, 6, packet.length);
+				executor.execute(new SendableNewDataTask(sendable, userData, logger));
 			}else if(dataType == SENDABLE_INIT){
-				if(sen == null){
-					String str = new String(packet.data, 6, packet.length - 6);
-					createSendable(str, id, packet.data[5]);
+				if(sendable == null){
+					String str = new String(packet, 6, packet.length - 6);
+					createSendable(str, id, packet[5]);
 				}else{
-					onRemoteAttached(sen, true);
+					onRemoteAttached(sendable, true);
 				}
-			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sen != null){
-				onRemoteAttached(sen, false);
-			}else if(dataType == SENDABLE_CONFIRM_DETACH && sen != null && sen.remoteAttached()){
-				sen.setRemoteAttached(false);
-				sen.onConnectionLost();
+			}else if(dataType == SENDABLE_CONFIRM_ATTACH && sendable != null){
+				onRemoteAttached(sendable, false);
+			}else if(dataType == SENDABLE_CONFIRM_DETACH && sendable != null && sendable.isRemoteAttached()){
+				sendable.setRemoteAttached(false);
+				sendable.onConnectionLost();
 			}
 		}
 	}
 	
-	private void createSendable(String name, int id, byte type){
+	private void createSendable(String name, int id, byte type) throws IOException {
 		if(sendableCreator == null) return;
 		
 		Sendable s = sendableCreator.create(name, type);
@@ -194,73 +253,80 @@ public class Communications {
 		while(getLocalyAttachedByID(nextId) != null || getFromAllAttachedByID(nextId) != null)
 			++nextId;
 	}
-	private void resetSendable(Sendable sen){
+	private void resetSendable(Sendable sen) {
 		sen.setRemoteInit(false);
 		sen.setRemoteAttached(false);
 	}
-	private void onDisconnect(){
+	private void onDisconnect() throws IOException {
 		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
 		while(sendablesEnum.hasNext())
 			handleDisconnection(sendablesEnum.next());
 	} 
-	private void handleDisconnection(Sendable sen){
-		if(sen.remoteAttached()){
+	private void handleDisconnection(Sendable sen) throws IOException {
+		if(sen.isRemoteAttached()){
 			sen.setRemoteAttached(false);
 			sen.onConnectionLost();
-			confirmRemoteDetached(sen.getID());
+			
+			if (isConnected())
+				confirmRemoteDetached(sen.getID());
 		}
+		
 		if(!sen.userID())
 			sen.setID(-1);
 	}
-	private void onRemoteAttached(Sendable sendable, boolean confirmRemote){
-		if(sendable.remoteAttached()) return;
+	private void onRemoteAttached(Sendable sendable, boolean confirmRemote) throws IOException {
+		if(sendable.isRemoteAttached()) return;
 		
 		sendable.setRemoteAttached(true);
 		sendable.onConnection();
 		if(confirmRemote)
 			confirmRemoteAttached(sendable.getID());
 	}
-	private void confirmRemoteAttached(int id){
+	private void confirmRemoteAttached(int id) throws IOException {
 		byte[] data = new byte[5];
 		data[0] = SENDABLE_CONFIRM_ATTACH;
 		FlashUtil.fillByteArray(id, 1, data);
 		write(data);
 	}
-	private void confirmRemoteDetached(int id){
+	private void confirmRemoteDetached(int id) throws IOException {
 		byte[] data = new byte[5];
 		data[0] = SENDABLE_CONFIRM_DETACH;
 		FlashUtil.fillByteArray(id, 1, data);
 		write(data);
 	}
-	private void sendAll(){
+	private void sendAll() throws IOException {
 		Iterator<Sendable> sendablesEnum = sendables.values().iterator();
-		while(sendablesEnum.hasNext())
-			sendFromSendable(sendablesEnum.next());
+		while(sendablesEnum.hasNext()) {
+			try {
+				sendFromSendable(sendablesEnum.next());
+			} catch (SendableException e) {
+				logger.log(Level.SEVERE, "Exception thrown from Sendable while retreiving data to send", e);
+			}
+		}
 	}
-	private void sendFromSendable(Sendable sen){
+	private void sendFromSendable(Sendable sen) throws IOException, SendableException {
 		if(!sen.remoteInit()){
 			byte[] bytes = sen.getName().getBytes();
 			send(bytes, sen, SENDABLE_INIT);
 			sen.setRemoteInit(true);
 			return;
 		}
-		if(!sen.remoteAttached())
+		if(!sen.isRemoteAttached())
 			return;
 		
 		byte[] dataB;
-		if(!sen.hasChanged() || (dataB = sen.dataForTransmition()) == null) 
+		if(!sen.hasChanged() || (dataB = sen.dataForTransmission()) == null) 
 			return;
 		send(dataB, sen, SENDABLE_DATA);
 	}
 	private boolean readTimedout(){
 		return readStart != -1 && FlashUtil.millisInt() - readStart > CommInterface.READ_TIMEOUT;
 	}
-	private void write(byte[] bytes){
-		if(!isConnected()) return;
+	private void write(byte[] bytes) throws IOException {
 		commInterface.write(bytes);
 	}
 	
-	private void send(byte[] data, Sendable sendable, byte type){
+	private void send(byte[] data, Sendable sendable, byte type) throws IOException {
 		byte[] bytes = new byte[data.length + 6];
 		bytes[0] = type;
 		FlashUtil.fillByteArray(sendable.getID(), 1, bytes);
@@ -269,11 +335,30 @@ public class Communications {
 		write(bytes);
 	}
 	
-	private boolean open(){
+	private boolean open() throws IOException {
 		if(commInterface.isOpened())
 			return true;
 		commInterface.open();
 		return commInterface.isOpened();
+	}
+	
+	private boolean connect() throws IOException {
+		if(isConnected()) 
+			return true;
+		if(!allowConnection) 
+			return false;
+		
+		commInterface.connect();
+		if(isConnected()){
+			setReadTimeout(CommInterface.READ_TIMEOUT);
+			return true;
+		}
+		return false;
+	}
+	private void disconnect() throws IOException {
+		if(isConnected()){
+			commInterface.disconnect();
+		}
 	}
 	
 	/**
@@ -284,17 +369,19 @@ public class Communications {
 	 * @param sendable the sendable 
 	 * @param data byte array of data
 	 * 
-	 * @throws RuntimeException the sendable is not attached or initialized for remote communications
+	 * @throws IOException If an IO error occurs while sending.
+	 * @throws IllegalStateException the sendable is not attached or initialized for remote communications, or if not connected
 	 */
-	public void sendDataForSendable(Sendable sendable, byte[] data){
+	public void sendDataForSendable(Sendable sendable, byte[] data) throws IOException {
 		if(!isConnected())
-			return;
+			throw new IllegalStateException("Not connected");
+		
 		if(getFromAllAttachedByID(sendable.getID()) == null)
-			throw new RuntimeException("No such id attached");
+			throw new IllegalArgumentException("No such id attached");
 		if(!sendable.remoteInit())
-			throw new RuntimeException("Sendable was not initialized for remote connection");
-		if(!sendable.remoteAttached())
-			throw new RuntimeException("Sendable is not connected to a remote sendable");
+			throw new IllegalStateException("Sendable was not initialized for remote connection");
+		if(!sendable.isRemoteAttached())
+			throw new IllegalStateException("Sendable is not connected to a remote sendable");
 		
 		send(data, sendable, SENDABLE_DATA);
 	}
@@ -304,7 +391,7 @@ public class Communications {
 	 * Attaches an array of sendables. Passes them one by one to {@link #attach(Sendable)}.
 	 * @param sendables array of sendables to attach
 	 */
-	public void attach(Sendable... sendables){
+	public void attach(Sendable... sendables) {
 		for (int i = 0; i < sendables.length; i++) 
 			attach(sendables[i]);
 	}
@@ -321,8 +408,8 @@ public class Communications {
 	 * 
 	 * @throws IllegalStateException if the sendable is already attached
 	 */
-	public void attach(Sendable sendable){
-		if(sendable.attached())
+	public void attach(Sendable sendable) {
+		if(sendable.isCommunicationAttached())
 			throw new IllegalStateException("Sendable is already attached to communications");
 			
 		attachedSendables.add(sendable);
@@ -339,7 +426,7 @@ public class Communications {
 	/**
 	 * Attaches a {@link Sendable} object to this communications manager and forces an ID for it instead
 	 * of an automatically allocated ID. If the object is already attached to a communications manager (i.e.
-	 * {@link Sendable#attached()} returns true) this will fail. If the ID is already allocated to a different object,
+	 * {@link Sendable#isCommunicationAttached()} returns true) this will fail. If the ID is already allocated to a different object,
 	 * this will fail.
 	 * 
 	 * 
@@ -349,7 +436,7 @@ public class Communications {
 	 * @throws IllegalStateException if the sendable is attached already or the ID requested is already allocated
 	 */
 	public void attachForID(Sendable sendable, int id){
-		if(sendable.attached())
+		if(sendable.isCommunicationAttached())
 			throw new IllegalStateException("Sendable is already attached to communications");
 		if(getLocalyAttachedByID(id) != null)
 			throw new IllegalStateException("Sendable with such ID already exists");
@@ -369,16 +456,21 @@ public class Communications {
 	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
 	 * the sendable is removed from the map.
 	 * 
-	 * 
 	 * @param sendable sendable to remove
 	 * @return true if the sendable was removed, false otherwise
+	 * 
+	 * @throws SendableException If an IO error occurs while reporting detachment
 	 */
-	public boolean detach(Sendable sendable){
+	public boolean detach(Sendable sendable) throws SendableException {
 		if(attachedSendables.remove(sendable)){
 			sendable.setAttached(false);
 			if(isConnected()){
-				handleDisconnection(sendable);
 				sendables.remove(sendable.getID());
+				try {
+					handleDisconnection(sendable);
+				} catch (IOException e) {
+					throw new SendableException(e);
+				}
 			}
 			return true;
 		}
@@ -388,26 +480,33 @@ public class Communications {
 	 * Removes a locally sendable from the system if it is attached. If connection was already established, 
 	 * the sendable is removed from the map.
 	 * 
-	 * 
 	 * @param id id of the sendable to remove
 	 * @return true if the sendable was removed, false otherwise
+	 * 
+	 * @throws SendableException If an error occurs while reporting detachment
 	 */
-	public boolean detach(int id){
+	public boolean detach(int id) throws SendableException {
 		Sendable sen = getLocalyAttachedByID(id);
 		if(sen != null) {
 			attachedSendables.remove(sen);
 			sen.setAttached(false);
 			if(isConnected()){
 				sendables.remove(sen.getID());
-				handleDisconnection(sen);
+				try {
+					handleDisconnection(sen);
+				} catch (IOException e) {
+					throw new SendableException(e);
+				}
 			}
 		}
-		return sen != null && !sen.attached();
+		return sen != null && !sen.isCommunicationAttached();
 	}
 	/**
 	 * Removes all the locally attached sendables.
+	 * 
+	 * @throws SendableException If an error occurs while reporting detachment
 	 */
-	public void detachAll(){
+	public void detachAll() throws SendableException {
 		Enumeration<Sendable> sendablesEnum = attachedSendables.elements();
 		while (sendablesEnum.hasMoreElements())
 			detach(sendablesEnum.nextElement());
@@ -466,36 +565,6 @@ public class Communications {
 	}
 	
 	/**
-	 * Attempts connection to a remote communications object. This is done by calling {@link CommInterface#connect(Packet)}.
-	 * If connection is not allowed, the method will simply return false.
-	 * @return true if connection was established, false otherwise
-	 */
-	public boolean connect(){
-		if(isConnected()) return true;
-		if(!allowConnection) return false;
-		
-		commInterface.connect(packet);
-		if(isConnected()){
-			setReadTimeout(CommInterface.READ_TIMEOUT);
-			return true;
-		}
-		return false;
-	}
-	/**
-	 * If connected, attempts disconnection from a remote communications object. Stops the communication loop and 
-	 * calls {@link CommInterface#disconnect()}
-	 * 
-	 * <p>
-	 * It is not recommended to call this method explicitly.
-	 * </p>
-	 */
-	public void disconnect(){
-		if(isConnected()){
-			commTask.stop();
-			commInterface.disconnect();
-		}
-	}
-	/**
 	 * Gets whether this port is connected to a remote communications port.
 	 * @return true if connected, false otherwise.
 	 */
@@ -508,16 +577,21 @@ public class Communications {
 	 * Sets timeout for the reading blocking call in milliseconds.
 	 * 
 	 * @param timeout timeout for reading call milliseconds
+	 * 
+	 * @throws IOException If an IO error occurs
 	 */
-	public void setReadTimeout(int timeout){
+	public void setReadTimeout(int timeout) throws IOException {
 		commInterface.setReadTimeout(timeout);
 	}
 	/**
 	 * Gets the timeout for the reading blocking call in milliseconds.
+	 * 
 	 * @return timeout for reading call in milliseconds.
+	 * 
+	 * @throws IOException If an IO error occurs
 	 */
-	public int getReadTimeout(){
-		return commInterface.getTimeout();
+	public int getReadTimeout() throws IOException{
+		return commInterface.getReadTimeout();
 	}
 	
 	/**
@@ -542,16 +616,20 @@ public class Communications {
 	 * be read from the port.
 	 * 
 	 * @param size maximum amount of bytes in the data buffer.
+	 * 
+	 * @throws IOException If an IO error occurs
 	 */
-	public void setBufferSize(int size){
+	public void setBufferSize(int size) throws IOException {
 		commInterface.setMaxBufferSize(size);
 	}
 	/**
 	 * Gets the maximum size of the reading data buffer. This is the maximum amount of bytes that can
 	 * be read from the port.
 	 * @return maximum amount of bytes in the data buffer.
+	 * 
+	 * @throws IOException If an IO error occurs
 	 */
-	public int getBufferSize(){
+	public int getBufferSize() throws IOException{
 		return commInterface.getMaxBufferSize();
 	}
 
@@ -586,24 +664,46 @@ public class Communications {
 	 * Starts the communications thread if it has not started.
 	 */
 	public void start(){
-		if(!commThread.isAlive())
-			commThread.start();
+		if(!running) {
+			executor.execute(commTask);
+			running = true;
+		}
 	}
 	/**
 	 * Closes this communications system. Usage of this system will not be possible after closing.
 	 * Awaits termination of the communications thread.
+	 * 
+	 * @throws IOException If an IO error occurs. This might lead to the communication interface not being closed, but the communication thread will be stopped.
 	 */
-	public void close() {
-		disconnect();
-		commTask.stop();
-		commInterface.close();
-		detachAll();
+	public void close() throws IOException {
+		if (!running)
+			return;
+		
+		setAllowConnection(false);
 		
 		try {
-			commThread.join();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			e.printStackTrace();
+			disconnect();
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Error while trying to disconnect", ex);
 		}
+		
+		try {
+			detachAll();
+		} catch (SendableException e) {
+			// not important
+		}
+		
+		executor.shutdownNow();
+		
+		try {
+			while (!executor.isTerminated()) {
+				executor.awaitTermination(10, TimeUnit.MILLISECONDS);
+			}
+		} catch (InterruptedException e) {
+			logger.info("Interruption while stopping executor");
+			Thread.currentThread().interrupt();
+		}
+		
+		commInterface.close();
 	}
 }

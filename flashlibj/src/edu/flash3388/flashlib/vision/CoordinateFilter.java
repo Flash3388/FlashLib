@@ -1,10 +1,4 @@
 package edu.flash3388.flashlib.vision;
-
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-
 /**
  * Filers out contours by their proximity to a coordinate in the frame.
  * 
@@ -12,47 +6,52 @@ import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
  * @since FlashLib 1.0.0
  * @see VisionSource#closestToCoordinate(double, double, int)
  */
-public class CoordinateFilter extends VisionFilter{
+public class CoordinateFilter implements VisionFilter{
 	
-	private DoubleProperty x = new SimpleDoubleProperty(),
-						   y = new SimpleDoubleProperty();
-	private IntegerProperty amount = new SimpleIntegerProperty();
+	/**
+	 * Indicates the x coordinate to filter around.
+	 */
+	private double x;
+	/**
+	 * Indicates the y coordinate to filter around.
+	 */
+	private double y;
+	/**
+	 * Indicates the maximum amount of contours to leave after the filter process.
+	 * Must be non-negative.
+	 */
+	private int amount;
 
 	public CoordinateFilter(){}
 	public CoordinateFilter(double x, double y, int amount){
-		this.x.set(x);
-		this.y.set(y);
-		this.amount.set(amount);
+		this.x = x;
+		this.y = y;
+		this.amount = amount;
 	}
 	
-	/**
-	 * A {@link DoubleProperty}.
-	 * Indicates the x coordinate to filter around.
-	 * @return the property
-	 */
-	public DoubleProperty xProperty(){
+	public double getX() {
 		return x;
 	}
-	/**
-	 * A {@link DoubleProperty}.
-	 * Indicates the y coordinate to filter around.
-	 * @return the property
-	 */
-	public DoubleProperty yProperty(){
+	public void setX(double x) {
+		this.x = x;
+	}
+	
+	public double getY() {
 		return y;
 	}
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the maximum amount of contours to leave after the filter process.
-	 * Must be non-negative
-	 * @return the property
-	 */
-	public IntegerProperty amountProperty(){
+	public void setY(double y) {
+		this.y = y;
+	}
+	
+	public int getAmount() {
 		return amount;
+	}
+	public void setAmount(int amount) {
+		this.amount = amount;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
-		source.closestToCoordinate(x.get(), y.get(), amount.get());
+		source.closestToCoordinate(x, y, amount);
 	}
 }

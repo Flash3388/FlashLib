@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import edu.flash3388.flashlib.util.beans.BooleanSource;
+
 /**
  * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
  * {@link Runnable} objects to the scheduler which will then be executed by when the {@link Scheduler} 
@@ -74,6 +76,81 @@ public final class Scheduler {
 		}
 	}
 	
+	/**
+	 * An event trigger for the scheduler.
+	 * 
+	 * @author Tom Tzook
+	 * @since FlashLib 1.2.1
+	 */
+	public static interface Trigger{
+		boolean checkTrigger();
+		void fire();
+	}
+	public static abstract class ActionTrigger implements Trigger{
+		protected final BooleanSource condition;
+		protected final Action action;
+		
+		public ActionTrigger(BooleanSource condition, Action action) {
+			this.condition = condition;
+			this.action = action;
+		}
+		
+		public final Action getAction(){
+			return action;
+		}
+		public final BooleanSource getConditionSource(){
+			return condition;
+		}
+	}
+	public static class StartActionTrigger extends ActionTrigger{
+
+		public StartActionTrigger(BooleanSource condition, Action action) {
+			super(condition, action);
+		}
+
+		@Override
+		public boolean checkTrigger() {
+			return !action.isRunning() && condition.get();
+		}
+		@Override
+		public void fire() {
+			action.start();
+		}
+	}
+	public static class CancelActionTrigger extends ActionTrigger{
+
+		public CancelActionTrigger(BooleanSource condition, Action action) {
+			super(condition, action);
+		}
+
+		@Override
+		public boolean checkTrigger() {
+			return action.isRunning() && condition.get();
+		}
+		@Override
+		public void fire() {
+			action.cancel();
+		}
+	}
+	public static class ToggleActionTrigger extends ActionTrigger{
+
+		public ToggleActionTrigger(BooleanSource condition, Action action) {
+			super(condition, action);
+		}
+
+		@Override
+		public boolean checkTrigger() {
+			return condition.get();
+		}
+		@Override
+		public void fire() {
+			if(!action.isRunning())
+				action.start();
+			else
+				action.cancel();
+		}
+	}
+	
 	public static final byte MODE_DISABLED = 0x0;
 	public static final byte MODE_TASKS = 0x1;
 	public static final byte MODE_ACTIONS = 0x2;
@@ -84,6 +161,7 @@ public final class Scheduler {
 	private byte mode = MODE_FULL;
 	
 	private Vector<Action> actions = new Vector<Action>();
+	private Vector<Trigger> triggers = new Vector<Trigger>();
 	private Set<Subsystem> systems = new HashSet<Subsystem>();
 	private Vector<TaskWrapper> tasks = new Vector<TaskWrapper>();
 	
@@ -95,7 +173,16 @@ public final class Scheduler {
 	public void run(){
 		if(isDisabled()) return;
 		
-		if(isMode(MODE_TASKS) && tasks.size() > 0){
+		if(!triggers.isEmpty()){
+			Trigger trigger = null;
+			for(Enumeration<Trigger> triggerEnum = triggers.elements(); triggerEnum.hasMoreElements();){
+				trigger = triggerEnum.nextElement();
+				if(trigger.checkTrigger())
+					trigger.fire();
+			}
+		}
+		
+		if(isMode(MODE_TASKS) && !tasks.isEmpty()){
 			TaskWrapper taskWrapper = null;
 			for(Enumeration<TaskWrapper> taskEnum = tasks.elements(); taskEnum.hasMoreElements();){
 				taskWrapper = taskEnum.nextElement();
@@ -104,7 +191,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(isMode(MODE_ACTIONS) && actions.size() > 0){
+		if(isMode(MODE_ACTIONS) && !actions.isEmpty()){			
 			Action action = null;
 			for(Enumeration<Action> actionEnum = actions.elements(); actionEnum.hasMoreElements();){
 				action = actionEnum.nextElement();
@@ -113,7 +200,7 @@ public final class Scheduler {
 			}
 		}
 		
-		if(isMode(MODE_ACTIONS) && systems.size() > 0){
+		if(isMode(MODE_ACTIONS) && !systems.isEmpty()){
 			Subsystem system = null;
 			for(Iterator<Subsystem> systemEnum = systems.iterator(); systemEnum.hasNext();){
 				system = systemEnum.next();
@@ -121,6 +208,20 @@ public final class Scheduler {
 					system.startDefaultAction();
 			}
 		}
+	}
+	
+	/**
+	 * Adds a new {@link Trigger} object to the {@link Scheduler}.
+	 * When running, the scheduler will check the trigger's condition. If
+	 * it is true, the trigger will will be fired.
+	 * 
+	 * The {@link Scheduler} must not be disabled in order
+	 * for triggers to be checked.
+	 * 
+	 * @param trigger a new trigger.
+	 */
+	public void addTrigger(Trigger trigger){
+		triggers.add(trigger);
 	}
 	
 	/**
@@ -156,7 +257,19 @@ public final class Scheduler {
 	 * @return true if the task was in execution, false otherwise
 	 */
 	public boolean remove(Runnable runnable){
-		return tasks.remove(runnable);
+		int index;
+		for (index = 0; index < tasks.size(); index++) {
+			if (tasks.get(index).equals(runnable)) {
+				break;
+			}
+		}
+		
+		if (index < tasks.size()) {
+			tasks.remove(index);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -190,6 +303,37 @@ public final class Scheduler {
 		actions.addElement(action);
 		
 		return true;
+	}
+	/**
+	 * Adds a new trigger to the scheduler which starts an action
+	 * on a given condition.
+	 * 
+	 * @param condition trigger condition.
+	 * @param action action to start.
+	 */
+	public void startOnTrigger(BooleanSource condition, Action action){
+		addTrigger(new StartActionTrigger(condition, action));
+	}
+	/**
+	 * Adds a new trigger to the scheduler which cancels an action
+	 * on a given condition.
+	 * 
+	 * @param condition trigger condition.
+	 * @param action action to cancel.
+	 */
+	public void cancelOnTrigger(BooleanSource condition, Action action){
+		addTrigger(new CancelActionTrigger(condition, action));
+	}
+	/**
+	 * Adds a new trigger to the scheduler which toggles an action
+	 * on a given condition. If the action is running, it is canceled.
+	 * If the action is not running, it is started.
+	 * 
+	 * @param condition trigger condition.
+	 * @param action action to toggle.
+	 */
+	public void toggleOnTrigger(BooleanSource condition, Action action){
+		addTrigger(new ToggleActionTrigger(condition, action));
 	}
 	/**
 	 * Removes an {@link Action} from the scheduler. If the action is in the scheduler, it is removed and its required systems

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardBarChart;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -55,7 +56,7 @@ public class BarChartControl extends Displayable{
 		}
 		
 		@Override
-		public void newData(byte[] data) {
+		public void newData(byte[] data) throws SendableException {
 			if(data[0] == FlashboardBarChart.CHART_NAME_UPDATE){
 				chartName = new String(data, 1, data.length - 1);
 				BarChartControl.allocateSeries(this);
@@ -70,7 +71,7 @@ public class BarChartControl extends Displayable{
 		}
 		
 		@Override
-		public byte[] dataForTransmition() {
+		public byte[] dataForTransmission() throws SendableException {
 			return null;
 		}
 		@Override
@@ -178,7 +179,7 @@ public class BarChartControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == FlashboardBarChart.CONFIG_UPDATE){
 			synchronized (configMutex) {
 				minY = FlashUtil.toDouble(data, 1);
@@ -189,7 +190,7 @@ public class BarChartControl extends Displayable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

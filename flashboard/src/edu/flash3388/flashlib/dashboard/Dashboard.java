@@ -1,12 +1,24 @@
 package edu.flash3388.flashlib.dashboard;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.opencv.core.Core;
 
@@ -18,14 +30,14 @@ import edu.flash3388.flashlib.dashboard.controls.ModeSelectorControl;
 import edu.flash3388.flashlib.dashboard.controls.TesterControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
-import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.io.XMLObjectInputStream;
+import edu.flash3388.flashlib.io.XMLObjectOutputStream;
 import edu.flash3388.flashlib.communications.CameraClient;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.IPCommInterface;
 import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.PropertyHandler;
 import edu.flash3388.flashlib.vision.ThreadedVisionRunner;
@@ -35,8 +47,6 @@ import edu.flash3388.flashlib.vision.VisionRunner;
 import edu.flash3388.flashlib.vision.cv.CvSource;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -50,39 +60,46 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	public static class Updater{
-		private Scheduler scheduler = Scheduler.getInstance();
-		private boolean stop = false;
-		private Runnable task;
+		private static final int EXECUTOR_THREAD_POOL = 5;
+		private static final int EXECUTION_INTERVAL = 5; //ms
+		private ScheduledExecutorService executor;
+		
+		private Map<Runnable, ScheduledFuture<?>> futuresMap;
 		
 		public Updater() {
-			task = ()->{
-				while (!stop) {
-					if(!fxInitialized()){
-						FlashUtil.delay(100);
-						continue;
-					}
-					
-					scheduler.run();
-					FlashUtil.delay(5);
-				}
-			};
+			executor = Executors.newScheduledThreadPool(EXECUTOR_THREAD_POOL);
+			futuresMap = new HashMap<Runnable, ScheduledFuture<?>>();
 		}
 		
 		public void addTask(Runnable runnable){
-			scheduler.addTask(runnable);
+			 ScheduledFuture<?> future = executor.scheduleWithFixedDelay(runnable, EXECUTION_INTERVAL, EXECUTION_INTERVAL, 
+					TimeUnit.MILLISECONDS);
+			 futuresMap.put(runnable, future);
 		}
 		public void execute(Runnable runnable){
-			scheduler.execute(runnable);
+			executor.execute(runnable);
 		}
-		public boolean removeTask(Runnable runnable){
-			return scheduler.remove(runnable);
+		public boolean removeTask(Runnable runnable) {
+			ScheduledFuture<?> future = futuresMap.get(runnable);
+			if (future == null)
+				return false;
+			
+			futuresMap.remove(runnable);
+			return future.cancel(true);
 		}
 		
-		public void stop(){
-			stop = true;
+		void shutdown() {
+			executor.shutdown();
 		}
-		public Runnable getThreadTask(){
-			return task;
+		boolean isTerminated() {
+			return executor.isTerminated();
+		}
+		void forceShutdown() throws InterruptedException{
+			executor.shutdownNow();
+			
+			while (!executor.isTerminated()) {
+				executor.awaitTermination(EXECUTION_INTERVAL, TimeUnit.MILLISECONDS);
+			}
 		}
 	}
 	
@@ -134,11 +151,12 @@ public class Dashboard extends Application {
 					try {
 						commAddress = InetAddress.getByName(commhost);
 						
-						log.log("Found host: "+commhost, "Dashboard Comm");
-						log.log("Address: "+commAddress.getHostAddress(), "Dashboard Comm");
+						logger.info("Found host: "+commhost);
+						logger.info("Address: "+commAddress.getHostAddress());
 						
 						retreiveComm = false;
 					} catch (UnknownHostException e) {
+						logger.log(Level.SEVERE, "Exception while resolving stdandard comm address", e);
 					}
 				}
 				
@@ -149,11 +167,12 @@ public class Dashboard extends Application {
 						else
 							camAddress = InetAddress.getByName(camhost);
 						
-						log.log("Found host: "+camhost, "Dashboard Cam");
-						log.log("Address: "+camAddress.getHostAddress(), "Dashboard Cam");
+						logger.info("Found host: "+camhost);
+						logger.info("Address: "+camAddress.getHostAddress());
 						
 						retreiveCam = false;
 					} catch (UnknownHostException e) {
+						logger.log(Level.SEVERE, "Exception while resolving cam comm address", e);
 					}
 				}
 				
@@ -173,6 +192,13 @@ public class Dashboard extends Application {
 		
 		private boolean camInitialized = false;
 		private boolean camSettingError = false;
+		
+		void resetComm() {
+			commInitialized = false;
+		}
+		void resetCam() {
+			camInitialized = false;
+		}
 		
 		private void commUpdate(){
 			if(!commInitialized){
@@ -210,13 +236,14 @@ public class Dashboard extends Application {
 								commInterface = new TCPCommInterface(local, ad, localport, remoteport);
 							}
 							
-							communications = new Communications("Robot", commInterface);
+							communications = new Communications("Robot-Communication", commInterface);
 							communications.setSendableCreator(new FlashboardSendableCreator());
 							communications.start();
 							
 							commInitialized = true;
 							commSettingError = false;
 						} catch (IOException e) {
+							logger.log(Level.SEVERE, "Exception while initializing comm communications", e);
 						}
 					}
 				}
@@ -228,9 +255,10 @@ public class Dashboard extends Application {
 						
 						hostRetriever.resetComm();
 						
-						log.log("Comm remote not reachable", "Dashboard Comm");
+						logger.info("Comm remote not reachable");
 					}
 				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Exception while checking comm remote reachebility", e);
 				}
 			}
 		}
@@ -268,6 +296,7 @@ public class Dashboard extends Application {
 							camInitialized = true;
 							camSettingError = false;
 						} catch (IOException e) {
+							logger.log(Level.SEVERE, "Exception while initializing cam communication", e);
 						}
 					}
 				}
@@ -281,36 +310,6 @@ public class Dashboard extends Application {
 				camUpdate();
 				
 				lastConAttmp = FlashUtil.millis();
-			}
-		}
-	}
-	private static class DisplayableUpdater implements Runnable{
-		
-		Runnable dataRunnable = ()->{
-			update();
-		};
-		boolean done = true;
-		
-		void update(){
-			done = false;
-			Enumeration<Displayable> denum = getDisplayables();
-			while(denum.hasMoreElements()){
-				Displayable d = denum.nextElement();
-				d.update();
-				if(!d.init()) {
-					Node root = d.setDisplay();
-					if(root != null){
-						GUI.getMain().addControlToDisplay(root, d.getDisplayType());
-					}
-				}
-			}
-			done = true;
-		}
-		
-		@Override
-		public void run() {
-			if(done){
-				Platform.runLater(dataRunnable);
 			}
 		}
 	}
@@ -374,15 +373,15 @@ public class Dashboard extends Application {
 		PropertyHandler.addString(PROP_HOST_ROBOT, "");
 		PropertyHandler.addString(PROP_HOST_CAM, "");
 		if(emptyProperty(PROP_HOST_ROBOT))
-			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
+			logger.severe("Missing Property: "+PROP_HOST_ROBOT);
 		if(emptyProperty(PROP_HOST_CAM))
-			log.reportError("Missing Property: "+PROP_HOST_ROBOT);
+			logger.severe("Missing Property: "+PROP_HOST_ROBOT);
 		
 		PropertyHandler.addString(PROP_COMM_PROTOCOL, "tcp");
 		String protocol = PropertyHandler.getStringValue(PROP_COMM_PROTOCOL);
 		if(!protocol.equals("tcp") && 
 				!protocol.equals("udp")){
-			log.reportError("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues should be: tcp or udp");
+			logger.severe("Invalid Property Value: "+PROP_COMM_PROTOCOL + "\nValues should be: tcp or udp");
 		}
 		
 		PropertyHandler.addNumber(PROP_COMM_PORT_LOCAL, Flashboard.PORT_BOARD);
@@ -393,13 +392,12 @@ public class Dashboard extends Application {
 	private static void loadSettings(){
 		try {
 			PropertyHandler.loadPropertyFromXml(SETTINGS_FILE);
-		} catch (Exception e) {
-			log.reportError("Failed to load settings");
-			log.reportError(e);
+		} catch (IllegalArgumentException e) { //TODO: minimize exception scope
+			logger.log(Level.SEVERE, "Failed to load settings", e);
 		}
 	}
 	private static void printSettings(){
-		PropertyHandler.printAll(log);
+		// TODO: print settings
 	}
 	private static void saveSettings(){
 		PropertyHandler.savePropertiesToXml(SETTINGS_FILE);
@@ -411,33 +409,28 @@ public class Dashboard extends Application {
 	
 	private static Vector<Displayable> displayables = new Vector<Displayable>();
 	private static CameraViewer camViewer;
-	private static boolean fxready = false;
 	
-	public static Enumeration<Displayable> getDisplayables(){
-		return displayables.elements();
-	}
-	public static void addDisplayable(Displayable d){
-		displayables.addElement(d);
+	public static void addDisplayable(Displayable displayable){
+		displayables.addElement(displayable);
+		updater.addTask(displayable);
 	}
 	public static void resetDisplaybles(){
-		displayables.clear();
-		addDisplayable(camViewer);
-		addDisplayable(emergencyStop);
+		synchronized (displayables) {
+			for (Displayable displayable : displayables) {
+				updater.removeTask(displayable);
+			}
+			
+			displayables.clear();
+			addDisplayable(camViewer);
+			addDisplayable(emergencyStop);
+		}
 		
 		TesterControl.resetTesters();
 		BarChartControl.resetControls();
 	}
 	
-	private static void fxReady(){
-		fxready = true;
-	}
-	private static boolean fxInitialized(){
-		return fxready;
-	}
-	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
 		Parent root = GUI.initializeMainWindow(primaryStage);
 		
 		Scene scene = new Scene(root, 1300, 680);
@@ -458,7 +451,9 @@ public class Dashboard extends Application {
 		});
 		primaryStage.setTitle("FLASHboard");
 		
-		fxReady();
+		resetDisplaybles();
+		startBaseTasks();
+		
 		primaryStage.show();
 	}
 	
@@ -467,7 +462,6 @@ public class Dashboard extends Application {
 	//--------------------------------------------------------------------
 	
 	private static Updater updater;
-	private static Thread updateThread;
 	
 	public static Updater getUpdater(){
 		return updater;
@@ -480,7 +474,6 @@ public class Dashboard extends Application {
 	private static ConnectionTask connectionTask;
 	
 	private static HostRetrieverTask hostRetriever;
-	private static Thread hostRetrieverThread;
 	
 	private static IPCommInterface commInterface;
 	private static Communications communications;
@@ -488,22 +481,26 @@ public class Dashboard extends Application {
 	
 	public static void restartCommunications(){
 		if(communications != null){
-			communications.close();
+			try {
+				communications.close();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error while closing communications", e);
+			}
 			communications = null;
-			connectionTask.commInitialized = false;
+			connectionTask.resetComm();
 			
 			hostRetriever.resetComm();
 			
-			log.log("Communication restart", "Dashboard Comm");
+			logger.info("Standard communication restart");
 		}
 		if(camClient != null){
 			camClient.close();
 			camClient = null;
-			connectionTask.camInitialized = false;
+			connectionTask.resetCam();
 			
 			hostRetriever.resetCam();
 			
-			log.log("Communication restart", "Dashboard Cam");
+			logger.info("Camera communication restart");
 		}
 	}
 	public static boolean communicationsConnected(){
@@ -534,7 +531,7 @@ public class Dashboard extends Application {
 		}
 	}
 	private static void loadVisionSaves(){
-		log.log("Loading vision files from saves folder...", "Dashboard");
+		logger.info("Loading vision files from saves folder...");
 		File savesFolder = new File(FOLDER_SAVES);
 		File[] files = savesFolder.listFiles(new FilenameFilter(){
 			@Override
@@ -543,15 +540,31 @@ public class Dashboard extends Application {
 			}
 		});
 		
-		VisionProcessing processing = null;
 		for (File file : files){
+			
+			FileInputStream inStream = null;
+			ObjectInputStream objectInputStream = null;
 			try{
-				processing = VisionProcessing.createFromXml(file.getAbsolutePath());
-			}catch(Throwable t){
-				processing = null;
-			}
-			if(processing != null){
-				vision.addProcessing(processing);
+				inStream = new FileInputStream(file);
+				objectInputStream = new XMLObjectInputStream(inStream);
+				
+				Object deserializedObj = objectInputStream.readObject();
+				
+				if (deserializedObj instanceof VisionProcessing)
+					vision.addProcessing((VisionProcessing) deserializedObj);
+			}catch(IOException | ClassNotFoundException e){
+				FlashUtil.getLogger().log(Level.SEVERE, "Failed to parse vision processing file", e);
+			} finally {
+				if (inStream != null) {
+					try {
+						inStream.close();
+					} catch (IOException e) {}
+				}
+				if (objectInputStream != null) {
+					try {
+						objectInputStream.close();
+					} catch (IOException e) {}
+				}
 			}
 		}
 		
@@ -563,7 +576,7 @@ public class Dashboard extends Application {
 				}
 			}
 		}
-		log.log("Done", "Dashboard");
+		logger.info("Done");
 	}
 	public static boolean visionInitialized(){
 		return vision != null;
@@ -590,36 +603,44 @@ public class Dashboard extends Application {
 		return emergencyStop;
 	}
 	
+	private static void loadModes() {
+	    File file = new File(MODES_FILE);
+	    if(file.exists()){
+	    	try {
+				modeSelectorControl.loadModes(file);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Failed to load states", e);
+			}
+	    }
+	}
+	
 	//--------------------------------------------------------------------
 	//-----------------------Init & Shut----------------------------------
 	//--------------------------------------------------------------------
 	
-	private static final Log log = Log.createStreamLog("flashboard");
+	private static final Logger logger = FlashUtil.getLogger();
 	private static String currentNativesFolder = "";
 	
 	public static void main(String[] args) throws Exception{
-		FlashUtil.setLog(log);
-		
-		log.log("Loading settings and properties...", "Dashboard");
+		logger.info("Loading settings and properties...");
 		validateBasicHierarcy();
 		loadSettings();
 		validateBasicSettings();
 		printSettings();
-		log.log("Done", "Dashboard");
+		logger.info("Done");
 		
 		setupValuePath();
-		log.log("FlashLib version: "+FlashUtil.VERSION, "Dashboard");
-		log.log("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...", "Dashboard");
+		logger.info("FlashLib version: "+FlashUtil.VERSION);
+		logger.info("Loading opencv natives: "+Core.NATIVE_LIBRARY_NAME+" ...");
 		loadValueLibrary(Core.NATIVE_LIBRARY_NAME);
-		log.log("opencv version: "+Core.VERSION, "Dashboard");
+		logger.info("opencv version: "+Core.VERSION);
 		
-		log.log("Creating shutdown hook...", "Dashboard");
+		logger.info("Creating shutdown hook...");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->close()));
-		log.log("Done", "Dashboard");
+		logger.info("Done");
 		
-		log.save();
 		initStart();
-	    log.log("Launching FX...", "Dashboard");
+	    logger.info("Launching FX...");
 	    launch();
 	}
 	private static void setupValuePath(){
@@ -636,68 +657,50 @@ public class Dashboard extends Application {
 			throw new RuntimeException("Incompatible Operating System");
 		
 		path = new File(path).getAbsolutePath();
-		log.log("java.library.path="+path, "Dashboard");
+		logger.info("java.library.path="+path);
 		currentNativesFolder = path;
 	}
 	private static void loadValueLibrary(String libname){
-		String path = currentNativesFolder+"/";
+		String path = currentNativesFolder + File.separator;
 		if(FlashUtil.isWindows())
-			path += libname+".dll";
+			path += libname + ".dll";
 		else if(FlashUtil.isUnix())
-			path += "lib"+libname+".so";
+			path += "lib" + libname + ".so";
 		System.load(path);
 	}
 	private static void initStart(){
-		//VisionFilter.setFilterCreator(new DefaultFilterCreator());
-		
 		hostRetriever = new HostRetrieverTask();
 		hostRetriever.resetCam();
 		hostRetriever.resetComm();
 		
-		hostRetrieverThread = new Thread(hostRetriever, "HostRetriever");//retrieve;
-		hostRetrieverThread.start();
-		
 		updater = new Updater();
-		updateThread = new Thread(updater.getThreadTask());
-	    updateThread.start();
-	    
 	    camViewer = new CameraViewer("Robot-CamViewer");
-	    addDisplayable(camViewer);
-	    
 	    hidcontrol = new HIDControl();
-	    updater.addTask(hidcontrol);
 	    
 	    modeSelectorControl = new ModeSelectorControl();
-	    File file = new File(MODES_FILE);
-	    if(file.exists()){
-	    	try {
-				modeSelectorControl.loadModes(file);
-			} catch (Exception e) {
-				e.printStackTrace();
-				log.reportError("Failed to load states");
-			}
-	    }
 	    
 	    connectionTask = new ConnectionTask();
-	    updater.addTask(connectionTask);
-	    
 	    emergencyStop = new EmergencyStopControl();
 	    
 	    vision = new ThreadedVisionRunner("flashboard-vision");
 	    vision.setVisionSource(new CvSource());
 		vision.getVisionSource().setImagePipeline(camViewer);
+	}
+	private static void startBaseTasks() {
+		updater.addTask(hostRetriever);
+		updater.addTask(new ConnectionTracker());
+		updater.addTask(connectionTask);
+		updater.addTask(hidcontrol);
 		updater.execute(()->{
 			loadVisionSaves();
+			loadModes();
 		});
-		
-		updater.addTask(new DisplayableUpdater());
-		updater.addTask(new ConnectionTracker());
 	}
 	private static void validateBasicHierarcy(){
 		File file = new File(FOLDER_DATA);
 		if(!file.exists()){
 			if(!file.mkdir()){
-				log.reportError("Unable to create DATA folder!!");
+				logger.severe("Unable to create DATA folder!!");
 				return;
 			}
 		}
@@ -712,60 +715,79 @@ public class Dashboard extends Application {
 			file.mkdir();
 	}
 	public static void close(){
-		log.log("Shutting down", "Dashboard");
+		logger.info("Shutting down");
 		
-		updater.stop();
+		updater.shutdown();
 		hostRetriever.stop();
 		
 		if(visionInitialized()){
 			for (int i = 0; i < vision.getProcessingCount(); i++) {
 				VisionProcessing proc = vision.getProcessing(i);
-				proc.saveXml(FOLDER_SAVES+proc.getName()+".xml");
+				
+				String fileName = FOLDER_SAVES + proc.getName() + ".xml";
+				
+				FileOutputStream fileOutputStream = null;
+				ObjectOutputStream objectOutputStream = null;
+				try {
+					fileOutputStream = new FileOutputStream(fileName);
+					objectOutputStream = new XMLObjectOutputStream(fileOutputStream);
+					
+					objectOutputStream.writeObject(proc);
+				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Failed to save processing object", e);
+				} finally {
+					if (fileOutputStream != null) {
+						try {
+							fileOutputStream.close();
+						} catch (IOException e) {}
+					}
+					if (objectOutputStream != null) {
+						try {
+							objectOutputStream.close();
+						} catch (IOException e) {}
+					}
+				}
 			}
 			
-			log.log("Stopping image processing...", "Dashboard");
+			logger.info("Stopping image processing...");
 			closeVision();
 		}
 		if(camClient != null){
-			log.log("Stopping camera client...", "Dashboard");
+			logger.info("Stopping camera client...");
 			camClient.close();
 		}
 		if(communications != null){
-			log.log("Stopping communications...", "Dashboard");
-			communications.close();
-		}
-		if(updateThread.isAlive()){
-			log.log("Stopping update thread...", "Dashboard");
+			logger.info("Stopping communications...");
 			try {
-				updateThread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				Thread.currentThread().interrupt();
+				communications.close();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error while closing communications", e);
 			}
 		}
-		if(hostRetrieverThread.isAlive()){
-			log.log("Stopping host retriever thread...", "Dashboard");
+		if(!updater.isTerminated()){
+			logger.info("Stopping update thread...");
 			try {
-				hostRetrieverThread.join();
+				updater.forceShutdown();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
-				Thread.currentThread().interrupt();
+				logger.warning("Thread interrupted while stopping updater");
 			}
 		}
 		
 		if(modeSelectorControl != null){
 			 File file = new File(MODES_FILE);
-			 modeSelectorControl.saveModes(file);
+			 try {
+				modeSelectorControl.saveModes(file);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Failed to save modes", e);
+			}
 		}
 		
-		/*File natives = new File(FOLDER_LIBS_NATIVES_CURRENT);
-		File[] files = natives.listFiles();
-		for (File file : files) {
-			file.delete();
-		}*/
-		
 		saveSettings();
-		log.log("Settings saved", "Dashboard");
-		log.close();
+		logger.info("Settings saved");
+		
+		for (Handler handler : logger.getHandlers()) {
+			handler.flush();
+			handler.close();
+		}
 	}
 }

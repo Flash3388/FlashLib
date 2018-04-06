@@ -8,7 +8,7 @@ package edu.flash3388.flashlib.util.beans;
  * @since FlashLib 1.0.1
  */
 public class SimpleDoubleProperty implements DoubleProperty{
-
+	
 	private double var;
 	
 	public SimpleDoubleProperty(double initialVal){
@@ -24,14 +24,6 @@ public class SimpleDoubleProperty implements DoubleProperty{
 	}
 	@Override
 	public double get(){
-		return var;
-	}
-	@Override
-	public void setValue(Double o) {
-		set(o == null? 0.0 : o.doubleValue());
-	}
-	@Override
-	public Double getValue() {
 		return var;
 	}
 	

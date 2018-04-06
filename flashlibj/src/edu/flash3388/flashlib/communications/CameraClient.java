@@ -10,8 +10,11 @@ import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * CameraClient provides a UDP communications client for camera data. It connects with a remote {@link CameraServer},
@@ -27,6 +30,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @since FlashLib 1.0.0
  */
 public class CameraClient {
+	
 	private static class Task implements Runnable{
 		CameraClient client;
 		
@@ -36,8 +40,8 @@ public class CameraClient {
 		
 		@Override
 		public void run() {
-			FlashUtil.getLog().log("Running", client.logName);
-			while(!client.stop){
+			client.logger.info("Running");
+			while(!Thread.interrupted()){
 				if(!client.connected)
 					client.write(HANDSHAKE);
 				client.read();
@@ -62,9 +66,10 @@ public class CameraClient {
 	private InetAddress sendAddress;
 	private int sendPort;
 	private int port;
-	private String name, logName;
 	
-	private boolean stop = false, connected = false;
+	private Logger logger;
+	
+	private boolean connected = false;
 	
 	/**
 	 * Creates a new CameraServer. A datagram socket is created at the local address listening to a given port. The read thread
@@ -72,27 +77,27 @@ public class CameraClient {
 	 * is sent to a given port and address which belong to the remote camera server. To avoid to much data, the data buffer is
 	 * limited to a maximum amount of bytes.
 	 * 
-	 * @param name the name of client, for logging
+	 * @param logName the name of client, for logging
 	 * @param localPort local port for data listening
 	 * @param remoteAdd remote server address
 	 * @param remotePort remote server port
 	 * @param maxBytes maximum buffer size
 	 * 
-	 * @throws SocketException if failed to create the socket
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes) throws SocketException{
+	public CameraClient(String logName, int localPort, InetAddress remoteAdd, int remotePort, int maxBytes) throws SecurityException, IOException{
 		port = localPort;
 		sendPort = remotePort;
 		sendAddress = remoteAdd;
-		this.name = name;
-		logName = name+"-CameraClient";
+		logger = LogUtil.getLogger(logName);
 		
 		socket = new DatagramSocket(new InetSocketAddress(localPort));
 		socket.setSoTimeout(READ_TIMEOUT);
 		
 		recBytes = new byte[maxBytes];
 		 
-		runThread = new Thread(new Task(this));
+		runThread = new Thread(new Task(this), logName + "-CamClientThread");
 		runThread.start();
 	}
 	/**
@@ -106,9 +111,10 @@ public class CameraClient {
 	 * @param remoteAdd remote server address
 	 * @param remotePort remote server port
 	 * 
-	 * @throws SocketException if failed to create the socket
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort) throws SocketException{
+	public CameraClient(String name, int localPort, InetAddress remoteAdd, int remotePort) throws SecurityException, IOException{
 		this(name, localPort, remoteAdd, remotePort, DEFAULT_MAX_BYTES);
 	}
 	
@@ -116,6 +122,7 @@ public class CameraClient {
 		try {
 			socket.send(new DatagramPacket(bytes, bytes.length, sendAddress, sendPort));
 		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Error while sending packet", e);
 		}
 	}
 	private void read(){
@@ -126,7 +133,7 @@ public class CameraClient {
 			
 			if(!connected) {
 				connected = true;
-				FlashUtil.getLog().log("Connection Established", logName);
+				logger.info("Connection Established");
 			}
 			if(len <= 10){
 				write(HANDSHAKE);
@@ -145,9 +152,10 @@ public class CameraClient {
 		} catch(SocketTimeoutException e1){
 			if(connected){
 				connected = false;
-				FlashUtil.getLog().log("Connection Lost", logName);
+				logger.info("Connection Lost");
 			}
 		}catch (IOException | NumberFormatException e) {
+			logger.log(Level.SEVERE, "Error while reading socket data", e);
 		}
 	}
 	
@@ -197,29 +205,23 @@ public class CameraClient {
 	public boolean isConnected(){
 		return connected;
 	}
-
-	/**
-	 * Gets the name of this client used for data logging.
-	 * @return the name of this client
-	 */
-	public String getName(){
-		return name;
-	}
 	
 	/**
 	 * Stops the operation of the client. Closes the socket and waits for termination of the reading thread.
 	 */
 	public void close(){
-		stop = true;
+		runThread.interrupt();
 		connected = false;
-		socket.close();
 		
 		try {
 			runThread.join();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			e.printStackTrace();
+			logger.log(Level.SEVERE, "Thread interruption while joining camera thread", e);
 		}
+		
+		socket.close();
 	}
 	
 	/**

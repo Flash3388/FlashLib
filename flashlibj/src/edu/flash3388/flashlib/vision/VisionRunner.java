@@ -1,9 +1,12 @@
 package edu.flash3388.flashlib.vision;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.observable.ObservableProperty;
@@ -155,31 +158,41 @@ public abstract class VisionRunner extends Sendable implements Vision, ImagePipe
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 2) return;
 		
 		if(data[0] == RemoteVision.REMOTE_RUN_MODE){
 			if(data[1] == RemoteVision.REMOTE_START){
 				start();
-				FlashUtil.getLog().log("Starting vision");
+				FlashUtil.getLogger().info("Starting vision");
 			}
 			else if(data[1] == RemoteVision.REMOTE_STOP){
 				stop();
-				FlashUtil.getLog().log("Stopping vision");
+				FlashUtil.getLogger().info("Stopping vision");
 			}
 		}else if(data[0] == RemoteVision.REMOTE_SELECT_MODE){
 			selectProcessing(data[1]);
 		}else if(data[0] == RemoteVision.REMOTE_PROC_MODE){
-			VisionProcessing proc = VisionProcessing.createFromBytes(Arrays.copyOfRange(data, 1, data.length));
-			if(proc != null)
-				addProcessing(proc);
+			ByteArrayInputStream procInStream = new ByteArrayInputStream(data, 1, data.length);
+			
+			try {
+				ObjectInputStream objectInputStream = new ObjectInputStream(procInStream);
+				Object deserializedObject = objectInputStream.readObject();
+				
+				if (deserializedObject instanceof VisionProcessing)
+					addProcessing((VisionProcessing) deserializedObject);
+				else 
+					FlashUtil.getLogger().warning("Received object is not VisionProcessing object");
+			} catch (IOException | ClassNotFoundException e) {
+				throw new SendableException(e);
+			} 
 		}
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(newProcessing){
 			newProcessing = false;
 			return new byte[]{RemoteVision.REMOTE_PROC_MODE, (byte) (processing.size())};

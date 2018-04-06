@@ -19,11 +19,11 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	
 	/**
 	 * Creates a new analog input port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired analog input
-	 * @throws HALException if port initialization failed.
+	 * @throws HALInitialzationException if port initialization failed.
 	 */
 	public HALAnalogInput(int port) {
 		if(!ANALOGJNI.checkAnalogInputPortValid(port))
@@ -34,7 +34,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		
 		handle = ANALOGJNI.initializeAnalogInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize AnalogInput: invalid HAL handle", port);
+			throw new HALInitialzationException("Unable to initialize AnalogInput: invalid HAL handle", port);
 		
 		accumulator = new HALAnalogAccumulator(this);
 	}
@@ -61,7 +61,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		int result = ANALOGJNI.enableAnalogInputAccumulator(handle, enable);
 		
 		if(result != 0){
-			throw new HALException("Unable to "+(enable? "enable" : "disable")+
+			throw new HALInitialzationException("Unable to "+(enable? "enable" : "disable")+
 					" accumulator for analog input port", handle);
 		}
 	}

@@ -7,8 +7,8 @@ package edu.flash3388.flashlib.util.beans;
  * @author Tom Tzook
  * @since FlashLib 1.0.1
  */
-public class SimpleBooleanProperty implements BooleanProperty{
-
+public class SimpleBooleanProperty implements BooleanProperty {
+	
 	private boolean var;
 	
 	public SimpleBooleanProperty(boolean initialVal){
@@ -29,14 +29,6 @@ public class SimpleBooleanProperty implements BooleanProperty{
 	}
 	@Override
 	public boolean get() {
-		return var;
-	}
-	@Override
-	public void setValue(Boolean o) {
-		set(o == null? false : o.booleanValue());
-	}
-	@Override
-	public Boolean getValue() {
 		return var;
 	}
 	

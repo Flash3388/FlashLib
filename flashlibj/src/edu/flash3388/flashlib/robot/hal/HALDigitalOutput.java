@@ -16,11 +16,11 @@ public class HALDigitalOutput extends HALPort implements DigitalOutput{
 
 	/**
 	 * Creates a new digital output port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired digital output
-	 * @throws HALException if port initialization failed.
+	 * @throws HALInitialzationException if port initialization failed.
 	 */
 	public HALDigitalOutput(int port) {
 		if(!DIOJNI.checkDigitalOutputPortValid(port))
@@ -31,7 +31,7 @@ public class HALDigitalOutput extends HALPort implements DigitalOutput{
 		
 		handle = DIOJNI.initializeDigitalOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALException("Unable to initialize DigitalOutput: invalid HAL handle", port);
+			throw new HALInitialzationException("Unable to initialize DigitalOutput: invalid HAL handle", port);
 	}
 	
 	/**

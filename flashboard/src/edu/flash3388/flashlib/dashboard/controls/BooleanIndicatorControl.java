@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 
@@ -50,7 +51,7 @@ public class BooleanIndicatorControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		synchronized (valueMutex) {
 			value = data[0] == 1;
 			update = true;
@@ -58,7 +59,7 @@ public class BooleanIndicatorControl extends Displayable{
 	}
 
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

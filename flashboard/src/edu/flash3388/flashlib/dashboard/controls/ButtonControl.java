@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardButton;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
@@ -54,7 +55,7 @@ public class ButtonControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] bytes) {
+	public void newData(byte[] bytes) throws SendableException {
 		if(bytes[0] == FlashboardButton.UP){
 			FlashFXUtils.onFXThread(()->{
 				button.setDisable(false);
@@ -71,7 +72,7 @@ public class ButtonControl extends Displayable{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
 		return press;
 	}

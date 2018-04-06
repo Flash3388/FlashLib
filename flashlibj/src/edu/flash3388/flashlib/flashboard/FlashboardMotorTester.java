@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -99,10 +100,10 @@ public class FlashboardMotorTester extends FlashboardControl{
 		}
 		
 		@Override
-		public void newData(byte[] data) {
+		public void newData(byte[] data) throws SendableException {
 		}
 		@Override
-		public byte[] dataForTransmition() {
+		public byte[] dataForTransmission() throws SendableException {
 			if(updateTesterName){
 				 updateTesterName = false;
 				 byte[] data = testerName.getBytes();
@@ -220,7 +221,7 @@ public class FlashboardMotorTester extends FlashboardControl{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == START){
 			startDataSending();
 		}else if(data[0] == STOP){
@@ -228,7 +229,7 @@ public class FlashboardMotorTester extends FlashboardControl{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

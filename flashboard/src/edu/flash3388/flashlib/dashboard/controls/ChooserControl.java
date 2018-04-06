@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -42,7 +43,7 @@ public class ChooserControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] bytes) {
+	public void newData(byte[] bytes) throws SendableException {
 		if(bytes[0] == 1){
 			int sel = FlashUtil.toInt(bytes, 1);
 			FlashFXUtils.onFXThread(()->{
@@ -64,7 +65,7 @@ public class ChooserControl extends Displayable{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		changed = false;
 		return FlashUtil.toByteArray(selected.get());
 	}

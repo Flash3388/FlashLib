@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
@@ -40,19 +41,26 @@ public final class FlashUtil {
 	/**
 	 * The current version of FlashLib.
 	 */
-	public static final String VERSION = "1.2.0";
+	public static final String VERSION = "1.3.0";
 	
 	private FlashUtil(){}
 	
 	private static long startTime = 0;
-	private static Log mainLog;
+	private static Logger mainLogger;
+	private static Throwable loggerInitException = null;
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
 	private static final String architecture = System.getProperty("os.arch");
 	private static final String version = System.getProperty("os.version");
 	
 	static{
-		setStartTime(System.currentTimeMillis());
+		setStartTime(System.nanoTime());
+		try {
+			initMainLogger();
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+			loggerInitException = e;
+		}
 	}
 	
 	//--------------------------------------------------------------------
@@ -174,7 +182,7 @@ public final class FlashUtil {
 	 * @return the difference, measured in milliseconds, between the current time and the time when the program was started.
 	 */
 	public static long millis(){
-		return System.currentTimeMillis() - startTime;
+		return (long) ((System.nanoTime() - startTime) * 1e-6);
 	}
 	/**
 	 * Returns the time since the program was started in milliseconds. The data is returned as an integer and not a long.
@@ -193,24 +201,25 @@ public final class FlashUtil {
 		return millis() * 0.001;
 	}
 
-	/**
-	 * Returns the main {@link Log} used throughout the library. If the log was not created, it is initialized 
-	 * to a new log named "flashlib" and the log implementation is {@link SimpleStreamLog}.
-	 * 
-	 * @return the main {@link Log} used throughout flashlib.
-	 */
-	public static Log getLog(){
-		if(mainLog == null)
-			mainLog = new SimpleStreamLog("flashlib");
-		return mainLog;
+	private static void initMainLogger() throws SecurityException, IOException {
+		Logger mainLogger = LogUtil.getLogger("flashlib");
+		
+		FlashUtil.mainLogger = mainLogger;
 	}
+	
 	/**
-	 * Sets the implementation of the main log.
+	 * Returns the main {@link Logger} used throughout the library. If the logger was not created, an exception is thrown.
+	 * The logger name "flashlib", and it holds several handlers.
 	 * 
-	 * @param log the log to use for the flashlib main log
+	 * @return the main {@link Logger} used throughout flashlib.
+	 * 
+	 * @throws IllegalStateException if the main logger was not initialized.
 	 */
-	public static void setLog(Log log){
-		mainLog = log;
+	public static Logger getLogger(){
+		if (mainLogger == null)
+			throw new IllegalStateException("Flashlib main logger was not initialized", 
+					loggerInitException);
+		return mainLogger;
 	}
 
 	//--------------------------------------------------------------------

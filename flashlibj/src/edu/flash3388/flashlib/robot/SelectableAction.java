@@ -143,11 +143,11 @@ public class SelectableAction extends Action{
 	public void start(){
 		int index = source != null? (int) source.get() : selectedIndex;
 		if(index < 0 || index >= nextActionIndex){
-			FlashUtil.getLog().reportError("Invalid action index");
+			FlashUtil.getLogger().warning("Invalid action index");
 			return;
 		}
 		if(actions[index] == null){
-			FlashUtil.getLog().reportError("Null action!!");
+			FlashUtil.getLogger().warning("Null action!!");
 			return;
 		}
 		runningAction = actions[index];

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.dashboard.controls;
 
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.flashboard.FlashboardMotorTester.TesterMotor;
@@ -50,7 +51,7 @@ public class TesterMotorControl extends Displayable{
 	}
 	
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data[0] == TesterMotor.UPDATE_TESTER_NAME){
 			testerName = new String(data, 1, data.length - 1);
 			TesterControl.allocateTesterMotor(this);
@@ -64,7 +65,7 @@ public class TesterMotorControl extends Displayable{
 		}
 	}
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		return null;
 	}
 	@Override

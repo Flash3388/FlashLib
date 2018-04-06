@@ -13,7 +13,7 @@ import edu.flash3388.flashlib.cams.Camera;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class niCamera implements Camera{
+public class NICamera implements Camera{
 
 	private edu.wpi.first.wpilibj.vision.USBCamera camera;
 	private Image image;
@@ -26,7 +26,7 @@ public class niCamera implements Camera{
 	 * @param width the frame width
 	 * @param height the frame height
 	 */
-	public niCamera(String name, int width, int height){
+	public NICamera(String name, int width, int height){
 		camera = new edu.wpi.first.wpilibj.vision.USBCamera(name);
 		camera.openCamera();
 		setSize(width, height);
@@ -40,7 +40,7 @@ public class niCamera implements Camera{
 	 * 
 	 * @param name the camera name
 	 */
-	public niCamera(String name){
+	public NICamera(String name){
 		this(name, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 	}
 	

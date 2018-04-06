@@ -1,9 +1,13 @@
 package edu.flash3388.flashlib.vision;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -16,7 +20,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @see VisionRunner
  * @see Vision
  */
-public class RemoteVision extends Sendable implements Vision{
+public class RemoteVision extends Sendable implements Vision {
 
 	static final byte REMOTE_STOP = 0xe;
 	static final byte REMOTE_START = 0x5;
@@ -189,7 +193,7 @@ public class RemoteVision extends Sendable implements Vision{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void newData(byte[] data) {
+	public void newData(byte[] data) throws SendableException {
 		if(data.length < 2) return;
 		
 		if(data[0] == REMOTE_RUN_MODE){
@@ -219,14 +223,23 @@ public class RemoteVision extends Sendable implements Vision{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] dataForTransmition() {
+	public byte[] dataForTransmission() throws SendableException {
 		if(sendProps){
-			byte[] data = processing.get(sendProc).toBytes();
+			ByteArrayOutputStream procOutStream = new ByteArrayOutputStream();
+			try {
+				ObjectOutputStream objectOutputStream = new ObjectOutputStream(procOutStream);
+				objectOutputStream.writeObject(processing.get(sendProc));
+			} catch (IOException e) {
+				throw new SendableException(e);
+			} finally {
+				if((++sendProc) >= processing.size())
+					sendProps = false;
+			}
+			
+			byte[] data = procOutStream.toByteArray();
 			byte[] send = new byte[data.length+1];
 			send[0] = REMOTE_PROC_MODE;
 			System.arraycopy(data, 0, send, 1, data.length);
-			if((++sendProc) >= processing.size())
-				sendProps = false;
 			return send;
 		}
 		if(stopRemote){

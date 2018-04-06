@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.util.beans;
  * @author tom Tzook
  * @since FlashLib 1.0.1
  */
-public interface StringSource extends ValueSource<String>{
+public interface StringSource extends ValueSource<String> {
 
 	/**
 	 * Gets the value of this source. Implementation is user dependent.

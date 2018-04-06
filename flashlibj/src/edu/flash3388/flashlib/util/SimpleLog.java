@@ -121,78 +121,42 @@ public abstract class SimpleLog extends Log{
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void printWarning(String warning, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <WARNING> : "+warning);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void printError(String error, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] <ERROR> : "+error);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ("+caller+") : "+log);
-	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void print(String log, String caller, double time){
-		if(!isLoggingMode(MODE_PRINT)) return;
-		getPrintStream().println(getName()+"> ["+time+"] ("+caller+") : "+log);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public synchronized void write(String mess, String caller){
+	public synchronized void write(String log, String caller){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("("+caller+") : "+mess);
+		writeToStandardLog(String.format("<%s> : %s", caller, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void write(String mess, String caller, double time){
+	public synchronized void write(String log, String caller, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		writeToStandardLog("["+time+"] ("+caller+") : "+mess);
+		writeToStandardLog(String.format("[%.3f] <%s> : %s", time, caller, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, double time){
+	public synchronized void writeError(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		mess = "["+time+"] : " + mess;
-		writeToErrorLog(mess);
+		writeToErrorLog(String.format("[%.3f] <ERROR> : %s", time, log));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeError(String mess, String stacktrace, double time){
+	public synchronized void writeError(String log, double time, StackTraceElement[] stacktrace, int traceIndex){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "ERROR");
-		mess = "["+time+"] <ERROR> : " + mess;
-		writeToErrorLog(mess, stacktrace);
+		write(log, "ERROR");
+		writeToErrorLog(String.format("[%.3f] <ERROR> : %s", time, log), stackTraceToString(stacktrace, traceIndex));
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void writeWarning(String mess, double time){
+	public synchronized void writeWarning(String log, double time){
 		if(isClosed() || !isLoggingMode(MODE_WRITE)) return;
-		write(mess, "WARNING");
-		mess = "["+time+"] <WARNING> : " + mess;
-		writeToErrorLog(mess);
+		write(log, "WARNING");
+		writeToErrorLog(String.format("[%.3f] <WARNING> : %s", time, log));
 	}
 }

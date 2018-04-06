@@ -18,13 +18,13 @@ public class FlashboardSimpleModeSelector implements ModeSelector{
 	}
 	
 	public void attachToFlashboard(){
-		if(!chooser.attached() && Flashboard.flashboardInit())
+		if(!chooser.isCommunicationAttached() && Flashboard.flashboardInit())
 			Flashboard.attach(chooser);
 	}
 	
 	@Override
 	public int getMode() {
-		if(!chooser.remoteAttached())
+		if(!chooser.isRemoteAttached())
 			return MODE_DISABLED;
 		Integer mode = chooser.getSelected();
 		return mode != null? mode : MODE_DISABLED;

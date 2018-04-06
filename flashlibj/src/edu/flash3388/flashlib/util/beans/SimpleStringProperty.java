@@ -26,14 +26,6 @@ public class SimpleStringProperty implements StringProperty{
 	public void set(String s) {
 		this.var = s == null? "" : s;
 	}
-	@Override
-	public void setValue(String o) {
-		set(o);
-	}
-	@Override
-	public String getValue() {
-		return var;
-	}
 	
 	@Override
 	public String toString() {

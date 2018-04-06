@@ -1,8 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.util.beans.IntegerProperty;
-import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
-
 /**
  * Filers out contours by their color. Works with grayscale.
  * 
@@ -11,10 +8,16 @@ import edu.flash3388.flashlib.util.beans.SimpleIntegerProperty;
  * 
  * @see VisionSource#filterColorRange(int, int)
  */
-public class GrayFilter extends VisionFilter{
+public class GrayFilter implements VisionFilter{
 
-	private IntegerProperty min = new SimpleIntegerProperty(), 
-			max = new SimpleIntegerProperty();
+	/**
+	 * Indicates the minimum value of the color filter.
+	 */
+	private int min;
+	/**
+	 * Indicates the maximum value of the color filter.
+	 */
+	private int max;
 
 	public GrayFilter(){}
 	public GrayFilter(int min, int max){
@@ -22,31 +25,28 @@ public class GrayFilter extends VisionFilter{
 	}
 	
 	public void set(int min, int max){
-		this.min.set(min);
-		this.max.set(max);
+		this.min = min;
+		this.max = max;
 	}
 	
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the value of the minimum value of the color filter.
-	 * @return the property
-	 */
-	public IntegerProperty minProperty(){
+	public int getMin() {
 		return min;
 	}
-	/**
-	 * An {@link IntegerProperty}.
-	 * Indicates the value of the maximum value of the color filter.
-	 * @return the property
-	 */
-	public IntegerProperty maxProperty(){
+	public void setMin(int min) {
+		this.min = min;
+	}
+	
+	public int getMax() {
 		return max;
+	}
+	public void setMax(int max) {
+		this.max = max;
 	}
 	
 	@Override
 	public void process(VisionSource source) {
 		source.convertGrayscale();
 		
-		source.filterColorRange(min.get(), max.get());
+		source.filterColorRange(min, max);
 	}
 }

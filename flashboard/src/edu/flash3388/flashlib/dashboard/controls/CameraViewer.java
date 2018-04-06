@@ -17,6 +17,7 @@ import edu.flash3388.flashlib.dashboard.Displayable;
 import edu.flash3388.flashlib.dashboard.GUI;
 import edu.flash3388.flashlib.gui.FlashFXUtils;
 import edu.flash3388.flashlib.communications.DataListener;
+import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.cv.CvProcessing;
 import javafx.scene.image.Image;
@@ -85,7 +86,9 @@ public class CameraViewer extends Displayable implements DataListener, ImagePipe
 
 	}
 	@Override
-	public byte[] dataForTransmition() {return null;}
+	public byte[] dataForTransmission() throws SendableException {
+		return null;
+	}
 	@Override
 	public boolean hasChanged() {
 		return false;

@@ -6,9 +6,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.LogUtil;
 
 /**
  * CameraClient provides a UDP communications server for camera data. A remote {@link CameraClient} can connect to it by 
@@ -41,25 +44,29 @@ public class CameraServer {
 				server.sendAddress = packet.getAddress();
 				server.sendPort = packet.getPort();
 				
-				FlashUtil.getLog().log("Client Connected: "+server.sendAddress.getHostAddress()+
-						":"+server.sendPort, server.logName);
+				server.logger.info(String.format("Client connected: %s:%s", 
+						server.sendAddress.getHostAddress(),
+						server.sendPort));
 				
 				byte[] checkBytes = HANDSHAKE;
+				
 				int cmillis = FlashUtil.millisInt();
 				int period = (server.camera == null || server.camera.getFPS() <= 5? DEFAULT_PERIOD : 
 					1000 / server.camera.getFPS()), 
 						lastCheck = cmillis;
+				
 				server.lastCalVal = cmillis;
-				while(!server.stop){
+				
+				while(!Thread.interrupted()){
 					int t0 = cmillis;
 					
 					if(server.camera == null) {
-						FlashUtil.delay(100);
+						Thread.sleep(100);
 						continue;
 					}
 					byte[] imageArray = server.camera.getData();
 					if(imageArray == null) {
-						FlashUtil.delay(100);
+						Thread.sleep(100);
 						continue;
 					}
 			        
@@ -69,8 +76,9 @@ public class CameraServer {
 			        cmillis = FlashUtil.millisInt();
 			        int dt = cmillis - t0;
 
-		            if (dt > 0 && dt < period)
-		            	FlashUtil.delay(dt);
+		            if (dt > 0 && dt < period) {
+		            	Thread.sleep(dt);
+		            }
 		            
 		            cmillis = FlashUtil.millisInt();
 		            if(cmillis - lastCheck > CHECK_PERIOD){
@@ -84,16 +92,20 @@ public class CameraServer {
 						server.sendPort = packet.getPort();
 						
 						String naddress = server.sendAddress.getHostAddress();
-						if(port != server.sendPort || !address.equals(naddress))
-							FlashUtil.getLog().log("Client Connected: "+naddress+":"+
-									server.sendPort, server.logName);
+						if(port != server.sendPort || !address.equals(naddress)) {
+							server.logger.info(String.format("Client connected: %s:%s", 
+									naddress,
+									server.sendPort));
+						}
 						
 		            	lastCheck = cmillis;
 		            }
 		            cmillis = FlashUtil.millisInt();
 				}
 			} catch (IOException e) {
-				FlashUtil.getLog().reportError(e.getMessage());
+				server.logger.log(Level.SEVERE, "Exception in camera thread", e);
+			} catch (InterruptedException e) {
+				server.logger.info("Camera thread interrupted");
 			}
 		}
 	}
@@ -108,12 +120,13 @@ public class CameraServer {
 	private InetAddress sendAddress;
 	private int sendPort;
 	private int port;
-	private String logName;
+	
+	private Logger logger;
+	
 	private long bytesSent = 0;
 	private long lastCalVal = 0;
 	
 	private Camera camera;
-	private boolean stop = false;
 	
 	/**
 	 * Creates a new CameraServer. A datagram socket is created and listens for incoming data on a specific port. A data
@@ -121,21 +134,21 @@ public class CameraServer {
 	 * the defined camera is sent by calling the {@link Camera#getData()} method for bytes and sending them using the
 	 * datagram socket.
 	 * 
-	 * @param name for logging data
+	 * @param logName for logging data
 	 * @param localPort port to listen for incoming data
 	 * @param camera camera whose data is sent
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraServer(String name, int localPort, Camera camera){
+	public CameraServer(String logName, int localPort, Camera camera) throws SecurityException, IOException{
 		port = localPort;
-		logName = name+"-CameraServer";
-		try {
-			socket = new DatagramSocket(new InetSocketAddress(localPort));
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		logger = LogUtil.getLogger(logName);
+		
+		socket = new DatagramSocket(new InetSocketAddress(localPort));
 		
 		this.camera = camera;
-		runThread = new Thread(new Task(this));
+		runThread = new Thread(new Task(this), logName + "-CamServerThread");
 		runThread.start();
 	}
 	/**
@@ -149,17 +162,12 @@ public class CameraServer {
 	 * 
 	 * @param localPort port to listen for incoming data
 	 * @param camera camera whose data is sent
+	 * 
+	 * @throws IOException If creating a log has thrown an I/O error, or creating a socket has thrown a {@link SocketException}
+	 * @throws SecurityException If creating a log has caused a security exception
 	 */
-	public CameraServer(int localPort, Camera camera){
+	public CameraServer(int localPort, Camera camera) throws SecurityException, IOException{
 		this("CamServer", localPort, camera);
-	}
-	
-	/**
-	 * Gets the logging name used by the thread for data logging.
-	 * @return the logging name
-	 */
-	public String getName(){
-		return logName;
 	}
 	
 	/**
@@ -196,15 +204,17 @@ public class CameraServer {
 	 * Stops the operation of the server. Closes the socket and waits for termination of the reading thread.
 	 */
 	public void close(){
-		stop = true;
-		socket.close();
+		runThread.interrupt();
 		
 		try {
 			runThread.join();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			e.printStackTrace();
+			logger.log(Level.SEVERE, "Thread interruption while joining camera thread", e);
 		}
+		
+		socket.close();
 	}
 	
 	/**
