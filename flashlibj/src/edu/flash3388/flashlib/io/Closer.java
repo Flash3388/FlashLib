@@ -16,21 +16,12 @@ import java.util.Collection;
  */
 public class Closer {
 
-	private Collection<Closeable> mClosables;
+	private Collection<Closeable> mCloseables;
+	private boolean mOnErrorOnly;
 	
-	private Closer(Collection<Closeable> closables) {
-		mClosables = closables;
-	}
-	
-	/**
-	 * Creates a new {@link Closer} with the given {@link Closeable} object, which
-	 * is the resource to be closed after the operation is performed.
-	 * 
-	 * @param closeable resource to close after use.
-	 * @return a new {@link Closer} object.
-	 */
-	public static Closer with(Closeable closeable) {
-		return with(closeable);
+	private Closer(Collection<Closeable> closeables, boolean onErrorOnly) {
+		mCloseables = closeables;
+		mOnErrorOnly = onErrorOnly;
 	}
 	
 	/**
@@ -52,7 +43,29 @@ public class Closer {
 	 * @return a new {@link Closer} object.
 	 */
 	public static Closer with(Collection<Closeable> closeables) {
-		return new Closer(closeables);
+		return new Closer(closeables, false);
+	}
+	
+	/**
+	 * Creates a new {@link Closer} with the given array of {@link Closeable} objects, which
+	 * are the resources to be closed after the operation is performed, only if an error has occurred.
+	 * 
+	 * @param closeables array of resources to close after use.
+	 * @return a new {@link Closer} object.
+	 */
+	public static Closer onError(Closeable... closeables) {
+		return onError(Arrays.asList(closeables));
+	}
+	
+	/**
+	 * Creates a new {@link Closer} with the given collection of {@link Closeable} objects, which
+	 * are the resources to be closed after the operation is performed, only if an error has occurred.
+	 * 
+	 * @param closeables collection of resources to close after use.
+	 * @return a new {@link Closer} object.
+	 */
+	public static Closer onError(Collection<Closeable> closeables) {
+		return new Closer(closeables, true);
 	}
 	
 	/**
@@ -62,7 +75,7 @@ public class Closer {
 	 * @return this object.
 	 */
 	public Closer add(Closeable closeable) {
-		mClosables.add(closeable);
+		mCloseables.add(closeable);
 		return this;
 	}
 	
@@ -77,10 +90,22 @@ public class Closer {
 	public <R> R run(IORunnable<R> callable) throws IOException {
 		try {
 			return callable.run();
-		} finally {
-			for (Closeable closeable : mClosables) {
-				closeable.close();
+		} catch (Throwable e) {
+			if (mOnErrorOnly) {
+				closeResources();
 			}
+			
+			throw e;
+		} finally {
+			if (!mOnErrorOnly) {
+				closeResources();
+			}
+		}
+	}
+	
+	private void closeResources() throws IOException {
+		for (Closeable closeable : mCloseables) {
+			closeable.close();
 		}
 	}
 }
