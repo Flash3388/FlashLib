@@ -29,6 +29,18 @@ public class EventDispatcher {
 	
 	/**
 	 * Registers a new listener that can be dispatched.
+	 * <p>
+	 * This listener has no event filtering.
+	 * 
+	 * @param listener listener
+	 * @return if the listener does not exist already and was added.
+	 */
+	public boolean registerListener(Listener listener) {
+		return registerListener(new TrueEventPredicate(), listener);
+	}
+	
+	/**
+	 * Registers a new listener that can be dispatched.
 	 * 
 	 * @param eventPredicate a condition which will be tested and must be answered to dispatch this listener.
 	 * @param listener listener
