@@ -11,13 +11,13 @@ import java.io.IOException;
  * @param <R> operation result type
  */
 @FunctionalInterface
-public interface IOCallable<R> {
+public interface IORunnable<R> {
 
 	/**
-	 * Calls the IO operation to be executed.
+	 * Runs the IO operation.
 	 * 
 	 * @return result of the operation.
 	 * @throws IOException exception in the operation.
 	 */
-	R call() throws IOException;
+	R run() throws IOException;
 }

@@ -74,9 +74,9 @@ public class Closer {
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */
-	public <R> R run(IOCallable<R> callable) throws IOException {
+	public <R> R run(IORunnable<R> callable) throws IOException {
 		try {
-			return callable.call();
+			return callable.run();
 		} finally {
 			for (Closeable closeable : mClosables) {
 				closeable.close();
