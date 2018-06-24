@@ -34,4 +34,8 @@ public class TcpClientConnector implements Connector {
 		}
 	}
 
+	@Override
+	public void close() throws IOException {
+		
+	}
 }

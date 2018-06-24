@@ -32,4 +32,9 @@ public class TcpServerConnector implements Connector {
 			throw new ConnectionFailedException(e);
 		}
 	}
+
+	@Override
+	public void close() throws IOException {
+		mServerSocket.close();
+	}
 }

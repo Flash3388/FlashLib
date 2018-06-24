@@ -7,4 +7,7 @@ public interface Connection extends Closeable {
 
 	void write(byte[] data) throws IOException;
 	byte[] read(int count) throws IOException, TimeoutException;
+	
+	@Override
+	void close() throws IOException;
 }
