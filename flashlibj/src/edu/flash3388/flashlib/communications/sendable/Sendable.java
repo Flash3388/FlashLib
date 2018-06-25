@@ -6,6 +6,6 @@ public interface Sendable {
 
 	void onReceive(Message message);
 	
-	void onConnect(SendableStream stream);
+	void onConnect(SendableMessageWriter stream);
 	void onDisconnect();
 }
