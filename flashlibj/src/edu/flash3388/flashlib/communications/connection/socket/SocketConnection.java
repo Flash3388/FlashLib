@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.communications.connection.socket;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,13 +15,13 @@ public class SocketConnection implements Connection {
 	private Socket mSocket;
 	
 	private OutputStream mOut;
-	private InputStream mIn;
+	private DataInputStream mIn;
 	
 	public SocketConnection(Socket socket) throws IOException {
 		mSocket = socket;
 		
 		mOut = mSocket.getOutputStream();
-		mIn = mSocket.getInputStream();
+		mIn = new DataInputStream(mSocket.getInputStream());
 	}
 	
 	@Override
@@ -32,7 +33,7 @@ public class SocketConnection implements Connection {
 	public byte[] read(int count) throws IOException, TimeoutException {
 		try {
 			byte[] buffer = new byte[count];
-			mIn.read(buffer, 0, count);
+			mIn.readFully(buffer, 0, count);
 			
 			return buffer;
 		} catch (SocketTimeoutException e) {
