@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.communications.connection.socket;
 import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.communications.connection.ConnectionFailedException;
 import edu.flash3388.flashlib.communications.connection.Connector;
+import edu.flash3388.flashlib.io.CloseOption;
 import edu.flash3388.flashlib.io.Closer;
 
 import java.io.IOException;
@@ -27,13 +28,13 @@ public class DatagramConnector implements Connector {
         try {
             DatagramSocket socket = new DatagramSocket();
 
-            return Closer.onError(socket).run(()-> {
+            return Closer.with(socket).run(()-> {
                 socket.bind(mLocalAddress);
                 socket.connect(mRemoteAddress);
                 socket.setSoTimeout(mReadTimeout);
 
                 return new DatagramSocketConnection(socket);
-            });
+            }, CloseOption.CLOSE_ON_ERROR);
         } catch (IOException e) {
             throw new ConnectionFailedException(e);
         }

@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.communications.connection.ConnectionFailedException;
 import edu.flash3388.flashlib.communications.connection.Connector;
+import edu.flash3388.flashlib.io.CloseOption;
 import edu.flash3388.flashlib.io.Closer;
 
 public class TcpClientConnector implements Connector {
@@ -23,12 +24,12 @@ public class TcpClientConnector implements Connector {
 	public Connection connect(int connectionTimeout) throws ConnectionFailedException {
 		Socket socket = new Socket();
 		try {
-			return Closer.onError(socket).run(()->{
+			return Closer.with(socket).run(()->{
 				socket.connect(mEndPoint, connectionTimeout);
 				socket.setSoTimeout(mReadTimeout);
 				
 				return new SocketConnection(socket);
-			});
+			}, CloseOption.CLOSE_ON_ERROR);
 		} catch (IOException e) {
 			throw new ConnectionFailedException(e);
 		}
