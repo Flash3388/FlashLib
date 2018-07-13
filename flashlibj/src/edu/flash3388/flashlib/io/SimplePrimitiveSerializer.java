@@ -51,10 +51,11 @@ public class SimplePrimitiveSerializer implements PrimitiveSerializer {
 	}
 
 	@Override
-	public short toShort(byte[] bytes) {
+	public short toShort(byte[] bytes, int offset) {
 		short result = 0;
-		
-	    for (int i = 0; i < 2; i++) {
+
+		int end = offset + 2;
+	    for (int i = offset; i < end; i++) {
 	        result <<= 8;
 	        result |= (bytes[i] & 0xff);
 	    }
@@ -63,10 +64,11 @@ public class SimplePrimitiveSerializer implements PrimitiveSerializer {
 	}
 
 	@Override
-	public int toInt(byte[] bytes) {
+	public int toInt(byte[] bytes, int offset) {
 		int result = 0;
-		
-	    for (int i = 0; i < 4; i++) {
+
+		int end = offset + 4;
+	    for (int i = offset; i < end; i++) {
 	        result <<= 8;
 	        result |= (bytes[i] & 0xff);
 	    }
@@ -75,10 +77,11 @@ public class SimplePrimitiveSerializer implements PrimitiveSerializer {
 	}
 
 	@Override
-	public long toLong(byte[] bytes) {
+	public long toLong(byte[] bytes, int offset) {
 		long result = 0;
-		
-	    for (int i = 0; i < 8; i++) {
+
+		int end = offset + 8;
+	    for (int i = offset; i < end; i++) {
 	        result <<= 8;
 	        result |= (bytes[i] & 0xff);
 	    }
@@ -87,13 +90,13 @@ public class SimplePrimitiveSerializer implements PrimitiveSerializer {
 	}
 
 	@Override
-	public float toFloat(byte[] bytes) {
-		return Float.intBitsToFloat(toInt(bytes));
+	public float toFloat(byte[] bytes, int offset) {
+		return Float.intBitsToFloat(toInt(bytes, offset));
 	}
 
 	@Override
-	public double toDouble(byte[] bytes) {
-		return Double.longBitsToDouble(toLong(bytes));
+	public double toDouble(byte[] bytes, int offset) {
+		return Double.longBitsToDouble(toLong(bytes, offset));
 	}
 
 }
