@@ -10,6 +10,8 @@ public class MessageReader {
 
 	private Connection mConnection;
 	private PrimitiveSerializer mSerializer;
+
+	private byte[] mLastHeaderData;
 	
 	public MessageReader(Connection connection, PrimitiveSerializer serializer) {
 		mConnection = connection;
@@ -18,14 +20,26 @@ public class MessageReader {
 	
 	public Message readMessage() throws ReadException, TimeoutException {
 		try {
-			byte[] headerData = mConnection.read(4);
+			byte[] headerData;
+
+			if (mLastHeaderData == null) {
+				headerData = mConnection.read(8);
+			} else {
+				headerData = mLastHeaderData;
+				mLastHeaderData = null;
+			}
+
 			int header = mSerializer.toInt(headerData);
-			
-			byte[] lengthData = mConnection.read(4);
-			int length = mSerializer.toInt(lengthData);
-			
-			byte[] data = mConnection.read(length);
-			return new StaticMessage(header, data);
+			int length = mSerializer.toInt(headerData, 4);
+
+			try {
+				byte[] data = mConnection.read(length);
+				return new StaticMessage(header, data);
+			} catch (Throwable t) {
+				mLastHeaderData = headerData;
+
+				throw t;
+			}
 		} catch(IOException e) {
 			throw new ReadException(e);
 		}
