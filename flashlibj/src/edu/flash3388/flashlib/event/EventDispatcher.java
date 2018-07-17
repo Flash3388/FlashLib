@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.event;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -33,7 +34,7 @@ public class EventDispatcher {
 	 * This listener has no event filtering.
 	 * 
 	 * @param listener listener
-	 * @return if the listener does not exist already and was added.
+	 * @return true if the listener does not exist already and was added, false otherwise.
 	 */
 	public boolean registerListener(Listener listener) {
 		return registerListener(new TrueEventPredicate(), listener);
@@ -44,9 +45,12 @@ public class EventDispatcher {
 	 * 
 	 * @param eventPredicate a condition which will be tested and must be answered to dispatch this listener.
 	 * @param listener listener
-	 * @return if the listener does not exist already and was added.
+	 * @return true if the listener does not exist already and was added, false otherwise.
 	 */
 	public boolean registerListener(Predicate<Event> eventPredicate, Listener listener) {
+		Objects.requireNonNull(listener, "listener cannot be null");
+		Objects.requireNonNull(eventPredicate, "listener predicate cannot be null");
+
 		synchronized (mListeners) {
 			return mListeners.add(new ListenerWrapper(eventPredicate, listener));
 		}
@@ -62,7 +66,7 @@ public class EventDispatcher {
 		synchronized (mListeners) {
 			ListenerWrapper toRemove = null;
 			for (ListenerWrapper wrapper : mListeners) {
-				if (listener.equals(wrapper.mListener)) {
+				if (wrapper.mListener.equals(listener)) {
 					toRemove = wrapper;
 					break;
 				}
