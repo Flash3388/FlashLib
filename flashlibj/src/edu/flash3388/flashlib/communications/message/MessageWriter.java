@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
+import edu.flash3388.flashlib.util.ArrayUtil;
 
 public class MessageWriter {
 
@@ -20,10 +21,7 @@ public class MessageWriter {
 		byte[] data = message.getData();
 		byte[] lengthData = mSerializer.toBytes(data.length);
 		
-		byte[] sendData = new byte[header.length + 4 + data.length];
-		System.arraycopy(header, 0, sendData, 0, header.length);
-		System.arraycopy(lengthData, 0, sendData, header.length, 4);
-		System.arraycopy(data, 0, sendData, header.length + 4, data.length);
+		byte[] sendData = ArrayUtil.combine(header, lengthData, data);
 		
 		try {
 			mConnection.write(sendData);
