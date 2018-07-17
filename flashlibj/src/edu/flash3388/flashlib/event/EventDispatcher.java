@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  */
 public class EventDispatcher {
 
-	private Set<ListenerWrapper> mListeners;
+	private final Set<ListenerWrapper> mListeners;
 	
 	public EventDispatcher() {
 		mListeners = new HashSet<ListenerWrapper>();
@@ -60,7 +60,19 @@ public class EventDispatcher {
 	 */
 	public boolean unregisterListener(Listener listener) {
 		synchronized (mListeners) {
-			return mListeners.remove(listener);
+			ListenerWrapper toRemove = null;
+			for (ListenerWrapper wrapper : mListeners) {
+				if (listener.equals(wrapper.mListener)) {
+					toRemove = wrapper;
+					break;
+				}
+			}
+
+			if (toRemove != null) {
+				return mListeners.remove(toRemove);
+			}
+
+			return false;
 		}
 	}
 	
