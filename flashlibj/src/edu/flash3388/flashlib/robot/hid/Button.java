@@ -3,12 +3,12 @@ package edu.flash3388.flashlib.robot.hid;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**
  * The base logic for a button. Allows attaching {@link Action} objects which will be executed 
- * according to different parameters. To allow execution of actions, it is required to call {@link #run()}
+ * according to different parameters. To allow execution of scheduling, it is required to call {@link #run()}
  * periodically, so that the activation parameters will be checked.
  * 
  * @author Tom Tzook
@@ -230,7 +230,7 @@ public abstract class Button implements BooleanSource, Runnable{
 	}
 	
 	/**
-	 * Gets the amount of actions attached to this object. 
+	 * Gets the amount of scheduling attached to this object.
 	 * @return action count
 	 */
 	public int getActionsCount(){
@@ -250,7 +250,7 @@ public abstract class Button implements BooleanSource, Runnable{
 		return false;
 	}
 	/**
-	 * Stops all running actions attached to this button. Done by calling {@link Action#cancel()}.
+	 * Stops all running scheduling attached to this button. Done by calling {@link Action#cancel()}.
 	 */
 	public void stopAll(){
 		Enumeration<ButtonAction> commEnum = actions.elements();

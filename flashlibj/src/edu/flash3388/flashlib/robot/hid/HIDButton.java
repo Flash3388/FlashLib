@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**

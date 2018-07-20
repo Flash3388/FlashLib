@@ -1,7 +1,10 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.robot.modes.ModeSelector;
 import edu.flash3388.flashlib.util.FlashUtil;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
@@ -18,10 +21,6 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * <p>
  * {@link #robotInit()} is called when FlashLib finished initialization. Robot systems should be initialized here.
  * <p>
- * This class provides extended custom initialization. When the robot is initializing, {@link #preInit(SimpleRobotInitializer)}
- * is called for custom initialization. The passed object, {@link SimpleRobotInitializer} is an extension
- * of {@link RobotInitializer} which adds additional initialization options.
- * <p>
  * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
  * <p>
  * When the robot enters shutdown mode {@link #robotFree()} is called to allow user shutdown operations.
@@ -31,70 +30,51 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public abstract class SimpleRobot extends RobotBase{
 	
-	protected static class SimpleRobotInitializer extends RobotInitializer{
-		
-		public void copy(SimpleRobotInitializer initializer){
-			super.copy(initializer);
-		}
-	}
-	
 	public static final int ITERATION_DELAY = 5; //ms
 	
-	private boolean stop = false;
-	
+	private AtomicBoolean mRunLoop;
+
+	protected SimpleRobot() {
+		mRunLoop = new AtomicBoolean(true);
+	}
+
+	@Override
+	protected void robotMain() {
+		robotLoop();
+	}
+
+	@Override
+	protected void robotShutdown(){
+		mRunLoop.compareAndSet(true, false);
+
+		robotFree();
+	}
+
 	private void robotLoop(){
-		if((Flashboard.getInitMode() & Flashboard.INIT_COMM) != 0)
-			Flashboard.start();
-		
-		int lastState;
-		while(!stop){
-			if(FlashRobotUtil.inEmergencyStop()){
-				
-				while(FlashRobotUtil.inEmergencyStop() && !stop){
-					FlashUtil.delay(ITERATION_DELAY);
-				}
-			}
-			else if(isDisabled()){
+		while(mRunLoop.get()){
+			if(isDisabled()){
 				disabled();
 				
-				while(isDisabled() && !FlashRobotUtil.inEmergencyStop() && !stop){
+				while(stayInMode(ModeSelector.MODE_DISABLED)){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
-			}else{
-				lastState = getMode();
+			} else{
+				int currentMode = getMode();
 				
-				onMode(lastState);
+				onMode(currentMode);
 				
-				while(isMode(lastState) && !FlashRobotUtil.inEmergencyStop() && !stop){
+				while(stayInMode(currentMode)){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			}
 		}
 	}
-	
-	@Override
-	protected void configInit(RobotInitializer initializer){
-		SimpleRobotInitializer ainitializer = new SimpleRobotInitializer();
-		preInit(ainitializer);
-		
-		initializer.copy(ainitializer);
+
+	private boolean stayInMode(int mode) {
+		return isMode(mode) && mRunLoop.get();
 	}
-	@Override
-	protected void robotMain() {
-		robotInit();
-		robotLoop();
-	}
-	@Override
-	protected void robotShutdown(){
-		stop = true;
-		robotFree();
-	}
-	
-	protected void preInit(SimpleRobotInitializer initializer){}
-	protected abstract void robotInit();
+
 	protected void robotFree(){}
-	
 	protected abstract void disabled();
-	
 	protected abstract void onMode(int mode);
 }

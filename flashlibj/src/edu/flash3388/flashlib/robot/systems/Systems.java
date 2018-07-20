@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.robot.InstantAction;
-import edu.flash3388.flashlib.robot.Subsystem;
+import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.InstantAction;
+import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 /**
  * Systems provides assistance methods for creation of system-related objects and instances with ease.

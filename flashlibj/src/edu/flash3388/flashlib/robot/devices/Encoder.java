@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.devices;
 
-import edu.flash3388.flashlib.robot.PIDSource;
+import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**

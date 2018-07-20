@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.HIDInterface;
+import edu.flash3388.flashlib.robot.hid.HIDInterface;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 

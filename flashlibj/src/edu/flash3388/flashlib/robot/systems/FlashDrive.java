@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.Subsystem;
+import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.hid.Axis;

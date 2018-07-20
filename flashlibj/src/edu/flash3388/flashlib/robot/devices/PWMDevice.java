@@ -140,8 +140,8 @@ public class PWMDevice implements IOPort{
 	}
 	
 	/**
-	 * Sets the speed of the device between -1.0 and 1.0. Negative values indicate backward actions, positive 
-	 * values indicate forward actions, 0.0 indicates stopping.
+	 * Sets the speed of the device between -1.0 and 1.0. Negative values indicate backward scheduling, positive
+	 * values indicate forward scheduling, 0.0 indicates stopping.
 	 * <p>
 	 * The speed value is converted to a PWM duty cycle by using the bounds configured to the device.
 	 * If the given value is positive, the output duty cycle is calculated by getting the minimum positive scale

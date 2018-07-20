@@ -2,9 +2,9 @@ package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.PIDController;
-import edu.flash3388.flashlib.robot.PIDSource;
-import edu.flash3388.flashlib.robot.Subsystem;
+import edu.flash3388.flashlib.robot.control.PIDController;
+import edu.flash3388.flashlib.robot.control.PIDSource;
+import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;

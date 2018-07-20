@@ -1,11 +1,11 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.ModableMotor;
 import edu.flash3388.flashlib.robot.devices.MultiSpeedController;
-import edu.flash3388.flashlib.robot.Subsystem;
+import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 /**
  * A generic single motor system. Implements XAxisMovable, YAxisMovable, Rotatable, ModableMotor, and VoltageScalable.

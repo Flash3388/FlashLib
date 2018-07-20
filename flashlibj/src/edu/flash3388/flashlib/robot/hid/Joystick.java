@@ -140,7 +140,7 @@ public class Joystick implements HID, Runnable{
 	
 	/**
 	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
-	 * actions attached to those wrapped. 
+	 * scheduling attached to those wrapped.
 	 */
 	@Override
 	public void run() {

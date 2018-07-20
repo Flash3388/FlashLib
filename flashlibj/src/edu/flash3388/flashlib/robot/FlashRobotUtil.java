@@ -7,6 +7,8 @@ import edu.flash3388.flashlib.flashboard.EmergencyStopControl;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.flashboard.FlashboardRemoteLogger;
+import edu.flash3388.flashlib.robot.hid.HIDInterface;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
@@ -36,7 +38,7 @@ public class FlashRobotUtil {
 		return emergencyStop;
 	}
 	/**
-	 * Enters the robot into an emergency stop. When emergency stop occurs, the Scheduler is disabled, all actions
+	 * Enters the robot into an emergency stop. When emergency stop occurs, the Scheduler is disabled, all scheduling
 	 * are removed and the MotorSafetyHelper disables all motors.
 	 */
 	public static void enterEmergencyStop(){

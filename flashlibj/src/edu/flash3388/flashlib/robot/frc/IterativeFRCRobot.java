@@ -12,11 +12,11 @@ import java.util.logging.Logger;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
-import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
-import edu.flash3388.flashlib.robot.HIDUpdateTask;
+import edu.flash3388.flashlib.robot.hid.HIDUpdateTask;
 import edu.flash3388.flashlib.robot.PowerLogger;
-import edu.flash3388.flashlib.robot.Scheduler;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.devices.IOFactory;
 
 import static edu.flash3388.flashlib.robot.FlashRobotUtil.inEmergencyStop;
@@ -97,7 +97,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 		
 		/**
 		 * Indicates whether or not to add an auto HID update task to the {@link Scheduler}. This will
-		 * refresh HID data automatically, allowing for HID-activated actions. The task will update 
+		 * refresh HID data automatically, allowing for HID-activated scheduling. The task will update
 		 * controllers only if the current operation mode is teleop.
 		 * <p>
 		 * The default value is `false`.
@@ -317,7 +317,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	 */
 	protected void preInit(RobotInitializer initializer){}
 	/**
-	 * Called after initialization of FlashLib. Use this to initialize your robot systems and actions for use.
+	 * Called after initialization of FlashLib. Use this to initialize your robot systems and scheduling for use.
 	 */
 	protected abstract void initRobot();
 	/**
@@ -333,7 +333,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	 */
 	protected abstract void teleopInit();
 	/**
-	 * Called periodically while in Teleoperation mode. Use this to perform actions during operator control.
+	 * Called periodically while in Teleoperation mode. Use this to perform scheduling during operator control.
 	 */
 	protected abstract void teleopPeriodic();
 	/**
@@ -341,7 +341,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	 */
 	protected abstract void autonomousInit();
 	/**
-	 * Called periodically while in Autonomous mode. Use this to perform actions during automatic control.
+	 * Called periodically while in Autonomous mode. Use this to perform scheduling during automatic control.
 	 */
 	protected abstract void autonomousPeriodic();
 	/**
@@ -349,7 +349,7 @@ public abstract class IterativeFRCRobot extends FRCRobotBase{
 	 */
 	protected void testInit(){}
 	/**
-	 * Called periodically while in Test mode. Use this to perform actions during test control.
+	 * Called periodically while in Test mode. Use this to perform scheduling during test control.
 	 */
 	protected void testPeriodic(){}
 }

@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.modes.ModeSelector;
+
 /**
  * An interface for the current robot implementation. This interface is used by
  * the robot framework to access data about robot operations. When initializing robot operations,
@@ -16,7 +18,7 @@ package edu.flash3388.flashlib.robot;
 public interface RobotInterface {
 	
 	/**
-	 * Gets the initialized {@link ModeSelector} object for the robot. 
+	 * Gets the initialized {@link ModeSelector} object for the robot.
 	 * <p>
 	 * This object will be used by base methods for operation mode data.
 	 * 
