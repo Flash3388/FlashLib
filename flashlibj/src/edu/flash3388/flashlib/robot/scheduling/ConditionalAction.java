@@ -12,65 +12,38 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  */
 public class ConditionalAction extends Action {
 
-	private BooleanSource condition;
-	private Action actionTrue, actionFalse, runAction;
-	
-	/**
-	 * Creates a new conditional action.
-	 * @param condition the condition source
-	 * @param aTrue action to run when condition is true
-	 * @param aFalse action to run when condition is false
-	 */
-	public ConditionalAction(BooleanSource condition, Action aTrue, Action aFalse){
-		this.condition = condition;
-		this.actionTrue = aTrue;
-		this.actionFalse = aFalse;
+	private BooleanSource mCondition;
+	private Action mActionRunOnTrue;
+	private Action mActionRunOnFalse;
+
+	private Action mActionRunning;
+
+	public ConditionalAction(BooleanSource condition, Action runOnTrue, Action runOnFalse){
+		mCondition = condition;
+		mActionRunOnTrue = runOnTrue;
+		mActionRunOnFalse = runOnFalse;
 	}
-	
-	private void validateRequirements(Action action){
-		resetRequirements();
-		copyRequirements(action);
-	}
-	
-	public void setConditionSource(BooleanSource source){
-		this.condition = source;
-	}
-	public void setActionOnTrue(Action action){
-		actionTrue = action;
-	}
-	public void setActionOnFalse(Action action){
-		actionFalse = action;
-	}
-	
+
 	@Override
-	public void start(){
-		if(condition == null){
-			FlashUtil.getLogger().severe("Missing condition source");
-			return;
-		}
-		runAction = condition.get()? actionTrue : actionFalse;
-		validateRequirements(runAction);
-		super.start();
+	protected void initialize() {
+		mActionRunning = mCondition.get() ? mActionRunOnTrue : mActionRunOnFalse;
+		mActionRunning.start();
 	}
-	
-	@Override
-	protected void initialize(){ 
-		runAction.initialize();
-	}
+
 	@Override
 	protected void execute() {
-		runAction.execute();
+
 	}
+
 	@Override
-	protected boolean isFinished(){ 
-		return runAction.isFinished();
+	protected boolean isFinished() {
+		return !mActionRunning.isRunning();
 	}
+
 	@Override
 	protected void end() {
-		runAction.end();
-	}
-	@Override
-	protected void interrupted(){ 
-		runAction.interrupted();
+		if (mActionRunning.isRunning()) {
+			mActionRunning.cancel();
+		}
 	}
 }

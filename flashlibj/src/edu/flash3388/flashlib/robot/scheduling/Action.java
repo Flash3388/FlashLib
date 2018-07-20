@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -48,209 +49,10 @@ public abstract class Action{
 		protected void end() {}
 	};
 
-	private Set<Subsystem> requirements = new HashSet<Subsystem>(2);
-	private boolean initialized = false;
-	private boolean canceled = false;
-	private boolean running = false;
-	private int timeout = -1;
-	private int startTime = -1;
-	private String name;
-	
-	/**
-	 * Creates a new action with a given name.
-	 * 
-	 * @param name name of the action
-	 */
-	public Action(String name){
-		this.name = name;
-	}
-	/**
-	 * Creates a new action with an empty name.
-	 */
-	public Action(){
-		this("");
-	}
-	
-	/**
-	 * Starts the action. If the Scheduler was initialized, than the action is added to the
-	 * Scheduler for running. If the action is running than it is not added.
-	 */
-	public void start(){
-		if(!running && Scheduler.getInstance().add(this)){
-			initialized = false;
-			canceled = false;
-			running = true;
-		}
-	}
-	/**
-	 * Cancels the operation of the action if it is running.
-	 */
-	public void cancel(){
-		if(running)
-			canceled = true;
-	}
-	
-	void removed(){
-		if(initialized){
-			if(canceled)
-				interrupted();
-			else end();
-		}
-		initialized = false;
-		canceled = false;
-		running = false;
-		startTime = -1;
-	}
-	boolean run(){
-		if(isTimedout())
-			cancel();
-		if(canceled)
-			return false;
-		if(!initialized){
-			initialized = true;
-			startTime = FlashUtil.millisInt();
-			initialize();
-		}
-		execute();
-		return !isFinished();
-	}
-	
-	/**
-	 * Gets the name of the action.
-	 * @return the name of the action
-	 */
-	public String getName(){
-		return name;
-	}
-	/**
-	 * Sets the name of the action.
-	 * @param name name of the action
-	 */
-	public void setName(String name){
-		this.name = name;
-	}
-	
-	/**
-	 * Gets whether or not an action has been canceled. Meaning it did not reach {@link #end()}.
-	 * @return true if the action was canceled, false otherwise
-	 */
-	public boolean isCanceled(){
-		return canceled;
-	}
-	/**
-	 * Gets whether or not an action is running.
-	 * @return true if the action is running, false otherwise
-	 */
-	public boolean isRunning(){
-		return running;
-	}
-	/**
-	 * Gets the running timeout of the action in milliseconds. 
-	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
-	 */
-	public int getTimeout(){
-		return timeout;
-	}
-	/**
-	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param timeout timeout in milliseconds
-	 */
-	public void setTimeout(int timeout){
-		this.timeout = timeout;
-	}
-	/**
-	 * Sets the running timeout for this action in seconds. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param timeout timeout in seconds
-	 */
-	public void setTimeout(double timeout){
-		setTimeout((int)(timeout * 0.001));
-	}
-	/**
-	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
-	 */
-	public void cancelTimeout(){
-		setTimeout(-1);
-	}
-	/**
-	 * Adds a System that is used by this action.
-	 * @param subsystem a system used by this action
-	 */
-	public void requires(Subsystem subsystem){
-		requirements.add(subsystem);
-	}
-	/**
-	 * Adds Systems that are used by this action.
-	 * @param subsystems an array of systems used by this action
-	 */
-	public void requires(Subsystem... subsystems){
-		for(Subsystem s : subsystems)
-			requires(s);
-	}
-	/**
-	 * Resets the requirements of this action
-	 */
-	public void resetRequirements(){
-		requirements.clear();
-	}	
-	/**
-	 * Gets the {@link Subsystem}s which are used by this action.
-	 * @return {@link Iterator} of the used {@link Subsystem}s.
-	 */
-	public Iterator<Subsystem> getRequirements(){
-		return requirements.iterator();
-	}
-	
-	
-	/**
-	 * Copies the requirements used by another action to this one.
-	 * @param action action to copy requirements from
-	 */
-	protected void copyRequirements(Action action){
-		for (Iterator<Subsystem> sys = action.getRequirements(); sys.hasNext(); )
-			requires(sys.next());
-	}
-	/**
-	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout
-	 * is defined. 
-	 * @return true if the action timeout, false otherwise
-	 */
-	protected boolean isTimedout(){
-		return startTime > 0 && timeout > 0 && (FlashUtil.millisInt() - startTime) 
-				>= timeout;
-	}
-	
-	/**
-	 * Called once when the action is started.
-	 */
-	protected void initialize(){ }
-	/**
-	 * Returns true when the action should end.
-	 * @return true when the action should end, false otherwise.
-	 */
-	protected boolean isFinished(){ return false;}
-	/**
-	 * Called when the action was before {@link #isFinished()} returns true.
-	 * <p>
-	 * Calls {@link #end()} now. Override to execute something else.
-	 * </p>
-	 */
-	protected void interrupted(){ end();}
-	
-	/**
-	 * Called repeatedly during the execution of the action.
-	 */
-	protected abstract void execute();
-	/**
-	 * Called when {@link #isFinished()} returns true.
-	 */
-	protected abstract void end();
-	
 	/**
 	 * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link #cancel()}
 	 * for a given action when started.
-	 * 
+	 *
 	 * @param action action to cancel
 	 * @return canceling action
 	 */
@@ -263,4 +65,234 @@ public abstract class Action{
 			}
 		};
 	}
+
+	private final Set<Subsystem> mRequirements;
+
+	private boolean mIsInitialized;
+	private boolean mIsCanceled;
+	private boolean mIsRunning;
+
+	private int mTimeoutMs;
+	private int mStartTime;
+
+	/**
+	 * Creates a new action.
+	 */
+	public Action(int timeoutMs){
+		this();
+		setTimeout(timeoutMs);
+	}
+
+	public Action(double timeoutSeconds) {
+		this();
+		setTimeout(timeoutSeconds);
+	}
+
+	public Action() {
+		mRequirements = new HashSet<Subsystem>(2);
+
+		mIsRunning = false;
+		mIsCanceled = false;
+		mIsInitialized = false;
+
+		mTimeoutMs = -1;
+		mStartTime = -1;
+	}
+	
+	/**
+	 * Starts the action. If the Scheduler was initialized, than the action is added to the
+	 * Scheduler for running. If the action is running than it is not added.
+	 */
+	public void start(){
+		if(!mIsRunning){
+			mIsInitialized = false;
+			mIsCanceled = false;
+			mIsRunning = true;
+
+			Scheduler.getInstance().add(this);
+		}
+	}
+
+	/**
+	 * Cancels the operation of the action if it is running.
+	 */
+	public void cancel(){
+		if(isRunning()) {
+			mIsCanceled = true;
+		}
+	}
+
+	/**
+	 * Gets whether or not an action has been canceled. Meaning it did not reach {@link #end()}.
+	 * @return true if the action was canceled, false otherwise
+	 */
+	public boolean isCanceled(){
+		return mIsCanceled;
+	}
+
+	/**
+	 * Gets whether or not an action is running.
+	 * @return true if the action is running, false otherwise
+	 */
+	public boolean isRunning(){
+		return mIsRunning;
+	}
+
+	/**
+	 * Gets the running timeout of the action in milliseconds.
+	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
+	 */
+	public int getTimeoutMs(){
+		return mTimeoutMs;
+	}
+
+	/**
+	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param timeoutMs timeout in milliseconds
+	 */
+	public void setTimeout(int timeoutMs){
+		mTimeoutMs = timeoutMs;
+	}
+
+	/**
+	 * Sets the running timeout for this action in seconds. When started, if the timeout is not 0 or negative
+	 * time is counted. If the timeout is reached, the action is canceled.
+	 * @param timeoutSeconds timeout in seconds
+	 */
+	public void setTimeout(double timeoutSeconds){
+		setTimeout((int)(timeoutSeconds * 0.001));
+	}
+
+	/**
+	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
+	 */
+	public void cancelTimeout(){
+		setTimeout(-1);
+	}
+
+	/**
+	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout
+	 * is defined.
+	 * @return true if the action timeout, false otherwise
+	 */
+	public boolean hasTimeoutReached(){
+		return mStartTime > 0 && mTimeoutMs > 0 && (FlashUtil.millisInt() - mStartTime)
+				>= mTimeoutMs;
+	}
+
+	/**
+	 * Adds a System that is used by this action.
+	 * @param subsystem a system used by this action
+	 */
+	public void requires(Subsystem subsystem){
+		mRequirements.add(subsystem);
+	}
+
+	/**
+	 * Adds Systems that are used by this action.
+	 * @param subsystems an array of systems used by this action
+	 */
+	public void requires(Subsystem... subsystems){
+		mRequirements.addAll(Arrays.asList(subsystems));
+	}
+
+	/**
+	 * Resets the requirements of this action
+	 */
+	public void resetRequirements(){
+		mRequirements.clear();
+	}
+
+	/**
+	 * Gets the {@link Subsystem}s which are used by this action.
+	 * @return {@link Set} of the used {@link Subsystem}s.
+	 */
+	public Set<Subsystem> getRequirements(){
+		return Collections.unmodifiableSet(mRequirements);
+	}
+
+
+	/**
+	 * Copies the requirements used by another action to this one.
+	 * @param action action to copy requirements from
+	 */
+	public void copyRequirements(Action action){
+		for (Subsystem subsystem : action.getRequirements()) {
+			requires(subsystem);
+		}
+	}
+
+	public boolean doesRequire(Subsystem subsystem) {
+		return mRequirements.contains(subsystem);
+	}
+	
+	void removed(){
+		if(mIsInitialized){
+			if(isCanceled()) {
+				interrupted();
+			}
+			else {
+				end();
+			}
+		}
+
+		mIsInitialized = false;
+		mIsCanceled = false;
+		mIsRunning = false;
+		mStartTime = -1;
+	}
+
+	boolean run(){
+		if(hasTimeoutReached()) {
+			cancel();
+		}
+
+		if(isCanceled()) {
+			return false;
+		}
+
+		if(!mIsInitialized) {
+			mIsInitialized = true;
+			mStartTime = FlashUtil.millisInt();
+			initialize();
+		}
+
+		execute();
+
+		return !isFinished();
+	}
+	
+	/**
+	 * Called once when the action is started.
+	 */
+	protected void initialize() {}
+
+	/**
+	 * Returns true when the action should end.
+	 * @return true when the action should end, false otherwise.
+	 */
+	protected boolean isFinished() {
+		return false;
+	}
+
+	/**
+	 * Called when the action was before {@link #isFinished()} returns true.
+	 * <p>
+	 * Calls {@link #end()} now. Override to execute something else.
+	 * </p>
+	 */
+	protected void interrupted() {
+		end();
+	}
+	
+	/**
+	 * Called repeatedly during the execution of the action.
+	 */
+	protected abstract void execute();
+
+	/**
+	 * Called when {@link #isFinished()} returns true.
+	 */
+	protected abstract void end();
 }
