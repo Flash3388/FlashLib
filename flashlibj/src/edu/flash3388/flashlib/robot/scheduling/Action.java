@@ -37,7 +37,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class Action{
+public abstract class Action {
 	
 	/**
 	 * An action which does nothing
@@ -80,12 +80,12 @@ public abstract class Action{
 	 */
 	public Action(int timeoutMs){
 		this();
-		setTimeout(timeoutMs);
+		setTimeoutMs(timeoutMs);
 	}
 
 	public Action(double timeoutSeconds) {
 		this();
-		setTimeout(timeoutSeconds);
+		setTimeoutSeconds(timeoutSeconds);
 	}
 
 	public Action() {
@@ -151,7 +151,7 @@ public abstract class Action{
 	 * time is counted. If the timeout is reached, the action is canceled.
 	 * @param timeoutMs timeout in milliseconds
 	 */
-	public void setTimeout(int timeoutMs){
+	public void setTimeoutMs(int timeoutMs){
 		mTimeoutMs = timeoutMs;
 	}
 
@@ -160,15 +160,15 @@ public abstract class Action{
 	 * time is counted. If the timeout is reached, the action is canceled.
 	 * @param timeoutSeconds timeout in seconds
 	 */
-	public void setTimeout(double timeoutSeconds){
-		setTimeout((int)(timeoutSeconds * 0.001));
+	public void setTimeoutSeconds(double timeoutSeconds){
+		setTimeoutMs((int)(timeoutSeconds * 0.001));
 	}
 
 	/**
 	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
 	 */
 	public void cancelTimeout(){
-		setTimeout(-1);
+		mTimeoutMs = -1;
 	}
 
 	/**
@@ -226,7 +226,12 @@ public abstract class Action{
 	public boolean doesRequire(Subsystem subsystem) {
 		return mRequirements.contains(subsystem);
 	}
-	
+
+	void copyActionProperties(Action action) {
+		copyRequirements(action);
+		mTimeoutMs = action.mTimeoutMs;
+	}
+
 	void removed(){
 		if(mIsInitialized){
 			if(isCanceled()) {

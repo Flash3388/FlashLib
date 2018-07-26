@@ -10,23 +10,24 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class PeriodicRunnable implements Runnable{
 
-	private Runnable runnable;
-	private int time;
-	private int lastRun = -1;
+	private Runnable mRunnable;
+	private int mPeriodMs;
+	private int mLastRunTimeMs = -1;
 	
-	public PeriodicRunnable(Runnable run, int ms){
-		this.runnable = run;
-		this.time = ms;
+	public PeriodicRunnable(Runnable task, int periodMs){
+		this.mRunnable = task;
+		this.mPeriodMs = periodMs;
 	}
-	public PeriodicRunnable(Runnable run, double sec){
-		this(run, (int)(sec * 0.001));
+
+	public PeriodicRunnable(Runnable task, double periodSeconds){
+		this(task, (int)(periodSeconds * 0.001));
 	}
 	
 	@Override
 	public void run() {
-		if(lastRun < 0 || FlashUtil.millisInt() - lastRun >= time){
-			runnable.run();
-			lastRun = FlashUtil.millisInt();
+		if(mLastRunTimeMs < 0 || FlashUtil.millisInt() - mLastRunTimeMs >= mPeriodMs){
+			mRunnable.run();
+			mLastRunTimeMs = FlashUtil.millisInt();
 		}
 	}
 }

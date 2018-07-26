@@ -98,7 +98,11 @@ public final class Scheduler {
 	}
 
 	public void removeAllActions() {
-		mActions.clear();
+		List<Action> allActions = new ArrayList<Action>(mActions);
+
+		for (Action action : allActions) {
+			remove(action);
+		}
 	}
 
 	public void registerSubsystem(Subsystem subsystem) {
