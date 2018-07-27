@@ -25,6 +25,7 @@ public interface RobotInterface {
 	 * @return robot mode selector, or null if not initialized.
 	 */
 	ModeSelector getModeSelector();
+
 	/**
 	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot.
 	 * <p>
@@ -37,6 +38,7 @@ public interface RobotInterface {
 	default int getMode(){
 		return getModeSelector() == null? ModeSelector.MODE_DISABLED : getModeSelector().getMode();
 	}
+
 	/**
 	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
 	 * to a given mode value. If true, this indicates that the current mode is the given mode.
@@ -63,19 +65,4 @@ public interface RobotInterface {
 	default boolean isDisabled(){
 		return isMode(ModeSelector.MODE_DISABLED);
 	}
-	/**
-	 * Gets whether or not the robot is currently in operator control mode. Operator control
-	 * mode is a mode where the robot is controlled by an operator and does not operator autonomously.
-	 * 
-	 * @return true if in operator control mode, false otherwise
-	 */
-	boolean isOperatorControl();
-	/**
-	 * Gets whether or not the current implementation is an FRC robot. Used to indicate if WPILib
-	 * is currently used for electronics IO. If this is not the case, FlashLib will know to operate its own
-	 * electronics IO features.
-	 * 
-	 * @return true if an FRC robot, false otherwise
-	 */
-	boolean isFRC();
 }

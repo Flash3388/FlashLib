@@ -58,27 +58,6 @@ public abstract class RobotBase implements RobotInterface {
 	//--------------------------------------------------------------------
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * returns false always.
-	 * <p>
-	 * It is recommended to override this method and indicate when the robot is controlled by a user.
-	 */
-	@Override
-	public boolean isOperatorControl() {
-		return false;
-	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * returns false always
-	 */
-	@Override
-	public boolean isFRC(){
-		return false;
-	}
-
-	/**
 	 * Called when robot initialization starts, allowing for initialization of user code.
 	 *
 	 * @throws RobotInitializationException if an error occurs while initializing
