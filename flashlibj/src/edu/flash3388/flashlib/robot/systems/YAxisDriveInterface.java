@@ -13,6 +13,7 @@ public interface YAxisMovable {
 	 * @param speed speed [-1...1]
 	 */
 	void moveY(double speed);
+
 	/**
 	 * Moves the system at a speed to a given direction along the y-axis.
 	 * @param speed speed [0...1]
@@ -21,6 +22,7 @@ public interface YAxisMovable {
 	default void moveY(double speed, boolean direction){
 		moveY(direction? speed : -speed);
 	}
+
 	/**
 	 * Moves the system at a speed forwards.
 	 * 
@@ -32,6 +34,7 @@ public interface YAxisMovable {
 	default void forward(double speed){
 		moveY(speed, true);
 	}
+
 	/**
 	 * Moves the system at a speed backwards.
 	 * <p>Default implementation calls {@link #moveY(double, boolean)} with the given speed
@@ -41,6 +44,7 @@ public interface YAxisMovable {
 	default void backward(double speed){
 		moveY(speed, false);
 	}
+
 	/**
 	 * Stops the system
 	 */

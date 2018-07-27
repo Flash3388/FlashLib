@@ -2,29 +2,31 @@ package edu.flash3388.flashlib.robot.scheduling.actions.drive;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.HolonomicDriveSystem;
+import edu.flash3388.flashlib.robot.systems.HolonomicDriveInterface;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class PolarDriveAction extends Action{
 	
-	private HolonomicDriveSystem driveTrain;
+	private HolonomicDriveInterface driveTrain;
 	private DoubleSource dirAxis, magAxis, rotateAxis;
 	
-	public PolarDriveAction(HolonomicDriveSystem driveTrain, 
+	public PolarDriveAction(HolonomicDriveInterface driveTrain,
 			DoubleSource magnitude, DoubleSource direction, DoubleSource rotate) {
 		this.driveTrain = driveTrain;
 		this.dirAxis = direction;
 		this.magAxis = magnitude;
 		this.rotateAxis = rotate;
 		
-		if(driveTrain instanceof Subsystem)
-			requires((Subsystem)driveTrain);
+		if(driveTrain instanceof Subsystem) {
+			requires((Subsystem) driveTrain);
+		}
 	}
 	
 	@Override
 	protected void execute() {
 		driveTrain.holonomicPolar(magAxis.get(), dirAxis.get(), rotateAxis.get());
 	}
+
 	@Override
 	protected void end() {
 		driveTrain.stop();

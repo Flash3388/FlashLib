@@ -10,5 +10,5 @@ package edu.flash3388.flashlib.robot.systems;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface RobotDriveSystem extends Rotatable, YAxisMovable{
+public interface DriveInterface extends Rotatable, YAxisMovable{
 }

@@ -3,12 +3,12 @@ package edu.flash3388.flashlib.robot.systems;
 import edu.flash3388.flashlib.math.Mathf;
 
 /**
- * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link RobotDriveSystem}.
+ * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link DriveInterface}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface HolonomicDriveSystem extends RobotDriveSystem, XAxisMovable{
+public interface HolonomicDriveInterface extends DriveInterface, XAxisMovable {
 	
 	/**
 	 * {@inheritDoc}

@@ -2,28 +2,30 @@ package edu.flash3388.flashlib.robot.scheduling.actions.drive;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.YAxisMovable;
+import edu.flash3388.flashlib.robot.systems.Rotatable;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class YAxisMoveAction extends Action{
+public class RotateAction extends Action{
 
-	private YAxisMovable yMovable;
+	private Rotatable rotatable;
 	private DoubleSource speedSource;
 	
-	public YAxisMoveAction(YAxisMovable yMovable, DoubleSource speedSource) {
-		this.yMovable = yMovable;
+	public RotateAction(Rotatable rotatable, DoubleSource speedSource) {
+		this.rotatable = rotatable;
 		this.speedSource = speedSource;
 		
-		if(yMovable instanceof Subsystem)
-			requires((Subsystem)yMovable);
+		if(rotatable instanceof Subsystem) {
+			requires((Subsystem) rotatable);
+		}
 	}
 	
 	@Override
 	protected void execute() {
-		yMovable.moveY(speedSource.get());
+		rotatable.rotate(speedSource.get());
 	}
+
 	@Override
 	protected void end() {
-		yMovable.stop();
+		rotatable.stop();
 	}
 }

@@ -2,28 +2,30 @@ package edu.flash3388.flashlib.robot.scheduling.actions.drive;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.Rotatable;
+import edu.flash3388.flashlib.robot.systems.XAxisMovable;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class RotateAction extends Action{
+public class XAxisMoveAction extends Action{
 
-	private Rotatable rotatable;
+	private XAxisMovable xMovable;
 	private DoubleSource speedSource;
 	
-	public RotateAction(Rotatable rotatable, DoubleSource speedSource) {
-		this.rotatable = rotatable;
+	public XAxisMoveAction(XAxisMovable xMovable, DoubleSource speedSource) {
+		this.xMovable = xMovable;
 		this.speedSource = speedSource;
 		
-		if(rotatable instanceof Subsystem)
-			requires((Subsystem)rotatable);
+		if(xMovable instanceof Subsystem) {
+			requires((Subsystem) xMovable);
+		}
 	}
 	
 	@Override
 	protected void execute() {
-		rotatable.rotate(speedSource.get());
+		xMovable.moveX(speedSource.get());
 	}
+
 	@Override
 	protected void end() {
-		rotatable.stop();
+		xMovable.stop();
 	}
 }

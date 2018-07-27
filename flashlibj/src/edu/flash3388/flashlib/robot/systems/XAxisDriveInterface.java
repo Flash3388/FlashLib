@@ -13,6 +13,7 @@ public interface XAxisMovable {
 	 * @param speed speed [-1...1]
 	 */
 	void moveX(double speed);
+
 	/**
 	 * Moves the system at a speed to a given direction along the x-axis.
 	 * @param speed speed [0...1]
@@ -21,6 +22,7 @@ public interface XAxisMovable {
 	default void moveX(double speed, boolean direction){
 		moveX(direction? speed : -speed);
 	}
+
 	/**
 	 * Moves the system at a speed to the right.
 	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
@@ -30,6 +32,7 @@ public interface XAxisMovable {
 	default void right(double speed){
 		moveX(speed, true);
 	}
+
 	/**
 	 * Moves the system at a speed to the left.
 	 * <p>Default implementation calls {@link #moveX(double, boolean)} with the given speed
@@ -39,6 +42,7 @@ public interface XAxisMovable {
 	default void left(double speed){
 		moveX(speed, false);
 	}
+
 	/**
 	 * Stops the system.
 	 */
