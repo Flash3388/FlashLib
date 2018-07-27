@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.frc;
+package edu.flash3388.flashlib.robot.frc.devices;
 
 import edu.flash3388.flashlib.robot.devices.DigitalOutput;
 

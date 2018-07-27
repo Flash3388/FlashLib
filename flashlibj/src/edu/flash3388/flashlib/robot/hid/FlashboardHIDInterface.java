@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.FlashboardHIDControl;
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
 
 public class FlashboardHIDInterface implements HIDInterface, Runnable {
 
@@ -35,22 +34,16 @@ public class FlashboardHIDInterface implements HIDInterface, Runnable {
 
 	@Override
 	public double getHidAxis(int hid, int axis) {
-		if(FlashRobotUtil.inEmergencyStop())
-			return 0.0;
 		return hidcontrol.getAxis(hid, axis);
 	}
 
 	@Override
 	public boolean getHidButton(int hid, int button) {
-		if(FlashRobotUtil.inEmergencyStop())
-			return false;
 		return hidcontrol.getButton(hid, button);
 	}
 
 	@Override
 	public int getHidPov(int hid, int pov) {
-		if(FlashRobotUtil.inEmergencyStop())
-			return -1;
 		return hidcontrol.getPOV(hid, pov);
 	}
 

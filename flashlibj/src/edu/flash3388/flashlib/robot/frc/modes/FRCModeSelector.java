@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.frc;
+package edu.flash3388.flashlib.robot.frc.modes;
 
 import edu.flash3388.flashlib.robot.modes.ModeSelector;
 import edu.wpi.first.wpilibj.DriverStation;

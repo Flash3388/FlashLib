@@ -1,6 +1,5 @@
-package edu.flash3388.flashlib.robot.frc;
+package edu.flash3388.flashlib.robot.frc.hid;
 
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.hid.HIDInterface;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
@@ -31,21 +30,21 @@ public class FRCHIDInterface implements HIDInterface{
 
 	@Override
 	public double getHidAxis(int hid, int axis) {
-		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
+		if(RobotState.isDisabled())
 			return 0;
 		return ds.getStickAxis(hid, axis);
 	}
 	
 	@Override
 	public boolean getHidButton(int hid, int button) {
-		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
+		if(RobotState.isDisabled())
 			return false;
 		return ds.getStickButton(hid, (byte)button);
 	}
 
 	@Override
 	public int getHidPov(int hid, int pov) {
-		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
+		if(RobotState.isDisabled())
 			return -1;
 		return ds.getStickPOV(hid, pov);
 	}

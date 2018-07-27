@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.frc;
+package edu.flash3388.flashlib.robot.frc.logging;
 
 import java.util.logging.Handler;
 import java.util.logging.Level;
