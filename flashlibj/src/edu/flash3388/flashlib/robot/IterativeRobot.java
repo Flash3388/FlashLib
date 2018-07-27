@@ -71,9 +71,9 @@ public abstract class IterativeRobot extends RobotBase {
 	private AtomicBoolean mRunLoop;
 	private Scheduler mScheduler;
 
-	protected IterativeRobot(Scheduler scheduler) {
+	protected IterativeRobot() {
 	    mRunLoop = new AtomicBoolean(true);
-	    mScheduler = scheduler;
+	    mScheduler = Scheduler.getInstance();
     }
 
 	@Override
@@ -86,7 +86,7 @@ public abstract class IterativeRobot extends RobotBase {
         mRunLoop.compareAndSet(true, false);
 
 		mScheduler.removeAllActions();
-		mScheduler.setDisabled(true);
+		mScheduler.setRunMode(Scheduler.SchedulerRunMode.DISABLED);
 
 		robotFree();
 	}
@@ -96,7 +96,7 @@ public abstract class IterativeRobot extends RobotBase {
             if(isDisabled()){
 
                 mScheduler.removeAllActions();
-                mScheduler.setMode(Scheduler.MODE_TASKS);
+                mScheduler.setRunMode(Scheduler.SchedulerRunMode.TASKS_ONLY);
 
                 disabledInit();
 
@@ -111,7 +111,7 @@ public abstract class IterativeRobot extends RobotBase {
                 int currentMode = getMode();
 
                 mScheduler.removeAllActions();
-                mScheduler.setMode(Scheduler.MODE_FULL);
+                mScheduler.setRunMode(Scheduler.SchedulerRunMode.ALL);
 
                 modeInit(currentMode);
 

@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Provides a series of scheduling to run in a order. Action can run sequentially or parallel to one another.
@@ -14,35 +13,30 @@ import java.util.Vector;
  */
 public class ActionGroup extends Action {
 
-	private static class Entry{
-		Action action;
-		boolean sequential;
+	public enum ActionTiming {
+		SEQUENTIAL,
+		PARALLEL
 	}
 	
-	private Vector<Entry> actions = new Vector<Entry>(5);
-	private int index = -1;
-	private Vector<Entry> current = new Vector<Entry>(5);
+	private final Collection<Action> mActions;
+	private final ActionTiming mTiming;
+
+	private final Queue<Action> mActionsQueue;
+	private final Collection<Action> mCurrentlyRunningActions;
 	
 	/**
 	 * Creates a new empty action group
 	 */
-	public ActionGroup(){}
-	/**
-	 * Creates an action group and adds an array of scheduling to run sequentially.
-	 * @param actions array of scheduling to add
-	 */
-	public ActionGroup(Action...actions){
-		this(true, actions);
+	public ActionGroup(ActionTiming timing) {
+		this(timing, new ArrayList<Action>());
 	}
-	/**
-	 * Creates an action group and adds an array of scheduling to run.
-	 * @param actions array of scheduling to add
-	 * @param sequential if true, the scheduling will run sequentially, otherwise they will run in parallel
-	 */
-	public ActionGroup(boolean sequential, Action...actions){
-		if(sequential)
-			addSequential(actions);
-		else addParallel(actions);
+
+	public ActionGroup(ActionTiming timing, Collection<Action> actions) {
+		mTiming = timing;
+		mActions = actions;
+
+		mActionsQueue = new ArrayDeque<Action>();
+		mCurrentlyRunningActions = new ArrayList<Action>();
 	}
 	
 	/**
@@ -52,34 +46,32 @@ public class ActionGroup extends Action {
 	 * @param timeout timeout in seconds for the action
 	 * @return this instance
 	 */
-	public ActionGroup addSequential(Action action, double timeout){
-		addSequential(new TimedAction(action, timeout));
-		return this;
+	public ActionGroup add(Action action, double timeout){
+		return add(new TimedAction(action, timeout));
 	}
+
 	/**
-	 * Adds an action to run sequentially.
+	 * Adds an action to run.
 	 * 
 	 * @param action action to run
 	 * @return this instance
 	 */
-	public ActionGroup addSequential(Action action){
-		Entry entry = new Entry();
-		entry.action = action;
-		entry.sequential = true;
-		this.actions.add(entry);
+	public ActionGroup add(Action action){
+		mActions.add(action);
 		return this;
 	}
+
 	/**
-	 * Adds an array of scheduling to run sequentially.
+	 * Adds an array of scheduling to run.
 	 * 
 	 * @param actions action to run
 	 * @return this instance
 	 */
-	public ActionGroup addSequential(Action... actions){
-		for(Action action : actions)
-			addSequential(action);
+	public ActionGroup add(Collection<Action> actions){
+		mActions.addAll(actions);
 		return this;
 	}
+
 	/**
 	 * Adds an empty action to run for few seconds.
 	 * 
@@ -87,91 +79,69 @@ public class ActionGroup extends Action {
 	 * @return this instance
 	 */
 	public ActionGroup addWaitAction(double seconds){
-		addSequential(new TimedAction(Action.EMPTY, seconds));
-		return this;
-	}
-	
-	/**
-	 * Adds an action to run in parallel with a timeout in seconds.
-	 * 
-	 * @param action action to run
-	 * @param timeout timeout in seconds for the action
-	 * @return this instance
-	 */
-	public ActionGroup addParallel(Action action, double timeout){
-		addParallel(new TimedAction(action, timeout));
-		return this;
-	}
-	/**
-	 * Adds an action to run in parallel.
-	 * 
-	 * @param action action to run
-	 * @return this instance
-	 */
-	public ActionGroup addParallel(Action action){
-		Entry entry = new Entry();
-		entry.action = action;
-		entry.sequential = false;
-		this.actions.add(entry);
-		return this;
-	}
-	/**
-	 * Adds an array of scheduling to run in parallel.
-	 * 
-	 * @param actions action to run
-	 * @return this instance
-	 */
-	public ActionGroup addParallel(Action... actions){
-		for(Action action : actions)
-			addParallel(action);
-		return this;
+		return add(Action.EMPTY, seconds);
 	}
 	
 	@Override
 	protected void initialize(){
-		index = 0;
-		Entry c = actions.elementAt(index);
-		c.action.start();
-		current.addElement(c);
+		mActionsQueue.addAll(mActions);
 	}
+
 	@Override
 	protected void execute() {
-		Entry c = actions.elementAt(index); boolean next = false;
-		if(!c.action.isRunning()){
-			current.removeElement(c);
-			index++;
-			next = true;
-		}
-		else if(!c.sequential){
-			index++;
-			next = true;
-		}
-		
-		for(Enumeration<Entry> en = current.elements(); en.hasMoreElements();){
-			 Entry entry = en.nextElement();
-			 if(!entry.action.isRunning()){
-				 current.remove(entry);
-			 }
-		}
-		
-		if(next && index < actions.size()){
-			Entry toRun = actions.elementAt(index);
-			toRun.action.start();
-			current.add(toRun);
-		}
+		tryStartNextAction();
+		handleCurrentActions();
 	}
+
 	@Override
 	protected boolean isFinished() {
-		return index >= actions.size();
+		return mActionsQueue.isEmpty() && mCurrentlyRunningActions.isEmpty();
 	}
+
 	@Override
 	protected void end() {
-		for(Enumeration<Entry> en = current.elements(); en.hasMoreElements();){
-			Entry entry = en.nextElement();
-			if(entry.action.isRunning())
-				entry.action.cancel();
+		for (Action action : mCurrentlyRunningActions) {
+			action.cancel();
 		}
-		current.clear();
-		index = -1;
+
+		mCurrentlyRunningActions.clear();
+		mActionsQueue.clear();
+	}
+
+	private void tryStartNextAction() {
+		if (mActionsQueue.isEmpty()) {
+			return;
+		}
+
+		if (mTiming == ActionTiming.SEQUENTIAL && mCurrentlyRunningActions.isEmpty()) {
+			startNextAction();
+		} else if (mTiming == ActionTiming.PARALLEL) {
+			startNextAction();
+		}
+	}
+
+	private void startNextAction() {
+		Action nextAction = mActionsQueue.poll();
+		if (nextAction == null) {
+			return;
+		}
+
+		nextAction.start();
+
+		mCurrentlyRunningActions.add(nextAction);
+	}
+
+	private void handleCurrentActions() {
+		if (mCurrentlyRunningActions.isEmpty()) {
+			return;
+		}
+
+		List<Action> currentlyRunning = new ArrayList<Action>(mCurrentlyRunningActions);
+
+		for (Action action : currentlyRunning) {
+			if (!action.isRunning()) {
+				mCurrentlyRunningActions.remove(action);
+			}
+		}
 	}
 }

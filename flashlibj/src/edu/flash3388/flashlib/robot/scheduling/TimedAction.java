@@ -9,41 +9,41 @@ package edu.flash3388.flashlib.robot.scheduling;
  */
 public class TimedAction extends Action {
 
-	private Action action;
+	private Action mAction;
 	
-	public TimedAction(Action action, double seconds){
-		this(action, (int) (seconds * 1000));
+	public TimedAction(Action action, double timeoutSeconds){
+		this(action, (int) (timeoutSeconds * 1000));
 	}
-	public TimedAction(Action action, int milliseconds){
-		this.action = action;
+
+	public TimedAction(Action action, int timeoutMs){
+		mAction = action;
 		
-		setTimeout(milliseconds);
-		
-		copyRequirements(action);
+		copyActionProperties(action);
+		setTimeoutMs(timeoutMs);
 	}
 
 	@Override
 	protected void initialize(){
-		action.initialize();
+		mAction.initialize();
 	}
 	
 	@Override
 	protected void execute() {
-		action.execute();
+		mAction.execute();
 	}
 
 	@Override
 	protected boolean isFinished(){
-		return action.isFinished();
+		return mAction.isFinished();
 	}
 	
 	@Override
 	protected void end() {
-		action.end();
+		mAction.end();
 	}
 	
 	@Override
 	protected void interrupted(){
-		action.interrupted();
+		mAction.interrupted();
 	}
 }

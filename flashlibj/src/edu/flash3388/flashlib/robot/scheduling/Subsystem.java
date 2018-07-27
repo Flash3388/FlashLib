@@ -27,62 +27,22 @@ public abstract class Subsystem{
 	private Action defaultAction;
 	private Action currentAction;
 	
-	private String name;
-	
 	/**
-	 * Creates a new subsystem with a given name. The name is just for comfort of data logging if needed.
-	 * To register this subsystem to the {@link Scheduler}, {@link Scheduler#registerSystem(Subsystem)} is
-	 * called, passing it this object.
-	 * 
-	 * @param name the subsystem name.
-	 */
-	protected Subsystem(String name){
-		Scheduler.getInstance().registerSystem(this);
-		this.name = name;
-	}
-	/**
-	 * Creates a new subsystem with an empty name. The name is just for comfort of data logging if needed.
-	 * To register this subsystem to the {@link Scheduler}, {@link Scheduler#registerSystem(Subsystem)} is
+	 * Creates a new subsystem. The name is just for comfort of data logging if needed.
+	 * To register this subsystem to the {@link Scheduler}, {@link Scheduler#registerSubsystem(Subsystem)} is
 	 * called, passing it this object.
 	 */
-	protected Subsystem() {
-		this("");
-	}
-	
-	void setCurrentAction(Action action){
-		currentAction = action;
-	}
-	Action getCurrentAction(){
-		return currentAction;
-	}
-	void startDefaultAction(){
-		if(defaultAction != null) 
-			defaultAction.start();
-	}
-	
-	/**
-	 * Sets the name of the system
-	 * 
-	 * @param name name
-	 */
-	public void setName(String name){
-		this.name = name;
-	}
-	/**
-	 * Gets the name of the system
-	 * 
-	 * @return the name of the system
-	 */
-	public String getName(){
-		return name;
+	protected Subsystem(){
+		Scheduler.getInstance().registerSubsystem(this);
 	}
 	
 	/**
 	 * Cancels the current action running on this system, if there is one.
 	 */
 	public void cancelCurrentAction(){
-		if(hasCurrentAction() && getCurrentAction().isRunning())
+		if(hasCurrentAction() && getCurrentAction().isRunning()) {
 			getCurrentAction().cancel();
+		}
 	}
 	/**
 	 * Gets whether or not this system contains a current action.
@@ -100,5 +60,19 @@ public abstract class Subsystem{
 	 */
 	public void setDefaultAction(Action action){
 		defaultAction = action;
+	}
+
+	void setCurrentAction(Action action){
+		currentAction = action;
+	}
+
+	Action getCurrentAction(){
+		return currentAction;
+	}
+
+	void startDefaultAction(){
+		if(defaultAction != null) {
+			defaultAction.start();
+		}
 	}
 }

@@ -9,38 +9,37 @@ package edu.flash3388.flashlib.robot.scheduling;
  */
 public class SystemAction extends Action {
 
-	private Action action;
+	private Action mAction;
 	
-	public SystemAction(Action action, Subsystem... systems){
-		this.action = action;
+	public SystemAction(Action action, Subsystem... subsystems){
+		mAction = action;
 		
-		setTimeout(action.getTimeout());
-		requires(systems);
-		copyRequirements(action);
+		copyActionProperties(action);
+		requires(subsystems);
 	}
 	
 	@Override
 	protected void initialize(){
-		action.initialize();
+		mAction.initialize();
 	}
 	
 	@Override
 	protected void execute() {
-		action.execute();
+		mAction.execute();
 	}
 
 	@Override
 	protected boolean isFinished(){
-		return action.isFinished();
+		return mAction.isFinished();
 	}
 	
 	@Override
 	protected void end() {
-		action.end();
+		mAction.end();
 	}
 	
 	@Override
 	protected void interrupted(){
-		action.interrupted();
+		mAction.interrupted();
 	}
 }

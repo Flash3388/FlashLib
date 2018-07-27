@@ -8,15 +8,15 @@ package edu.flash3388.flashlib.robot.scheduling;
  */
 public class RunnableAction extends Action{
 
-	private Runnable runnable;
+	private Runnable mRunnable;
 	
 	public RunnableAction(Runnable runnable){
-		this.runnable = runnable;
+		mRunnable = runnable;
 	}
 	
 	@Override
 	protected void execute() {
-		runnable.run();
+		mRunnable.run();
 	}
 
 	@Override
