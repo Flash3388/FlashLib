@@ -7,6 +7,7 @@ package edu.flash3388.flashlib.robot.hid;
  * @since FlashLib 1.0.0
  */
 public class DPad extends POV {
+	
 	/**
 	 * The Up button on the D-Pad
 	 */
@@ -30,7 +31,7 @@ public class DPad extends POV {
 	/**
 	 * The entire POV as a button
 	 */
-	public final Button POV;
+	public final Button FULL;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
@@ -41,11 +42,11 @@ public class DPad extends POV {
 	public DPad(HID hid, int num){
 		super(hid, num);
 		
-		Up = new DPadButton(hid, num, DPadButton.Type.UP);
-		Down = new DPadButton(hid, num, DPadButton.Type.DOWN);
-		Right = new DPadButton(hid, num, DPadButton.Type.RIGHT);
-		Left = new DPadButton(hid, num, DPadButton.Type.LEFT);
-		POV = new DPadButton(hid, num, DPadButton.Type.POV);
+		Up = new POVButton(hid, num, POVRange.UP);
+		Down = new POVButton(hid, num, POVRange.DOWN);
+		Right = new POVButton(hid, num, POVRange.RIGHT);
+		Left = new POVButton(hid, num, POVRange.LEFT);
+		FULL = new POVButton(hid, num, POVRange.FULL);
 	}
 
 	/**
@@ -78,5 +79,9 @@ public class DPad extends POV {
 	 */
 	public Button getLeft(){
 		return Left;
+	}
+
+	public Button getFull() {
+		return FULL;
 	}
 }

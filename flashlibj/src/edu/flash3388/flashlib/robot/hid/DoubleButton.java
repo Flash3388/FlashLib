@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class DoubleButton extends Button{
+public abstract class DoubleButton extends Button {
 	
 	private Button button1, button2;
 	
@@ -41,7 +41,7 @@ public abstract class DoubleButton extends Button{
 	 * Gets the current button state
 	 */
 	@Override
-	public boolean get() {
+	public boolean isDown() {
 		return button1.get() && button2.get();
 	}
 }
