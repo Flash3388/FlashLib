@@ -4,7 +4,6 @@ import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.Flashboard.FlashboardInitData;
 import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.robot.RobotInterface;
-import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.LogUtil;
 

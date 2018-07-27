@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +9,7 @@ import java.util.List;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class XboxController implements HID{
+public class XboxController implements HID {
 	
 	//{("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
 
@@ -47,8 +45,8 @@ public class XboxController implements HID{
 	 * 
 	 * @param channel the device index
 	 */
-	public XboxController(int channel){
-		mHidInterface = RobotFactory.getHIDInterface();
+	public XboxController(HIDInterface hidInterface, int channel){
+		mHidInterface = hidInterface;
 		
 		mChannel = channel;
 		

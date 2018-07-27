@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.hid.HIDInterface;
 import edu.flash3388.flashlib.robot.modes.ModeSelector;
 
 /**
@@ -65,4 +66,6 @@ public interface RobotInterface {
 	default boolean isDisabled(){
 		return isMode(ModeSelector.MODE_DISABLED);
 	}
+
+	HIDInterface getHidInterface();
 }

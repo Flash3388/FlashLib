@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +30,8 @@ public class Joystick implements HID {
 	 * @param channel the channel
 	 * @param buttonCount the amount of buttons
 	 */
-	public Joystick(int channel, int buttonCount){
-		mHidInterface = RobotFactory.getHIDInterface();
+	public Joystick(HIDInterface hidInterface, int channel, int buttonCount){
+		mHidInterface = hidInterface;
 
 		mChannel = channel;
 
