@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.robot.PowerLogger.PowerSource;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class FRCVoltagePowerSource extends PowerSource{

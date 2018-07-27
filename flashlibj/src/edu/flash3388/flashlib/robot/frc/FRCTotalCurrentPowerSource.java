@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.frc;
 
-import edu.flash3388.flashlib.robot.PowerLogger.PowerSource;
-
 public class FRCTotalCurrentPowerSource extends PowerSource{
 
 	public FRCTotalCurrentPowerSource(double min, double max) {
