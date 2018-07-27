@@ -7,26 +7,27 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class OmniDriveAction extends Action{
 	
-	private HolonomicDriveInterface driveTrain;
-	private DoubleSource xAxis, yAxis;
+	private HolonomicDriveInterface mDriveInterface;
+	private DoubleSource mYAxisSource;
+	private DoubleSource mXAxisSource;
 	
-	public OmniDriveAction(HolonomicDriveInterface driveTrain, DoubleSource y, DoubleSource x) {
-		this.driveTrain = driveTrain;
-		this.xAxis = x;
-		this.yAxis = y;
+	public OmniDriveAction(HolonomicDriveInterface driveInterface, DoubleSource y, DoubleSource x) {
+		this.mDriveInterface = driveInterface;
+		this.mXAxisSource = x;
+		this.mYAxisSource = y;
 		
-		if(driveTrain instanceof Subsystem) {
-			requires((Subsystem) driveTrain);
+		if(driveInterface instanceof Subsystem) {
+			requires((Subsystem) driveInterface);
 		}
 	}
 	
 	@Override
 	protected void execute() {
-		driveTrain.omniDrive(yAxis.get(), xAxis.get());
+		mDriveInterface.omniDrive(mYAxisSource.get(), mXAxisSource.get());
 	}
 
 	@Override
 	protected void end() {
-		driveTrain.stop();
+		mDriveInterface.stop();
 	}
 }

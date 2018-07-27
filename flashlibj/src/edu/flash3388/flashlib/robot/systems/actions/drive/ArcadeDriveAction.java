@@ -7,27 +7,28 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class ArcadeDriveAction extends Action{
 	
-	private TankDriveInterface driveTrain;
-	private DoubleSource rotateAxis, moveAxis;
+	private TankDriveInterface mDriveInterface;
+	private DoubleSource mMoveAxis;
+	private DoubleSource mRotateAxis;
 	
-	public ArcadeDriveAction(TankDriveInterface driveTrain, DoubleSource move, DoubleSource rotate) {
-		this.driveTrain = driveTrain;
-		this.rotateAxis = rotate;
-		this.moveAxis = move;
+	public ArcadeDriveAction(TankDriveInterface driveInterface, DoubleSource move, DoubleSource rotate) {
+		this.mDriveInterface = driveInterface;
+		this.mRotateAxis = rotate;
+		this.mMoveAxis = move;
 		
-		if(driveTrain instanceof Subsystem) {
-			requires((Subsystem) driveTrain);
+		if(driveInterface instanceof Subsystem) {
+			requires((Subsystem) driveInterface);
 		}
 	}
 	
 	@Override
 	protected void execute() {
-		driveTrain.arcadeDrive(moveAxis.get(), rotateAxis.get());
+		mDriveInterface.arcadeDrive(mMoveAxis.get(), mRotateAxis.get());
 	}
 
 	@Override
 	protected void end() {
-		driveTrain.stop();
+		mDriveInterface.stop();
 	}
 
 }

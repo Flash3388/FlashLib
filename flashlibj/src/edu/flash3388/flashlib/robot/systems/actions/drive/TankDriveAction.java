@@ -7,26 +7,27 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class TankDriveAction extends Action{
 	
-	private TankDriveInterface driveTrain;
-	private DoubleSource leftAxis, rightAxis;
+	private TankDriveInterface mDriveInterface;
+	private DoubleSource mRightSource;
+	private DoubleSource mLeftSource;
 	
-	public TankDriveAction(TankDriveInterface driveTrain, DoubleSource right, DoubleSource left) {
-		this.driveTrain = driveTrain;
-		this.leftAxis = left;
-		this.rightAxis = right;
+	public TankDriveAction(TankDriveInterface driveInterface, DoubleSource right, DoubleSource left) {
+		this.mDriveInterface = driveInterface;
+		this.mRightSource = right;
+		this.mLeftSource = left;
 		
-		if(driveTrain instanceof Subsystem) {
-			requires((Subsystem) driveTrain);
+		if(driveInterface instanceof Subsystem) {
+			requires((Subsystem) driveInterface);
 		}
 	}
 	
 	@Override
 	protected void execute() {
-		driveTrain.tankDrive(rightAxis.get(), leftAxis.get());
+		mDriveInterface.tankDrive(mRightSource.get(), mLeftSource.get());
 	}
 
 	@Override
 	protected void end() {
-		driveTrain.stop();
+		mDriveInterface.stop();
 	}
 }

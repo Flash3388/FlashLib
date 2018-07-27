@@ -7,12 +7,12 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class RotateAction extends Action{
 
-	private Rotatable rotatable;
-	private DoubleSource speedSource;
+	private Rotatable mRotatable;
+	private DoubleSource mSpeedSource;
 	
 	public RotateAction(Rotatable rotatable, DoubleSource speedSource) {
-		this.rotatable = rotatable;
-		this.speedSource = speedSource;
+		this.mRotatable = rotatable;
+		this.mSpeedSource = speedSource;
 		
 		if(rotatable instanceof Subsystem) {
 			requires((Subsystem) rotatable);
@@ -21,11 +21,11 @@ public class RotateAction extends Action{
 	
 	@Override
 	protected void execute() {
-		rotatable.rotate(speedSource.get());
+		mRotatable.rotate(mSpeedSource.get());
 	}
 
 	@Override
 	protected void end() {
-		rotatable.stop();
+		mRotatable.stop();
 	}
 }

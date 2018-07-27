@@ -7,28 +7,29 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class CartesianDriveAction extends Action{
 	
-	private HolonomicDriveInterface driveTrain;
-	private DoubleSource xAxis, yAxis, rotateAxis;
+	private HolonomicDriveInterface mDriveInterface;
+	private DoubleSource mYAxisSource;
+	private DoubleSource mXAxisSource;
+	private DoubleSource mRotateSource;
 	
-	public CartesianDriveAction(HolonomicDriveInterface driveTrain,
-			DoubleSource y, DoubleSource x, DoubleSource rotate) {
-		this.driveTrain = driveTrain;
-		this.xAxis = x;
-		this.yAxis = y;
-		this.rotateAxis = rotate;
+	public CartesianDriveAction(HolonomicDriveInterface driveInterface, DoubleSource y, DoubleSource x, DoubleSource rotate) {
+		this.mDriveInterface = driveInterface;
+		this.mXAxisSource = x;
+		this.mYAxisSource = y;
+		this.mRotateSource = rotate;
 		
-		if(driveTrain instanceof Subsystem) {
-			requires((Subsystem) driveTrain);
+		if(driveInterface instanceof Subsystem) {
+			requires((Subsystem) driveInterface);
 		}
 	}
 	
 	@Override
 	protected void execute() {
-		driveTrain.holonomicCartesian(yAxis.get(), xAxis.get(), rotateAxis.get());
+		mDriveInterface.holonomicCartesian(mYAxisSource.get(), mXAxisSource.get(), mRotateSource.get());
 	}
 
 	@Override
 	protected void end() {
-		driveTrain.stop();
+		mDriveInterface.stop();
 	}
 }
