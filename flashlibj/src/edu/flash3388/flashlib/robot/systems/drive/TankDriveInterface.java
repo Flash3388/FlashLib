@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.systems;
+package edu.flash3388.flashlib.robot.systems.drive;
 
 /**
  * Interface for tank drive systems. Extends {@link DriveInterface}.

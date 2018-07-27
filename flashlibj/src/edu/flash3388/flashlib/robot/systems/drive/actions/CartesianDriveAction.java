@@ -1,8 +1,8 @@
-package edu.flash3388.flashlib.robot.systems.actions.drive;
+package edu.flash3388.flashlib.robot.systems.drive.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.HolonomicDriveInterface;
+import edu.flash3388.flashlib.robot.systems.drive.HolonomicDriveInterface;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 public class CartesianDriveAction extends Action{

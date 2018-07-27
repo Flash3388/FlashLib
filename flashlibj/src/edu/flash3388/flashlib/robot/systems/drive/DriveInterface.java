@@ -1,4 +1,7 @@
-package edu.flash3388.flashlib.robot.systems;
+package edu.flash3388.flashlib.robot.systems.drive;
+
+import edu.flash3388.flashlib.robot.systems.Rotatable;
+import edu.flash3388.flashlib.robot.systems.YAxisMovableInterface;
 
 /**
  * Interface for drive systems. Extends several different interfaces:

@@ -1,6 +1,7 @@
-package edu.flash3388.flashlib.robot.systems;
+package edu.flash3388.flashlib.robot.systems.drive;
 
 import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.robot.systems.XAxisMovableInterface;
 
 /**
  * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link DriveInterface}.
