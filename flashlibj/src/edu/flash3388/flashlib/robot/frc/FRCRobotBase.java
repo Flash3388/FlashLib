@@ -18,7 +18,7 @@ public abstract class FRCRobotBase extends SampleRobot implements RobotInterface
 	}
 
 	@Override
-	public HIDInterface getHidInterface() {
+	public HIDInterface getHIDInterface() {
 		return mHidInterface;
 	}
 }

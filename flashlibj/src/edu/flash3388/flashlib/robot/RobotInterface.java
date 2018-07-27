@@ -64,5 +64,5 @@ public interface RobotInterface {
 		return isInMode(RobotMode.DISABLED);
 	}
 
-	HIDInterface getHidInterface();
+	HIDInterface getHIDInterface();
 }
