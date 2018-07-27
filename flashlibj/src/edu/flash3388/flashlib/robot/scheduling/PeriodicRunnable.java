@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author TomTzook
  * @since FlashLib 1.0.1
  */
-public class PeriodicRunnable implements Runnable{
+public class PeriodicRunnable implements Runnable {
 
 	private Runnable mRunnable;
 	private int mPeriodMs;

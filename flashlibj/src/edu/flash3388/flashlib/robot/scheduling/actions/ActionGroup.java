@@ -1,4 +1,7 @@
-package edu.flash3388.flashlib.robot.scheduling;
+package edu.flash3388.flashlib.robot.scheduling.actions;
+
+import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.TimedAction;
 
 import java.util.*;
 

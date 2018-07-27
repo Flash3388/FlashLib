@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author TomTzook
  * @since FlashLib 1.0.1
  */
-public class PeriodicAction extends Action{
+public class PeriodicAction extends Action {
 
 	private Action mAction;
 	private int mPeriodMs;

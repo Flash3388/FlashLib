@@ -1,7 +1,6 @@
-package edu.flash3388.flashlib.robot.scheduling;
+package edu.flash3388.flashlib.robot.scheduling.actions;
 
-import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.util.beans.IntegerSource;
 
 import java.util.List;
