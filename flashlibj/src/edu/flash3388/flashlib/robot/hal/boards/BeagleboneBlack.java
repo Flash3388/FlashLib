@@ -1,10 +1,15 @@
-package edu.flash3388.flashlib.robot.hal;
+package edu.flash3388.flashlib.robot.hal.boards;
 
+import edu.flash3388.flashlib.robot.hal.HALAnalogInput;
+import edu.flash3388.flashlib.robot.hal.HALDigitalInput;
+import edu.flash3388.flashlib.robot.hal.HALDigitalOutput;
+import edu.flash3388.flashlib.robot.hal.HALPWM;
+import edu.flash3388.flashlib.robot.hal.devices.HALPulseCounter;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
 import edu.flash3388.flashlib.robot.io.DigitalInput;
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 
 /**
  * Provides utilities for the Hardware Abstraction Layer implementation 

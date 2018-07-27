@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.io.devices.sensors;
+package edu.flash3388.flashlib.robot.io.devices;
 
 import edu.flash3388.flashlib.robot.io.IOPort;
 import edu.flash3388.flashlib.util.beans.IntegerSource;

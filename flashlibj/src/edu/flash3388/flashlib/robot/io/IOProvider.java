@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 
 /**
  * An interface for classes which provide implementations of port interfaces to be used

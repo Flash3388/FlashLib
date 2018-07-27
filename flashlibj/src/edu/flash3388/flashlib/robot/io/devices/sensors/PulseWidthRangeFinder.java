@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.IOFactory;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 
 /**
  * Control class for a pulse width range finder sensor. Range finders are sensors used to measure distances between

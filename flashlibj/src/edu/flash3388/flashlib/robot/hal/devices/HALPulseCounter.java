@@ -1,6 +1,9 @@
-package edu.flash3388.flashlib.robot.hal;
+package edu.flash3388.flashlib.robot.hal.devices;
 
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.hal.*;
+import edu.flash3388.flashlib.robot.hal.jni.COUNTERJNI;
+import edu.flash3388.flashlib.robot.hal.jni.DIOJNI;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 
 /**
  * Represents a pulse counter using FlashLib's Hardware Abstraction Layer. A pulse counter is used to
@@ -13,7 +16,7 @@ import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALPulseCounter extends HALPort implements PulseCounter{
+public class HALPulseCounter extends HALPort implements PulseCounter {
 	
 	private HALDigitalInput upSource, downSource;
 	

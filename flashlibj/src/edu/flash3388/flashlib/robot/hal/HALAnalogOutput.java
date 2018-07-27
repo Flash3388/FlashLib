@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
+import edu.flash3388.flashlib.robot.hal.jni.ANALOGJNI;
 import edu.flash3388.flashlib.robot.io.AnalogOutput;
 
 /**

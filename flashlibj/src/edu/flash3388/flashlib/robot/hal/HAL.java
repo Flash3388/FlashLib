@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
+import edu.flash3388.flashlib.robot.hal.HALIOProvider;
 import edu.flash3388.flashlib.robot.io.IOProvider;
 
 /**

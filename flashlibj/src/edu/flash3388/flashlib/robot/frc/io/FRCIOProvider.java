@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.robot.io.DigitalInput;
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
 import edu.flash3388.flashlib.robot.io.IOProvider;
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 import edu.flash3388.flashlib.robot.frc.io.devices.FRCPWM;
 import edu.flash3388.flashlib.robot.frc.io.devices.FRCPulseCounter;
 

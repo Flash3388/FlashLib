@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.frc.io.devices;
 
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 

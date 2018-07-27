@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.hal;
+package edu.flash3388.flashlib.robot.hal.jni;
 
 public final class COUNTERJNI {
 

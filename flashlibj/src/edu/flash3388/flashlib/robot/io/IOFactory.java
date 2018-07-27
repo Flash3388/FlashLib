@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 
 /**
  * Provides a factory for IO ports to be used with devices. Although not a must, this class is recommended

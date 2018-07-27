@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
 import edu.flash3388.flashlib.robot.io.IOFactory;
+import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
