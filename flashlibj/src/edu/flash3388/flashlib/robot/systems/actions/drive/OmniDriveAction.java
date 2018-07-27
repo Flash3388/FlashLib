@@ -1,21 +1,19 @@
-package edu.flash3388.flashlib.robot.scheduling.actions.drive;
+package edu.flash3388.flashlib.robot.systems.actions.drive;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.HolonomicDriveInterface;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class CartesianDriveAction extends Action{
+public class OmniDriveAction extends Action{
 	
 	private HolonomicDriveInterface driveTrain;
-	private DoubleSource xAxis, yAxis, rotateAxis;
+	private DoubleSource xAxis, yAxis;
 	
-	public CartesianDriveAction(HolonomicDriveInterface driveTrain,
-			DoubleSource y, DoubleSource x, DoubleSource rotate) {
+	public OmniDriveAction(HolonomicDriveInterface driveTrain, DoubleSource y, DoubleSource x) {
 		this.driveTrain = driveTrain;
 		this.xAxis = x;
 		this.yAxis = y;
-		this.rotateAxis = rotate;
 		
 		if(driveTrain instanceof Subsystem) {
 			requires((Subsystem) driveTrain);
@@ -24,7 +22,7 @@ public class CartesianDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		driveTrain.holonomicCartesian(yAxis.get(), xAxis.get(), rotateAxis.get());
+		driveTrain.omniDrive(yAxis.get(), xAxis.get());
 	}
 
 	@Override

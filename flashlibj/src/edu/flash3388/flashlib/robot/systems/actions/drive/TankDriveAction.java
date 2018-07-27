@@ -1,19 +1,19 @@
-package edu.flash3388.flashlib.robot.scheduling.actions.drive;
+package edu.flash3388.flashlib.robot.systems.actions.drive;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.TankDriveInterface;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
-public class ArcadeDriveAction extends Action{
+public class TankDriveAction extends Action{
 	
 	private TankDriveInterface driveTrain;
-	private DoubleSource rotateAxis, moveAxis;
+	private DoubleSource leftAxis, rightAxis;
 	
-	public ArcadeDriveAction(TankDriveInterface driveTrain, DoubleSource move, DoubleSource rotate) {
+	public TankDriveAction(TankDriveInterface driveTrain, DoubleSource right, DoubleSource left) {
 		this.driveTrain = driveTrain;
-		this.rotateAxis = rotate;
-		this.moveAxis = move;
+		this.leftAxis = left;
+		this.rightAxis = right;
 		
 		if(driveTrain instanceof Subsystem) {
 			requires((Subsystem) driveTrain);
@@ -22,12 +22,11 @@ public class ArcadeDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		driveTrain.arcadeDrive(moveAxis.get(), rotateAxis.get());
+		driveTrain.tankDrive(rightAxis.get(), leftAxis.get());
 	}
 
 	@Override
 	protected void end() {
 		driveTrain.stop();
 	}
-
 }

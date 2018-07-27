@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.math.Mathf;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface HolonomicDriveInterface extends DriveInterface, XAxisMovable {
+public interface HolonomicDriveInterface extends DriveInterface, XAxisDriveInterface {
 	
 	/**
 	 * {@inheritDoc}

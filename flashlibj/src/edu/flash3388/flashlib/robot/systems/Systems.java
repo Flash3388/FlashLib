@@ -15,16 +15,16 @@ public final class Systems {
 	private Systems(){}
 
 	/**
-	 * Creates an {@link Action} which calls {@link YAxisMovable#forward(double)} during the execute() phase of the action
-	 * and {@link YAxisMovable#stop()} during the end() phase of the action. This action contains a system
-	 * requirement of the instance of {@link YAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link Action} which calls {@link YAxisDriveInterface#forward(double)} during the execute() phase of the action
+	 * and {@link YAxisDriveInterface#stop()} during the end() phase of the action. This action contains a system
+	 * requirement of the instance of {@link YAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}.
 	 * 
 	 * @param system the system
 	 * @param speed the movement speed
 	 * @return the action
 	 */
-	public static Action forwardAction(YAxisMovable system, double speed){
+	public static Action forwardAction(YAxisDriveInterface system, double speed){
 		return new Action(){
 			{
 				if(system instanceof Subsystem) {
@@ -40,16 +40,16 @@ public final class Systems {
 	}
 
 	/**
-	 * Creates an {@link Action} which calls {@link YAxisMovable#backward(double)} during the execute() phase of the action
-	 * and {@link YAxisMovable#stop()} during the end() phase of the action. This action contains a system
-	 * requirement of the instance of {@link YAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link Action} which calls {@link YAxisDriveInterface#backward(double)} during the execute() phase of the action
+	 * and {@link YAxisDriveInterface#stop()} during the end() phase of the action. This action contains a system
+	 * requirement of the instance of {@link YAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}.
 	 * 
 	 * @param system the system
 	 * @param speed the movement speed
 	 * @return the action
 	 */
-	public static Action backwardAction(YAxisMovable system, double speed){
+	public static Action backwardAction(YAxisDriveInterface system, double speed){
 		return new Action(){
 			{
 				if(system instanceof Subsystem) {
@@ -65,16 +65,16 @@ public final class Systems {
 	}
 
 	/**
-	 * Creates an {@link Action} which calls {@link XAxisMovable#right(double)} during the execute() phase of the action
-	 * and {@link XAxisMovable#stop()} during the end() phase of the action. This action contains a system
-	 * requirement of the instance of {@link XAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link Action} which calls {@link XAxisDriveInterface#right(double)} during the execute() phase of the action
+	 * and {@link XAxisDriveInterface#stop()} during the end() phase of the action. This action contains a system
+	 * requirement of the instance of {@link XAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}. 
 	 * 
 	 * @param system the system
 	 * @param speed the movement speed
 	 * @return the action
 	 */
-	public static Action rightAction(XAxisMovable system, double speed){
+	public static Action rightAction(XAxisDriveInterface system, double speed){
 		return new Action(){
 			{
 				if(system instanceof Subsystem) {
@@ -90,16 +90,16 @@ public final class Systems {
 	}
 
 	/**
-	 * Creates an {@link Action} which calls {@link XAxisMovable#left(double)} during the execute() phase of the action
-	 * and {@link XAxisMovable#stop()} during the end() phase of the action. This action contains a system
-	 * requirement of the instance of {@link XAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link Action} which calls {@link XAxisDriveInterface#left(double)} during the execute() phase of the action
+	 * and {@link XAxisDriveInterface#stop()} during the end() phase of the action. This action contains a system
+	 * requirement of the instance of {@link XAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}.	 
 	 * 
 	 * @param system the system
 	 * @param speed the movement speed
 	 * @return the action
 	 */
-	public static Action leftAction(XAxisMovable system, double speed){
+	public static Action leftAction(XAxisDriveInterface system, double speed){
 		return new Action(){
 			{
 				if(system instanceof Subsystem) {
@@ -165,14 +165,14 @@ public final class Systems {
 	}
 
 	/**
-	 * Creates an {@link InstantAction} which calls {@link YAxisMovable#stop()} during the execute() phase of the action. 
-	 * This action contains a system requirement of the instance of {@link YAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link InstantAction} which calls {@link YAxisDriveInterface#stop()} during the execute() phase of the action.
+	 * This action contains a system requirement of the instance of {@link YAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}.
 	 * 
 	 * @param system the system
 	 * @return the action
 	 */
-	public static Action stopAction(YAxisMovable system){
+	public static Action stopAction(YAxisDriveInterface system){
 		return new InstantAction(){
 			{
 				if(system instanceof Subsystem) {
@@ -186,14 +186,14 @@ public final class Systems {
 	}
 
 	/**
-	 * Creates an {@link InstantAction} which calls {@link XAxisMovable#stop()} during the execute() phase of the action. 
-	 * This action contains a system requirement of the instance of {@link XAxisMovable} used by checking if the given system is an instance of 
+	 * Creates an {@link InstantAction} which calls {@link XAxisDriveInterface#stop()} during the execute() phase of the action.
+	 * This action contains a system requirement of the instance of {@link XAxisDriveInterface} used by checking if the given system is an instance of
 	 * {@link Subsystem}.
 	 * 
 	 * @param system the system
 	 * @return the action
 	 */
-	public static Action stopAction(XAxisMovable system){
+	public static Action stopAction(XAxisDriveInterface system){
 		return new InstantAction(){
 			{
 				if(system instanceof Subsystem) {

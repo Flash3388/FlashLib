@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.robot.systems;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface XAxisMovable {
+public interface XAxisDriveInterface {
 	
 	/**
 	 * Moves the system at a speed to a given direction along the x-axis.

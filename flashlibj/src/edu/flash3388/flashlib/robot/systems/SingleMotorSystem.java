@@ -3,11 +3,11 @@ package edu.flash3388.flashlib.robot.systems;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
-public class MotorSystem extends Subsystem implements YAxisMovable, XAxisMovable, Rotatable {
+public class SingleMotorSystem extends Subsystem implements YAxisDriveInterface, XAxisDriveInterface, Rotatable {
 
     private final FlashSpeedController mController;
 
-    public MotorSystem(FlashSpeedController controller) {
+    public SingleMotorSystem(FlashSpeedController controller) {
         mController = controller;
     }
 
