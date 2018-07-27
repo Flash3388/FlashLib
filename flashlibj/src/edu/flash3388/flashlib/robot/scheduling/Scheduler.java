@@ -36,14 +36,60 @@ public final class Scheduler {
 		return mInstance;
 	}
 
+	public enum SchedulerRunMode {
+		DISABLED {
+			@Override
+			void runScheduler(Scheduler scheduler) {
+			}
+		},
+		TASKS_ONLY {
+			@Override
+			void runScheduler(Scheduler scheduler) {
+				scheduler.runTasks();
+			}
+		},
+		ACTIONS_ONLY {
+			@Override
+			void runScheduler(Scheduler scheduler) {
+				scheduler.runActions();
+				scheduler.startDefaultSubsystemActions();
+			}
+		},
+		ALL {
+			@Override
+			void runScheduler(Scheduler scheduler) {
+				scheduler.runTasks();
+				scheduler.runActions();
+				scheduler.startDefaultSubsystemActions();
+			}
+		};
+
+		SchedulerRunMode() {
+		}
+
+		abstract void runScheduler(Scheduler scheduler);
+	}
+
 	private final Set<Subsystem> mSubsystems;
 	private final Collection<Action> mActions;
 	private final Collection<Task> mTasks;
+
+	private SchedulerRunMode mRunMode;
 
 	private Scheduler() {
 		mTasks = new ArrayList<Task>();
 		mActions = new ArrayList<Action>();
 		mSubsystems = new HashSet<Subsystem>();
+
+		mRunMode = SchedulerRunMode.ALL;
+	}
+
+	public void setRunMode(SchedulerRunMode runMode) {
+		mRunMode = runMode;
+	}
+
+	public SchedulerRunMode getRunMode() {
+		return mRunMode;
 	}
 
 	public void execute(Runnable runnable) {
@@ -114,9 +160,7 @@ public final class Scheduler {
 	}
 
 	public void run() {
-		runTasks();
-		runActions();
-		startDefaultSubsystemActions();
+		mRunMode.runScheduler(this);
 	}
 
 	private void runTasks() {

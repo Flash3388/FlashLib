@@ -40,8 +40,9 @@ public abstract class Subsystem{
 	 * Cancels the current action running on this system, if there is one.
 	 */
 	public void cancelCurrentAction(){
-		if(hasCurrentAction() && getCurrentAction().isRunning())
+		if(hasCurrentAction() && getCurrentAction().isRunning()) {
 			getCurrentAction().cancel();
+		}
 	}
 	/**
 	 * Gets whether or not this system contains a current action.
@@ -70,7 +71,8 @@ public abstract class Subsystem{
 	}
 
 	void startDefaultAction(){
-		if(defaultAction != null)
+		if(defaultAction != null) {
 			defaultAction.start();
+		}
 	}
 }

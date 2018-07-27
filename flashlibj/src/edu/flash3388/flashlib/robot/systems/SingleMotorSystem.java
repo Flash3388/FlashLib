@@ -52,7 +52,6 @@ public class SingleMotorSystem extends Subsystem implements XAxisMovable, YAxisM
 	 * @param defaultAction default system action
 	 */
 	public SingleMotorSystem(FlashSpeedController controller, Action defaultAction){
-		super("");
 		this.controller = controller;
 		setDefaultAction(defaultAction);
 		enableBrakeMode(false);

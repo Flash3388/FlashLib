@@ -69,7 +69,6 @@ public class FlashDrive extends Subsystem implements TankDriveSystem, HolonomicD
 	 * @throws IllegalArgumentException If all parameters are null.
 	 */
 	public FlashDrive(FlashSpeedController right, FlashSpeedController left, FlashSpeedController front, FlashSpeedController back){
-		super("FlashDrive");
 		if(right == null && left == null && front == null && back == null) 
 			throw new IllegalArgumentException("At least one side must have wheels");
 		
