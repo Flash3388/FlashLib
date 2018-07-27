@@ -15,7 +15,7 @@ public class FRCRobotModeSupplier implements RobotModeSupplier {
 	@Override
 	public RobotMode getMode() {
 		if (mDs.isOperatorControl()) {
-			return FRCRobotMode.TELEOP;
+			return FRCRobotMode.OPERATOR_CONTROL;
 		}
 		if (mDs.isAutonomous()) {
 			return FRCRobotMode.AUTONOMOUS;

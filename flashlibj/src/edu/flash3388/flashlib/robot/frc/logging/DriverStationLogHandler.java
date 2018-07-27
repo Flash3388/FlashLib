@@ -17,11 +17,9 @@ public class DriverStationLogHandler extends Handler {
 		
 		if (record.getLevel() == Level.WARNING) {
 			DriverStation.reportWarning(log, false);
-		}
-		else if (record.getLevel() == Level.SEVERE) {
+		} else if (record.getLevel() == Level.SEVERE) {
 			DriverStation.reportError(log, false);
-		}
-		else {
+		} else {
 			System.out.println(String.format("%s> <%s> %s", 
 					record.getLoggerName(), record.getLevel(), log));
 		}
@@ -30,6 +28,7 @@ public class DriverStationLogHandler extends Handler {
 	@Override
 	public void flush() {
 	}
+
 	@Override
 	public void close() throws SecurityException {
 	}
