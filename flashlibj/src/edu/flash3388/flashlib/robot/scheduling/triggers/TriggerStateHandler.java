@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.scheduling;
+package edu.flash3388.flashlib.robot.scheduling.triggers;
 
 @FunctionalInterface
 public interface TriggerStateHandler {

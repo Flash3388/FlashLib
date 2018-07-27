@@ -1,4 +1,6 @@
-package edu.flash3388.flashlib.robot.scheduling;
+package edu.flash3388.flashlib.robot.scheduling.triggers;
+
+import edu.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.ArrayList;
 import java.util.List;
