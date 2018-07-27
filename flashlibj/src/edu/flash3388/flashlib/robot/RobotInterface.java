@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.robot.hid.HIDInterface;
-import edu.flash3388.flashlib.robot.modes.ModeSelector;
+import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 
 /**
  * An interface for the current robot implementation. This interface is used by
@@ -19,29 +19,29 @@ import edu.flash3388.flashlib.robot.modes.ModeSelector;
 public interface RobotInterface {
 	
 	/**
-	 * Gets the initialized {@link ModeSelector} object for the robot.
+	 * Gets the initialized {@link RobotModeSupplier} object for the robot.
 	 * <p>
 	 * This object will be used by base methods for operation mode data.
 	 * 
 	 * @return robot mode selector, or null if not initialized.
 	 */
-	ModeSelector getModeSelector();
+	RobotModeSupplier getModeSelector();
 
 	/**
-	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot.
+	 * Gets the current operation mode set by the {@link RobotModeSupplier} object of the robot.
 	 * <p>
 	 * The default implementation gets the mode selector by calling {@link #getModeSelector()}. If the
-	 * returned value is null, {@link ModeSelector#MODE_DISABLED} is returned, otherwise {@link ModeSelector#getMode()}
+	 * returned value is null, {@link RobotModeSupplier#MODE_DISABLED} is returned, otherwise {@link RobotModeSupplier#getMode()}
 	 * is returned.
 	 * 
 	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
 	 */
 	default int getMode(){
-		return getModeSelector() == null? ModeSelector.MODE_DISABLED : getModeSelector().getMode();
+		return getModeSelector() == null? RobotModeSupplier.MODE_DISABLED : getModeSelector().getMode();
 	}
 
 	/**
-	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
+	 * Gets whether or not the current mode set by the robot's {@link RobotModeSupplier} object is equal
 	 * to a given mode value. If true, this indicates that the current mode is the given mode.
 	 * <p>
 	 * The default implementation calls {@link #getMode()} and gets whether the returned value
@@ -59,12 +59,12 @@ public interface RobotInterface {
 	 * Gets whether or not the robot is currently in disabled mode. Disabled mode
 	 * is a safety mode where the robot does nothing.
 	 * <p>
-	 * The default implementation calls {@link #isMode(int)} and passes it {@link ModeSelector#MODE_DISABLED}.
+	 * The default implementation calls {@link #isMode(int)} and passes it {@link RobotModeSupplier#MODE_DISABLED}.
 	 * 
 	 * @return true if in disabled mode, false otherwise
 	 */
 	default boolean isDisabled(){
-		return isMode(ModeSelector.MODE_DISABLED);
+		return isMode(RobotModeSupplier.MODE_DISABLED);
 	}
 
 	HIDInterface getHidInterface();

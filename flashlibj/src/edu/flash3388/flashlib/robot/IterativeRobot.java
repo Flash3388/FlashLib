@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.modes.ModeSelector;
+import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
@@ -100,7 +100,7 @@ public abstract class IterativeRobot extends RobotBase {
 
                 disabledInit();
 
-                while(stayInMode(ModeSelector.MODE_DISABLED)){
+                while(stayInMode(RobotModeSupplier.MODE_DISABLED)){
                     mScheduler.run();
 
                     disabledPeriodic();

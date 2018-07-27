@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.modes.ModeSelector;
+import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,7 +55,7 @@ public abstract class SimpleRobot extends RobotBase{
 			if(isDisabled()){
 				disabled();
 				
-				while(stayInMode(ModeSelector.MODE_DISABLED)){
+				while(stayInMode(RobotModeSupplier.MODE_DISABLED)){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			} else{

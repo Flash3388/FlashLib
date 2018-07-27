@@ -16,7 +16,7 @@ public class FlashboardModeSelectorControl extends FlashboardControl{
 	private int currentState = 0;
 	
 	private FlashboardModeSelectorControl() {
-		super("ModeSelector", FlashboardSendableType.MODE_SELECTOR);
+		super("RobotModeSupplier", FlashboardSendableType.MODE_SELECTOR);
 	}
 
 	public boolean isDisabled(){

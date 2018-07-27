@@ -3,16 +3,16 @@ package edu.flash3388.flashlib.robot.modes;
 import edu.flash3388.flashlib.flashboard.FlashboardChooser;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 
-public class FlashboardSimpleModeSelector implements ModeSelector{
+public class FlashboardSimpleRobotModeSupplier implements RobotModeSupplier {
 
 	private FlashboardChooser<Integer> chooser;
 	
-	public FlashboardSimpleModeSelector() {
+	public FlashboardSimpleRobotModeSupplier() {
 		chooser = new FlashboardChooser<Integer>("Mode Selector");
 		chooser.addDefault("Disabled", MODE_DISABLED);
 	}
 	
-	public FlashboardSimpleModeSelector addOption(String name, int mode){
+	public FlashboardSimpleRobotModeSupplier addOption(String name, int mode){
 		chooser.addOption(name, mode);
 		return this;
 	}

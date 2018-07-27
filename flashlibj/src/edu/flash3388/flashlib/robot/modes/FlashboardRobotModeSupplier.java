@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.modes;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.flashboard.FlashboardModeSelectorControl;
 
-public class FlashboardModeSelector implements ModeSelector{
+public class FlashboardRobotModeSupplier implements RobotModeSupplier {
 
 	private FlashboardModeSelectorControl modeselector = FlashboardModeSelectorControl.getInstance();
 	
