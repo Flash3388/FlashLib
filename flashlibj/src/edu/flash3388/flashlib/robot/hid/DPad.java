@@ -6,23 +6,27 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad extends POV implements Runnable{
+public class DPad extends POV {
 	/**
 	 * The Up button on the D-Pad
 	 */
 	public final Button Up;
+
 	/**
 	 * The Down button on the D-Pad
 	 */
 	public final Button Down;
+
 	/**
 	 * The Right button on the D-Pad
 	 */
 	public final Button Right;
+
 	/**
 	 * The Left button on the D-Pad
 	 */
 	public final Button Left;
+
 	/**
 	 * The entire POV as a button
 	 */
@@ -51,6 +55,7 @@ public class DPad extends POV implements Runnable{
 	public Button getUp(){
 		return Up;
 	}
+
 	/**
 	 * Gets the down DPad button object
 	 * @return down button
@@ -58,6 +63,7 @@ public class DPad extends POV implements Runnable{
 	public Button getDown(){
 		return Down;
 	}
+
 	/**
 	 * Gets the right DPad button object
 	 * @return right button
@@ -65,25 +71,12 @@ public class DPad extends POV implements Runnable{
 	public Button getRight(){
 		return Right;
 	}
+
 	/**
 	 * Gets the left DPad button object
 	 * @return left button
 	 */
 	public Button getLeft(){
 		return Left;
-	}
-	
-	@Override
-	public void run() {
-		if(Up.getActionsCount() > 0)
-			Up.run();
-		if(Down.getActionsCount() > 0)
-			Down.run();
-		if(Left.getActionsCount() > 0)
-			Left.run();
-		if(Right.getActionsCount() > 0)
-			Right.run();
-		if(POV.getActionsCount() > 0)
-			POV.run();
 	}
 }

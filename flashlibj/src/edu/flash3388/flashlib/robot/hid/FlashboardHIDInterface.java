@@ -14,7 +14,7 @@ public class FlashboardHIDInterface implements HIDInterface, Runnable{
 	}
 	
 	@Override
-	public boolean isHIDConnected(int hid) {
+	public boolean isHidConnected(int hid) {
 		return hidcontrol.getAxisCount(hid) > 0 && hidcontrol.getButtonCount(hid) > 0;
 	}
 	@Override
@@ -22,7 +22,7 @@ public class FlashboardHIDInterface implements HIDInterface, Runnable{
 		return hidcontrol.getAxisCount(hid) > axis;
 	}
 	@Override
-	public boolean isPOVConnected(int hid, int pov) {
+	public boolean isPovConnected(int hid, int pov) {
 		return hidcontrol.getPOVCount(hid) > pov;
 	}
 	@Override
@@ -31,19 +31,19 @@ public class FlashboardHIDInterface implements HIDInterface, Runnable{
 	}
 
 	@Override
-	public double getHIDAxis(int hid, int axis) {
+	public double getHidAxis(int hid, int axis) {
 		if(FlashRobotUtil.inEmergencyStop())
 			return 0.0;
 		return hidcontrol.getAxis(hid, axis);
 	}
 	@Override
-	public boolean getHIDButton(int hid, int button) {
+	public boolean getHidButton(int hid, int button) {
 		if(FlashRobotUtil.inEmergencyStop())
 			return false;
 		return hidcontrol.getButton(hid, button);
 	}
 	@Override
-	public int getHIDPOV(int hid, int pov) {
+	public int getHidPov(int hid, int pov) {
 		if(FlashRobotUtil.inEmergencyStop())
 			return -1;
 		return hidcontrol.getPOV(hid, pov);

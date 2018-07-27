@@ -9,7 +9,7 @@ package edu.flash3388.flashlib.robot.hid;
 public class EmptyHIDInterface implements HIDInterface{
 	
 	@Override
-	public boolean isHIDConnected(int hid) {
+	public boolean isHidConnected(int hid) {
 		return false;
 	}
 	@Override
@@ -17,7 +17,7 @@ public class EmptyHIDInterface implements HIDInterface{
 		return false;
 	}
 	@Override
-	public boolean isPOVConnected(int hid, int pov) {
+	public boolean isPovConnected(int hid, int pov) {
 		return false;
 	}
 	@Override
@@ -25,15 +25,15 @@ public class EmptyHIDInterface implements HIDInterface{
 		return false;
 	}
 	@Override
-	public double getHIDAxis(int hid, int axis) {
+	public double getHidAxis(int hid, int axis) {
 		return 0.0;
 	}
 	@Override
-	public boolean getHIDButton(int hid, int button) {
+	public boolean getHidButton(int hid, int button) {
 		return false;
 	}
 	@Override
-	public int getHIDPOV(int hid, int pov) {
+	public int getHidPov(int hid, int pov) {
 		return -1;
 	}
 }

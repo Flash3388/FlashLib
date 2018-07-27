@@ -22,7 +22,7 @@ public abstract class Button implements BooleanSource, Runnable{
 	 * @author Tom Tzook
 	 * @since FlashLib 1.0.0
 	 */
-	public static enum ActivateType {
+	public enum ActivateType {
 		Press, Hold, Release
 	}
 	

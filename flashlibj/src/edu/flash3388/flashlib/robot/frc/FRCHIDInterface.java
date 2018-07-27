@@ -10,7 +10,7 @@ public class FRCHIDInterface implements HIDInterface{
 	private DriverStation ds = DriverStation.getInstance();
 	
 	@Override
-	public boolean isHIDConnected(int hid) {
+	public boolean isHidConnected(int hid) {
 		return ds.getStickAxisCount(hid) > 0;
 	}
 
@@ -20,7 +20,7 @@ public class FRCHIDInterface implements HIDInterface{
 	}
 
 	@Override
-	public boolean isPOVConnected(int hid, int pov) {
+	public boolean isPovConnected(int hid, int pov) {
 		return ds.getStickPOVCount(hid) > pov;
 	}
 
@@ -30,21 +30,21 @@ public class FRCHIDInterface implements HIDInterface{
 	}
 
 	@Override
-	public double getHIDAxis(int hid, int axis) {
+	public double getHidAxis(int hid, int axis) {
 		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
 			return 0;
 		return ds.getStickAxis(hid, axis);
 	}
 	
 	@Override
-	public boolean getHIDButton(int hid, int button) {
+	public boolean getHidButton(int hid, int button) {
 		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
 			return false;
 		return ds.getStickButton(hid, (byte)button);
 	}
 
 	@Override
-	public int getHIDPOV(int hid, int pov) {
+	public int getHidPov(int hid, int pov) {
 		if(FlashRobotUtil.inEmergencyStop() || RobotState.isDisabled())
 			return -1;
 		return ds.getStickPOV(hid, pov);

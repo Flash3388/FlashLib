@@ -7,33 +7,41 @@ package edu.flash3388.flashlib.robot.hid;
  * @since FlashLib 1.0.0
  */
 public class DPadButton extends HIDButton {
+
 	/**
 	 * Represents the type of the button. If the POV is a D-Pad, This could be useful.
 	 * 
 	 * @author Tom Tzook
 	 */
 	public static class Type{
-		public final byte value;
+
+		public final int type;
+
 		/**
 		 * The minimum degree to be considered as the button being pressed.
 		 */
 		public final int minDegree;
+
 		/**
 		 * The maximum degree to be considered as the button being pressed.
 		 */
 		public final int maxDegree;
 		
-		private Type(int val, int min, int max){ 
-			value = (byte) val;
+		private Type(int type, int min, int max){
+			this.type = type;
 			minDegree = min;
 			maxDegree = max;
 		}
 		
 		public boolean get(int degrees){
-			if(value == UP.value) 
+			if(type == UP.type) {
 				return (degrees >= minDegree || degrees <= maxDegree) && degrees >= 0 && degrees <= 360;
-			if(value == POV.value)
+			}
+
+			if(type == POV.type) {
 				return degrees != -1;
+			}
+
 			return degrees >= minDegree && degrees <= maxDegree && degrees >= 0 && degrees <= 360;
 		}
 		
@@ -41,18 +49,22 @@ public class DPadButton extends HIDButton {
 		 * The Up button on a D-Pad.
 		 */
 		public static final Type UP = new Type(-1, 315, 45);
+
 		/**
 		 * The Down button on a D-Pad.
 		 */
 		public static final Type DOWN = new Type(-2, 135, 255);
+
 		/**
 		 * The Right button on a D-Pad.
 		 */
 		public static final Type RIGHT = new Type(-3, 45, 135);
+
 		/**
 		 * The Left button on a D-Pad.
 		 */
 		public static final Type LEFT = new Type(-4, 255, 315);
+
 		/**
 		 * Represents the entire POV
 		 */
@@ -78,6 +90,6 @@ public class DPadButton extends HIDButton {
 	 */
 	@Override
 	public boolean get() {
-		return type.get(getHID().getRawPOV(getButtonNumber()));
+		return type.get(getHID().getRawPov(getButtonNumber()));
 	}
 }
