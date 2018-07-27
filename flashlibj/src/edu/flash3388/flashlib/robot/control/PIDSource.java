@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.robot.control;
 
-import edu.flash3388.flashlib.robot.devices.Encoder;
-import edu.flash3388.flashlib.robot.devices.Gyro;
-import edu.flash3388.flashlib.robot.devices.RangeFinder;
+import edu.flash3388.flashlib.robot.io.devices.sensors.Encoder;
+import edu.flash3388.flashlib.robot.io.devices.sensors.Gyro;
+import edu.flash3388.flashlib.robot.io.devices.sensors.RangeFinder;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;

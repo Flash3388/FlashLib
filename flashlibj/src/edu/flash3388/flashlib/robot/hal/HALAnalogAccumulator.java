@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.AnalogAccumulator;
+import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccumulator;
 
 public class HALAnalogAccumulator implements AnalogAccumulator{
 

@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
 
 /**
  * Represents a pulse counter using FlashLib's Hardware Abstraction Layer. A pulse counter is used to

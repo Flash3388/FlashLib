@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.IOProvider;
+import edu.flash3388.flashlib.robot.io.IOProvider;
 
 /**
  * The main class for controlling FlashLib's Hardware Abstraction Layer.

@@ -1,12 +1,12 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.AnalogInput;
-import edu.flash3388.flashlib.robot.devices.AnalogOutput;
-import edu.flash3388.flashlib.robot.devices.DigitalInput;
-import edu.flash3388.flashlib.robot.devices.DigitalOutput;
-import edu.flash3388.flashlib.robot.devices.IOProvider;
-import edu.flash3388.flashlib.robot.devices.PWM;
-import edu.flash3388.flashlib.robot.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.AnalogInput;
+import edu.flash3388.flashlib.robot.io.AnalogOutput;
+import edu.flash3388.flashlib.robot.io.DigitalInput;
+import edu.flash3388.flashlib.robot.io.DigitalOutput;
+import edu.flash3388.flashlib.robot.io.IOProvider;
+import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.devices.sensors.PulseCounter;
 
 public class HALIOProvider implements IOProvider{
 

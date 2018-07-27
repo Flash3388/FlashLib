@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class OmniDriveSystem extends Subsystem implements HolonomicDriveInterface {

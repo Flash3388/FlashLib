@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.AnalogAccumulator;
-import edu.flash3388.flashlib.robot.devices.AnalogInput;
+import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccumulator;
+import edu.flash3388.flashlib.robot.io.AnalogInput;
 
 /**
  * Represents an analog input port using FlashLib's Hardware Abstraction Layer. When using

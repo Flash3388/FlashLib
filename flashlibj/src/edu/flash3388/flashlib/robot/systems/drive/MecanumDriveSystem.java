@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInterface {

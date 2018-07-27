@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.PWM;
+import edu.flash3388.flashlib.robot.io.PWM;
 
 /**
  * Represents an PWM port using FlashLib's Hardware Abstraction Layer. When using

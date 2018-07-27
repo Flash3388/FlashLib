@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.AnalogOutput;
+import edu.flash3388.flashlib.robot.io.AnalogOutput;
 
 /**
  * Represents an analog output port using FlashLib's Hardware Abstraction Layer. When using

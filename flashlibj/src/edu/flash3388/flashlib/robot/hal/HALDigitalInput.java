@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.DigitalInput;
+import edu.flash3388.flashlib.robot.io.DigitalInput;
 
 /**
  * Represents an digital input port using FlashLib's Hardware Abstraction Layer. When using

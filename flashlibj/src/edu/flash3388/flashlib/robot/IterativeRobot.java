@@ -5,7 +5,7 @@ import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.devices.MotorSafetyHelper;
+import edu.flash3388.flashlib.robot.io.devices.actuators.MotorSafetyHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

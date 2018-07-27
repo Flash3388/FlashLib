@@ -7,8 +7,8 @@ import edu.flash3388.flashlib.robot.FlashboardModeSelector;
 import edu.flash3388.flashlib.robot.IterativeRobot;
 import edu.flash3388.flashlib.robot.Scheduler;
 import edu.flash3388.flashlib.robot.actions.OmniDriveAction;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.Talon;
+import edu.flash3388.flashlib.robot.io.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.Talon;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.robot.systems.FlashDrive;
 
