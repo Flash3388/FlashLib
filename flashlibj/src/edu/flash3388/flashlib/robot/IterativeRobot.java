@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
@@ -94,13 +95,12 @@ public abstract class IterativeRobot extends RobotBase {
     private void robotLoop(){
         while(mRunLoop.get()){
             if(isDisabled()){
-
                 mScheduler.removeAllActions();
                 mScheduler.setRunMode(Scheduler.SchedulerRunMode.TASKS_ONLY);
 
                 disabledInit();
 
-                while(stayInMode(RobotModeSupplier.MODE_DISABLED)){
+                while(stayInMode(RobotMode.DISABLED)){
                     mScheduler.run();
 
                     disabledPeriodic();
@@ -108,7 +108,7 @@ public abstract class IterativeRobot extends RobotBase {
                     FlashUtil.delay(ITERATION_DELAY);
                 }
             } else{
-                int currentMode = getMode();
+                RobotMode currentMode = getMode();
 
                 mScheduler.removeAllActions();
                 mScheduler.setRunMode(Scheduler.SchedulerRunMode.ALL);
@@ -126,8 +126,8 @@ public abstract class IterativeRobot extends RobotBase {
         }
     }
 
-    private boolean stayInMode(int mode) {
-	    return isMode(mode) && mRunLoop.get();
+    private boolean stayInMode(RobotMode mode) {
+	    return isInMode(mode) && mRunLoop.get();
     }
 
 	protected void robotFree(){}
@@ -135,6 +135,6 @@ public abstract class IterativeRobot extends RobotBase {
 	protected abstract void disabledInit();
 	protected abstract void disabledPeriodic();
 	
-	protected abstract void modeInit(int mode);
-	protected abstract void modePeriodic(int mode);
+	protected abstract void modeInit(RobotMode mode);
+	protected abstract void modePeriodic(RobotMode mode);
 }

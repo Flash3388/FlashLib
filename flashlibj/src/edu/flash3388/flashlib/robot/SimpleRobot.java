@@ -71,7 +71,7 @@ public abstract class SimpleRobot extends RobotBase{
 	}
 
 	private boolean stayInMode(int mode) {
-		return isMode(mode) && mRunLoop.get();
+		return isInMode(mode) && mRunLoop.get();
 	}
 
 	protected void robotFree(){}

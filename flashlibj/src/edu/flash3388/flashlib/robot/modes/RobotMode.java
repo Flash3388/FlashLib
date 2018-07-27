@@ -13,4 +13,8 @@ public class RobotMode {
     public int getKey() {
         return mKey;
     }
+
+    public boolean equals(RobotMode other) {
+        return other != null && mKey == other.mKey;
+    }
 }
