@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -16,7 +15,7 @@ public abstract class EncoderBase implements Encoder{
 	
 	private EncoderDataType pidType = EncoderDataType.Rate;
 	
-	private PulseCounter counter;
+	private Counter counter;
 	
 	private double distancePerPulse;
 	private int pulsesPerRevolution;
@@ -42,7 +41,7 @@ public abstract class EncoderBase implements Encoder{
 		checkQuadrature(false);
 		reset();
 	}
-	protected EncoderBase(PulseCounter counter, int pulsesPerRevolution, double distancePerPulse, boolean quadrature) {
+	protected EncoderBase(Counter counter, int pulsesPerRevolution, double distancePerPulse, boolean quadrature) {
 		this.counter = counter;
 		this.distancePerPulse = distancePerPulse;
 		this.pulsesPerRevolution = pulsesPerRevolution;
@@ -185,7 +184,7 @@ public abstract class EncoderBase implements Encoder{
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Resets the pulse counter by calling {@link PulseCounter#reset()}.
+	 * Resets the pulse counter by calling {@link Counter#reset()}.
 	 */
 	@Override
 	public void reset() {
@@ -232,7 +231,7 @@ public abstract class EncoderBase implements Encoder{
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * The pulse count is returned by getting it from the pulse counter object used, calling {@link PulseCounter#get()}.
+	 * The pulse count is returned by getting it from the pulse counter object used, calling {@link Counter#get()}.
 	 */
 	@Override
 	public int getRaw() {
@@ -241,7 +240,7 @@ public abstract class EncoderBase implements Encoder{
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * The direction is received by calling {@link PulseCounter#getDirection()}.
+	 * The direction is received by calling {@link Counter#getDirection()}.
 	 */
 	@Override
 	public boolean getDirection(){

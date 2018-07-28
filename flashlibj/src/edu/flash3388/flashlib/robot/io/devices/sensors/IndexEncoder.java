@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 
 /**
  * Control class for a relative encoder sensor using the index channel. Relative encoders measure the 
@@ -70,7 +69,7 @@ public class IndexEncoder extends EncoderBase{
 	 * 
 	 * @param counter the pulse counter object
 	 */
-	public IndexEncoder(PulseCounter counter) {
+	public IndexEncoder(Counter counter) {
 		this(counter, 0.0);
 	}
 	/**
@@ -85,7 +84,7 @@ public class IndexEncoder extends EncoderBase{
 	 * @param counter the pulse counter object
 	 * @param distancePerRevolution distance per revolution in meters
 	 */
-	public IndexEncoder(PulseCounter counter, double distancePerRevolution) {
+	public IndexEncoder(Counter counter, double distancePerRevolution) {
 		super(counter, 1, distancePerRevolution, false);
 	}
 	

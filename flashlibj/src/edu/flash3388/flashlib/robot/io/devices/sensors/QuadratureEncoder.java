@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 
 /**
  * Control class for a relative encoder sensor using quadrature data. Relative encoders measure the 
@@ -79,7 +78,7 @@ public class QuadratureEncoder extends EncoderBase {
 	 * 
 	 * @param counter the pulse counter object
 	 */
-	public QuadratureEncoder(PulseCounter counter) {
+	public QuadratureEncoder(Counter counter) {
 		this(counter, DEFAULT_PPR, 0.0);
 	}
 	/**
@@ -96,7 +95,7 @@ public class QuadratureEncoder extends EncoderBase {
 	 * @param pulsesPerRevolution amount of pulses per revolution of the encoder
 	 * @param distancePerPulse distance per pulse in meters
 	 */
-	public QuadratureEncoder(PulseCounter counter, int pulsesPerRevolution, double distancePerPulse) {
+	public QuadratureEncoder(Counter counter, int pulsesPerRevolution, double distancePerPulse) {
 		super(counter, pulsesPerRevolution, distancePerPulse, true);
 	}
 }

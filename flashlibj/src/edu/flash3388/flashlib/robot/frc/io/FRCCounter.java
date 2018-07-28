@@ -1,16 +1,15 @@
-package edu.flash3388.flashlib.robot.frc.io.devices;
+package edu.flash3388.flashlib.robot.frc.io;
 
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
-import edu.wpi.first.wpilibj.Counter;
+import edu.flash3388.flashlib.robot.io.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 
-public class FRCPulseCounter implements PulseCounter{
+public class FRCCounter implements Counter {
 	
-	private Counter counter;
+	private edu.wpi.first.wpilibj.Counter counter;
 	private boolean quadrature;
 
-	public FRCPulseCounter(DigitalInput port, boolean pulseLength) {
-		counter = new Counter();
+	public FRCCounter(DigitalInput port, boolean pulseLength) {
+		counter = new edu.wpi.first.wpilibj.Counter();
 		
 		if(pulseLength){
 			counter.setPulseLengthMode(0.01);
@@ -22,12 +21,12 @@ public class FRCPulseCounter implements PulseCounter{
 		
 		quadrature = false;
 	}
-	public FRCPulseCounter(int port, boolean pulseLength){
+	public FRCCounter(int port, boolean pulseLength){
 		this(new DigitalInput(port), pulseLength);
 	}
 	
-	public FRCPulseCounter(DigitalInput upPort, DigitalInput downPort) {
-		counter = new Counter();
+	public FRCCounter(DigitalInput upPort, DigitalInput downPort) {
+		counter = new edu.wpi.first.wpilibj.Counter();
 		
 		counter.setUpSource(upPort);
 		counter.setDownSource(downPort);
@@ -36,7 +35,7 @@ public class FRCPulseCounter implements PulseCounter{
 		
 		quadrature = true;
 	}
-	public FRCPulseCounter(int upPort, int downPort){
+	public FRCCounter(int upPort, int downPort){
 		this(new DigitalInput(upPort), new DigitalInput(downPort));
 	}
 	

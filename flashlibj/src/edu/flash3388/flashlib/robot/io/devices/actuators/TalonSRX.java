@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
 import edu.flash3388.flashlib.robot.io.PWM;
 
 /**
@@ -10,20 +9,8 @@ import edu.flash3388.flashlib.robot.io.PWM;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class TalonSRX extends PWMSpeedController{
+public class TalonSRX extends PWMSpeedController {
 
-	/**
-	 * Creates a new Talon SRX control class for a given PWM channel.
-	 * <p>
-	 * The PWM port object is created using {@link IOFactory#createPWMPort(int)}.
-	 * 
-	 * @param port PWM port number
-	 */
-	public TalonSRX(int port) {
-		super(port);
-		
-		init();
-	}
 	/**
 	 * Creates a new Talon SRX control class for a given PWM channel.
 	 * 
@@ -31,14 +18,10 @@ public class TalonSRX extends PWMSpeedController{
 	 */
 	public TalonSRX(PWM port) {
 		super(port);
-		
-		init();
-	}
-	
-	private void init(){
+
 		setFrequency(333.0);
 		setBounds(2.004, 1.52, 1.50, 1.48, 0.997);
-		
+
 		setSpeed(0.0);
 	}
 }

@@ -1,8 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
+import edu.flash3388.flashlib.robot.io.Counter;
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
-import edu.flash3388.flashlib.robot.io.IOFactory;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -52,7 +51,7 @@ public class Ultrasonic implements RangeFinder{
 	private static SonicTask autoTask = new SonicTask();
 	private static Thread autoThread;
 	
-	private PulseCounter counter;
+	private Counter counter;
 	private DigitalOutput pingChannel;
 	
 	private boolean enabled = true;
@@ -89,7 +88,7 @@ public class Ultrasonic implements RangeFinder{
 	 * @param pingChannel digital output channel for ping
 	 * @param counter pulse counter for echo
 	 */
-	public Ultrasonic(DigitalOutput pingChannel, PulseCounter counter) {
+	public Ultrasonic(DigitalOutput pingChannel, Counter counter) {
 		this.counter = counter;
 		this.pingChannel = pingChannel;
 		

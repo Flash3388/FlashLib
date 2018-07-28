@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.AnalogInput;
-import edu.flash3388.flashlib.robot.io.IOFactory;
 
 /**
  * Control class for an analog range finder sensor. Range finders are sensors used to measure distances between

@@ -1,6 +1,6 @@
-package edu.flash3388.flashlib.robot.io.devices;
+package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.robot.io.IOPort;
+import edu.flash3388.flashlib.util.Resource;
 import edu.flash3388.flashlib.util.beans.IntegerSource;
 
 /**
@@ -13,7 +13,7 @@ import edu.flash3388.flashlib.util.beans.IntegerSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public interface PulseCounter extends IntegerSource, IOPort {
+public interface Counter extends IntegerSource, Resource {
 
 	/**
 	 * Resets the counter, setting the pulse count to zero.
@@ -25,6 +25,7 @@ public interface PulseCounter extends IntegerSource, IOPort {
 	 * 
 	 * @return amount of pulses counted.
 	 */
+	@Override
 	int get();
 	
 	/**

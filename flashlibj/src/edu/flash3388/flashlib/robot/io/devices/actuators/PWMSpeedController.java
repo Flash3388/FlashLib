@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
 import edu.flash3388.flashlib.robot.io.PWM;
 import edu.flash3388.flashlib.robot.io.devices.PWMDevice;
 import edu.flash3388.flashlib.robot.io.devices.SafePWM;
@@ -16,17 +15,7 @@ import edu.flash3388.flashlib.robot.io.devices.SafePWM;
 public class PWMSpeedController extends SafePWM implements FlashSpeedController{
 
 	private boolean inverted = false;
-	
-	/**
-	 * Creates a new PWM speed controller device for a given PWM port number.
-	 * <p>
-	 * The PWM port object is created using {@link IOFactory#createPWMPort(int)}.
-	 * 
-	 * @param port port number
-	 */
-	public PWMSpeedController(int port) {
-		super(port);
-	}
+
 	/**
 	 * Creates a new PWM speed controller device for a given PWM port.
 	 * 
@@ -66,6 +55,7 @@ public class PWMSpeedController extends SafePWM implements FlashSpeedController{
 	public boolean isInverted() {
 		return inverted;
 	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 
 /**
  * Control class for a pulse width range finder sensor. Range finders are sensors used to measure distances between
@@ -20,7 +19,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 
 	private static final double DEFAULT_SENSITIVITY = 147.0 * 2.54;
 	
-	private PulseCounter counter;
+	private Counter counter;
 	private double sensitivity;
 	
 	/**
@@ -64,7 +63,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * 
 	 * @param counter pulse counter for the input port
 	 */
-	public PulseWidthRangeFinder(PulseCounter counter) {
+	public PulseWidthRangeFinder(Counter counter) {
 		this(counter, DEFAULT_SENSITIVITY);
 	}
 	/**
@@ -77,7 +76,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * @param counter pulse counter for the input port
 	 * @param sensitivity sensitivity in microseconds/centimeter
 	 */
-	public PulseWidthRangeFinder(PulseCounter counter, double sensitivity) {
+	public PulseWidthRangeFinder(Counter counter, double sensitivity) {
 		this.counter = counter;
 		this.sensitivity = sensitivity;
 	}

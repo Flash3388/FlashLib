@@ -4,12 +4,12 @@ import edu.flash3388.flashlib.robot.hal.HALAnalogInput;
 import edu.flash3388.flashlib.robot.hal.HALDigitalInput;
 import edu.flash3388.flashlib.robot.hal.HALDigitalOutput;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
-import edu.flash3388.flashlib.robot.hal.devices.HALPulseCounter;
+import edu.flash3388.flashlib.robot.hal.HALCounter;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
 import edu.flash3388.flashlib.robot.io.DigitalInput;
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 
 /**
  * Provides utilities for the Hardware Abstraction Layer implementation 
@@ -178,9 +178,9 @@ public final class BeagleboneBlack {
 	 * @param pin DIO pin
 	 * @return a pulse counter, or null if port is not valid
 	 */
-	public static PulseCounter createPulseCounterPort(int header, int pin){
+	public static Counter createPulseCounterPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
-		return new HALPulseCounter(convertDIOToHALPort(header, pin));
+		return new HALCounter(convertDIOToHALPort(header, pin));
 	}
 }

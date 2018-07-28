@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.io.devices;
 
-import edu.flash3388.flashlib.robot.io.IOFactory;
 import edu.flash3388.flashlib.robot.io.PWM;
 import edu.flash3388.flashlib.robot.io.devices.actuators.MotorSafetyHelper;
 import edu.flash3388.flashlib.robot.io.devices.actuators.SafeMotor;
@@ -16,17 +15,7 @@ import edu.flash3388.flashlib.robot.io.devices.actuators.SafeMotor;
 public class SafePWM extends PWMDevice implements SafeMotor{
 
 	private MotorSafetyHelper helper;
-	
-	/**
-	 * Creates a new PWM device for a given PWM port number. The port object
-	 * is created by calling {@link IOFactory#createPWMPort(int)}.
-	 * 
-	 * @param port PWM port channel
-	 */
-	public SafePWM(int port) {
-		super(port);
-		helper = new MotorSafetyHelper(this);
-	}
+
 	/**
 	 * Creates a new safe PWM device for a given PWM port.
 	 * 
@@ -50,6 +39,7 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 			helper.feed();
 		}
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -71,6 +61,7 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 	public void setExpiration(int timeout) {
 		helper.setExpiration(timeout);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -94,6 +85,7 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 	public void setSafetyEnabled(boolean enabled) {
 		helper.setSafetyEnabled(enabled);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */

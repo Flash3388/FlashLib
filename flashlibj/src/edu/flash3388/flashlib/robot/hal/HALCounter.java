@@ -1,9 +1,9 @@
-package edu.flash3388.flashlib.robot.hal.devices;
+package edu.flash3388.flashlib.robot.hal;
 
 import edu.flash3388.flashlib.robot.hal.*;
 import edu.flash3388.flashlib.robot.hal.jni.COUNTERJNI;
 import edu.flash3388.flashlib.robot.hal.jni.DIOJNI;
-import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
+import edu.flash3388.flashlib.robot.io.Counter;
 
 /**
  * Represents a pulse counter using FlashLib's Hardware Abstraction Layer. A pulse counter is used to
@@ -11,12 +11,12 @@ import edu.flash3388.flashlib.robot.io.devices.PulseCounter;
  * this, make sure HAL was initialized first. Before using this class, make sure the current HAL
  * implementation supports digital input ports.
  * <p>
- * This class implements {@link PulseCounter}.
+ * This class implements {@link Counter}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALPulseCounter extends HALPort implements PulseCounter {
+public class HALCounter extends HALPort implements Counter {
 	
 	private HALDigitalInput upSource, downSource;
 	
@@ -28,7 +28,7 @@ public class HALPulseCounter extends HALPort implements PulseCounter {
 	 * @param port the HAL port of the desired digital input
 	 * @throws HALInitialzationException if counter initialization failed.
 	 */
-	public HALPulseCounter(int port) {
+	public HALCounter(int port) {
 		upSource = initialzeInputSource(port);
 		
 		init();
@@ -41,7 +41,7 @@ public class HALPulseCounter extends HALPort implements PulseCounter {
 	 * @param port the HAL port of the desired digital input
 	 * @throws HALInitialzationException if counter initialization failed.
 	 */
-	public HALPulseCounter(HALDigitalInput port) {
+	public HALCounter(HALDigitalInput port) {
 		upSource = port;
 		
 		init();
@@ -56,7 +56,7 @@ public class HALPulseCounter extends HALPort implements PulseCounter {
 	 * @param downPort the HAL port of the desired backward digital input
 	 * @throws HALInitialzationException if counter initialization failed.
 	 */
-	public HALPulseCounter(int upPort, int downPort) {
+	public HALCounter(int upPort, int downPort) {
 		upSource = initialzeInputSource(upPort);
 		downSource = initialzeInputSource(downPort);
 		
@@ -72,7 +72,7 @@ public class HALPulseCounter extends HALPort implements PulseCounter {
 	 * @param downPort the HAL port of the desired backward digital input
 	 * @throws HALInitialzationException if counter initialization failed.
 	 */
-	public HALPulseCounter(HALDigitalInput upPort, HALDigitalInput downPort) {
+	public HALCounter(HALDigitalInput upPort, HALDigitalInput downPort) {
 		upSource = upPort;
 		downSource = downPort;
 		
@@ -83,21 +83,21 @@ public class HALPulseCounter extends HALPort implements PulseCounter {
 		if(downSource == null){
 			handle = COUNTERJNI.initializePulseCounter(upSource.getHandle());
 			if(handle == HAL_INVALID_HANDLE)
-				throw new HALInitialzationException("Unable to initialize PulseCounter: invalid HAL handle", 
+				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
 						upSource.getHandle());
 		}else{
 			handle = COUNTERJNI.initializeQuadPulseCounter(upSource.getHandle(), downSource.getHandle());
 			if(handle == HAL_INVALID_HANDLE)
-				throw new HALInitialzationException("Unable to initialize PulseCounter: invalid HAL handle", 
+				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
 						HAL_INVALID_HANDLE);
 		}
 	}
 	private HALDigitalInput initialzeInputSource(int port){
 		if(!DIOJNI.checkDigitalInputPortValid(port))
-			throw new IllegalArgumentException("PulseCounter: Invalid DigitalInput port "+port);
+			throw new IllegalArgumentException("Counter: Invalid DigitalInput port "+port);
 		
 		if(DIOJNI.checkDigitalInputPortTaken(port))
-			throw new HALAllocationException("PulseCounter: DigitalInput port taken", port);
+			throw new HALAllocationException("Counter: DigitalInput port taken", port);
 		
 		return new HALDigitalInput(port);
 	}

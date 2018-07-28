@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
-import edu.flash3388.flashlib.robot.io.IOFactory;
 import edu.flash3388.flashlib.robot.io.IOPort;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 

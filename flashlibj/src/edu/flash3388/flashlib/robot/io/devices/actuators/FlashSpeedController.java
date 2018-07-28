@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+import edu.flash3388.flashlib.util.beans.DoubleProperty;
 
 /**
  * Interface for speed controllers.
@@ -8,7 +8,8 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface FlashSpeedController extends DoubleSource{
+public interface FlashSpeedController extends DoubleProperty {
+
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
@@ -19,7 +20,9 @@ public interface FlashSpeedController extends DoubleSource{
 	 * 
 	 * @param speed [-1 to 1] describing the percent vbus
 	 */
+	@Override
 	void set(double speed);
+
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
@@ -38,6 +41,7 @@ public interface FlashSpeedController extends DoubleSource{
 	default void set(double speed, boolean direction){
 		set(direction? speed : -speed);
 	}
+
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
 	 * percent voltage bus (vbus), which describes a percentage of the currently available voltage to
@@ -78,6 +82,7 @@ public interface FlashSpeedController extends DoubleSource{
 	 * @return true if the motor is inverted, false otherwise.
 	 */
 	boolean isInverted();
+
 	/**
 	 * Sets the reversing of directions by the motor controller.
 	 * @param inverted true to reverse directions, false otherwise
