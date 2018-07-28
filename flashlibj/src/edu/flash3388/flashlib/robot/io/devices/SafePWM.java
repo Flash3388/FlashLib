@@ -20,9 +20,10 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 	 * Creates a new safe PWM device for a given PWM port.
 	 * 
 	 * @param port PWM port
+	 * @param bounds pwm bounds
 	 */
-	public SafePWM(PWM port) {
-		super(port);
+	public SafePWM(PWM port, PWMBounds bounds) {
+		super(port, bounds);
 		helper = new MotorSafetyHelper(this);
 	}
 

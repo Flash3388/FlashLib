@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.devices.PWMBounds;
 
 /**
  * Control class for the Talon SRX speed controller from Cross the Road Electronics. This
@@ -17,10 +18,9 @@ public class TalonSRX extends PWMSpeedController {
 	 * @param port PWM port object.
 	 */
 	public TalonSRX(PWM port) {
-		super(port);
+		super(port, new PWMBounds(2.004, 1.52, 1.50, 1.48, 0.997, false));
 
 		setFrequency(333.0);
-		setBounds(2.004, 1.52, 1.50, 1.48, 0.997);
 
 		setSpeed(0.0);
 	}

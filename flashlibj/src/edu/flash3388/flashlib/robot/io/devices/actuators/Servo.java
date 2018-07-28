@@ -2,28 +2,25 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.devices.PWMBounds;
 import edu.flash3388.flashlib.robot.io.devices.SafePWM;
 
 public class Servo extends SafePWM implements FlashSpeedController{
 
-	private double minAngle, maxAngle;
+	private double mMinAngle;
+	private double mMaxAngle;
 	
 	public Servo(PWM port, double minAngle, double maxAngle) {
-		super(port);
-		
-		init(minAngle, maxAngle);
+		super(port, new PWMBounds(2.4, 0, 0, 0, 0.6, false));
+
+		mMaxAngle = maxAngle;
+		mMinAngle = minAngle;
+
+		setFrequency(getFrequency() * 0.25f);
 	}
 
 	public Servo(PWM port){
 		this(port, 0.0, 180.0);
-	}
-	
-	private void init(double minAngle, double maxAngle){
-		this.maxAngle = maxAngle;
-		this.minAngle = minAngle;
-		
-		setBounds(2.4, 0, 0, 0, 0.6);
-		setFrequency(getFrequency() * 0.25f);
 	}
 
 	@Override
@@ -52,20 +49,21 @@ public class Servo extends SafePWM implements FlashSpeedController{
 	}
 	
 	public void setAngle(double angle){
-		if(angle < 0.0)
+		if(angle < 0.0) {
 			angle = Math.abs(angle);
+		}
 		
-		angle = Mathf.constrain(angle, minAngle, maxAngle);
+		angle = Mathf.constrain(angle, mMinAngle, mMaxAngle);
 		
-		setPosition((angle - minAngle) / getAngleRange());
+		setPosition((angle - mMinAngle) / getAngleRange());
 	}
 
 	public double getAngle(){
-		return getPosition() * getAngleRange() + minAngle;
+		return getPosition() * getAngleRange() + mMinAngle;
 	}
 	
 	public double getAngleRange(){
-		return maxAngle - minAngle;
+		return mMaxAngle - mMinAngle;
 	}
 	
 	@Override
