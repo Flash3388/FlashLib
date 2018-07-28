@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.PWMBounds;
 
 /**
  * Control class for the Talon and Talon SR speed controllers from Cross the Road Electronics. This

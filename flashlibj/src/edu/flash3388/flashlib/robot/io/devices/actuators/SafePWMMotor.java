@@ -1,18 +1,16 @@
-package edu.flash3388.flashlib.robot.io.devices;
+package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.actuators.MotorSafetyHelper;
-import edu.flash3388.flashlib.robot.io.devices.actuators.SafeMotor;
 
 /**
- * Provides safety features for PWM controlled devices. Extends {@link PWMDevice},
+ * Provides safety features for PWM controlled devices. Extends {@link PWMActuator},
  * adding implementation of {@link SafeMotor}. PWM devices should extend this
  * devices to be able to use the safety feature from FlashLib.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class SafePWM extends PWMDevice implements SafeMotor{
+public class SafePWMMotor extends PWMActuator implements SafeMotor{
 
 	private MotorSafetyHelper helper;
 
@@ -22,7 +20,7 @@ public class SafePWM extends PWMDevice implements SafeMotor{
 	 * @param port PWM port
 	 * @param bounds pwm bounds
 	 */
-	public SafePWM(PWM port, PWMBounds bounds) {
+	public SafePWMMotor(PWM port, PWMBounds bounds) {
 		super(port, bounds);
 		helper = new MotorSafetyHelper(this);
 	}

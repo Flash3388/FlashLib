@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.io.devices;
+package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class PWMDevice implements Resource {
+public class PWMActuator implements Resource {
 
 	private PWM mPort;
 	private PWMBounds mBounds;
@@ -22,7 +22,7 @@ public class PWMDevice implements Resource {
 	 * @param port the PWM port
 	 * @param bounds the PWM port bounds
 	 */
-	public PWMDevice(PWM port, PWMBounds bounds) {
+	public PWMActuator(PWM port, PWMBounds bounds) {
 		mPort = port;
 		mBounds = bounds;
 

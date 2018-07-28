@@ -2,10 +2,8 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.PWMBounds;
-import edu.flash3388.flashlib.robot.io.devices.SafePWM;
 
-public class Servo extends SafePWM implements FlashSpeedController{
+public class Servo extends SafePWMMotor implements FlashSpeedController{
 
 	private double mMinAngle;
 	private double mMaxAngle;

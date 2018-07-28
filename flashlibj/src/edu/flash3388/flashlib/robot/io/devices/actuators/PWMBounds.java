@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.io.devices;
+package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 public class PWMBounds {
 

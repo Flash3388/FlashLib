@@ -1,19 +1,16 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.PWM;
-import edu.flash3388.flashlib.robot.io.devices.PWMBounds;
-import edu.flash3388.flashlib.robot.io.devices.PWMDevice;
-import edu.flash3388.flashlib.robot.io.devices.SafePWM;
 
 /**
  * Control class for a PWM-controlled speed controller device. This class integrates 
- * {@link PWMDevice} and {@link FlashSpeedController} into one. For safety, this class
- * extends the {@link SafePWM} base.
+ * {@link PWMActuator} and {@link FlashSpeedController} into one. For safety, this class
+ * extends the {@link SafePWMMotor} base.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class PWMSpeedController extends SafePWM implements FlashSpeedController{
+public class PWMSpeedController extends SafePWMMotor implements FlashSpeedController{
 
 	private boolean inverted = false;
 
