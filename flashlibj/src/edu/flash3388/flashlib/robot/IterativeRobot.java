@@ -4,6 +4,7 @@ import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.io.devices.actuators.MotorSafetyHelper;
@@ -27,13 +28,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 	<li> {@link #robotInit()}: initialization of robot systems
  * 	<li> {@link #disabledInit()}: initialization for disabled mode </li>
  * 	<li> {@link #disabledPeriodic()}: execution of disabled mode </li>
- *  <li> {@link #modeInit(int)}: initialization for a given operation mode </li>
- * 	<li> {@link #modePeriodic(int)}: execution of a given operation mode </li>
+ *  <li> {@link #modeInit(RobotMode)}: initialization for a given operation mode </li>
+ * 	<li> {@link #modePeriodic(RobotMode)}: execution of a given operation mode </li>
  * </ul>
  * {@link #robotInit()} is called after FlashLib systems finished initialization and are ready to be used.
  * Use this to initialize robot systems.
  * <p>
- * Since FlashLib supports custom operation modes, {@link #modeInit(int)} and {@link #modePeriodic(int)} are
+ * Since FlashLib supports custom operation modes, {@link #modeInit(RobotMode)} and {@link #modePeriodic(RobotMode)} are
  * called for every operation mode that is not disabled mode. The passed parameter is the mode's value, so it
  * is recommended to pay attention to the value.
  * <p>
@@ -87,7 +88,7 @@ public abstract class IterativeRobot extends RobotBase {
         mRunLoop.compareAndSet(true, false);
 
 		mScheduler.removeAllActions();
-		mScheduler.setRunMode(Scheduler.SchedulerRunMode.DISABLED);
+		mScheduler.setRunMode(SchedulerRunMode.DISABLED);
 
 		robotFree();
 	}
@@ -96,7 +97,7 @@ public abstract class IterativeRobot extends RobotBase {
         while(mRunLoop.get()){
             if(isDisabled()){
                 mScheduler.removeAllActions();
-                mScheduler.setRunMode(Scheduler.SchedulerRunMode.TASKS_ONLY);
+                mScheduler.setRunMode(SchedulerRunMode.TASKS_ONLY);
 
                 disabledInit();
 
@@ -111,7 +112,7 @@ public abstract class IterativeRobot extends RobotBase {
                 RobotMode currentMode = getMode();
 
                 mScheduler.removeAllActions();
-                mScheduler.setRunMode(Scheduler.SchedulerRunMode.ALL);
+                mScheduler.setRunMode(SchedulerRunMode.ALL);
 
                 modeInit(currentMode);
 

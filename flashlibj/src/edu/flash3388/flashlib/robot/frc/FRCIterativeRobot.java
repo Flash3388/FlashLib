@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import edu.wpi.first.wpilibj.hal.HAL;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
@@ -37,7 +38,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
             if (isDisabled()) {
                 if (!mIsDisabledInitialized) {
                     resetInitializationIndicators();
-                    resetScheduler(Scheduler.SchedulerRunMode.TASKS_ONLY);
+                    resetScheduler(SchedulerRunMode.TASKS_ONLY);
                     LiveWindow.setEnabled(false);
 
                     disabledInit();
@@ -51,7 +52,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
             } else if (isOperatorControl()) {
                 if (!mIsTeleopInitialized) {
                     resetInitializationIndicators();
-                    resetScheduler(Scheduler.SchedulerRunMode.ALL);
+                    resetScheduler(SchedulerRunMode.ALL);
                     LiveWindow.setEnabled(true);
 
                     teleopInit();
@@ -65,7 +66,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
             } else if (isAutonomous()) {
                 if (!mIsAutonomousInitialized) {
                     resetInitializationIndicators();
-                    resetScheduler(Scheduler.SchedulerRunMode.ALL);
+                    resetScheduler(SchedulerRunMode.ALL);
                     LiveWindow.setEnabled(true);
 
                     autonomousInit();
@@ -79,7 +80,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
             } else if (isTest()) {
                 if (!mIsTestInitialized) {
                     resetInitializationIndicators();
-                    resetScheduler(Scheduler.SchedulerRunMode.ALL);
+                    resetScheduler(SchedulerRunMode.ALL);
                     LiveWindow.setEnabled(true);
 
                     testInit();
@@ -94,7 +95,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
         }
     }
 
-    private void resetScheduler(Scheduler.SchedulerRunMode runMode) {
+    private void resetScheduler(SchedulerRunMode runMode) {
         mScheduler.removeAllActions();
         mScheduler.setRunMode(runMode);
     }

@@ -36,40 +36,6 @@ public final class Scheduler {
 		return mInstance;
 	}
 
-	public enum SchedulerRunMode {
-		DISABLED {
-			@Override
-			void runScheduler(Scheduler scheduler) {
-			}
-		},
-		TASKS_ONLY {
-			@Override
-			void runScheduler(Scheduler scheduler) {
-				scheduler.runTasks();
-			}
-		},
-		ACTIONS_ONLY {
-			@Override
-			void runScheduler(Scheduler scheduler) {
-				scheduler.runActions();
-				scheduler.startDefaultSubsystemActions();
-			}
-		},
-		ALL {
-			@Override
-			void runScheduler(Scheduler scheduler) {
-				scheduler.runTasks();
-				scheduler.runActions();
-				scheduler.startDefaultSubsystemActions();
-			}
-		};
-
-		SchedulerRunMode() {
-		}
-
-		abstract void runScheduler(Scheduler scheduler);
-	}
-
 	private final Set<Subsystem> mSubsystems;
 	private final Collection<Action> mActions;
 	private final Collection<Task> mTasks;
@@ -160,7 +126,14 @@ public final class Scheduler {
 	}
 
 	public void run() {
-		mRunMode.runScheduler(this);
+		if (mRunMode.shouldRunTasks()) {
+			runTasks();
+		}
+
+		if (mRunMode.shouldRunActions()) {
+			runActions();
+			startDefaultSubsystemActions();
+		}
 	}
 
 	private void runTasks() {
