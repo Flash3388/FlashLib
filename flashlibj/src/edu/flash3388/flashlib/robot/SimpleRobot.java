@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.flashboard.Flashboard;
+import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * The control loop tracks operation mode data and calls user methods accordingly. When in disabled
  * mode, {@link #disabled()} is called and allows user operations in disabled mode. When in any other mode,
- * {@link #onMode(int)} is called and the current mode value is passed, allowing user operations for that mode.
+ * {@link #onMode(RobotMode)} is called and the current mode value is passed, allowing user operations for that mode.
  * Those methods are called only once when in the operation mode. So if they finish execution before the mode is
  * finished, not further user code will be executed for that mode. If mode was changed and user code did not
  * finished and the methods did not return, this will disrupt robot operations.
@@ -55,11 +56,11 @@ public abstract class SimpleRobot extends RobotBase{
 			if(isDisabled()){
 				disabled();
 				
-				while(stayInMode(RobotModeSupplier.MODE_DISABLED)){
+				while(stayInMode(RobotMode.DISABLED)){
 					FlashUtil.delay(ITERATION_DELAY);
 				}
 			} else{
-				int currentMode = getMode();
+				RobotMode currentMode = getMode();
 				
 				onMode(currentMode);
 				
@@ -70,11 +71,11 @@ public abstract class SimpleRobot extends RobotBase{
 		}
 	}
 
-	private boolean stayInMode(int mode) {
+	private boolean stayInMode(RobotMode mode) {
 		return isInMode(mode) && mRunLoop.get();
 	}
 
 	protected void robotFree(){}
 	protected abstract void disabled();
-	protected abstract void onMode(int mode);
+	protected abstract void onMode(RobotMode mode);
 }

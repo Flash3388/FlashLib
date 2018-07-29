@@ -105,6 +105,7 @@ public abstract class IterativeRobot extends RobotBase {
                     mScheduler.run();
 
                     disabledPeriodic();
+                    robotPeriodic();
 
                     FlashUtil.delay(ITERATION_DELAY);
                 }
@@ -120,6 +121,7 @@ public abstract class IterativeRobot extends RobotBase {
                     mScheduler.run();
 
                     modePeriodic(currentMode);
+                    robotPeriodic();
 
                     FlashUtil.delay(ITERATION_DELAY);
                 }
@@ -138,4 +140,6 @@ public abstract class IterativeRobot extends RobotBase {
 	
 	protected abstract void modeInit(RobotMode mode);
 	protected abstract void modePeriodic(RobotMode mode);
+
+	protected abstract void robotPeriodic();
 }
