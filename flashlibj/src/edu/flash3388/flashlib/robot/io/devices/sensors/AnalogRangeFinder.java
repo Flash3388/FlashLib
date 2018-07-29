@@ -17,26 +17,9 @@ import edu.flash3388.flashlib.robot.io.AnalogInput;
  */
 public class AnalogRangeFinder implements RangeFinder {
 	
-	private AnalogInput input;
-	private double sensitivity;
-	
-	/**
-	 * Creates a new analog range finder sensor.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into distance.
-	 * <p>
-	 * The sensitivity of the sensor is used to convert from analog voltage into distance.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * 
-	 * @param port analog input port
-	 * @param sensitivity sensitivity in volts/centimeter
-	 */
-	public AnalogRangeFinder(int port, double sensitivity) {
-		this.input = IOFactory.createAnalogInputPort(port);
-		this.sensitivity = sensitivity;
-	}
+	private AnalogInput mInput;
+	private double mSensitivity;
+
 	/**
 	 * Creates a new analog range finder sensor.
 	 * <p>
@@ -48,8 +31,8 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * @param sensitivity sensitivity in volts/centimeter
 	 */
 	public AnalogRangeFinder(AnalogInput input, double sensitivity) {
-		this.input = input;
-		this.sensitivity = sensitivity;
+		this.mInput = input;
+		this.mSensitivity = sensitivity;
 	}
 	
 	/**
@@ -59,9 +42,10 @@ public class AnalogRangeFinder implements RangeFinder {
 	 */
 	@Override
 	public void free() {
-		if(input != null)
-			input.free();
-		input = null;
+		if(mInput != null) {
+			mInput.free();
+			mInput = null;
+		}
 	}
 	
 	/**
@@ -73,8 +57,9 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * @param sensitivity sensitivity in volts per centimeter
 	 */
 	public void setSensitivity(double sensitivity){
-		this.sensitivity = sensitivity;
+		this.mSensitivity = sensitivity;
 	}
+
 	/**
 	 * Gets the sensor sensitivity value.
 	 * <p>
@@ -84,7 +69,7 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * @return sensitivity in volts per centimeter
 	 */
 	public double getSensitivity(){
-		return sensitivity;
+		return mSensitivity;
 	}
 
 	/**
@@ -95,6 +80,6 @@ public class AnalogRangeFinder implements RangeFinder {
 	 */
 	@Override
 	public double getRangeCM() {
-		return input.getVoltage() / sensitivity;
+		return mInput.getVoltage() / mSensitivity;
 	}
 }

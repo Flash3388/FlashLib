@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
-import edu.flash3388.flashlib.robot.io.IOPort;
+import edu.flash3388.flashlib.util.Resource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -12,7 +12,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface RangeFinder extends DoubleSource, PIDSource, IOPort {
+public interface RangeFinder extends DoubleSource, PIDSource, Resource {
 	/**
 	 * Gets the distance measured by the sensor in centimeters. 
 	 * 
@@ -29,6 +29,7 @@ public interface RangeFinder extends DoubleSource, PIDSource, IOPort {
 	default double pidGet() {
 		return getRangeCM();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

@@ -19,40 +19,9 @@ public class PulseWidthRangeFinder implements RangeFinder {
 
 	private static final double DEFAULT_SENSITIVITY = 147.0 * 2.54;
 	
-	private Counter counter;
-	private double sensitivity;
-	
-	/**
-	 * Creates a new pulse width range finder sensor.
-	 * <p>
-	 * A {@link IOFactory#createPulseCounter(int)} is created for the given port to measure pulse lengths from the
-	 * sensor to convert into distance.
-	 * <p>
-	 * The sensitivity of the sensor is used to convert from pulse lengths in microseconds into distance. The sensitivity
-	 * used is {@value #DEFAULT_SENSITIVITY}.
-	 * 
-	 * 
-	 * @param port digital input port
-	 */
-	public PulseWidthRangeFinder(int port) {
-		this(port, DEFAULT_SENSITIVITY);
-	}
-	/**
-	 * Creates a new pulse width range finder sensor.
-	 * <p>
-	 * A {@link IOFactory#createPulseCounter(int)} is created for the given port to measure pulse lengths from the 
-	 * sensor to convert into distance.
-	 * <p>
-	 * The sensitivity of the sensor is used to convert from pulse lengths in microseconds into distance.
-	 * 
-	 * 
-	 * @param port digital input port
-	 * @param sensitivity sensitivity in microseconds/centimeter
-	 */
-	public PulseWidthRangeFinder(int port, double sensitivity) {
-		this.counter = IOFactory.createPulseCounter(port);
-		this.sensitivity = sensitivity;
-	}
+	private Counter mCounter;
+	private double mSensitivity;
+
 	/**
 	 * Creates a new pulse width range finder sensor.
 	 * <p>
@@ -66,6 +35,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	public PulseWidthRangeFinder(Counter counter) {
 		this(counter, DEFAULT_SENSITIVITY);
 	}
+
 	/**
 	 * Creates a new pulse width range finder sensor.
 	 * <p>
@@ -77,8 +47,8 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * @param sensitivity sensitivity in microseconds/centimeter
 	 */
 	public PulseWidthRangeFinder(Counter counter, double sensitivity) {
-		this.counter = counter;
-		this.sensitivity = sensitivity;
+		this.mCounter = counter;
+		this.mSensitivity = sensitivity;
 	}
 	
 	/**
@@ -90,8 +60,9 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * @return sensitivity in microseconds per centimeter
 	 */
 	public double getSensitivity(){
-		return sensitivity;
+		return mSensitivity;
 	}
+
 	/**
 	 * Sets the sensor sensitivity value.
 	 * <p>
@@ -101,7 +72,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * @param sensitivity sensitivity in microseconds per centimeter
 	 */
 	public void setSensitivity(double sensitivity){
-		this.sensitivity = sensitivity;
+		this.mSensitivity = sensitivity;
 	}
 	
 	/**
@@ -111,9 +82,10 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 */
 	@Override
 	public void free() {
-		if(counter != null)
-			counter.free();
-		counter = null;
+		if (mCounter != null) {
+			mCounter.free();
+			mCounter = null;
+		}
 	}
 
 	/**
@@ -124,6 +96,6 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 */
 	@Override
 	public double getRangeCM() {
-		return counter.getPulseLength() * 1e6 / sensitivity;
+		return mCounter.getPulseLength() * 1e6 / mSensitivity;
 	}
 }

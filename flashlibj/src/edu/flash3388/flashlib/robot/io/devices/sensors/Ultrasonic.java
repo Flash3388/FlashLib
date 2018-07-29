@@ -47,38 +47,9 @@ public class Ultrasonic implements RangeFinder{
 	private static final double PING_TIME = 10 * 1e-6;
 	private static final double SPEED_OF_SOUND = 340.29 * 100;//cm/sec
 	
-	private static boolean inAutomaticMode = false;
-	private static SonicTask autoTask = new SonicTask();
-	private static Thread autoThread;
-	
-	private Counter counter;
-	private DigitalOutput pingChannel;
-	
-	private boolean enabled = true;
-	
-	private Ultrasonic nextSonic;
-	
-	private static Ultrasonic headSonic;
-	
-	/**
-	 * Creates a new ultrasonic sensor. 
-	 * <p>
-	 * The ping port given is used to ping the sensor, sending out a sound wave. The echo channel receives a pulse
-	 * from the ultrasonic which is then converted to distance.
-	 * <p>
-	 * The digital output channel is created using {@link IOFactory#createDigitalOutputPort(int)} and the pulse
-	 * counter for echo is created using {@link IOFactory#createPulseCounter(int)}.
-	 * 
-	 * @param pingChannel channel for ping
-	 * @param echoChannel channel for echo
-	 */
-	public Ultrasonic(int pingChannel, int echoChannel) {
-		this.counter = IOFactory.createPulseCounter(echoChannel);
-		this.pingChannel = IOFactory.createDigitalOutputPort(pingChannel);
-		
-		nextSonic = headSonic;
-		headSonic = this;
-	}
+	private Counter mCounter;
+	private DigitalOutput mPingPort;
+
 	/**
 	 * Creates a new ultrasonic sensor. 
 	 * <p>
@@ -89,82 +60,36 @@ public class Ultrasonic implements RangeFinder{
 	 * @param counter pulse counter for echo
 	 */
 	public Ultrasonic(DigitalOutput pingChannel, Counter counter) {
-		this.counter = counter;
-		this.pingChannel = pingChannel;
-		
-		nextSonic = headSonic;
-		headSonic = this;
+		this.mCounter = counter;
+		this.mPingPort = pingChannel;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Releases both the counter and the ping channel and removes this object from
-	 * automatic update. If automatic update is enabled and no more sensors were created, the update
-	 * thread is stopped.
+	 * Releases both the counter and the ping channel.
 	 */
 	@Override
 	public void free() {
-		boolean wasAutomatic = inAutomaticMode;
-		setAutomaticMode(false);
-		
-		setEnabled(false);
-		
-		if(counter != null)
-			counter.free();
-		counter = null;
-		
-		if(pingChannel != null)
-			pingChannel.free();
-		pingChannel = null;
-		
-		if(this == headSonic){
-			headSonic = nextSonic;
-			if(headSonic == null)
-				setAutomaticMode(false);
-		}else{
-			for (Ultrasonic sonic = headSonic; sonic != null; sonic = sonic.nextSonic) {
-				if(this == sonic.nextSonic){
-					sonic.nextSonic = sonic.nextSonic.nextSonic;
-					break;
-				}
-	        }
+		if (mCounter != null) {
+			mCounter.free();
+			mCounter = null;
 		}
-		
-		if(headSonic != null && wasAutomatic)
-			setAutomaticMode(true);
-	}
-	
-	/**
-	 * Sets whether or not this ultrasonic is to be updated while in automatic.
-	 * 
-	 * @param enabled true to enable, false to disable.
-	 */
-	public void setEnabled(boolean enabled){
-		this.enabled = enabled;
-	}
-	/**
-	 * Gets whether or not this ultrasonic is to be updated while in automatic.
-	 * 
-	 * @return true if enabled, false if disabled.
-	 */
-	public boolean isEnabled(){
-		return enabled;
+
+		if (mPingPort != null) {
+			mPingPort.free();
+			mPingPort = null;
+		}
 	}
 	
 	/**
 	 * Sends a pulse to the ultrasonic sending our a sound wave.
-	 * <p>
-	 * If automatic mode is enabled, an {@link IllegalStateException} is thrown.
-	 * 
-	 * @throws IllegalStateException if automatic mode is enabled.
 	 */
 	public void ping(){
-		if(inAutomaticMode)
-			throw new IllegalStateException("Cannot ping, automatic mode is enabled");
-		counter.reset();
-		pingChannel.pulse(PING_TIME);
+		mCounter.reset();
+		mPingPort.pulse(PING_TIME);
 	}
+
 	/**
 	 * Gets whether or not a range was measured from the ultrasonic. 
 	 * <p>
@@ -174,7 +99,7 @@ public class Ultrasonic implements RangeFinder{
 	 * @return true if a range was measured, false otherwise
 	 */
 	public boolean isRangeValid(){
-		return counter.get() > 0;
+		return mCounter.get() > 0;
 	}
 	
 	/**
@@ -186,45 +111,10 @@ public class Ultrasonic implements RangeFinder{
 	 */
 	@Override
 	public double getRangeCM() {
-		if(!isRangeValid())
+		if(!isRangeValid()) {
 			return 0.0;
-		return counter.getPulseLength() * SPEED_OF_SOUND * 0.5;
-	}
-	
-	/**
-	 * Starts or stops the automatic update thread. If enabled, the thread
-	 * automatically sends a ping to each ultrasonic sensor created by this class updating it 
-	 * and allowing to call {@link #getRangeCM()} immediately.
-	 * 
-	 * @param enabled true to enable, false otherwise
-	 */
-	public static void setAutomaticMode(boolean enabled){
-		if(inAutomaticMode == enabled)
-			return;
-		
-		inAutomaticMode = enabled;
-		if(enabled){
-			if(autoThread == null)
-				autoThread = new Thread(autoTask, "Ultrasonic Updater");
-			
-			for (Ultrasonic sonic = headSonic; sonic != null; sonic = sonic.nextSonic) {
-				sonic.counter.reset();
-	        }
-			
-			autoThread.start();
-		}else{
-			if(autoThread != null && autoThread.isAlive()){
-				try {
-					autoThread.join();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					e.printStackTrace();
-				}
-			}
-			
-			for (Ultrasonic sonic = headSonic; sonic != null; sonic = sonic.nextSonic) {
-				sonic.counter.reset();
-	        }
 		}
+
+		return mCounter.getPulseLength() * SPEED_OF_SOUND * 0.5;
 	}
 }
