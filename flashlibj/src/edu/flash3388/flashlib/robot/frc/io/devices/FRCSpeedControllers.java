@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.frc.io.devices;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
-import edu.flash3388.flashlib.robot.io.devices.actuators.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 import edu.wpi.first.wpilibj.SpeedController;

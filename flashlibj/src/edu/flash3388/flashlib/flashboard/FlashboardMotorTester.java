@@ -6,7 +6,6 @@ import java.util.Map;
 
 import edu.flash3388.flashlib.communications.SendableException;
 import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
-import edu.flash3388.flashlib.robot.io.devices.actuators.ModableMotor;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
