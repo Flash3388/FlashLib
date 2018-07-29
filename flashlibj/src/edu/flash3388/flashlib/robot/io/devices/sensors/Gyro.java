@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
-import edu.flash3388.flashlib.robot.io.IOPort;
+import edu.flash3388.flashlib.util.Resource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -11,7 +11,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Gyro extends IOPort, PIDSource, DoubleSource{
+public interface Gyro extends Resource, PIDSource, DoubleSource{
 	
 	/**
 	 * Enumeration of gyroscope data types. Using this, it is possible to indicate
@@ -35,6 +35,7 @@ public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	 * @return angle of the robot with degrees
 	 */
 	double getAngle();
+
 	/**
 	 * Gets the rate of angular rotation measured by the sensor.
 	 * 
@@ -51,6 +52,7 @@ public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	 * @return the current data type
 	 */
 	GyroDataType getDataType();
+
 	/**
 	 * Sets the {@link GyroDataType} value for this gyroscope.
 	 * <p>
@@ -70,6 +72,7 @@ public interface Gyro extends IOPort, PIDSource, DoubleSource{
 	default double get() {
 		return pidGet();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

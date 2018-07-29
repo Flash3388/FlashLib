@@ -1,7 +1,10 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
+import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 import edu.flash3388.flashlib.util.FlashUtil;
+
+import java.util.Objects;
 
 /**
  * Control class for an analog gyroscope sensor. Gyroscope sensors measure angular rotation and are used to measure
@@ -18,95 +21,18 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class AnalogGyro extends GyroBase{
+public class AnalogGyro extends GyroBase {
 	
 	private static final double DEFAULT_SENSITIVITY = 0.007;
 	private static final double CALIBRATION_TIME = 0.5;
 	
-	private AnalogInput inputPort;
-	private AnalogAccumulator accumulator;
+	private AnalogInput mInputPort;
+	private AnalogAccumulator mAccumulator;
 	
-	private double offset;
-	private double sensitivity;
-	private int center;
-	
-	/**
-	 * Creates a new analog gyroscope sensor for a given analog input port.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
-	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
-	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * <p>
-	 * Sensor center and offset are calculated by calling {@link #calibrate()}. Sensitivity used is {@value #DEFAULT_SENSITIVITY}.
-	 * 
-	 * @param port an analog input port 
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
-	 */
-	public AnalogGyro(int port){
-		this.inputPort = IOFactory.createAnalogInputPort(port);
-		
-		this.accumulator = inputPort.getAccumulator();
-		if(accumulator == null)
-			throw new IllegalArgumentException("Failed to retreive accumulator for port, cannot use analog gyro");
-		this.accumulator.enable();
-		
-		calibrate();
-	}
-	/**
-	 * Creates a new analog gyroscope sensor for a given analog input port.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
-	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
-	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * <p>
-	 * For gyro center voltage and gyro offset given values are used. Sensitivity used is {@value #DEFAULT_SENSITIVITY}.
-	 * 
-	 * @param port an analog input port 
-	 * @param center uncalibrated sensor center voltage.
-	 * @param offset uncalibrated sensor offset voltage.
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
-	 */
-	public AnalogGyro(int port, double center, double offset){
-		this(port, DEFAULT_SENSITIVITY, center, offset);
-	}
-	/**
-	 * Creates a new analog gyroscope sensor for a given analog input port.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
-	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
-	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * <p>
-	 * For gyroscope sensitivity, gyro center voltage and gyro offset given values are used.
-	 * 
-	 * @param port an analog input port 
-	 * @param sensetivity sensor sensitivity in volts per degree per second
-	 * @param center uncalibrated sensor center voltage.
-	 * @param offset uncalibrated sensor offset voltage.
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
-	 */
-	public AnalogGyro(int port, double sensetivity, double center, double offset) {
-		this.inputPort = IOFactory.createAnalogInputPort(port);
-		this.sensitivity = sensetivity;
-		this.center = inputPort.voltsToValue(center);
-		this.offset = inputPort.voltsToValue(offset);
-		
-		this.accumulator = inputPort.getAccumulator();
-		if(accumulator == null)
-			throw new IllegalArgumentException("Failed to retreive accumulator for port, cannot use analog gyro");
-		this.accumulator.enable();
-	}
+	private double mOffset;
+	private double mSensitivity;
+	private int mCenter;
+
 	
 	/**
 	 * Creates a new analog gyroscope sensor for a given analog input port.
@@ -117,20 +43,19 @@ public class AnalogGyro extends GyroBase{
 	 * <p>
 	 * Sensor center and offset are calculated by calling {@link #calibrate()}. Sensitivity used is {@value #DEFAULT_SENSITIVITY}.
 	 * 
-	 * @param port an analog input port 
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
+	 * @param port an analog input port.
 	 */
 	public AnalogGyro(AnalogInput port){
-		this.inputPort = port;
+		this.mInputPort = port;
 		
-		this.accumulator = port.getAccumulator();
-		if(accumulator == null)
-			throw new IllegalArgumentException("Failed to retreive accumulator for port, cannot use analog gyro");
-		this.accumulator.enable();
+		this.mAccumulator = port.getAccumulator();
+		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
+
+		this.mAccumulator.enable();
 		
 		calibrate();
 	}
+
 	/**
 	 * Creates a new analog gyroscope sensor for a given analog input port.
 	 * <p>
@@ -143,12 +68,11 @@ public class AnalogGyro extends GyroBase{
 	 * @param port an analog input port 
 	 * @param center uncalibrated sensor center voltage.
 	 * @param offset uncalibrated sensor offset voltage.
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
 	 */
 	public AnalogGyro(AnalogInput port, double center, double offset){
 		this(port, DEFAULT_SENSITIVITY, center, offset);
 	}
+
 	/**
 	 * Creates a new analog gyroscope sensor for a given analog input port.
 	 * <p>
@@ -159,22 +83,20 @@ public class AnalogGyro extends GyroBase{
 	 * For gyroscope sensitivity, gyro center voltage and gyro offset given values are used.
 	 * 
 	 * @param port an analog input port 
-	 * @param sensetivity sensor sensitivity in volts per degree per second
+	 * @param sensitivity sensor sensitivity in volts per degree per second
 	 * @param center uncalibrated sensor center voltage.
 	 * @param offset uncalibrated sensor offset voltage.
-	 * 
-	 * @throws IllegalArgumentException if {@link AnalogInput#getAccumulator()} returned null.
 	 */
-	public AnalogGyro(AnalogInput port, double sensetivity, double center, double offset) {
-		this.inputPort = port;
-		this.sensitivity = sensetivity;
-		this.center = port.voltsToValue(center);
-		this.offset = port.voltsToValue(offset);
+	public AnalogGyro(AnalogInput port, double sensitivity, double center, double offset) {
+		this.mInputPort = port;
+		this.mSensitivity = sensitivity;
+		this.mCenter = port.voltsToValue(center);
+		this.mOffset = port.voltsToValue(offset);
 		
-		this.accumulator = port.getAccumulator();
-		if(accumulator == null)
-			throw new IllegalArgumentException("Failed to retreive accumulator for port, cannot use analog gyro");
-		this.accumulator.enable();
+		this.mAccumulator = port.getAccumulator();
+		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
+
+		this.mAccumulator.enable();
 	}
 	
 	/**
@@ -183,18 +105,18 @@ public class AnalogGyro extends GyroBase{
 	 * This process takes approximately {@value #CALIBRATION_TIME} seconds.
 	 */
 	public void calibrate(){
-		accumulator.reset();
+		mAccumulator.reset();
 		
 		FlashUtil.delay(CALIBRATION_TIME);
 		
-		long value = accumulator.getValue();
-		int count = accumulator.getCount();
-		
-		center = (int)((double)value / (double)count);
-		offset = ((double)value / (double)count) - center;
-		
-		accumulator.setCenter(center);
-		accumulator.reset();
+		long value = mAccumulator.getValue();
+		int count = mAccumulator.getCount();
+
+		mCenter = (int)((double)value / (double)count);
+		mOffset = ((double)value / (double)count) - mCenter;
+
+		mAccumulator.setCenter(mCenter);
+		mAccumulator.reset();
 	}
 	
 	/**
@@ -205,8 +127,9 @@ public class AnalogGyro extends GyroBase{
 	 * @param sensitivity conversion factor from voltage to angular speed
 	 */
 	public void setSensitivity(double sensitivity){
-		this.sensitivity = sensitivity;
+		this.mSensitivity = sensitivity;
 	}
+
 	/**
 	 * Gets the sensor sensitivity. 
 	 * <p>
@@ -215,7 +138,7 @@ public class AnalogGyro extends GyroBase{
 	 * @return conversion factor from voltage to angular speed
 	 */
 	public double getSensitivity(){
-		return sensitivity;
+		return mSensitivity;
 	}
 	
 	/**
@@ -224,23 +147,25 @@ public class AnalogGyro extends GyroBase{
 	 * @return the current offset voltage
 	 */
 	public double getOffset(){
-		return inputPort.valueToVolts((int)offset);
+		return mInputPort.valueToVolts((int)mOffset);
 	}
+
 	/**
 	 * Gets the gyro center voltage set during calibration to use as a future preset.
 	 *
 	 * @return the current center voltage
 	 */
 	public double getCenterVoltage(){
-		return inputPort.valueToVolts(center);
+		return mInputPort.valueToVolts(mCenter);
 	}
+
 	/**
 	 * Gets the gyro center value set during calibration to use as a future preset.
 	 *
 	 * @return the current center value
 	 */
 	public int getCenter(){
-		return center;
+		return mCenter;
 	}
 	
 	/**
@@ -250,11 +175,13 @@ public class AnalogGyro extends GyroBase{
 	 */
 	@Override
 	public void free() {
-		if(inputPort != null)
-			inputPort.free();
-		inputPort = null;
-		accumulator = null;
+		if (mInputPort != null) {
+			mInputPort.free();
+			mInputPort = null;
+			mAccumulator = null;
+		}
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -262,7 +189,7 @@ public class AnalogGyro extends GyroBase{
 	 */
 	@Override
 	public void reset() {
-		accumulator.reset();
+		mAccumulator.reset();
 	}
 
 	/**
@@ -273,12 +200,13 @@ public class AnalogGyro extends GyroBase{
 	 */
 	@Override
 	public double getAngle() {
-		long value = accumulator.getValue() - (long)(accumulator.getCount() * offset);
+		long value = mAccumulator.getValue() - (long)(mAccumulator.getCount() * mOffset);
 		
-		double scaledValue = ((value * inputPort.getMaxVoltage()) / inputPort.getMaxValue()) / 
-				(inputPort.getSampleRate() * sensitivity);
+		double scaledValue = ((value * mInputPort.getMaxVoltage()) / mInputPort.getMaxValue()) /
+				(mInputPort.getSampleRate() * mSensitivity);
 		return scaledValue;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -287,8 +215,8 @@ public class AnalogGyro extends GyroBase{
 	 */
 	@Override
 	public double getRate() {
-		double value = ((inputPort.getValue() - (center + offset)) * inputPort.getMaxVoltage()) / 
-				inputPort.getMaxVoltage();
-		return (value / sensitivity);
+		double value = ((mInputPort.getValue() - (mCenter + mOffset)) * mInputPort.getMaxVoltage()) /
+				mInputPort.getMaxVoltage();
+		return (value / mSensitivity);
 	}
 }

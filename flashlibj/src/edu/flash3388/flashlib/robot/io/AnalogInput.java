@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
 import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccelerometer;
-import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccumulator;
 
 /**
  * Interface for analog input ports. This interface is used by devices

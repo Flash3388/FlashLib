@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
-import edu.flash3388.flashlib.robot.io.IOPort;
+import edu.flash3388.flashlib.util.Resource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -18,49 +18,15 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
+public class AnalogAccelerometer implements DoubleSource, PIDSource, Resource {
 
 	private static final double DEFAULT_SENSITIVITY = 1.0;
 	private static final double DEFAULT_ZERO_VOLTAGE = 2.5;
 	
-	private AnalogInput input;
-	private double zeroGvoltage;
-	private double voltsPerG;
-	
-	/**
-	 * Creates a new analog accelerometer sensor for a given analog input port. 
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into acceleration. The defined voltage output
-	 * where acceleration is 0 is {@value #DEFAULT_ZERO_VOLTAGE} and the conversion factor from volts to acceleration in G 
-	 * is {@value #DEFAULT_SENSITIVITY}.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * 
-	 * @param port analog input port to which the sensor is connected
-	 */
-	public AnalogAccelerometer(int port) {
-		this(port, DEFAULT_ZERO_VOLTAGE, DEFAULT_SENSITIVITY);
-	}
-	/**
-	 * Creates a new analog accelerometer sensor for a given analog input port. 
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into acceleration. The other 2 parameters
-	 * are configuration parameters of the sensor. The first is the voltage output by the sensor when the
-	 * acceleration is 0, the second is the conversion value from volts to acceleration is G.
-	 * <p>
-	 * An {@link AnalogInput} object is created for the given port using {@link IOFactory} by calling
-	 * {@link IOFactory#createAnalogInputPort(int)} and passing it the given port number.
-	 * 
-	 * @param port analog input port to which the sensor is connected
-	 * @param zeroGVoltage voltage when acceleration is 0
-	 * @param voltsPerG conversion factor from volts to G acceleration.
-	 */
-	public AnalogAccelerometer(int port, double zeroGVoltage, double voltsPerG) {
-		this.input = IOFactory.createAnalogInputPort(port);
-		this.zeroGvoltage = zeroGVoltage;
-		this.voltsPerG = voltsPerG;
-	}
+	private AnalogInput mInput;
+	private double mZeroGvoltage;
+	private double mVoltsPerG;
+
 	/**
 	 * Creates a new analog accelerometer sensor for a given analog input port. 
 	 * <p>
@@ -73,6 +39,7 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	public AnalogAccelerometer(AnalogInput input) {
 		this(input, DEFAULT_ZERO_VOLTAGE, DEFAULT_SENSITIVITY);
 	}
+
 	/**
 	 * Creates a new analog accelerometer sensor for a given analog input port. 
 	 * <p>
@@ -85,9 +52,9 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @param voltsPerG conversion factor from volts to G acceleration.
 	 */
 	public AnalogAccelerometer(AnalogInput input, double zeroGVoltage, double voltsPerG) {
-		this.input = input;
-		this.zeroGvoltage = zeroGVoltage;
-		this.voltsPerG = voltsPerG;
+		this.mInput = input;
+		this.mZeroGvoltage = zeroGVoltage;
+		this.mVoltsPerG = voltsPerG;
 	}
 	
 	/**
@@ -97,9 +64,10 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 */
 	@Override
 	public void free() {
-		if(input != null)
-			input.free();
-		input = null;
+		if(mInput != null) {
+			mInput.free();
+			mInput = null;
+		}
 	}
 	
 	/**
@@ -110,8 +78,9 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @param voltsPerG sensor volts per G scale factor.
 	 */
 	public void setSensitivity(double voltsPerG){
-		this.voltsPerG = voltsPerG;
+		this.mVoltsPerG = voltsPerG;
 	}
+
 	/**
 	 * Gets the sensor sensitivity.
 	 * <p>
@@ -120,7 +89,7 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @return sensor volts per G scale factor.
 	 */
 	public double getSensitivity(){
-		return voltsPerG;
+		return mVoltsPerG;
 	}
 	
 	/**
@@ -131,8 +100,9 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @param volts voltage where acceleration is 0.
 	 */
 	public void setZeroVoltage(double volts){
-		this.zeroGvoltage = volts;
+		this.mZeroGvoltage = volts;
 	}
+
 	/**
 	 * Gets the sensor zero acceleration voltage.
 	 * <p>
@@ -141,7 +111,7 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @return voltage where acceleration is 0.
 	 */
 	public double getZeroVoltage(){
-		return zeroGvoltage;
+		return mZeroGvoltage;
 	}
 	
 	/**
@@ -153,7 +123,7 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	 * @return acceleration in G.
 	 */
 	public double getAcceleration(){
-		return (input.getVoltage() - zeroGvoltage) / voltsPerG;
+		return (mInput.getVoltage() - mZeroGvoltage) / mVoltsPerG;
 	}
 
 	/**
@@ -165,6 +135,7 @@ public class AnalogAccelerometer implements DoubleSource, PIDSource, IOPort {
 	public double pidGet() {
 		return getAcceleration();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

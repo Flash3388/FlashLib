@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.frc.io;
 
-import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccumulator;
+import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 import edu.flash3388.flashlib.robot.frc.io.devices.FRCAnalogAccumulator;
 

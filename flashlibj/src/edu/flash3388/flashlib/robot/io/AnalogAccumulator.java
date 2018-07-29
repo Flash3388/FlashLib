@@ -1,6 +1,4 @@
-package edu.flash3388.flashlib.robot.io.devices.sensors;
-
-import edu.flash3388.flashlib.robot.io.AnalogInput;
+package edu.flash3388.flashlib.robot.io;
 
 /**
  * An accumulator for an {@link AnalogInput} port. This is used to accumulate values from the port,
@@ -17,6 +15,7 @@ public interface AnalogAccumulator {
 	 * accumulates data from the port when it is sampled by the implementation.
 	 */
 	void enable();
+
 	/**
 	 * Disables the accumulator, stopping data accumulation.
 	 */
@@ -43,6 +42,7 @@ public interface AnalogAccumulator {
 	 * @return accumulated data
 	 */
 	long getValue();
+
 	/**
 	 * Gets the sample count of accumulated values.
 	 * @return the sample count.
