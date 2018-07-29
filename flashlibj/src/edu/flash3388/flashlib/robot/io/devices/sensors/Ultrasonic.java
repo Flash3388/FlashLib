@@ -25,24 +25,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class Ultrasonic implements RangeFinder{
-
-	private static class SonicTask implements Runnable{
-		@Override
-		public void run() {
-			Ultrasonic sonic = null;
-			while(inAutomaticMode){
-				if(sonic == null)
-					sonic = headSonic;
-				if(sonic == null)
-					return;
-				if(sonic.isEnabled())
-					sonic.pingChannel.pulse(PING_TIME);
-				sonic = sonic.nextSonic;
-				FlashUtil.delay(50);
-			}
-		}
-	}
+public class Ultrasonic implements RangeFinder {
 	
 	private static final double PING_TIME = 10 * 1e-6;
 	private static final double SPEED_OF_SOUND = 340.29 * 100;//cm/sec
