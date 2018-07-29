@@ -9,68 +9,48 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public abstract class EncoderBase implements Encoder{
+public abstract class PulseEncoder implements Encoder{
 
 	private static final int DEFAULT_REST_TIMEOUT = 200;
 	
-	private EncoderDataType pidType = EncoderDataType.Rate;
+	private EncoderDataType mDataType = EncoderDataType.Rate;
 	
-	private Counter counter;
+	private Counter mCounter;
 	
-	private double distancePerPulse;
-	private int pulsesPerRevolution;
+	private double mDistancePerPulse;
+	private int mPulsesPerRevolution;
 	
-	private int lastCount;
-	private int lastCheckTime;
-	private int restTimeout = DEFAULT_REST_TIMEOUT;
-	private boolean checkRest = false;
-	
-	protected EncoderBase(int port, int pulsesPerRevolution, double distancePerPulse) {
-		this.counter = IOFactory.createPulseCounter(port);
-		this.distancePerPulse = distancePerPulse;
-		this.pulsesPerRevolution = pulsesPerRevolution;
-		
-		checkQuadrature(false);
+	private int mLastCount;
+	private int mLastCheckTime;
+	private int mRestTimeout;
+	private boolean shouldCheckRest;
+
+	protected PulseEncoder(Counter counter, int pulsesPerRevolution, double distancePerPulse) {
+		this.mCounter = counter;
+		this.mDistancePerPulse = distancePerPulse;
+		this.mPulsesPerRevolution = pulsesPerRevolution;
+
+		shouldCheckRest = false;
+		mRestTimeout = DEFAULT_REST_TIMEOUT;
+
 		reset();
-	}
-	protected EncoderBase(int upPort, int downPort, int pulsesPerRevolution, double distancePerPulse) {
-		this.counter = IOFactory.createPulseCounter(upPort, downPort);
-		this.distancePerPulse = distancePerPulse;
-		this.pulsesPerRevolution = pulsesPerRevolution;
-		
-		checkQuadrature(false);
-		reset();
-	}
-	protected EncoderBase(Counter counter, int pulsesPerRevolution, double distancePerPulse, boolean quadrature) {
-		this.counter = counter;
-		this.distancePerPulse = distancePerPulse;
-		this.pulsesPerRevolution = pulsesPerRevolution;
-		
-		checkQuadrature(quadrature);
-		reset();
-	}
-	
-	private void checkQuadrature(boolean quadrature){
-		if(counter.isQuadrature() != quadrature){
-			throw new IllegalArgumentException(quadrature? 
-					"Expected a quadrature counter, isQuadrature returned false" :
-					"Expected a non-quadrature counter, isQuadrature returned true"
-					);
-		}
 	}
 	
 	private void checkRest(){
-		if(checkRest){
+		if(shouldCheckRest){
 			int time = FlashUtil.millisInt();
 			int count = getRaw();
 			
-			if(lastCheckTime == 0)
-				lastCheckTime = time;
-			if(lastCount == count && time - lastCheckTime >= restTimeout)
+			if(mLastCheckTime == 0) {
+				mLastCheckTime = time;
+			}
+
+			if(mLastCount == count && time - mLastCheckTime >= mRestTimeout) {
 				reset();
+			}
 			
-			lastCheckTime = time;
-			lastCount = count;
+			mLastCheckTime = time;
+			mLastCount = count;
 		}
 	}
 	
@@ -83,8 +63,9 @@ public abstract class EncoderBase implements Encoder{
 	 * @param distancePerPulse distance passed per pulse in meters.
 	 */
 	public void setDistancePerPulse(double distancePerPulse){
-		this.distancePerPulse = distancePerPulse;
+		this.mDistancePerPulse = distancePerPulse;
 	}
+
 	/**
 	 * Gets the linear distance passed by the measured object per one pulse of the encoder. This value 
 	 * depends on the amount of pulses the encoder outputs per rotation revolution and what object is measured.
@@ -94,7 +75,7 @@ public abstract class EncoderBase implements Encoder{
 	 * @return distance passed per pulse in meters.
 	 */
 	public double getDistancePerPulse(){
-		return distancePerPulse;
+		return mDistancePerPulse;
 	}
 	
 	/**
@@ -104,8 +85,9 @@ public abstract class EncoderBase implements Encoder{
 	 * @param pulsesPerRevolution amount of pulses per rotation revolution.
 	 */
 	public void setPulsesPerRevolution(int pulsesPerRevolution){
-		this.pulsesPerRevolution = pulsesPerRevolution;
+		this.mPulsesPerRevolution = pulsesPerRevolution;
 	}
+
 	/**
 	 * Gets the amount of pulses that the encoder outputs per one revolution of the rotating object measured. This
 	 * value can be found in the encoder sensor datasheet.
@@ -113,7 +95,7 @@ public abstract class EncoderBase implements Encoder{
 	 * @return amount of pulses per rotation revolution.
 	 */
 	public int getPulsesPerRevolution(){
-		return pulsesPerRevolution;
+		return mPulsesPerRevolution;
 	}
 	
 	/**
@@ -129,12 +111,14 @@ public abstract class EncoderBase implements Encoder{
 	 * @param restCheck true to enable rest check, false otherwise.
 	 */
 	public void enableRestCheck(boolean restCheck){
-		checkRest = restCheck;
+		shouldCheckRest = restCheck;
+
 		if(restCheck){
-			lastCheckTime = 0;
-			lastCount = 0;
+			mLastCheckTime = 0;
+			mLastCount = 0;
 		}
 	}
+
 	/**
 	 * Gets whether or not this encoder should perform rest checking when the rotation rate is measured.
 	 * <p>
@@ -148,7 +132,7 @@ public abstract class EncoderBase implements Encoder{
 	 * @return true to enable rest check, false otherwise.
 	 */
 	public boolean isRestCheckEnabled(){
-		return checkRest;
+		return shouldCheckRest;
 	}
 	
 	/**
@@ -158,8 +142,9 @@ public abstract class EncoderBase implements Encoder{
 	 * @param timeout timeout in milliseconds.
 	 */
 	public void setRestTimeout(int timeout){
-		restTimeout = timeout;
+		mRestTimeout = timeout;
 	}
+
 	/**
 	 * Gets the timeout for rest check. This value indicates the time after which if not new pulses
 	 * have been measured by the pulse counter a reset should be performed.
@@ -167,7 +152,7 @@ public abstract class EncoderBase implements Encoder{
 	 * @return timeout in milliseconds.
 	 */
 	public int getRestTimeout(){
-		return restTimeout;
+		return mRestTimeout;
 	}
 			
 	/**
@@ -177,10 +162,12 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public void free() {
-		if(counter != null)
-			counter.free();
-		counter = null;
+		if(mCounter != null) {
+			mCounter.free();
+			mCounter = null;
+		}
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -188,9 +175,9 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public void reset() {
-		lastCheckTime = 0;
-		lastCount = 0;
-		counter.reset();
+		mLastCheckTime = 0;
+		mLastCount = 0;
+		mCounter.reset();
 	}
 	
 	/**
@@ -201,8 +188,9 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public double getVelocity(){
-		return distancePerPulse / counter.getPulsePeriod();
+		return mDistancePerPulse / mCounter.getPulsePeriod();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -214,10 +202,13 @@ public abstract class EncoderBase implements Encoder{
 	public double getRate() {
 		checkRest();
 		
-		if(getRaw() == 0)
+		if(getRaw() == 0) {
 			return 0.0;
-		return (60.0 * pulsesPerRevolution) / counter.getPulsePeriod();
+		}
+
+		return (60.0 * mPulsesPerRevolution) / mCounter.getPulsePeriod();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -226,8 +217,9 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public double getDistance() {
-		return counter.get() * distancePerPulse;
+		return mCounter.get() * mDistancePerPulse;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -235,8 +227,9 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public int getRaw() {
-		return counter.get();
+		return mCounter.get();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -244,7 +237,7 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public boolean getDirection(){
-		return counter.getDirection();
+		return mCounter.getDirection();
 	}
 	
 	/**
@@ -252,13 +245,14 @@ public abstract class EncoderBase implements Encoder{
 	 */
 	@Override
 	public EncoderDataType getDataType() {
-		return pidType;
+		return mDataType;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void setDataType(EncoderDataType type) {
-		pidType = type;
+		mDataType = type;
 	}
 }

@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
-import edu.flash3388.flashlib.robot.io.IOPort;
+import edu.flash3388.flashlib.util.Resource;
 import edu.flash3388.flashlib.util.beans.DoubleSource;
 
 /**
@@ -15,7 +15,7 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Encoder extends IOPort, DoubleSource, PIDSource{
+public interface Encoder extends Resource, DoubleSource, PIDSource{
 	
 	/**
 	 * Enumeration of encoder data types. Using this, it is possible to indicate
@@ -39,12 +39,14 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 * @return pulse count.
 	 */
 	int getRaw();
+
 	/**
 	 * Gets the rate of rotation measured by the encoder.
 	 * 
 	 * @return rate of rotation in RPM.
 	 */
 	double getRate();
+
 	/**
 	 * Gets the current linear velocity measured by the encoder.
 	 * <p>
@@ -54,6 +56,7 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 * @return linear velocity in meters per second.
 	 */
 	double getVelocity();
+
 	/**
 	 * Gets the distance passed by the wheel the sensor measures. 
 	 * <p>
@@ -65,6 +68,7 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 * @return distance passed in meters.
 	 */
 	double getDistance();
+
 	/**
 	 * Gets the rotation direction measured by the encoder. If the encoder is not quadrature, rotation direction
 	 * cannot be determined and the value returned will always be true.
@@ -82,6 +86,7 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	 * @return the current data type
 	 */
 	EncoderDataType getDataType();
+
 	/**
 	 * Sets the {@link EncoderDataType} value for this sensor.
 	 * <p>
@@ -101,6 +106,7 @@ public interface Encoder extends IOPort, DoubleSource, PIDSource{
 	default double get() {
 		return pidGet();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
