@@ -2,14 +2,14 @@ package edu.flash3388.flashlib.robot.scheduling.triggers;
 
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
-public class TriggerScheduler implements Runnable {
+public class TriggerSchedulerTask implements Runnable {
 
     private final BooleanSource mCondition;
     private final Trigger mTrigger;
 
     private boolean mLastRunConditionMet;
 
-    public TriggerScheduler(BooleanSource condition, Trigger trigger) {
+    public TriggerSchedulerTask(BooleanSource condition, Trigger trigger) {
         mCondition = condition;
         mTrigger = trigger;
 
