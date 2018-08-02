@@ -17,10 +17,4 @@ public class HALJNI {
      * Performs a shutdown to the HAL, freeing all ports and resources.
      */
     public static native void shutdown();
-
-    /**
-     * Gets the name of the current board, depending on the current implementation.
-     * @return the board name.
-     */
-    public static native String boardName();
 }
