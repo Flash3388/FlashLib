@@ -33,4 +33,8 @@ public final class HAL {
 	public static int initialize(int mode){
 		return HALJNI.initialize(mode);
 	}
+
+	public static void shutdown() {
+		HALJNI.shutdown();
+	}
 }
