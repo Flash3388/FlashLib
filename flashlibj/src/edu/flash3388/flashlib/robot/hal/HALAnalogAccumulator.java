@@ -46,7 +46,7 @@ public class HALAnalogAccumulator implements AnalogAccumulator{
 		int result = AnalogAccumulatorJNI.enableAnalogInputAccumulator(inputPort.getHandle(), enable);
 
 		if(result != 0){
-			throw new HALInitialzationException("Unable to "+(enable? "enable" : "disable")+
+			throw new HALInitializationException("Unable to "+(enable? "enable" : "disable")+
 					" accumulator for analog input port", inputPort.getHandle());
 		}
 	}

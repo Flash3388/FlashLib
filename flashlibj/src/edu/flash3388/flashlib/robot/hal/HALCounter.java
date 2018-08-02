@@ -1,8 +1,9 @@
 package edu.flash3388.flashlib.robot.hal;
 
 import edu.flash3388.flashlib.robot.hal.jni.CounterJNI;
-import edu.flash3388.flashlib.robot.hal.jni.DIOJNI;
 import edu.flash3388.flashlib.robot.io.Counter;
+
+import java.util.Collection;
 
 /**
  * Represents a pulse counter using FlashLib's Hardware Abstraction Layer. A pulse counter is used to
@@ -15,96 +16,48 @@ import edu.flash3388.flashlib.robot.io.Counter;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALCounter extends HALPort implements Counter {
-	
-	private HALDigitalInput upSource, downSource;
-	
+public class HALCounter extends HALResource implements Counter {
+
 	/**
 	 * Creates a new pulse counter for the given DIO port using FlashLib's Hardware Abstraction Layer.
-	 * If the counter initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the counter initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired digital input
-	 * @throws HALInitialzationException if counter initialization failed.
-	 */
-	public HALCounter(int port) {
-		upSource = initialzeInputSource(port);
-		
-		init();
-	}
-	/**
-	 * Creates a new pulse counter for the given DIO port using FlashLib's Hardware Abstraction Layer.
-	 * If the counter initialization failed, for whatever reason, {@link HALInitialzationException}
-	 * is thrown.
-	 * 
-	 * @param port the HAL port of the desired digital input
-	 * @throws HALInitialzationException if counter initialization failed.
+	 * @throws HALInitializationException if counter initialization failed.
 	 */
 	public HALCounter(HALDigitalInput port) {
-		upSource = port;
+		handle = CounterJNI.initializePulseCounter(port.getHandle());
 		
-		init();
-	}
-	/**
-	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
-	 * If the counter initialization failed, for whatever reason, {@link HALInitialzationException}
-	 * is thrown. This initializes the counter to quadrature mode, counting pulses from 2 sources: 
-	 * one forward, one backward.
-	 * 
-	 * @param upPort the HAL port of the desired forward digital input
-	 * @param downPort the HAL port of the desired backward digital input
-	 * @throws HALInitialzationException if counter initialization failed.
-	 */
-	public HALCounter(int upPort, int downPort) {
-		upSource = initialzeInputSource(upPort);
-		downSource = initialzeInputSource(downPort);
-		
-		init();
-	}
-	/**
-	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
-	 * If the counter initialization failed, for whatever reason, {@link HALInitialzationException}
-	 * is thrown. This initializes the counter to quadrature mode, counting pulses from 2 sources: 
-	 * one forward, one backward.
-	 * 
-	 * @param upPort the HAL port of the desired forward digital input
-	 * @param downPort the HAL port of the desired backward digital input
-	 * @throws HALInitialzationException if counter initialization failed.
-	 */
-	public HALCounter(HALDigitalInput upPort, HALDigitalInput downPort) {
-		upSource = upPort;
-		downSource = downPort;
-		
-		init();
-	}
-	
-	private void init(){
-		if(downSource == null){
-			handle = CounterJNI.initializePulseCounter(upSource.getHandle());
-			if(handle == HAL_INVALID_HANDLE)
-				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
-						upSource.getHandle());
-		}else{
-			handle = CounterJNI.initializeQuadPulseCounter(upSource.getHandle(), downSource.getHandle());
-			if(handle == HAL_INVALID_HANDLE)
-				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
-						HAL_INVALID_HANDLE);
+		if(handle == HAL_INVALID_HANDLE) {
+			throw new HALInitializationException("Unable to initialize Counter: invalid HAL handle",
+					port.getHandle());
 		}
 	}
-	private HALDigitalInput initialzeInputSource(int port){
-		if(!DIOJNI.checkDigitalInputPortValid(port))
-			throw new IllegalArgumentException("Counter: Invalid DigitalInput port "+port);
-		
-		if(DIOJNI.checkDigitalInputPortTaken(port))
-			throw new HALAllocationException("Counter: DigitalInput port taken", port);
-		
-		return new HALDigitalInput(port);
+
+	/**
+	 * Creates a new pulse counter for 2 given DIO ports using FlashLib's Hardware Abstraction Layer.
+	 * If the counter initialization failed, for whatever reason, {@link HALInitializationException}
+	 * is thrown. This initializes the counter to quadrature mode, counting pulses from 2 sources: 
+	 * one forward, one backward.
+	 * 
+	 * @param upPort the HAL port of the desired forward digital input
+	 * @param downPort the HAL port of the desired backward digital input
+	 * @throws HALInitializationException if counter initialization failed.
+	 */
+	public HALCounter(HALDigitalInput upPort, HALDigitalInput downPort) {
+		handle = CounterJNI.initializeQuadPulseCounter(upPort.getHandle(), downPort.getHandle());
+
+		if(handle == HAL_INVALID_HANDLE) {
+			throw new HALInitializationException("Unable to initialize Counter: invalid HAL handle",
+					HAL_INVALID_HANDLE);
+		}
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * If the port was successfully initialized, the port is freed.
+	 * If the counter was successfully initialized, the counter is freed.
 	 */
 	@Override
 	public void free() {
@@ -114,9 +67,6 @@ public class HALCounter extends HALPort implements Counter {
 		
 		CounterJNI.freePulseCounter(handle);
 		handle = HAL_INVALID_HANDLE;
-		
-		upSource.free();
-		downSource.free();
 	}
 	
 	

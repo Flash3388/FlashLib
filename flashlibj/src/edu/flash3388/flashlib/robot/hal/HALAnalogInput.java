@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.hal.jni.AnalogAccumulatorJNI;
 import edu.flash3388.flashlib.robot.hal.jni.AnalogJNI;
 import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
@@ -15,17 +14,17 @@ import edu.flash3388.flashlib.robot.io.AnalogInput;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALAnalogInput extends HALPort implements AnalogInput{
+public class HALAnalogInput extends HALResource implements AnalogInput{
 	
 	private HALAnalogAccumulator accumulator;
 	
 	/**
 	 * Creates a new analog input port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired analog input
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALAnalogInput(int port) {
 		if(!AnalogJNI.checkAnalogInputPortValid(port))
@@ -36,7 +35,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 		
 		handle = AnalogJNI.initializeAnalogInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize AnalogInput: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize AnalogInput: invalid HAL handle", port);
 		
 		accumulator = new HALAnalogAccumulator(this);
 	}

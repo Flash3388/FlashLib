@@ -13,15 +13,15 @@ import edu.flash3388.flashlib.robot.io.AnalogOutput;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALAnalogOutput extends HALPort implements AnalogOutput{
+public class HALAnalogOutput extends HALResource implements AnalogOutput{
 	
 	/**
 	 * Creates a new analog output port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired analog output
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALAnalogOutput(int port) {
 		if(!AnalogJNI.checkAnalogOutputPortValid(port))
@@ -32,7 +32,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 		
 		handle = AnalogJNI.initializeAnalogOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize AnalogOutput: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize AnalogOutput: invalid HAL handle", port);
 	}
 	
 	/**
