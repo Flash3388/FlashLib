@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hal.jni;
 
-public final class ANALOGJNI {
+public final class AnalogJNI {
 
 	public static native float getGlobalSampleRate();
 	public static native float getMaxAnalogPortVoltage();
@@ -25,10 +25,4 @@ public final class ANALOGJNI {
 	
 	public static native void setAnalogVoltage(int handle, float voltage);
 	public static native void setAnalogValue(int handle, int value);
-	
-	public static native int enableAnalogInputAccumulator(int handle, boolean enable);
-	public static native void resetAnalogInputAccumulator(int handle);
-	public static native void setAnalogInputAccumulatorCenter(int handle, int center);
-	public static native long getAnalogInputAccumulatorValue(int handle);
-	public static native int getAnalogInputAccumulatorCount(int handle);
 }

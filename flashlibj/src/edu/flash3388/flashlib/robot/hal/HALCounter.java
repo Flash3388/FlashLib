@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.hal.*;
-import edu.flash3388.flashlib.robot.hal.jni.COUNTERJNI;
+import edu.flash3388.flashlib.robot.hal.jni.CounterJNI;
 import edu.flash3388.flashlib.robot.hal.jni.DIOJNI;
 import edu.flash3388.flashlib.robot.io.Counter;
 
@@ -81,12 +80,12 @@ public class HALCounter extends HALPort implements Counter {
 	
 	private void init(){
 		if(downSource == null){
-			handle = COUNTERJNI.initializePulseCounter(upSource.getHandle());
+			handle = CounterJNI.initializePulseCounter(upSource.getHandle());
 			if(handle == HAL_INVALID_HANDLE)
 				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
 						upSource.getHandle());
 		}else{
-			handle = COUNTERJNI.initializeQuadPulseCounter(upSource.getHandle(), downSource.getHandle());
+			handle = CounterJNI.initializeQuadPulseCounter(upSource.getHandle(), downSource.getHandle());
 			if(handle == HAL_INVALID_HANDLE)
 				throw new HALInitialzationException("Unable to initialize Counter: invalid HAL handle",
 						HAL_INVALID_HANDLE);
@@ -113,7 +112,7 @@ public class HALCounter extends HALPort implements Counter {
 			return;
 		}
 		
-		COUNTERJNI.freePulseCounter(handle);
+		CounterJNI.freePulseCounter(handle);
 		handle = HAL_INVALID_HANDLE;
 		
 		upSource.free();
@@ -128,7 +127,7 @@ public class HALCounter extends HALPort implements Counter {
 	 */
 	@Override 
 	public void reset(){
-		COUNTERJNI.resetPulseCounter(handle);
+		CounterJNI.resetPulseCounter(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -137,7 +136,7 @@ public class HALCounter extends HALPort implements Counter {
 	 */
 	@Override 
 	public int get(){
-		return COUNTERJNI.getPulseCounterPulseCount(handle);
+		return CounterJNI.getPulseCounterPulseCount(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -146,7 +145,7 @@ public class HALCounter extends HALPort implements Counter {
 	 */
 	@Override
 	public double getPulseLength(){
-		return (double)COUNTERJNI.getPulseCounterPulseLength(handle);
+		return (double)CounterJNI.getPulseCounterPulseLength(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -155,7 +154,7 @@ public class HALCounter extends HALPort implements Counter {
 	 */
 	@Override
 	public double getPulsePeriod() {
-		return (double)COUNTERJNI.getPulseCounterPulsePeriod(handle);
+		return (double)CounterJNI.getPulseCounterPulsePeriod(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -166,13 +165,13 @@ public class HALCounter extends HALPort implements Counter {
 	public boolean getDirection() {
 		if(!isQuadrature())
 			return true;
-		return COUNTERJNI.getPulseCounterDirection(handle);
+		return CounterJNI.getPulseCounterDirection(handle);
 	}
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean isQuadrature() {
-		return COUNTERJNI.isPulseCounterQuadrature(handle);
+		return CounterJNI.isPulseCounterQuadrature(handle);
 	}
 }

@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot.hal.jni;
 
-public final class COUNTERJNI {
+public final class CounterJNI {
 
 	public static native int initializePulseCounter(int port);
-	public static native int initializeQuadPulseCounter(int upport, int downport);
+	public static native int initializeQuadPulseCounter(int upPort, int downPort);
 	
 	public static native void freePulseCounter(int handle);
 	

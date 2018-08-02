@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.hal.jni.ANALOGJNI;
+import edu.flash3388.flashlib.robot.hal.jni.AnalogAccumulatorJNI;
+import edu.flash3388.flashlib.robot.hal.jni.AnalogJNI;
 import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 
@@ -27,13 +28,13 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 * @throws HALInitialzationException if port initialization failed.
 	 */
 	public HALAnalogInput(int port) {
-		if(!ANALOGJNI.checkAnalogInputPortValid(port))
+		if(!AnalogJNI.checkAnalogInputPortValid(port))
 			throw new IllegalArgumentException("Invalid AnalogInput port "+port);
 		
-		if(ANALOGJNI.checkAnalogInputPortTaken(port))
+		if(AnalogJNI.checkAnalogInputPortTaken(port))
 			throw new HALAllocationException("AnalogInput port taken", port);
 		
-		handle = ANALOGJNI.initializeAnalogInputPort(port);
+		handle = AnalogJNI.initializeAnalogInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
 			throw new HALInitialzationException("Unable to initialize AnalogInput: invalid HAL handle", port);
 		
@@ -51,32 +52,10 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 			return;
 		}
 		
-		ANALOGJNI.freeAnalogInputPort(handle);
+		AnalogJNI.freeAnalogInputPort(handle);
 		handle = HAL_INVALID_HANDLE;
 		
 		accumulator = null;
-	}
-	
-	
-	public void enableAccumulator(boolean enable){
-		int result = ANALOGJNI.enableAnalogInputAccumulator(handle, enable);
-		
-		if(result != 0){
-			throw new HALInitialzationException("Unable to "+(enable? "enable" : "disable")+
-					" accumulator for analog input port", handle);
-		}
-	}
-	public void resetAccumulator(){
-		ANALOGJNI.resetAnalogInputAccumulator(handle);
-	}
-	public void setAccumulatorCenter(int value){
-		ANALOGJNI.setAnalogInputAccumulatorCenter(handle, value);
-	}
-	public long getAccumulatorValue(){
-		return ANALOGJNI.getAnalogInputAccumulatorValue(handle);
-	}
-	public int getAccumulatorCount(){
-		return ANALOGJNI.getAnalogInputAccumulatorCount(handle);
 	}
 	
 	/**
@@ -86,7 +65,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 */
 	@Override 
 	public int getValue(){
-		return ANALOGJNI.getAnalogValue(handle);
+		return AnalogJNI.getAnalogValue(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -95,7 +74,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 */
 	@Override
 	public double getVoltage(){
-		return (double)ANALOGJNI.getAnalogVoltage(handle);
+		return (double)AnalogJNI.getAnalogVoltage(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -115,7 +94,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 */
 	@Override
 	public double getSampleRate() {
-		return ANALOGJNI.getGlobalSampleRate();
+		return AnalogJNI.getGlobalSampleRate();
 	}
 	/**
 	 * {@inheritDoc}
@@ -124,7 +103,7 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 */
 	@Override
 	public double getMaxVoltage() {
-		return ANALOGJNI.getMaxAnalogPortVoltage();
+		return AnalogJNI.getMaxAnalogPortVoltage();
 	}
 	/**
 	 * {@inheritDoc}
@@ -133,6 +112,6 @@ public class HALAnalogInput extends HALPort implements AnalogInput{
 	 */
 	@Override
 	public int getMaxValue() {
-		return ANALOGJNI.getMaxAnalogPortValue();
+		return AnalogJNI.getMaxAnalogPortValue();
 	}
 }

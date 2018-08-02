@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hal;
 
+import edu.flash3388.flashlib.robot.hal.jni.AnalogAccumulatorJNI;
 import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 
 public class HALAnalogAccumulator implements AnalogAccumulator{
@@ -12,26 +13,41 @@ public class HALAnalogAccumulator implements AnalogAccumulator{
 	
 	@Override
 	public void enable() {
-		inputPort.enableAccumulator(true);
+		setEnabled(true);
 	}
+
 	@Override
 	public void disable() {
-		inputPort.enableAccumulator(false);
+		setEnabled(false);
 	}
+
 	@Override
 	public void reset() {
-		inputPort.resetAccumulator();
+		AnalogAccumulatorJNI.resetAnalogInputAccumulator(inputPort.getHandle());
 	}
+
 	@Override
 	public void setCenter(int value) {
-		inputPort.setAccumulatorCenter(value);
+		AnalogAccumulatorJNI.setAnalogInputAccumulatorCenter(inputPort.getHandle(), value);
 	}
+
 	@Override
 	public long getValue() {
-		return inputPort.getAccumulatorValue();
+		return AnalogAccumulatorJNI.getAnalogInputAccumulatorValue(inputPort.getHandle());
 	}
+
 	@Override
 	public int getCount() {
-		return inputPort.getAccumulatorCount();
+		return AnalogAccumulatorJNI.getAnalogInputAccumulatorCount(inputPort.getHandle());
+	}
+
+
+	public void setEnabled(boolean enable) {
+		int result = AnalogAccumulatorJNI.enableAnalogInputAccumulator(inputPort.getHandle(), enable);
+
+		if(result != 0){
+			throw new HALInitialzationException("Unable to "+(enable? "enable" : "disable")+
+					" accumulator for analog input port", inputPort.getHandle());
+		}
 	}
 }
