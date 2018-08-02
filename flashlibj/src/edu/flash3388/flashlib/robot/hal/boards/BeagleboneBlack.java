@@ -122,7 +122,7 @@ public final class BeagleboneBlack {
 	 */
 	public static DigitalInput createDigitalInputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
-			return null;
+			throw new IllegalArgumentException("invalid port");
 		return new HALDigitalInput(convertDIOToHALPort(header, pin));
 	}
 	/**
@@ -136,7 +136,7 @@ public final class BeagleboneBlack {
 	 */
 	public static DigitalOutput createDigitalOutputPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
-			return null;
+			throw new IllegalArgumentException("invalid port");
 		return new HALDigitalOutput(convertDIOToHALPort(header, pin));
 	}
 	
@@ -151,7 +151,7 @@ public final class BeagleboneBlack {
 	 */
 	public static PWM createPWMPort(int module, int port){
 		if(!checkValidPWMPort(module, port))
-			return null;
+			throw new IllegalArgumentException("invalid port");
 		return new HALPWM(convertPWMToHALPort(module, port));
 	}
 	
@@ -165,7 +165,7 @@ public final class BeagleboneBlack {
 	 */
 	public static AnalogInput createAnalogInputPort(int channel){
 		if(!checkValidADCChannel(channel))
-			return null;
+			throw new IllegalArgumentException("invalid port");
 		return new HALAnalogInput(channel);
 	}
 	
@@ -180,7 +180,7 @@ public final class BeagleboneBlack {
 	 */
 	public static Counter createPulseCounterPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
-			return null;
+			throw new IllegalArgumentException("invalid port");
 		return new HALCounter((HALDigitalInput) createDigitalInputPort(header, pin));
 	}
 }
