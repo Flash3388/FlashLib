@@ -3,7 +3,9 @@ package edu.flash3388.flashlib.robot.hal;
 import edu.flash3388.flashlib.robot.hal.jni.CounterJNI;
 import edu.flash3388.flashlib.robot.io.Counter;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Represents a pulse counter using FlashLib's Hardware Abstraction Layer. A pulse counter is used to
@@ -18,6 +20,8 @@ import java.util.Collection;
  */
 public class HALCounter extends HALResource implements Counter {
 
+	private final Collection<HALResource> mAttachedResources;
+
 	/**
 	 * Creates a new pulse counter for the given DIO port using FlashLib's Hardware Abstraction Layer.
 	 * If the counter initialization failed, for whatever reason, {@link HALInitializationException}
@@ -28,11 +32,13 @@ public class HALCounter extends HALResource implements Counter {
 	 */
 	public HALCounter(HALDigitalInput port) {
 		handle = CounterJNI.initializePulseCounter(port.getHandle());
-		
+
 		if(handle == HAL_INVALID_HANDLE) {
 			throw new HALInitializationException("Unable to initialize Counter: invalid HAL handle",
 					port.getHandle());
 		}
+
+		mAttachedResources = Collections.singleton(port);
 	}
 
 	/**
@@ -52,6 +58,8 @@ public class HALCounter extends HALResource implements Counter {
 			throw new HALInitializationException("Unable to initialize Counter: invalid HAL handle",
 					HAL_INVALID_HANDLE);
 		}
+
+		mAttachedResources = Arrays.asList(upPort, downPort);
 	}
 	
 	/**
@@ -67,6 +75,10 @@ public class HALCounter extends HALResource implements Counter {
 		
 		CounterJNI.freePulseCounter(handle);
 		handle = HAL_INVALID_HANDLE;
+
+		for (HALResource resource : mAttachedResources) {
+			resource.free();
+		}
 	}
 	
 	

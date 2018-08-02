@@ -181,6 +181,6 @@ public final class BeagleboneBlack {
 	public static Counter createPulseCounterPort(int header, int pin){
 		if(!checkValidDIOPort(header, pin))
 			return null;
-		return new HALCounter(convertDIOToHALPort(header, pin));
+		return new HALCounter((HALDigitalInput) createDigitalInputPort(header, pin));
 	}
 }
