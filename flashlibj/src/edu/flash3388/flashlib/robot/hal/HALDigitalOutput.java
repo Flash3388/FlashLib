@@ -24,10 +24,10 @@ public class HALDigitalOutput extends HALResource implements DigitalOutput{
 	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALDigitalOutput(int port) {
-		if(!DIOJNI.checkDigitalOutputPortValid(port))
+		if(!DIOJNI.isDigitalOutputPortValid(port))
 			throw new IllegalArgumentException("Invalid DigitalOutput port "+port);
 		
-		if(DIOJNI.checkDigitalOutputPortTaken(port))
+		if(DIOJNI.isDigitalOutputPortTaken(port))
 			throw new HALAllocationException("DigitalOutput port taken", port);
 		
 		handle = DIOJNI.initializeDigitalOutputPort(port);

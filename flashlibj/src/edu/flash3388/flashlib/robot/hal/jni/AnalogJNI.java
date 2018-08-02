@@ -9,10 +9,11 @@ public final class AnalogJNI {
 	public static native float convertAnalogValueToVoltage(int value);
 	public static native int convertAnalogVoltageToValue(float voltage);
 	
-	public static native boolean checkAnalogInputPortValid(int port);
-	public static native boolean checkAnalogInputPortTaken(int port);
-	public static native boolean checkAnalogOutputPortValid(int port);
-	public static native boolean checkAnalogOutputPortTaken(int port);
+	public static native boolean isAnalogInputPortValid(int port);
+	public static native boolean isAnalogInputPortTaken(int port);
+
+	public static native boolean isAnalogOutputPortValid(int port);
+	public static native boolean isAnalogOutputPortTaken(int port);
 	
 	public static native int initializeAnalogInputPort(int port);
 	public static native int initializeAnalogOutputPort(int port);

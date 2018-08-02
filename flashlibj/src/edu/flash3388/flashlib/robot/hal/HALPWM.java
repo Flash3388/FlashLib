@@ -24,10 +24,10 @@ public class HALPWM extends HALResource implements PWM{
 	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALPWM(int port) {
-		if(!PWMJNI.checkPWMPortValid(port))
+		if(!PWMJNI.isPWMPortValid(port))
 			throw new IllegalArgumentException("Invalid PWM port "+port);
 		
-		if(PWMJNI.checkPWMPortTaken(port))
+		if(PWMJNI.isPWMPortTaken(port))
 			throw new HALAllocationException("PWM port taken", port);
 		
 		handle = PWMJNI.initializePWMPort(port);

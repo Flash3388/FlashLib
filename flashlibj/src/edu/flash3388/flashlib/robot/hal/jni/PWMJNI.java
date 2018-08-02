@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.robot.hal.jni;
 
 public final class PWMJNI {
 	
-	public static native boolean checkPWMPortValid(int port);
-	public static native boolean checkPWMPortTaken(int port);
+	public static native boolean isPWMPortValid(int port);
+	public static native boolean isPWMPortTaken(int port);
 	
 	public static native int initializePWMPort(int port);
 	

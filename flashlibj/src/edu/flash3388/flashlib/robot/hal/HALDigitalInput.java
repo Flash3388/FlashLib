@@ -24,10 +24,10 @@ public class HALDigitalInput extends HALResource implements DigitalInput{
 	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALDigitalInput(int port) {
-		if(!DIOJNI.checkDigitalInputPortValid(port))
+		if(!DIOJNI.isDigitalInputPortValid(port))
 			throw new IllegalArgumentException("Invalid DigitalInput port "+port);
 		
-		if(DIOJNI.checkDigitalInputPortTaken(port))
+		if(DIOJNI.isDigitalInputPortTaken(port))
 			throw new HALAllocationException("DigitalInput port taken", port);
 		
 		handle = DIOJNI.initializeDigitalInputPort(port);

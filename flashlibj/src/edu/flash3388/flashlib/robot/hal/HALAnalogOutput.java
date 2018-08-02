@@ -24,10 +24,10 @@ public class HALAnalogOutput extends HALResource implements AnalogOutput{
 	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALAnalogOutput(int port) {
-		if(!AnalogJNI.checkAnalogOutputPortValid(port))
+		if(!AnalogJNI.isAnalogOutputPortValid(port))
 			throw new IllegalArgumentException("Invalid AnalogOutput port "+port);
 		
-		if(AnalogJNI.checkAnalogOutputPortTaken(port))
+		if(AnalogJNI.isAnalogOutputPortTaken(port))
 			throw new HALAllocationException("AnalogOutput port taken", port);
 		
 		handle = AnalogJNI.initializeAnalogOutputPort(port);

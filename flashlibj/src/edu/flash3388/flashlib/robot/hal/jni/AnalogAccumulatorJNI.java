@@ -7,6 +7,7 @@ public class AnalogAccumulatorJNI {
     public static native void setAnalogInputAccumulatorCenter(int inputPortHandle, int center);
 
     public static native void resetAnalogInputAccumulator(int inputPortHandle);
+    
     public static native long getAnalogInputAccumulatorValue(int inputPortHandle);
     public static native int getAnalogInputAccumulatorCount(int inputPortHandle);
 }
