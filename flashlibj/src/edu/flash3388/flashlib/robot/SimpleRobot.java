@@ -46,9 +46,9 @@ public abstract class SimpleRobot extends RobotBase{
 
 	@Override
 	protected void robotShutdown(){
-		mRunLoop.compareAndSet(true, false);
-
-		robotFree();
+		if (mRunLoop.compareAndSet(true, false)) {
+			robotFree();
+		}
 	}
 
 	private void robotLoop(){
