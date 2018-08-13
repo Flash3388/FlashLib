@@ -20,7 +20,7 @@ public class MessageEvent implements Event {
         return mMessage;
     }
 
-    public void writeResponse(Message message) {
-        mOutputMessageQueue.enqueueMessage(message);
+    public MessageQueue getMessageQueue() {
+        return mOutputMessageQueue;
     }
 }
