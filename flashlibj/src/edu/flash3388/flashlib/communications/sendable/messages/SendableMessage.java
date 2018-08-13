@@ -52,7 +52,7 @@ public class SendableMessage implements Message {
         return mSendableMessage;
     }
 
-    static SendableMessage fromMessage(Message message, PrimitiveSerializer serializer) {
+    public static SendableMessage fromMessage(Message message, PrimitiveSerializer serializer) {
         byte[] allData = message.getData();
 
         int sendableDataSerializedSize = SendableData.getSerializedSize();
