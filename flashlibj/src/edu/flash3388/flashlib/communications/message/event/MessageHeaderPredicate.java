@@ -14,6 +14,6 @@ public class MessageHeaderPredicate implements Predicate<Event> {
 
     @Override
     public boolean test(Event event) {
-        return MessageEvent.class.isInstance(event) && ((MessageEvent)event).getMessage().getHeader() == mHeader;
+        return event instanceof MessageEvent && ((MessageEvent)event).getMessage().getHeader() == mHeader;
     }
 }
