@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.communications.message.event;
 
 import edu.flash3388.flashlib.communications.message.Message;
+import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.message.MessageWriter;
 import edu.flash3388.flashlib.communications.message.WriteException;
 import edu.flash3388.flashlib.event.Event;
@@ -8,18 +9,18 @@ import edu.flash3388.flashlib.event.Event;
 public class MessageEvent implements Event {
 
     private Message mMessage;
-    private MessageWriter mWriter;
+    private MessageQueue mOutputMessageQueue;
 
-    public MessageEvent(Message message, MessageWriter writer) {
+    public MessageEvent(Message message, MessageQueue outputMessageQueue) {
         mMessage = message;
-        mWriter = writer;
+        mOutputMessageQueue = outputMessageQueue;
     }
 
     public Message getMessage() {
         return mMessage;
     }
 
-    public void writeResponse(Message message) throws WriteException {
-        mWriter.writeMessage(message);
+    public void writeResponse(Message message) {
+        mOutputMessageQueue.enqueueMessage(message);
     }
 }

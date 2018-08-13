@@ -4,10 +4,7 @@ import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.communications.connection.ConnectionFailedException;
 import edu.flash3388.flashlib.communications.connection.Connector;
 import edu.flash3388.flashlib.communications.connection.TimeoutException;
-import edu.flash3388.flashlib.communications.message.Message;
-import edu.flash3388.flashlib.communications.message.MessageReader;
-import edu.flash3388.flashlib.communications.message.MessageWriter;
-import edu.flash3388.flashlib.communications.message.ReadException;
+import edu.flash3388.flashlib.communications.message.*;
 import edu.flash3388.flashlib.communications.message.event.MessageEvent;
 import edu.flash3388.flashlib.communications.message.event.MessageListener;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionEvent;
@@ -19,6 +16,8 @@ import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -141,20 +140,48 @@ public class CommunicationRunner {
             MessageReader messageReader = new MessageReader(connection, mSerializer);
             MessageWriter messageWriter = new MessageWriter(connection, mSerializer);
 
+            Queue<Message> messageQueue = new ConcurrentLinkedDeque<Message>();
+            MessageQueue messageQueueWrapper = new MessageQueue(messageQueue);
+
             while (!Thread.interrupted()) {
-                try {
-                    Message message = messageReader.readMessage();
-                    mEventDispatcher.dispatch(MessageListener.class, new MessageEvent(message, messageWriter),
-                            MessageListener::onMessageReceived);
-                } catch (ReadException e) {
-                    mLogger.log(Level.SEVERE, "Error while reading from connection", e);
-                    break; // TODO: SHOULD WE REALLY DISCONNECT
-                } catch (TimeoutException e) {
-                    // nothing we need to do, this might happen
+                if (!handleNewMessages(messageReader, messageQueueWrapper)) {
+                    break;
+                }
+                if (!flushMessageQueue(messageQueue, messageWriter)) {
+                    break;
                 }
             }
 
             mEventDispatcher.dispatch(ConnectionListener.class, new DisconnectionEvent(), ConnectionListener::onDisconnection);
+        }
+
+        private boolean handleNewMessages(MessageReader messageReader, MessageQueue messageQueue) {
+            try {
+                Message message = messageReader.readMessage();
+                mEventDispatcher.dispatch(MessageListener.class, new MessageEvent(message, messageQueue),
+                        MessageListener::onMessageReceived);
+            } catch (ReadException e) {
+                mLogger.log(Level.SEVERE, "Error while reading from connection", e);
+                return false; // TODO: SHOULD WE REALLY DISCONNECT
+            } catch (TimeoutException e) {
+                // nothing we need to do, this might happen
+            }
+
+            return true;
+        }
+
+        private boolean flushMessageQueue(Queue<Message> messageQueue, MessageWriter messageWriter) {
+            while (!messageQueue.isEmpty()) {
+                Message message = messageQueue.remove();
+                try {
+                    messageWriter.writeMessage(message);
+                } catch (WriteException e) {
+                    mLogger.log(Level.SEVERE, "Error while writing to connection", e);
+                    return false; // TODO: SHOULD WE REALLY DISCONNECT
+                }
+            }
+
+            return true;
         }
     }
 }
