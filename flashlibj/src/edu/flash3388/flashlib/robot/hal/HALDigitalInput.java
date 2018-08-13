@@ -13,26 +13,26 @@ import edu.flash3388.flashlib.robot.io.DigitalInput;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALDigitalInput extends HALPort implements DigitalInput{
+public class HALDigitalInput extends HALResource implements DigitalInput{
 
 	/**
 	 * Creates a new digital input port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired digital input
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALDigitalInput(int port) {
-		if(!DIOJNI.checkDigitalInputPortValid(port))
+		if(!DIOJNI.isDigitalInputPortValid(port))
 			throw new IllegalArgumentException("Invalid DigitalInput port "+port);
 		
-		if(DIOJNI.checkDigitalInputPortTaken(port))
+		if(DIOJNI.isDigitalInputPortTaken(port))
 			throw new HALAllocationException("DigitalInput port taken", port);
 		
 		handle = DIOJNI.initializeDigitalInputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize DigitalInput: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize DigitalInput: invalid HAL handle", port);
 	}
 	
 	/**

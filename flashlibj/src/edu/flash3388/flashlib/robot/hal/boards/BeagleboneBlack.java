@@ -56,7 +56,7 @@ public final class BeagleboneBlack {
 	 * @param pin the pin number on the header
 	 * @return true if the given port is valid for DIO.
 	 */
-	public static boolean checkValidDIOPort(int header, int pin){
+	public static boolean isValidDIOPort(int header, int pin){
 		if(header != 0 && header != 1)
 			return false;
 		if(pin <= 0 || pin > HEADER_PIN_COUNT)
@@ -74,7 +74,7 @@ public final class BeagleboneBlack {
 	 * @param channel the channel number
 	 * @return true if the ADC channel number exists
 	 */
-	public static boolean checkValidADCChannel(int channel){
+	public static boolean isValidADCChannel(int channel){
 		return channel >= 0 && channel < ADC_CHANNEL_COUNT;
 	}
 	/**
@@ -84,7 +84,7 @@ public final class BeagleboneBlack {
 	 * @param port the PWM port number
 	 * @return true if the given port is a valid PWM port
 	 */
-	public static boolean checkValidPWMPort(int module, int port){
+	public static boolean isValidPWMPort(int module, int port){
 		return module >= 0 && module < PWM_MODULE_COUNT && port >= 0 && port < PWM_MODULE_PORT_COUNT;
 	}
 	
@@ -112,7 +112,7 @@ public final class BeagleboneBlack {
 	}
 	
 	/**
-	 * Creates a new Digital input port for the given port. If {@link #checkValidDIOPort(int, int)}
+	 * Creates a new Digital input port for the given port. If {@link #isValidDIOPort(int, int)}
 	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
 	 * a digital input port is created and returned.
 	 * 
@@ -121,12 +121,12 @@ public final class BeagleboneBlack {
 	 * @return a digital input port, or null if port is not valid
 	 */
 	public static DigitalInput createDigitalInputPort(int header, int pin){
-		if(!checkValidDIOPort(header, pin))
-			return null;
+		if(!isValidDIOPort(header, pin))
+			throw new IllegalArgumentException("invalid port");
 		return new HALDigitalInput(convertDIOToHALPort(header, pin));
 	}
 	/**
-	 * Creates a new Digital output port for the given port. If {@link #checkValidDIOPort(int, int)}
+	 * Creates a new Digital output port for the given port. If {@link #isValidDIOPort(int, int)}
 	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
 	 * a digital output port is created and returned.
 	 * 
@@ -135,13 +135,13 @@ public final class BeagleboneBlack {
 	 * @return a digital output port, or null if port is not valid
 	 */
 	public static DigitalOutput createDigitalOutputPort(int header, int pin){
-		if(!checkValidDIOPort(header, pin))
-			return null;
+		if(!isValidDIOPort(header, pin))
+			throw new IllegalArgumentException("invalid port");
 		return new HALDigitalOutput(convertDIOToHALPort(header, pin));
 	}
 	
 	/**
-	 * Creates a new PWM port for the given port. If {@link #checkValidPWMPort(int, int)}
+	 * Creates a new PWM port for the given port. If {@link #isValidPWMPort(int, int)}
 	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
 	 * a PWM port is created and returned.
 	 * 
@@ -150,13 +150,13 @@ public final class BeagleboneBlack {
 	 * @return a PWM port, or null if port is not valid
 	 */
 	public static PWM createPWMPort(int module, int port){
-		if(!checkValidPWMPort(module, port))
-			return null;
+		if(!isValidPWMPort(module, port))
+			throw new IllegalArgumentException("invalid port");
 		return new HALPWM(convertPWMToHALPort(module, port));
 	}
 	
 	/**
-	 * Creates a new analog input port for the given port. If {@link #checkValidADCChannel(int)}
+	 * Creates a new analog input port for the given port. If {@link #isValidADCChannel(int)}
 	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
 	 * an analog input port is created and returned.
 	 * 
@@ -164,13 +164,13 @@ public final class BeagleboneBlack {
 	 * @return an analog input port, or null if port is not valid
 	 */
 	public static AnalogInput createAnalogInputPort(int channel){
-		if(!checkValidADCChannel(channel))
-			return null;
+		if(!isValidADCChannel(channel))
+			throw new IllegalArgumentException("invalid port");
 		return new HALAnalogInput(channel);
 	}
 	
 	/**
-	 * Creates a new pulse counter for a given digital input port. If {@link #checkValidDIOPort(int, int)}
+	 * Creates a new pulse counter for a given digital input port. If {@link #isValidDIOPort(int, int)}
 	 * returns false, null is returned. Otherwise the given values are converted to an HAL port number and
 	 * an pulse counter is created and returned.
 	 * 
@@ -179,8 +179,8 @@ public final class BeagleboneBlack {
 	 * @return a pulse counter, or null if port is not valid
 	 */
 	public static Counter createPulseCounterPort(int header, int pin){
-		if(!checkValidDIOPort(header, pin))
-			return null;
-		return new HALCounter(convertDIOToHALPort(header, pin));
+		if(!isValidDIOPort(header, pin))
+			throw new IllegalArgumentException("invalid port");
+		return new HALCounter((HALDigitalInput) createDigitalInputPort(header, pin));
 	}
 }

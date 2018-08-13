@@ -13,26 +13,26 @@ import edu.flash3388.flashlib.robot.io.DigitalOutput;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALDigitalOutput extends HALPort implements DigitalOutput{
+public class HALDigitalOutput extends HALResource implements DigitalOutput{
 
 	/**
 	 * Creates a new digital output port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired digital output
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALDigitalOutput(int port) {
-		if(!DIOJNI.checkDigitalOutputPortValid(port))
+		if(!DIOJNI.isDigitalOutputPortValid(port))
 			throw new IllegalArgumentException("Invalid DigitalOutput port "+port);
 		
-		if(DIOJNI.checkDigitalOutputPortTaken(port))
+		if(DIOJNI.isDigitalOutputPortTaken(port))
 			throw new HALAllocationException("DigitalOutput port taken", port);
 		
 		handle = DIOJNI.initializeDigitalOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize DigitalOutput: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize DigitalOutput: invalid HAL handle", port);
 	}
 	
 	/**
