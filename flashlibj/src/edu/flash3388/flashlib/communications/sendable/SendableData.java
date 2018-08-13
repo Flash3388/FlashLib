@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.communications.sendable;
 
-import edu.flash3388.flashlib.communications.message.Message;
-import edu.flash3388.flashlib.communications.message.StaticMessage;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
 import edu.flash3388.flashlib.util.ArrayUtil;
 

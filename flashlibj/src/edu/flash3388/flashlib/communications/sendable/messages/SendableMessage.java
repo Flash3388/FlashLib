@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.communications.sendable.manager;
+package edu.flash3388.flashlib.communications.sendable.messages;
 
 import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.StaticMessage;
@@ -8,17 +8,17 @@ import edu.flash3388.flashlib.util.ArrayUtil;
 
 import java.util.Arrays;
 
-class SendableMessage implements Message {
+public class SendableMessage implements Message {
+
+    public static final int HEADER = 1000;
 
     private PrimitiveSerializer mSerializer;
 
-    private int mHeader;
     private SendableData mFrom;
     private SendableData mTo;
     private Message mSendableMessage;
 
-    SendableMessage(int header, SendableData from, SendableData to, Message sendableMessage, PrimitiveSerializer serializer) {
-        mHeader = header;
+    public SendableMessage(SendableData from, SendableData to, Message sendableMessage, PrimitiveSerializer serializer) {
         mFrom = from;
         mTo = to;
         mSendableMessage = sendableMessage;
@@ -27,7 +27,7 @@ class SendableMessage implements Message {
 
     @Override
     public int getHeader() {
-        return mHeader;
+        return HEADER;
     }
 
     @Override
@@ -53,7 +53,6 @@ class SendableMessage implements Message {
     }
 
     static SendableMessage fromMessage(Message message, PrimitiveSerializer serializer) {
-        int header = message.getHeader();
         byte[] allData = message.getData();
 
         int sendableDataSerializedSize = SendableData.getSerializedSize();
@@ -65,7 +64,6 @@ class SendableMessage implements Message {
         int sendableMessageHeader = serializer.toInt(allData, sendableDataSerializedSize * 2);
         byte[] sendableMessageData = Arrays.copyOfRange(allData, sendableDataSerializedSize * 2 + 4, allData.length - sendableDataSerializedSize * 2 + 4);
 
-        return new SendableMessage(header, from, to, new StaticMessage(sendableMessageHeader, sendableMessageData),
-                serializer);
+        return new SendableMessage(from, to, new StaticMessage(sendableMessageHeader, sendableMessageData), serializer);
     }
 }
