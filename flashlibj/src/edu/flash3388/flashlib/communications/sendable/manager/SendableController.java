@@ -4,22 +4,22 @@ import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.Sendable;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.SendableSession;
-import edu.flash3388.flashlib.communications.sendable.messages.MessageQueueSendableStream;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
+import edu.flash3388.flashlib.communications.sendable.SendableStream;
 
 public class SendableController {
 
     private SendableData mSendableData;
     private Sendable mSendable;
-    private PrimitiveSerializer mSerializer;
+    private SendableStreamFactory mSendableStreamFactory;
 
-    public SendableController(SendableData sendableData, Sendable sendable, PrimitiveSerializer serializer) {
+    public SendableController(SendableData sendableData, Sendable sendable, SendableStreamFactory sendableStreamFactory) {
         mSendableData = sendableData;
         mSendable = sendable;
-        mSerializer = serializer;
+        mSendableStreamFactory = sendableStreamFactory;
     }
 
     public SendableSession startNewSession(SendableData to, MessageQueue messageQueue) {
-        return mSendable.onPairing(new MessageQueueSendableStream(messageQueue, mSendableData, to, mSerializer));
+        SendableStream sendableStream = mSendableStreamFactory.create(mSendableData, to, messageQueue);
+        return mSendable.onPairing(sendableStream);
     }
 }

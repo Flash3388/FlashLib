@@ -21,6 +21,20 @@ public class SendableData {
         return mType;
     }
 
+    @Override
+    public int hashCode() {
+        return mId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SendableData) {
+            return ((SendableData) obj).mId == mId;
+        }
+
+        return false;
+    }
+
     public byte[] toBytes(PrimitiveSerializer serializer) {
         byte[] idData = serializer.toBytes(mId);
         byte[] typeData = serializer.toBytes(mType);
