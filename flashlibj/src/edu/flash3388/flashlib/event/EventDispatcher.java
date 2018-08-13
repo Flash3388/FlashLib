@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.event;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -21,10 +22,12 @@ import java.util.stream.Stream;
  */
 public class EventDispatcher {
 
-	private Set<ListenerWrapper> mListeners;
-	
-	public EventDispatcher() {
+	private ListenerInvocation mInvocator;
+	private final Set<ListenerWrapper> mListeners;
+
+	public EventDispatcher(ListenerInvocation invocator) {
 		mListeners = new HashSet<ListenerWrapper>();
+		mInvocator = invocator;
 	}
 	
 	/**
@@ -33,7 +36,7 @@ public class EventDispatcher {
 	 * This listener has no event filtering.
 	 * 
 	 * @param listener listener
-	 * @return if the listener does not exist already and was added.
+	 * @return true if the listener does not exist already and was added, false otherwise.
 	 */
 	public boolean registerListener(Listener listener) {
 		return registerListener(new TrueEventPredicate(), listener);
@@ -44,9 +47,12 @@ public class EventDispatcher {
 	 * 
 	 * @param eventPredicate a condition which will be tested and must be answered to dispatch this listener.
 	 * @param listener listener
-	 * @return if the listener does not exist already and was added.
+	 * @return true if the listener does not exist already and was added, false otherwise.
 	 */
 	public boolean registerListener(Predicate<Event> eventPredicate, Listener listener) {
+		Objects.requireNonNull(listener, "listener cannot be null");
+		Objects.requireNonNull(eventPredicate, "listener predicate cannot be null");
+
 		synchronized (mListeners) {
 			return mListeners.add(new ListenerWrapper(eventPredicate, listener));
 		}
@@ -60,7 +66,19 @@ public class EventDispatcher {
 	 */
 	public boolean unregisterListener(Listener listener) {
 		synchronized (mListeners) {
-			return mListeners.remove(listener);
+			ListenerWrapper toRemove = null;
+			for (ListenerWrapper wrapper : mListeners) {
+				if (wrapper.mListener.equals(listener)) {
+					toRemove = wrapper;
+					break;
+				}
+			}
+
+			if (toRemove != null) {
+				return mListeners.remove(toRemove);
+			}
+
+			return false;
 		}
 	}
 	
@@ -73,7 +91,7 @@ public class EventDispatcher {
 	 */
 	public synchronized <E extends Event, L extends Listener> void dispatch(Class<L> listenerCls, E event, BiConsumer<L, E> consumer) {
 		Stream<ListenerWrapper> listenersStream = getListenersForClass(listenerCls);
-		listenersStream.forEach(new InvocationConsumer<L, E>(listenerCls, event, consumer));
+		listenersStream.forEach(new InvocationConsumer<L, E>(listenerCls, event, consumer, mInvocator));
 	}
 	
 	private <L extends Listener> Stream<ListenerWrapper> getListenersForClass(Class<L> cls) {
@@ -97,11 +115,13 @@ public class EventDispatcher {
 		private Class<L> mListenerCls;
 		private E mEvent;
 		private BiConsumer<L, E> mConsumer;
-		
-		InvocationConsumer(Class<L> listenerCls, E event, BiConsumer<L, E> consumer) {
+		private ListenerInvocation mInvocator;
+
+		InvocationConsumer(Class<L> listenerCls, E event, BiConsumer<L, E> consumer, ListenerInvocation invocator) {
 			mListenerCls = listenerCls;
 			mEvent = event;
 			mConsumer = consumer;
+			mInvocator = invocator;
 		}
 		
 		@Override
@@ -110,7 +130,7 @@ public class EventDispatcher {
 			Predicate<Event> predicate = wrapper.mEventPredicate;
 			
 			if (predicate.test(mEvent)) {
-				mConsumer.accept(listener, mEvent);
+				mInvocator.invoke(listener, mEvent, mConsumer);
 			}
 		}
 	}
