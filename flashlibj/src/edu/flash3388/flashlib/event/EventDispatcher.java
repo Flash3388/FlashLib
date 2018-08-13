@@ -22,9 +22,11 @@ import java.util.stream.Stream;
 public class EventDispatcher {
 
 	private Set<ListenerWrapper> mListeners;
+	private ListenerInvocation mInvocator;
 	
-	public EventDispatcher() {
+	public EventDispatcher(ListenerInvocation invocator) {
 		mListeners = new HashSet<ListenerWrapper>();
+		mInvocator = invocator;
 	}
 	
 	/**
@@ -73,7 +75,7 @@ public class EventDispatcher {
 	 */
 	public synchronized <E extends Event, L extends Listener> void dispatch(Class<L> listenerCls, E event, BiConsumer<L, E> consumer) {
 		Stream<ListenerWrapper> listenersStream = getListenersForClass(listenerCls);
-		listenersStream.forEach(new InvocationConsumer<L, E>(listenerCls, event, consumer));
+		listenersStream.forEach(new InvocationConsumer<L, E>(listenerCls, event, consumer, mInvocator));
 	}
 	
 	private <L extends Listener> Stream<ListenerWrapper> getListenersForClass(Class<L> cls) {
@@ -97,11 +99,13 @@ public class EventDispatcher {
 		private Class<L> mListenerCls;
 		private E mEvent;
 		private BiConsumer<L, E> mConsumer;
+		private ListenerInvocation mInvocator;
 		
-		InvocationConsumer(Class<L> listenerCls, E event, BiConsumer<L, E> consumer) {
+		InvocationConsumer(Class<L> listenerCls, E event, BiConsumer<L, E> consumer, ListenerInvocation invocator) {
 			mListenerCls = listenerCls;
 			mEvent = event;
 			mConsumer = consumer;
+			mInvocator = invocator;
 		}
 		
 		@Override
@@ -110,7 +114,7 @@ public class EventDispatcher {
 			Predicate<Event> predicate = wrapper.mEventPredicate;
 			
 			if (predicate.test(mEvent)) {
-				mConsumer.accept(listener, mEvent);
+				mInvocator.invoke(listener, mEvent, mConsumer);
 			}
 		}
 	}
