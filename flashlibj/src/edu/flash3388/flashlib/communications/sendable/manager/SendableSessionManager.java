@@ -41,6 +41,10 @@ public class SendableSessionManager {
 
         synchronized (sendableSession) {
             sendableSession.close();
+
+            synchronized (this) {
+                mSendableSessions.remove(sendableData);
+            }
         }
     }
 
