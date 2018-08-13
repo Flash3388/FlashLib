@@ -6,27 +6,32 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad extends POV implements Runnable{
+public class DPad extends POV {
+	
 	/**
 	 * The Up button on the D-Pad
 	 */
 	public final Button Up;
+
 	/**
 	 * The Down button on the D-Pad
 	 */
 	public final Button Down;
+
 	/**
 	 * The Right button on the D-Pad
 	 */
 	public final Button Right;
+
 	/**
 	 * The Left button on the D-Pad
 	 */
 	public final Button Left;
+
 	/**
 	 * The entire POV as a button
 	 */
-	public final Button POV;
+	public final Button FULL;
 	
 	/**
 	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
@@ -37,11 +42,11 @@ public class DPad extends POV implements Runnable{
 	public DPad(HID hid, int num){
 		super(hid, num);
 		
-		Up = new DPadButton(hid, num, DPadButton.Type.UP);
-		Down = new DPadButton(hid, num, DPadButton.Type.DOWN);
-		Right = new DPadButton(hid, num, DPadButton.Type.RIGHT);
-		Left = new DPadButton(hid, num, DPadButton.Type.LEFT);
-		POV = new DPadButton(hid, num, DPadButton.Type.POV);
+		Up = new POVButton(hid, num, POVRange.UP);
+		Down = new POVButton(hid, num, POVRange.DOWN);
+		Right = new POVButton(hid, num, POVRange.RIGHT);
+		Left = new POVButton(hid, num, POVRange.LEFT);
+		FULL = new POVButton(hid, num, POVRange.FULL);
 	}
 
 	/**
@@ -51,6 +56,7 @@ public class DPad extends POV implements Runnable{
 	public Button getUp(){
 		return Up;
 	}
+
 	/**
 	 * Gets the down DPad button object
 	 * @return down button
@@ -58,6 +64,7 @@ public class DPad extends POV implements Runnable{
 	public Button getDown(){
 		return Down;
 	}
+
 	/**
 	 * Gets the right DPad button object
 	 * @return right button
@@ -65,6 +72,7 @@ public class DPad extends POV implements Runnable{
 	public Button getRight(){
 		return Right;
 	}
+
 	/**
 	 * Gets the left DPad button object
 	 * @return left button
@@ -72,18 +80,8 @@ public class DPad extends POV implements Runnable{
 	public Button getLeft(){
 		return Left;
 	}
-	
-	@Override
-	public void run() {
-		if(Up.getActionsCount() > 0)
-			Up.run();
-		if(Down.getActionsCount() > 0)
-			Down.run();
-		if(Left.getActionsCount() > 0)
-			Left.run();
-		if(Right.getActionsCount() > 0)
-			Right.run();
-		if(POV.getActionsCount() > 0)
-			POV.run();
+
+	public Button getFull() {
+		return FULL;
 	}
 }

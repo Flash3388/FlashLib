@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple joystick device used for robot control. 
@@ -8,35 +9,40 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Joystick implements HID, Runnable{
+public class Joystick implements HID {
 
-	private static Joystick head;
-	private Joystick next;
-	
-	private static final int X = 0, Y = 1, Z = 2, THROTTLE = 3;
+	private static final int X = 0;
+	private static final int Y = 1;
+	private static final int Z = 2;
+	private static final int THROTTLE = 3;
 
-	private Button[] buttons;
-	private int stick_num;
-	private POV pov;
-	private Stick stick;
+	private HIDInterface mHidInterface;
+
+	private int mChannel;
+
+	private POV mPov;
+	private Stick mStick;
+	private List<Button> mButtons;
 	
 	/**
 	 * Creates a new joystick device at an index with a given amount of buttons.
 	 * 
-	 * @param stick the stick index
+	 * @param channel the channel
 	 * @param buttonCount the amount of buttons
 	 */
-	public Joystick(int stick, int buttonCount){
-		stick_num = stick;
-		
-		this.stick = new Stick(this, X, Y);
-		buttons = new Button[buttonCount];
-		for(int i = 0; i < buttons.length; i++)
-			buttons[i] = new HIDButton(this, i+1);
-		pov = new POV(this, 0);
-		
-		next = head;
-		head = this;
+	public Joystick(HIDInterface hidInterface, int channel, int buttonCount){
+		mHidInterface = hidInterface;
+
+		mChannel = channel;
+
+		mStick = new Stick(this, X, Y);
+
+		mButtons = new ArrayList<Button>();
+		for(int i = 0; i < buttonCount; i++) {
+			mButtons.add(new HIDButton(this, i + 1));
+		}
+
+		mPov = new POV(this, 0);
 	}
 	
 	/**
@@ -44,15 +50,17 @@ public class Joystick implements HID, Runnable{
 	 * @return the x axis value
 	 */
 	public double getX(){
-		return stick.getX();
+		return getRawAxis(X);
 	}
+
 	/**
 	 * Gets the y-axis value of the joystick
 	 * @return the y axis value
 	 */
 	public double getY(){
-		return stick.getY();
+		return getRawAxis(Y);
 	}
+
 	/**
 	 * Gets the z-axis value of the joystick
 	 * @return the z axis value
@@ -60,6 +68,7 @@ public class Joystick implements HID, Runnable{
 	public double getZ(){
 		return getRawAxis(Z);
 	}
+
 	/**
 	 * Gets the throttle axis value of the joystick
 	 * @return the throttle axis value
@@ -73,36 +82,41 @@ public class Joystick implements HID, Runnable{
 	 */
 	@Override
 	public int getChannel(){
-		return stick_num;
+		return mChannel;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getHIDInterface().getHIDAxis(stick_num, axis);
+		return mHidInterface.getHidAxis(mChannel, axis);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getHIDInterface().getHIDButton(stick_num, button);
+		return mHidInterface.getHidButton(mChannel, button);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getRawPOV(int pov){
-		return RobotFactory.getHIDInterface().getHIDPOV(stick_num, pov);
+	public int getRawPov(int pov){
+		return mHidInterface.getHidPov(mChannel, pov);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Button getButton(int button) {
-		return buttons[button - 1];
+		return mButtons.get(button);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -112,49 +126,28 @@ public class Joystick implements HID, Runnable{
 	@Override
 	public Stick getStick(int index) {
 		switch(index){
-			case 0: return stick;
+			case 0: return mStick;
 			default: return null;
 		}
 	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+
 	public Stick getStick() {
-		return stick;
+		return mStick;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public int getButtonCount(){
-		return buttons.length;
+		return mButtons.size();
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public POV getPOV(){
-		return pov;
-	}
-	
-	/**
-	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
-	 * actions attached to those wrapped. 
-	 */
-	@Override
-	public void run() {
-		for(int i = 0; i < buttons.length; i++){
-			if(buttons[i].getActionsCount() > 0)
-				buttons[i].run();
-		}
-	}
-	
-	/**
-	 * Refreshes all created joysticks.
-	 */
-	public static void refreshAll(){
-		for(Joystick c = head; c != null; c = c.next)
-			c.run();
+		return mPov;
 	}
 }

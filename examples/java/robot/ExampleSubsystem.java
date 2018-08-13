@@ -1,9 +1,9 @@
 package examples.robot;
 
 import edu.flash3388.flashlib.robot.Subsystem;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.PWM;
-import edu.flash3388.flashlib.robot.devices.Talon;
+import edu.flash3388.flashlib.robot.io.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.PWM;
+import edu.flash3388.flashlib.robot.io.devices.Talon;
 import edu.flash3388.flashlib.robot.hal.HALPWM;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
 

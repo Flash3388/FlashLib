@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.AnalogOutput;
+import edu.flash3388.flashlib.robot.hal.jni.AnalogJNI;
+import edu.flash3388.flashlib.robot.io.AnalogOutput;
 
 /**
  * Represents an analog output port using FlashLib's Hardware Abstraction Layer. When using
@@ -12,26 +13,26 @@ import edu.flash3388.flashlib.robot.devices.AnalogOutput;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALAnalogOutput extends HALPort implements AnalogOutput{
+public class HALAnalogOutput extends HALResource implements AnalogOutput{
 	
 	/**
 	 * Creates a new analog output port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired analog output
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALAnalogOutput(int port) {
-		if(!ANALOGJNI.checkAnalogOutputPortValid(port))
+		if(!AnalogJNI.isAnalogOutputPortValid(port))
 			throw new IllegalArgumentException("Invalid AnalogOutput port "+port);
 		
-		if(ANALOGJNI.checkAnalogOutputPortTaken(port))
+		if(AnalogJNI.isAnalogOutputPortTaken(port))
 			throw new HALAllocationException("AnalogOutput port taken", port);
 		
-		handle = ANALOGJNI.initializeAnalogOutputPort(port);
+		handle = AnalogJNI.initializeAnalogOutputPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize AnalogOutput: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize AnalogOutput: invalid HAL handle", port);
 	}
 	
 	/**
@@ -46,7 +47,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 		}
 		
 		setValue(0);
-		ANALOGJNI.freeAnalogOutputPort(handle);
+		AnalogJNI.freeAnalogOutputPort(handle);
 		handle = HAL_INVALID_HANDLE;
 	}
 	
@@ -57,7 +58,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	 */
 	@Override
 	public int getValue(){
-		return ANALOGJNI.getAnalogValue(handle);
+		return AnalogJNI.getAnalogValue(handle);
 	}
 	/**
 	 * {@inheritDoc}
@@ -66,7 +67,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	 */
 	@Override
 	public double getVoltage(){
-		return (double)ANALOGJNI.getAnalogVoltage(handle);
+		return (double)AnalogJNI.getAnalogVoltage(handle);
 	}
 
 	/**
@@ -76,7 +77,7 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	 */
 	@Override
 	public void setValue(int value){
-		ANALOGJNI.setAnalogValue(handle, value);
+		AnalogJNI.setAnalogValue(handle, value);
 	}
 	/**
 	 * {@inheritDoc}
@@ -85,6 +86,6 @@ public class HALAnalogOutput extends HALPort implements AnalogOutput{
 	 */
 	@Override
 	public void setVoltage(double voltage){
-		ANALOGJNI.setAnalogVoltage(handle, (float)voltage);
+		AnalogJNI.setAnalogVoltage(handle, (float)voltage);
 	}
 }

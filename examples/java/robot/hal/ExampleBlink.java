@@ -1,6 +1,6 @@
 package examples.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.DigitalOutput;
+import edu.flash3388.flashlib.robot.io.devices.DigitalOutput;
 import edu.flash3388.flashlib.robot.hal.HAL;
 import edu.flash3388.flashlib.robot.hal.HALDigitalOutput;
 import edu.flash3388.flashlib.util.FlashUtil;

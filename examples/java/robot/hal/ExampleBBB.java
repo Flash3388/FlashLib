@@ -2,9 +2,9 @@ package examples.robot.hal;
 
 import static edu.flash3388.flashlib.robot.hal.BeagleboneBlack.*;
 
-import edu.flash3388.flashlib.robot.devices.AnalogInput;
-import edu.flash3388.flashlib.robot.devices.DigitalOutput;
-import edu.flash3388.flashlib.robot.devices.PWM;
+import edu.flash3388.flashlib.robot.io.devices.AnalogInput;
+import edu.flash3388.flashlib.robot.io.devices.DigitalOutput;
+import edu.flash3388.flashlib.robot.io.devices.PWM;
 import edu.flash3388.flashlib.robot.hal.HAL;
 
 /*

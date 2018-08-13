@@ -1,8 +1,8 @@
 package examples.robot;
 
-import edu.flash3388.flashlib.robot.devices.DigitalInput;
-import edu.flash3388.flashlib.robot.devices.IOFactory;
-import edu.flash3388.flashlib.robot.devices.PWM;
+import edu.flash3388.flashlib.robot.io.devices.DigitalInput;
+import edu.flash3388.flashlib.robot.io.devices.IOFactory;
+import edu.flash3388.flashlib.robot.io.devices.PWM;
 import edu.flash3388.flashlib.robot.hal.HAL;
 
 /*

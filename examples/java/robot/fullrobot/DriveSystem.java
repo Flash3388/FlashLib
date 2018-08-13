@@ -1,8 +1,8 @@
 package examples.robot.fullrobot;
 
 import edu.flash3388.flashlib.robot.Subsystem;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
-import edu.flash3388.flashlib.robot.devices.Talon;
+import edu.flash3388.flashlib.robot.io.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.Talon;
 import edu.flash3388.flashlib.robot.systems.TankDriveSystem;
 
 /*

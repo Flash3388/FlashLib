@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.hal;
 
-import edu.flash3388.flashlib.robot.devices.PWM;
+import edu.flash3388.flashlib.robot.hal.jni.PWMJNI;
+import edu.flash3388.flashlib.robot.io.PWM;
 
 /**
  * Represents an PWM port using FlashLib's Hardware Abstraction Layer. When using
@@ -12,26 +13,26 @@ import edu.flash3388.flashlib.robot.devices.PWM;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class HALPWM extends HALPort implements PWM{
+public class HALPWM extends HALResource implements PWM{
 
 	/**
 	 * Creates a new PWM port using FlashLib's Hardware Abstraction Layer.
-	 * If the port initialization failed, for whatever reason, {@link HALInitialzationException}
+	 * If the port initialization failed, for whatever reason, {@link HALInitializationException}
 	 * is thrown.
 	 * 
 	 * @param port the HAL port of the desired PWM
-	 * @throws HALInitialzationException if port initialization failed.
+	 * @throws HALInitializationException if port initialization failed.
 	 */
 	public HALPWM(int port) {
-		if(!PWMJNI.checkPWMPortValid(port))
+		if(!PWMJNI.isPWMPortValid(port))
 			throw new IllegalArgumentException("Invalid PWM port "+port);
 		
-		if(PWMJNI.checkPWMPortTaken(port))
+		if(PWMJNI.isPWMPortTaken(port))
 			throw new HALAllocationException("PWM port taken", port);
 		
 		handle = PWMJNI.initializePWMPort(port);
 		if(handle == HAL_INVALID_HANDLE)
-			throw new HALInitialzationException("Unable to initialize PWM: invalid HAL handle", port);
+			throw new HALInitializationException("Unable to initialize PWM: invalid HAL handle", port);
 	}
 	
 	/**

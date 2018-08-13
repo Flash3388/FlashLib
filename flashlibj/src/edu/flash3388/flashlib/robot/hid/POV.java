@@ -10,18 +10,18 @@ import edu.flash3388.flashlib.util.beans.IntegerSource;
  */
 public class POV implements IntegerSource{
 
-	private HID hid;
-	private int num;
+	private final HID mHid;
+	private final int mPov;
 	
 	/**
 	 * Creates a POV wrapper object
 	 * 
 	 * @param hid The hid
-	 * @param num the number of the POV on the controller.
+	 * @param pov the number of the POV on the controller.
 	 */
-	public POV(HID hid, int num){
-		this.hid = hid;
-		this.num = num;
+	public POV(HID hid, int pov){
+		mHid = hid;
+		mPov = pov;
 	}
 	
 	/**
@@ -29,18 +29,19 @@ public class POV implements IntegerSource{
 	 * @return hid
 	 */
 	public final HID getHID(){
-		return hid;
+		return mHid;
 	}
+
 	/**
 	 * Get the POV number
 	 * @return POV number
 	 */
-	public final int getPOVNumber(){
-		return num;
+	public final int getPovNumber(){
+		return mPov;
 	}
 	
 	@Override
 	public int get(){
-		return hid.getRawPOV(num);
+		return mHid.getRawPov(mPov);
 	}
 }
