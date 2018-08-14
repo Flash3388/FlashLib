@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.communications.sendable.manager;
 
-import edu.flash3388.flashlib.communications.message.event.MessageListener;
+import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.runner.CommunicationRunner;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionEvent;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
@@ -9,27 +9,21 @@ import edu.flash3388.flashlib.communications.sendable.Sendable;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.manager.handlers.*;
 import edu.flash3388.flashlib.communications.sendable.manager.listeners.ManagerMessageListener;
+import edu.flash3388.flashlib.communications.sendable.manager.messages.DiscoveryRequestMessage;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.ManagerMessagesPredicate;
-import edu.flash3388.flashlib.event.Event;
-import edu.flash3388.flashlib.event.Listener;
 import edu.flash3388.flashlib.event.TrueEventPredicate;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
-import edu.flash3388.flashlib.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 public class SendableCommunicationManager {
 
     private final SendableStorage mSendableStorage;
     private final SendableSessionManager mSendableSessionManager;
-    private final RemoteSendablesStatus mRemoteSendablesStatus;
     private final PairHandler mPairHandler;
     private final SendableHandler mSendableHandler;
     private final SendableMatcher mSendableMatcher;
@@ -41,20 +35,23 @@ public class SendableCommunicationManager {
 
     private final Lock mLock;
 
+    private final DiscoverySetting mDiscoverySetting;
+
     private CommunicationRunner mAttachedCommunicationRunner;
+    private MessageQueue mMessageQueue;
     private boolean mIsRunning;
     private boolean mIsConnected;
 
-    public SendableCommunicationManager(PrimitiveSerializer serializer, Logger logger) {
+    public SendableCommunicationManager(PrimitiveSerializer serializer, Logger logger, DiscoverySetting discoverySetting) {
         mSerializer = serializer;
         mLogger = logger;
+        mDiscoverySetting = discoverySetting;
 
         mLock = new ReentrantLock();
         mSendableMatcher = new SendableMatcher();
 
         mSendableStorage = new SendableStorage(new SendableStreamFactory(mSerializer));
         mSendableSessionManager = new SendableSessionManager(mSendableStorage);
-        mRemoteSendablesStatus = new RemoteSendablesStatus();
 
         mPairHandler = new PairHandler(mSendableSessionManager, mSerializer, mLogger);
         mSendableHandler = new SendableHandler(mSendableSessionManager, mSerializer);
@@ -72,7 +69,7 @@ public class SendableCommunicationManager {
         try {
             if (mSendableStorage.addSendable(sendableData, sendable)) {
                 if (mIsConnected) {
-                    mSendableHandler.handleAttachedSendable(sendableData);// TODO: IF CONNECTED, SEND DISCOVERY, OR CONNECT
+                    mSendableHandler.handleAttachedSendable(mDiscoverySetting, mMessageQueue);
                 }
 
                 return true;
@@ -89,7 +86,7 @@ public class SendableCommunicationManager {
         try {
             if (mSendableStorage.removeSendable(sendableData)) {
                 if (mIsConnected) {
-                    mSendableHandler.handleDetachedSendable(sendableData);
+                    mSendableHandler.handleDetachedSendable(sendableData, mMessageQueue);
                 }
 
                 return true;
@@ -142,12 +139,16 @@ public class SendableCommunicationManager {
         }
     }
 
-    private void onCommunicationConnection() {
+    private void onCommunicationConnection(MessageQueue messageQueue) {
         mLock.lock();
         try {
             mIsConnected = true;
+            mMessageQueue = messageQueue;
 
-            // TODO: SEND DISCOVERY, DO STARTUP...
+            if (mDiscoverySetting == DiscoverySetting.SEND_DISCOVERY_REQUESTS) {
+                DiscoveryRequestMessage discoveryRequestMessage = new DiscoveryRequestMessage();
+                messageQueue.enqueueMessage(discoveryRequestMessage);
+            }
         } finally {
             mLock.unlock();
         }
@@ -159,7 +160,6 @@ public class SendableCommunicationManager {
             mIsConnected = false;
 
             mSendableSessionManager.closeAllSessions();
-            mRemoteSendablesStatus.reset();
         } finally {
             mLock.unlock();
         }
@@ -187,7 +187,7 @@ public class SendableCommunicationManager {
 
         @Override
         public void onConnection(ConnectionEvent e) {
-            mCommunicationManager.onCommunicationConnection();
+            mCommunicationManager.onCommunicationConnection(e.getMessageQueue());
         }
 
         @Override

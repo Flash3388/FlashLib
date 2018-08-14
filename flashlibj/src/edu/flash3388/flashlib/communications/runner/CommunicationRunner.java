@@ -135,13 +135,13 @@ public class CommunicationRunner {
 
         @Override
         public void accept(Connection connection) {
-            mEventDispatcher.dispatch(ConnectionListener.class, new ConnectionEvent(connection), ConnectionListener::onConnection);
-
             MessageReader messageReader = new MessageReader(connection, mSerializer);
             MessageWriter messageWriter = new MessageWriter(connection, mSerializer);
 
             Queue<Message> messageQueue = new ConcurrentLinkedDeque<Message>();
             MessageQueue messageQueueWrapper = new MessageQueue(messageQueue);
+
+            mEventDispatcher.dispatch(ConnectionListener.class, new ConnectionEvent(connection, messageQueueWrapper), ConnectionListener::onConnection);
 
             while (!Thread.interrupted()) {
                 if (!handleNewMessages(messageReader, messageQueueWrapper)) {
