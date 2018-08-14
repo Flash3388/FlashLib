@@ -25,8 +25,8 @@ public class SendableStorage {
         return true;
     }
 
-    public synchronized void removeSendable(SendableData sendableData) {
-        mSendableControllers.remove(sendableData);
+    public synchronized boolean removeSendable(SendableData sendableData) {
+        return mSendableControllers.remove(sendableData) != null;
     }
 
     public SendableController getControllerForSendable(SendableData sendableData) throws NoSuchSendableException {

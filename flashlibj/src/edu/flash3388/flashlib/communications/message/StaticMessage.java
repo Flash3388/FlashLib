@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.communications.message;
 
 public class StaticMessage implements Message {
 
-	private int mHeader;
-	private byte[] mData;
+	private final int mHeader;
+	private final byte[] mData;
 	
 	public StaticMessage(int header, byte[] data) {
 		mHeader = header;

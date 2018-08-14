@@ -14,9 +14,9 @@ public class SendableMessage implements Message {
 
     private PrimitiveSerializer mSerializer;
 
-    private SendableData mFrom;
-    private SendableData mTo;
-    private Message mSendableMessage;
+    private final SendableData mFrom;
+    private final SendableData mTo;
+    private final Message mSendableMessage;
 
     public SendableMessage(SendableData from, SendableData to, Message sendableMessage, PrimitiveSerializer serializer) {
         mFrom = from;

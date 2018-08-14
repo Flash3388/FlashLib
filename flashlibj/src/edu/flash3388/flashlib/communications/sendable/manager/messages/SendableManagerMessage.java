@@ -9,10 +9,10 @@ import java.util.Arrays;
 
 public class SendableManagerMessage implements Message {
 
-    private int mHeader;
-    private SendableData mFrom;
-    private SendableData mTo;
-    private PrimitiveSerializer mSerializer;
+    private final int mHeader;
+    private final SendableData mFrom;
+    private final SendableData mTo;
+    private final PrimitiveSerializer mSerializer;
 
     public SendableManagerMessage(int header, SendableData from, SendableData to, PrimitiveSerializer serializer) {
         mHeader = header;
