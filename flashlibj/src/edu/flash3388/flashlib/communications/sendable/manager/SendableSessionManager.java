@@ -7,6 +7,7 @@ import edu.flash3388.flashlib.communications.sendable.SendableSession;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SendableSessionManager {
 
@@ -18,10 +19,18 @@ public class SendableSessionManager {
         mSendableSessions = new HashMap<SendableData, SendableSessionData>();
     }
 
-    public synchronized SendableData getSessionRemote(SendableData sendableData) throws NoSuchSessionException {
-        SendableSessionData sendableSession = getSendableSession(sendableData);
+    public synchronized Optional<SendableData> getSessionRemote(SendableData sendableData) {
+        if (mSendableSessions.containsKey(sendableData)) {
+            try {
+                SendableSessionData sendableSession = getSendableSession(sendableData);
+                return Optional.of(sendableSession.getRemote());
+            } catch (NoSuchSessionException e) {
+                // would not happen
+                throw new RuntimeException(e);
+            }
+        }
 
-        return sendableSession.getRemote();
+        return Optional.empty();
     }
 
     public synchronized void startNewSendableSession(SendableData sendableData, SendableData to, MessageQueue messageQueue) throws SessionAlreadyExistsException, NoSuchSendableException {
