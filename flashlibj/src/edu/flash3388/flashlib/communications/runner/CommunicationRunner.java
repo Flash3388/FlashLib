@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.communications.runner;
 import edu.flash3388.flashlib.communications.connection.Connector;
 import edu.flash3388.flashlib.communications.message.event.MessageListener;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
+import edu.flash3388.flashlib.event.ConcurrentListenerInvocation;
 import edu.flash3388.flashlib.event.Event;
 import edu.flash3388.flashlib.event.EventDispatcher;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
@@ -26,7 +27,7 @@ public class CommunicationRunner {
         mSerializer = serializer;
         mLogger = logger;
 
-        mEventDispatcher = new EventDispatcher();
+        mEventDispatcher = new EventDispatcher(new ConcurrentListenerInvocation(executorService));
     }
 
     public void addMessageListener(Predicate<Event> eventPredicate, MessageListener listener) {
