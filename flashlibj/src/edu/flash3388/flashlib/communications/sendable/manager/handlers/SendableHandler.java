@@ -6,6 +6,8 @@ import edu.flash3388.flashlib.communications.sendable.manager.SendableSessionMan
 import edu.flash3388.flashlib.communications.sendable.manager.messages.PairCloseMessage;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
+import java.util.Optional;
+
 public class SendableHandler {
 
     private final SendableSessionManager mSendableSessionMananger;
@@ -21,14 +23,17 @@ public class SendableHandler {
     }
 
     public void handleDetachedSendable(SendableData sendableData) {
-        try {
-            SendableData remote = mSendableSessionMananger.getSessionRemote(sendableData);
-            mSendableSessionMananger.closeSendableSession(sendableData);
+        Optional<SendableData> optionalRemote = mSendableSessionMananger.getSessionRemote(sendableData);
+        if (optionalRemote.isPresent()) {
+            SendableData remote = optionalRemote.get();
+            try {
+                mSendableSessionMananger.closeSendableSession(sendableData);
 
-            PairCloseMessage pairCloseMessage = new PairCloseMessage(sendableData, remote, mSerializer);
-            // TODO: SEND
-        } catch (NoSuchSessionException e) {
-            // nothing we need to do
+                PairCloseMessage pairCloseMessage = new PairCloseMessage(sendableData, remote, mSerializer);
+                // TODO: SEND
+            } catch (NoSuchSessionException e) {
+                // should not occur
+            }
         }
     }
 }

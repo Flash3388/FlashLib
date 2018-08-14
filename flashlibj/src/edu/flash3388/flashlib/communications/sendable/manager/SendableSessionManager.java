@@ -4,10 +4,9 @@ import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.SendableSession;
+import edu.flash3388.flashlib.util.Pair;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class SendableSessionManager {
 
@@ -19,8 +18,13 @@ public class SendableSessionManager {
         mSendableSessions = new HashMap<SendableData, SendableSessionData>();
     }
 
+
+    public synchronized boolean hasSession(SendableData sendableData) {
+        return mSendableSessions.containsKey(sendableData);
+    }
+
     public synchronized Optional<SendableData> getSessionRemote(SendableData sendableData) {
-        if (mSendableSessions.containsKey(sendableData)) {
+        if (hasSession(sendableData)) {
             try {
                 SendableSessionData sendableSession = getSendableSession(sendableData);
                 return Optional.of(sendableSession.getRemote());
@@ -31,6 +35,18 @@ public class SendableSessionManager {
         }
 
         return Optional.empty();
+    }
+
+    public synchronized Collection<Pair<SendableData, SendableData>> getSendablesPairedWithRemotes(Collection<SendableData> remotes) {
+        Collection<Pair<SendableData, SendableData>> sendableDataCollection = new ArrayList<Pair<SendableData, SendableData>>();
+
+        for (SendableSessionData sendableSessionData : mSendableSessions.values()) {
+            if (remotes.contains(sendableSessionData.getRemote())) {
+                sendableDataCollection.add(Pair.create(sendableSessionData.getLocal(), sendableSessionData.getRemote()));
+            }
+        }
+
+        return sendableDataCollection;
     }
 
     public synchronized void startNewSendableSession(SendableData sendableData, SendableData to, MessageQueue messageQueue) throws SessionAlreadyExistsException, NoSuchSendableException {

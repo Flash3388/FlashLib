@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 public class PairRequestMessage extends SendableManagerMessage {
 
-    private static final int HEADER = 5001;
+    public static final int HEADER = 5001;
 
     public PairRequestMessage(SendableData from, SendableData to, PrimitiveSerializer serializer) {
         super(HEADER, from, to, serializer);
