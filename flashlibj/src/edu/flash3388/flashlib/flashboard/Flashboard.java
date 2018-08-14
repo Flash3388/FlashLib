@@ -18,7 +18,7 @@ import edu.flash3388.flashlib.communications.TCPCommInterface;
 import edu.flash3388.flashlib.communications.UDPCommInterface;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.PIDSource;
-import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.beans.BooleanProperty;
 import edu.flash3388.flashlib.util.beans.BooleanSource;

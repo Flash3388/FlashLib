@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
-
 /**
  * Interface for systems using the scaling voltage feature from {@link FlashRobotUtil#scaleVoltageBus(double, double)}.
  * 

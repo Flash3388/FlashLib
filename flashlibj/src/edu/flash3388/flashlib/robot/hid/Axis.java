@@ -8,10 +8,10 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class Axis implements DoubleSource{
+public class Axis implements DoubleSource {
 
-	private HID hid;
-	private int axis;
+	private final HID mHid;
+	private final int mAxis;
 	
 	/**
 	 * Creates a new trigger.
@@ -20,8 +20,8 @@ public class Axis implements DoubleSource{
 	 * @param number the axis index
 	 */
 	public Axis(HID hid, int number) {
-		this.hid = hid;
-		this.axis = number;
+		mHid = hid;
+		mAxis = number;
 	}
 	
 	/**
@@ -29,14 +29,15 @@ public class Axis implements DoubleSource{
 	 * @return hid
 	 */
 	public final HID getHID(){
-		return hid;
+		return mHid;
 	}
+
 	/**
 	 * Get the axis number
 	 * @return axis number
 	 */
 	public final int getAxisNumber(){
-		return axis;
+		return mAxis;
 	}
 	
 	/**
@@ -44,6 +45,6 @@ public class Axis implements DoubleSource{
 	 * @return the value of the trigger
 	 */
 	public double get(){
-		return hid.getRawAxis(axis);
+		return mHid.getRawAxis(mAxis);
 	}
 }

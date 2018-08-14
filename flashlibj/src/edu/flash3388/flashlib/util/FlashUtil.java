@@ -83,7 +83,9 @@ public final class FlashUtil {
 		if(ms <= 0) return;
 		try {
 			Thread.sleep(ms);
-		} catch (InterruptedException e) {}
+		} catch (InterruptedException e) {
+		    Thread.currentThread().interrupt();
+        }
 	}
 	/**
 	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of 

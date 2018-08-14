@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.flashboard;
 
 import edu.flash3388.flashlib.communications.SendableException;
-import edu.flash3388.flashlib.robot.FlashRobotUtil;
 import edu.flash3388.flashlib.util.beans.BooleanSource;
 
 /**

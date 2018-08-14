@@ -1,10 +1,12 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.hid.HIDInterface;
+import edu.flash3388.flashlib.robot.modes.RobotMode;
+import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
+
 /**
  * An interface for the current robot implementation. This interface is used by
- * the robot framework to access data about robot operations. When initializing robot operations,
- * an implementation of this interface is set to {@link RobotFactory} and can be accessed by
- * {@link RobotFactory#getImplementation()}.
+ * the robot framework to access data about robot operations.
  * <p>
  * For non-FRC robots, {@link RobotBase} implements most of this interface.
  * <p>
@@ -16,27 +18,29 @@ package edu.flash3388.flashlib.robot;
 public interface RobotInterface {
 	
 	/**
-	 * Gets the initialized {@link ModeSelector} object for the robot. 
+	 * Gets the initialized {@link RobotModeSupplier} object for the robot.
 	 * <p>
 	 * This object will be used by base methods for operation mode data.
 	 * 
 	 * @return robot mode selector, or null if not initialized.
 	 */
-	ModeSelector getModeSelector();
+	RobotModeSupplier getModeSupplier();
+
 	/**
-	 * Gets the current operation mode set by the {@link ModeSelector} object of the robot.
+	 * Gets the current operation mode set by the {@link RobotModeSupplier} object of the robot.
 	 * <p>
-	 * The default implementation gets the mode selector by calling {@link #getModeSelector()}. If the
-	 * returned value is null, {@link ModeSelector#MODE_DISABLED} is returned, otherwise {@link ModeSelector#getMode()}
+	 * The default implementation gets the mode selector by calling {@link #getModeSupplier()}. If the
+	 * returned value is null, {@link RobotModeSupplier#MODE_DISABLED} is returned, otherwise {@link RobotModeSupplier#getMode()}
 	 * is returned.
 	 * 
 	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
 	 */
-	default int getMode(){
-		return getModeSelector() == null? ModeSelector.MODE_DISABLED : getModeSelector().getMode();
+	default RobotMode getMode(){
+		return getModeSupplier() == null ? RobotMode.DISABLED : getModeSupplier().getMode();
 	}
+
 	/**
-	 * Gets whether or not the current mode set by the robot's {@link ModeSelector} object is equal
+	 * Gets whether or not the current mode set by the robot's {@link RobotModeSupplier} object is equal
 	 * to a given mode value. If true, this indicates that the current mode is the given mode.
 	 * <p>
 	 * The default implementation calls {@link #getMode()} and gets whether the returned value
@@ -46,34 +50,19 @@ public interface RobotInterface {
 	 * @return true if the given mode is the current operation mode, false otherwise
 	 * @see #getMode()
 	 */
-	default boolean isMode(int mode){
-		return getMode() == mode;
+	default boolean isInMode(RobotMode mode){
+		return getMode().equals(mode);
 	}
 	
 	/**
 	 * Gets whether or not the robot is currently in disabled mode. Disabled mode
 	 * is a safety mode where the robot does nothing.
-	 * <p>
-	 * The default implementation calls {@link #isMode(int)} and passes it {@link ModeSelector#MODE_DISABLED}.
 	 * 
 	 * @return true if in disabled mode, false otherwise
 	 */
 	default boolean isDisabled(){
-		return isMode(ModeSelector.MODE_DISABLED);
+		return isInMode(RobotMode.DISABLED);
 	}
-	/**
-	 * Gets whether or not the robot is currently in operator control mode. Operator control
-	 * mode is a mode where the robot is controlled by an operator and does not operator autonomously.
-	 * 
-	 * @return true if in operator control mode, false otherwise
-	 */
-	boolean isOperatorControl();
-	/**
-	 * Gets whether or not the current implementation is an FRC robot. Used to indicate if WPILib
-	 * is currently used for electronics IO. If this is not the case, FlashLib will know to operate its own
-	 * electronics IO features.
-	 * 
-	 * @return true if an FRC robot, false otherwise
-	 */
-	boolean isFRC();
+
+	HIDInterface getHIDInterface();
 }

@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents an Xbox 360 controller for use for robot control.
@@ -8,12 +9,17 @@ import edu.flash3388.flashlib.robot.RobotFactory;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class XboxController implements HID, Runnable{
+public class XboxController implements HID {
 	
-	//private static String[] buttonNames = {("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
-	
-	private int channel;
-	private Button[] buttons = new Button[10];
+	//{("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
+
+	private static final int BUTTON_COUNT = 10;
+
+	private HIDInterface mHidInterface;
+
+	private int mChannel;
+
+	private List<Button> mButtons;
 	
 	public final Button A;
     public final Button B;
@@ -34,17 +40,15 @@ public class XboxController implements HID, Runnable{
 	public final Axis RT;
 	public final Axis LT;
 	
-	private XboxController next;
-	
-	private static XboxController head;
-	
 	/**
 	 * Creates a new Xbox controller.
 	 * 
 	 * @param channel the device index
 	 */
-	public XboxController(int channel){
-		this.channel = channel;
+	public XboxController(HIDInterface hidInterface, int channel){
+		mHidInterface = hidInterface;
+		
+		mChannel = channel;
 		
 		LeftStick = new Stick(this, 0, 1);
 		RightStick = new Stick(this, 4, 5);
@@ -52,23 +56,23 @@ public class XboxController implements HID, Runnable{
 		DPad = new DPad(this, 0);
 		RT = new Axis(this, 3);
 		LT = new Axis(this, 2);
+
+		mButtons = new ArrayList<Button>(BUTTON_COUNT);
+
+		for(int i = 0; i < BUTTON_COUNT; i++) {
+			mButtons.add(new HIDButton(this, i + 1));
+		}
 		
-		for(int i = 0; i < buttons.length; i++)
-    		buttons[i] = new HIDButton(this, i+1);//buttonNames[i]
-		
-		A = buttons[0];
-	    B = buttons[1];
-	    X = buttons[2];
-	    Y = buttons[3];
-	    LB = buttons[4];
-	    RB = buttons[5];
-	    Back = buttons[6];
-	    Start = buttons[7];
-	    LeftStickButton = buttons[8];
-	    RightStickButton = buttons[9];
-	    
-	    next = head;
-	    head = this;
+		A = getButton(0);
+	    B = getButton(1);
+	    X = getButton(2);
+	    Y = getButton(3);
+	    LB = getButton(4);
+	    RB = getButton(5);
+	    Back = getButton(6);
+	    Start = getButton(7);
+	    LeftStickButton = getButton(8);
+	    RightStickButton = getButton(9);
 	}
 	
 	/**
@@ -106,43 +110,49 @@ public class XboxController implements HID, Runnable{
 	 */
 	@Override
 	public int getChannel(){
-		return channel;
+		return mChannel;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public double getRawAxis(int axis){
-		return RobotFactory.getHIDInterface().getHIDAxis(channel, axis);
+		return mHidInterface.getHidAxis(mChannel, axis);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean getRawButton(int button){
-		return RobotFactory.getHIDInterface().getHIDButton(channel, button);
+		return mHidInterface.getHidButton(mChannel, button);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int getRawPOV(int pov){
-		return RobotFactory.getHIDInterface().getHIDPOV(channel, pov);
+	public int getRawPov(int pov){
+		return mHidInterface.getHidPov(mChannel, pov);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Button getButton(int button) {
-		return buttons[button - 1];
+		return mButtons.get(button);
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override 
 	public int getButtonCount(){
-		return 10;
+		return BUTTON_COUNT;
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -154,40 +164,13 @@ public class XboxController implements HID, Runnable{
 			default: return null;
 		}
 	}
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Stick getStick() {
-		return getStick(0);
-	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public POV getPOV() {
 		return getDPad();
-	}
-	
-	/**
-	 * Refreshes all created xbox controllers.
-	 */
-	public static void refreshAll(){
-		for(XboxController c = head; c != null; c = c.next)
-			c.run();
-	}
-	
-	/**
-	 * Refreshes the value of the button wrappers. Used to determine whether or not to run 
-	 * actions attached to those wrapped. 
-	 */
-	@Override
-	public void run() {
-		for(int i = 0; i < buttons.length; i++){
-			if(buttons[i].getActionsCount() > 0)
-				buttons[i].run();
-		}
-		DPad.run();
 	}
 }
 

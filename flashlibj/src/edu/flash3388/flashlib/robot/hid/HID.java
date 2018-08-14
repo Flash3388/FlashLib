@@ -13,6 +13,7 @@ public interface HID {
 	 * @return channel
 	 */
 	int getChannel();
+
 	/**
 	 * Gets the value of an axis from the human interface device.
 	 * 
@@ -28,12 +29,14 @@ public interface HID {
 	 * @return the value of the button [false...true]
 	 */
 	boolean getRawButton(int button);
+
 	/**
 	 * Gets the button object for the button at the given index
 	 * @param button the button index
 	 * @return the button wrapper
 	 */
 	Button getButton(int button);
+
 	/**
 	 * Gets the amount of buttons on the interface device.
 	 * @return the count of buttons
@@ -46,11 +49,6 @@ public interface HID {
 	 * @return stick wrapper
 	 */
 	Stick getStick(int index);
-	/**
-	 * Gets the main stick of this device. Usually the stick at the first index.
-	 * @return main stick wrapper
-	 */
-	Stick getStick();
 	
 	/**
 	 * Gets the value of a POV from the device
@@ -58,7 +56,8 @@ public interface HID {
 	 * @param pov the pov index
 	 * @return the value of the pov in degrees
 	 */
-	int getRawPOV(int pov);
+	int getRawPov(int pov);
+
 	/**
 	 * Gets the POV object wrapper for the POV on this device
 	 * @return the POV wrapper
