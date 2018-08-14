@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.communications.sendable.manager;
 import edu.flash3388.flashlib.communications.sendable.Sendable;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,5 +43,9 @@ public class SendableStorage {
         }
 
         return controller;
+    }
+
+    public Collection<SendableData> getAllSendables() {
+        return Collections.unmodifiableCollection(mSendableControllers.keySet());
     }
 }

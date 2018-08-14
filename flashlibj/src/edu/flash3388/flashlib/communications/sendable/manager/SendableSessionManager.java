@@ -11,11 +11,17 @@ import java.util.Map;
 public class SendableSessionManager {
 
     private SendableStorage mSendableStorage;
-    private Map<SendableData, SendableSession> mSendableSessions;
+    private Map<SendableData, SendableSessionData> mSendableSessions;
 
     public SendableSessionManager(SendableStorage sendableStorage) {
         mSendableStorage = sendableStorage;
-        mSendableSessions = new HashMap<SendableData, SendableSession>();
+        mSendableSessions = new HashMap<SendableData, SendableSessionData>();
+    }
+
+    public synchronized SendableData getSessionRemote(SendableData sendableData) throws NoSuchSessionException {
+        SendableSessionData sendableSession = getSendableSession(sendableData);
+
+        return sendableSession.getRemote();
     }
 
     public synchronized void startNewSendableSession(SendableData sendableData, SendableData to, MessageQueue messageQueue) throws SessionAlreadyExistsException, NoSuchSendableException {
@@ -25,22 +31,22 @@ public class SendableSessionManager {
 
         SendableController sendableController = mSendableStorage.getControllerForSendable(sendableData);
         SendableSession sendableSession = sendableController.startNewSession(to, messageQueue);
-        mSendableSessions.put(sendableData, sendableSession);
+        mSendableSessions.put(sendableData, new SendableSessionData(sendableData, to, sendableSession));
     }
 
     public void newMessageForSession(SendableData sendableData, Message message) throws NoSuchSessionException {
-        SendableSession sendableSession = getSendableSession(sendableData);
+        SendableSessionData sendableSession = getSendableSession(sendableData);
 
         synchronized (sendableSession) {
-            sendableSession.onMessageReceived(message);
+            sendableSession.getSession().onMessageReceived(message);
         }
     }
 
     public void closeSendableSession(SendableData sendableData) throws NoSuchSessionException {
-        SendableSession sendableSession = getSendableSession(sendableData);
+        SendableSessionData sendableSession = getSendableSession(sendableData);
 
         synchronized (sendableSession) {
-            sendableSession.close();
+            sendableSession.getSession().close();
 
             synchronized (this) {
                 mSendableSessions.remove(sendableData);
@@ -48,8 +54,19 @@ public class SendableSessionManager {
         }
     }
 
-    private SendableSession getSendableSession(SendableData sendableData) throws NoSuchSessionException {
-        SendableSession sendableSession;
+    public synchronized void closeAllSessions() {
+        for (SendableData sendableData : mSendableSessions.keySet()) {
+            try {
+                closeSendableSession(sendableData);
+            } catch (NoSuchSessionException e) {
+                // should not happen
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private SendableSessionData getSendableSession(SendableData sendableData) throws NoSuchSessionException {
+        SendableSessionData sendableSession;
 
         synchronized (this) {
             sendableSession = mSendableSessions.get(sendableData);
