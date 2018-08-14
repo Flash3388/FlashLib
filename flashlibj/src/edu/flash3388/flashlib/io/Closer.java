@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.io;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,23 +15,16 @@ import java.util.Collection;
  * @author Tom Tzook
  * @since FlashLib 1.3.0
  */
-public class Closer {
+public class Closer implements Closeable {
 
-	private Collection<Closeable> mClosables;
+	private Collection<Closeable> mCloseables;
 	
-	private Closer(Collection<Closeable> closables) {
-		mClosables = closables;
+	private Closer(Collection<Closeable> closeables) {
+		mCloseables = closeables;
 	}
-	
-	/**
-	 * Creates a new {@link Closer} with the given {@link Closeable} object, which
-	 * is the resource to be closed after the operation is performed.
-	 * 
-	 * @param closeable resource to close after use.
-	 * @return a new {@link Closer} object.
-	 */
-	public static Closer with(Closeable closeable) {
-		return with(closeable);
+
+	public static Closer empty() {
+		return new Closer(new ArrayList<Closeable>());
 	}
 	
 	/**
@@ -62,7 +56,7 @@ public class Closer {
 	 * @return this object.
 	 */
 	public Closer add(Closeable closeable) {
-		mClosables.add(closeable);
+		mCloseables.add(closeable);
 		return this;
 	}
 	
@@ -71,16 +65,44 @@ public class Closer {
 	 * all saved resources all be closed by calling {@link Closeable#close()}.
 	 * 
 	 * @param callable operation callable object.
+	 * @param closeOption states when to close the resources
+	 * @return result of the operation, from the callable call.
+	 * @throws IOException if an exception was thrown by the callable object.
+	 */
+	public <R> R run(IORunnable<R> callable, CloseOption closeOption) throws IOException {
+		boolean errorOccurred = false;
+
+		try {
+			return callable.run();
+		} catch (Throwable t) {
+			errorOccurred = true;
+
+			throw t;
+		} finally {
+			if (closeOption.shouldClose(errorOccurred)) {
+				close();
+			}
+		}
+	}
+
+	/**
+	 * Run the IO operation and return the result from it. After operation, whether or not it has failed,
+	 * all saved resources all be closed by calling {@link Closeable#close()}.
+	 * <p>
+	 * Calls {@link #run(IORunnable, CloseOption)} and passes it {@link CloseOption#CLOSE_ALWAYS}.
+	 *
+	 * @param callable operation callable object.
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */
 	public <R> R run(IORunnable<R> callable) throws IOException {
-		try {
-			return callable.run();
-		} finally {
-			for (Closeable closeable : mClosables) {
-				closeable.close();
-			}
+		return run(callable, CloseOption.CLOSE_ALWAYS);
+	}
+
+	@Override
+	public void close() throws IOException {
+		for (Closeable closeable : mCloseables) {
+			closeable.close();
 		}
 	}
 }
