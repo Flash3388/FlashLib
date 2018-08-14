@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.communications.sendable.manager.NoSuchSendableExce
 import edu.flash3388.flashlib.communications.sendable.manager.NoSuchSessionException;
 import edu.flash3388.flashlib.communications.sendable.manager.SendableSessionManager;
 import edu.flash3388.flashlib.communications.sendable.manager.SessionAlreadyExistsException;
-import edu.flash3388.flashlib.communications.sendable.manager.messages.PairCloseMessage;
+import edu.flash3388.flashlib.communications.sendable.manager.messages.SessionCloseMessage;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.PairFailureMessage;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.PairSuccessMessage;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
@@ -37,9 +37,13 @@ public class PairHandler {
     }
 
     public void unpair(SendableData local, SendableData remote, MessageQueue messageQueue) {
+        unpairWithoutResponse(local);
+        messageQueue.enqueueMessage(new SessionCloseMessage(local, remote, mSerializer));
+    }
+
+    public void unpairWithoutResponse(SendableData local) {
         try {
             mSendableSessionManager.closeSendableSession(local);
-            messageQueue.enqueueMessage(new PairCloseMessage(local, remote, mSerializer));
         } catch (NoSuchSessionException e) {
             mLogger.log(Level.SEVERE, "failed closing sendable session", e);
         }

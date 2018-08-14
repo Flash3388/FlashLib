@@ -7,8 +7,9 @@ import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
 import edu.flash3388.flashlib.communications.runner.events.DisconnectionEvent;
 import edu.flash3388.flashlib.communications.sendable.Sendable;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
-import edu.flash3388.flashlib.communications.sendable.manager.handlers.PairHandler;
-import edu.flash3388.flashlib.communications.sendable.manager.handlers.SendableHandler;
+import edu.flash3388.flashlib.communications.sendable.manager.handlers.*;
+import edu.flash3388.flashlib.communications.sendable.manager.listeners.ManagerMessageListener;
+import edu.flash3388.flashlib.communications.sendable.manager.messages.ManagerMessagesPredicate;
 import edu.flash3388.flashlib.event.Event;
 import edu.flash3388.flashlib.event.Listener;
 import edu.flash3388.flashlib.event.TrueEventPredicate;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -29,11 +32,14 @@ public class SendableCommunicationManager {
     private final RemoteSendablesStatus mRemoteSendablesStatus;
     private final PairHandler mPairHandler;
     private final SendableHandler mSendableHandler;
+    private final SendableMatcher mSendableMatcher;
     private final PrimitiveSerializer mSerializer;
     private final Logger mLogger;
 
     private final ConnectionListener mConnectionListener;
-    private final Collection<Pair<Predicate<Event>, MessageListener>> mRunnerListeners;
+    private final ManagerMessageListener mMessageListener;
+
+    private final Lock mLock;
 
     private CommunicationRunner mAttachedCommunicationRunner;
     private boolean mIsRunning;
@@ -43,88 +49,132 @@ public class SendableCommunicationManager {
         mSerializer = serializer;
         mLogger = logger;
 
+        mLock = new ReentrantLock();
+        mSendableMatcher = new SendableMatcher();
+
         mSendableStorage = new SendableStorage(new SendableStreamFactory(mSerializer));
         mSendableSessionManager = new SendableSessionManager(mSendableStorage);
         mRemoteSendablesStatus = new RemoteSendablesStatus();
 
         mPairHandler = new PairHandler(mSendableSessionManager, mSerializer, mLogger);
-        mSendableHandler = new SendableHandler(mSendableSessionManager, mRemoteSendablesStatus);
+        mSendableHandler = new SendableHandler(mSendableSessionManager, mSerializer);
 
         mConnectionListener = new ManagerConnectionListener(this);
-        mRunnerListeners = new ArrayList<Pair<Predicate<Event>, MessageListener>>();
+        mMessageListener = new ManagerMessageListener(createMessageHandlers());
 
         mAttachedCommunicationRunner = null;
         mIsRunning = false;
         mIsConnected = false;
     }
 
-    public synchronized boolean attachSendable(SendableData sendableData, Sendable sendable) {
-        if (mSendableStorage.addSendable(sendableData, sendable)) {
-            if (mIsConnected) {
-                mSendableHandler.handleAttachedSendable(sendableData);// TODO: IF CONNECTED, SEND DISCOVERY, OR CONNECT
+    public boolean attachSendable(SendableData sendableData, Sendable sendable) {
+        mLock.lock();
+        try {
+            if (mSendableStorage.addSendable(sendableData, sendable)) {
+                if (mIsConnected) {
+                    mSendableHandler.handleAttachedSendable(sendableData);// TODO: IF CONNECTED, SEND DISCOVERY, OR CONNECT
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
+        } finally {
+            mLock.unlock();
         }
-
-        return false;
     }
 
-    public synchronized boolean detachSendable(SendableData sendableData) {
-        if (mSendableStorage.removeSendable(sendableData)) {
-            if (mIsConnected) {
-                mSendableHandler.handleDetachedSendable(sendableData); // TODO: IF CONNECTED, UPDATE DISCOVERY, DISCONNECT
+    public boolean detachSendable(SendableData sendableData) {
+        mLock.lock();
+        try {
+            if (mSendableStorage.removeSendable(sendableData)) {
+                if (mIsConnected) {
+                    mSendableHandler.handleDetachedSendable(sendableData);
+                }
+
+                return true;
             }
 
-            return true;
-        }
-
-        return false;
-    }
-
-    public synchronized void start(CommunicationRunner communicationRunner) {
-        if (mIsRunning) {
-            throw new IllegalStateException("already started");
-        }
-        mIsRunning = true;
-
-        for (Pair<Predicate<Event>, MessageListener> listenerData : mRunnerListeners) {
-            communicationRunner.addMessageListener(listenerData.getKey(), listenerData.getValue());
-        }
-
-        mAttachedCommunicationRunner.addConnectionListener(new TrueEventPredicate(), mConnectionListener);
-
-        mAttachedCommunicationRunner = communicationRunner;
-    }
-
-    public synchronized boolean isRunning() {
-        return mIsRunning;
-    }
-
-    public synchronized void stop() {
-        if (!mIsRunning) {
-            throw new IllegalStateException("not started");
-        }
-        mIsRunning = false;
-
-        mAttachedCommunicationRunner.removeConnectionListener(mConnectionListener);
-
-        for (Pair<Predicate<Event>, MessageListener> listenerData : mRunnerListeners) {
-            mAttachedCommunicationRunner.removeMessageListener(listenerData.getValue());
+            return false;
+        } finally {
+            mLock.unlock();
         }
     }
 
-    private synchronized void onCommunicationConnection() {
-        mIsConnected = true;
+    public void start(CommunicationRunner communicationRunner) {
+        mLock.lock();
+        try {
+            if (mIsRunning) {
+                throw new IllegalStateException("already started");
+            }
+            mIsRunning = true;
 
+            mAttachedCommunicationRunner = communicationRunner;
 
+            mAttachedCommunicationRunner.addMessageListener(new ManagerMessagesPredicate(), mMessageListener);
+            mAttachedCommunicationRunner.addConnectionListener(new TrueEventPredicate(), mConnectionListener);
+        } finally {
+            mLock.unlock();
+        }
     }
 
-    private synchronized void onCommunicationDisconnection() {
-        mIsConnected = false;
+    public boolean isRunning() {
+        mLock.lock();
+        try {
+            return mIsRunning;
+        } finally {
+            mLock.unlock();
+        }
+    }
 
-        mSendableSessionManager.closeAllSessions();
-        mRemoteSendablesStatus.reset();
+    public void stop() {
+        mLock.lock();
+        try {
+            if (!mIsRunning) {
+                throw new IllegalStateException("not started");
+            }
+            mIsRunning = false;
+
+            mAttachedCommunicationRunner.removeConnectionListener(mConnectionListener);
+            mAttachedCommunicationRunner.removeMessageListener(mMessageListener);
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private void onCommunicationConnection() {
+        mLock.lock();
+        try {
+            mIsConnected = true;
+
+            // TODO: SEND DISCOVERY, DO STARTUP...
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private void onCommunicationDisconnection() {
+        mLock.lock();
+        try {
+            mIsConnected = false;
+
+            mSendableSessionManager.closeAllSessions();
+            mRemoteSendablesStatus.reset();
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private Collection<ManagerMessageHandler> createMessageHandlers() {
+        Collection<ManagerMessageHandler> messageHandlers = new ArrayList<ManagerMessageHandler>();
+        messageHandlers.add(new DiscoveryRequestHandler(mSendableStorage, mSerializer, mLock));
+        messageHandlers.add(new DiscoveryDataHandler(mSendableStorage, mSendableSessionManager, mSendableMatcher, mPairHandler, mSerializer, mLock));
+        messageHandlers.add(new PairRequestHandler(mPairHandler, mSerializer, mLock));
+        messageHandlers.add(new PairSuccessHandler(mPairHandler, mSerializer, mLock));
+        messageHandlers.add(new SessionCloseHandler(mPairHandler, mSerializer, mLock));
+        messageHandlers.add(new SendableMessageHandler(mSendableSessionManager, mSerializer, mLogger));
+
+        return messageHandlers;
     }
 
     private static class ManagerConnectionListener implements ConnectionListener {

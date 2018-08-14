@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.communications.sendable.messages;
+package edu.flash3388.flashlib.communications.sendable.manager.messages;
 
 import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.StaticMessage;

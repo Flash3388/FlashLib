@@ -4,6 +4,7 @@ import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.SendableStream;
+import edu.flash3388.flashlib.communications.sendable.manager.messages.SendableMessage;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 public class MessageQueueSendableStream implements SendableStream {
