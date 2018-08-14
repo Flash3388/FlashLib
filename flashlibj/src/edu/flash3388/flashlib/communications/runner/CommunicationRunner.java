@@ -68,5 +68,7 @@ public class CommunicationRunner {
 
         mTaskFuture.cancel(true);
         mTaskFuture = null;
+
+        // TODO: CONSIDER TERMINATING EXECUTOR SERVICE HERE
     }
 }
