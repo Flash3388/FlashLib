@@ -24,7 +24,7 @@ public class Packing {
         return new DataUnpacker(inputStream, allocateBuffer(), DEFAULT_CHARSET);
     }
 
-    public DataBufferUnpacker newBufferUnpacker(byte[] bytes) {
+    public static DataBufferUnpacker newBufferUnpacker(byte[] bytes) {
         return new DataBufferUnpacker(bytes, allocateBuffer(), DEFAULT_CHARSET);
     }
 
