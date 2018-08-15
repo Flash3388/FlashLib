@@ -27,6 +27,11 @@ public class DataUnpacker {
         return b == TRUE;
     }
 
+    public char unpackChar() throws IOException {
+        ensureAvailable(2);
+        return mBuffer.getChar();
+    }
+
     public byte unpackByte() throws IOException {
         ensureAvailable(1);
         return mBuffer.get();

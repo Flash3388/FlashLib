@@ -28,6 +28,12 @@ public class DataPacker implements Closeable, Flushable {
         return this;
     }
 
+    public DataPacker packChar(char value) throws IOException {
+        ensureCapacity(2);
+        mBuffer.putChar(value);
+        return this;
+    }
+
     public DataPacker packByte(byte value) throws IOException {
         ensureCapacity(1);
         mBuffer.put(value);
