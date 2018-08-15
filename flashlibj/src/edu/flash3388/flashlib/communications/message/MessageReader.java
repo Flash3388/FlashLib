@@ -5,17 +5,17 @@ import java.io.IOException;
 import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.communications.connection.TimeoutException;
 import edu.flash3388.flashlib.io.PrimitiveSerializer;
+import edu.flash3388.flashlib.io.packing.DataBufferUnpacker;
+import edu.flash3388.flashlib.io.packing.Packing;
 
 public class MessageReader {
 
-	private Connection mConnection;
-	private PrimitiveSerializer mSerializer;
+	private final Connection mConnection;
 
 	private byte[] mLastHeaderData;
 	
-	public MessageReader(Connection connection, PrimitiveSerializer serializer) {
+	public MessageReader(Connection connection) {
 		mConnection = connection;
-		mSerializer = serializer;
 	}
 	
 	public Message readMessage() throws ReadException, TimeoutException {
@@ -29,8 +29,10 @@ public class MessageReader {
 				mLastHeaderData = null;
 			}
 
-			int header = mSerializer.toInt(headerData);
-			int length = mSerializer.toInt(headerData, 4);
+            DataBufferUnpacker unpacker = Packing.newBufferUnpacker(headerData);
+
+			int header = unpacker.unpackInt();
+			int length = unpacker.unpackInt();
 
 			try {
 				byte[] data = mConnection.read(length);
