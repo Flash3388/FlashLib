@@ -1,9 +1,12 @@
 package edu.flash3388.flashlib.communications.sendable;
 
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
-import edu.flash3388.flashlib.util.ArrayUtil;
+import edu.flash3388.flashlib.io.packing.DataPacker;
+import edu.flash3388.flashlib.io.packing.DataUnpacker;
+import edu.flash3388.flashlib.io.packing.Packable;
 
-public class SendableData {
+import java.io.IOException;
+
+public class SendableData implements Packable {
 
     private int mId;
     private int mType;
@@ -11,6 +14,9 @@ public class SendableData {
     public SendableData(int id, int type) {
         mId = id;
         mType = type;
+    }
+
+    private SendableData() {
     }
 
     public int getId() {
@@ -35,18 +41,22 @@ public class SendableData {
         return false;
     }
 
-    public byte[] toBytes(PrimitiveSerializer serializer) {
-        byte[] idData = serializer.toBytes(mId);
-        byte[] typeData = serializer.toBytes(mType);
-
-        return ArrayUtil.combine(idData, typeData);
+    @Override
+    public void pack(DataPacker packer) throws IOException {
+        packer.packInt(mId);
+        packer.packInt(mType);
     }
 
-    public static SendableData fromBytes(byte[] bytes, PrimitiveSerializer serializer) {
-        int id = serializer.toInt(bytes);
-        int type = serializer.toInt(bytes, 4);
+    @Override
+    public void unpack(DataUnpacker unpacker) throws IOException {
+        mId = unpacker.unpackInt();
+        mType = unpacker.unpackInt();
+    }
 
-        return new SendableData(id, type);
+    public static SendableData unpackObject(DataUnpacker unpacker) throws IOException {
+        SendableData sendableData = new SendableData();
+        sendableData.unpack(unpacker);
+        return sendableData;
     }
 
     public static int getSerializedSize() {

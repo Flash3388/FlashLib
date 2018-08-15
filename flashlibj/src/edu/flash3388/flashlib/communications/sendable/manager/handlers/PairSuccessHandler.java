@@ -4,19 +4,16 @@ import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.PairSuccessMessage;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.concurrent.locks.Lock;
 
 public class PairSuccessHandler implements ManagerMessageHandler {
 
     private final PairHandler mPairHandler;
-    private final PrimitiveSerializer mSerializer;
     private final Lock mManagerLock;
 
-    public PairSuccessHandler(PairHandler pairHandler, PrimitiveSerializer serializer, Lock managerLock) {
+    public PairSuccessHandler(PairHandler pairHandler, Lock managerLock) {
         mPairHandler = pairHandler;
-        mSerializer = serializer;
         mManagerLock = managerLock;
     }
 
@@ -27,7 +24,7 @@ public class PairSuccessHandler implements ManagerMessageHandler {
 
     @Override
     public void handle(Message message, MessageQueue messageQueue) {
-        PairSuccessMessage pairSuccessMessage = PairSuccessMessage.fromMessage(message, mSerializer);
+        PairSuccessMessage pairSuccessMessage = PairSuccessMessage.fromMessage(message);
         SendableData remote = pairSuccessMessage.getFrom();
         SendableData local = pairSuccessMessage.getTo();
 

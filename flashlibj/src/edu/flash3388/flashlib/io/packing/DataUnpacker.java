@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.io.packing;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -7,7 +8,7 @@ import java.nio.charset.Charset;
 
 import static edu.flash3388.flashlib.io.packing.DataCode.TRUE;
 
-public class DataUnpacker {
+public class DataUnpacker implements Closeable {
 
     private final InputStream mInputStream;
     private final ByteBuffer mBuffer;
@@ -74,6 +75,11 @@ public class DataUnpacker {
     public String unpackString() throws IOException {
         byte[] bytes = unpackByteArray();
         return new String(bytes, mCharset);
+    }
+
+    @Override
+    public void close() throws IOException {
+        mInputStream.close();
     }
 
     private void ensureAvailable(int bytes) throws IOException {

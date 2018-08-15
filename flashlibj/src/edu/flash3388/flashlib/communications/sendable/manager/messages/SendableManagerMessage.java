@@ -2,23 +2,22 @@ package edu.flash3388.flashlib.communications.sendable.manager.messages;
 
 import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
-import edu.flash3388.flashlib.util.ArrayUtil;
+import edu.flash3388.flashlib.io.packing.DataBufferPacker;
+import edu.flash3388.flashlib.io.packing.DataBufferUnpacker;
+import edu.flash3388.flashlib.io.packing.Packing;
 
-import java.util.Arrays;
+import java.io.IOException;
 
 public class SendableManagerMessage implements Message {
 
     private final int mHeader;
     private final SendableData mFrom;
     private final SendableData mTo;
-    private final PrimitiveSerializer mSerializer;
 
-    public SendableManagerMessage(int header, SendableData from, SendableData to, PrimitiveSerializer serializer) {
+    public SendableManagerMessage(int header, SendableData from, SendableData to) {
         mHeader = header;
         mFrom = from;
         mTo = to;
-        mSerializer = serializer;
     }
 
     @Override
@@ -28,10 +27,16 @@ public class SendableManagerMessage implements Message {
 
     @Override
     public byte[] getData() {
-        byte[] fromData = mFrom.toBytes(mSerializer);
-        byte[] toData = mTo.toBytes(mSerializer);
+        try {
+            DataBufferPacker packer = Packing.newBufferPacker(SendableData.getSerializedSize() * 2);
+            mFrom.pack(packer);
+            mTo.pack(packer);
 
-        return ArrayUtil.combine(fromData, toData);
+            packer.close();
+            return packer.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SendableData getFrom() {
@@ -42,16 +47,19 @@ public class SendableManagerMessage implements Message {
         return mTo;
     }
 
-    public static SendableManagerMessage fromMessage(Message message, PrimitiveSerializer serializer) {
+    public static SendableManagerMessage fromMessage(Message message) {
         int header = message.getHeader();
         byte[] allData = message.getData();
 
-        int sendableDataSerializedSize = SendableData.getSerializedSize();
+        try {
+            DataBufferUnpacker unpacker = Packing.newBufferUnpacker(allData);
 
-        SendableData from = SendableData.fromBytes(allData, serializer);
-        byte[] toData = Arrays.copyOfRange(allData, sendableDataSerializedSize, sendableDataSerializedSize);
-        SendableData to = SendableData.fromBytes(toData, serializer);
+            SendableData from = SendableData.unpackObject(unpacker);
+            SendableData to = SendableData.unpackObject(unpacker);
 
-        return new SendableManagerMessage(header, from, to, serializer);
+            return new SendableManagerMessage(header, from, to);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

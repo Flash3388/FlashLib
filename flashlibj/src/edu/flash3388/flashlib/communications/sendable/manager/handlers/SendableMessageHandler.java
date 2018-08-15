@@ -6,7 +6,6 @@ import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.manager.NoSuchSessionException;
 import edu.flash3388.flashlib.communications.sendable.manager.SendableSessionManager;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.SendableMessage;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,12 +13,10 @@ import java.util.logging.Logger;
 public class SendableMessageHandler implements ManagerMessageHandler {
 
     private final SendableSessionManager mSendableSessionManager;
-    private final PrimitiveSerializer mSerializer;
     private final Logger mLogger;
 
-    public SendableMessageHandler(SendableSessionManager sendableSessionManager, PrimitiveSerializer serializer, Logger logger) {
+    public SendableMessageHandler(SendableSessionManager sendableSessionManager, Logger logger) {
         mSendableSessionManager = sendableSessionManager;
-        mSerializer = serializer;
         mLogger = logger;
     }
 
@@ -30,7 +27,7 @@ public class SendableMessageHandler implements ManagerMessageHandler {
 
     @Override
     public void handle(Message message, MessageQueue messageQueue) {
-        SendableMessage sendableMessage = SendableMessage.fromMessage(message, mSerializer);
+        SendableMessage sendableMessage = SendableMessage.fromMessage(message);
         SendableData local = sendableMessage.getTo();
         Message messageToSendable = sendableMessage.getSendableMessage();
 

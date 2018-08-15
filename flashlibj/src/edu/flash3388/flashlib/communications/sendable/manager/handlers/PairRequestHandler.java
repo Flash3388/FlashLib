@@ -4,19 +4,16 @@ import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.PairRequestMessage;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.concurrent.locks.Lock;
 
 public class PairRequestHandler implements ManagerMessageHandler {
 
     private final PairHandler mPairHandler;
-    private final PrimitiveSerializer mSerializer;
     private final Lock mManagerLock;
 
-    public PairRequestHandler(PairHandler pairHandler, PrimitiveSerializer serializer, Lock managerLock) {
+    public PairRequestHandler(PairHandler pairHandler, Lock managerLock) {
         mPairHandler = pairHandler;
-        mSerializer = serializer;
         mManagerLock = managerLock;
     }
 
@@ -27,7 +24,7 @@ public class PairRequestHandler implements ManagerMessageHandler {
 
     @Override
     public void handle(Message message, MessageQueue messageQueue) {
-        PairRequestMessage pairRequestMessage = PairRequestMessage.fromMessage(message, mSerializer);
+        PairRequestMessage pairRequestMessage = PairRequestMessage.fromMessage(message);
         SendableData remote = pairRequestMessage.getFrom();
         SendableData local = pairRequestMessage.getTo();
 
