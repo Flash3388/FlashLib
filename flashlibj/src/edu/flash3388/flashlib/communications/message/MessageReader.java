@@ -23,7 +23,7 @@ public class MessageReader {
 			byte[] headerData;
 
 			if (mLastHeaderData == null) {
-				headerData = mConnection.read(8);
+				headerData = mConnection.read(4);
 			} else {
 				headerData = mLastHeaderData;
 				mLastHeaderData = null;
