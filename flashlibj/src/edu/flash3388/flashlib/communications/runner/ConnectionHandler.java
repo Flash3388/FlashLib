@@ -9,7 +9,6 @@ import edu.flash3388.flashlib.communications.runner.events.ConnectionEvent;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
 import edu.flash3388.flashlib.communications.runner.events.DisconnectionEvent;
 import edu.flash3388.flashlib.event.EventDispatcher;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -20,19 +19,17 @@ import java.util.logging.Logger;
 class ConnectionHandler implements Consumer<Connection> {
 
     private EventDispatcher mEventDispatcher;
-    private PrimitiveSerializer mSerializer;
     private Logger mLogger;
 
-    ConnectionHandler(EventDispatcher eventDispatcher, PrimitiveSerializer serializer, Logger logger) {
+    ConnectionHandler(EventDispatcher eventDispatcher, Logger logger) {
         mEventDispatcher = eventDispatcher;
-        mSerializer = serializer;
         mLogger = logger;
     }
 
     @Override
     public void accept(Connection connection) {
-        MessageReader messageReader = new MessageReader(connection, mSerializer);
-        MessageWriter messageWriter = new MessageWriter(connection, mSerializer);
+        MessageReader messageReader = new MessageReader(connection);
+        MessageWriter messageWriter = new MessageWriter(connection);
 
         Queue<Message> messageQueue = new ConcurrentLinkedDeque<Message>();
         MessageQueue messageQueueWrapper = new MessageQueue(messageQueue);

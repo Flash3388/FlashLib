@@ -2,12 +2,12 @@ package edu.flash3388.flashlib.communications.sendable.manager.messages;
 
 import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
+import edu.flash3388.flashlib.io.packing.DataBufferPacker;
+import edu.flash3388.flashlib.io.packing.DataBufferUnpacker;
+import edu.flash3388.flashlib.io.packing.Packing;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -17,12 +17,10 @@ public class DiscoveryDataMessage implements Message {
 
     private final State mState;
     private final Collection<SendableData> mSendables;
-    private final PrimitiveSerializer mSerializer;
 
-    public DiscoveryDataMessage(State state, Collection<SendableData> sendables, PrimitiveSerializer serializer) {
+    public DiscoveryDataMessage(State state, Collection<SendableData> sendables) {
         mState = state;
         mSendables = sendables;
-        mSerializer = serializer;
     }
 
     @Override
@@ -33,19 +31,17 @@ public class DiscoveryDataMessage implements Message {
     @Override
     public byte[] getData() {
         try {
-            byte[] state = mSerializer.toBytes(mState.getValue());
-            byte[] sendablesCount = mSerializer.toBytes(mSendables.size());
+            DataBufferPacker packer = Packing.newBufferPacker();
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            outputStream.write(state);
-            outputStream.write(sendablesCount);
+            packer.packInt(mState.getValue());
+            packer.packInt(mSendables.size());
 
             for (SendableData sendableData : mSendables) {
-                 byte[] sendableSerializedData = sendableData.toBytes(mSerializer);
-                 outputStream.write(sendableSerializedData);
+                 sendableData.pack(packer);
             }
 
-            return outputStream.toByteArray();
+            packer.toByteArray();
+            return packer.toByteArray();
         } catch (IOException e) {
             // should never happen
             throw new RuntimeException(e);
@@ -60,23 +56,28 @@ public class DiscoveryDataMessage implements Message {
         return mState;
     }
 
-    public static DiscoveryDataMessage fromMessage(Message message, PrimitiveSerializer serializer) {
+    public static DiscoveryDataMessage fromMessage(Message message) {
         byte[] allData = message.getData();
 
-        int stateValue = serializer.toInt(allData);
-        State state = State.fromValue(stateValue);
+        DataBufferUnpacker unpacker = Packing.newBufferUnpacker(allData);
 
-        int count = serializer.toInt(allData, 4);
+        try {
+            int stateValue = unpacker.unpackInt();
+            State state = State.fromValue(stateValue);
 
-        List<SendableData> sendableDataList = new ArrayList<SendableData>();
-        int offset = 8;
-        for (int i = 0; i < count; i++) {
-            byte[] data = Arrays.copyOfRange(allData, offset, SendableData.getSerializedSize());
-            SendableData sendableData = SendableData.fromBytes(data, serializer);
-            sendableDataList.add(sendableData);
+            int count = unpacker.unpackInt();
+
+            List<SendableData> sendableDataList = new ArrayList<SendableData>();
+            for (int i = 0; i < count; i++) {
+                SendableData sendableData = SendableData.unpackObject(unpacker);
+                sendableDataList.add(sendableData);
+            }
+
+            return new DiscoveryDataMessage(state, sendableDataList);
+        } catch (IOException e) {
+            // shouldn't occur
+            throw new RuntimeException(e);
         }
-
-        return new DiscoveryDataMessage(state, sendableDataList, serializer);
     }
 
     public enum State {

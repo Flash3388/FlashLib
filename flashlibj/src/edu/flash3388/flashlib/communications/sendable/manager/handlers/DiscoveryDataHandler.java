@@ -3,9 +3,10 @@ package edu.flash3388.flashlib.communications.sendable.manager.handlers;
 import edu.flash3388.flashlib.communications.message.Message;
 import edu.flash3388.flashlib.communications.message.MessageQueue;
 import edu.flash3388.flashlib.communications.sendable.SendableData;
-import edu.flash3388.flashlib.communications.sendable.manager.*;
+import edu.flash3388.flashlib.communications.sendable.manager.SendableMatcher;
+import edu.flash3388.flashlib.communications.sendable.manager.SendableSessionManager;
+import edu.flash3388.flashlib.communications.sendable.manager.SendableStorage;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.DiscoveryDataMessage;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 import edu.flash3388.flashlib.util.Pair;
 
 import java.util.Collection;
@@ -17,16 +18,14 @@ public class DiscoveryDataHandler implements ManagerMessageHandler {
     private final SendableSessionManager mSendableSessionManager;
     private final SendableMatcher mSendableMatcher;
     private final PairHandler mPairHandler;
-    private final PrimitiveSerializer mSerializer;
     private final Lock mManagerLock;
 
     public DiscoveryDataHandler(SendableStorage sendableStorage, SendableSessionManager sendableSessionManager, SendableMatcher sendableMatcher, PairHandler pairHandler,
-                                PrimitiveSerializer serializer, Lock managerLock) {
+                                Lock managerLock) {
         mSendableStorage = sendableStorage;
         mSendableSessionManager = sendableSessionManager;
         mSendableMatcher = sendableMatcher;
         mPairHandler = pairHandler;
-        mSerializer = serializer;
         mManagerLock = managerLock;
     }
 
@@ -37,7 +36,7 @@ public class DiscoveryDataHandler implements ManagerMessageHandler {
 
     @Override
     public void handle(Message message, MessageQueue messageQueue) {
-        DiscoveryDataMessage discoveryDataMessage = DiscoveryDataMessage.fromMessage(message, mSerializer);
+        DiscoveryDataMessage discoveryDataMessage = DiscoveryDataMessage.fromMessage(message);
         Collection<SendableData> sendableDataCollection = discoveryDataMessage.getSendables();
 
         mManagerLock.lock();

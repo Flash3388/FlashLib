@@ -12,7 +12,6 @@ import edu.flash3388.flashlib.communications.sendable.manager.listeners.ManagerM
 import edu.flash3388.flashlib.communications.sendable.manager.messages.DiscoveryRequestMessage;
 import edu.flash3388.flashlib.communications.sendable.manager.messages.ManagerMessagesPredicate;
 import edu.flash3388.flashlib.event.TrueEventPredicate;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +26,6 @@ public class SendableCommunicationManager {
     private final PairHandler mPairHandler;
     private final SendableHandler mSendableHandler;
     private final SendableMatcher mSendableMatcher;
-    private final PrimitiveSerializer mSerializer;
     private final Logger mLogger;
 
     private final ConnectionListener mConnectionListener;
@@ -42,19 +40,18 @@ public class SendableCommunicationManager {
     private boolean mIsRunning;
     private boolean mIsConnected;
 
-    public SendableCommunicationManager(PrimitiveSerializer serializer, Logger logger, DiscoverySetting discoverySetting) {
-        mSerializer = serializer;
+    public SendableCommunicationManager(Logger logger, DiscoverySetting discoverySetting) {
         mLogger = logger;
         mDiscoverySetting = discoverySetting;
 
         mLock = new ReentrantLock();
         mSendableMatcher = new SendableMatcher();
 
-        mSendableStorage = new SendableStorage(new SendableStreamFactory(mSerializer));
+        mSendableStorage = new SendableStorage(new SendableStreamFactory());
         mSendableSessionManager = new SendableSessionManager(mSendableStorage);
 
-        mPairHandler = new PairHandler(mSendableSessionManager, mSerializer, mLogger);
-        mSendableHandler = new SendableHandler(mSendableSessionManager, mSerializer);
+        mPairHandler = new PairHandler(mSendableSessionManager, mLogger);
+        mSendableHandler = new SendableHandler(mSendableSessionManager);
 
         mConnectionListener = new ManagerConnectionListener(this);
         mMessageListener = new ManagerMessageListener(createMessageHandlers());
@@ -167,12 +164,12 @@ public class SendableCommunicationManager {
 
     private Collection<ManagerMessageHandler> createMessageHandlers() {
         Collection<ManagerMessageHandler> messageHandlers = new ArrayList<ManagerMessageHandler>();
-        messageHandlers.add(new DiscoveryRequestHandler(mSendableStorage, mSerializer, mLock));
-        messageHandlers.add(new DiscoveryDataHandler(mSendableStorage, mSendableSessionManager, mSendableMatcher, mPairHandler, mSerializer, mLock));
-        messageHandlers.add(new PairRequestHandler(mPairHandler, mSerializer, mLock));
-        messageHandlers.add(new PairSuccessHandler(mPairHandler, mSerializer, mLock));
-        messageHandlers.add(new SessionCloseHandler(mPairHandler, mSerializer, mLock));
-        messageHandlers.add(new SendableMessageHandler(mSendableSessionManager, mSerializer, mLogger));
+        messageHandlers.add(new DiscoveryRequestHandler(mSendableStorage));
+        messageHandlers.add(new DiscoveryDataHandler(mSendableStorage, mSendableSessionManager, mSendableMatcher, mPairHandler, mLock));
+        messageHandlers.add(new PairRequestHandler(mPairHandler, mLock));
+        messageHandlers.add(new PairSuccessHandler(mPairHandler, mLock));
+        messageHandlers.add(new SessionCloseHandler(mPairHandler, mLock));
+        messageHandlers.add(new SendableMessageHandler(mSendableSessionManager, mLogger));
 
         return messageHandlers;
     }
