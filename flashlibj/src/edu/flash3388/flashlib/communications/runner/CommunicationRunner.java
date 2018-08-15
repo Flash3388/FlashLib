@@ -6,7 +6,6 @@ import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
 import edu.flash3388.flashlib.event.ConcurrentListenerInvocation;
 import edu.flash3388.flashlib.event.Event;
 import edu.flash3388.flashlib.event.EventDispatcher;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;

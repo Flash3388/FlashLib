@@ -1,12 +1,10 @@
 package edu.flash3388.flashlib.communications.message;
 
-import java.io.IOException;
-
 import edu.flash3388.flashlib.communications.connection.Connection;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 import edu.flash3388.flashlib.io.packing.DataBufferPacker;
 import edu.flash3388.flashlib.io.packing.Packing;
-import edu.flash3388.flashlib.util.ArrayUtil;
+
+import java.io.IOException;
 
 public class MessageWriter {
 

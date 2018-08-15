@@ -9,7 +9,6 @@ import edu.flash3388.flashlib.communications.runner.events.ConnectionEvent;
 import edu.flash3388.flashlib.communications.runner.events.ConnectionListener;
 import edu.flash3388.flashlib.communications.runner.events.DisconnectionEvent;
 import edu.flash3388.flashlib.event.EventDispatcher;
-import edu.flash3388.flashlib.io.PrimitiveSerializer;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
