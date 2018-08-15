@@ -17,14 +17,12 @@ public class CommunicationRunner {
 
     private ExecutorService mExecutorService;
     private EventDispatcher mEventDispatcher;
-    private PrimitiveSerializer mSerializer;
     private Logger mLogger;
 
     private Future<?> mTaskFuture;
 
-    public CommunicationRunner(ExecutorService executorService, PrimitiveSerializer serializer, Logger logger) {
+    public CommunicationRunner(ExecutorService executorService, Logger logger) {
         mExecutorService = executorService;
-        mSerializer = serializer;
         mLogger = logger;
 
         mEventDispatcher = new EventDispatcher(new ConcurrentListenerInvocation(executorService));
@@ -51,7 +49,7 @@ public class CommunicationRunner {
             throw new IllegalStateException("Already running");
         }
 
-        ConnectionHandler connectionHandler = new ConnectionHandler(mEventDispatcher, mSerializer, mLogger);
+        ConnectionHandler connectionHandler = new ConnectionHandler(mEventDispatcher, mLogger);
         ConnectionTask connectionTask = new ConnectionTask(connector, connectionTimeout, connectionHandler, mLogger);
 
         mTaskFuture = mExecutorService.submit(connectionTask);

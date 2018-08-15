@@ -20,19 +20,17 @@ import java.util.logging.Logger;
 class ConnectionHandler implements Consumer<Connection> {
 
     private EventDispatcher mEventDispatcher;
-    private PrimitiveSerializer mSerializer;
     private Logger mLogger;
 
-    ConnectionHandler(EventDispatcher eventDispatcher, PrimitiveSerializer serializer, Logger logger) {
+    ConnectionHandler(EventDispatcher eventDispatcher, Logger logger) {
         mEventDispatcher = eventDispatcher;
-        mSerializer = serializer;
         mLogger = logger;
     }
 
     @Override
     public void accept(Connection connection) {
-        MessageReader messageReader = new MessageReader(connection, mSerializer);
-        MessageWriter messageWriter = new MessageWriter(connection, mSerializer);
+        MessageReader messageReader = new MessageReader(connection);
+        MessageWriter messageWriter = new MessageWriter(connection);
 
         Queue<Message> messageQueue = new ConcurrentLinkedDeque<Message>();
         MessageQueue messageQueueWrapper = new MessageQueue(messageQueue);
