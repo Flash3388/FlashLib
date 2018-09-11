@@ -75,7 +75,7 @@ public class DiscoveryDataHandler implements ManagerMessageHandler {
     private void unpairSendables(Collection<SendableData> sendableDataCollection, MessageQueue messageQueue) {
         Collection<Pair<SendableData, SendableData>> localSendables = mSendableSessionManager.getSendablesPairedWithRemotes(sendableDataCollection);
         for (Pair<SendableData, SendableData> sendablePair : localSendables) {
-            mPairHandler.unpair(sendablePair.getKey(), sendablePair.getValue(), messageQueue);
+            mPairHandler.unpair(sendablePair.getFirst(), sendablePair.getSecond(), messageQueue);
         }
     }
 }

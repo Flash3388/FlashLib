@@ -2,20 +2,20 @@ package edu.flash3388.flashlib.util;
 
 public class Pair<K, V> {
 
-    private K mKey;
-    private V mValue;
+    private K mFirst;
+    private V mSecond;
 
-    public Pair(K key, V value) {
-        mKey = key;
-        mValue = value;
+    public Pair(K first, V second) {
+        mFirst = first;
+        mSecond = second;
     }
 
-    public K getKey() {
-        return mKey;
+    public K getFirst() {
+        return mFirst;
     }
 
-    public V getValue() {
-        return mValue;
+    public V getSecond() {
+        return mSecond;
     }
 
     public static <K, V> Pair<K, V> create(K key, V value) {
