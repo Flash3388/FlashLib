@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.cams;
 
-import edu.flash3388.flashlib.util.Queue;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * A camera implementation which uses a {@link Queue} to hold images.
@@ -11,13 +12,13 @@ import edu.flash3388.flashlib.util.Queue;
  */
 public abstract class QueueCamera<T> implements Camera{
 	
-	private Queue<T> frames = new Queue<T>();
+	private Queue<T> frames = new ArrayDeque<>();
 	
 	public void enqueue(T frame){
-		frames.enqueue(frame);
+		frames.add(frame);
 	}
 	public T dequeue(){
-		return frames.dequeue();
+		return frames.remove();
 	}
 	
 	@Override

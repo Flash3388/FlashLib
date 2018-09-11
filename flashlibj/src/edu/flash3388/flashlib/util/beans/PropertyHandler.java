@@ -19,7 +19,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 /**
  * 
@@ -570,15 +569,7 @@ public class PropertyHandler {
 			throw new IllegalArgumentException("Given path is not a file");
 		saveXml(wfile);
 	}
-	
-	/**
-	 * Prints all values in the maps to a {@link Log}.
-	 * @param log the log to print to
-	 */
-	public static void printAll(Log log){
-		log.log("\n" + getBooleanPrint() + "\n" + getNumberPrint() + "\n" + getStringPrint(),
-				"PropertyHandler");
-	}
+
 	/**
 	 * Gets a string representing all string values in the string map. The string should be used for printing.
 	 * @return a string representing string values
