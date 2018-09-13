@@ -6,8 +6,6 @@ import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import edu.flash3388.flashlib.util.FlashUtil;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * An extension of {@link RobotBase}. This class provides extended and easier control over robot
  * operation by providing a control loop which calls user methods depending on the operation mode.
@@ -50,7 +48,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * addition, when in disabled mode the scheduling enters {@link SchedulerRunMode#TASKS_ONLY} mode so {@link Action} objects
  * are not executed, only tasks are, this is for safety of operation.
  * <p>
- * When the robot enters stop mode {@link #robotFree()} is called to allow user stop operations.
+ * When the robot enters stop mode {@link #robotStop()} is called to allow user stop operations.
  * 
  * 
  * @author Tom Tzook
@@ -58,14 +56,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class IterativeRobot extends RobotBase {
 	
-	public static final int ITERATION_DELAY = 5; //ms
-	
-	private final AtomicBoolean mRunLoop;
+	private static final int ITERATION_DELAY = 5; //ms
+
 	private final Scheduler mScheduler;
+	private boolean mRunLoop;
 
 	protected IterativeRobot() {
-	    mRunLoop = new AtomicBoolean(true);
 	    mScheduler = Scheduler.getInstance();
+        mRunLoop = true;
     }
 
 	@Override
@@ -75,16 +73,22 @@ public abstract class IterativeRobot extends RobotBase {
 
 	@Override
 	protected void robotShutdown(){
-        if (mRunLoop.compareAndSet(true, false)) {
-            mScheduler.removeAllActions();
-            mScheduler.setRunMode(SchedulerRunMode.DISABLED);
-
-            robotFree();
+        if (mRunLoop) {
+            mRunLoop = false;
         }
+
+        mScheduler.removeAllActions();
+        mScheduler.setRunMode(SchedulerRunMode.DISABLED);
+
+        robotStop();
 	}
 
+	protected void stopRobotLoop() {
+	    mRunLoop = false;
+    }
+
     private void robotLoop(){
-        while(mRunLoop.get()){
+        while(mRunLoop){
             if(isDisabled()){
                 mScheduler.removeAllActions();
                 mScheduler.setRunMode(SchedulerRunMode.TASKS_ONLY);
@@ -120,10 +124,14 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private boolean stayInMode(RobotMode mode) {
-	    return isInMode(mode) && mRunLoop.get();
+	    return isInMode(mode) && mRunLoop;
     }
 
-	protected void robotFree(){}
+    //--------------------------------------------------------------------
+    //----------------------Implementable---------------------------------
+    //--------------------------------------------------------------------
+
+	protected void robotStop(){}
 	
 	protected abstract void disabledInit();
 	protected abstract void disabledPeriodic();

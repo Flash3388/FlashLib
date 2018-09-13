@@ -41,8 +41,7 @@ public abstract class RobotBase implements RobotInterface {
 	final void initialize() throws RobotInitializationException {
 		//setting the JVM thread priority for this thread. Should be highest possible.
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		
-
+        robotInit();
 	}
 
 	final void start() {
@@ -71,7 +70,7 @@ public abstract class RobotBase implements RobotInterface {
 	protected abstract void robotMain();
 
 	/**
-	 * Called when the JVM shuts down to perform custom stop operations. Should be used
+	 * Called when the robot finishes running, allowing to perform custom stop operations. Should be used
 	 * to free robot systems.
 	 */
 	protected abstract void robotShutdown();
