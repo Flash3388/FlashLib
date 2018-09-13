@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
 
-public class Servo extends SafePWMMotor implements FlashSpeedController {
+public class Servo extends SafePWMMotor implements FlashPositionController {
 
 	private double mMinAngle;
 	private double mMaxAngle;
@@ -23,50 +23,26 @@ public class Servo extends SafePWMMotor implements FlashSpeedController {
 
 	@Override
 	public void set(double value){
-		setPosition(value);
-	}
+        if(value < 0.0) {
+            value = Math.abs(value);
+        }
 
-	@Override
-	public void set(double speed, int direction) {
-		set(speed);
-	}
+        value = Mathf.constrain(value, mMinAngle, mMaxAngle);
 
-	@Override
-	public void set(double speed, boolean direction) {
-		set(speed);
+        setPosition((value - mMinAngle) / getAngleRange());
 	}
 	
 	@Override
 	public double get(){
-		return getPosition();
+		return getPosition() * getAngleRange() + mMinAngle;
 	}
 	
 	@Override
 	public void stop(){
-		set(0);
-	}
-	
-	public void setAngle(double angle){
-		if(angle < 0.0) {
-			angle = Math.abs(angle);
-		}
-		
-		angle = Mathf.constrain(angle, mMinAngle, mMaxAngle);
-		
-		setPosition((angle - mMinAngle) / getAngleRange());
-	}
-
-	public double getAngle(){
-		return getPosition() * getAngleRange() + mMinAngle;
+		disable();
 	}
 	
 	public double getAngleRange(){
 		return mMaxAngle - mMinAngle;
 	}
-	
-	@Override
-	public boolean isInverted() {return false;}
-
-	@Override
-	public void setInverted(boolean inverted) {}
 }
