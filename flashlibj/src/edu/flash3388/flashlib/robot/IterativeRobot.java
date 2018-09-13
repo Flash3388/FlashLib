@@ -1,13 +1,10 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.robot.modes.RobotMode;
-import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.flashboard.Flashboard;
-import edu.flash3388.flashlib.robot.io.devices.actuators.MotorSafetyHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -50,15 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * is in a mode, the {@link Scheduler#run()} method is executed periodically, insuring correct operation
  * of that system. When operation modes change, all {@link Action} objects are interrupted by calling
  * {@link Scheduler#removeAllActions()} so that unwanted execution will not remain and cause issues. In
- * addition, when in disabled mode the scheduling enters {@link Scheduler#MODE_TASKS} mode so {@link Action} objects
+ * addition, when in disabled mode the scheduling enters {@link SchedulerRunMode#TASKS_ONLY} mode so {@link Action} objects
  * are not executed, only tasks are, this is for safety of operation.
- * <p>
- * The {@link MotorSafetyHelper} class is used to provide safety for motor operations. When in disabled mode,
- * {@link MotorSafetyHelper#disableAll()} is used to disable usage of safe actuators. When in other operation
- * modes, {@link MotorSafetyHelper#checkAll()} is called periodically (every {@value #SAFETY_CHECK_COUNTER} iterations) 
- * to insure motor safety.
- * <p>
- * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
  * <p>
  * When the robot enters shutdown mode {@link #robotFree()} is called to allow user shutdown operations.
  * 
@@ -70,8 +60,8 @@ public abstract class IterativeRobot extends RobotBase {
 	
 	public static final int ITERATION_DELAY = 5; //ms
 	
-	private AtomicBoolean mRunLoop;
-	private Scheduler mScheduler;
+	private final AtomicBoolean mRunLoop;
+	private final Scheduler mScheduler;
 
 	protected IterativeRobot() {
 	    mRunLoop = new AtomicBoolean(true);
