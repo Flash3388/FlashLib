@@ -73,9 +73,7 @@ public abstract class IterativeRobot extends RobotBase {
 
 	@Override
 	protected void robotShutdown(){
-        if (mRunLoop) {
-            mRunLoop = false;
-        }
+        mRunLoop = false;
 
         mScheduler.removeAllActions();
         mScheduler.setRunMode(SchedulerRunMode.DISABLED);
