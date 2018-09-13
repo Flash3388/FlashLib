@@ -19,12 +19,12 @@ public class RobotMain {
 
         try {
             logger.entering("RobotBase", "robotMain");
-            robotBase.robotMain();
+            robotBase.start();
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error in robot main", t);
         } finally {
-            logger.entering("RobotBase", "shutdown");
-            robotBase.robotShutdown();
+            logger.entering("RobotBase", "stop");
+            robotBase.stop();
         }
     }
 }

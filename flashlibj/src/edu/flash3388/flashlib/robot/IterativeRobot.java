@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * addition, when in disabled mode the scheduling enters {@link SchedulerRunMode#TASKS_ONLY} mode so {@link Action} objects
  * are not executed, only tasks are, this is for safety of operation.
  * <p>
- * When the robot enters shutdown mode {@link #robotFree()} is called to allow user shutdown operations.
+ * When the robot enters stop mode {@link #robotFree()} is called to allow user stop operations.
  * 
  * 
  * @author Tom Tzook

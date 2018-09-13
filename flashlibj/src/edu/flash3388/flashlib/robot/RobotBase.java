@@ -8,8 +8,8 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
  * starting the robot software. When the robot is started, the user implementation of this class is initialized,
  * robot and FlashLib systems are initialized and user robot code is then started by calling {@link #robotMain()}.
- * When the JVM enters shutdown, this class uses a shutdown hook to perform ordered robot shutdown and will
- * allow custom user shutdown by calling {@link #robotShutdown()}.
+ * When the JVM enters stop, this class uses a stop hook to perform ordered robot stop and will
+ * allow custom user stop by calling {@link #robotShutdown()}.
  * 
  * <p>
  * To setup a robot class, insure the software's MANIFEST file contains a {@value #MANIFEST_ROBOT_CLASS} property
@@ -45,11 +45,11 @@ public abstract class RobotBase implements RobotInterface {
 
 	}
 
-	final void run() {
+	final void start() {
 		robotMain();
 	}
 
-	final void shutdown() {
+	final void stop() {
 		robotShutdown();
 	}
 	
@@ -71,7 +71,7 @@ public abstract class RobotBase implements RobotInterface {
 	protected abstract void robotMain();
 
 	/**
-	 * Called when the JVM shuts down to perform custom shutdown operations. Should be used
+	 * Called when the JVM shuts down to perform custom stop operations. Should be used
 	 * to free robot systems.
 	 */
 	protected abstract void robotShutdown();
