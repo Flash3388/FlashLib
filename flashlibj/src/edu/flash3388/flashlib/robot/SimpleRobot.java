@@ -1,11 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.flashboard.Flashboard;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
-import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.util.FlashUtil;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
@@ -22,21 +18,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * {@link #robotInit()} is called when FlashLib finished initialization. Robot systems should be initialized here.
  * <p>
- * If flashboard was initialized, {@link Flashboard#start()} is called automatically.
- * <p>
- * When the robot enters stop mode {@link #robotFree()} is called to allow user stop operations.
+ * When the robot enters stop mode {@link #robotStop()} is called to allow user stop operations.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
 public abstract class SimpleRobot extends RobotBase{
 	
-	public static final int ITERATION_DELAY = 5; //ms
+	private static final int ITERATION_DELAY = 5; //ms
 	
-	private AtomicBoolean mRunLoop;
+	private boolean mRunLoop;
 
 	protected SimpleRobot() {
-		mRunLoop = new AtomicBoolean(true);
+		mRunLoop = true;
 	}
 
 	@Override
@@ -46,13 +40,17 @@ public abstract class SimpleRobot extends RobotBase{
 
 	@Override
 	protected void robotShutdown(){
-		if (mRunLoop.compareAndSet(true, false)) {
-			robotFree();
-		}
+		mRunLoop = false;
+
+        robotStop();
 	}
 
+	protected void stopRobotLoop() {
+	    mRunLoop = false;
+    }
+
 	private void robotLoop(){
-		while(mRunLoop.get()){
+		while(mRunLoop){
 			if(isDisabled()){
 				disabled();
 				
@@ -72,10 +70,10 @@ public abstract class SimpleRobot extends RobotBase{
 	}
 
 	private boolean stayInMode(RobotMode mode) {
-		return isInMode(mode) && mRunLoop.get();
+		return isInMode(mode) && mRunLoop;
 	}
 
-	protected void robotFree(){}
+	protected void robotStop(){}
 	protected abstract void disabled();
 	protected abstract void onMode(RobotMode mode);
 }
