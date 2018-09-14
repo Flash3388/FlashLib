@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
 
-public class Servo extends SafePWMMotor implements FlashPositionController {
+public class Servo extends SafePWMMotor implements PositionController {
 
 	private double mMinAngle;
 	private double mMaxAngle;

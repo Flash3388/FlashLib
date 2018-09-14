@@ -9,9 +9,9 @@ import java.util.*;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class MultiSpeedController implements FlashSpeedController {
+public class MultiSpeedController implements SpeedController {
 
-	private List<FlashSpeedController> mControllers;
+	private List<SpeedController> mControllers;
 	private boolean mIsInverted;
 	
 	/**
@@ -19,7 +19,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	 * 
 	 * @param controllers array of controllers to be contained
 	 */
-	public MultiSpeedController(FlashSpeedController...controllers) {
+	public MultiSpeedController(SpeedController...controllers) {
 		this(Arrays.asList(controllers));
 	}
 	/**
@@ -27,8 +27,8 @@ public class MultiSpeedController implements FlashSpeedController {
 	 * 
 	 * @param controllers list of controllers to be contained
 	 */
-	public MultiSpeedController(Collection<FlashSpeedController> controllers){
-		mControllers = new ArrayList<FlashSpeedController>(controllers);
+	public MultiSpeedController(Collection<SpeedController> controllers){
+		mControllers = new ArrayList<SpeedController>(controllers);
 
 		setInverted(false);
 		set(0);
@@ -40,7 +40,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	 * @param index the index of the controller
 	 * @return a controller from the container
 	 */
-	public FlashSpeedController getController(int index){
+	public SpeedController getController(int index){
 		return mControllers.get(index);
 	}
 
@@ -60,7 +60,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	 */
 	@Override
 	public void set(double speed) {
-		for (FlashSpeedController controller : mControllers) {
+		for (SpeedController controller : mControllers) {
 			controller.set(speed);
 		}
 	}
@@ -73,7 +73,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	 */
 	@Override
 	public void stop() {
-		for (FlashSpeedController controller : mControllers) {
+		for (SpeedController controller : mControllers) {
 			controller.stop();
 		}
 	}
@@ -88,7 +88,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	public double get() {
 		double totalSpeed = 0.0;
 
-		for (FlashSpeedController controller : mControllers) {
+		for (SpeedController controller : mControllers) {
 			totalSpeed += controller.get();
 		}
 
@@ -113,7 +113,7 @@ public class MultiSpeedController implements FlashSpeedController {
 	public void setInverted(boolean inverted) {
 		mIsInverted = inverted;
 
-		for (FlashSpeedController controller : mControllers) {
+		for (SpeedController controller : mControllers) {
 			controller.setInverted(inverted);
 		}
 	}

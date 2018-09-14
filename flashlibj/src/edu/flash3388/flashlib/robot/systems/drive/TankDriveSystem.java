@@ -1,23 +1,23 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class TankDriveSystem extends Subsystem implements TankDriveInterface {
 
-    private final FlashSpeedController mRightController;
-    private final FlashSpeedController mLeftController;
+    private final SpeedController mRightController;
+    private final SpeedController mLeftController;
 
     private final DriveAlgorithms mDriveAlgorithms;
 
-    public TankDriveSystem(FlashSpeedController rightController, FlashSpeedController leftController, DriveAlgorithms driveAlgorithms) {
+    public TankDriveSystem(SpeedController rightController, SpeedController leftController, DriveAlgorithms driveAlgorithms) {
         mRightController = rightController;
         mLeftController = leftController;
 
         mDriveAlgorithms = driveAlgorithms;
     }
 
-    public TankDriveSystem(FlashSpeedController rightController, FlashSpeedController leftController) {
+    public TankDriveSystem(SpeedController rightController, SpeedController leftController) {
         this(rightController, leftController, new DriveAlgorithms());
     }
 

@@ -1,13 +1,13 @@
 package edu.flash3388.flashlib.robot.systems;
 
-import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class SingleMotorSystem extends Subsystem implements YAxisMovableInterface, XAxisMovableInterface, Rotatable {
 
-    private final FlashSpeedController mController;
+    private final SpeedController mController;
 
-    public SingleMotorSystem(FlashSpeedController controller) {
+    public SingleMotorSystem(SpeedController controller) {
         mController = controller;
     }
 

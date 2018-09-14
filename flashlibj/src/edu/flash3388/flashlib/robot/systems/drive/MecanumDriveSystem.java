@@ -1,20 +1,20 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInterface {
 
-    private final FlashSpeedController mFrontRightController;
-    private final FlashSpeedController mRearRightController;
-    private final FlashSpeedController mFrontLeftController;
-    private final FlashSpeedController mRearLeftController;
+    private final SpeedController mFrontRightController;
+    private final SpeedController mRearRightController;
+    private final SpeedController mFrontLeftController;
+    private final SpeedController mRearLeftController;
 
     private final DriveAlgorithms mDriveAlgorithms;
 
-    public MecanumDriveSystem(FlashSpeedController frontRightController, FlashSpeedController rearRightController,
-                              FlashSpeedController frontLeftController, FlashSpeedController rearLeftController,
+    public MecanumDriveSystem(SpeedController frontRightController, SpeedController rearRightController,
+                              SpeedController frontLeftController, SpeedController rearLeftController,
                               DriveAlgorithms driveAlgorithms) {
         mFrontRightController = frontRightController;
         mRearRightController = rearRightController;
@@ -24,8 +24,8 @@ public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInter
         mDriveAlgorithms = driveAlgorithms;
     }
 
-    public MecanumDriveSystem(FlashSpeedController frontRightController, FlashSpeedController rearRightController,
-                              FlashSpeedController frontLeftController, FlashSpeedController rearLeftController) {
+    public MecanumDriveSystem(SpeedController frontRightController, SpeedController rearRightController,
+                              SpeedController frontLeftController, SpeedController rearLeftController) {
         this(frontRightController, rearRightController, frontLeftController, rearLeftController, new DriveAlgorithms());
     }
 

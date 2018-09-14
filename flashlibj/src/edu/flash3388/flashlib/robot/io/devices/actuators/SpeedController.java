@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.util.beans.DoubleProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface FlashSpeedController extends DoubleProperty {
+public interface SpeedController extends DoubleProperty {
 
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 

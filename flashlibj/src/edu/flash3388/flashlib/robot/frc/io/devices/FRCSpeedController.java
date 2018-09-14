@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.robot.frc.io.devices;
 
-import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 
-public class FRCSpeedController implements FlashSpeedController {
+public class FRCSpeedController implements SpeedController {
 
     private final edu.wpi.first.wpilibj.SpeedController mSpeedController;
 

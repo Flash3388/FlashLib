@@ -1,19 +1,19 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import edu.flash3388.flashlib.robot.io.devices.actuators.FlashSpeedController;
+import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class OmniDriveSystem extends Subsystem implements HolonomicDriveInterface {
 
-    private final FlashSpeedController mFrontController;
-    private final FlashSpeedController mRightController;
-    private final FlashSpeedController mRearController;
-    private final FlashSpeedController mLeftController;
+    private final SpeedController mFrontController;
+    private final SpeedController mRightController;
+    private final SpeedController mRearController;
+    private final SpeedController mLeftController;
 
     private final DriveAlgorithms mDriveAlgorithms;
 
-    public OmniDriveSystem(FlashSpeedController frontController, FlashSpeedController rightController,
-                           FlashSpeedController leftController, FlashSpeedController rearController,
+    public OmniDriveSystem(SpeedController frontController, SpeedController rightController,
+                           SpeedController leftController, SpeedController rearController,
                            DriveAlgorithms driveAlgorithms) {
         mFrontController = frontController;
         mRightController = rightController;
@@ -23,8 +23,8 @@ public class OmniDriveSystem extends Subsystem implements HolonomicDriveInterfac
         mDriveAlgorithms = driveAlgorithms;
     }
 
-    public OmniDriveSystem(FlashSpeedController frontController, FlashSpeedController rightController,
-                           FlashSpeedController leftController, FlashSpeedController rearController) {
+    public OmniDriveSystem(SpeedController frontController, SpeedController rightController,
+                           SpeedController leftController, SpeedController rearController) {
         this(frontController, rightController, leftController, rearController, new DriveAlgorithms());
     }
 

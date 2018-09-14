@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-public interface FlashPositionController {
+public interface PositionController {
     // TODO: COMPILE A STRONGER CONTRACT FOR THIS INTERFACE: values ranges, and meaning.
 
     /**
