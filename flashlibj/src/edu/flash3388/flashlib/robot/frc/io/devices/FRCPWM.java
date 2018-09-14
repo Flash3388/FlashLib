@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.robot.io.PWM;
 import edu.wpi.first.wpilibj.SensorBase;
 import edu.wpi.first.wpilibj.hal.DIOJNI;
 
-public class FRCPWM implements PWM{
+public class FRCPWM implements PWM {
 
 	private edu.wpi.first.wpilibj.PWM port;
 	
