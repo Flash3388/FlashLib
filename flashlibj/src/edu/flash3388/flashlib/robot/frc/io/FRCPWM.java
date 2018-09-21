@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.frc.io.devices;
+package edu.flash3388.flashlib.robot.frc.io;
 
 import edu.flash3388.flashlib.robot.io.PWM;
 import edu.wpi.first.wpilibj.SensorBase;
