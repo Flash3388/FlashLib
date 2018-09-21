@@ -10,8 +10,14 @@ import edu.wpi.first.wpilibj.SampleRobot;
 
 public abstract class FRCRobotBase extends RobotBase implements RobotInterface {
 	
-	private final RobotModeSupplier mRobotModeSupplier = new FRCRobotModeSupplier();
-	private final HIDInterface mHidInterface = new FRCHIDInterface();
+	private final RobotModeSupplier mRobotModeSupplier;
+	private final HIDInterface mHidInterface;
+
+	public FRCRobotBase() {
+	    // m_ds -> from super -> protected final DriverStation m_ds
+        mRobotModeSupplier = new FRCRobotModeSupplier(m_ds);
+        mHidInterface = new FRCHIDInterface(m_ds);
+    }
 
 	@Override
 	public RobotModeSupplier getModeSupplier() {

@@ -19,10 +19,8 @@ public class Talon extends PWMSpeedController {
 	 * @param port PWM port object.
 	 */
 	public Talon(PWM port) {
-		super(port, new PWMBounds(2.037, 1.539, 1.513, 1.487, 0.989, false));
-
-		setFrequency(333.0);
-
-		setSpeed(0.0);
+		super(port,
+                new PWMBounds(2.037, 1.539, 1.513, 1.487, 0.989, false),
+                333.0);
 	}
 }

@@ -6,21 +6,21 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class FRCRobotModeSupplier implements RobotModeSupplier {
 
-	private final DriverStation mDs;
+	private final DriverStation mDriverStation;
 
-	public FRCRobotModeSupplier() {
-		mDs = DriverStation.getInstance();
+	public FRCRobotModeSupplier(DriverStation driverStation) {
+		mDriverStation = driverStation;
 	}
 	
 	@Override
 	public RobotMode getMode() {
-		if (mDs.isOperatorControl()) {
+		if (mDriverStation.isOperatorControl()) {
 			return FRCRobotMode.OPERATOR_CONTROL;
 		}
-		if (mDs.isAutonomous()) {
+		if (mDriverStation.isAutonomous()) {
 			return FRCRobotMode.AUTONOMOUS;
 		}
-		if (mDs.isTest()) {
+		if (mDriverStation.isTest()) {
 			return FRCRobotMode.TEST;
 		}
 

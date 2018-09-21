@@ -17,10 +17,9 @@ public class TalonSRX extends PWMSpeedController {
 	 * @param port PWM port object.
 	 */
 	public TalonSRX(PWM port) {
-		super(port, new PWMBounds(2.004, 1.52, 1.50, 1.48, 0.997, false));
-
-		setFrequency(333.0);
-
-		setSpeed(0.0);
+		super(
+		        port,
+                new PWMBounds(2.004, 1.52, 1.50, 1.48, 0.997, false),
+                333.0);
 	}
 }

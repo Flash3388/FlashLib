@@ -1,45 +1,32 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
 
-public class Servo extends SafePWMMotor implements PositionController {
+public class Servo extends PWMPositionController {
 
-	private double mMinAngle;
-	private double mMaxAngle;
+	private final double mMinAngle;
+	private final double mMaxAngle;
 	
 	public Servo(PWM port, double minAngle, double maxAngle) {
-		super(port, new PWMBounds(2.4, 0, 0, 0, 0.6, false));
+		super(
+		        port,
+                new PWMBounds(2.4, 0, 0, 0, 0.6, false),
+                port.getFrequency() * 0.25);
 
 		mMaxAngle = maxAngle;
 		mMinAngle = minAngle;
-
-		setFrequency(getFrequency() * 0.25f);
 	}
 
 	public Servo(PWM port){
 		this(port, 0.0, 180.0);
 	}
 
-	@Override
-	public void set(double value){
-        if(value < 0.0) {
-            value = Math.abs(value);
-        }
-
-        value = Mathf.constrain(value, mMinAngle, mMaxAngle);
-
-        setPosition((value - mMinAngle) / getAngleRange());
+	public void setAngle(double angle){
+        set((angle - mMinAngle) / getAngleRange());
 	}
-	
-	@Override
-	public double get(){
-		return getPosition() * getAngleRange() + mMinAngle;
-	}
-	
-	@Override
-	public void stop(){
-		disable();
+
+	public double getAngle(){
+		return get() * getAngleRange() + mMinAngle;
 	}
 	
 	public double getAngleRange(){

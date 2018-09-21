@@ -30,21 +30,13 @@ public class PWMBounds {
      */
     public PWMBounds(double max, double deadbandMax, double center, double deadbandMin, double min,
                   boolean eliminateDeadband) {
-        set(max, deadbandMax, center, deadbandMin, min);
-
-        mShouldEliminateDeadband = eliminateDeadband;
-    }
-
-    public void set(double max, double deadbandMax, double center, double deadbandMin, double min) {
         mMax = max;
         mDeadbandMax = deadbandMax;
         mCenter = center;
         mDeadbandMin = deadbandMin;
         mMin = min;
-    }
 
-    public void setEliminateDeadband(boolean eliminate) {
-        mShouldEliminateDeadband = eliminate;
+        mShouldEliminateDeadband = eliminateDeadband;
     }
 
     public boolean isDeadbandEliminated(){

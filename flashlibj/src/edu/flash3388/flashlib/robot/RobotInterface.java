@@ -30,7 +30,7 @@ public interface RobotInterface {
 	 * Gets the current operation mode set by the {@link RobotModeSupplier} object of the robot.
 	 * <p>
 	 * The default implementation gets the mode selector by calling {@link #getModeSupplier()}. If the
-	 * returned value is null, {@link RobotModeSupplier#MODE_DISABLED} is returned, otherwise {@link RobotModeSupplier#getMode()}
+	 * returned value is null, {@link RobotMode#DISABLED} is returned, otherwise {@link RobotModeSupplier#getMode()}
 	 * is returned.
 	 * 
 	 * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
