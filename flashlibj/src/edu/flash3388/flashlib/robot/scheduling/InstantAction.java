@@ -8,12 +8,16 @@ package edu.flash3388.flashlib.robot.scheduling;
  */
 public abstract class InstantAction extends Action {
 
-	@Override
-	protected void end() {
-	}
+    @Override
+    protected final void initialize() {
+    }
 
-	@Override
-	protected boolean isFinished() {
+    @Override
+	protected final boolean isFinished() {
 		return true;
 	}
+
+    @Override
+    protected final void end() {
+    }
 }
