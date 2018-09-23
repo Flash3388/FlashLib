@@ -30,16 +30,10 @@ import java.util.logging.Logger;
  */
 public final class FlashUtil {
 	
-	/**
-	 * The current version of FlashLib.
-	 */
-	public static final String VERSION = "1.3.0";
-	
 	private FlashUtil(){}
 	
 	private static final String os = System.getProperty("os.name").toLowerCase();
 	private static final String architecture = System.getProperty("os.arch");
-	private static final String version = System.getProperty("os.version");
 
 	
 	//--------------------------------------------------------------------
