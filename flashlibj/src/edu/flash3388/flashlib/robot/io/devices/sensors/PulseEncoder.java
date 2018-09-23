@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.Counter;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
@@ -13,35 +15,39 @@ public abstract class PulseEncoder implements Encoder{
 
 	private static final int DEFAULT_REST_TIMEOUT = 200;
 	
-	private EncoderDataType mDataType = EncoderDataType.Rate;
+	private EncoderDataType mDataType;
 	
 	private Counter mCounter;
+	private final Clock mClock;
 	
 	private double mDistancePerPulse;
 	private int mPulsesPerRevolution;
 	
 	private int mLastCount;
-	private int mLastCheckTime;
-	private int mRestTimeout;
-	private boolean shouldCheckRest;
+	private long mLastCheckTime;
+	private long mRestTimeout;
+	private boolean mShouldCheckRest;
 
-	protected PulseEncoder(Counter counter, int pulsesPerRevolution, double distancePerPulse) {
-		this.mCounter = counter;
-		this.mDistancePerPulse = distancePerPulse;
-		this.mPulsesPerRevolution = pulsesPerRevolution;
+	protected PulseEncoder(Counter counter, Clock clock, int pulsesPerRevolution, double distancePerPulse) {
+		mCounter = counter;
+		mClock = clock;
+		mDistancePerPulse = distancePerPulse;
+		mPulsesPerRevolution = pulsesPerRevolution;
 
-		shouldCheckRest = false;
+		mShouldCheckRest = false;
 		mRestTimeout = DEFAULT_REST_TIMEOUT;
+        mDataType = EncoderDataType.Rate;
+        mLastCheckTime = Time.INVALID_TIME;
 
 		reset();
 	}
 	
 	private void checkRest(){
-		if(shouldCheckRest){
-			int time = FlashUtil.millisInt();
+		if(mShouldCheckRest){
+			long time = mClock.currentTimeMillis();
 			int count = getRaw();
 			
-			if(mLastCheckTime == 0) {
+			if(mLastCheckTime == Time.INVALID_TIME) {
 				mLastCheckTime = time;
 			}
 
@@ -111,7 +117,7 @@ public abstract class PulseEncoder implements Encoder{
 	 * @param restCheck true to enable rest check, false otherwise.
 	 */
 	public void enableRestCheck(boolean restCheck){
-		shouldCheckRest = restCheck;
+		mShouldCheckRest = restCheck;
 
 		if(restCheck){
 			mLastCheckTime = 0;
@@ -132,7 +138,7 @@ public abstract class PulseEncoder implements Encoder{
 	 * @return true to enable rest check, false otherwise.
 	 */
 	public boolean isRestCheckEnabled(){
-		return shouldCheckRest;
+		return mShouldCheckRest;
 	}
 	
 	/**
@@ -151,7 +157,7 @@ public abstract class PulseEncoder implements Encoder{
 	 * 
 	 * @return timeout in milliseconds.
 	 */
-	public int getRestTimeout(){
+	public long getRestTimeout(){
 		return mRestTimeout;
 	}
 			

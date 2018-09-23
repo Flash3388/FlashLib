@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
-import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.Time;
 
 /**
  * An {@link Action} wrapper which calls {@link #execute()} once during a period of time defined by the user.
@@ -10,33 +11,32 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public class PeriodicAction extends Action {
 
-	private Action mAction;
-	private int mPeriodMs;
-	private int mLastRunTimeMs;
+	private final Action mAction;
+	private final Clock mClock;
+	private final long mPeriodMs;
+
+	private long mLastRunTimeMs;
 	
-	public PeriodicAction(Action action, int periodMs){
-		this.mAction = action;
-		this.mPeriodMs = periodMs;
+	public PeriodicAction(Action action, Clock clock, long periodMs){
+		mAction = action;
+		mClock = clock;
+		mPeriodMs = periodMs;
 		
 		setTimeoutMs(action.getTimeoutMs());
 		copyRequirements(action);
 	}
 
-	public PeriodicAction(Action action, double periodSeconds){
-		this(action, (int)(periodSeconds * 0.001));
-	}
-	
 	@Override
 	protected void initialize(){
 		mAction.initialize();
-		mLastRunTimeMs = -1;
+		mLastRunTimeMs = Time.INVALID_TIME;
 	}
 	
 	@Override
 	protected void execute() {
-		if(mLastRunTimeMs < 0 || FlashUtil.millisInt() - mLastRunTimeMs >= mPeriodMs){
+		if(mLastRunTimeMs == Time.INVALID_TIME || mClock.currentTimeMillis() - mLastRunTimeMs >= mPeriodMs){
 			mAction.execute();
-			mLastRunTimeMs = FlashUtil.millisInt();
+			mLastRunTimeMs = mClock.currentTimeMillis();
 		}
 	}
 

@@ -1,11 +1,14 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.FlashClock;
+import edu.flash3388.flashlib.time.Time;
+import edu.flash3388.flashlib.util.FlashUtil;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * An Action is something that can be executed on the robot. This can include any operation on the robot,
@@ -25,7 +28,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * be called.
  * <p>
  * An action can have a timeout. If the time since the action started running has passed a given timeout, the
- * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeout(int)}.
+ * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeoutMs(long)}.
  * <p>
  * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Subsystem} object
  * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
@@ -67,37 +70,34 @@ public abstract class Action {
 	}
 
 	private final Set<Subsystem> mRequirements;
+	private final Clock mClock;
 
 	private boolean mIsInitialized;
 	private boolean mIsCanceled;
 	private boolean mIsRunning;
 
-	private int mTimeoutMs;
-	private int mStartTime;
+	private long mTimeoutMs;
+	private long mStartTime;
 
-	/**
-	 * Creates a new action.
-	 */
-	public Action(int timeoutMs){
-		this();
-		setTimeoutMs(timeoutMs);
-	}
-
-	public Action(double timeoutSeconds) {
-		this();
-		setTimeoutSeconds(timeoutSeconds);
-	}
-
-	public Action() {
+	public Action(Clock clock, long timeoutMs) {
 		mRequirements = new HashSet<Subsystem>(2);
+        mClock = clock;
 
 		mIsRunning = false;
 		mIsCanceled = false;
 		mIsInitialized = false;
 
-		mTimeoutMs = -1;
-		mStartTime = -1;
+		mTimeoutMs = timeoutMs;
+		mStartTime = Time.INVALID_TIME;
 	}
+
+	public Action(Clock clock) {
+	    this(clock, Time.INVALID_TIME);
+    }
+
+    public Action() {
+	    this(FlashClock.getClock());
+    }
 	
 	/**
 	 * Starts the action. If the Scheduler was initialized, than the action is added to the
@@ -142,7 +142,7 @@ public abstract class Action {
 	 * Gets the running timeout of the action in milliseconds.
 	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
 	 */
-	public int getTimeoutMs(){
+	public long getTimeoutMs(){
 		return mTimeoutMs;
 	}
 
@@ -151,24 +151,15 @@ public abstract class Action {
 	 * time is counted. If the timeout is reached, the action is canceled.
 	 * @param timeoutMs timeout in milliseconds
 	 */
-	public void setTimeoutMs(int timeoutMs){
+	public void setTimeoutMs(long timeoutMs){
 		mTimeoutMs = timeoutMs;
-	}
-
-	/**
-	 * Sets the running timeout for this action in seconds. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param timeoutSeconds timeout in seconds
-	 */
-	public void setTimeoutSeconds(double timeoutSeconds){
-		setTimeoutMs((int)(timeoutSeconds * 0.001));
 	}
 
 	/**
 	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
 	 */
 	public void cancelTimeout(){
-		mTimeoutMs = -1;
+		mTimeoutMs = Time.INVALID_TIME;
 	}
 
 	/**
@@ -177,8 +168,8 @@ public abstract class Action {
 	 * @return true if the action timeout, false otherwise
 	 */
 	public boolean hasTimeoutReached(){
-		return mStartTime > 0 && mTimeoutMs > 0 && (FlashUtil.millisInt() - mStartTime)
-				>= mTimeoutMs;
+		return mStartTime != Time.INVALID_TIME && mTimeoutMs != Time.INVALID_TIME &&
+                (mClock.currentTimeMillis() - mStartTime) >= mTimeoutMs;
 	}
 
 	/**
@@ -245,7 +236,7 @@ public abstract class Action {
 		mIsInitialized = false;
 		mIsCanceled = false;
 		mIsRunning = false;
-		mStartTime = -1;
+		mStartTime = Time.INVALID_TIME;
 	}
 
 	boolean run(){
@@ -259,7 +250,7 @@ public abstract class Action {
 
 		if(!mIsInitialized) {
 			mIsInitialized = true;
-			mStartTime = FlashUtil.millisInt();
+			mStartTime = mClock.currentTimeMillis();
 			initialize();
 		}
 
