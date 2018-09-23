@@ -1,9 +1,5 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.logging.Logger;
-
-import edu.flash3388.flashlib.util.FlashUtil;
-
 /**
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
  * starting the robot software. When the robot is started, the user implementation of this class is initialized,
@@ -18,24 +14,13 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * <p>
  * This class implements the interfaces {@link RobotInterface} and {@link SBC} and provides basic implementations. Those
  * can be overridden if needed.
- * <p>
- * There are 2 abstract method: {@link #robotMain()} and {@link #robotShutdown()}. Those must recieve implementation.
- * To allow user customization, it is possible to override {@link #configInit(RobotInitializationData)} and customize
- * initialization parameters. 
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public abstract class RobotBase implements RobotInterface {
-	
-	/**
-	 * FlashLib's main log. Received by calling {@link FlashUtil#getLogger()}. Used to log
-	 * initialization and error data for software operation tracking.
-	 */
-	protected final Logger logger = FlashUtil.getLogger();
 
 	protected RobotBase() {
-
 	}
 
 	final void initialize() throws RobotInitializationException {

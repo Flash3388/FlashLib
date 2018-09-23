@@ -7,7 +7,6 @@ public class RobotMain {
 
     private RobotMain() {}
 
-
     public static void start(RobotBase robotBase, Logger logger) {
         try {
             logger.entering("RobotBase", "initialize");
