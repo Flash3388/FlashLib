@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.frc;
 
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
+import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
@@ -21,7 +22,7 @@ public abstract class FRCIterativeRobot extends FRCRobotBase {
 
     @Override
     public void startCompetition() {
-        HAL.report(22, 1); // TODO: FIND CONSTANTS FOR THE RESOURCE TYPE
+        HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative); // TODO: FIND CONSTANTS FOR THE RESOURCE TYPE
 
         HAL.observeUserProgramStarting();
         robotInit();
