@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.Counter;
 import edu.flash3388.flashlib.robot.io.DigitalOutput;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * Control class for an ultrasonic range finder sensor. Range finders are sensors used to measure distances between
@@ -15,12 +14,6 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * short ~10 us pulse to send a sound wave, the echo channel is used to receive a pulse until the sound wave is returned.
  * The length of the pulse measured in the echo channel is the time the passed from when the sound wave was sent until the time
  * it was received. This time value is then divided by 2 and multiplied by the speed of sound.
- * <p>
- * It is possible to enter all the ultrasonic objects from this class into automatic mode using {@link #setAutomaticMode(boolean)},
- * which will start or stop a thread. The thread will iterate over all the created ultrasonics and if {@link #isEnabled()} returns
- * true, {@link #ping()} is called. Using automatic mode creates a "round robin" status for ultrasonics where they updated
- * one by one, which also makes sure that sound waves do not cancel each other since only one sensor is updated at any given
- * time.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0

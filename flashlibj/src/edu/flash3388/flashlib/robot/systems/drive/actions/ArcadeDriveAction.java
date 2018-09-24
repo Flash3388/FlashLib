@@ -3,15 +3,16 @@ package edu.flash3388.flashlib.robot.systems.drive.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.TankDriveInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class ArcadeDriveAction extends Action{
 	
 	private TankDriveInterface mDriveInterface;
-	private DoubleSource mMoveAxis;
-	private DoubleSource mRotateAxis;
+	private DoubleSupplier mMoveAxis;
+	private DoubleSupplier mRotateAxis;
 	
-	public ArcadeDriveAction(TankDriveInterface driveInterface, DoubleSource move, DoubleSource rotate) {
+	public ArcadeDriveAction(TankDriveInterface driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;
 		this.mRotateAxis = rotate;
 		this.mMoveAxis = move;
@@ -23,7 +24,7 @@ public class ArcadeDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mDriveInterface.arcadeDrive(mMoveAxis.get(), mRotateAxis.get());
+		mDriveInterface.arcadeDrive(mMoveAxis.getAsDouble(), mRotateAxis.getAsDouble());
 	}
 
 	@Override

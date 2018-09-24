@@ -3,15 +3,16 @@ package edu.flash3388.flashlib.robot.systems.drive.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.TankDriveInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class TankDriveAction extends Action{
 	
 	private TankDriveInterface mDriveInterface;
-	private DoubleSource mRightSource;
-	private DoubleSource mLeftSource;
+	private DoubleSupplier mRightSource;
+	private DoubleSupplier mLeftSource;
 	
-	public TankDriveAction(TankDriveInterface driveInterface, DoubleSource right, DoubleSource left) {
+	public TankDriveAction(TankDriveInterface driveInterface, DoubleSupplier right, DoubleSupplier left) {
 		this.mDriveInterface = driveInterface;
 		this.mRightSource = right;
 		this.mLeftSource = left;
@@ -23,7 +24,7 @@ public class TankDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mDriveInterface.tankDrive(mRightSource.get(), mLeftSource.get());
+		mDriveInterface.tankDrive(mRightSource.getAsDouble(), mLeftSource.getAsDouble());
 	}
 
 	@Override

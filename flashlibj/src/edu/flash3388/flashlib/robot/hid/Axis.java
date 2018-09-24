@@ -1,14 +1,12 @@
 package edu.flash3388.flashlib.robot.hid;
 
-import edu.flash3388.flashlib.util.beans.DoubleSource;
-
 /**
  * A wrapper for axes on human interface devices.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class Axis implements DoubleSource {
+public class Axis {
 
 	private final HID mHid;
 	private final int mAxis;

@@ -88,6 +88,9 @@ public class EventDispatcher {
 	 * @param listenerCls class of listener to invoke - all listeners of this class will be invoked.
 	 * @param event event to dispatch, passing it to all listeners.
 	 * @param consumer consumer to dispatch event to, must be a method from the listener class which receives the given event as a parameter.
+     *
+     * @param <L> listener class type
+     * @param <E> event class type
 	 */
 	public synchronized <E extends Event, L extends Listener> void dispatch(Class<L> listenerCls, E event, BiConsumer<L, E> consumer) {
 		Stream<ListenerWrapper> listenersStream = getListenersForClass(listenerCls);

@@ -42,7 +42,8 @@ public class XboxController implements HID {
 	
 	/**
 	 * Creates a new Xbox controller.
-	 * 
+	 *
+     * @param hidInterface the hid interface
 	 * @param channel the device index
 	 */
 	public XboxController(HIDInterface hidInterface, int channel){

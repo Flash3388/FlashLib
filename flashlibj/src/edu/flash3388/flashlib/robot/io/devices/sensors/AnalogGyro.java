@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.io.AnalogAccumulator;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 import java.util.Objects;
 
@@ -24,7 +23,7 @@ import java.util.Objects;
 public class AnalogGyro extends GyroBase {
 	
 	private static final double DEFAULT_SENSITIVITY = 0.007;
-	private static final double CALIBRATION_TIME = 0.5;
+	private static final long CALIBRATION_TIME_MS = 500;
 	
 	private AnalogInput mInputPort;
 	private AnalogAccumulator mAccumulator;
@@ -41,19 +40,18 @@ public class AnalogGyro extends GyroBase {
 	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
 	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
 	 * <p>
-	 * Sensor center and offset are calculated by calling {@link #calibrate()}. Sensitivity used is {@value #DEFAULT_SENSITIVITY}.
+	 * Sensor center and offset should be calculated by calling {@link #calibrate()}. Sensitivity used is {@value #DEFAULT_SENSITIVITY}.
 	 * 
 	 * @param port an analog input port.
 	 */
-	public AnalogGyro(AnalogInput port){
-		this.mInputPort = port;
+	public AnalogGyro(AnalogInput port) {
+		mInputPort = port;
+		mSensitivity = DEFAULT_SENSITIVITY;
 		
-		this.mAccumulator = port.getAccumulator();
+		mAccumulator = port.getAccumulator();
 		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
 
-		this.mAccumulator.enable();
-		
-		calibrate();
+		mAccumulator.enable();
 	}
 
 	/**
@@ -88,26 +86,28 @@ public class AnalogGyro extends GyroBase {
 	 * @param offset uncalibrated sensor offset voltage.
 	 */
 	public AnalogGyro(AnalogInput port, double sensitivity, double center, double offset) {
-		this.mInputPort = port;
-		this.mSensitivity = sensitivity;
-		this.mCenter = port.voltsToValue(center);
-		this.mOffset = port.voltsToValue(offset);
+		mInputPort = port;
+		mSensitivity = sensitivity;
+		mCenter = port.voltsToValue(center);
+		mOffset = port.voltsToValue(offset);
 		
-		this.mAccumulator = port.getAccumulator();
+		mAccumulator = port.getAccumulator();
 		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
 
-		this.mAccumulator.enable();
+		mAccumulator.enable();
 	}
 	
 	/**
 	 * Calibrates the sensor values, determining the gyro center and offset value. In this phase the gyro should remain
 	 * stable and not move. Samples from the sensor are measured, the average value at this phase indicates the gyro center.
-	 * This process takes approximately {@value #CALIBRATION_TIME} seconds.
+	 * This process takes approximately {@value #CALIBRATION_TIME_MS} seconds.
+     *
+     * @throws InterruptedException if the current thread was interrupted while waiting for calibration
 	 */
-	public void calibrate(){
+	public void calibrate() throws InterruptedException {
 		mAccumulator.reset();
 		
-		FlashUtil.delay(CALIBRATION_TIME);
+		Thread.sleep(CALIBRATION_TIME_MS);
 		
 		long value = mAccumulator.getValue();
 		int count = mAccumulator.getCount();
@@ -127,7 +127,7 @@ public class AnalogGyro extends GyroBase {
 	 * @param sensitivity conversion factor from voltage to angular speed
 	 */
 	public void setSensitivity(double sensitivity){
-		this.mSensitivity = sensitivity;
+		mSensitivity = sensitivity;
 	}
 
 	/**

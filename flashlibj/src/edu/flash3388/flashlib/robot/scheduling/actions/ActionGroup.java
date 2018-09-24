@@ -16,26 +16,28 @@ import java.util.*;
  */
 public class ActionGroup extends Action {
 
-	public enum ActionTiming {
+	public enum ExecutionOrder {
 		SEQUENTIAL,
 		PARALLEL
 	}
 	
 	private final Collection<Action> mActions;
-	private final ActionTiming mTiming;
+	private final ExecutionOrder mExecutionOrder;
 
 	private final Queue<Action> mActionsQueue;
 	private final Collection<Action> mCurrentlyRunningActions;
 	
 	/**
 	 * Creates a new empty action group
+     *
+     * @param executionOrder action execution order
 	 */
-	public ActionGroup(ActionTiming timing) {
-		this(timing, new ArrayList<Action>());
+	public ActionGroup(ExecutionOrder executionOrder) {
+		this(executionOrder, new ArrayList<Action>());
 	}
 
-	public ActionGroup(ActionTiming timing, Collection<Action> actions) {
-		mTiming = timing;
+	public ActionGroup(ExecutionOrder executionOrder, Collection<Action> actions) {
+		mExecutionOrder = executionOrder;
 		mActions = actions;
 
 		mActionsQueue = new ArrayDeque<Action>();
@@ -116,9 +118,9 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		if (mTiming == ActionTiming.SEQUENTIAL && mCurrentlyRunningActions.isEmpty()) {
+		if (mExecutionOrder == ExecutionOrder.SEQUENTIAL && mCurrentlyRunningActions.isEmpty()) {
 			startNextAction();
-		} else if (mTiming == ActionTiming.PARALLEL) {
+		} else if (mExecutionOrder == ExecutionOrder.PARALLEL) {
 			startNextAction();
 		}
 	}

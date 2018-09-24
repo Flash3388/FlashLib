@@ -4,7 +4,6 @@ import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * An extension of {@link RobotBase}. This class provides extended and easier control over robot
@@ -33,7 +32,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * called for every operation mode that is not disabled mode. The passed parameter is the mode's value, so it
  * is recommended to pay attention to the value.
  * <p>
- * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY} milliseconds.
+ * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY_MS} milliseconds.
  * <p>
  * The control loop which is provided here performs several background operations before execution of user 
  * code:
@@ -56,7 +55,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public abstract class IterativeRobot extends RobotBase {
 	
-	private static final int ITERATION_DELAY = 5; //ms
+	private static final long ITERATION_DELAY_MS = 5;
 
 	private final Scheduler mScheduler;
 	private boolean mRunLoop;
@@ -99,7 +98,11 @@ public abstract class IterativeRobot extends RobotBase {
                     disabledPeriodic();
                     robotPeriodic();
 
-                    FlashUtil.delay(ITERATION_DELAY);
+                    try {
+                        Thread.sleep(ITERATION_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
                 }
             } else{
                 RobotMode currentMode = getMode();
@@ -115,7 +118,11 @@ public abstract class IterativeRobot extends RobotBase {
                     modePeriodic(currentMode);
                     robotPeriodic();
 
-                    FlashUtil.delay(ITERATION_DELAY);
+                    try {
+                        Thread.sleep(ITERATION_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
                 }
             }
         }

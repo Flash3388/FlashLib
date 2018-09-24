@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot.control;
 
+import com.beans.DoubleProperty;
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
-import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -24,7 +24,7 @@ import edu.flash3388.flashlib.util.beans.SimpleDoubleProperty;
 public class PIDController {
 	
 	private PIDSource mPidSource;
-	private DoubleSource mSetPoint;
+	private DoubleSupplier mSetPoint;
 
 	private DoubleProperty mKp;
 	private DoubleProperty mKi;
@@ -53,10 +53,10 @@ public class PIDController {
 	 * @param kd the differential constant
 	 * @param kf the feed forward constant
 	 * @param setPoint the set point
-	 * @param mPidSource the feedback mPidSource
+	 * @param source the feedback source
 	 */
 	public PIDController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf,
-						 DoubleSource setPoint, PIDSource source){
+						 DoubleSupplier setPoint, PIDSource source){
 		mKp = kp;
 		mKi = ki;
 		mKd = kd;
@@ -91,10 +91,10 @@ public class PIDController {
 			input = Mathf.constrain(input, input - mSetPointRange, input + mSetPointRange);
 		}
 
-		double error = mSetPoint.get() - input;
+		double error = mSetPoint.getAsDouble() - input;
 		
-		double pOut = mKp.get() * error;
-		double fOut = mKf.get() * mSetPoint.get();
+		double pOut = mKp.getAsDouble() * error;
+		double fOut = mKf.getAsDouble() * mSetPoint.getAsDouble();
 		
 		if(mIsFirstRun){
 			mIsFirstRun = false;
@@ -102,8 +102,8 @@ public class PIDController {
 			mLastInput = input;
 		}
 		
-		double iOut = mKi.get() * mTotalError;
-		double dOut = -mKd.get() * (input - mLastInput);
+		double iOut = mKi.getAsDouble() * mTotalError;
+		double dOut = -mKd.getAsDouble() * (input - mLastInput);
 		
 		double output = pOut + iOut + dOut + fOut;
 		
@@ -148,7 +148,7 @@ public class PIDController {
 	 * @return proportional constant
 	 */
 	public double getP(){
-		return mKp.get();
+		return mKp.getAsDouble();
 	}
 	/**
 	 * Sets the value of the proportional constant
@@ -171,7 +171,7 @@ public class PIDController {
 	 * @return integral constant
 	 */
 	public double getI(){
-		return mKi.get();
+		return mKi.getAsDouble();
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class PIDController {
 	 * @return differential constant
 	 */
 	public double getD(){
-		return mKd.get();
+		return mKd.getAsDouble();
 	}
 	/**
 	 * Sets the value of the differential constant
@@ -216,7 +216,7 @@ public class PIDController {
 	 * @return differential constant
 	 */
 	public double getF(){
-		return mKf.get();
+		return mKf.getAsDouble();
 	}
 	/**
 	 * Sets the feed forward gain value
@@ -262,7 +262,7 @@ public class PIDController {
 	 * Gets the set point data mPidSource used by this loop.
 	 * @return set point
 	 */
-	public DoubleSource getSetPoint(){
+	public DoubleSupplier getSetPoint(){
 		return mSetPoint;
 	}
 	/**
@@ -324,7 +324,7 @@ public class PIDController {
 	 * Sets the set point mPidSource used by this loop.
 	 * @param setpoint set point mPidSource
 	 */
-	public void setSetPoint(DoubleSource setpoint){
+	public void setSetPoint(DoubleSupplier setpoint){
 		mSetPoint = setpoint;
 	}
 

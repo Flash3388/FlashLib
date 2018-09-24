@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
-import edu.flash3388.flashlib.util.beans.BooleanSource;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * Conditional action uses a BooleanDataSource to select which action to use when {@link Action#start()} is
@@ -12,13 +13,13 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  */
 public class ConditionalAction extends Action {
 
-	private BooleanSource mCondition;
+	private BooleanSupplier mCondition;
 	private Action mActionRunOnTrue;
 	private Action mActionRunOnFalse;
 
 	private Action mActionRunning;
 
-	public ConditionalAction(BooleanSource condition, Action runOnTrue, Action runOnFalse){
+	public ConditionalAction(BooleanSupplier condition, Action runOnTrue, Action runOnFalse){
 		mCondition = condition;
 		mActionRunOnTrue = runOnTrue;
 		mActionRunOnFalse = runOnFalse;
@@ -26,7 +27,7 @@ public class ConditionalAction extends Action {
 
 	@Override
 	protected void initialize() {
-		mActionRunning = mCondition.get() ? mActionRunOnTrue : mActionRunOnFalse;
+		mActionRunning = mCondition.getAsBoolean() ? mActionRunOnTrue : mActionRunOnFalse;
 		mActionRunning.start();
 	}
 

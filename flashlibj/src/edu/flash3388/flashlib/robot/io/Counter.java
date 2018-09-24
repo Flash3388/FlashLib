@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
 import edu.flash3388.flashlib.util.Resource;
-import edu.flash3388.flashlib.util.beans.IntegerSource;
 
 /**
  * Interface for a pulse counter. A pulse counter is used to
@@ -13,7 +12,7 @@ import edu.flash3388.flashlib.util.beans.IntegerSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public interface Counter extends IntegerSource, Resource {
+public interface Counter extends Resource {
 
 	/**
 	 * Resets the counter, setting the pulse count to zero.
@@ -25,7 +24,6 @@ public interface Counter extends IntegerSource, Resource {
 	 * 
 	 * @return amount of pulses counted.
 	 */
-	@Override
 	int get();
 	
 	/**

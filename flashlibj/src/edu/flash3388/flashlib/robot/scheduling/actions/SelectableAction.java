@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
-import edu.flash3388.flashlib.util.beans.IntegerSource;
 
 import java.util.List;
+import java.util.function.IntSupplier;
 
 /**
  * An action which executes a selected action when started. 
@@ -14,24 +14,24 @@ import java.util.List;
 public class SelectableAction extends Action {
 
 	private List<Action> mActions;
-	private IntegerSource mSelectionSource;
+	private IntSupplier mSelectionSource;
 
 	private Action mSelectedAction;
-	
+
 	/**
-	 * Creates a new selectable action. 
-	 * 
-	 * @param source the index source
-	 * @param actions an array of scheduling to select from
+	 * Creates a new selectable action.
+	 *
+	 * @param selectionSource the index source
+	 * @param actions a list of scheduling to select from
 	 */
-	public SelectableAction(IntegerSource selectionSource, List<Action> actions){
+	public SelectableAction(IntSupplier selectionSource, List<Action> actions){
 		mSelectionSource = selectionSource;
 		mActions = actions;
 	}
 
 	/**
 	 * Adds a new action to the action array.
-	 * 
+	 *
 	 * @param action action to be added
 	 * @return this instance
 	 */
@@ -42,7 +42,7 @@ public class SelectableAction extends Action {
 
 	/**
 	 * Removes the action at the given array index.
-	 * 
+	 *
 	 * @param action action to remove
 	 * @return this instance
 	 * @throws IndexOutOfBoundsException if the index is out of the array bounds
@@ -51,10 +51,10 @@ public class SelectableAction extends Action {
 		mActions.remove(action);
 		return this;
 	}
-	
+
 	@Override
-	protected void initialize(){ 
-		int selectedIndex = mSelectionSource.get();
+	protected void initialize(){
+		int selectedIndex = mSelectionSource.getAsInt();
 
 		if (selectedIndex < 0 || selectedIndex >= mActions.size()) {
 			cancel();
@@ -69,7 +69,7 @@ public class SelectableAction extends Action {
 	}
 
 	@Override
-	protected boolean isFinished(){ 
+	protected boolean isFinished(){
 		return !mSelectedAction.isRunning();
 	}
 

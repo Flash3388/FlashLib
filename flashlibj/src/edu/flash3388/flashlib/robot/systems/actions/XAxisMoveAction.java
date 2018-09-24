@@ -3,14 +3,15 @@ package edu.flash3388.flashlib.robot.systems.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.XAxisMovableInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class XAxisMoveAction extends Action{
 
 	private XAxisMovableInterface mInterface;
-	private DoubleSource mSpeedSource;
+	private DoubleSupplier mSpeedSource;
 	
-	public XAxisMoveAction(XAxisMovableInterface motionInterface, DoubleSource speedSource) {
+	public XAxisMoveAction(XAxisMovableInterface motionInterface, DoubleSupplier speedSource) {
 		this.mInterface = motionInterface;
 		this.mSpeedSource = speedSource;
 		
@@ -21,7 +22,7 @@ public class XAxisMoveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mInterface.moveX(mSpeedSource.get());
+		mInterface.moveX(mSpeedSource.getAsDouble());
 	}
 
 	@Override

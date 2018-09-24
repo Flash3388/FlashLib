@@ -3,14 +3,15 @@ package edu.flash3388.flashlib.robot.systems.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.YAxisMovableInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class YAxisMoveAction extends Action{
 
 	private YAxisMovableInterface mInterface;
-	private DoubleSource mSpeedSource;
+	private DoubleSupplier mSpeedSource;
 	
-	public YAxisMoveAction(YAxisMovableInterface motionInterface, DoubleSource speedSource) {
+	public YAxisMoveAction(YAxisMovableInterface motionInterface, DoubleSupplier speedSource) {
 		this.mInterface = motionInterface;
 		this.mSpeedSource = speedSource;
 		
@@ -21,7 +22,7 @@ public class YAxisMoveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mInterface.moveY(mSpeedSource.get());
+		mInterface.moveY(mSpeedSource.getAsDouble());
 	}
 
 	@Override

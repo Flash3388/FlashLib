@@ -26,7 +26,8 @@ public class Joystick implements HID {
 	
 	/**
 	 * Creates a new joystick device at an index with a given amount of buttons.
-	 * 
+	 *
+     * @param hidInterface the hid interface
 	 * @param channel the channel
 	 * @param buttonCount the amount of buttons
 	 */

@@ -66,6 +66,8 @@ public class Closer implements Closeable {
 	 * 
 	 * @param callable operation callable object.
 	 * @param closeOption states when to close the resources
+     * @param <R> return type
+     *
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */
@@ -92,6 +94,8 @@ public class Closer implements Closeable {
 	 * Calls {@link #run(IORunnable, CloseOption)} and passes it {@link CloseOption#CLOSE_ALWAYS}.
 	 *
 	 * @param callable operation callable object.
+     * @param <R> return type
+     *
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */

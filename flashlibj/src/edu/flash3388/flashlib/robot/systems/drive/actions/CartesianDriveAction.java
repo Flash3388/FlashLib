@@ -3,16 +3,17 @@ package edu.flash3388.flashlib.robot.systems.drive.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.HolonomicDriveInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class CartesianDriveAction extends Action{
 	
 	private HolonomicDriveInterface mDriveInterface;
-	private DoubleSource mYAxisSource;
-	private DoubleSource mXAxisSource;
-	private DoubleSource mRotateSource;
+	private DoubleSupplier mYAxisSource;
+	private DoubleSupplier mXAxisSource;
+	private DoubleSupplier mRotateSource;
 	
-	public CartesianDriveAction(HolonomicDriveInterface driveInterface, DoubleSource y, DoubleSource x, DoubleSource rotate) {
+	public CartesianDriveAction(HolonomicDriveInterface driveInterface, DoubleSupplier y, DoubleSupplier x, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;
 		this.mXAxisSource = x;
 		this.mYAxisSource = y;
@@ -25,7 +26,7 @@ public class CartesianDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mDriveInterface.holonomicCartesian(mYAxisSource.get(), mXAxisSource.get(), mRotateSource.get());
+		mDriveInterface.holonomicCartesian(mYAxisSource.getAsDouble(), mXAxisSource.getAsDouble(), mRotateSource.getAsDouble());
 	}
 
 	@Override

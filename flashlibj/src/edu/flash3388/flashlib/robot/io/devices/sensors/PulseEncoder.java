@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 import edu.flash3388.flashlib.robot.io.Counter;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * Base for relative encoder sensors.

@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.robot.modes.RobotMode;
-import edu.flash3388.flashlib.util.FlashUtil;
 
 /**
  * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
@@ -14,7 +13,7 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * finished, not further user code will be executed for that mode. If mode was changed and user code did not
  * finished and the methods did not return, this will disrupt robot operations.
  * <p>
- * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY} milliseconds.
+ * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY_MS} milliseconds.
  * <p>
  * {@link #robotInit()} is called when FlashLib finished initialization. Robot systems should be initialized here.
  * <p>
@@ -23,9 +22,9 @@ import edu.flash3388.flashlib.util.FlashUtil;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public abstract class SimpleRobot extends RobotBase{
+public abstract class SimpleRobot extends RobotBase {
 	
-	private static final int ITERATION_DELAY = 5; //ms
+	private static final long ITERATION_DELAY_MS = 5;
 	
 	private boolean mRunLoop;
 
@@ -55,7 +54,11 @@ public abstract class SimpleRobot extends RobotBase{
 				disabled();
 				
 				while(stayInMode(RobotMode.DISABLED)){
-					FlashUtil.delay(ITERATION_DELAY);
+                    try {
+                        Thread.sleep(ITERATION_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
 				}
 			} else{
 				RobotMode currentMode = getMode();
@@ -63,7 +66,11 @@ public abstract class SimpleRobot extends RobotBase{
 				onMode(currentMode);
 				
 				while(stayInMode(currentMode)){
-					FlashUtil.delay(ITERATION_DELAY);
+                    try {
+                        Thread.sleep(ITERATION_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
 				}
 			}
 		}

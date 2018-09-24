@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.hid;
 
 /**
  * An extension of {@link Button} which combines two button objects. This basically means that
- * {@link #get()} returns true if {@link #get()} for both buttons returns true.
+ * {@link #isDown()} returns true if {@link #isDown()} for both buttons returns true.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2
@@ -42,6 +42,6 @@ public abstract class DoubleButton extends Button {
 	 */
 	@Override
 	public boolean isDown() {
-		return button1.get() && button2.get();
+		return button1.isDown() && button2.isDown();
 	}
 }

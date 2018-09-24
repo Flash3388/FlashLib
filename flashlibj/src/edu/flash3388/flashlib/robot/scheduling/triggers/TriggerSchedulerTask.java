@@ -1,15 +1,15 @@
 package edu.flash3388.flashlib.robot.scheduling.triggers;
 
-import edu.flash3388.flashlib.util.beans.BooleanSource;
+import java.util.function.BooleanSupplier;
 
 public class TriggerSchedulerTask implements Runnable {
 
-    private final BooleanSource mCondition;
+    private final BooleanSupplier mCondition;
     private final Trigger mTrigger;
 
     private boolean mLastRunConditionMet;
 
-    public TriggerSchedulerTask(BooleanSource condition, Trigger trigger) {
+    public TriggerSchedulerTask(BooleanSupplier condition, Trigger trigger) {
         mCondition = condition;
         mTrigger = trigger;
 
@@ -18,7 +18,7 @@ public class TriggerSchedulerTask implements Runnable {
 
     @Override
     public void run() {
-        boolean isConditionMet = mCondition.get();
+        boolean isConditionMet = mCondition.getAsBoolean();
 
         if (isConditionMet != mLastRunConditionMet) {
             if (isConditionMet) {

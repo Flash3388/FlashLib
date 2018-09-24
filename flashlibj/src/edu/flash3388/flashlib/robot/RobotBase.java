@@ -6,15 +6,7 @@ package edu.flash3388.flashlib.robot;
  * robot and FlashLib systems are initialized and user robot code is then started by calling {@link #robotMain()}.
  * When the JVM enters stop, this class uses a stop hook to perform ordered robot stop and will
  * allow custom user stop by calling {@link #robotShutdown()}.
- * 
- * <p>
- * To setup a robot class, insure the software's MANIFEST file contains a {@value #MANIFEST_ROBOT_CLASS} property
- * and the value should be the user robot classname and package (full package.classname). Remember that the user
- * robot class should inherit this base or extend a class which already inherited this.
- * <p>
- * This class implements the interfaces {@link RobotInterface} and {@link SBC} and provides basic implementations. Those
- * can be overridden if needed.
- * 
+ *
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */

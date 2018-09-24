@@ -2,7 +2,8 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.Resource;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * Interface for gyroscope sensors. Gyroscope sensors measure angular rotation and are used to measure
@@ -11,11 +12,11 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Gyro extends Resource, PIDSource, DoubleSource{
+public interface Gyro extends Resource, PIDSource, DoubleSupplier {
 	
 	/**
 	 * Enumeration of gyroscope data types. Using this, it is possible to indicate
-	 * which values will be returned when {@link #pidGet()} and {@link #get()} are called.
+	 * which values will be returned when {@link #pidGet()} and {@link #getAsDouble()} are called.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.2.0
@@ -46,7 +47,7 @@ public interface Gyro extends Resource, PIDSource, DoubleSource{
 	/**
 	 * Gets the {@link GyroDataType} value for this gyroscope.
 	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
 	 * gyroscope data will be returned when they are called.
 	 * 
 	 * @return the current data type
@@ -56,22 +57,12 @@ public interface Gyro extends Resource, PIDSource, DoubleSource{
 	/**
 	 * Sets the {@link GyroDataType} value for this gyroscope.
 	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
 	 * gyroscope data will be returned when they are called.
 	 * 
 	 * @param type the current data type
 	 */
 	void setDataType(GyroDataType type);
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns the value of {@link #pidGet()}.
-	 */
-	@Override
-	default double get() {
-		return pidGet();
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -90,4 +81,9 @@ public interface Gyro extends Resource, PIDSource, DoubleSource{
 		}
 		return 0.0;
 	}
+
+    @Override
+    default double getAsDouble() {
+        return pidGet();
+    }
 }

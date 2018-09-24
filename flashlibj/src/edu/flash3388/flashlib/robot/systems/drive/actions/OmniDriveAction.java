@@ -3,15 +3,16 @@ package edu.flash3388.flashlib.robot.systems.drive.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.HolonomicDriveInterface;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class OmniDriveAction extends Action{
 	
 	private HolonomicDriveInterface mDriveInterface;
-	private DoubleSource mYAxisSource;
-	private DoubleSource mXAxisSource;
+	private DoubleSupplier mYAxisSource;
+	private DoubleSupplier mXAxisSource;
 	
-	public OmniDriveAction(HolonomicDriveInterface driveInterface, DoubleSource y, DoubleSource x) {
+	public OmniDriveAction(HolonomicDriveInterface driveInterface, DoubleSupplier y, DoubleSupplier x) {
 		this.mDriveInterface = driveInterface;
 		this.mXAxisSource = x;
 		this.mYAxisSource = y;
@@ -23,7 +24,7 @@ public class OmniDriveAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mDriveInterface.omniDrive(mYAxisSource.get(), mXAxisSource.get());
+		mDriveInterface.omniDrive(mYAxisSource.getAsDouble(), mXAxisSource.getAsDouble());
 	}
 
 	@Override

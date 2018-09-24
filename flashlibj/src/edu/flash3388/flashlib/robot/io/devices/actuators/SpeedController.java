@@ -1,14 +1,12 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.util.beans.DoubleProperty;
-
 /**
  * Interface for speed controllers.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface SpeedController extends DoubleProperty {
+public interface SpeedController {
 
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
@@ -20,7 +18,6 @@ public interface SpeedController extends DoubleProperty {
 	 * 
 	 * @param speed [-1 to 1] describing the percent vbus
 	 */
-	@Override
 	void set(double speed);
 
 	/**
@@ -74,7 +71,6 @@ public interface SpeedController extends DoubleProperty {
 	 * Gets the currently set percent vbus in the motor controller.
 	 * @return used percent vbus
 	 */
-	@Override
 	double get();
 	
 	/**

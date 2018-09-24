@@ -3,14 +3,15 @@ package edu.flash3388.flashlib.robot.systems.actions;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 public class RotateAction extends Action{
 
 	private Rotatable mRotatable;
-	private DoubleSource mSpeedSource;
+	private DoubleSupplier mSpeedSource;
 	
-	public RotateAction(Rotatable rotatable, DoubleSource speedSource) {
+	public RotateAction(Rotatable rotatable, DoubleSupplier speedSource) {
 		this.mRotatable = rotatable;
 		this.mSpeedSource = speedSource;
 		
@@ -21,7 +22,7 @@ public class RotateAction extends Action{
 	
 	@Override
 	protected void execute() {
-		mRotatable.rotate(mSpeedSource.get());
+		mRotatable.rotate(mSpeedSource.getAsDouble());
 	}
 
 	@Override

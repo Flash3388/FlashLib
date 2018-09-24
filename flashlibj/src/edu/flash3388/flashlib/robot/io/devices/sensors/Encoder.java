@@ -2,7 +2,8 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 
 import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.Resource;
-import edu.flash3388.flashlib.util.beans.DoubleSource;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * Interface for relative encoder sensors. Relative encoders measure the rotation of wheels axes and are used to get the 
@@ -15,11 +16,11 @@ import edu.flash3388.flashlib.util.beans.DoubleSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Encoder extends Resource, DoubleSource, PIDSource{
+public interface Encoder extends Resource, PIDSource, DoubleSupplier {
 	
 	/**
 	 * Enumeration of encoder data types. Using this, it is possible to indicate
-	 * which values will be returned when {@link #pidGet()} and {@link #get()} are called.
+	 * which values will be returned when {@link #pidGet()} and {@link #getAsDouble()} are called.
 	 * 
 	 * @author Tom Tzook
 	 * @since FlashLib 1.2.0
@@ -80,7 +81,7 @@ public interface Encoder extends Resource, DoubleSource, PIDSource{
 	/**
 	 * Gets the {@link EncoderDataType} value for this sensor.
 	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
 	 * gyroscope data will be returned when they are called.
 	 * 
 	 * @return the current data type
@@ -90,22 +91,12 @@ public interface Encoder extends Resource, DoubleSource, PIDSource{
 	/**
 	 * Sets the {@link EncoderDataType} value for this sensor.
 	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #get()} to determine which
+	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
 	 * gyroscope data will be returned when they are called.
 	 * 
 	 * @param type the current data type
 	 */
 	void setDataType(EncoderDataType type);
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns the value of {@link #pidGet()}.
-	 */
-	@Override
-	default double get() {
-		return pidGet();
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -126,4 +117,9 @@ public interface Encoder extends Resource, DoubleSource, PIDSource{
 		}
 		return 0.0;
 	}
+
+    @Override
+    default double getAsDouble() {
+        return pidGet();
+    }
 }

@@ -2,7 +2,8 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.triggers.Trigger;
-import edu.flash3388.flashlib.util.beans.BooleanSource;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * The base logic for a button. Allows attaching {@link Action} objects which will be executed 
@@ -11,12 +12,12 @@ import edu.flash3388.flashlib.util.beans.BooleanSource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class Button extends Trigger implements BooleanSource {
+public abstract class Button extends Trigger implements BooleanSupplier {
 
 	public abstract boolean isDown();
 
-	@Override
-	public boolean get() {
-		return isDown();
-	}
+    @Override
+    public boolean getAsBoolean() {
+        return isDown();
+    }
 }
