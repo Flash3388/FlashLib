@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Vector2;
 import edu.flash3388.flashlib.robot.systems.XAxisMovableInterface;
 
 /**
@@ -64,7 +64,8 @@ public interface HolonomicDriveInterface extends DriveInterface, XAxisMovableInt
 	 * @param rotation the degree of rotation
 	 */
 	default void holonomicPolar(double magnitude, double direction, double rotation){
-		holonomicCartesian(Mathf.vecY(magnitude, direction), Mathf.vecX(magnitude, direction), rotation);
+        Vector2 vector = Vector2.polar(magnitude, direction);
+		holonomicCartesian(vector.getY(), vector.getX(), rotation);
 	}
 	
 	/**

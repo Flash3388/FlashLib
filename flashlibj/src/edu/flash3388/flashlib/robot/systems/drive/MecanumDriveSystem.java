@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Vector2;
 import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 
@@ -41,7 +41,8 @@ public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInter
 
     @Override
     public void holonomicCartesian(double y, double x, double rotation) {
-        holonomicPolar(Mathf.vecMagnitude(x, y), Mathf.vecAzimuth(y, x), rotation);
+        Vector2 vector = new Vector2(x, y);
+        holonomicPolar(vector.length(), vector.angle(), rotation);
     }
 
     @Override
