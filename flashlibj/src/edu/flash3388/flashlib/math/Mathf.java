@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.math;
 
+import com.jmath.vectors.Vector3;
+
 /**
  * Mathf is FlashLib's math utilities class. It is not meant to replace java's {@link Math}, but
  * rather expend upon it with additional utilities. This class cannot be instantiated and all
@@ -26,6 +28,7 @@ public class Mathf {
 			res += ds[i];
 		return res / ds.length;
 	}
+
 	/**
 	 * Gets whether or not a double value is valid, meaning that the value is finite and
 	 * is a number. 
@@ -55,6 +58,7 @@ public class Mathf {
 			value += 360;
 		return value;
 	}
+
 	/**
 	 * Translates a given value to within an enclosed range. This translation insures that values
 	 * are repeated within a range instead of overflowing.
@@ -96,6 +100,7 @@ public class Mathf {
 		else if(value < min) value = min;
 		return value;
 	}
+
 	/**
 	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
 	 * will be changed to meet the limit accordingly:
@@ -118,6 +123,7 @@ public class Mathf {
 		else if(mag < min) mag = min;
 		return value >= 0? mag : -mag;
 	}
+
 	/**
 	 * Gets whether a value is between two boundaries.
 	 * 
@@ -152,4 +158,17 @@ public class Mathf {
 	public static double scale(double value, double min, double max){
 		return (value - min) / (max - min);
 	}
+
+    public static double shortestAngularDistance(double current, double last) {
+        Vector3 currentVector = new Vector3(current - 360.0, current, current + 360.0);
+
+        Vector3 diffVector = currentVector.sub(last);
+        double result = diffVector.abs().min();
+
+        if (result > 180.0) {
+            result = Math.signum(result) * (360.0 - result);
+        }
+
+        return result;
+    }
 }
