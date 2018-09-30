@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.systems;
+package edu.flash3388.flashlib.robot.motion;
 
 /**
  * Interface for object with the capability to rotate.
@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.robot.systems;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Rotatable {
+public interface Rotatable extends Stoppable {
 	
 	/**
 	 * Rotates the system at a speed to a given direction.
@@ -39,8 +39,4 @@ public interface Rotatable {
 	default void rotateLeft(double speed){
 		rotate(speed, false);
 	}
-	/**
-	 * Stops the system.
-	 */
-	void stop();
 }

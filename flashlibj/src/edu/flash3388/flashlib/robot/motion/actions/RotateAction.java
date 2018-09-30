@@ -1,8 +1,8 @@
-package edu.flash3388.flashlib.robot.systems.actions;
+package edu.flash3388.flashlib.robot.motion.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.Rotatable;
+import edu.flash3388.flashlib.robot.motion.Rotatable;
 
 import java.util.function.DoubleSupplier;
 

@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
 import com.jmath.vectors.Vector2;
-import edu.flash3388.flashlib.robot.systems.XAxisMovableInterface;
+import edu.flash3388.flashlib.robot.motion.Movable2d;
 
 /**
  * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link DriveInterface}.
@@ -9,30 +9,20 @@ import edu.flash3388.flashlib.robot.systems.XAxisMovableInterface;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface HolonomicDriveInterface extends DriveInterface, XAxisMovableInterface {
+public interface HolonomicDriveInterface extends DriveInterface, Movable2d {
 	
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * A default implementation is provided. It calls {@link #holonomicCartesian(double, double, double)}
-	 * and passes it the given speed for y while passing 0.0 for the rest of the parameters.
+	 * A default implementation is provided. It calls {@link #omniDrive(double, double)}
+	 * and passes it the given speed for y and x from the vector.
 	 * 
 	 */
 	@Override
-	default void moveY(double speed) {
-		holonomicCartesian(speed, 0.0, 0.0);
+	default void move(Vector2 motionVector) {
+		omniDrive(motionVector.y(), motionVector.x());
 	}
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * A default implementation is provided. It calls {@link #holonomicCartesian(double, double, double)}
-	 * and passes it the given speed for the x parameters while passing 0.0 for the rest of the parameters.
-	 * 
-	 */
-	@Override
-	default void moveX(double speed) {
-		holonomicCartesian(0.0, speed, 0.0);
-	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

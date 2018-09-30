@@ -7,17 +7,7 @@ package edu.flash3388.flashlib.robot.systems.drive;
  * @since FlashLib 1.0.0
  */
 public interface TankDriveInterface extends DriveInterface {
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * A default implementation is provided. It calls {@link #tankDrive(double, double)} and
-	 * passes it the speed parameter for both sides.
-	 */
-	@Override
-	default void moveY(double speed) {
-		tankDrive(speed, speed);
-	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
