@@ -40,6 +40,7 @@ public class SocketConnection implements Connection {
 
 	@Override
 	public void close() throws IOException {
+	    // closes the output and input streams
 		mSocket.close();
 	}
 }
