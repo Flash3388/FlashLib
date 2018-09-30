@@ -12,9 +12,9 @@ import java.net.SocketAddress;
 
 public class DatagramConnector implements Connector {
 
-    private SocketAddress mLocalAddress;
-    private SocketAddress mRemoteAddress;
-    private int mReadTimeout;
+    private final SocketAddress mLocalAddress;
+    private final SocketAddress mRemoteAddress;
+    private final int mReadTimeout;
 
     public DatagramConnector(SocketAddress localAddress, SocketAddress remoteAddress, int readTimeoutMs) {
         mLocalAddress = localAddress;

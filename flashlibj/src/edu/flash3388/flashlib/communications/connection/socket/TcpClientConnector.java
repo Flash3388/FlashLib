@@ -12,8 +12,8 @@ import edu.flash3388.flashlib.io.Closer;
 
 public class TcpClientConnector implements Connector {
 
-	private SocketAddress mEndPoint;
-	private int mReadTimeout;
+	private final SocketAddress mEndPoint;
+	private final int mReadTimeout;
 	
 	public TcpClientConnector(SocketAddress endPoint, int readTimeout) {
 		mEndPoint = endPoint;

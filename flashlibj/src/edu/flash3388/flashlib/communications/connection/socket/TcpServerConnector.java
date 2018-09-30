@@ -12,8 +12,8 @@ import edu.flash3388.flashlib.io.Closer;
 
 public class TcpServerConnector implements Connector {
 
-	private ServerSocket mServerSocket;
-	private int mReadTimeout;
+	private final ServerSocket mServerSocket;
+	private final int mReadTimeout;
 	
 	public TcpServerConnector(ServerSocket serverSocket, int readTimeout) {
 		mServerSocket = serverSocket;
