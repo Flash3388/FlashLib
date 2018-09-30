@@ -24,27 +24,8 @@ public class SocketConnection implements Connection {
 	}
 
     @Override
-    public void write(int data) throws IOException {
-        mOut.write(data);
-    }
-
-    @Override
-	public void write(byte[] data) throws IOException {
-		mOut.write(data);
-	}
-
-    @Override
     public void write(byte[] data, int start, int length) throws IOException {
         mOut.write(data, start, length);
-    }
-
-    @Override
-    public int read() throws IOException, TimeoutException {
-        try {
-            return mIn.read();
-        } catch (SocketTimeoutException e) {
-            throw new TimeoutException(e);
-        }
     }
 
     @Override
@@ -56,13 +37,6 @@ public class SocketConnection implements Connection {
             throw new TimeoutException(e);
         }
     }
-
-    @Override
-	public byte[] read(int count) throws IOException, TimeoutException {
-		byte[] buffer = new byte[count];
-		read(buffer, 0, count);
-		return buffer;
-	}
 
 	@Override
 	public void close() throws IOException {

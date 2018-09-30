@@ -14,7 +14,8 @@ public class ConnectionInputStream extends InputStream {
     @Override
     public int read() throws IOException {
         try {
-            return mConnection.read();
+            byte[] result = mConnection.read(1);
+            return result[0];
         } catch (TimeoutException e) {
             throw new IOException(e);
         }

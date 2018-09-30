@@ -13,7 +13,8 @@ public class ConnectionOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        mConnection.write(b);
+        byte[] data = new byte[]{(byte)b};
+        write(data);
     }
 
     @Override
