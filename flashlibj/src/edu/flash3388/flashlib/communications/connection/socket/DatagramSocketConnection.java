@@ -10,7 +10,7 @@ import java.net.SocketTimeoutException;
 
 public class DatagramSocketConnection implements Connection {
 
-    private DatagramSocket mSocket;
+    private final DatagramSocket mSocket;
 
     public DatagramSocketConnection(DatagramSocket socket) {
         mSocket = socket;

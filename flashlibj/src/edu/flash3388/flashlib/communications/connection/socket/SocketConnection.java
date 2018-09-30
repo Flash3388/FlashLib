@@ -11,10 +11,10 @@ import edu.flash3388.flashlib.communications.connection.TimeoutException;
 
 public class SocketConnection implements Connection {
 
-	private Socket mSocket;
+	private final Socket mSocket;
 	
-	private OutputStream mOut;
-	private DataInputStream mIn;
+	private final OutputStream mOut;
+	private final DataInputStream mIn;
 	
 	public SocketConnection(Socket socket) throws IOException {
 		mSocket = socket;
