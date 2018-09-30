@@ -73,16 +73,18 @@ public class Closer implements Closeable {
 	 */
 	public <R> R run(IORunnable<R> callable, CloseOption closeOption) throws IOException {
 		boolean errorOccurred = false;
+		Throwable throwableThrown = null;
 
 		try {
 			return callable.run();
 		} catch (Throwable t) {
 			errorOccurred = true;
+			throwableThrown = t;
 
 			throw t;
 		} finally {
 			if (closeOption.shouldClose(errorOccurred)) {
-				close();
+				close(errorOccurred, throwableThrown);
 			}
 		}
 	}
@@ -105,8 +107,28 @@ public class Closer implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		for (Closeable closeable : mCloseables) {
-			closeable.close();
-		}
+		close(false, null);
 	}
+
+	private void close(boolean suppressErrors, Throwable throwableThrown) throws IOException {
+	    IOException errorToThrowWhenDone = null;
+
+        for (Closeable closeable : mCloseables) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                if (suppressErrors) {
+                    throwableThrown.addSuppressed(e);
+                } else {
+                    throwableThrown = e;
+                    suppressErrors = true;
+                    errorToThrowWhenDone = e;
+                }
+            }
+        }
+
+        if (errorToThrowWhenDone != null) {
+            throw errorToThrowWhenDone;
+        }
+    }
 }
