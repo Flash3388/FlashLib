@@ -1,12 +1,14 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import java.util.function.IntSupplier;
+
 /**
  * A wrapper for POVs on human interface devices.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class POV {
+public class POV implements IntSupplier {
 
 	private final HID mHid;
 	private final int mPov;
@@ -41,4 +43,9 @@ public class POV {
 	public int get(){
 		return mHid.getRawPov(mPov);
 	}
+
+    @Override
+    public int getAsInt() {
+	    return get();
+    }
 }

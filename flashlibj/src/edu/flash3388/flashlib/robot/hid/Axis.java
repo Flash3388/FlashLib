@@ -1,12 +1,14 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import java.util.function.DoubleSupplier;
+
 /**
  * A wrapper for axes on human interface devices.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class Axis {
+public class Axis implements DoubleSupplier {
 
 	private final HID mHid;
 	private final int mAxis;
@@ -45,4 +47,9 @@ public class Axis {
 	public double get(){
 		return mHid.getRawAxis(mAxis);
 	}
+
+    @Override
+    public double getAsDouble() {
+        return get();
+    }
 }
