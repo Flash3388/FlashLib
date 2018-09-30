@@ -13,8 +13,8 @@ import java.util.function.IntSupplier;
  */
 public class SelectableAction extends Action {
 
-	private List<Action> mActions;
-	private IntSupplier mSelectionSource;
+	private final List<Action> mActions;
+	private final IntSupplier mSelectionSource;
 
 	private Action mSelectedAction;
 
@@ -37,18 +37,6 @@ public class SelectableAction extends Action {
 	 */
 	public SelectableAction addAction(Action action){
 		mActions.add(action);
-		return this;
-	}
-
-	/**
-	 * Removes the action at the given array index.
-	 *
-	 * @param action action to remove
-	 * @return this instance
-	 * @throws IndexOutOfBoundsException if the index is out of the array bounds
-	 */
-	public SelectableAction removeAction(Action action){
-		mActions.remove(action);
 		return this;
 	}
 

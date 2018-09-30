@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.robot.io.devices.sensors;
 import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.Resource;
 
+import java.util.function.DoubleSupplier;
+
 /**
  * Interface for range finder sensors. Range finders are sensors used to measure distances between
  * them and an object in front of them. There are several ways range finders measure distances, for example: sound waves,
@@ -11,7 +13,8 @@ import edu.flash3388.flashlib.util.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface RangeFinder extends PIDSource, Resource {
+public interface RangeFinder extends PIDSource, Resource, DoubleSupplier {
+
 	/**
 	 * Gets the distance measured by the sensor in centimeters. 
 	 * 
@@ -28,4 +31,14 @@ public interface RangeFinder extends PIDSource, Resource {
 	default double pidGet() {
 		return getRangeCM();
 	}
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Returns the value of {@link #getRangeCM()}.
+     */
+    @Override
+    default double getAsDouble() {
+        return getRangeCM();
+    }
 }
