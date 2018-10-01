@@ -2,8 +2,8 @@ package edu.flash3388.flashlib.util;
 
 public class Pair<K, V> {
 
-    private K mFirst;
-    private V mSecond;
+    private final K mFirst;
+    private final V mSecond;
 
     public Pair(K first, V second) {
         mFirst = first;
