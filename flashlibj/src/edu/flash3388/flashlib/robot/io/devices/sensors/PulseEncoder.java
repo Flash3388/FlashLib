@@ -5,12 +5,12 @@ import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 
 /**
- * Base for relative encoder sensors.
+ * Pulse based encoder sensor.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public abstract class PulseEncoder implements Encoder{
+public class PulseEncoder implements Encoder {
 
 	private static final int DEFAULT_REST_TIMEOUT = 200;
 	
