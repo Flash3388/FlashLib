@@ -27,7 +27,7 @@ public abstract class PulseEncoder implements Encoder{
 	private long mRestTimeout;
 	private boolean mShouldCheckRest;
 
-	protected PulseEncoder(Counter counter, Clock clock, int pulsesPerRevolution, double distancePerPulse) {
+	public PulseEncoder(Counter counter, Clock clock, int pulsesPerRevolution, double distancePerPulse) {
 		mCounter = counter;
 		mClock = clock;
 		mDistancePerPulse = distancePerPulse;
