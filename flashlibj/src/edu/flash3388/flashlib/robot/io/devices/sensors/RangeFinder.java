@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.Resource;
 
 import java.util.function.DoubleSupplier;
@@ -13,7 +12,7 @@ import java.util.function.DoubleSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface RangeFinder extends PIDSource, Resource, DoubleSupplier {
+public interface RangeFinder extends Resource, DoubleSupplier {
 
 	/**
 	 * Gets the distance measured by the sensor in centimeters. 
@@ -21,16 +20,6 @@ public interface RangeFinder extends PIDSource, Resource, DoubleSupplier {
 	 * @return distance by centimeters
 	 */
 	double getRangeCM();
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns the value of {@link #getRangeCM()}.
-	 */
-	@Override
-	default double pidGet() {
-		return getRangeCM();
-	}
 
     /**
      * {@inheritDoc}

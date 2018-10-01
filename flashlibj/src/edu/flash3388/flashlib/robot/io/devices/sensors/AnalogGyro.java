@@ -20,7 +20,7 @@ import java.util.Objects;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class AnalogGyro extends GyroBase {
+public class AnalogGyro implements Gyro {
 	
 	private static final double DEFAULT_SENSITIVITY = 0.007;
 	private static final long CALIBRATION_TIME_MS = 500;

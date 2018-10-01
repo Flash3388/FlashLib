@@ -1,8 +1,9 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.robot.io.AnalogInput;
 import edu.flash3388.flashlib.util.Resource;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * Control class for an analog accelerometer sensor. Accelerometer is a linear acceleration sensor,
@@ -17,7 +18,7 @@ import edu.flash3388.flashlib.util.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class AnalogAccelerometer implements PIDSource, Resource {
+public class AnalogAccelerometer implements Resource, DoubleSupplier {
 
 	private static final double DEFAULT_SENSITIVITY = 1.0;
 	private static final double DEFAULT_ZERO_VOLTAGE = 2.5;
@@ -125,13 +126,8 @@ public class AnalogAccelerometer implements PIDSource, Resource {
 		return (mInput.getVoltage() - mZeroGvoltage) / mVoltsPerG;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Returns the value of {@link #getAcceleration()}.
-	 */
-	@Override
-	public double pidGet() {
-		return getAcceleration();
-	}
+    @Override
+    public double getAsDouble() {
+        return getAcceleration();
+    }
 }

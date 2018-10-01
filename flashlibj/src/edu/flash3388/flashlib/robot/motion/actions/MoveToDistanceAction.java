@@ -23,8 +23,6 @@ public class MoveToDistanceAction extends Action {
         mWantedDistance = wantedDistance;
         mDistanceMargin = distanceMargin;
 
-        mPidController.setPIDSource(distanceSupplier::getAsDouble);
-        mPidController.setSetPoint(()->mWantedDistance);
         mPidController.setOutputLimit(1.0);
 
         if (movable instanceof Subsystem) {
@@ -34,13 +32,12 @@ public class MoveToDistanceAction extends Action {
 
     @Override
     protected void initialize() {
-        mPidController.setEnabled(true);
         mPidController.reset();
     }
 
     @Override
     protected void execute() {
-        double pidResult = mPidController.calculate();
+        double pidResult = mPidController.calculate(mDistanceSupplier.getAsDouble(), mWantedDistance);
         mMovable.move(pidResult);
     }
 

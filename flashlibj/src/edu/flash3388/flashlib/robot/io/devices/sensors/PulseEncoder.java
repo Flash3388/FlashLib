@@ -14,8 +14,6 @@ public class PulseEncoder implements Encoder {
 
 	private static final int DEFAULT_REST_TIMEOUT = 200;
 	
-	private EncoderDataType mDataType;
-	
 	private Counter mCounter;
 	private final Clock mClock;
 	
@@ -35,7 +33,6 @@ public class PulseEncoder implements Encoder {
 
 		mShouldCheckRest = false;
 		mRestTimeout = DEFAULT_REST_TIMEOUT;
-        mDataType = EncoderDataType.Rate;
         mLastCheckTime = Time.INVALID_TIME;
 
 		reset();
@@ -243,21 +240,5 @@ public class PulseEncoder implements Encoder {
 	@Override
 	public boolean getDirection(){
 		return mCounter.getDirection();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public EncoderDataType getDataType() {
-		return mDataType;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setDataType(EncoderDataType type) {
-		mDataType = type;
 	}
 }

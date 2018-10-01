@@ -1,9 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.robot.control.PIDSource;
 import edu.flash3388.flashlib.util.Resource;
-
-import java.util.function.DoubleSupplier;
 
 /**
  * Interface for relative encoder sensors. Relative encoders measure the rotation of wheels axes and are used to get the 
@@ -16,18 +13,7 @@ import java.util.function.DoubleSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Encoder extends Resource, PIDSource, DoubleSupplier {
-	
-	/**
-	 * Enumeration of encoder data types. Using this, it is possible to indicate
-	 * which values will be returned when {@link #pidGet()} and {@link #getAsDouble()} are called.
-	 * 
-	 * @author Tom Tzook
-	 * @since FlashLib 1.2.0
-	 */
-	public static enum EncoderDataType{
-		Distance, Rate, Velocity
-	}
+public interface Encoder extends Resource {
 	
 	/**
 	 * Resets the encoder. 
@@ -77,49 +63,4 @@ public interface Encoder extends Resource, PIDSource, DoubleSupplier {
 	 * @return true for clockwise rotation, false for counter-clockwise rotation.
 	 */
 	boolean getDirection();
-	
-	/**
-	 * Gets the {@link EncoderDataType} value for this sensor.
-	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
-	 * gyroscope data will be returned when they are called.
-	 * 
-	 * @return the current data type
-	 */
-	EncoderDataType getDataType();
-
-	/**
-	 * Sets the {@link EncoderDataType} value for this sensor.
-	 * <p>
-	 * This value is used by {@link #pidGet()} and {@link #getAsDouble()} to determine which
-	 * gyroscope data will be returned when they are called.
-	 * 
-	 * @param type the current data type
-	 */
-	void setDataType(EncoderDataType type);
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Depending on the value of {@link #getDataType()}, the following values will be returned:
-	 * <ul>
-	 * 	<li> {@link EncoderDataType#Distance}: {@link #getDistance()} </li>
-	 * 	<li> {@link EncoderDataType#Rate}: {@link #getRate()} </li>
-	 *  <li> {@link EncoderDataType#Velocity}: {@link #getVelocity()} </li>
-	 * </ul>
-	 */
-	@Override
-	default double pidGet() {
-		switch (getDataType()) {
-			case Distance: return getDistance();
-			case Rate: return getRate();
-			case Velocity: return getVelocity();
-		}
-		return 0.0;
-	}
-
-    @Override
-    default double getAsDouble() {
-        return pidGet();
-    }
 }
