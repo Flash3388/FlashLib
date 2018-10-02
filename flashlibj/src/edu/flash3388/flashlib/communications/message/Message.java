@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.communications.message;
 
-public interface Message {
+import java.io.Serializable;
+
+public interface Message extends Serializable {
 
 	int getHeader();
-	byte[] getData();
 }
