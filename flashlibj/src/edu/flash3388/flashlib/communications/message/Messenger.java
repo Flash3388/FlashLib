@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.communications.message;
 
 import edu.flash3388.flashlib.communications.connection.Connection;
+import edu.flash3388.flashlib.io.Closeables;
 import edu.flash3388.flashlib.io.Serializer;
 
 import java.io.ByteArrayOutputStream;
@@ -25,6 +26,8 @@ public class Messenger {
             mConnection.write(serializedMessage);
         } catch (IOException e) {
             throw new WriteException(e);
+        } finally {
+            Closeables.closeQuietly(outputStream);
         }
     }
 
