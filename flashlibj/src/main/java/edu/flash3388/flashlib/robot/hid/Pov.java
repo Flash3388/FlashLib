@@ -8,13 +8,13 @@ import java.util.function.IntSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class POV implements IntSupplier {
+public class Pov implements IntSupplier {
 
     private final HIDInterface mHidInterface;
     private final int mChannel;
     private final int mPov;
 
-    public POV(HIDInterface hidInterface, int channel, int pov) {
+    public Pov(HIDInterface hidInterface, int channel, int pov) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mPov = pov;

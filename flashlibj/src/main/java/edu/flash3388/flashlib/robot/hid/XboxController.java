@@ -79,7 +79,7 @@ public class XboxController implements HID {
 	}
 
     @Override
-    public POV getPOV(int pov) {
+    public Pov getPOV(int pov) {
         if (pov != DPAD_POV_INDEX) {
             throw new NoSuchPovException(mChannel, pov);
         }

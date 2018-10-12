@@ -48,13 +48,13 @@ public interface HID {
 	int getButtonCount();
 
 	/**
-	 * Gets the POV object at the given index.
+	 * Gets the Pov object at the given index.
      *
      * @param pov pov index, from 0.
      *
-	 * @return POV
+	 * @return Pov
 	 */
-	POV getPOV(int pov);
+	Pov getPOV(int pov);
 
     /**
      * Gets the amount of POVs on the interface device.

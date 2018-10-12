@@ -6,7 +6,7 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class DPad extends POV {
+public class DPad extends Pov {
 
 	private final Button mUp;
     private final Button mDown;

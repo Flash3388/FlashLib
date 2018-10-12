@@ -9,7 +9,7 @@ public class GenericHID implements HID {
 
 	private final List<Axis> mAxes;
 	private final List<Button> mButtons;
-    private final List<POV> mPovs;
+    private final List<Pov> mPovs;
 
 	public GenericHID(HIDInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
 		mChannel = channel;
@@ -26,7 +26,7 @@ public class GenericHID implements HID {
 
         mPovs = new ArrayList<>();
         for(int i = 0; i < povsCount; i++) {
-            mPovs.add(new POV(hidInterface, channel, i));
+            mPovs.add(new Pov(hidInterface, channel, i));
         }
 	}
 
@@ -64,7 +64,7 @@ public class GenericHID implements HID {
 	}
 
     @Override
-    public POV getPOV(int pov) {
+    public Pov getPOV(int pov) {
         if (pov < 0 || pov >= mPovs.size()) {
             throw new NoSuchPovException(mChannel, pov);
         }
