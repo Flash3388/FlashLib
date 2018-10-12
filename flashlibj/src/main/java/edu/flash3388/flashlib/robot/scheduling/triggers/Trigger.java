@@ -3,14 +3,18 @@ package edu.flash3388.flashlib.robot.scheduling.triggers;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class Trigger {
 
-    private final List<TriggerStateHandler> mTriggerStateHandlers;
+    private final Collection<TriggerStateHandler> mTriggerStateHandlers;
 
     public Trigger() {
-        mTriggerStateHandlers = new ArrayList<TriggerStateHandler>();
+        this(new ArrayList<>());
+    }
+
+    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers) {
+        mTriggerStateHandlers = triggerStateHandlers;
     }
     
     public void addStateHandler(TriggerStateHandler handler) {
@@ -51,7 +55,7 @@ public class Trigger {
         });
     }
 
-    public void cancelWhenInActive(Action action) {
+    public void cancelWhenInactive(Action action) {
         addStateHandler((state)-> {
             if (state == TriggerState.INACTIVE) {
                 action.cancel();
