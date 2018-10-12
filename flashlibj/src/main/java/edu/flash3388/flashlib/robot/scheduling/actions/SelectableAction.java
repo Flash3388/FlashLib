@@ -14,18 +14,18 @@ import java.util.function.IntSupplier;
 public class SelectableAction extends Action {
 
 	private final List<Action> mActions;
-	private final IntSupplier mSelectionSource;
+	private final IntSupplier mSelectionSupplier;
 
 	private Action mSelectedAction;
 
 	/**
 	 * Creates a new selectable action.
 	 *
-	 * @param selectionSource the index source
+	 * @param selectionSupplier the index source
 	 * @param actions a list of scheduling to select from
 	 */
-	public SelectableAction(IntSupplier selectionSource, List<Action> actions){
-		mSelectionSource = selectionSource;
+	public SelectableAction(IntSupplier selectionSupplier, List<Action> actions){
+		mSelectionSupplier = selectionSupplier;
 		mActions = actions;
 	}
 
@@ -42,7 +42,7 @@ public class SelectableAction extends Action {
 
 	@Override
 	protected void initialize(){
-		int selectedIndex = mSelectionSource.getAsInt();
+		int selectedIndex = mSelectionSupplier.getAsInt();
 
 		if (selectedIndex < 0 || selectedIndex >= mActions.size()) {
 			cancel();
