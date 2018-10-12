@@ -12,6 +12,6 @@ public class Serializer {
     public <T> T deserialize(InputStream inputStream, Class<T> type) throws IOException, ClassNotFoundException {
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
         Object deserializedObject = objectInputStream.readObject();
-        return  type.cast(deserializedObject);
+        return type.cast(deserializedObject);
     }
 }
