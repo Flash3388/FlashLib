@@ -16,27 +16,27 @@ public interface Rotatable extends Stoppable {
 	/**
 	 * Rotates the system at a speed to a given direction.
 	 * @param speed speed [0...1]
-	 * @param direction right - true, left - false
+	 * @param direction right - forward, left - backward
 	 */
-	default void rotate(double speed, boolean direction){
-		rotate(direction? speed : -speed);
+	default void rotate(double speed, Direction direction){
+		rotate(speed * direction.sign());
 	}
 	/**
 	 * Rotates the system at a speed to the right.
-	 * <p>Default implementation calls {@link #rotate(double, boolean)} with the given speed
-	 * and true for direction.
+	 * <p>Default implementation calls {@link #rotate(double, Direction)} with the given speed
+     * 	 * and {@link Direction#FORWARD} for direction.
 	 * @param speed speed [0...1]
 	 */
 	default void rotateRight(double speed){
-		rotate(speed, true);
+		rotate(speed, Direction.FORWARD);
 	}
 	/**
 	 * Rotates the system at a speed to the left.
-	 * <p>Default implementation calls {@link #rotate(double, boolean)} with the given speed
-	 * and true for direction.
+	 * <p>Default implementation calls {@link #rotate(double, Direction)} with the given speed
+	 * and {@link Direction#BACKWARD} for direction.
 	 * @param speed speed [0...1]
 	 */
 	default void rotateLeft(double speed){
-		rotate(speed, false);
+		rotate(speed, Direction.BACKWARD);
 	}
 }
