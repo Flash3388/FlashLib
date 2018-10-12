@@ -9,47 +9,21 @@ import java.util.*;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class MultiSpeedController implements SpeedController {
+public class SpeedControllerGroup implements SpeedController {
 
-	private List<SpeedController> mControllers;
+	private final List<SpeedController> mControllers;
 	private boolean mIsInverted;
-	
-	/**
-	 * Creates a new container for an array of speed controller.
-	 * 
-	 * @param controllers array of controllers to be contained
-	 */
-	public MultiSpeedController(SpeedController...controllers) {
-		this(Arrays.asList(controllers));
-	}
+
 	/**
 	 * Creates a new container for a list of speed controller.
 	 * 
 	 * @param controllers list of controllers to be contained
 	 */
-	public MultiSpeedController(Collection<SpeedController> controllers){
+	public SpeedControllerGroup(Collection<SpeedController> controllers){
 		mControllers = new ArrayList<SpeedController>(controllers);
 
 		setInverted(false);
 		set(0);
-	}
-	
-	/**
-	 * Gets a controller held in this container by the index
-	 *
-	 * @param index the index of the controller
-	 * @return a controller from the container
-	 */
-	public SpeedController getController(int index){
-		return mControllers.get(index);
-	}
-
-	/**
-	 * Gets the amount of controllers held in this container.
-	 * @return the amount of controllers
-	 */
-	public int getControllerCount(){
-		return mControllers.size();
 	}
 	
 	/**
