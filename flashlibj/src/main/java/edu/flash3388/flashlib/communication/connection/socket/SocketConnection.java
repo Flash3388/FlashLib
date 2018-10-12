@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.communications.connection.socket;
+package edu.flash3388.flashlib.communication.connection.socket;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-import edu.flash3388.flashlib.communications.connection.Connection;
-import edu.flash3388.flashlib.communications.connection.TimeoutException;
+import edu.flash3388.flashlib.communication.connection.Connection;
+import edu.flash3388.flashlib.communication.connection.TimeoutException;
 
 public class SocketConnection implements Connection {
 

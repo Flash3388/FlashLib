@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.communications.connection;
+package edu.flash3388.flashlib.communication.connection;
 
 public class ConnectionFailedException extends Exception {
 

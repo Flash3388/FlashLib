@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.communications.message;
+package edu.flash3388.flashlib.communication.message;
 
 import edu.flash3388.flashlib.util.versioning.Version;
 

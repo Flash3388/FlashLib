@@ -1,7 +1,7 @@
-package edu.flash3388.flashlib.communications.message;
+package edu.flash3388.flashlib.communication.message;
 
-import edu.flash3388.flashlib.communications.connection.Connection;
-import edu.flash3388.flashlib.communications.connection.TimeoutException;
+import edu.flash3388.flashlib.communication.connection.Connection;
+import edu.flash3388.flashlib.communication.connection.TimeoutException;
 import edu.flash3388.flashlib.io.Closeables;
 import edu.flash3388.flashlib.io.Serializer;
 import edu.flash3388.flashlib.util.versioning.IncompatibleVersionException;
