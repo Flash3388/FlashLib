@@ -16,8 +16,20 @@ import java.util.*;
 public class ActionGroup extends Action {
 
 	public enum ExecutionOrder {
-		SEQUENTIAL,
-		PARALLEL
+		SEQUENTIAL {
+            @Override
+            protected boolean canStartNextAction(ActionGroup actionGroup) {
+                return actionGroup.mCurrentlyRunningActions.isEmpty();
+            }
+        },
+		PARALLEL {
+            @Override
+            protected boolean canStartNextAction(ActionGroup actionGroup) {
+                return true;
+            }
+        };
+
+		protected abstract boolean canStartNextAction(ActionGroup actionGroup);
 	}
 	
 	private final Collection<Action> mActions;
@@ -109,9 +121,7 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		if (mExecutionOrder == ExecutionOrder.SEQUENTIAL && mCurrentlyRunningActions.isEmpty()) {
-			startNextAction();
-		} else if (mExecutionOrder == ExecutionOrder.PARALLEL) {
+		if (mExecutionOrder.canStartNextAction(this)) {
 			startNextAction();
 		}
 	}
