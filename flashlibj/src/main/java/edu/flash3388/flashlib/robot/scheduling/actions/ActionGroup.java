@@ -10,6 +10,7 @@ import java.util.*;
  * Sequential scheduling cannot run if another action from the group is active currently. Parallel action will run at all
  * conditions.
  * </p>
+ * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
