@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 public class Closer implements Closeable {
 
-	private Collection<Closeable> mCloseables;
+	private final Collection<Closeable> mCloseables;
 	
 	private Closer(Collection<Closeable> closeables) {
 		mCloseables = closeables;
