@@ -17,19 +17,6 @@ public class HidButton extends Button {
         mChannel = channel;
         mButton = button;
     }
-
-
-    public HidInterface getHidInterface(){
-        return mHidInterface;
-    }
-
-    public int getChannel() {
-        return mChannel;
-    }
-
-    public int getButtonNumber() {
-        return mButton;
-    }
 	
 	/**
 	 * Gets the current button state
