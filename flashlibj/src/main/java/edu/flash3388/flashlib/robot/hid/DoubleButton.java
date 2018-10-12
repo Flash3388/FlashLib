@@ -21,21 +21,6 @@ public abstract class DoubleButton extends Button {
 		this.button1 = button1;
 		this.button2 = button2;
 	}
-	
-	/**
-	 * Gets the first button 
-	 * @return first button
-	 */
-	public final Button getButton1(){
-		return button1;
-	}
-	/**
-	 * Gets the second button 
-	 * @return second button
-	 */
-	public final Button getButton2(){
-		return button2;
-	}
 
 	/**
 	 * Gets the current button state
