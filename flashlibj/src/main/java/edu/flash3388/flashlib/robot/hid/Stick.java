@@ -8,7 +8,7 @@ import com.jmath.vectors.Vector2;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Stick{
+public class Stick {
 
 	private final Axis mAxisX;
 	private final Axis mAxisY;
@@ -16,22 +16,6 @@ public class Stick{
 	public Stick(Axis axisX, Axis axisY){
 		mAxisX = axisX;
 		mAxisY = axisY;
-	}
-	
-	/**
-	 * Gets the x axis {@link Axis} object.
-	 * @return x axis
-	 */
-	public Axis getXAxis(){
-		return mAxisX;
-	}
-
-	/**
-	 * Gets the y axis {@link Axis} object.
-	 * @return y axis
-	 */
-	public Axis getYAxis(){
-		return mAxisY;
 	}
 	
 	/**
