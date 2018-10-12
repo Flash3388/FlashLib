@@ -9,8 +9,6 @@ import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
  * the robot framework to access data about robot operations.
  * <p>
  * For non-FRC robots, {@link RobotBase} implements most of this interface.
- * <p>
- * For FRC robot, {@link edu.flash3388.flashlib.robot.frc.FRCRobotBase FRCRobotBase} implements this interface.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.2

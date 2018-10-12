@@ -2,12 +2,6 @@ apply plugin: 'java'
 
 
 dependencies {
-    compile name: 'WPILib'
-	compile name: 'opencv'
-	compile name: 'RXTXcomm'
-	compile name: 'niVisionWPI'
-	compile name: 'TalonSRXLibJava'
-
     compile name: 'jmath-1.0'
     compile name: 'javabeans-1.0'
 
