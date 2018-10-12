@@ -11,8 +11,6 @@ import java.util.List;
  */
 public class XboxController implements HID {
 	
-	//{("A"),("B"),("X"),("Y"),("LB"),("RB"),("Back"),("Start"),("LStick"),("RStick")};
-
 	private static final int BUTTON_COUNT = 10;
 
 	private HIDInterface mHidInterface;
@@ -143,6 +141,10 @@ public class XboxController implements HID {
 	 */
 	@Override
 	public Button getButton(int button) {
+	    if (button < 0 || button >= mButtons.size()) {
+	        throw new NoSuchButtonException(mChannel, button);
+        }
+
 		return mButtons.get(button);
 	}
 

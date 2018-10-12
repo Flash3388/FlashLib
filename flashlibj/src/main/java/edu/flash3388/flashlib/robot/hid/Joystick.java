@@ -115,15 +115,13 @@ public class Joystick implements HID {
 	 */
 	@Override
 	public Button getButton(int button) {
+        if (button < 0 || button >= mButtons.size()) {
+            throw new NoSuchButtonException(mChannel, button);
+        }
+
 		return mButtons.get(button);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Since only one stick exists, indexes other than 0 returns null.
-	 * </p>
-	 */
 	@Override
 	public Stick getStick(int index) {
 		switch(index){
