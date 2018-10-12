@@ -16,7 +16,7 @@ import edu.flash3388.flashlib.math.Mathf;
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PIDController {
+public class PidController {
 
 	private final DoubleProperty mKp;
 	private final DoubleProperty mKi;
@@ -44,7 +44,7 @@ public class PIDController {
 	 * @param kd the differential constant
 	 * @param kf the feed forward constant
 	 */
-	public PIDController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
+	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
 		mKp = kp;
 		mKi = ki;
 		mKd = kd;

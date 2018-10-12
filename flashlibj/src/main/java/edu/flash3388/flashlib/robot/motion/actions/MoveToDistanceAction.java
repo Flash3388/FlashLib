@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.motion.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.control.PIDController;
+import edu.flash3388.flashlib.robot.control.PidController;
 import edu.flash3388.flashlib.robot.motion.Movable;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
@@ -10,13 +10,13 @@ import java.util.function.DoubleSupplier;
 
 public class MoveToDistanceAction extends Action {
 
-    private final PIDController mPidController;
+    private final PidController mPidController;
     private final Movable mMovable;
     private final DoubleSupplier mDistanceSupplier;
     private final double mWantedDistance;
     private final double mDistanceMargin;
 
-    public MoveToDistanceAction(PIDController pidController, Movable movable, DoubleSupplier distanceSupplier, double wantedDistance, double distanceMargin) {
+    public MoveToDistanceAction(PidController pidController, Movable movable, DoubleSupplier distanceSupplier, double wantedDistance, double distanceMargin) {
         mPidController = pidController;
         mMovable = movable;
         mDistanceSupplier = distanceSupplier;
