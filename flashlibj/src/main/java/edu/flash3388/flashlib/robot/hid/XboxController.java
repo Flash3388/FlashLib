@@ -162,7 +162,7 @@ public class XboxController implements HID {
 		switch(index){
 			case 0: return RightStick;
 			case 1: return LeftStick;
-			default: return null;
+			default: throw new NoSuchStickException(mChannel, index);
 		}
 	}
 

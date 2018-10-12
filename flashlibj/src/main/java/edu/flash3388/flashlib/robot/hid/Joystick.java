@@ -128,7 +128,7 @@ public class Joystick implements HID {
 	public Stick getStick(int index) {
 		switch(index){
 			case 0: return mStick;
-			default: return null;
+			default: throw new NoSuchStickException(mChannel, index);
 		}
 	}
 
