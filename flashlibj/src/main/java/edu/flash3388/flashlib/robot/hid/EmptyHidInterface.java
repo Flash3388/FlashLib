@@ -1,12 +1,12 @@
 package edu.flash3388.flashlib.robot.hid;
 
 /**
- * Implements an empty {@link HIDInterface}. Does nothing, will return default values.
+ * Implements an empty {@link HidInterface}. Does nothing, will return default values.
  * 
  * @author TomTzook
  * @since FlashLib 1.0.2
  */
-public class EmptyHIDInterface implements HIDInterface{
+public class EmptyHidInterface implements HidInterface {
 	
 	@Override
 	public boolean isHidConnected(int hid) {

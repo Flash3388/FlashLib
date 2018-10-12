@@ -6,10 +6,10 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface HID {
+public interface Hid {
 	
 	/**
-	 * Gets the HID channel number.
+	 * Gets the Hid channel number.
      *
 	 * @return channel
 	 */
@@ -54,7 +54,7 @@ public interface HID {
      *
 	 * @return Pov
 	 */
-	Pov getPOV(int pov);
+	Pov getPov(int pov);
 
     /**
      * Gets the amount of POVs on the interface device.

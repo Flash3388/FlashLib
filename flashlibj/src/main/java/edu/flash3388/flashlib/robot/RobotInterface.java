@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.robot.hid.HIDInterface;
+import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 
@@ -62,5 +62,5 @@ public interface RobotInterface {
 		return isInMode(RobotMode.DISABLED);
 	}
 
-	HIDInterface getHIDInterface();
+	HidInterface getHIDInterface();
 }

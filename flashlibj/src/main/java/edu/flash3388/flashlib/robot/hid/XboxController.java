@@ -9,7 +9,7 @@ import java.util.List;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class XboxController implements HID {
+public class XboxController implements Hid {
 	
 	private static final int BUTTON_COUNT = 10;
 	private static final int AXES_COUNT = 6;
@@ -21,7 +21,7 @@ public class XboxController implements HID {
     private final List<Button> mButtons;
     private final DPad mDpad;
 
-	public XboxController(HIDInterface hidInterface, int channel){
+	public XboxController(HidInterface hidInterface, int channel){
 		mChannel = channel;
 
 		mAxes = new ArrayList<>(AXES_COUNT);
@@ -31,7 +31,7 @@ public class XboxController implements HID {
 
 		mButtons = new ArrayList<>(BUTTON_COUNT);
 		for(int i = 0; i < BUTTON_COUNT; i++) {
-			mButtons.add(new HIDButton(hidInterface, mChannel, i));
+			mButtons.add(new HidButton(hidInterface, mChannel, i));
 		}
 
         mDpad = new DPad(hidInterface, mChannel, DPAD_POV_INDEX);
@@ -79,7 +79,7 @@ public class XboxController implements HID {
 	}
 
     @Override
-    public Pov getPOV(int pov) {
+    public Pov getPov(int pov) {
         if (pov != DPAD_POV_INDEX) {
             throw new NoSuchPovException(mChannel, pov);
         }

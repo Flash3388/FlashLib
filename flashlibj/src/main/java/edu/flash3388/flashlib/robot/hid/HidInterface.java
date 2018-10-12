@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.hid;
 
-public interface HIDInterface {
+public interface HidInterface {
 	
 	boolean isHidConnected(int hid);
 

@@ -10,11 +10,11 @@ import java.util.function.DoubleSupplier;
  */
 public class Axis implements DoubleSupplier {
 
-	private final HIDInterface mHidInterface;
+	private final HidInterface mHidInterface;
 	private final int mChannel;
 	private final int mAxis;
 
-	public Axis(HIDInterface hidInterface, int channel, int axis) {
+	public Axis(HidInterface hidInterface, int channel, int axis) {
         mHidInterface = hidInterface;
         mChannel = channel;
 		mAxis = axis;

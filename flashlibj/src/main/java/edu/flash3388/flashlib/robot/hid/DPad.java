@@ -14,14 +14,14 @@ public class DPad extends Pov {
     private final Button mLeft;
     private final Button mFull;
 
-	public DPad(HIDInterface hidInterface, int channel, int pov){
+	public DPad(HidInterface hidInterface, int channel, int pov){
 		super(hidInterface, channel, pov);
 		
-		mUp = new POVButton(hidInterface, channel, pov, POVRange.UP);
-		mDown = new POVButton(hidInterface, channel, pov, POVRange.DOWN);
-		mRight = new POVButton(hidInterface, channel, pov, POVRange.RIGHT);
-		mLeft = new POVButton(hidInterface, channel, pov, POVRange.LEFT);
-		mFull = new POVButton(hidInterface, channel, pov, POVRange.FULL);
+		mUp = new PovButton(hidInterface, channel, pov, PovRange.UP);
+		mDown = new PovButton(hidInterface, channel, pov, PovRange.DOWN);
+		mRight = new PovButton(hidInterface, channel, pov, PovRange.RIGHT);
+		mLeft = new PovButton(hidInterface, channel, pov, PovRange.LEFT);
+		mFull = new PovButton(hidInterface, channel, pov, PovRange.FULL);
 	}
 
 	/**

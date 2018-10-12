@@ -6,14 +6,14 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class POVButton extends Button {
+public class PovButton extends Button {
 
-    private final HIDInterface mHidInterface;
+    private final HidInterface mHidInterface;
     private final int mChannel;
     private final int mPov;
-	private final POVRange mRange;
+	private final PovRange mRange;
 
-	public POVButton(HIDInterface hidInterface, int channel, int pov, POVRange povRange) {
+	public PovButton(HidInterface hidInterface, int channel, int pov, PovRange povRange) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mPov = pov;

@@ -6,20 +6,20 @@ package edu.flash3388.flashlib.robot.hid;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class HIDButton extends Button {
+public class HidButton extends Button {
 
-	private final HIDInterface mHidInterface;
+	private final HidInterface mHidInterface;
 	private final int mChannel;
 	private final int mButton;
 
-    public HIDButton(HIDInterface hidInterface, int channel, int button) {
+    public HidButton(HidInterface hidInterface, int channel, int button) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mButton = button;
     }
 
 
-    public HIDInterface getHidInterface(){
+    public HidInterface getHidInterface(){
         return mHidInterface;
     }
 

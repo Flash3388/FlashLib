@@ -10,11 +10,11 @@ import java.util.function.IntSupplier;
  */
 public class Pov implements IntSupplier {
 
-    private final HIDInterface mHidInterface;
+    private final HidInterface mHidInterface;
     private final int mChannel;
     private final int mPov;
 
-    public Pov(HIDInterface hidInterface, int channel, int pov) {
+    public Pov(HidInterface hidInterface, int channel, int pov) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mPov = pov;

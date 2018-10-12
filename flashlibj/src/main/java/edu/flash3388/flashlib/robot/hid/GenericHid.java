@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.hid;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GenericHID implements HID {
+public class GenericHid implements Hid {
 
 	private final int mChannel;
 
@@ -11,7 +11,7 @@ public class GenericHID implements HID {
 	private final List<Button> mButtons;
     private final List<Pov> mPovs;
 
-	public GenericHID(HIDInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
+	public GenericHid(HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
 		mChannel = channel;
 
         mAxes = new ArrayList<>();
@@ -21,7 +21,7 @@ public class GenericHID implements HID {
 
 		mButtons = new ArrayList<>();
 		for(int i = 0; i < buttonCount; i++) {
-			mButtons.add(new HIDButton(hidInterface, channel, i));
+			mButtons.add(new HidButton(hidInterface, channel, i));
 		}
 
         mPovs = new ArrayList<>();
@@ -64,7 +64,7 @@ public class GenericHID implements HID {
 	}
 
     @Override
-    public Pov getPOV(int pov) {
+    public Pov getPov(int pov) {
         if (pov < 0 || pov >= mPovs.size()) {
             throw new NoSuchPovException(mChannel, pov);
         }
