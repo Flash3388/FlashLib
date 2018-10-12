@@ -13,33 +13,24 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.4'
 }
+
 jar {
 	baseName 'flashlib'
-	//destinationDir project.file('../build')
 }
+
 task sourcesJar(type: Jar, dependsOn: classes) {
 	classifier = 'sources'
 	baseName 'flashlib'
 	from sourceSets.main.allSource
 }
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	classifier = 'javadoc'
 	baseName 'flashlib'
 	from javadoc.destinationDir
 }
+
 artifacts {
 	archives sourcesJar
 	archives javadocJar
 }
-
-task copyManeditor{		
-	doLast{
-		copy {
-			from fileTree("maneditor")
-			into projectOutputFolder + "maneditor"
-		}
-		println ('added maneditor')
-	}
-}
-
-build.finalizedBy(copyManeditor)

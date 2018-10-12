@@ -1,3 +1,0 @@
-#!/bin/bash
-
-java -jar manedit.jar "$1" "$2" edu.flash3388.flashlib.robot.RobotBase "Robot-Class=$3"
