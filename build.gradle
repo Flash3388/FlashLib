@@ -1,14 +1,16 @@
-task clean(type: Delete){
-	delete rootProject.buildDir
-}
 
 subprojects{
-
 	buildDir = projectOutputFolder
-	
-	repositories {
-		flatDir {
-			dirs projectLibsFolder
-		}
-	}
+
+    repositories {
+        mavenCentral()
+
+        flatDir {
+            dirs projectLibsFolder
+        }
+    }
+}
+
+task clean(type: Delete){
+    delete rootProject.buildDir
 }

@@ -17,6 +17,8 @@ dependencies {
 
     compile name: 'jmath-1.0'
     compile name: 'javabeans-1.0'
+
+    testImplementation 'junit:junit:4.12'
 }
 jar {
 	baseName 'flashlib'
