@@ -13,9 +13,9 @@ import java.util.function.BooleanSupplier;
  */
 public class ConditionalAction extends Action {
 
-	private BooleanSupplier mCondition;
-	private Action mActionRunOnTrue;
-	private Action mActionRunOnFalse;
+	private final BooleanSupplier mCondition;
+	private final Action mActionRunOnTrue;
+	private final Action mActionRunOnFalse;
 
 	private Action mActionRunning;
 
