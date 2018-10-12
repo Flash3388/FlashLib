@@ -43,12 +43,20 @@ public final class Scheduler {
 	private SchedulerRunMode mRunMode;
 
 	private Scheduler() {
+        mSubsystems = new HashSet<Subsystem>();
+        mActions = new ArrayList<Action>();
 		mTasks = new ArrayList<Task>();
-		mActions = new ArrayList<Action>();
-		mSubsystems = new HashSet<Subsystem>();
 
-		mRunMode = SchedulerRunMode.ALL;
+        mRunMode = SchedulerRunMode.ALL;
 	}
+
+	// FOR TESTING
+    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<Task> tasks, SchedulerRunMode runMode) {
+        mSubsystems = subsystems;
+        mActions = actions;
+        mTasks = tasks;
+        mRunMode = runMode;
+    }
 
 	public void setRunMode(SchedulerRunMode runMode) {
 		mRunMode = runMode;
@@ -180,7 +188,7 @@ public final class Scheduler {
 		}
 	}
 
-	private static class Task {
+	/*package*/ static class Task {
 
 		private final Runnable mRunnable;
 		private final boolean mIsRepeating;
