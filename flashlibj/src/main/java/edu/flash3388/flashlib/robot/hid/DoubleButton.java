@@ -9,7 +9,8 @@ package edu.flash3388.flashlib.robot.hid;
  */
 public abstract class DoubleButton extends Button {
 	
-	private Button button1, button2;
+	private final Button mButton1;
+	private final Button mButton2;
 	
 	/**
 	 * Creates a dual button wrapper
@@ -18,8 +19,8 @@ public abstract class DoubleButton extends Button {
 	 * @param button2 the second button
 	 */
 	public DoubleButton(Button button1, Button button2){
-		this.button1 = button1;
-		this.button2 = button2;
+		mButton1 = button1;
+		mButton2 = button2;
 	}
 
 	/**
@@ -27,6 +28,6 @@ public abstract class DoubleButton extends Button {
 	 */
 	@Override
 	public boolean isDown() {
-		return button1.isDown() && button2.isDown();
+		return mButton1.isDown() && mButton2.isDown();
 	}
 }
