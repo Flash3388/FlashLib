@@ -12,133 +12,54 @@ import java.util.List;
 public class XboxController implements HID {
 	
 	private static final int BUTTON_COUNT = 10;
+	private static final int AXES_COUNT = 6;
+	private static final int DPAD_POV_INDEX = 0;
 
-	private HIDInterface mHidInterface;
+	private final int mChannel;
 
-	private int mChannel;
+    private final List<Axis> mAxes;
+    private final List<Button> mButtons;
+    private final DPad mDpad;
 
-	private List<Button> mButtons;
-	
-	public final Button A;
-    public final Button B;
-    public final Button X;
-    public final Button Y;
-    public final Button LB;
-    public final Button RB;
-    public final Button Back;
-    public final Button Start;
-    public final Button LeftStickButton;
-    public final Button RightStickButton;
-    
-	public final Stick LeftStick;
-	public final Stick RightStick;
-	
-	public final DPad DPad;
-	
-	public final Axis RT;
-	public final Axis LT;
-	
-	/**
-	 * Creates a new Xbox controller.
-	 *
-     * @param hidInterface the hid interface
-	 * @param channel the device index
-	 */
 	public XboxController(HIDInterface hidInterface, int channel){
-		mHidInterface = hidInterface;
-		
 		mChannel = channel;
-		
-		LeftStick = new Stick(this, 0, 1);
-		RightStick = new Stick(this, 4, 5);
-		
-		DPad = new DPad(this, 0);
-		RT = new Axis(this, 3);
-		LT = new Axis(this, 2);
 
-		mButtons = new ArrayList<Button>(BUTTON_COUNT);
+		mAxes = new ArrayList<>(AXES_COUNT);
+        for(int i = 0; i < AXES_COUNT; i++) {
+            mAxes.add(new Axis(hidInterface, mChannel, i));
+        }
 
+		mButtons = new ArrayList<>(BUTTON_COUNT);
 		for(int i = 0; i < BUTTON_COUNT; i++) {
-			mButtons.add(new HIDButton(this, i + 1));
+			mButtons.add(new HIDButton(hidInterface, mChannel, i));
 		}
-		
-		A = getButton(0);
-	    B = getButton(1);
-	    X = getButton(2);
-	    Y = getButton(3);
-	    LB = getButton(4);
-	    RB = getButton(5);
-	    Back = getButton(6);
-	    Start = getButton(7);
-	    LeftStickButton = getButton(8);
-	    RightStickButton = getButton(9);
+
+        mDpad = new DPad(hidInterface, mChannel, DPAD_POV_INDEX);
 	}
-	
-	/**
-	 * Gets the left stick of the controller represented in a class
-	 * @return The left stick on the controller
-	 */
-	public Stick getLeftStick() { return LeftStick; } 
-	
-	/**
-	 * Gets the right stick of the controller represented in a class
-	 * @return The right stick on the controller
-	 */
-	public Stick getRightStick() { return RightStick; }
-	
-	/**
-	 * Gets the DPad buttons represented in a class
-	 * @return The DPad on the controller 
-	 */
-	public DPad getDPad() { return DPad; }
-	
-	/**
-	 * Gets the trigger representing the Xbox left trigger (LT)
-	 * @return left trigger
-	 */
-	public Axis getLeftTrigger() { return LT; }
-	
-	/**
-	 * Gets the trigger representing the Xbox right trigger (RT)
-	 * @return right trigger
-	 */
-	public Axis getRightTrigger() { return RT; }
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public int getChannel(){
 		return mChannel;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public double getRawAxis(int axis){
-		return mHidInterface.getHidAxis(mChannel, axis);
-	}
+    @Override
+    public Axis getAxis(int axis) {
+        if (axis < 0 || axis >= mAxes.size()) {
+            throw new NoSuchAxisException(mChannel, axis);
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean getRawButton(int button){
-		return mHidInterface.getHidButton(mChannel, button);
-	}
+        return mAxes.get(axis);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int getRawPov(int pov){
-		return mHidInterface.getHidPov(mChannel, pov);
-	}
+    public Axis getAxis(XboxAxis xboxAxis) {
+        return getAxis(xboxAxis.axisIndex());
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    @Override
+    public int getAxisCount() {
+        return mAxes.size();
+    }
+
 	@Override
 	public Button getButton(int button) {
 	    if (button < 0 || button >= mButtons.size()) {
@@ -148,32 +69,31 @@ public class XboxController implements HID {
 		return mButtons.get(button);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	public Button getButton(XboxButton xboxButton) {
+	    return getButton(xboxButton.buttonIndex());
+    }
+
 	@Override 
 	public int getButtonCount(){
 		return BUTTON_COUNT;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Stick getStick(int index) {
-		switch(index){
-			case 0: return RightStick;
-			case 1: return LeftStick;
-			default: throw new NoSuchStickException(mChannel, index);
-		}
-	}
+    @Override
+    public POV getPOV(int pov) {
+        if (pov != DPAD_POV_INDEX) {
+            throw new NoSuchPovException(mChannel, pov);
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public POV getPOV() {
-		return getDPad();
-	}
+        return getDPad();
+    }
+
+    public DPad getDPad() {
+        return mDpad;
+    }
+
+    @Override
+    public int getPovCount() {
+        return 1;
+    }
 }
 

@@ -10,38 +10,18 @@ import java.util.function.IntSupplier;
  */
 public class POV implements IntSupplier {
 
-	private final HID mHid;
-	private final int mPov;
-	
-	/**
-	 * Creates a POV wrapper object
-	 * 
-	 * @param hid The hid
-	 * @param pov the number of the POV on the controller.
-	 */
-	public POV(HID hid, int pov){
-		mHid = hid;
-		mPov = pov;
-	}
-	
-	/**
-	 * Get the HID
-	 * @return hid
-	 */
-	public final HID getHID(){
-		return mHid;
-	}
+    private final HIDInterface mHidInterface;
+    private final int mChannel;
+    private final int mPov;
 
-	/**
-	 * Get the POV number
-	 * @return POV number
-	 */
-	public final int getPovNumber(){
-		return mPov;
-	}
+    public POV(HIDInterface hidInterface, int channel, int pov) {
+        mHidInterface = hidInterface;
+        mChannel = channel;
+        mPov = pov;
+    }
 
 	public int get(){
-		return mHid.getRawPov(mPov);
+		return mHidInterface.getHidPov(mChannel, mPov);
 	}
 
     @Override

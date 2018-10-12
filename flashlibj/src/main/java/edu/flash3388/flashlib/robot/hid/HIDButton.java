@@ -8,41 +8,34 @@ package edu.flash3388.flashlib.robot.hid;
  */
 public class HIDButton extends Button {
 
-	private HID hid;
-	private int num;
-	
-	/**
-	 * Creates a button wrapper object
-	 * 
-	 * @param hid The hid
-	 * @param num the number of the button on the controller.
-	 */
-	public HIDButton(HID hid, int num){
-		this.hid = hid;
-		this.num = num;
-	}
-	
-	/**
-	 * Get the HID
-	 * @return hid
-	 */
-	public final HID getHID(){
-		return hid;
-	}
+	private final HIDInterface mHidInterface;
+	private final int mChannel;
+	private final int mButton;
 
-	/**
-	 * Get the button number
-	 * @return button number
-	 */
-	public final int getButtonNumber(){
-		return num;
-	}
+    public HIDButton(HIDInterface hidInterface, int channel, int button) {
+        mHidInterface = hidInterface;
+        mChannel = channel;
+        mButton = button;
+    }
+
+
+    public HIDInterface getHidInterface(){
+        return mHidInterface;
+    }
+
+    public int getChannel() {
+        return mChannel;
+    }
+
+    public int getButtonNumber() {
+        return mButton;
+    }
 	
 	/**
 	 * Gets the current button state
 	 */
 	@Override
 	public boolean isDown() {
-		return hid.getRawButton(num);
+		return mHidInterface.getHidButton(mChannel, mButton);
 	}
 }

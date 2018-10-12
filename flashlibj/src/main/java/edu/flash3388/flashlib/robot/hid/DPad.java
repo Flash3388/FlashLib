@@ -7,46 +7,21 @@ package edu.flash3388.flashlib.robot.hid;
  * @since FlashLib 1.0.0
  */
 public class DPad extends POV {
-	
-	/**
-	 * The Up button on the D-Pad
-	 */
-	public final Button Up;
 
-	/**
-	 * The Down button on the D-Pad
-	 */
-	public final Button Down;
+	private final Button mUp;
+    private final Button mDown;
+    private final Button mRight;
+    private final Button mLeft;
+    private final Button mFull;
 
-	/**
-	 * The Right button on the D-Pad
-	 */
-	public final Button Right;
-
-	/**
-	 * The Left button on the D-Pad
-	 */
-	public final Button Left;
-
-	/**
-	 * The entire POV as a button
-	 */
-	public final Button FULL;
-	
-	/**
-	 * Creates a new instance of DPad, representing the D-Pad of a given Joystick.
-	 * 
-	 * @param hid The hid the D-Pad is on.
-	 * @param num the number of the D-Pad on the controller.
-	 */
-	public DPad(HID hid, int num){
-		super(hid, num);
+	public DPad(HIDInterface hidInterface, int channel, int pov){
+		super(hidInterface, channel, pov);
 		
-		Up = new POVButton(hid, num, POVRange.UP);
-		Down = new POVButton(hid, num, POVRange.DOWN);
-		Right = new POVButton(hid, num, POVRange.RIGHT);
-		Left = new POVButton(hid, num, POVRange.LEFT);
-		FULL = new POVButton(hid, num, POVRange.FULL);
+		mUp = new POVButton(hidInterface, channel, pov, POVRange.UP);
+		mDown = new POVButton(hidInterface, channel, pov, POVRange.DOWN);
+		mRight = new POVButton(hidInterface, channel, pov, POVRange.RIGHT);
+		mLeft = new POVButton(hidInterface, channel, pov, POVRange.LEFT);
+		mFull = new POVButton(hidInterface, channel, pov, POVRange.FULL);
 	}
 
 	/**
@@ -54,7 +29,7 @@ public class DPad extends POV {
 	 * @return up button
 	 */
 	public Button getUp(){
-		return Up;
+		return mUp;
 	}
 
 	/**
@@ -62,7 +37,7 @@ public class DPad extends POV {
 	 * @return down button
 	 */
 	public Button getDown(){
-		return Down;
+		return mDown;
 	}
 
 	/**
@@ -70,7 +45,7 @@ public class DPad extends POV {
 	 * @return right button
 	 */
 	public Button getRight(){
-		return Right;
+		return mRight;
 	}
 
 	/**
@@ -78,10 +53,10 @@ public class DPad extends POV {
 	 * @return left button
 	 */
 	public Button getLeft(){
-		return Left;
+		return mLeft;
 	}
 
 	public Button getFull() {
-		return FULL;
+		return mFull;
 	}
 }

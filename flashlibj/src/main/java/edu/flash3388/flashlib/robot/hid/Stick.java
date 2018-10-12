@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import com.jmath.vectors.Vector2;
+
 /**
  * Represents a simple 2-axis stick from a controller: X-Axis, Y-Axis.
  * 
@@ -10,17 +12,10 @@ public class Stick{
 
 	private final Axis mAxisX;
 	private final Axis mAxisY;
-	
-	/**
-	 * Creates a new stick for a controller.
-	 * 
-	 * @param hid the HID
-	 * @param axisX the index of the x-axis
-	 * @param axisY the index of the y-axis
-	 */
-	public Stick(HID hid, int axisX, int axisY){
-		mAxisX = new Axis(hid, axisX);
-		mAxisY = new Axis(hid, axisY);
+
+	public Stick(Axis axisX, Axis axisY){
+		mAxisX = axisX;
+		mAxisY = axisY;
 	}
 	
 	/**
@@ -60,8 +55,7 @@ public class Stick{
 	 * @return magnitude
 	 */
 	public double getMagnitude(){
-		double x = getX(), y = getY();
-		return Math.sqrt(x * x + y * y);
+		return new Vector2(getX(), getY()).magnitude();
 	}
 
 	/**
@@ -69,6 +63,6 @@ public class Stick{
 	 * @return angle in degrees
 	 */
 	public double getAngle(){
-		return Math.toDegrees(Math.atan2(-getX(), -getY()));
+        return new Vector2(getX(), getY()).angle();
 	}
 }

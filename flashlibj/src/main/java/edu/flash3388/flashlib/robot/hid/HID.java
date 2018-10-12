@@ -10,57 +10,56 @@ public interface HID {
 	
 	/**
 	 * Gets the HID channel number.
+     *
 	 * @return channel
 	 */
 	int getChannel();
 
-	/**
-	 * Gets the value of an axis from the human interface device.
-	 * 
-	 * @param axis the axis index
-	 * @return the value of the axis [-1...1]
-	 */
-	double getRawAxis(int axis);
-	
-	/**
-	 * Gets the value of an button from the human interface device.
-	 * 
-	 * @param button the button index
-	 * @return the value of the button [false...true]
-	 */
-	boolean getRawButton(int button);
+    /**
+     * Gets the axis object at the given index.
+     *
+     * @param axis axis index, from 0.
+     *
+     * @return axis
+     */
+	Axis getAxis(int axis);
+
+    /**
+     * Gets the amount of axes on the interface device.
+     *
+     * @return the amount of axes.
+     */
+	int getAxisCount();
 
 	/**
-	 * Gets the button object for the button at the given index
-	 * @param button the button index
-	 * @return the button wrapper
+	 * Gets the button object for the button at the given index.
+     *
+	 * @param button button index, from 0.
+     *
+	 * @return button
 	 */
 	Button getButton(int button);
 
 	/**
 	 * Gets the amount of buttons on the interface device.
-	 * @return the count of buttons
+     *
+	 * @return the amount of buttons
 	 */
 	int getButtonCount();
-	
-	/**
-	 * Gets the stick object at the given index
-	 * @param index the index of the stick
-	 * @return stick wrapper
-	 */
-	Stick getStick(int index);
-	
-	/**
-	 * Gets the value of a POV from the device
-	 * 
-	 * @param pov the pov index
-	 * @return the value of the pov in degrees
-	 */
-	int getRawPov(int pov);
 
 	/**
-	 * Gets the POV object wrapper for the POV on this device
-	 * @return the POV wrapper
+	 * Gets the POV object at the given index.
+     *
+     * @param pov pov index, from 0.
+     *
+	 * @return POV
 	 */
-	POV getPOV();
+	POV getPOV(int pov);
+
+    /**
+     * Gets the amount of POVs on the interface device.
+     *
+     * @return the amount of POVs.
+     */
+	int getPovCount();
 }
