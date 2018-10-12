@@ -1,8 +1,9 @@
 package edu.flash3388.flashlib.util.versioning;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Version {
+public class Version implements Serializable {
 
     private final int mMajor;
     private final int mMinor;

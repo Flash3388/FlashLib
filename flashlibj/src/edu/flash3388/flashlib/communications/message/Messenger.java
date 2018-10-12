@@ -4,6 +4,8 @@ import edu.flash3388.flashlib.communications.connection.Connection;
 import edu.flash3388.flashlib.communications.connection.TimeoutException;
 import edu.flash3388.flashlib.io.Closeables;
 import edu.flash3388.flashlib.io.Serializer;
+import edu.flash3388.flashlib.util.versioning.IncompatibleVersionException;
+import edu.flash3388.flashlib.util.versioning.Version;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,7 +14,7 @@ import java.nio.ByteBuffer;
 
 public class Messenger {
 
-    private static final int VERSION = 1;
+    private static final Version VERSION = new Version(1, 0, 0);
     private static final int HEADER_LENGTH_SIZE = 4;
 
     private final Connection mConnection;
@@ -64,7 +66,9 @@ public class Messenger {
         }
     }
 
-    private void ensureCompatibleVersion(int otherVersion) {
-        // TODO: IMPLEMENT
+    private void ensureCompatibleVersion(Version other) {
+        if (!VERSION.isCompatibleWith(other)) {
+            throw new IncompatibleVersionException(VERSION, other);
+        }
     }
 }

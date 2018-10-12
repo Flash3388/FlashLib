@@ -1,17 +1,20 @@
 package edu.flash3388.flashlib.communications.message;
 
-public class MessageHeader {
+import edu.flash3388.flashlib.util.versioning.Version;
 
-    private final int mVersion;
+import java.io.Serializable;
+
+public class MessageHeader implements Serializable {
+
+    private final Version mVersion;
     private final int mMessageLength;
 
-
-    public MessageHeader(int version, int messageLength) {
+    public MessageHeader(Version version, int messageLength) {
         mVersion = version;
         mMessageLength = messageLength;
     }
 
-    public int getVersion() {
+    public Version getVersion() {
         return mVersion;
     }
 
