@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
-import edu.flash3388.flashlib.robot.scheduling.TimedAction;
 
 import java.util.*;
 
@@ -43,17 +42,6 @@ public class ActionGroup extends Action {
 		mActionsQueue = new ArrayDeque<Action>();
 		mCurrentlyRunningActions = new ArrayList<Action>();
 	}
-	
-	/**
-	 * Adds an action to run sequentially with a timeout in seconds.
-	 * 
-	 * @param action action to run
-	 * @param timeout timeout in seconds for the action
-	 * @return this instance
-	 */
-	public ActionGroup add(Action action, double timeout){
-		return add(new TimedAction(action, timeout));
-	}
 
 	/**
 	 * Adds an action to run.
@@ -78,13 +66,16 @@ public class ActionGroup extends Action {
 	}
 
 	/**
-	 * Adds an empty action to run for few seconds.
+	 * Adds an empty action to run for a given time of milliseconds.
 	 * 
-	 * @param seconds seconds for the empty action to run
+	 * @param timeoutMs milliseconds for the empty action to run
 	 * @return this instance
 	 */
-	public ActionGroup addWaitAction(double seconds){
-		return add(Action.EMPTY, seconds);
+	public ActionGroup addWaitAction(long timeoutMs){
+	    Action action = Actions.empty();
+	    action.setTimeoutMs(timeoutMs);
+
+		return add(action);
 	}
 	
 	@Override

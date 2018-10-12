@@ -1,4 +1,6 @@
-package edu.flash3388.flashlib.robot.scheduling;
+package edu.flash3388.flashlib.robot.scheduling.actions;
+
+import edu.flash3388.flashlib.robot.scheduling.Action;
 
 /**
  * An action which runs {@link Action#execute()} once.

@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
+import edu.flash3388.flashlib.robot.scheduling.actions.InstantAction;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.FlashClock;
 import edu.flash3388.flashlib.time.Time;
@@ -40,33 +41,6 @@ import java.util.Set;
  * @since FlashLib 1.0.0
  */
 public abstract class Action {
-	
-	/**
-	 * An action which does nothing
-	 */
-	public static final Action EMPTY = new Action(){
-		@Override
-		protected void execute() {}
-		@Override
-		protected void end() {}
-	};
-
-	/**
-	 * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link #cancel()}
-	 * for a given action when started.
-	 *
-	 * @param action action to cancel
-	 * @return canceling action
-	 */
-	public static Action stopAction(Action action){
-		return new InstantAction(){
-			@Override
-			public void execute() {
-				if(action.isRunning())
-					action.cancel();
-			}
-		};
-	}
 
 	private final Set<Subsystem> mRequirements;
 	private final Clock mClock;
