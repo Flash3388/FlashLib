@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-public class PWMBounds {
+public class PwmBounds {
 
     private double mCenter;
     private double mMin;
@@ -28,8 +28,8 @@ public class PWMBounds {
      * @param min the minimum bound of the PWM value in milliseconds
      * @param eliminateDeadband whether or not to eliminate the deadband
      */
-    public PWMBounds(double max, double deadbandMax, double center, double deadbandMin, double min,
-                  boolean eliminateDeadband) {
+    public PwmBounds(double max, double deadbandMax, double center, double deadbandMin, double min,
+                     boolean eliminateDeadband) {
         mMax = max;
         mDeadbandMax = deadbandMax;
         mCenter = center;

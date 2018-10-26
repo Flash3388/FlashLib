@@ -2,7 +2,7 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.PWM;
 
-public class Servo extends PWMPositionController {
+public class Servo extends PwmPositionController {
 
 	private final double mMinAngle;
 	private final double mMaxAngle;
@@ -10,7 +10,7 @@ public class Servo extends PWMPositionController {
 	public Servo(PWM port, double minAngle, double maxAngle) {
 		super(
 		        port,
-                new PWMBounds(2.4, 0, 0, 0, 0.6, false),
+                new PwmBounds(2.4, 0, 0, 0, 0.6, false),
                 port.getFrequency() * 0.25);
 
 		mMaxAngle = maxAngle;

@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
 
-public class PWMPositionController extends PWMController implements PositionController {
+public class PwmPositionController extends PwmController implements PositionController {
 
     /**
      * Creates a new PWM device control for a given PWM port.
@@ -12,7 +12,7 @@ public class PWMPositionController extends PWMController implements PositionCont
      * @param pulseBounds the PWM port bounds
      * @param pwmFrequency frequency of the PWM in Hz
      */
-    public PWMPositionController(PWM port, PWMBounds pulseBounds, double pwmFrequency) {
+    public PwmPositionController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
         super(port, pulseBounds, pwmFrequency);
     }
 
@@ -36,7 +36,7 @@ public class PWMPositionController extends PWMController implements PositionCont
 
         position = Mathf.constrain(position, 0.0, 1.0);
 
-        PWMBounds bounds = getBounds();
+        PwmBounds bounds = getBounds();
 
         setDutyCycle(bounds.getMinNegative() + position * bounds.getFullScaleFactor());
     }
@@ -58,7 +58,7 @@ public class PWMPositionController extends PWMController implements PositionCont
     public double get() {
         double duty = getDutyCycle();
 
-        PWMBounds bounds = getBounds();
+        PwmBounds bounds = getBounds();
 
         if(duty > bounds.getMaxPositive()) {
             return 1.0;

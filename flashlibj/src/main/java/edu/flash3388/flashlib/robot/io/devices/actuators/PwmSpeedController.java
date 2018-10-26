@@ -1,16 +1,15 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.io.PWM;
 
 /**
  * Control class for a PWM-controlled speed controller device. This class integrates 
- * {@link PWMController} and {@link SpeedController} into one.
+ * {@link PwmController} and {@link SpeedController} into one.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class PWMSpeedController extends PWMController implements SpeedController {
+public class PwmSpeedController extends PwmController implements SpeedController {
 
 	private boolean mInverted;
 
@@ -21,7 +20,7 @@ public class PWMSpeedController extends PWMController implements SpeedController
 	 * @param pulseBounds pwm bounds
      * @param pwmFrequency frequency of the PWM in Hz
 	 */
-	public PWMSpeedController(PWM port, PWMBounds pulseBounds, double pwmFrequency) {
+	public PwmSpeedController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
 		super(port, pulseBounds, pwmFrequency);
 
 		mInverted = false;
@@ -54,7 +53,7 @@ public class PWMSpeedController extends PWMController implements SpeedController
 
 	    speed = mInverted ? -speed : speed;
 
-        PWMBounds bounds = getBounds();
+        PwmBounds bounds = getBounds();
 
         if(speed == 0.0) {
             setDutyCycle(bounds.getCenter());
@@ -89,7 +88,7 @@ public class PWMSpeedController extends PWMController implements SpeedController
 	public double get() {
         double duty = getDutyCycle();
 
-        PWMBounds bounds = getBounds();
+        PwmBounds bounds = getBounds();
 
         if(duty == 0.0 || duty == bounds.getCenter()) {
             return 0.0;

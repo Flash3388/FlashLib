@@ -10,10 +10,10 @@ import edu.flash3388.flashlib.util.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class PWMController implements Resource {
+public class PwmController implements Resource {
 
 	private PWM mPort;
-	private final PWMBounds mBounds;
+	private final PwmBounds mBounds;
 
 	/**
 	 * Creates a new PWM device control for a given PWM port.
@@ -22,7 +22,7 @@ public class PWMController implements Resource {
 	 * @param pulseBounds the PWM port bounds
      * @param pwmFrequency frequency of the PWM in Hz
 	 */
-	public PWMController(PWM port, PWMBounds pulseBounds, double pwmFrequency) {
+	public PwmController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
 		mPort = port;
 		mPort.setFrequency(pwmFrequency);
 		mBounds = calculateDutyBounds(pulseBounds, pwmFrequency);
@@ -38,7 +38,7 @@ public class PWMController implements Resource {
         return mPort.getDuty();
     }
 
-    public PWMBounds getBounds() {
+    public PwmBounds getBounds() {
 	    return mBounds;
     }
 
@@ -55,7 +55,7 @@ public class PWMController implements Resource {
 		}
 	}
 
-	private PWMBounds calculateDutyBounds(PWMBounds pulseBounds, double frequency) {
+	private PwmBounds calculateDutyBounds(PwmBounds pulseBounds, double frequency) {
 		double looptime = 1000.0 / frequency;
 
 		double max = pulseBounds.getMaxPositive() / looptime;
@@ -64,6 +64,6 @@ public class PWMController implements Resource {
 		double deadbandMin = pulseBounds.getDeadbandMin() / looptime;
 		double min = pulseBounds.getMinNegative() / looptime;
 
-		return new PWMBounds(max, deadbandMax, center, deadbandMin, min, pulseBounds.isDeadbandEliminated());
+		return new PwmBounds(max, deadbandMax, center, deadbandMin, min, pulseBounds.isDeadbandEliminated());
 	}
 }
