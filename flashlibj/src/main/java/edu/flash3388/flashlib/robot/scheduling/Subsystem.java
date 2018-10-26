@@ -24,8 +24,8 @@ package edu.flash3388.flashlib.robot.scheduling;
  */
 public abstract class Subsystem{
 	
-	private Action defaultAction;
-	private Action currentAction;
+	private Action mDefaultAction;
+	private Action mCurrentAction;
 	
 	/**
 	 * Creates a new subsystem. The name is just for comfort of data logging if needed.
@@ -44,13 +44,14 @@ public abstract class Subsystem{
 			getCurrentAction().cancel();
 		}
 	}
+
 	/**
 	 * Gets whether or not this system contains a current action.
 	 * 
 	 * @return true if there is a current action, false otherwise
 	 */
 	public boolean hasCurrentAction(){
-		return currentAction != null;
+		return mCurrentAction != null;
 	}
 	
 	/**
@@ -59,20 +60,20 @@ public abstract class Subsystem{
 	 * @param action the default action
 	 */
 	public void setDefaultAction(Action action){
-		defaultAction = action;
+		mDefaultAction = action;
 	}
 
 	void setCurrentAction(Action action){
-		currentAction = action;
+		mCurrentAction = action;
 	}
 
 	Action getCurrentAction(){
-		return currentAction;
+		return mCurrentAction;
 	}
 
 	void startDefaultAction(){
-		if(defaultAction != null) {
-			defaultAction.start();
+		if(mDefaultAction != null) {
+			mDefaultAction.start();
 		}
 	}
 }
