@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 
 public class Messenger {
 
-    private static final Version VERSION = new Version(1, 0, 0);
+    public static final Version VERSION = new Version(1, 0, 0);
     private static final int HEADER_LENGTH_SIZE = 4;
 
     private final Connection mConnection;
@@ -61,7 +61,7 @@ public class Messenger {
 
             byte[] serializedMessage = mConnection.read(messageHeader.getMessageLength());
             return mSerializer.deserialize(new ByteArrayInputStream(serializedMessage), Message.class);
-        } catch (IOException | TimeoutException | ClassNotFoundException | IncompatibleVersionException e) {
+        } catch (IOException | TimeoutException | ClassNotFoundException e) {
             throw new ReadException(e);
         }
     }
