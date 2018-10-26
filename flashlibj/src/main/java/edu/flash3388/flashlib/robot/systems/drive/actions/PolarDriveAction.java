@@ -8,10 +8,10 @@ import java.util.function.DoubleSupplier;
 
 public class PolarDriveAction extends Action{
 	
-	private HolonomicDriveInterface mDriveInterface;
-	private DoubleSupplier mMagnitudeSource;
-	private DoubleSupplier mDirectionSource;
-	private DoubleSupplier mRotationSource;
+	private final HolonomicDriveInterface mDriveInterface;
+	private final DoubleSupplier mMagnitudeSource;
+	private final DoubleSupplier mDirectionSource;
+	private final DoubleSupplier mRotationSource;
 	
 	public PolarDriveAction(HolonomicDriveInterface driveInterface, DoubleSupplier magnitude, DoubleSupplier direction, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;

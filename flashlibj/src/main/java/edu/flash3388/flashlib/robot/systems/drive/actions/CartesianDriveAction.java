@@ -8,10 +8,10 @@ import java.util.function.DoubleSupplier;
 
 public class CartesianDriveAction extends Action{
 	
-	private HolonomicDriveInterface mDriveInterface;
-	private DoubleSupplier mYAxisSource;
-	private DoubleSupplier mXAxisSource;
-	private DoubleSupplier mRotateSource;
+	private final HolonomicDriveInterface mDriveInterface;
+	private final DoubleSupplier mYAxisSource;
+	private final DoubleSupplier mXAxisSource;
+	private final DoubleSupplier mRotateSource;
 	
 	public CartesianDriveAction(HolonomicDriveInterface driveInterface, DoubleSupplier y, DoubleSupplier x, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;

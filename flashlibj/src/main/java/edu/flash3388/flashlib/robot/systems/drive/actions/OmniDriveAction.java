@@ -8,9 +8,9 @@ import java.util.function.DoubleSupplier;
 
 public class OmniDriveAction extends Action{
 	
-	private HolonomicDriveInterface mDriveInterface;
-	private DoubleSupplier mYAxisSource;
-	private DoubleSupplier mXAxisSource;
+	private final HolonomicDriveInterface mDriveInterface;
+	private final DoubleSupplier mYAxisSource;
+	private final DoubleSupplier mXAxisSource;
 	
 	public OmniDriveAction(HolonomicDriveInterface driveInterface, DoubleSupplier y, DoubleSupplier x) {
 		this.mDriveInterface = driveInterface;

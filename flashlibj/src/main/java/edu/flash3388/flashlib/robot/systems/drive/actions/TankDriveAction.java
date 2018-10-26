@@ -8,9 +8,9 @@ import java.util.function.DoubleSupplier;
 
 public class TankDriveAction extends Action{
 	
-	private TankDriveInterface mDriveInterface;
-	private DoubleSupplier mRightSource;
-	private DoubleSupplier mLeftSource;
+	private final TankDriveInterface mDriveInterface;
+	private final DoubleSupplier mRightSource;
+	private final DoubleSupplier mLeftSource;
 	
 	public TankDriveAction(TankDriveInterface driveInterface, DoubleSupplier right, DoubleSupplier left) {
 		this.mDriveInterface = driveInterface;

@@ -8,8 +8,8 @@ import java.util.function.DoubleSupplier;
 
 public class RotateAction extends Action{
 
-	private Rotatable mRotatable;
-	private DoubleSupplier mSpeedSource;
+	private final Rotatable mRotatable;
+	private final DoubleSupplier mSpeedSource;
 	
 	public RotateAction(Rotatable rotatable, DoubleSupplier speedSource) {
 		this.mRotatable = rotatable;

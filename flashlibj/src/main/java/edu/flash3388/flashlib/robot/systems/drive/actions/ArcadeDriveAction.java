@@ -8,9 +8,9 @@ import java.util.function.DoubleSupplier;
 
 public class ArcadeDriveAction extends Action{
 	
-	private TankDriveInterface mDriveInterface;
-	private DoubleSupplier mMoveAxis;
-	private DoubleSupplier mRotateAxis;
+	private final TankDriveInterface mDriveInterface;
+	private final DoubleSupplier mMoveAxis;
+	private final DoubleSupplier mRotateAxis;
 	
 	public ArcadeDriveAction(TankDriveInterface driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;
