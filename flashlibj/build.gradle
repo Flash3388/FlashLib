@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply from: '../integration-test.gradle'
 
 
 dependencies {
