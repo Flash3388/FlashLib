@@ -20,6 +20,10 @@ public abstract class InstantAction extends Action {
 	}
 
     @Override
+    protected final void interrupted() {
+    }
+
+    @Override
     protected final void end() {
     }
 }
