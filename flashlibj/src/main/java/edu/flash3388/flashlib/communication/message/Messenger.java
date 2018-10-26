@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.communication.message;
 import edu.flash3388.flashlib.communication.connection.Connection;
 import edu.flash3388.flashlib.communication.connection.TimeoutException;
 import edu.flash3388.flashlib.io.Closeables;
-import edu.flash3388.flashlib.io.Serializer;
+import edu.flash3388.flashlib.io.serialization.Serializer;
 import edu.flash3388.flashlib.util.versioning.IncompatibleVersionException;
 import edu.flash3388.flashlib.util.versioning.Version;
 

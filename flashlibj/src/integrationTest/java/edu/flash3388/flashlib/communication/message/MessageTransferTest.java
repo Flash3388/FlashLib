@@ -3,7 +3,8 @@ package edu.flash3388.flashlib.communication.message;
 import edu.flash3388.flashlib.communication.connection.Connection;
 import edu.flash3388.flashlib.communication.connection.FakeConnection;
 import edu.flash3388.flashlib.io.Closer;
-import edu.flash3388.flashlib.io.Serializer;
+import edu.flash3388.flashlib.io.serialization.JavaObjectSerializer;
+import edu.flash3388.flashlib.io.serialization.Serializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class MessageTransferTest {
     public void setUp() throws Exception {
         mCloser = Closer.empty();
 
-        mSerializer = new Serializer();
+        mSerializer = new JavaObjectSerializer();
 
         mSharedBuffer = ByteBuffer.allocate(1024);
 

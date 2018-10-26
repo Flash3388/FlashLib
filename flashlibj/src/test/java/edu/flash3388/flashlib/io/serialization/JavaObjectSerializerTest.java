@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.io;
+package edu.flash3388.flashlib.io.serialization;
 
 import org.junit.Test;
 
@@ -6,15 +6,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-public class SerializerTest {
+public class JavaObjectSerializerTest {
 
     @Test
     public void serialize_deserialize_objectStateRemains() throws Exception {
         TestClass OBJECT = new TestClass(23, 5.0);
 
-        Serializer serializer = new Serializer();
+        JavaObjectSerializer serializer = new JavaObjectSerializer();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
