@@ -73,6 +73,20 @@ public class SchedulerTest {
     }
 
     @Test
+    public void run_actionsIsFinished_removesAction() throws Exception {
+        Action action = mockFinishedAction();
+
+        Collection<Action> actionCollection = new ArrayList<>();
+        actionCollection.add(action);
+
+        Scheduler scheduler = new Scheduler(Collections.emptySet(), actionCollection, Collections.emptySet(), SchedulerRunMode.ALL);
+        scheduler.run();
+
+        verify(action, times(1)).removed();
+        assertThat(actionCollection, hasSize(0));
+    }
+
+    @Test
     public void add_actionsWithSameRequirements_cancelsThoseActions() throws Exception {
         Subsystem subsystem = mockSubsystemWithAction();
         Action actionWithRequirement = mockActionWithRequirement(subsystem);
@@ -107,6 +121,13 @@ public class SchedulerTest {
     private Action mockNonFinishingAction() {
         Action action = mock(Action.class);
         when(action.run()).thenReturn(true);
+
+        return action;
+    }
+
+    private Action mockFinishedAction() {
+        Action action = mock(Action.class);
+        when(action.run()).thenReturn(false);
 
         return action;
     }
