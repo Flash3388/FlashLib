@@ -4,13 +4,13 @@ public class PwmBounds {
 
     private static final double CENTER_OFFSET = 0.01;
 
-    private double mCenter;
-    private double mMin;
-    private double mMax;
-    private double mDeadbandMin;
-    private double mDeadbandMax;
+    private final double mCenter;
+    private final double mMin;
+    private final double mMax;
+    private final double mDeadbandMin;
+    private final double mDeadbandMax;
 
-    private boolean mShouldEliminateDeadband;
+    private final boolean mShouldEliminateDeadband;
 
     /**
      * Sets the data bounds for the PWM device, configuring it for use. Using those values,
