@@ -61,7 +61,7 @@ public class Messenger {
 
             byte[] serializedMessage = mConnection.read(messageHeader.getMessageLength());
             return mSerializer.deserialize(new ByteArrayInputStream(serializedMessage), Message.class);
-        } catch (IOException | TimeoutException | ClassNotFoundException e) {
+        } catch (IOException | TimeoutException | ClassNotFoundException | IncompatibleVersionException e) {
             throw new ReadException(e);
         }
     }
