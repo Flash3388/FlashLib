@@ -92,23 +92,28 @@ public class ActionGroup extends Action {
 	}
 	
 	@Override
-	protected void initialize(){
+	protected final void initialize(){
 		mActionsQueue.addAll(mActions);
 	}
 
 	@Override
-	protected void execute() {
+	protected final void execute() {
 		tryStartNextAction();
 		handleCurrentActions();
 	}
 
 	@Override
-	protected boolean isFinished() {
+	protected final boolean isFinished() {
 		return mActionsQueue.isEmpty() && mCurrentlyRunningActions.isEmpty();
 	}
 
-	@Override
-	protected void end() {
+    @Override
+    protected final void interrupted() {
+        end();
+    }
+
+    @Override
+	protected final void end() {
 		for (Action action : mCurrentlyRunningActions) {
 			action.cancel();
 		}

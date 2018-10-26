@@ -41,7 +41,7 @@ public class SelectableAction extends Action {
 	}
 
 	@Override
-	protected void initialize(){
+	protected final void initialize(){
 		int selectedIndex = mSelectionSupplier.getAsInt();
 
 		if (selectedIndex < 0 || selectedIndex >= mActions.size()) {
@@ -57,12 +57,17 @@ public class SelectableAction extends Action {
 	}
 
 	@Override
-	protected boolean isFinished(){
+	protected final boolean isFinished(){
 		return !mSelectedAction.isRunning();
 	}
 
+    @Override
+    protected final void interrupted() {
+        end();
+    }
+
 	@Override
-	protected void end(){
+	protected final void end(){
 		if (mSelectedAction.isRunning()) {
 			mSelectedAction.cancel();
 		}

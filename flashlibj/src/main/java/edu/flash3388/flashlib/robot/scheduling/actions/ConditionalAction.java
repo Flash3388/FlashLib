@@ -26,7 +26,7 @@ public class ConditionalAction extends Action {
 	}
 
 	@Override
-	protected void initialize() {
+	protected final void initialize() {
 		mActionRunning = mCondition.getAsBoolean() ? mActionRunOnTrue : mActionRunOnFalse;
 		mActionRunning.start();
 	}
@@ -37,12 +37,17 @@ public class ConditionalAction extends Action {
 	}
 
 	@Override
-	protected boolean isFinished() {
+	protected final boolean isFinished() {
 		return !mActionRunning.isRunning();
 	}
 
+    @Override
+    protected final void interrupted() {
+        end();
+    }
+
 	@Override
-	protected void end() {
+	protected final void end() {
 		if (mActionRunning.isRunning()) {
 			mActionRunning.cancel();
 		}
