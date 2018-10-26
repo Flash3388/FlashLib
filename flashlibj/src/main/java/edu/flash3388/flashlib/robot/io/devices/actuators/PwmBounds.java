@@ -2,6 +2,8 @@ package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 public class PwmBounds {
 
+    private static final double CENTER_OFFSET = 0.01;
+
     private double mCenter;
     private double mMin;
     private double mMax;
@@ -60,7 +62,7 @@ public class PwmBounds {
     }
 
     public double getMinPositive(){
-        return mShouldEliminateDeadband ? mDeadbandMax : mCenter + 0.01;
+        return mShouldEliminateDeadband ? mDeadbandMax : mCenter + CENTER_OFFSET;
     }
 
     public double getNegativeScaleFactor(){
@@ -68,7 +70,7 @@ public class PwmBounds {
     }
 
     public double getMaxNegative(){
-        return mShouldEliminateDeadband ? mDeadbandMin : mCenter - 0.01;
+        return mShouldEliminateDeadband ? mDeadbandMin : mCenter - CENTER_OFFSET;
     }
 
     public double getDeadbandMin() {
