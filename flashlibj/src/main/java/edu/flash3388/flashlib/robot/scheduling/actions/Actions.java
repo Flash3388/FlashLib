@@ -39,4 +39,13 @@ public class Actions {
             }
         };
     }
+
+    public static Action instantAction(Runnable runnable) {
+        return new InstantAction() {
+            @Override
+            protected void execute() {
+                runnable.run();
+            }
+        };
+    }
 }
