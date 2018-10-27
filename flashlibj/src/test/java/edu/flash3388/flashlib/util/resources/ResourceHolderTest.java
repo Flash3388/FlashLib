@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.util.resources;
 
-import edu.flash3388.flashlib.util.resources.Resource;
-import edu.flash3388.flashlib.util.resources.ResourceHolder;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
