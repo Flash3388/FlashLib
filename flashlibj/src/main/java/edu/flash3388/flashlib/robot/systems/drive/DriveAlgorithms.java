@@ -18,7 +18,7 @@ public class DriveAlgorithms {
      * @return returns an array of 2 with the motor output values in this order: right, left.
      */
     public double[] arcadeDrive(double moveValue, double rotateValue){
-        double rSpeed = 0.0, lSpeed = 0.0;
+        double rSpeed, lSpeed;
 
         if (moveValue > 0.0) {
             if (rotateValue > 0.0) {
@@ -64,7 +64,7 @@ public class DriveAlgorithms {
      * @return returns an array of 4 with the motor output values in this order: front, right, left, back
      */
     public double[] vectoredOmniDriveCartesian(double y, double x, double rotation){
-        double right = 0.0, left = 0.0, front = 0.0, rear = 0.0;
+        double right, left, front, rear;
 
         double[] yAxisValues = arcadeDrive(y, rotation);
         right = yAxisValues[0];
