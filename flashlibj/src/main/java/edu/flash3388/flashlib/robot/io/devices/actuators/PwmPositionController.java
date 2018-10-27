@@ -1,25 +1,25 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.Pwm;
 
 public class PwmPositionController extends PwmController implements PositionController {
 
     /**
-     * Creates a new PWM device control for a given PWM port.
+     * Creates a new Pwm device control for a given Pwm port.
      *
-     * @param port the PWM port
-     * @param pulseBounds the PWM port bounds
-     * @param pwmFrequency frequency of the PWM in Hz
+     * @param port the Pwm port
+     * @param pulseBounds the Pwm port bounds
+     * @param pwmFrequency frequency of the Pwm in Hz
      */
-    public PwmPositionController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
+    public PwmPositionController(Pwm port, PwmBounds pulseBounds, double pwmFrequency) {
         super(port, pulseBounds, pwmFrequency);
     }
 
     /**
      * Sets the device position between 0.0 and 1.0.
      * <p>
-     * The position value is converted into duty cycle using the defined PWM bounds for
+     * The position value is converted into duty cycle using the defined Pwm bounds for
      * the device. The output duty cycle is equal to the minimum negative value, adding to it
      * the position multiplied by the full bound scale factor:
      * <pre>
@@ -44,8 +44,8 @@ public class PwmPositionController extends PwmController implements PositionCont
     /**
      * Gets the current position output to the device controller by this class.
      * <p>
-     * The output position value is calculated from the current duty cycle set to the PWM port using
-     * the PWM bounds configured.
+     * The output position value is calculated from the current duty cycle set to the Pwm port using
+     * the Pwm bounds configured.
      * <p>
      * The value is calculated using the full bound range:
      * <pre>

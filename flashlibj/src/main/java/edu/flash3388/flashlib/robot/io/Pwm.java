@@ -1,52 +1,50 @@
 package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.robot.io.IOPort;
-
 /**
- * Interface for PWM ports. This interface is used by devices
- * which require analog PWM for output, allowing for different implementations.
+ * Interface for Pwm ports. This interface is used by devices
+ * which require analog Pwm for output, allowing for different implementations.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface PWM extends IOPort {
+public interface Pwm extends IoPort {
 
 	/**
-	 * Sets the PWM port output duty cycle.
+	 * Sets the Pwm port output duty cycle.
 	 * 
 	 * @param duty duty cycle between 0 and 1.
 	 */
 	void setDuty(double duty);
 	/**
-	 * Sets the PWM port output raw value. This corresponds to
+	 * Sets the Pwm port output raw value. This corresponds to
 	 * a duty cycle value and depends on the used implementation.
 	 * 
-	 * @param raw raw PWM output value
+	 * @param raw raw Pwm output value
 	 */
 	void setRaw(int raw);
 	
 	/**
-	 * Gets the PWM port output duty cycle.
+	 * Gets the Pwm port output duty cycle.
 	 * 
 	 * @return duty cycle between 0 and 1.
 	 */
 	double getDuty();
 	/**
-	 * Gets the PWM port output raw value. This corresponds to
+	 * Gets the Pwm port output raw value. This corresponds to
 	 * a duty cycle value and depends on the used implementation.
 	 * 
-	 * @return raw PWM output value
+	 * @return raw Pwm output value
 	 */
 	int getRaw();
 	
 	/**
-	 * Sets the PWM port's frequency.
+	 * Sets the Pwm port's frequency.
 	 * 
 	 * @param frequency frequency in HZ.
 	 */
 	void setFrequency(double frequency);
 	/**
-	 * Gets the PWM port's frequency.
+	 * Gets the Pwm port's frequency.
 	 * 
 	 * @return frequency in HZ.
 	 */

@@ -13,7 +13,7 @@ public class PwmBounds {
     private final boolean mShouldEliminateDeadband;
 
     /**
-     * Sets the data bounds for the PWM device, configuring it for use. Using those values,
+     * Sets the data bounds for the Pwm device, configuring it for use. Using those values,
      * speed and position data are converted to duty cycle which is then written to the port.
      * <p>
      * The maximum and minimum bounds indicate the smallest and largest time cycles which can be detected by the device.
@@ -23,11 +23,11 @@ public class PwmBounds {
      * If wanted it is possible to eliminate out a deadband zone of values around the center. If eliminated, those
      * values are not used in consideration when calculating the duty cycle to be used.
      *
-     * @param max the maximum bound of the PWM value in milliseconds
+     * @param max the maximum bound of the Pwm value in milliseconds
      * @param deadbandMax the maximum bound  for the deadband
-     * @param center the center of the PWM value in milliseconds
+     * @param center the center of the Pwm value in milliseconds
      * @param deadbandMin the minimum bound for the deadband
-     * @param min the minimum bound of the PWM value in milliseconds
+     * @param min the minimum bound of the Pwm value in milliseconds
      * @param eliminateDeadband whether or not to eliminate the deadband
      */
     public PwmBounds(double max, double deadbandMax, double center, double deadbandMin, double min,

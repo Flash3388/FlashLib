@@ -8,7 +8,7 @@ import edu.flash3388.flashlib.util.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface IOPort extends Resource {
+public interface IoPort extends Resource {
 
 	/**
 	 * Frees the port. Releasing all resources and

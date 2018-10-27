@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot.io;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface DigitalOutput extends IOPort{
+public interface DigitalOutput extends IoPort {
 
 	/**
 	 * Gets the current digital input value of the port. If the

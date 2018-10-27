@@ -7,7 +7,7 @@ package edu.flash3388.flashlib.robot.io;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface AnalogOutput extends IOPort{
+public interface AnalogOutput extends IoPort {
 
 	/**
 	 * Sets the analog output value for the port. This corresponds to

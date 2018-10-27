@@ -1,9 +1,9 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.Pwm;
 
 /**
- * Control class for a PWM-controlled speed controller device. This class integrates 
+ * Control class for a Pwm-controlled speed controller device. This class integrates
  * {@link PwmController} and {@link SpeedController} into one.
  * 
  * @author Tom Tzook
@@ -14,13 +14,13 @@ public class PwmSpeedController extends PwmController implements SpeedController
 	private boolean mInverted;
 
 	/**
-	 * Creates a new PWM speed controller device for a given PWM port.
+	 * Creates a new Pwm speed controller device for a given Pwm port.
 	 * 
 	 * @param port port
 	 * @param pulseBounds pwm bounds
-     * @param pwmFrequency frequency of the PWM in Hz
+     * @param pwmFrequency frequency of the Pwm in Hz
 	 */
-	public PwmSpeedController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
+	public PwmSpeedController(Pwm port, PwmBounds pulseBounds, double pwmFrequency) {
 		super(port, pulseBounds, pwmFrequency);
 
 		mInverted = false;
@@ -30,7 +30,7 @@ public class PwmSpeedController extends PwmController implements SpeedController
      * Sets the speed of the device between -1.0 and 1.0. Negative values indicate backward scheduling, positive
      * values indicate forward scheduling, 0.0 indicates stopping.
      * <p>
-     * The speed value is converted to a PWM duty cycle by using the bounds configured to the device.
+     * The speed value is converted to a Pwm duty cycle by using the bounds configured to the device.
      * If the given value is positive, the output duty cycle is calculated by getting the minimum positive scale
      * and adding it the speed value times the positive scale factor:
      * <pre>
@@ -65,18 +65,18 @@ public class PwmSpeedController extends PwmController implements SpeedController
 	}
 
     /**
-     * Gets the speed value set as output to the device controlled by this PWM.
+     * Gets the speed value set as output to the device controlled by this Pwm.
      * <p>
      * The output speed is converted from the output duty cycle using the bounds configured
      * to this device.
      * <p>
      * If the value is in the positive output range, the output speed is calculated using the positive scale
-     * of the PWM output range:
+     * of the Pwm output range:
      * <pre>
      * (duty - minPositive) / positiveScaleFactor
      * </pre>
      * If the value is in the negative output range, the output speed is calculated using the negative scale
-     * of the PWM output range:
+     * of the Pwm output range:
      * <pre>
      * (duty - maxNegative) / negativeScaleFactor
      * </pre>

@@ -9,7 +9,7 @@ import edu.flash3388.flashlib.robot.io.devices.sensors.AnalogAccelerometer;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public interface AnalogInput extends IOPort{
+public interface AnalogInput extends IoPort {
 
 	/**
 	 * Gets the current analog value measured on the port. This corresponds to

@@ -1,28 +1,28 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-import edu.flash3388.flashlib.robot.io.PWM;
+import edu.flash3388.flashlib.robot.io.Pwm;
 import edu.flash3388.flashlib.util.Resource;
 
 /**
- * Control class for PWM-controlled electronic devices. This class should be extended by electronic devices who use
- * PWM and not instantiated.
+ * Control class for Pwm-controlled electronic devices. This class should be extended by electronic devices who use
+ * Pwm and not instantiated.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
 public class PwmController implements Resource {
 
-	private PWM mPort;
+	private Pwm mPort;
 	private final PwmBounds mBounds;
 
 	/**
-	 * Creates a new PWM device control for a given PWM port.
+	 * Creates a new Pwm device control for a given Pwm port.
 	 * 
-	 * @param port the PWM port
-	 * @param pulseBounds the PWM port bounds
-     * @param pwmFrequency frequency of the PWM in Hz
+	 * @param port the Pwm port
+	 * @param pulseBounds the Pwm port bounds
+     * @param pwmFrequency frequency of the Pwm in Hz
 	 */
-	public PwmController(PWM port, PwmBounds pulseBounds, double pwmFrequency) {
+	public PwmController(Pwm port, PwmBounds pulseBounds, double pwmFrequency) {
 		mPort = port;
 		mPort.setFrequency(pwmFrequency);
 		mBounds = calculateDutyBounds(pulseBounds, pwmFrequency);
@@ -45,7 +45,7 @@ public class PwmController implements Resource {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Releases the PWM port used.
+	 * Releases the Pwm port used.
 	 */
 	@Override
 	public void free() {
