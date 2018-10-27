@@ -1,12 +1,7 @@
 package edu.flash3388.flashlib.util;
 
 @FunctionalInterface
-public interface Resource extends AutoCloseable {
+public interface Resource {
 
     void free();
-
-    @Override
-    default void close() {
-        free();
-    }
 }
