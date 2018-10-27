@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.util;
 
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class ResourceHolderTest {
@@ -15,6 +16,28 @@ public class ResourceHolderTest {
 
         ResourceHolder resourceHolder = ResourceHolder.with(RESOURCES);
         resourceHolder.freeAll();
+
+        for (Resource resource : RESOURCES) {
+            verify(resource, times(1)).free();
+        }
+    }
+
+    @Test
+    public void freeAll_unexpectedExceptionThrown_allResourcesFreed() throws Exception {
+        Resource[] RESOURCES = {
+                mock(Resource.class),
+                mock(Resource.class)
+        };
+
+        doThrow(new RuntimeException()).when(RESOURCES[0]).free();
+
+        ResourceHolder resourceHolder = ResourceHolder.with(RESOURCES);
+        try {
+            resourceHolder.freeAll();
+            fail("expected exception");
+        } catch (RuntimeException e) {
+            // expected
+        }
 
         for (Resource resource : RESOURCES) {
             verify(resource, times(1)).free();

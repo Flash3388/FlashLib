@@ -26,8 +26,22 @@ public class ResourceHolder {
     }
 
     public void freeAll() {
+        RuntimeException unexpectedException = null;
+
         for (Resource resource : mResources) {
-            resource.free();
+            try {
+                resource.free();
+            } catch (RuntimeException e) {
+                if (unexpectedException == null) {
+                    unexpectedException = e;
+                } else {
+                    unexpectedException.addSuppressed(e);
+                }
+            }
+        }
+
+        if (unexpectedException != null) {
+            throw unexpectedException;
         }
     }
 }
