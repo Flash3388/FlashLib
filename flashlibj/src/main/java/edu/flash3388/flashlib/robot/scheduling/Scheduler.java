@@ -79,7 +79,7 @@ public final class Scheduler {
 			throw new IllegalArgumentException("action already added");
 		}
 
-		cancelActionsInRequirements(action);
+		updateActionRequirementsWithNewRunningAction(action);
 
 		mActions.add(action);
 	}
@@ -174,11 +174,12 @@ public final class Scheduler {
 		}
 	}
 
-	private void cancelActionsInRequirements(Action action) {
+	private void updateActionRequirementsWithNewRunningAction(Action action) {
 		for (Subsystem subsystem : action.getRequirements()) {
 			if (subsystem.hasCurrentAction()) {
 				subsystem.cancelCurrentAction();
 			}
+			subsystem.setCurrentAction(action);
 		}
 	}
 
