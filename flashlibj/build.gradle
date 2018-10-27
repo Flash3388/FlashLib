@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply from: '../integration-test.gradle'
+apply from: rootProject.file('integration-test.gradle')
 
 
 dependencies {

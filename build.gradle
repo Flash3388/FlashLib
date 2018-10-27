@@ -1,12 +1,17 @@
 
-subprojects{
-	buildDir = projectOutputFolder
+allprojects {
+    group = 'edu.flash3388.flashlib'
+    version = '1.3'
+}
 
-    repositories {
+subprojects{
+    buildDir = rootProject.file('build')
+
+	repositories {
         mavenCentral()
 
         flatDir {
-            dirs projectLibsFolder
+            dirs rootProject.file('libs')
         }
     }
 }
