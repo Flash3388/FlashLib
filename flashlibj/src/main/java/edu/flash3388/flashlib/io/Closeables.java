@@ -17,4 +17,12 @@ public class Closeables {
             LOGGER.log(Level.SEVERE, "error while closing closeable quietly", e);
         }
     }
+
+    public static void closeQuietly(AutoCloseable closeable) {
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "error while closing auto closeable quietly", e);
+        }
+    }
 }
