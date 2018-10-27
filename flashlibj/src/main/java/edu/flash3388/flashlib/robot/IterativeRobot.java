@@ -143,7 +143,7 @@ public abstract class IterativeRobot extends RobotBase {
 	protected void robotStop(){}
 
 	@Override
-	protected abstract void robotInit();
+	protected abstract void robotInit() throws RobotInitializationException;
     protected abstract void robotPeriodic();
 
 	protected abstract void disabledInit();

@@ -87,7 +87,7 @@ public abstract class SimpleRobot extends RobotBase {
 	protected void robotStop(){}
 
 	@Override
-    protected abstract void robotInit();
+    protected abstract void robotInit() throws RobotInitializationException;
 
 	protected abstract void disabled();
 	protected abstract void onMode(RobotMode mode);
