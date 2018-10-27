@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.mockito.Mockito.*;
 
-public class ResourceCloserTest {
+public class ResourceHolderTest {
 
     @Test
     public void freeAll_resourcesAdded_allResourcesFreed() throws Exception {
@@ -13,8 +13,8 @@ public class ResourceCloserTest {
             mock(Resource.class)
         };
 
-        ResourceCloser resourceCloser = ResourceCloser.with(RESOURCES);
-        resourceCloser.close();
+        ResourceHolder resourceHolder = ResourceHolder.with(RESOURCES);
+        resourceHolder.freeAll();
 
         for (Resource resource : RESOURCES) {
             verify(resource, times(1)).free();

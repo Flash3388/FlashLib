@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.util.Resource;
-import edu.flash3388.flashlib.util.ResourceCloser;
+import edu.flash3388.flashlib.util.ResourceHolder;
 
 /**
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
@@ -15,15 +15,15 @@ import edu.flash3388.flashlib.util.ResourceCloser;
  */
 public abstract class RobotBase implements RobotInterface {
 
-    private final ResourceCloser mResourceCloser;
+    private final ResourceHolder mResourceHolder;
 
 	protected RobotBase() {
-	    mResourceCloser = ResourceCloser.empty();
+	    mResourceHolder = ResourceHolder.empty();
 	}
 
 	public final void registerResources(Resource... resources) {
 	    for (Resource resource : resources) {
-	        mResourceCloser.add(resource);
+	        mResourceHolder.add(resource);
         }
     }
 
@@ -39,7 +39,7 @@ public abstract class RobotBase implements RobotInterface {
 
 	final void stop() {
 		robotShutdown();
-		mResourceCloser.close();
+		mResourceHolder.freeAll();
 	}
 	
 	//--------------------------------------------------------------------
