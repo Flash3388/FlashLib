@@ -24,8 +24,11 @@ public class Mathf {
 	 */
 	public static double avg(double...ds){
 		double res = 0;
-		for (int i = 0; i < ds.length; i++) 
-			res += ds[i];
+
+		for (double value : ds) {
+            res += value;
+        }
+
 		return res / ds.length;
 	}
 
@@ -54,8 +57,11 @@ public class Mathf {
 	 */
 	public static double translateAngle(double value){
 		value %= 360;
-		if(value < 0)
-			value += 360;
+
+		if(value < 0) {
+            value += 360;
+        }
+
 		return value;
 	}
 
@@ -77,8 +83,11 @@ public class Mathf {
 	 */
 	public static double translateInRange(double value, double range, boolean forcePositive){
 		value %= range;
-		if(forcePositive && value < 0)
-			value += range;
+
+		if(forcePositive && value < 0) {
+            value += range;
+        }
+
 		return value;
 	}
 	
@@ -96,8 +105,12 @@ public class Mathf {
 	 * @return The new value after making sure it is within the given limit.
 	 */
 	public static double constrain(double value, double min, double max){
-		if(value > max) value = max;
-		else if(value < min) value = min;
+		if(value > max) {
+		    value = max;
+        } else if(value < min) {
+		    value = min;
+        }
+
 		return value;
 	}
 
@@ -119,8 +132,13 @@ public class Mathf {
 	 */
 	public static double constrain2(double value, double min, double max){
 		double mag = Math.abs(value);
-		if(mag > max) mag = max;
-		else if(mag < min) mag = min;
+
+		if(mag > max) {
+		    mag = max;
+        } else if(mag < min) {
+		    mag = min;
+        }
+
 		return value >= 0? mag : -mag;
 	}
 
