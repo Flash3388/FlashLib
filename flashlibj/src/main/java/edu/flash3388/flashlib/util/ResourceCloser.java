@@ -27,7 +27,7 @@ public class ResourceCloser {
 
     public void close() {
         for (Resource resource : mResources) {
-            resource.close();
+            resource.free();
         }
     }
 }
