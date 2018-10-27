@@ -11,8 +11,8 @@ public class RobotMain {
         try {
             logger.entering("RobotBase", "initialize");
             robotBase.initialize();
-        } catch (RobotInitializationException e) {
-            logger.log(Level.SEVERE, "Error in robot initialization", e);
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error in robot initialization", t);
             return;
         }
 
