@@ -1,4 +1,6 @@
-package edu.flash3388.flashlib.robot.hid;
+package edu.flash3388.flashlib.robot.hid.xbox;
+
+import edu.flash3388.flashlib.robot.hid.*;
 
 import java.util.ArrayList;
 import java.util.List;
