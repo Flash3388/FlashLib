@@ -32,8 +32,9 @@ public abstract class RobotBase implements RobotInterface {
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         try {
             robotInit();
-        } finally {
+        } catch (RobotInitializationException | RuntimeException e) {
             stop();
+            throw e;
         }
 	}
 
