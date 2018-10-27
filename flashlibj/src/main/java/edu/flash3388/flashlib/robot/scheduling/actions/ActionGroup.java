@@ -45,15 +45,15 @@ public class ActionGroup extends Action {
      * @param executionOrder action execution order
 	 */
 	public ActionGroup(ExecutionOrder executionOrder) {
-		this(executionOrder, new ArrayList<Action>());
+		this(executionOrder, new ArrayList<>());
 	}
 
 	public ActionGroup(ExecutionOrder executionOrder, Collection<Action> actions) {
 		mExecutionOrder = executionOrder;
 		mActions = actions;
 
-		mActionsQueue = new ArrayDeque<Action>();
-		mCurrentlyRunningActions = new ArrayList<Action>();
+		mActionsQueue = new ArrayDeque<>();
+		mCurrentlyRunningActions = new ArrayList<>();
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		List<Action> currentlyRunning = new ArrayList<Action>(mCurrentlyRunningActions);
+		List<Action> currentlyRunning = new ArrayList<>(mCurrentlyRunningActions);
 
 		for (Action action : currentlyRunning) {
 			if (!action.isRunning()) {

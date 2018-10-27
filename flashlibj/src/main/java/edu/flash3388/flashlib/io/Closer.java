@@ -24,7 +24,7 @@ public class Closer implements Closeable {
 	}
 
 	public static Closer empty() {
-		return new Closer(new ArrayList<Closeable>());
+		return new Closer(new ArrayList<>());
 	}
 	
 	/**

@@ -52,7 +52,7 @@ public abstract class Action {
 	private long mStartTime;
 
 	public Action(Clock clock, long timeoutMs) {
-		mRequirements = new HashSet<Subsystem>(2);
+		mRequirements = new HashSet<>(2);
         mClock = clock;
 
 		mIsRunning = false;

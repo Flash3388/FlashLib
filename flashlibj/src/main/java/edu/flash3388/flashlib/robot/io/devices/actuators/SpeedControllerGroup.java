@@ -20,7 +20,7 @@ public class SpeedControllerGroup implements SpeedController {
 	 * @param controllers list of controllers to be contained
 	 */
 	public SpeedControllerGroup(Collection<SpeedController> controllers){
-		mControllers = new ArrayList<SpeedController>(controllers);
+		mControllers = new ArrayList<>(controllers);
 
 		setInverted(false);
 		set(0);

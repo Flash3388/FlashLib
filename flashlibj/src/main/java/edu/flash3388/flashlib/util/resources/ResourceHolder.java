@@ -13,7 +13,7 @@ public class ResourceHolder {
     }
 
     public static ResourceHolder empty() {
-        return new ResourceHolder(new ArrayList<Resource>());
+        return new ResourceHolder(new ArrayList<>());
     }
 
     public static ResourceHolder with(Resource... resources) {

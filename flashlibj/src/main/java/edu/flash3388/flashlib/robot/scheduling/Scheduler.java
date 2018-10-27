@@ -43,9 +43,9 @@ public final class Scheduler {
 	private SchedulerRunMode mRunMode;
 
 	private Scheduler() {
-        mSubsystems = new HashSet<Subsystem>();
-        mActions = new ArrayList<Action>();
-		mTasks = new ArrayList<Task>();
+        mSubsystems = new HashSet<>();
+        mActions = new ArrayList<>();
+		mTasks = new ArrayList<>();
 
         mRunMode = SchedulerRunMode.ALL;
 	}
@@ -118,7 +118,7 @@ public final class Scheduler {
 	}
 
 	public void removeAllActions() {
-		List<Action> allActions = new ArrayList<Action>(mActions);
+		List<Action> allActions = new ArrayList<>(mActions);
 
 		for (Action action : allActions) {
 			remove(action);
@@ -145,7 +145,7 @@ public final class Scheduler {
 	}
 
 	private void runTasks() {
-		List<Task> tasks = new ArrayList<Task>(mTasks);
+		List<Task> tasks = new ArrayList<>(mTasks);
 
 		for (Task task : tasks) {
 			task.run();
@@ -157,7 +157,7 @@ public final class Scheduler {
 	}
 
 	private void runActions() {
-		List<Action> actions = new ArrayList<Action>(mActions);
+		List<Action> actions = new ArrayList<>(mActions);
 
 		for (Action action : actions) {
 			if (!action.run()) {

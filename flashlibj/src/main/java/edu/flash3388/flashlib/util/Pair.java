@@ -19,6 +19,6 @@ public class Pair<K, V> {
     }
 
     public static <K, V> Pair<K, V> create(K key, V value) {
-        return new Pair<K, V>(key, value);
+        return new Pair<>(key, value);
     }
 }
