@@ -30,7 +30,11 @@ public abstract class RobotBase implements RobotInterface {
 	final void initialize() throws RobotInitializationException {
 		//setting the JVM thread priority for this thread. Should be highest possible.
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-        robotInit();
+        try {
+            robotInit();
+        } finally {
+            stop();
+        }
 	}
 
 	final void start() {
