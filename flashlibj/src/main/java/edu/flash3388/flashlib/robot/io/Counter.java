@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 /**
  * Interface for a pulse counter. A pulse counter is used to

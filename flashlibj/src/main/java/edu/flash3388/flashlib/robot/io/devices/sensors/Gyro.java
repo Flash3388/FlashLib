@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 /**
  * Interface for gyroscope sensors. Gyroscope sensors measure angular rotation and are used to measure

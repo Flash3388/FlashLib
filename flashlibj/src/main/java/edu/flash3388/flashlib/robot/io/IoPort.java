@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io;
 
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 /**
  * Interface for IO ports. Contains a single method {@link #free()} which releases the port from usage.

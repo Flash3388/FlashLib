@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.sensors;
 
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 /**
  * Interface for relative encoder sensors. Relative encoders measure the rotation of wheels axes and are used to get the 

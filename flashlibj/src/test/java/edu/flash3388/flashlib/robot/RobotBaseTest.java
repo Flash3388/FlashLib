@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;

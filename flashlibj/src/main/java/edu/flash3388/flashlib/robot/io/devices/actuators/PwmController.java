@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
 import edu.flash3388.flashlib.robot.io.Pwm;
-import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 /**
  * Control class for Pwm-controlled electronic devices. This class should be extended by electronic devices who use

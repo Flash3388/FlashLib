@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.util.Resource;
-import edu.flash3388.flashlib.util.ResourceHolder;
+import edu.flash3388.flashlib.util.resources.Resource;
+import edu.flash3388.flashlib.util.resources.ResourceHolder;
 
 /**
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 

@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.util;
+package edu.flash3388.flashlib.util.resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
