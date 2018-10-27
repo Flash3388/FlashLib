@@ -1,5 +1,8 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.util.Resource;
+import edu.flash3388.flashlib.util.ResourceCloser;
+
 /**
  * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
  * starting the robot software. When the robot is started, the user implementation of this class is initialized,
@@ -12,8 +15,17 @@ package edu.flash3388.flashlib.robot;
  */
 public abstract class RobotBase implements RobotInterface {
 
+    private final ResourceCloser mResourceCloser;
+
 	protected RobotBase() {
+	    mResourceCloser = ResourceCloser.empty();
 	}
+
+	public final void registerResources(Resource... resources) {
+	    for (Resource resource : resources) {
+	        mResourceCloser.add(resource);
+        }
+    }
 
 	final void initialize() throws RobotInitializationException {
 		//setting the JVM thread priority for this thread. Should be highest possible.
@@ -27,6 +39,7 @@ public abstract class RobotBase implements RobotInterface {
 
 	final void stop() {
 		robotShutdown();
+		mResourceCloser.close();
 	}
 	
 	//--------------------------------------------------------------------
