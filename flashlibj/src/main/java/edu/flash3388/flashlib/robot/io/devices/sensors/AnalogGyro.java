@@ -49,7 +49,7 @@ public class AnalogGyro implements Gyro {
 		mSensitivity = DEFAULT_SENSITIVITY;
 		
 		mAccumulator = port.getAccumulator();
-		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
+		Objects.requireNonNull(mAccumulator, "Failed to retrieve accumulator for port, cannot use analog gyro");
 
 		mAccumulator.enable();
 	}
@@ -92,7 +92,7 @@ public class AnalogGyro implements Gyro {
 		mOffset = port.voltsToValue(offset);
 		
 		mAccumulator = port.getAccumulator();
-		Objects.requireNonNull(mAccumulator, "Failed to retreive accumulator for port, cannot use analog gyro");
+		Objects.requireNonNull(mAccumulator, "Failed to retrieve accumulator for port, cannot use analog gyro");
 
 		mAccumulator.enable();
 	}

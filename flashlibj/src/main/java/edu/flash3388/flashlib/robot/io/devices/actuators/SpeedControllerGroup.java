@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * A container for multiple speed controllers. Grouping controllers in such manner allows simultaneous 
- * control of several motors. When motors should be activated together, this container is extremly useful.
+ * control of several motors. When motors should be activated together, this container is extremely useful.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0

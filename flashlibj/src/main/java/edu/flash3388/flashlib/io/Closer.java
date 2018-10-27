@@ -10,7 +10,7 @@ import java.util.Collection;
  * A {@link Closer} provides a utility for ensuring IO resources are closed after usage, regardless
  * of whether or not the operation has failed.
  * 
- * An instance can only be used once, since the resources will be closed after that and so won't be useable again.
+ * An instance can only be used once, since the resources will be closed after that and so won't be usable again.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.3.0
