@@ -25,6 +25,10 @@ public class SpeedControllerGroup implements SpeedController {
 		setInverted(false);
 		set(0);
 	}
+
+	public SpeedControllerGroup(SpeedController... controllers) {
+	    this(Arrays.asList(controllers));
+    }
 	
 	/**
 	 * {@inheritDoc}
