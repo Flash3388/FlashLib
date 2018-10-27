@@ -80,6 +80,10 @@ public abstract class IterativeRobot extends RobotBase {
         robotStop();
 	}
 
+	public Scheduler getScheduler() {
+	    return mScheduler;
+    }
+
 	protected void stopRobotLoop() {
 	    mRunLoop = false;
     }
