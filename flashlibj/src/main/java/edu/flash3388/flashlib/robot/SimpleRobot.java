@@ -80,7 +80,15 @@ public abstract class SimpleRobot extends RobotBase {
 		return isInMode(mode) && mRunLoop;
 	}
 
+    //--------------------------------------------------------------------
+    //----------------------Implementable---------------------------------
+    //--------------------------------------------------------------------
+
 	protected void robotStop(){}
+
+	@Override
+    protected abstract void robotInit();
+
 	protected abstract void disabled();
 	protected abstract void onMode(RobotMode mode);
 }
