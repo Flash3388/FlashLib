@@ -75,7 +75,7 @@ public class Mathf {
 	 * @param forcePositive true if actual range is 0 - range, false if -range - range.
 	 * @return the value after translation
 	 */
-	public static double translate(double value, double range, boolean forcePositive){
+	public static double translateInRange(double value, double range, boolean forcePositive){
 		value %= range;
 		if(forcePositive && value < 0)
 			value += range;
