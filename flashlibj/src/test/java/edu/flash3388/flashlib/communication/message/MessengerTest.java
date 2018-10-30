@@ -92,14 +92,12 @@ public class MessengerTest {
     }
 
     private void mockSerializeOnType(Serializer serializer, byte[] data, Class<?> type) throws Exception {
-        doAnswer(new Answer<Void>() {
+        doAnswer(new Answer<byte[]>() {
             @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                OutputStream outputStream = invocation.getArgument(0);
-                outputStream.write(data);
-                return null;
+            public byte[] answer(InvocationOnMock invocation) throws Throwable {
+                return data;
             }
-        }).when(serializer).serialize(any(), any(type));
+        }).when(serializer).serialize(any(type));
     }
 
     private void mockReadOnRequestedLength(Connection connection, byte[] data, int requestedLength) throws Exception {
@@ -107,7 +105,7 @@ public class MessengerTest {
     }
 
     private <T> void mockDeserializeOnType(Serializer serializer, T data, Class<T> type) throws Exception {
-        when(serializer.deserialize(any(InputStream.class), eq(type))).thenReturn(data);
+        when(serializer.deserialize(any(byte[].class), eq(type))).thenReturn(data);
     }
 
     private Messenger mockForReturningVersion(Version version) throws Exception {

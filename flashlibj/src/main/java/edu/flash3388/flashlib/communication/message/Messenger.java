@@ -4,6 +4,7 @@ import edu.flash3388.flashlib.communication.connection.Connection;
 import edu.flash3388.flashlib.communication.connection.TimeoutException;
 import edu.flash3388.flashlib.io.Closeables;
 import edu.flash3388.flashlib.io.serialization.Serializer;
+import edu.flash3388.flashlib.io.serialization.TypeException;
 import edu.flash3388.flashlib.util.versioning.IncompatibleVersionException;
 import edu.flash3388.flashlib.util.versioning.Version;
 
@@ -26,16 +27,11 @@ public class Messenger {
     }
 
     public void writeMessage(Message message) throws WriteException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            mSerializer.serialize(outputStream, message);
-            byte[] serializedMessage = outputStream.toByteArray();
-
-            outputStream.reset();
+            byte[] serializedMessage = mSerializer.serialize(message);
 
             MessageHeader messageHeader = new MessageHeader(VERSION, serializedMessage.length);
-            mSerializer.serialize(outputStream, messageHeader);
-            byte[] serializedMessageHeader = outputStream.toByteArray();
+            byte[] serializedMessageHeader = mSerializer.serialize(messageHeader);
 
             byte[] serializedHeaderLength = ByteBuffer.allocate(HEADER_LENGTH_SIZE).putInt(serializedMessageHeader.length).array();
 
@@ -44,8 +40,6 @@ public class Messenger {
             mConnection.write(serializedMessage);
         } catch (IOException e) {
             throw new WriteException(e);
-        } finally {
-            Closeables.closeQuietly(outputStream);
         }
     }
 
@@ -55,13 +49,13 @@ public class Messenger {
             int headerLength = ByteBuffer.wrap(serializedHeaderLength).getInt();
 
             byte[] serializedMessageHeader = mConnection.read(headerLength);
-            MessageHeader messageHeader = mSerializer.deserialize(new ByteArrayInputStream(serializedMessageHeader), MessageHeader.class);
+            MessageHeader messageHeader = mSerializer.deserialize(serializedMessageHeader, MessageHeader.class);
 
             ensureCompatibleVersion(messageHeader.getVersion());
 
             byte[] serializedMessage = mConnection.read(messageHeader.getMessageLength());
-            return mSerializer.deserialize(new ByteArrayInputStream(serializedMessage), Message.class);
-        } catch (IOException | TimeoutException | ClassNotFoundException e) {
+            return mSerializer.deserialize(serializedMessage, Message.class);
+        } catch (IOException | TimeoutException | TypeException e) {
             throw new ReadException(e);
         }
     }
