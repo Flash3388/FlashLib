@@ -5,15 +5,31 @@ import java.io.*;
 public class JavaObjectSerializer implements Serializer {
 
     @Override
-    public <T> void serialize(OutputStream outputStream, T value) throws IOException {
+    public <T> byte[] serialize(T value) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        objectOutputStream.writeObject(value);
+        try {
+            objectOutputStream.writeObject(value);
+        } finally {
+            objectOutputStream.close();
+            outputStream.close();
+        }
+
+        return outputStream.toByteArray();
     }
 
     @Override
-    public <T> T deserialize(InputStream inputStream, Class<T> type) throws IOException, ClassNotFoundException {
+    public <T> T deserialize(byte[] serializedValue, Class<T> type) throws IOException, TypeException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(serializedValue);
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-        Object deserializedObject = objectInputStream.readObject();
-        return type.cast(deserializedObject);
+        try {
+            Object deserializedObject = objectInputStream.readObject();
+            return type.cast(deserializedObject);
+        } catch (ClassNotFoundException | ClassCastException e) {
+            throw new TypeException(e);
+        } finally {
+            objectInputStream.close();
+            inputStream.close();
+        }
     }
 }
