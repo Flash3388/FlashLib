@@ -44,20 +44,33 @@ public class TcpConnectionTest {
     public void connecting_clientAndServer_success() throws Exception {
         byte[] DATA = {0x1, 0x3};
 
-        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), READ_TIMEOUT);
-        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, READ_TIMEOUT);
+        Function<Connection> serverTask = (serverConnection) -> {
+            byte[] data = serverConnection.read(DATA.length);
+            assertArrayEquals(DATA, data);
+        };
+        Function<Connection> clientTask = (clientConnection) -> {
+            clientConnection.write(DATA);
+        };
+
+        connectAndRun(serverTask, clientTask,
+                CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTImeout) throws Exception {
+        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), readTImeout);
+        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTImeout);
 
         CountDownLatch connectionLatch = new CountDownLatch(1);
-        CountDownLatch writeLatch = new CountDownLatch(1);
+        CountDownLatch tasksLatch = new CountDownLatch(1);
 
-        mExecutorService.submit(new Callable<Void>() {
+        Future<Void> clientFuture = mExecutorService.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
                 connectionLatch.await();
-                Connection connection = clientConnector.connect(CONNECTION_TIMEOUT);
+                Connection connection = clientConnector.connect(connectionTimeout);
                 try {
-                    writeLatch.countDown();
-                    connection.write(DATA);
+                    tasksLatch.countDown();
+                    clientTask.apply(connection);
                 } finally {
                     connection.close();
                 }
@@ -66,17 +79,30 @@ public class TcpConnectionTest {
             }
         });
 
-        byte[] readData;
-
         connectionLatch.countDown();
-        Connection connection = serverConnector.connect(CONNECTION_TIMEOUT);
+        Connection connection = serverConnector.connect(connectionTimeout);
         try {
-            writeLatch.await();
-            readData = connection.read(DATA.length);
+            tasksLatch.await();
+            serverTask.apply(connection);
         } finally {
             connection.close();
         }
 
-        assertArrayEquals(DATA, readData);
+        // to throw an exception if necessary
+        try {
+            clientFuture.get();
+        } catch (ExecutionException e) {
+            Throwable throwable = e.getCause();
+            if (throwable instanceof RuntimeException) {
+                throw (RuntimeException) throwable;
+            } else if(throwable instanceof Exception) {
+                throw (Exception) throwable;
+            }
+        }
+    }
+
+    @FunctionalInterface
+    private interface Function<T> {
+        void apply(T value) throws Exception;
     }
 }
