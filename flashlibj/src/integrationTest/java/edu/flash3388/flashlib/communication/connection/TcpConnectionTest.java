@@ -89,9 +89,9 @@ public class TcpConnectionTest {
         tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
     }
 
-    private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTImeout) throws Exception {
-        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), readTImeout);
-        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTImeout);
+    private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTimeout) throws Exception {
+        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), readTimeout);
+        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTimeout);
 
         CountDownLatch connectionLatch = new CountDownLatch(1);
         CountDownLatch tasksLatch = new CountDownLatch(1);
