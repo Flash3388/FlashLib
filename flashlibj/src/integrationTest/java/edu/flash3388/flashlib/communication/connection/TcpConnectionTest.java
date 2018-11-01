@@ -17,8 +17,8 @@ import static org.junit.Assert.assertArrayEquals;
 public class TcpConnectionTest {
 
     private static final int PORT = 10000;
-    private static final int READ_TIMEOUT = 1000;
-    private static final int CONNECTION_TIMEOUT = 1000;
+    private static final int DEFAULT_READ_TIMEOUT = 1000;
+    private static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
 
     private ExecutorService mExecutorService;
     private ServerSocket mServerSocket;
@@ -53,7 +53,45 @@ public class TcpConnectionTest {
         };
 
         connectAndRun(serverTask, clientTask,
-                CONNECTION_TIMEOUT, READ_TIMEOUT);
+                DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void read_nothingToRead_throwsTimeoutException() throws Exception {
+        final int READ_TIMEOUT = 200;
+
+        Function<Connection> serverTask = (serverConnection) -> {
+        };
+        Function<Connection> clientTask = (clientConnection) -> {
+            clientConnection.read(1);
+        };
+
+        connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void connect_serverHasNoClient_throwsTimeoutException() throws Exception {
+        final int CONNECTION_TIMEOUT = 200;
+
+        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT);
+        try {
+            serverConnector.connect(CONNECTION_TIMEOUT);
+        } finally {
+            serverConnector.close();
+        }
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void connect_clientHasNoClient_throwsTimeoutException() throws Exception {
+        final int CONNECTION_TIMEOUT = 200;
+
+        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), DEFAULT_READ_TIMEOUT);
+        try {
+            clientConnector.connect(CONNECTION_TIMEOUT);
+        } finally {
+            clientConnector.close();
+        }
     }
 
     private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTImeout) throws Exception {
