@@ -3,10 +3,12 @@ package edu.flash3388.flashlib.communication.connection.socket;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 
 import edu.flash3388.flashlib.communication.connection.Connection;
 import edu.flash3388.flashlib.communication.connection.ConnectionFailedException;
 import edu.flash3388.flashlib.communication.connection.Connector;
+import edu.flash3388.flashlib.communication.connection.TimeoutException;
 import edu.flash3388.flashlib.io.CloseOption;
 import edu.flash3388.flashlib.io.Closer;
 
@@ -21,8 +23,9 @@ public class TcpClientConnector implements Connector {
 	}
 	
 	@Override
-	public Connection connect(int connectionTimeout) throws ConnectionFailedException {
+	public Connection connect(int connectionTimeout) throws ConnectionFailedException, TimeoutException {
 		Socket socket = new Socket();
+
 		try {
 			return Closer.with(socket).run(()->{
 				socket.connect(mEndPoint, connectionTimeout);
@@ -30,9 +33,11 @@ public class TcpClientConnector implements Connector {
 				
 				return new SocketConnection(socket);
 			}, CloseOption.CLOSE_ON_ERROR);
-		} catch (IOException e) {
-			throw new ConnectionFailedException(e);
-		}
+		} catch (SocketTimeoutException e) {
+		    throw new TimeoutException(e);
+        } catch (IOException e) {
+            throw new ConnectionFailedException(e);
+        }
 	}
 
 	@Override

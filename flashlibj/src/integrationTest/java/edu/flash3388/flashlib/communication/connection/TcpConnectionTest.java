@@ -8,11 +8,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.*;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 public class TcpConnectionTest {
 
@@ -75,23 +77,16 @@ public class TcpConnectionTest {
         final int CONNECTION_TIMEOUT = 200;
 
         TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT);
-        try {
-            serverConnector.connect(CONNECTION_TIMEOUT);
-        } finally {
-            serverConnector.close();
-        }
+        tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT);
     }
 
     @Test(expected = TimeoutException.class)
     public void connect_clientHasNoClient_throwsTimeoutException() throws Exception {
         final int CONNECTION_TIMEOUT = 200;
 
-        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), DEFAULT_READ_TIMEOUT);
-        try {
-            clientConnector.connect(CONNECTION_TIMEOUT);
-        } finally {
-            clientConnector.close();
-        }
+        InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT);
+        TcpClientConnector clientConnector = new TcpClientConnector(address, DEFAULT_READ_TIMEOUT);
+        tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
     }
 
     private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTImeout) throws Exception {
@@ -136,6 +131,19 @@ public class TcpConnectionTest {
             } else if(throwable instanceof Exception) {
                 throw (Exception) throwable;
             }
+        }
+    }
+
+    private void tryConnectExpectFailure(Connector connector, int timeout) throws Exception {
+        try {
+            Connection connection = connector.connect(timeout);
+            try {
+                fail("should not have connected");
+            } finally {
+                connection.close();
+            }
+        } finally {
+            connector.close();
         }
     }
 
