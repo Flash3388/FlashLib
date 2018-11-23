@@ -1,6 +1,11 @@
 package edu.flash3388.flashlib.robot;
 
+import com.beans.BooleanProperty;
+import com.beans.properties.SimpleBooleanProperty;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
+import edu.flash3388.flashlib.util.concurrent.Sleeper;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
@@ -25,11 +30,13 @@ import edu.flash3388.flashlib.robot.modes.RobotMode;
 public abstract class SimpleRobot extends RobotBase {
 	
 	private static final long ITERATION_DELAY_MS = 5;
-	
-	private boolean mRunLoop;
 
-	protected SimpleRobot() {
-		mRunLoop = true;
+    private final Sleeper mSleeper;
+    private final BooleanProperty mRunLoopProperty;
+
+	protected SimpleRobot(Sleeper sleeper) {
+		mSleeper = sleeper;
+		mRunLoopProperty = new SimpleBooleanProperty(true);
 	}
 
 	@Override
@@ -39,26 +46,31 @@ public abstract class SimpleRobot extends RobotBase {
 
 	@Override
 	protected void robotShutdown(){
-		mRunLoop = false;
+		stopRobotLoop();
 
         robotStop();
 	}
 
 	protected void stopRobotLoop() {
-	    mRunLoop = false;
+	    mRunLoopProperty.setAsBoolean(false);
     }
 
 	private void robotLoop(){
-		while(mRunLoop){
+		while(mRunLoopProperty.getAsBoolean()){
 		    RobotMode currentMode = getMode();
 
 		    enterMode(currentMode);
-		    waitForModeToEnd(currentMode);
-		}
+		    
+            try {
+                waitForModeToEnd(currentMode);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
 	}
 
 	private boolean stayInMode(RobotMode mode) {
-		return isInMode(mode) && mRunLoop;
+		return isInMode(mode) && mRunLoopProperty.getAsBoolean();
 	}
 
 	private void enterMode(RobotMode mode) {
@@ -69,13 +81,9 @@ public abstract class SimpleRobot extends RobotBase {
         }
     }
 
-    private void waitForModeToEnd(RobotMode mode) {
+    private void waitForModeToEnd(RobotMode mode) throws InterruptedException {
         while(stayInMode(mode)){
-            try {
-                Thread.sleep(ITERATION_DELAY_MS);
-            } catch (InterruptedException e) {
-                break;
-            }
+            mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY_MS, TimeUnit.MILLISECONDS);
         }
     }
 

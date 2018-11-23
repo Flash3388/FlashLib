@@ -1,9 +1,14 @@
 package edu.flash3388.flashlib.robot;
 
+import com.beans.BooleanProperty;
+import com.beans.properties.SimpleBooleanProperty;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
+import edu.flash3388.flashlib.util.concurrent.Sleeper;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * An extension of {@link RobotBase}. This class provides extended and easier control over robot
@@ -58,15 +63,17 @@ public abstract class IterativeRobot extends RobotBase {
 	private static final long ITERATION_DELAY_MS = 5;
 
 	private final Scheduler mScheduler;
-	private boolean mRunLoop;
+	private final Sleeper mSleeper;
+	private final BooleanProperty mRunLoopProperty;
 
-	protected IterativeRobot(Scheduler scheduler) {
+	protected IterativeRobot(Scheduler scheduler, Sleeper sleeper) {
 	    mScheduler = scheduler;
-        mRunLoop = true;
+	    mSleeper = sleeper;
+        mRunLoopProperty = new SimpleBooleanProperty(true);
     }
 
     protected IterativeRobot() {
-	    this(Scheduler.getInstance());
+	    this(Scheduler.getInstance(), new Sleeper());
     }
 
 	@Override
@@ -76,7 +83,7 @@ public abstract class IterativeRobot extends RobotBase {
 
 	@Override
 	protected void robotShutdown(){
-        mRunLoop = false;
+        stopRobotLoop();
 
         mScheduler.setRunMode(SchedulerRunMode.DISABLED);
         mScheduler.removeAllTasks();
@@ -90,16 +97,16 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
 	protected void stopRobotLoop() {
-	    mRunLoop = false;
+        mRunLoopProperty.setAsBoolean(false);
     }
 
     private void robotLoop(){
-	    RobotMode currentMode = null;
+	    RobotMode currentMode;
 	    RobotMode lastMode = null;
 
 	    boolean wasModeInitialize = false;
 
-        while(mRunLoop){
+        while(mRunLoopProperty.getAsBoolean()){
             currentMode = getMode();
 
             if (!currentMode.equals(lastMode)) {
@@ -115,7 +122,7 @@ public abstract class IterativeRobot extends RobotBase {
             periodicMode(currentMode);
 
             try {
-                Thread.sleep(ITERATION_DELAY_MS);
+                mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY_MS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 break;
             }

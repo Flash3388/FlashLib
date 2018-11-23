@@ -6,6 +6,7 @@ import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.util.concurrent.ExecutorTerminator;
+import edu.flash3388.flashlib.util.concurrent.Sleeper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class IterativeRobotTest {
         mCloser.add(new ExecutorTerminator(mExecutorService));
 
         mScheduler = mock(Scheduler.class);
-        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler));
+        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mock(Sleeper.class)));
     }
 
     @After
@@ -153,8 +154,8 @@ public class IterativeRobotTest {
 
     private static class FakeIterativeRobot extends IterativeRobot {
 
-        private FakeIterativeRobot(Scheduler scheduler) {
-            super(scheduler);
+        private FakeIterativeRobot(Scheduler scheduler, Sleeper sleeper) {
+            super(scheduler, sleeper);
         }
 
         @Override
