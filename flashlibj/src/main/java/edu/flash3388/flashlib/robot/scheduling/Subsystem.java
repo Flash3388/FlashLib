@@ -26,14 +26,18 @@ public abstract class Subsystem{
 	
 	private Action mDefaultAction;
 	private Action mCurrentAction;
-	
+
+	protected Subsystem(Scheduler scheduler) {
+	    scheduler.registerSubsystem(this);
+    }
+
 	/**
 	 * Creates a new subsystem. The name is just for comfort of data logging if needed.
 	 * To register this subsystem to the {@link Scheduler}, {@link Scheduler#registerSubsystem(Subsystem)} is
 	 * called, passing it this object.
 	 */
 	protected Subsystem(){
-		Scheduler.getInstance().registerSubsystem(this);
+		this(Scheduler.getInstance());
 	}
 	
 	/**
