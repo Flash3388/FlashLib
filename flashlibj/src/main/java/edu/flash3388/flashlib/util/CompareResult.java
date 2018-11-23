@@ -14,4 +14,14 @@ public enum CompareResult {
     public int getValue() {
         return mValue;
     }
+
+    public static CompareResult forValue(int value) {
+        for (CompareResult result : values()) {
+            if (result.getValue() == value) {
+                return result;
+            }
+        }
+
+        throw new EnumConstantNotPresentException(CompareResult.class, String.valueOf(value));
+    }
 }
