@@ -89,51 +89,55 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void robotLoop(){
+	    RobotMode currentMode = getMode();
+	    RobotMode lastMode = currentMode;
+
+	    boolean wasModeInitialize = false;
+
         while(mRunLoop){
-            if(isDisabled()){
-                mScheduler.removeAllActions();
-                mScheduler.setRunMode(SchedulerRunMode.TASKS_ONLY);
+            currentMode = getMode();
 
-                disabledInit();
+            if (!currentMode.equals(lastMode)) {
+                lastMode = currentMode;
+                wasModeInitialize = false;
+            }
 
-                while(stayInMode(RobotMode.DISABLED)){
-                    mScheduler.run();
+            if (!wasModeInitialize) {
+                initMode(currentMode);
+                wasModeInitialize = true;
+            }
 
-                    disabledPeriodic();
-                    robotPeriodic();
+            periodicMode(currentMode);
 
-                    try {
-                        Thread.sleep(ITERATION_DELAY_MS);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
-            } else{
-                RobotMode currentMode = getMode();
-
-                mScheduler.removeAllActions();
-                mScheduler.setRunMode(SchedulerRunMode.ALL);
-
-                modeInit(currentMode);
-
-                while(stayInMode(currentMode)){
-                    mScheduler.run();
-
-                    modePeriodic(currentMode);
-                    robotPeriodic();
-
-                    try {
-                        Thread.sleep(ITERATION_DELAY_MS);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
+            try {
+                Thread.sleep(ITERATION_DELAY_MS);
+            } catch (InterruptedException e) {
+                break;
             }
         }
     }
 
-    private boolean stayInMode(RobotMode mode) {
-	    return isInMode(mode) && mRunLoop;
+    private void initMode(RobotMode mode) {
+        mScheduler.removeAllActions();
+
+        if (mode.equals(RobotMode.DISABLED)) {
+            mScheduler.setRunMode(SchedulerRunMode.TASKS_ONLY);
+            disabledInit();
+        } else {
+            mScheduler.setRunMode(SchedulerRunMode.ALL);
+            modeInit(mode);
+        }
+    }
+
+    private void periodicMode(RobotMode mode) {
+        if (mode.equals(RobotMode.DISABLED)) {
+            disabledPeriodic();
+        } else {
+            mScheduler.run();
+            modePeriodic(mode);
+        }
+
+        robotPeriodic();
     }
 
     //--------------------------------------------------------------------
