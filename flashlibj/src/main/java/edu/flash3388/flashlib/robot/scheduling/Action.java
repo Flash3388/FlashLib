@@ -63,7 +63,7 @@ public abstract class Action {
 		mIsInitialized = false;
 
 		mTimeout = timeout;
-        mStartTime = Time.INVALID_TIME;
+        mStartTime = Time.INVALID;
 	}
 
     public Action(Clock clock, Time timeout) {
@@ -71,7 +71,7 @@ public abstract class Action {
     }
 
 	public Action(Clock clock) {
-	    this(clock, Time.INVALID_TIME);
+	    this(clock, Time.INVALID);
     }
 
     public Action() {
@@ -139,7 +139,7 @@ public abstract class Action {
 	 * Cancels the timeout set for this action. Done by setting the timeout to an invalid value.
 	 */
 	public void cancelTimeout(){
-		setTimeout(Time.INVALID_TIME);
+		setTimeout(Time.INVALID);
 	}
 
 	/**
@@ -207,7 +207,7 @@ public abstract class Action {
 		mIsInitialized = false;
 		mIsCanceled = false;
 		mIsRunning = false;
-		mStartTime = Time.INVALID_TIME;
+		mStartTime = Time.INVALID;
 	}
 
 	boolean run(){

@@ -28,7 +28,7 @@ import edu.flash3388.flashlib.util.concurrent.Sleeper;
  */
 public abstract class SimpleRobot extends RobotBase {
 
-    private static final Time ITERATION_DELAY = Time.forMillis(5);
+    private static final Time ITERATION_DELAY = Time.millis(5);
 
     private final Sleeper mSleeper;
     private final BooleanProperty mRunLoopProperty;

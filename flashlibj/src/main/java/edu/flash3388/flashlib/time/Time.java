@@ -6,40 +6,40 @@ import java.util.concurrent.TimeUnit;
 
 public class Time implements Comparable<Time> {
 
-    public static final long INVALID_TIME_VALUE = -1L;
-    public static final Time INVALID_TIME = new Time(INVALID_TIME_VALUE, TimeUnit.MILLISECONDS);
+    public static final long INVALID_VALUE = -1L;
+    public static final Time INVALID = new Time(INVALID_VALUE, TimeUnit.MILLISECONDS);
 
-    private final long mTimeValue;
-    private final TimeUnit mTimeUnit;
+    private final long mValue;
+    private final TimeUnit mUnit;
 
-    public Time(long timeValue, TimeUnit timeUnit) {
-        mTimeValue = timeValue;
-        mTimeUnit = timeUnit;
+    public Time(long value, TimeUnit unit) {
+        mValue = value;
+        mUnit = unit;
     }
 
-    public static Time forMillis(long timeMs) {
+    public static Time millis(long timeMs) {
         return new Time(timeMs, TimeUnit.MILLISECONDS);
     }
 
-    public long getTimeValue() {
-        return mTimeValue;
+    public long getValue() {
+        return mValue;
     }
 
-    public Time getForUnit(TimeUnit newTimeUnit) {
+    public Time getAsUnit(TimeUnit newTimeUnit) {
         if (!isValid()) {
-            return new Time(INVALID_TIME_VALUE, newTimeUnit);
+            return new Time(INVALID_VALUE, newTimeUnit);
         }
 
-        long valueInWantedUnits = newTimeUnit.convert(mTimeValue, mTimeUnit);
+        long valueInWantedUnits = newTimeUnit.convert(mValue, mUnit);
         return new Time(valueInWantedUnits, newTimeUnit);
     }
 
     public long getAsMillis() {
-        return getForUnit(TimeUnit.MILLISECONDS).getTimeValue();
+        return getAsUnit(TimeUnit.MILLISECONDS).getValue();
     }
 
     public boolean isValid() {
-        return mTimeValue >= 0;
+        return mValue >= 0;
     }
 
     public Time add(Time other) {
