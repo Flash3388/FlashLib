@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.EOFException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -60,10 +61,54 @@ public class TcpConnectionTest {
     }
 
     @Test(expected = TimeoutException.class)
-    public void read_nothingToRead_throwsTimeoutException() throws Exception {
+    public void read_clientNothingToRead_clientThrowsTimeoutException() throws Exception {
         final int READ_TIMEOUT = 200;
 
         Function<Connection> serverTask = (serverConnection) -> {
+        };
+        Function<Connection> clientTask = (clientConnection) -> {
+            clientConnection.read(1);
+        };
+
+        connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    @Test(expected = TimeoutException.class)
+    public void read_serverNothingToRead_serverThrowsTimeoutException() throws Exception {
+        final int READ_TIMEOUT = 200;
+
+        Function<Connection> serverTask = (serverConnection) -> {
+            serverConnection.read(1);
+        };
+        Function<Connection> clientTask = (clientConnection) -> {
+        };
+
+        connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    @Test(expected = EOFException.class)
+    public void read_clientDisconnectedInMiddle_serverThrowsEOFException() throws Exception {
+        final int READ_TIMEOUT = 200;
+
+        Function<Connection> serverTask = (serverConnection) -> {
+            serverConnection.read(1);
+        };
+        Function<Connection> clientTask = (clientConnection) -> {
+            clientConnection.close();
+        };
+
+        connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
+    }
+
+    @Test(expected = EOFException.class)
+    public void read_serverDisconnectedInMiddle_clientThrowsEOFException() throws Exception {
+        final int READ_TIMEOUT = 200;
+
+        Function<Connection> serverTask = (serverConnection) -> {
+            serverConnection.close();
         };
         Function<Connection> clientTask = (clientConnection) -> {
             clientConnection.read(1);
@@ -103,7 +148,7 @@ public class TcpConnectionTest {
         TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTimeout);
 
         CountDownLatch connectionLatch = new CountDownLatch(1);
-        CountDownLatch tasksLatch = new CountDownLatch(1);
+        CyclicBarrier endTasksBarrier = new CyclicBarrier(2);
 
         Future<Void> clientFuture = mExecutorService.submit(new Callable<Void>() {
             @Override
@@ -113,7 +158,7 @@ public class TcpConnectionTest {
                 try {
                     clientTask.apply(connection);
                 } finally {
-                    tasksLatch.countDown();
+                    endTasksBarrier.await();
                     connection.close();
                 }
 
@@ -126,7 +171,7 @@ public class TcpConnectionTest {
         try {
             serverTask.apply(connection);
         } finally {
-            tasksLatch.await();
+            endTasksBarrier.await();
             connection.close();
         }
 
