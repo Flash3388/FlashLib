@@ -42,8 +42,9 @@ import java.util.Set;
  */
 public abstract class Action {
 
-	private final Set<Subsystem> mRequirements;
+    private final Scheduler mScheduler;
 	private final Clock mClock;
+    private final Set<Subsystem> mRequirements;
 
 	private boolean mIsInitialized;
 	private boolean mIsCanceled;
@@ -52,9 +53,10 @@ public abstract class Action {
 	private Time mTimeout;
 	private Time mStartTime;
 
-	public Action(Clock clock, Time timeout) {
-		mRequirements = new HashSet<>(2);
+	public Action(Scheduler scheduler, Clock clock, Time timeout) {
+	    mScheduler = scheduler;
         mClock = clock;
+		mRequirements = new HashSet<>(2);
 
 		mIsRunning = false;
 		mIsCanceled = false;
@@ -63,6 +65,10 @@ public abstract class Action {
 		mTimeout = timeout;
         mStartTime = Time.INVALID_TIME;
 	}
+
+    public Action(Clock clock, Time timeout) {
+	    this(Scheduler.getInstance(), clock, timeout);
+    }
 
 	public Action(Clock clock) {
 	    this(clock, Time.INVALID_TIME);
@@ -82,7 +88,7 @@ public abstract class Action {
 			mIsCanceled = false;
 			mIsRunning = true;
 
-			Scheduler.getInstance().add(this);
+			mScheduler.add(this);
 		}
 	}
 
