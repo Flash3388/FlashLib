@@ -60,9 +60,13 @@ public abstract class IterativeRobot extends RobotBase {
 	private final Scheduler mScheduler;
 	private boolean mRunLoop;
 
-	protected IterativeRobot() {
-	    mScheduler = Scheduler.getInstance();
+	protected IterativeRobot(Scheduler scheduler) {
+	    mScheduler = scheduler;
         mRunLoop = true;
+    }
+
+    protected IterativeRobot() {
+	    this(Scheduler.getInstance());
     }
 
 	@Override
@@ -89,8 +93,8 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void robotLoop(){
-	    RobotMode currentMode = getMode();
-	    RobotMode lastMode = currentMode;
+	    RobotMode currentMode = null;
+	    RobotMode lastMode = null;
 
 	    boolean wasModeInitialize = false;
 

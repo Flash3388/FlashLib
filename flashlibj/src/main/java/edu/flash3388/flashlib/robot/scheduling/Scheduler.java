@@ -24,7 +24,7 @@ import java.util.*;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public final class Scheduler {
+public class Scheduler {
 
 	private static Scheduler mInstance;
 
