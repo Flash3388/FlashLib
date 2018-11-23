@@ -38,6 +38,10 @@ public abstract class SimpleRobot extends RobotBase {
 		mRunLoopProperty = new SimpleBooleanProperty(true);
 	}
 
+	protected SimpleRobot() {
+	    this(new Sleeper());
+    }
+
 	@Override
 	protected void robotMain() {
 		robotLoop();
@@ -68,10 +72,6 @@ public abstract class SimpleRobot extends RobotBase {
         }
 	}
 
-	private boolean stayInMode(RobotMode mode) {
-		return isInMode(mode) && mRunLoopProperty.getAsBoolean();
-	}
-
 	private void enterMode(RobotMode mode) {
         if (mode.equals(RobotMode.DISABLED)) {
             disabled();
@@ -84,6 +84,10 @@ public abstract class SimpleRobot extends RobotBase {
         while(stayInMode(mode)){
             mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY);
         }
+    }
+
+    private boolean stayInMode(RobotMode mode) {
+        return isInMode(mode) && mRunLoopProperty.getAsBoolean();
     }
 
     //--------------------------------------------------------------------
