@@ -125,6 +125,7 @@ public abstract class Action {
 	 * @param timeout timeout
 	 */
 	public void setTimeout(Time timeout){
+	    validateNotRunning();
         mTimeout = timeout;
 	}
 
@@ -132,7 +133,7 @@ public abstract class Action {
 	 * Cancels the timeout set for this action. Done by setting the timeout to an invalid value.
 	 */
 	public void cancelTimeout(){
-		mTimeout = Time.INVALID_TIME;
+		setTimeout(Time.INVALID_TIME);
 	}
 
 	/**
@@ -141,6 +142,7 @@ public abstract class Action {
 	 * @return true if the action timeout, false otherwise
 	 */
 	public boolean hasTimeoutReached(){
+        validateRunning();
 	    if (!mStartTime.isValid() || !mTimeout.isValid()) {
 	        return false;
         }
@@ -153,6 +155,7 @@ public abstract class Action {
 	 * @param subsystem a system used by this action
 	 */
 	public void requires(Subsystem subsystem){
+	    validateNotRunning();
 		mRequirements.add(subsystem);
 	}
 
@@ -161,6 +164,7 @@ public abstract class Action {
 	 * @param subsystems an array of systems used by this action
 	 */
 	public void requires(Subsystem... subsystems){
+	    validateNotRunning();
 		mRequirements.addAll(Arrays.asList(subsystems));
 	}
 
@@ -168,6 +172,7 @@ public abstract class Action {
 	 * Resets the requirements of this action
 	 */
 	public void resetRequirements(){
+	    validateNotRunning();
 		mRequirements.clear();
 	}
 
@@ -234,7 +239,23 @@ public abstract class Action {
 
 		return !isFinished();
 	}
-	
+
+	private void validateRunning() {
+        if (!isRunning()) {
+            throw new IllegalStateException("action not running");
+        }
+    }
+
+    private void validateNotRunning() {
+        if (isRunning()) {
+            throw new IllegalStateException("action running");
+        }
+    }
+
+    //--------------------------------------------------------------------
+    //----------------------Implementable---------------------------------
+    //--------------------------------------------------------------------
+
 	/**
 	 * Called once when the action is started.
 	 */
