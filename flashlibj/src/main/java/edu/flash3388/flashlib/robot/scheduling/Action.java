@@ -184,24 +184,8 @@ public abstract class Action {
 		return Collections.unmodifiableSet(mRequirements);
 	}
 
-
-	/**
-	 * Copies the requirements used by another action to this one.
-	 * @param action action to copy requirements from
-	 */
-	public void copyRequirements(Action action){
-		for (Subsystem subsystem : action.getRequirements()) {
-			requires(subsystem);
-		}
-	}
-
 	public boolean doesRequire(Subsystem subsystem) {
 		return mRequirements.contains(subsystem);
-	}
-
-	void copyActionProperties(Action action) {
-		copyRequirements(action);
-		mTimeout = action.mTimeout;
 	}
 
 	void removed(){
