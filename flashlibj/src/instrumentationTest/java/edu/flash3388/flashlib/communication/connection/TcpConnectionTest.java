@@ -145,7 +145,10 @@ public class TcpConnectionTest {
 
     private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTimeout) throws Exception {
         TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), readTimeout);
+        mCloser.add(clientConnector);
+
         TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTimeout);
+        mCloser.add(serverConnector);
 
         CountDownLatch connectionLatch = new CountDownLatch(1);
         CyclicBarrier endTasksBarrier = new CyclicBarrier(2);
