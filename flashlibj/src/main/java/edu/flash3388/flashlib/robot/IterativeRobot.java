@@ -4,6 +4,7 @@ import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.FlashScheduler;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import edu.flash3388.flashlib.time.Time;
@@ -72,7 +73,7 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     protected IterativeRobot() {
-	    this(Scheduler.getInstance(), new Sleeper());
+	    this(FlashScheduler.get(), new Sleeper());
     }
 
 	@Override

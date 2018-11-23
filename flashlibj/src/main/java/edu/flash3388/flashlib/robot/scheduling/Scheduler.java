@@ -1,6 +1,10 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
@@ -26,23 +30,13 @@ import java.util.*;
  */
 public class Scheduler {
 
-	private static Scheduler mInstance;
-
-	public static Scheduler getInstance() {
-		if (mInstance == null) {
-			mInstance = new Scheduler();
-		}
-
-		return mInstance;
-	}
-
 	private final Set<Subsystem> mSubsystems;
 	private final Collection<Action> mActions;
 	private final Collection<Task> mTasks;
 
 	private SchedulerRunMode mRunMode;
 
-	private Scheduler() {
+	public Scheduler() {
         mSubsystems = new HashSet<>();
         mActions = new ArrayList<>();
 		mTasks = new ArrayList<>();

@@ -37,7 +37,7 @@ public abstract class Subsystem{
 	 * called, passing it this object.
 	 */
 	protected Subsystem(){
-		this(Scheduler.getInstance());
+		this(FlashScheduler.get());
 	}
 	
 	/**

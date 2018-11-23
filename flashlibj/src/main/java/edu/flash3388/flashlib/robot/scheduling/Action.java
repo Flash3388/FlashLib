@@ -67,7 +67,7 @@ public abstract class Action {
 	}
 
     public Action(Clock clock, Time timeout) {
-	    this(Scheduler.getInstance(), clock, timeout);
+	    this(FlashScheduler.get(), clock, timeout);
     }
 
 	public Action(Clock clock) {
