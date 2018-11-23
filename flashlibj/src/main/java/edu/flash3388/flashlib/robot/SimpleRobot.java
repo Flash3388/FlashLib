@@ -50,35 +50,34 @@ public abstract class SimpleRobot extends RobotBase {
 
 	private void robotLoop(){
 		while(mRunLoop){
-			if(isDisabled()){
-				disabled();
-				
-				while(stayInMode(RobotMode.DISABLED)){
-                    try {
-                        Thread.sleep(ITERATION_DELAY_MS);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-				}
-			} else{
-				RobotMode currentMode = getMode();
-				
-				onMode(currentMode);
-				
-				while(stayInMode(currentMode)){
-                    try {
-                        Thread.sleep(ITERATION_DELAY_MS);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-				}
-			}
+		    RobotMode currentMode = getMode();
+
+		    enterMode(currentMode);
+		    waitForModeToEnd(currentMode);
 		}
 	}
 
 	private boolean stayInMode(RobotMode mode) {
 		return isInMode(mode) && mRunLoop;
 	}
+
+	private void enterMode(RobotMode mode) {
+        if (mode.equals(RobotMode.DISABLED)) {
+            disabled();
+        } else {
+            onMode(mode);
+        }
+    }
+
+    private void waitForModeToEnd(RobotMode mode) {
+        while(stayInMode(mode)){
+            try {
+                Thread.sleep(ITERATION_DELAY_MS);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
 
     //--------------------------------------------------------------------
     //----------------------Implementable---------------------------------
