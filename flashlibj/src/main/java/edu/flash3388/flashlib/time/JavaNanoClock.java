@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.time;
 
+import java.util.concurrent.TimeUnit;
+
 public class JavaNanoClock implements Clock {
 
     private final long mStartTimeNanos;
@@ -9,7 +11,8 @@ public class JavaNanoClock implements Clock {
     }
 
     @Override
-    public long currentTimeMillis() {
-        return (long) ((System.nanoTime() - mStartTimeNanos) * 1e-6);
+    public Time currentTime() {
+        long timeNanos = System.nanoTime() - mStartTimeNanos;
+        return new Time(timeNanos, TimeUnit.NANOSECONDS);
     }
 }

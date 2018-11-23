@@ -1,9 +1,11 @@
 package edu.flash3388.flashlib.time;
 
+import java.util.concurrent.TimeUnit;
+
 public class JavaMillisClock implements Clock {
 
     @Override
-    public long currentTimeMillis() {
-        return System.currentTimeMillis();
+    public Time currentTime() {
+        return new Time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 }

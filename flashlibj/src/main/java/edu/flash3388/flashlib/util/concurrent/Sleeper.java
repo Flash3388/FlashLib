@@ -1,8 +1,8 @@
 package edu.flash3388.flashlib.util.concurrent;
 
 import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.time.Time;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 public class Sleeper {
@@ -10,17 +10,21 @@ public class Sleeper {
     private static final long MIN_SLEEP_PERIOD_MS = 5;
     private static final long MAX_SLEEP_PERIOD_MS = 1000;
 
-    public void sleep(long sleepTime, TimeUnit timeUnit) throws InterruptedException {
-        Thread.sleep(timeUnit.toMillis(sleepTime));
+    public void sleepMs(long sleepTimeMs) throws InterruptedException {
+        Thread.sleep(sleepTimeMs);
     }
 
-    public void sleepWhileConditionMet(BooleanSupplier condition, long timeout, TimeUnit timeUnit) throws InterruptedException {
-        long timeoutMs = timeUnit.toMillis(timeout);
+    public void sleep(Time sleepTime) throws InterruptedException {
+        sleepMs(sleepTime.getAsMillis());
+    }
+
+    public void sleepWhileConditionMet(BooleanSupplier condition, Time sleepTime) throws InterruptedException {
+        long timeoutMs = sleepTime.getAsMillis();
         long sleepingPeriodMs = getSleepingPeriodMs(timeoutMs);
         long timeWaited = 0;
 
         while (condition.getAsBoolean() && timeWaited < timeoutMs) {
-            sleep(sleepingPeriodMs, TimeUnit.MILLISECONDS);
+            sleepMs(sleepingPeriodMs);
             timeWaited += sleepingPeriodMs;
         }
     }

@@ -33,17 +33,17 @@ public class PulseEncoder implements Encoder {
 
 		mShouldCheckRest = false;
 		mRestTimeout = DEFAULT_REST_TIMEOUT;
-        mLastCheckTime = Time.INVALID_TIME;
+        mLastCheckTime = Time.INVALID_TIME_VALUE;
 
 		reset();
 	}
 	
 	private void checkRest(){
 		if(mShouldCheckRest){
-			long time = mClock.currentTimeMillis();
+			long time = mClock.currentTime().getAsMillis();
 			int count = getRaw();
 			
-			if(mLastCheckTime == Time.INVALID_TIME) {
+			if(mLastCheckTime == Time.INVALID_TIME_VALUE) {
 				mLastCheckTime = time;
 			}
 

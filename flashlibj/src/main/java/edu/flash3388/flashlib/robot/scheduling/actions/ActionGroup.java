@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.time.Time;
 
 import java.util.*;
 
@@ -81,12 +82,12 @@ public class ActionGroup extends Action {
 	/**
 	 * Adds an empty action to run for a given time of milliseconds.
 	 * 
-	 * @param timeoutMs milliseconds for the empty action to run
+	 * @param time time for the empty action to run
 	 * @return this instance
 	 */
-	public ActionGroup addWaitAction(long timeoutMs){
+	public ActionGroup addWaitAction(Time time){
 	    Action action = Actions.empty();
-	    action.setTimeoutMs(timeoutMs);
+	    action.setTimeout(time);
 
 		return add(action);
 	}

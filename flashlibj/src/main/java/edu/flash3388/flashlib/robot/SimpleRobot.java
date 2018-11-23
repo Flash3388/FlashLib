@@ -3,9 +3,8 @@ package edu.flash3388.flashlib.robot;
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
+import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class provides a simple extension of {@link RobotBase}, adding simple operation mode operation
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * finished, not further user code will be executed for that mode. If mode was changed and user code did not
  * finished and the methods did not return, this will disrupt robot operations.
  * <p>
- * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY_MS} milliseconds.
+ * Each iteration of the control loop puts the current thread into sleep.
  * <p>
  * {@link #robotInit()} is called when FlashLib finished initialization. Robot systems should be initialized here.
  * <p>
@@ -28,8 +27,8 @@ import java.util.concurrent.TimeUnit;
  * @since FlashLib 1.2.0
  */
 public abstract class SimpleRobot extends RobotBase {
-	
-	private static final long ITERATION_DELAY_MS = 5;
+
+    private static final Time ITERATION_DELAY = Time.forMillis(5);
 
     private final Sleeper mSleeper;
     private final BooleanProperty mRunLoopProperty;
@@ -60,7 +59,7 @@ public abstract class SimpleRobot extends RobotBase {
 		    RobotMode currentMode = getMode();
 
 		    enterMode(currentMode);
-		    
+
             try {
                 waitForModeToEnd(currentMode);
             } catch (InterruptedException e) {
@@ -83,7 +82,7 @@ public abstract class SimpleRobot extends RobotBase {
 
     private void waitForModeToEnd(RobotMode mode) throws InterruptedException {
         while(stayInMode(mode)){
-            mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY_MS, TimeUnit.MILLISECONDS);
+            mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY);
         }
     }
 

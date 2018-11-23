@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot.scheduling;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.FlashClock;
 import edu.flash3388.flashlib.time.Time;
+import edu.flash3388.flashlib.util.CompareResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +28,7 @@ import java.util.Set;
  * be called.
  * <p>
  * An action can have a timeout. If the time since the action started running has passed a given timeout, the
- * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeoutMs(long)}.
+ * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeout(Time)}.
  * <p>
  * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Subsystem} object
  * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
@@ -48,10 +49,10 @@ public abstract class Action {
 	private boolean mIsCanceled;
 	private boolean mIsRunning;
 
-	private long mTimeoutMs;
-	private long mStartTime;
+	private Time mTimeout;
+	private Time mStartTime;
 
-	public Action(Clock clock, long timeoutMs) {
+	public Action(Clock clock, Time timeout) {
 		mRequirements = new HashSet<>(2);
         mClock = clock;
 
@@ -59,8 +60,8 @@ public abstract class Action {
 		mIsCanceled = false;
 		mIsInitialized = false;
 
-		mTimeoutMs = timeoutMs;
-		mStartTime = Time.INVALID_TIME;
+		mTimeout = timeout;
+        mStartTime = Time.INVALID_TIME;
 	}
 
 	public Action(Clock clock) {
@@ -112,26 +113,26 @@ public abstract class Action {
 
 	/**
 	 * Gets the running timeout of the action in milliseconds.
-	 * @return the timeout in milliseconds, or a negative value if there is no timeout.
+	 * @return the timeout.
 	 */
-	public long getTimeoutMs(){
-		return mTimeoutMs;
+	public Time getTimeout(){
+		return mTimeout;
 	}
 
 	/**
-	 * Sets the running timeout for this action in milliseconds. When started, if the timeout is not 0 or negative
+	 * Sets the running timeout for this action. When started, if the timeout is not 0 or negative
 	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param timeoutMs timeout in milliseconds
+	 * @param timeout timeout
 	 */
-	public void setTimeoutMs(long timeoutMs){
-		mTimeoutMs = timeoutMs;
+	public void setTimeout(Time timeout){
+        mTimeout = timeout;
 	}
 
 	/**
-	 * Cancels the timeout set for this action. Done by setting the timeout to a negative value.
+	 * Cancels the timeout set for this action. Done by setting the timeout to an invalid value.
 	 */
 	public void cancelTimeout(){
-		mTimeoutMs = Time.INVALID_TIME;
+		mTimeout = Time.INVALID_TIME;
 	}
 
 	/**
@@ -140,8 +141,11 @@ public abstract class Action {
 	 * @return true if the action timeout, false otherwise
 	 */
 	public boolean hasTimeoutReached(){
-		return mStartTime != Time.INVALID_TIME && mTimeoutMs != Time.INVALID_TIME &&
-                (mClock.currentTimeMillis() - mStartTime) >= mTimeoutMs;
+	    if (!mStartTime.isValid() || !mTimeout.isValid()) {
+	        return false;
+        }
+
+		return (mClock.currentTime().sub(mStartTime)).compareTo(mTimeout) == CompareResult.GREATER_THAN.getValue();
 	}
 
 	/**
@@ -192,7 +196,7 @@ public abstract class Action {
 
 	void copyActionProperties(Action action) {
 		copyRequirements(action);
-		mTimeoutMs = action.mTimeoutMs;
+		mTimeout = action.mTimeout;
 	}
 
 	void removed(){
@@ -222,7 +226,7 @@ public abstract class Action {
 
 		if(!mIsInitialized) {
 			mIsInitialized = true;
-			mStartTime = mClock.currentTimeMillis();
+			mStartTime = mClock.currentTime();
 			initialize();
 		}
 

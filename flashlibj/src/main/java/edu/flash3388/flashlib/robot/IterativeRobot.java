@@ -6,9 +6,8 @@ import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
+import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * An extension of {@link RobotBase}. This class provides extended and easier control over robot
@@ -37,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * called for every operation mode that is not disabled mode. The passed parameter is the mode's value, so it
  * is recommended to pay attention to the value.
  * <p>
- * Each iteration of the control loop puts the current thread into sleep for {@value #ITERATION_DELAY_MS} milliseconds.
+ * Each iteration of the control loop puts the current thread into sleep.
  * <p>
  * The control loop which is provided here performs several background operations before execution of user 
  * code:
@@ -59,8 +58,8 @@ import java.util.concurrent.TimeUnit;
  * @since FlashLib 1.0.2
  */
 public abstract class IterativeRobot extends RobotBase {
-	
-	private static final long ITERATION_DELAY_MS = 5;
+
+	private static final Time ITERATION_DELAY = Time.forMillis(5);
 
 	private final Scheduler mScheduler;
 	private final Sleeper mSleeper;
@@ -122,7 +121,7 @@ public abstract class IterativeRobot extends RobotBase {
             periodicMode(currentMode);
 
             try {
-                mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY_MS, TimeUnit.MILLISECONDS);
+                mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY);
             } catch (InterruptedException e) {
                 break;
             }
