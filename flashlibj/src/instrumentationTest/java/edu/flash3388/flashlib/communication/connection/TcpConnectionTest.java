@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 public class TcpConnectionTest {
 
     private static final int PORT = 10000;
+    private static final int PORT_NO_SERVER = 10001;
     private static final int DEFAULT_READ_TIMEOUT = 1000;
     private static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
 
@@ -77,16 +78,24 @@ public class TcpConnectionTest {
         final int CONNECTION_TIMEOUT = 200;
 
         TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT);
-        tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT);
+        try {
+            tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT);
+        } finally {
+            serverConnector.close();
+        }
     }
 
-    @Test(expected = TimeoutException.class)
-    public void connect_clientHasNoClient_throwsTimeoutException() throws Exception {
+    @Test(expected = ConnectionFailedException.class)
+    public void connect_clientHasNoServer_throwsConnectionFailedException() throws Exception {
         final int CONNECTION_TIMEOUT = 200;
 
-        InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT);
+        InetSocketAddress address = new InetSocketAddress(PORT_NO_SERVER);
         TcpClientConnector clientConnector = new TcpClientConnector(address, DEFAULT_READ_TIMEOUT);
-        tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
+        try {
+            tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
+        } finally {
+            clientConnector.close();
+        }
     }
 
     private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTimeout) throws Exception {
@@ -102,9 +111,9 @@ public class TcpConnectionTest {
                 connectionLatch.await();
                 Connection connection = clientConnector.connect(connectionTimeout);
                 try {
-                    tasksLatch.countDown();
                     clientTask.apply(connection);
                 } finally {
+                    tasksLatch.countDown();
                     connection.close();
                 }
 
@@ -115,9 +124,9 @@ public class TcpConnectionTest {
         connectionLatch.countDown();
         Connection connection = serverConnector.connect(connectionTimeout);
         try {
-            tasksLatch.await();
             serverTask.apply(connection);
         } finally {
+            tasksLatch.await();
             connection.close();
         }
 
@@ -135,15 +144,11 @@ public class TcpConnectionTest {
     }
 
     private void tryConnectExpectFailure(Connector connector, int timeout) throws Exception {
+        Connection connection = connector.connect(timeout);
         try {
-            Connection connection = connector.connect(timeout);
-            try {
-                fail("should not have connected");
-            } finally {
-                connection.close();
-            }
+            fail("should not have connected");
         } finally {
-            connector.close();
+            connection.close();
         }
     }
 
