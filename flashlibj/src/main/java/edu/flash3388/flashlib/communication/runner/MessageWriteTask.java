@@ -26,10 +26,10 @@ public class MessageWriteTask implements Runnable {
             try {
                 Message message = mMessagesQueue.take();
                 mMessenger.writeMessage(message);
-            } catch (InterruptedException e) {
-                break;
             } catch (WriteException e) {
                 mLogger.log(Level.SEVERE, "error while writing message", e);
+            } catch (InterruptedException e) {
+                break;
             }
         }
     }

@@ -23,12 +23,13 @@ public class MessageReadTask implements Runnable {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            // TODO: OFFER and READ should timeout/interrupted
             try {
                 Message message = mMessenger.readMessage();
-                mMessagesQueue.offer(message);
+                mMessagesQueue.put(message);
             } catch (ReadException e) {
                 mLogger.log(Level.SEVERE, "error while reading message", e);
+            } catch (InterruptedException e) {
+                break;
             }
         }
     }
