@@ -71,7 +71,7 @@ public class Closer implements Closeable {
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */
-	public <R> R run(IORunnable<R> callable, CloseOption closeOption) throws IOException {
+	public <R> R run(IoRunnable<R> callable, CloseOption closeOption) throws IOException {
 		boolean errorOccurred = false;
 		Throwable throwableThrown = null;
 
@@ -93,7 +93,7 @@ public class Closer implements Closeable {
 	 * Run the IO operation and return the result from it. After operation, whether or not it has failed,
 	 * all saved resources all be closed by calling {@link Closeable#close()}.
 	 * <p>
-	 * Calls {@link #run(IORunnable, CloseOption)} and passes it {@link CloseOption#CLOSE_ALWAYS}.
+	 * Calls {@link #run(IoRunnable, CloseOption)} and passes it {@link CloseOption#CLOSE_ALWAYS}.
 	 *
 	 * @param callable operation callable object.
      * @param <R> return type
@@ -101,7 +101,7 @@ public class Closer implements Closeable {
 	 * @return result of the operation, from the callable call.
 	 * @throws IOException if an exception was thrown by the callable object.
 	 */
-	public <R> R run(IORunnable<R> callable) throws IOException {
+	public <R> R run(IoRunnable<R> callable) throws IOException {
 		return run(callable, CloseOption.CLOSE_ALWAYS);
 	}
 

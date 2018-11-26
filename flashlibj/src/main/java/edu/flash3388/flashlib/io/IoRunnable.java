@@ -11,7 +11,7 @@ import java.io.IOException;
  * @param <R> operation result type
  */
 @FunctionalInterface
-public interface IORunnable<R> {
+public interface IoRunnable<R> {
 
 	/**
 	 * Runs the IO operation.

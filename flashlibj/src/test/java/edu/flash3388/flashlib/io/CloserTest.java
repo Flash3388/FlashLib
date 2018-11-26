@@ -17,7 +17,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        closer.run(mock(IORunnable.class), CloseOption.CLOSE_ALWAYS);
+        closer.run(mock(IoRunnable.class), CloseOption.CLOSE_ALWAYS);
 
         verify(mockCloseable, times(1)).close();
     }
@@ -29,7 +29,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        IORunnable runnable = mockThrowingRunnable();
+        IoRunnable runnable = mockThrowingRunnable();
         try {
             closer.run(runnable, CloseOption.CLOSE_ALWAYS);
             fail("did not throw");
@@ -47,7 +47,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        IORunnable runnable = mockThrowingRunnable();
+        IoRunnable runnable = mockThrowingRunnable();
         try {
             closer.run(runnable, CloseOption.CLOSE_ON_ERROR);
             fail("did not throw");
@@ -65,7 +65,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        closer.run(mock(IORunnable.class), CloseOption.CLOSE_ON_ERROR);
+        closer.run(mock(IoRunnable.class), CloseOption.CLOSE_ON_ERROR);
 
         verify(mockCloseable, times(0)).close();
     }
@@ -77,7 +77,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        closer.run(mock(IORunnable.class), CloseOption.CLOSE_ON_SUCCESS);
+        closer.run(mock(IoRunnable.class), CloseOption.CLOSE_ON_SUCCESS);
 
         verify(mockCloseable, times(1)).close();
     }
@@ -89,7 +89,7 @@ public class CloserTest {
         Closeable mockCloseable = mock(Closeable.class);
         closer.add(mockCloseable);
 
-        IORunnable runnable = mockThrowingRunnable();
+        IoRunnable runnable = mockThrowingRunnable();
         try {
             closer.run(runnable, CloseOption.CLOSE_ON_SUCCESS);
             fail("did not throw");
@@ -107,7 +107,7 @@ public class CloserTest {
         Closeable mockCloseable = mockThrowingCloseable();
         closer.add(mockCloseable);
 
-        IORunnable runnable = mockThrowingRunnable();
+        IoRunnable runnable = mockThrowingRunnable();
         try {
             closer.run(runnable);
             fail("did not throw");
@@ -162,8 +162,8 @@ public class CloserTest {
         assertEquals(1, throwable.getSuppressed().length);
     }
 
-    private IORunnable mockThrowingRunnable() throws IOException {
-        IORunnable mockRunnable = mock(IORunnable.class);
+    private IoRunnable mockThrowingRunnable() throws IOException {
+        IoRunnable mockRunnable = mock(IoRunnable.class);
         when(mockRunnable.run()).thenThrow(new IOException());
         
         return mockRunnable;
