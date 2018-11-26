@@ -23,13 +23,19 @@ public class CommunicationRunner {
     private final Serializer mSerializer;
     private final Logger mLogger;
 
+    private final Consumer<Message> mNewMessagesConsumer;
+    private final Supplier<Optional<Message>> mMessagesToSendSupplier;
+
     private final AtomicReference<Connection> mConnectionReference;
     private final AtomicBoolean mIsTerminated;
 
-    public CommunicationRunner(ExecutorService executorService, Serializer serializer, Logger logger) {
+    public CommunicationRunner(ExecutorService executorService, Serializer serializer, Logger logger, Consumer<Message> newMessageConsumer, Supplier<Optional<Message>> messagesToSendSupplier) {
         mExecutorService = executorService;
         mSerializer = serializer;
         mLogger = logger;
+
+        mNewMessagesConsumer = newMessageConsumer;
+        mMessagesToSendSupplier = messagesToSendSupplier;
 
         mConnectionReference = new AtomicReference<>();
         mIsTerminated = new AtomicBoolean(false);
@@ -43,7 +49,7 @@ public class CommunicationRunner {
         return mConnectionReference.get() != null;
     }
 
-    public synchronized void start(Connection connection, Consumer<Message> newMessageConsumer, Supplier<Optional<Message>> sendMessageSupplier) {
+    public synchronized void start(Connection connection) {
         if (isTerminated()) {
             throw new IllegalStateException("terminated");
         }
@@ -55,8 +61,8 @@ public class CommunicationRunner {
 
         Messenger messenger = new Messenger(connection, mSerializer);
 
-        mExecutorService.execute(new MessageReadTask(messenger, newMessageConsumer, mLogger));
-        mExecutorService.execute(new MessageWriteTask(messenger, sendMessageSupplier, mLogger));
+        mExecutorService.execute(new MessageReadTask(messenger, mNewMessagesConsumer, mLogger));
+        mExecutorService.execute(new MessageWriteTask(messenger, mMessagesToSendSupplier, mLogger));
     }
 
     public synchronized void terminate() {
