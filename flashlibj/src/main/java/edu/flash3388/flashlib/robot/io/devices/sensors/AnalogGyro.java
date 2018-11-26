@@ -201,10 +201,9 @@ public class AnalogGyro implements Gyro {
 	@Override
 	public double getAngle() {
 		long value = mAccumulator.getValue() - (long)(mAccumulator.getCount() * mOffset);
-		
-		double scaledValue = ((value * mInputPort.getMaxVoltage()) / mInputPort.getMaxValue()) /
-				(mInputPort.getSampleRate() * mSensitivity);
-		return scaledValue;
+
+        return ((value * mInputPort.getMaxVoltage()) / mInputPort.getMaxValue()) /
+                (mInputPort.getSampleRate() * mSensitivity);
 	}
 
 	/**
