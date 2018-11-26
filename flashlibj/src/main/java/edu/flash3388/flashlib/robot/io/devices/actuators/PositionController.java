@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
-public interface PositionController {
+import edu.flash3388.flashlib.robot.motion.Stoppable;
+
+public interface PositionController extends Stoppable {
     // TODO: COMPILE A STRONGER CONTRACT FOR THIS INTERFACE: values ranges, and meaning.
 
     /**
@@ -20,5 +22,6 @@ public interface PositionController {
     /**
      * Stops the motion of the controlled component.
      */
+    @Override
     void stop();
 }

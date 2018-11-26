@@ -1,12 +1,14 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
+import edu.flash3388.flashlib.robot.motion.Stoppable;
+
 /**
  * Interface for speed controllers.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface SpeedController {
+public interface SpeedController extends Stoppable {
 
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
@@ -63,6 +65,7 @@ public interface SpeedController {
 	 * <p>
 	 * Default implementation calls {@link #set(double)}, passing it 0.0.
 	 */
+	@Override
 	default void stop(){
 		set(0.0);
 	}
