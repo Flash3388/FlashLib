@@ -4,19 +4,20 @@ import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.communication.message.WriteException;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MessageWriteTask implements Runnable {
 
     private final Messenger mMessenger;
-    private final BlockingQueue<Message> mMessagesQueue;
+    private final Supplier<Optional<Message>> mMessagesSupplier;
     private final Logger mLogger;
 
-    public MessageWriteTask(Messenger messenger, BlockingQueue<Message> messagesQueue, Logger logger) {
+    public MessageWriteTask(Messenger messenger, Supplier<Optional<Message>> messagesSupplier, Logger logger) {
         mMessenger = messenger;
-        mMessagesQueue = messagesQueue;
+        mMessagesSupplier = messagesSupplier;
         mLogger = logger;
     }
 
@@ -24,12 +25,15 @@ public class MessageWriteTask implements Runnable {
     public void run() {
         while (!Thread.interrupted()) {
             try {
-                Message message = mMessagesQueue.take();
+                Optional<Message> optionalMessage = mMessagesSupplier.get();
+                if (!optionalMessage.isPresent()) {
+                    continue;
+                }
+
+                Message message = optionalMessage.get();
                 mMessenger.writeMessage(message);
             } catch (WriteException e) {
                 mLogger.log(Level.SEVERE, "error while writing message", e);
-            } catch (InterruptedException e) {
-                break;
             }
         }
     }

@@ -4,19 +4,19 @@ import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.communication.message.ReadException;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MessageReadTask implements Runnable {
 
     private final Messenger mMessenger;
-    private final BlockingQueue<Message> mMessagesQueue;
+    private final Consumer<Message> mMessagesConsumer;
     private final Logger mLogger;
 
-    public MessageReadTask(Messenger messenger, BlockingQueue<Message> messagesQueue, Logger logger) {
+    public MessageReadTask(Messenger messenger, Consumer<Message> messagesConsumer, Logger logger) {
         mMessenger = messenger;
-        mMessagesQueue = messagesQueue;
+        mMessagesConsumer = messagesConsumer;
         mLogger = logger;
     }
 
@@ -25,11 +25,9 @@ public class MessageReadTask implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 Message message = mMessenger.readMessage();
-                mMessagesQueue.put(message);
+                mMessagesConsumer.accept(message);
             } catch (ReadException e) {
                 mLogger.log(Level.SEVERE, "error while reading message", e);
-            } catch (InterruptedException e) {
-                break;
             }
         }
     }
