@@ -32,7 +32,7 @@ public class Scheduler {
 
 	private final Set<Subsystem> mSubsystems;
 	private final Collection<Action> mActions;
-	private final Collection<Task> mTasks;
+	private final Collection<SchedulerTask> mTasks;
 
 	private SchedulerRunMode mRunMode;
 
@@ -45,7 +45,7 @@ public class Scheduler {
 	}
 
 	// FOR TESTING
-    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<Task> tasks, SchedulerRunMode runMode) {
+    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<SchedulerTask> tasks, SchedulerRunMode runMode) {
         mSubsystems = subsystems;
         mActions = actions;
         mTasks = tasks;
@@ -60,12 +60,8 @@ public class Scheduler {
 		return mRunMode;
 	}
 
-	public void execute(Runnable runnable) {
-		mTasks.add(new Task(runnable, false));
-	}
-
-	public void add(Runnable task) {
-		mTasks.add(new Task(task, true));
+	public void add(SchedulerTask task) {
+		mTasks.add(task);
 	}
 
 	public void add(Action action) {
@@ -78,22 +74,8 @@ public class Scheduler {
 		mActions.add(action);
 	}
 
-	public boolean remove(Runnable runnable) {
-		Task taskToRemove = null;
-
-		for (Task task : mTasks) {
-			if (task.mRunnable.equals(runnable)) {
-				taskToRemove = task;
-				break;
-			}
-		}
-
-		if (taskToRemove != null) {
-			mTasks.remove(taskToRemove);
-			return true;
-		}
-
-		return false;
+	public boolean remove(SchedulerTask task) {
+		return mTasks.remove(task);
 	}
 
 	public void removeAllTasks() {
@@ -139,13 +121,11 @@ public class Scheduler {
 	}
 
 	private void runTasks() {
-		List<Task> tasks = new ArrayList<>(mTasks);
+		List<SchedulerTask> tasks = new ArrayList<>(mTasks);
 
-		for (Task task : tasks) {
-			task.run();
-
-			if (!task.isRepeating()) {
-				mTasks.remove(task);
+		for (SchedulerTask task : tasks) {
+			if (!task.run()) {
+				remove(task);
 			}
 		}
 	}
@@ -180,25 +160,6 @@ public class Scheduler {
 	private void updateRequirementsNoCurrentAction(Action action) {
 		for (Subsystem subsystem : action.getRequirements()) {
 			subsystem.setCurrentAction(null);
-		}
-	}
-
-	/*package*/ static class Task {
-
-		private final Runnable mRunnable;
-		private final boolean mIsRepeating;
-
-		Task(Runnable runnable, boolean isRepeating) {
-			mRunnable = runnable;
-			mIsRepeating = isRepeating;
-		}
-
-		void run() {
-			mRunnable.run();
-		}
-
-		boolean isRepeating() {
-			return mIsRepeating;
 		}
 	}
 }
