@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.logging;
+package edu.flash3388.flashlib.util.logging;
 
 import java.io.IOException;
 import java.nio.file.Files;
