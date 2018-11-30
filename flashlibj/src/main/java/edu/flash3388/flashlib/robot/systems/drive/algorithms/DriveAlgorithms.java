@@ -1,4 +1,8 @@
-package edu.flash3388.flashlib.robot.systems.drive;
+package edu.flash3388.flashlib.robot.systems.drive.algorithms;
+
+import edu.flash3388.flashlib.robot.systems.drive.MecanumDriveSpeed;
+import edu.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
+import edu.flash3388.flashlib.robot.systems.drive.TankDriveSpeed;
 
 public class DriveAlgorithms {
 
@@ -7,17 +11,12 @@ public class DriveAlgorithms {
      * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
      * rotate value is responsible for the robot rotation.
      *
-     * <p>
-     * This method calculates the outputs to the motors and returns them as an array. They array will contain
-     * values for 2 sides in the following order: right, left.
-     * </p>
-     *
      * @param moveValue The value to move forward or backward 1 to -1.
      * @param rotateValue The value to rotate right or left 1 to -1.
      *
-     * @return returns an array of 2 with the motor output values in this order: right, left.
+     * @return returns drive speed for tank
      */
-    public double[] arcadeDrive(double moveValue, double rotateValue){
+    public TankDriveSpeed arcadeDrive(double moveValue, double rotateValue){
         double rSpeed, lSpeed;
 
         if (moveValue > 0.0) {
@@ -38,7 +37,7 @@ public class DriveAlgorithms {
             }
         }
 
-        return new double[] {rSpeed, lSpeed};
+        return new TankDriveSpeed(rSpeed, lSpeed);
     }
 
     /**
@@ -52,29 +51,18 @@ public class DriveAlgorithms {
      * The control algorithm derives from arcade drive.
      * </p>
      *
-     * <p>
-     * This method calculates the outputs to the motors and returns them as an array. They array will contain
-     * values for 4 sides in the following order: front, right, left, back.
-     * </p>
-     *
      * @param y y-axis value of the vector
      * @param x x-axis value of the vector
      * @param rotation rotation value
      *
-     * @return returns an array of 4 with the motor output values in this order: front, right, left, back
+     * @return returns drive speeds for omni drive
      */
-    public double[] vectoredOmniDriveCartesian(double y, double x, double rotation){
-        double right, left, front, rear;
+    public OmniDriveSpeed vectoredOmniDriveCartesian(double y, double x, double rotation){
+        TankDriveSpeed yAxis = arcadeDrive(y, rotation);
+        TankDriveSpeed xAxis = arcadeDrive(x, rotation);
 
-        double[] yAxisValues = arcadeDrive(y, rotation);
-        right = yAxisValues[0];
-        left = yAxisValues[1];
-
-        double[] xAxisValues = arcadeDrive(x, rotation);
-        front = xAxisValues[0];
-        rear = xAxisValues[1];
-
-        return new double[] {front, right, left, rear};
+        // x axis - right is front, left is rear
+        return new OmniDriveSpeed(xAxis.getRight(), yAxis.getRight(), xAxis.getLeft(), yAxis.getLeft());
     }
 
     /**
@@ -85,18 +73,13 @@ public class DriveAlgorithms {
      * from the basic robot drive systems like arcade drive, tank drive, or shopping cart drive require you to
      * turn the front of the robot to travel in another direction.
      *
-     * <p>
-     * This method calculates the outputs to the motors and returns them as an array. They array will contain
-     * values for 4 sides in the following order: front right, front left, rear right, rear left.
-     * </p>
-     *
      * @param magnitude the magnitude of the vector [0...1]
      * @param direction the direction of the vector in degrees [0...360]
      * @param rotation rotation value [-1...1], -1 for left, 1 for right
      *
-     * @return returns an array of 4 with the motor output values in this order: front right, front left, rear right, rear left.
+     * @return returns drive speeds for mecanum
      */
-    public double[] mecanumDrivePolar(double magnitude, double direction, double rotation){
+    public MecanumDriveSpeed mecanumDrivePolar(double magnitude, double direction, double rotation){
 
         double dirInRad = Math.toRadians(direction + 45.0);
         double cosD = Math.cos(dirInRad);
@@ -111,7 +94,7 @@ public class DriveAlgorithms {
 
         normalize(wheelSpeeds);
 
-        return wheelSpeeds;
+        return new MecanumDriveSpeed(wheelSpeeds[0], wheelSpeeds[2], wheelSpeeds[1], wheelSpeeds[3]);
     }
 
     private void normalize(double[] wheelSpeeds) {

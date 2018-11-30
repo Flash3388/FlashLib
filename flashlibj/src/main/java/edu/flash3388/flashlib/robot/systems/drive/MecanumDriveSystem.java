@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot.systems.drive;
 import com.jmath.vectors.Vector2;
 import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
+import edu.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
 public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInterface {
 
@@ -29,14 +30,17 @@ public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInter
         this(frontRightController, rearRightController, frontLeftController, rearLeftController, new DriveAlgorithms());
     }
 
+    public void mecanumDrive(MecanumDriveSpeed driveSpeed) {
+        mFrontRightController.set(driveSpeed.getFrontRight());
+        mFrontLeftController.set(driveSpeed.getFrontLeft());
+        mRearRightController.set(driveSpeed.getRearRight());
+        mRearLeftController.set(driveSpeed.getRearLeft());
+    }
+
     @Override
     public void holonomicPolar(double magnitude, double direction, double rotation) {
-        double[] values = mDriveAlgorithms.mecanumDrivePolar(magnitude, direction, rotation);
-
-        mFrontRightController.set(values[0]);
-        mFrontLeftController.set(values[1]);
-        mRearRightController.set(values[2]);
-        mRearLeftController.set(values[3]);
+        MecanumDriveSpeed driveSpeed = mDriveAlgorithms.mecanumDrivePolar(magnitude, direction, rotation);
+        mecanumDrive(driveSpeed);
     }
 
     @Override

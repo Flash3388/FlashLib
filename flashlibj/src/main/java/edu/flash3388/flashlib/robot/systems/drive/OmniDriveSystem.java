@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.systems.drive;
 
 import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
+import edu.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
 public class OmniDriveSystem extends Subsystem implements HolonomicDriveInterface {
 
@@ -28,23 +29,23 @@ public class OmniDriveSystem extends Subsystem implements HolonomicDriveInterfac
         this(frontController, rightController, leftController, rearController, new DriveAlgorithms());
     }
 
+    public void omniDrive(OmniDriveSpeed driveSpeed) {
+        mFrontController.set(driveSpeed.getFront());
+        mRearController.set(driveSpeed.getRear());
+
+        mRightController.set(driveSpeed.getRight());
+        mLeftController.set(driveSpeed.getLeft());
+    }
+
     @Override
     public void omniDrive(double y, double x) {
-        mFrontController.set(y);
-        mRearController.set(y);
-
-        mRightController.set(x);
-        mLeftController.set(x);
+        omniDrive(new OmniDriveSpeed(y, x, y, x));
     }
 
     @Override
     public void holonomicCartesian(double y, double x, double rotation) {
-        double[] values = mDriveAlgorithms.vectoredOmniDriveCartesian(y, x, rotation);
-
-        mFrontController.set(values[0]);
-        mRightController.set(values[1]);
-        mLeftController.set(values[2]);
-        mRearController.set(values[3]);
+        OmniDriveSpeed driveSpeed = mDriveAlgorithms.vectoredOmniDriveCartesian(y, x, rotation);
+        omniDrive(driveSpeed);
     }
 
     @Override
