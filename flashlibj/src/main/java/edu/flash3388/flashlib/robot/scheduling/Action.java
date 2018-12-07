@@ -147,7 +147,7 @@ public abstract class Action {
 	 * is defined.
 	 * @return true if the action timeout, false otherwise
 	 */
-	public boolean hasTimeoutReached(){
+	public boolean wasTimeoutReached(){
         validateRunning();
 	    if (!mStartTime.isValid() || !mTimeout.isValid()) {
 	        return false;
@@ -198,8 +198,7 @@ public abstract class Action {
 		if(mIsInitialized){
 			if(isCanceled()) {
 				interrupted();
-			}
-			else {
+			} else {
 				end();
 			}
 		}
@@ -211,7 +210,7 @@ public abstract class Action {
 	}
 
 	boolean run(){
-		if(hasTimeoutReached()) {
+		if(wasTimeoutReached()) {
 			cancel();
 		}
 
