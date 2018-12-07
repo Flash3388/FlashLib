@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.systems.drive;
 
-import com.jmath.vectors.Vector2;
 import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
