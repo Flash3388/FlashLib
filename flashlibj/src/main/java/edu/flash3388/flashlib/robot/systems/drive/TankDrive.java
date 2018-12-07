@@ -3,12 +3,23 @@ package edu.flash3388.flashlib.robot.systems.drive;
 import edu.flash3388.flashlib.robot.motion.Movable;
 
 /**
- * Interface for tank drive systems. Extends {@link DriveInterface}.
+ * Interface for tank drive systems. Extends {@link Drive}.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface TankDriveInterface extends DriveInterface, Movable {
+public interface TankDrive extends Drive, Movable {
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A default implementation is provided. It calls {@link #tankDrive(double, double)} and
+     * passes it the speed parameter for both sides.
+     */
+    @Override
+    default void move(double speed) {
+        tankDrive(speed, speed);
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -22,15 +33,8 @@ public interface TankDriveInterface extends DriveInterface, Movable {
 		tankDrive(-speed, speed);
 	}
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * A default implementation is provided. It calls {@link #tankDrive(double, double)} and
-     * passes it the speed parameter for both sides.
-     */
-    @Override
-    default void move(double speed) {
-	    tankDrive(speed, speed);
+	default void tankDrive(TankDriveSpeed driveSpeed) {
+	    tankDrive(driveSpeed.getRight(), driveSpeed.getLeft());
     }
 
     /** Tank drive implements a dual joystick drive. Given right and left speed values, the code sets the values to move

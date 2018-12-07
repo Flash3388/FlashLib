@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
-public class TankDriveSystem extends Subsystem implements TankDriveInterface {
+public class TankDriveSystem extends Subsystem implements TankDrive {
 
     private final SpeedController mRightController;
     private final SpeedController mLeftController;
@@ -22,20 +22,16 @@ public class TankDriveSystem extends Subsystem implements TankDriveInterface {
         this(rightController, leftController, new DriveAlgorithms());
     }
 
-    public void tankDrive(TankDriveSpeed driveSpeed) {
-        tankDrive(driveSpeed.getRight(), driveSpeed.getLeft());
+    @Override
+    public void tankDrive(double right, double left) {
+        mRightController.set(right);
+        mLeftController.set(left);
     }
 
     @Override
     public void arcadeDrive(double moveValue, double rotateValue) {
         TankDriveSpeed driveSpeed = mDriveAlgorithms.arcadeDrive(moveValue, rotateValue);
         tankDrive(driveSpeed);
-    }
-
-    @Override
-    public void tankDrive(double right, double left) {
-        mRightController.set(right);
-        mLeftController.set(left);
     }
 
     @Override

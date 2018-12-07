@@ -4,13 +4,13 @@ public class OmniDriveSpeed {
 
     private final double mFront;
     private final double mRight;
-    private final double mRear;
+    private final double mBack;
     private final double mLeft;
 
-    public OmniDriveSpeed(double front, double right, double rear, double left) {
+    public OmniDriveSpeed(double front, double right, double back, double left) {
         mFront = front;
         mRight = right;
-        mRear = rear;
+        mBack = back;
         mLeft = left;
     }
 
@@ -22,8 +22,8 @@ public class OmniDriveSpeed {
         return mRight;
     }
 
-    public double getRear() {
-        return mRear;
+    public double getBack() {
+        return mBack;
     }
 
     public double getLeft() {

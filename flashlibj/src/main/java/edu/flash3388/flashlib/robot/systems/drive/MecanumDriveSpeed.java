@@ -3,30 +3,30 @@ package edu.flash3388.flashlib.robot.systems.drive;
 public class MecanumDriveSpeed {
 
     private final double mFrontRight;
-    private final double mRearRight;
+    private final double mBackRight;
     private final double mFrontLeft;
-    private final double mRearLeft;
+    private final double mBackLeft;
 
-    public MecanumDriveSpeed(double frontRight, double rearRight, double frontLeft, double rearLeft) {
+    public MecanumDriveSpeed(double frontRight, double backRight, double frontLeft, double backLeft) {
         mFrontRight = frontRight;
-        mRearRight = rearRight;
+        mBackRight = backRight;
         mFrontLeft = frontLeft;
-        mRearLeft = rearLeft;
+        mBackLeft = backLeft;
     }
 
     public double getFrontRight() {
         return mFrontRight;
     }
 
-    public double getRearRight() {
-        return mRearRight;
+    public double getBackRight() {
+        return mBackRight;
     }
 
     public double getFrontLeft() {
         return mFrontLeft;
     }
 
-    public double getRearLeft() {
-        return mRearLeft;
+    public double getBackLeft() {
+        return mBackLeft;
     }
 }

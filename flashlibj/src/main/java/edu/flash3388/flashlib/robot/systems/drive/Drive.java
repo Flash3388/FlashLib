@@ -5,5 +5,5 @@ import edu.flash3388.flashlib.robot.motion.Rotatable;
 /**
  * Interface for drive systems.
  */
-public interface DriveInterface extends Rotatable {
+public interface Drive extends Rotatable {
 }

@@ -5,36 +5,37 @@ import edu.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
 import edu.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
-public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInterface {
+public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
 
     private final SpeedController mFrontRightController;
-    private final SpeedController mRearRightController;
+    private final SpeedController mBackRightController;
     private final SpeedController mFrontLeftController;
-    private final SpeedController mRearLeftController;
+    private final SpeedController mBackLeftController;
 
     private final DriveAlgorithms mDriveAlgorithms;
 
-    public MecanumDriveSystem(SpeedController frontRightController, SpeedController rearRightController,
-                              SpeedController frontLeftController, SpeedController rearLeftController,
+    public MecanumDriveSystem(SpeedController frontRightController, SpeedController backRightController,
+                              SpeedController frontLeftController, SpeedController backLeftController,
                               DriveAlgorithms driveAlgorithms) {
         mFrontRightController = frontRightController;
-        mRearRightController = rearRightController;
+        mBackRightController = backRightController;
         mFrontLeftController = frontLeftController;
-        mRearLeftController = rearLeftController;
+        mBackLeftController = backLeftController;
 
         mDriveAlgorithms = driveAlgorithms;
     }
 
-    public MecanumDriveSystem(SpeedController frontRightController, SpeedController rearRightController,
-                              SpeedController frontLeftController, SpeedController rearLeftController) {
-        this(frontRightController, rearRightController, frontLeftController, rearLeftController, new DriveAlgorithms());
+    public MecanumDriveSystem(SpeedController frontRightController, SpeedController backRightController,
+                              SpeedController frontLeftController, SpeedController backLeftController) {
+        this(frontRightController, backRightController, frontLeftController, backLeftController, new DriveAlgorithms());
     }
 
-    public void mecanumDrive(MecanumDriveSpeed driveSpeed) {
-        mFrontRightController.set(driveSpeed.getFrontRight());
-        mFrontLeftController.set(driveSpeed.getFrontLeft());
-        mRearRightController.set(driveSpeed.getRearRight());
-        mRearLeftController.set(driveSpeed.getRearLeft());
+    @Override
+    public void mecanumDrive(double frontRight, double backRight, double frontLeft, double backLeft) {
+        mFrontRightController.set(frontRight);
+        mBackRightController.set(backRight);
+        mFrontLeftController.set(frontLeft);
+        mBackLeftController.set(backLeft);
     }
 
     @Override
@@ -44,16 +45,10 @@ public class MecanumDriveSystem extends Subsystem implements HolonomicDriveInter
     }
 
     @Override
-    public void holonomicCartesian(double y, double x, double rotation) {
-        Vector2 vector = new Vector2(x, y);
-        holonomicPolar(vector.magnitude(), vector.angle(), rotation);
-    }
-
-    @Override
     public void stop() {
         mFrontRightController.stop();
-        mRearRightController.stop();
+        mBackRightController.stop();
         mFrontLeftController.stop();
-        mRearLeftController.stop();
+        mBackLeftController.stop();
     }
 }

@@ -2,17 +2,17 @@ package edu.flash3388.flashlib.robot.systems.drive.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Subsystem;
-import edu.flash3388.flashlib.robot.systems.drive.TankDriveInterface;
+import edu.flash3388.flashlib.robot.systems.drive.TankDrive;
 
 import java.util.function.DoubleSupplier;
 
 public class ArcadeDriveAction extends Action{
 	
-	private final TankDriveInterface mDriveInterface;
+	private final TankDrive mDriveInterface;
 	private final DoubleSupplier mMoveAxis;
 	private final DoubleSupplier mRotateAxis;
 	
-	public ArcadeDriveAction(TankDriveInterface driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
+	public ArcadeDriveAction(TankDrive driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
 		this.mDriveInterface = driveInterface;
 		this.mRotateAxis = rotate;
 		this.mMoveAxis = move;
