@@ -53,7 +53,7 @@ public interface HolonomicDriveInterface extends DriveInterface, Movable2d {
 	 * @param direction the angle of the vector from the y-axis
 	 * @param rotation the degree of rotation
 	 */
-	default void holonomicPolar(double magnitude, double direction, double rotation){
+	default void holonomicPolar(double magnitude, double direction, double rotation) {
         Vector2 vector = Vector2.polar(magnitude, direction);
 		holonomicCartesian(vector.y(), vector.x(), rotation);
 	}
@@ -70,7 +70,7 @@ public interface HolonomicDriveInterface extends DriveInterface, Movable2d {
 	 * @param y the y-coordinate of the vector
 	 * @param x the x-coordinate of the vector
 	 */
-	default void omniDrive(double y, double x){
+	default void omniDrive(double y, double x) {
 		holonomicCartesian(y, x, 0.0);
 	}
 }

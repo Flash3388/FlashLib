@@ -23,8 +23,7 @@ public class TankDriveSystem extends Subsystem implements TankDriveInterface {
     }
 
     public void tankDrive(TankDriveSpeed driveSpeed) {
-        mRightController.set(driveSpeed.getRight());
-        mLeftController.set(driveSpeed.getLeft());
+        tankDrive(driveSpeed.getRight(), driveSpeed.getLeft());
     }
 
     @Override
@@ -35,7 +34,8 @@ public class TankDriveSystem extends Subsystem implements TankDriveInterface {
 
     @Override
     public void tankDrive(double right, double left) {
-        tankDrive(new TankDriveSpeed(right, left));
+        mRightController.set(right);
+        mLeftController.set(left);
     }
 
     @Override
