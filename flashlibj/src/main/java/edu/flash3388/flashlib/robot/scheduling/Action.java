@@ -75,7 +75,7 @@ public abstract class Action {
     }
 
     public Action() {
-	    this(FlashClock.getClock());
+	    this(FlashClock.get());
     }
 	
 	/**
