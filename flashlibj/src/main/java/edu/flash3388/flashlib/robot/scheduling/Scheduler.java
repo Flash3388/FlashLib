@@ -151,8 +151,11 @@ public class Scheduler {
 	private void updateRequirementsWithNewRunningAction(Action action) {
 		for (Subsystem subsystem : action.getRequirements()) {
 			if (subsystem.hasCurrentAction()) {
-				subsystem.cancelCurrentAction();
+			    Action currentAction = subsystem.getCurrentAction();
+				currentAction.cancel();
+				remove(currentAction);
 			}
+
 			subsystem.setCurrentAction(action);
 		}
 	}

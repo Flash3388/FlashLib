@@ -85,9 +85,10 @@ public class SchedulerTest {
     }
 
     @Test
-    public void add_actionsWithSameRequirements_cancelsThoseActions() throws Exception {
+    public void add_actionsWithSameRequirements_cancelsTheseActions() throws Exception {
         Subsystem subsystem = mockSubsystemWithAction();
         Action actionWithRequirement = mockActionWithRequirement(subsystem);
+        when(subsystem.getCurrentAction()).thenReturn(actionWithRequirement);
 
         Collection<Action> actionCollection = new ArrayList<>();
         actionCollection.add(actionWithRequirement);
@@ -98,7 +99,7 @@ public class SchedulerTest {
 
         scheduler.add(actionWithSameRequirement);
 
-        verify(subsystem, times(1)).cancelCurrentAction();
+        verify(actionWithRequirement, times(1)).cancel();
         assertThat(actionCollection, hasItem(actionWithSameRequirement));
     }
 
