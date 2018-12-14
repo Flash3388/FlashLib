@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.robot.control.Invertable;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.triggers.Trigger;
 
@@ -12,7 +13,7 @@ import java.util.function.BooleanSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class Button extends Trigger implements BooleanSupplier {
+public abstract class Button extends Trigger implements BooleanSupplier, Invertable {
 
 	public abstract boolean isDown();
 

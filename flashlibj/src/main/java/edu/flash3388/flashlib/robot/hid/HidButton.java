@@ -12,10 +12,14 @@ public class HidButton extends Button {
 	private final int mChannel;
 	private final int mButton;
 
+	private boolean mIsInverted;
+
     public HidButton(HidInterface hidInterface, int channel, int button) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mButton = button;
+
+        mIsInverted = false;
     }
 	
 	/**
@@ -23,6 +27,16 @@ public class HidButton extends Button {
 	 */
 	@Override
 	public boolean isDown() {
-		return mHidInterface.getHidButton(mChannel, mButton);
+		return mHidInterface.getHidButton(mChannel, mButton) ^ mIsInverted;
 	}
+
+    @Override
+    public void setInverted(boolean inverted) {
+        mIsInverted = inverted;
+    }
+
+    @Override
+    public boolean isInverted() {
+        return mIsInverted;
+    }
 }

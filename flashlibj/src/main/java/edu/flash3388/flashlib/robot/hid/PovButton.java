@@ -11,13 +11,18 @@ public class PovButton extends Button {
     private final HidInterface mHidInterface;
     private final int mChannel;
     private final int mPov;
+
 	private final PovRange mRange;
+
+	private boolean mIsInverted;
 
 	public PovButton(HidInterface hidInterface, int channel, int pov, PovRange povRange) {
         mHidInterface = hidInterface;
         mChannel = channel;
         mPov = pov;
 		mRange = povRange;
+
+		mIsInverted = false;
 	}
 	
 	/**
@@ -25,6 +30,16 @@ public class PovButton extends Button {
 	 */
 	@Override
 	public boolean isDown() {
-		return mRange.isInRange(mHidInterface.getHidPov(mChannel, mPov));
+		return mRange.isInRange(mHidInterface.getHidPov(mChannel, mPov)) ^ mIsInverted;
 	}
+
+    @Override
+    public void setInverted(boolean inverted) {
+        mIsInverted = inverted;
+    }
+
+    @Override
+    public boolean isInverted() {
+        return mIsInverted;
+    }
 }

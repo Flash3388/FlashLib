@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.io.devices.actuators;
 
+import edu.flash3388.flashlib.robot.control.Invertable;
 import edu.flash3388.flashlib.robot.motion.Direction;
 import edu.flash3388.flashlib.robot.motion.Stoppable;
 
@@ -9,7 +10,7 @@ import edu.flash3388.flashlib.robot.motion.Stoppable;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface SpeedController extends Stoppable {
+public interface SpeedController extends Stoppable, Invertable {
 
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
@@ -56,16 +57,18 @@ public interface SpeedController extends Stoppable {
 	 * @return used percent vbus
 	 */
 	double get();
-	
+
+    /**
+     * Sets the reversing of directions by the motor controller.
+     * @param inverted true to reverse directions, false otherwise
+     */
+    @Override
+    void setInverted(boolean inverted);
+
 	/**
 	 * Gets whether or not the directions of the motor are inverted
 	 * @return true if the motor is inverted, false otherwise.
 	 */
+	@Override
 	boolean isInverted();
-
-	/**
-	 * Sets the reversing of directions by the motor controller.
-	 * @param inverted true to reverse directions, false otherwise
-	 */
-	void setInverted(boolean inverted);
 }

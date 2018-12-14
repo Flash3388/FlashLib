@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.robot.hid;
 
+import edu.flash3388.flashlib.robot.control.Invertable;
+
 import java.util.function.DoubleSupplier;
 
 /**
@@ -8,7 +10,7 @@ import java.util.function.DoubleSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class Axis implements DoubleSupplier {
+public class Axis implements DoubleSupplier, Invertable {
 
 	private final HidInterface mHidInterface;
 	private final int mChannel;
@@ -22,7 +24,7 @@ public class Axis implements DoubleSupplier {
         mChannel = channel;
 		mAxis = axis;
 
-		mValueThreshold = 0;
+		mValueThreshold = 0.0;
 		mIsInverted = false;
 	}
 
@@ -34,10 +36,16 @@ public class Axis implements DoubleSupplier {
         mValueThreshold = valueThreshold;
     }
 
+    public double getValueThreshold() {
+	    return mValueThreshold;
+    }
+
+    @Override
     public void setInverted(boolean isInverted) {
 	    mIsInverted = isInverted;
     }
 
+    @Override
     public boolean isInverted() {
 	    return mIsInverted;
     }
