@@ -38,6 +38,10 @@ public class Axis implements DoubleSupplier {
 	    mIsInverted = isInverted;
     }
 
+    public boolean isInverted() {
+	    return mIsInverted;
+    }
+
 	/**
 	 * Gets the value of the axis.
      *

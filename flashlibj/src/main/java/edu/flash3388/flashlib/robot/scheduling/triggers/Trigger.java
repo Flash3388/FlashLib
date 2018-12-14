@@ -63,6 +63,18 @@ public class Trigger {
         });
     }
 
+    public void toggleWhenActive(Action action) {
+        addStateHandler((state) -> {
+            if (state == TriggerState.ACTIVE) {
+                if (action.isRunning()) {
+                    action.cancel();
+                } else {
+                    action.start();
+                }
+            }
+        });
+    }
+
     public void activate() {
         handleState(TriggerState.ACTIVE);
     }
