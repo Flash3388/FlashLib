@@ -14,19 +14,45 @@ public class Axis implements DoubleSupplier {
 	private final int mChannel;
 	private final int mAxis;
 
+	private double mValueThreshold;
+	private boolean mIsInverted;
+
 	public Axis(HidInterface hidInterface, int channel, int axis) {
         mHidInterface = hidInterface;
         mChannel = channel;
 		mAxis = axis;
+
+		mValueThreshold = 0;
+		mIsInverted = false;
 	}
-	
+
+	public void setValueThreshold(double valueThreshold) {
+	    if (valueThreshold < 0.0 || valueThreshold > 1.0) {
+	        throw new IllegalArgumentException("illegal value threshold [0.0, 1.0] " + valueThreshold);
+        }
+
+        mValueThreshold = valueThreshold;
+    }
+
+    public void setInverted(boolean isInverted) {
+	    mIsInverted = isInverted;
+    }
+
 	/**
 	 * Gets the value of the axis.
      *
 	 * @return the value of the axis
 	 */
 	public double get(){
-		return mHidInterface.getHidAxis(mChannel, mAxis);
+		double raw = mHidInterface.getHidAxis(mChannel, mAxis);
+		if (mIsInverted) {
+		    raw = -raw;
+        }
+        if (Math.abs(raw) < mValueThreshold) {
+            raw = 0.0;
+        }
+
+        return raw;
 	}
 
     @Override
