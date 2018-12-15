@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class ActionGroupTest {
@@ -24,7 +24,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunningBySupplier(isFirstActionRunning));
         actions.add(mockActionNotRunning());
 
-        ActionGroup actionGroup = new ActionGroup(ActionGroup.ExecutionOrder.SEQUENTIAL, actions);
+        ActionGroup actionGroup = new ActionGroup(ExecutionOrder.SEQUENTIAL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();
@@ -51,7 +51,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunning());
         actions.add(mockActionRunning());
 
-        ActionGroup actionGroup = new ActionGroup(ActionGroup.ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(ExecutionOrder.PARALLEL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();

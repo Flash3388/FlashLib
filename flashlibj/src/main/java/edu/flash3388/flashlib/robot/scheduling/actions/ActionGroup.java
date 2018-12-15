@@ -16,23 +16,6 @@ import java.util.*;
  * @since FlashLib 1.0.0
  */
 public class ActionGroup extends Action {
-
-	public enum ExecutionOrder {
-		SEQUENTIAL {
-            @Override
-            protected boolean canStartNextAction(ActionGroup actionGroup) {
-                return actionGroup.mCurrentlyRunningActions.isEmpty();
-            }
-        },
-		PARALLEL {
-            @Override
-            protected boolean canStartNextAction(ActionGroup actionGroup) {
-                return true;
-            }
-        };
-
-		protected abstract boolean canStartNextAction(ActionGroup actionGroup);
-	}
 	
 	private final Collection<Action> mActions;
 	private final ExecutionOrder mExecutionOrder;
@@ -71,13 +54,23 @@ public class ActionGroup extends Action {
 	/**
 	 * Adds an array of scheduling to run.
 	 * 
-	 * @param actions action to run
+	 * @param actions actions to run
 	 * @return this instance
 	 */
-	public ActionGroup add(Collection<Action> actions){
-		mActions.addAll(actions);
-		return this;
+	public ActionGroup add(Action... actions){
+		return add(Arrays.asList(actions));
 	}
+
+    /**
+     * Adds an array of scheduling to run.
+     *
+     * @param actions action to run
+     * @return this instance
+     */
+    public ActionGroup add(Collection<Action> actions){
+        mActions.addAll(actions);
+        return this;
+    }
 
 	/**
 	 * Adds an empty action to run for a given time of milliseconds.
@@ -91,6 +84,10 @@ public class ActionGroup extends Action {
 
 		return add(action);
 	}
+
+	/*package*/ boolean areAnyActionsRunning() {
+	    return !mCurrentlyRunningActions.isEmpty();
+    }
 	
 	@Override
 	protected final void initialize(){
