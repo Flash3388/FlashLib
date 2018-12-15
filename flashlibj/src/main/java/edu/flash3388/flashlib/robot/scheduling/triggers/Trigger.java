@@ -1,6 +1,10 @@
 package edu.flash3388.flashlib.robot.scheduling.triggers;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.triggers.handlers.CancelOnState;
+import edu.flash3388.flashlib.robot.scheduling.triggers.handlers.RunOnState;
+import edu.flash3388.flashlib.robot.scheduling.triggers.handlers.StartOnState;
+import edu.flash3388.flashlib.robot.scheduling.triggers.handlers.ToggleOnState;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,62 +21,34 @@ public class Trigger {
         mTriggerStateHandlers = triggerStateHandlers;
     }
     
-    public void addStateHandler(TriggerStateHandler handler) {
+    public Trigger addStateHandler(TriggerStateHandler handler) {
         mTriggerStateHandlers.add(handler);
+
+        return this;
     }
 
-    public void whenActive(Action action) {
-        addStateHandler((state)-> {
-            if (state == TriggerState.ACTIVE) {
-                action.start();
-            }
-        });
+    public Trigger whenActive(Action action) {
+        return addStateHandler(new StartOnState(TriggerState.ACTIVE, action));
     }
 
-    public void cancelWhenActive(Action action) {
-        addStateHandler((state)-> {
-            if (state == TriggerState.ACTIVE) {
-                action.cancel();
-            }
-        });
+    public Trigger cancelWhenActive(Action action) {
+        return addStateHandler(new CancelOnState(TriggerState.ACTIVE, action));
     }
 
-    public void whileActive(Action action) {
-        addStateHandler((state)-> {
-            if (state == TriggerState.ACTIVE) {
-                action.start();
-            } else {
-                action.cancel();
-            }
-        });
+    public Trigger toggleWhenActive(Action action) {
+        return addStateHandler(new ToggleOnState(TriggerState.ACTIVE, action));
     }
 
-    public void whenInactive(Action action) {
-        addStateHandler((state)-> {
-            if (state == TriggerState.INACTIVE) {
-                action.start();
-            }
-        });
+    public Trigger whileActive(Action action) {
+        return addStateHandler(new RunOnState(TriggerState.ACTIVE, action));
     }
 
-    public void cancelWhenInactive(Action action) {
-        addStateHandler((state)-> {
-            if (state == TriggerState.INACTIVE) {
-                action.cancel();
-            }
-        });
+    public Trigger whenInactive(Action action) {
+        return addStateHandler(new StartOnState(TriggerState.INACTIVE, action));
     }
 
-    public void toggleWhenActive(Action action) {
-        addStateHandler((state) -> {
-            if (state == TriggerState.ACTIVE) {
-                if (action.isRunning()) {
-                    action.cancel();
-                } else {
-                    action.start();
-                }
-            }
-        });
+    public Trigger cancelWhenInactive(Action action) {
+        return addStateHandler(new CancelOnState(TriggerState.INACTIVE, action));
     }
 
     public void activate() {
