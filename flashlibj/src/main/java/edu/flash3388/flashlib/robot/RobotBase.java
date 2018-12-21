@@ -33,7 +33,7 @@ public abstract class RobotBase implements RobotInterface {
         try {
             robotInit();
         } catch (RobotInitializationException | RuntimeException e) {
-            stop();
+            freeResources();
             throw e;
         }
 	}
@@ -46,12 +46,16 @@ public abstract class RobotBase implements RobotInterface {
 		try {
             robotShutdown();
         } finally {
-            mResourceHolder.freeAll();
-
-            RobotResources.CLOCK.clear();
-            RobotResources.SCHEDULER.clear();
+            freeResources();
         }
 	}
+
+	private void freeResources() {
+        mResourceHolder.freeAll();
+
+        RobotResources.CLOCK.clear();
+        RobotResources.SCHEDULER.clear();
+    }
 	
 	//--------------------------------------------------------------------
 	//----------------------Implementable---------------------------------
