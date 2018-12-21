@@ -45,6 +45,9 @@ public abstract class RobotBase implements RobotInterface {
 	final void stop() {
 		robotShutdown();
 		mResourceHolder.freeAll();
+
+		RobotResources.CLOCK.clear();
+		RobotResources.SCHEDULER.clear();
 	}
 	
 	//--------------------------------------------------------------------

@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
+import edu.flash3388.flashlib.robot.RobotResources;
+
 /**
  * Subsystem is the base for robot systems. When defining a class for a system on a robot, extend this class. 
  * Doing so, allows operation of the system with FlashLib's scheduling system. 
@@ -37,7 +39,7 @@ public abstract class Subsystem{
 	 * called, passing it this object.
 	 */
 	protected Subsystem(){
-		this(FlashScheduler.get());
+		this(RobotResources.SCHEDULER.get());
 	}
 	
 	/**
