@@ -1,6 +1,9 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
+import edu.flash3388.flashlib.robot.RobotResources;
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 
 import java.util.*;
@@ -33,6 +36,12 @@ public class ActionGroup extends Action {
 	}
 
 	public ActionGroup(ExecutionOrder executionOrder, Collection<Action> actions) {
+	    this(RobotResources.SCHEDULER.get(), RobotResources.CLOCK.get(), executionOrder, actions);
+    }
+
+	/* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions) {
+	    super(scheduler, clock, Time.INVALID);
+
 		mExecutionOrder = executionOrder;
 		mActions = actions;
 

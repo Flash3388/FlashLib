@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.robot.scheduling.actions;
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.JavaMillisClock;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -24,7 +26,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunningBySupplier(isFirstActionRunning));
         actions.add(mockActionNotRunning());
 
-        ActionGroup actionGroup = new ActionGroup(ExecutionOrder.SEQUENTIAL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.SEQUENTIAL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();
@@ -51,7 +53,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunning());
         actions.add(mockActionRunning());
 
-        ActionGroup actionGroup = new ActionGroup(ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();

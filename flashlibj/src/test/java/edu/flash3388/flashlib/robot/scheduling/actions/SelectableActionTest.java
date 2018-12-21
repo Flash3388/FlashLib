@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.JavaMillisClock;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class SelectableActionTest {
 
         IntSupplier supplier = ()-> 0;
 
-        SelectableAction selectableAction = new SelectableAction(supplier, actions);
+        SelectableAction selectableAction = new SelectableAction(new Scheduler(), new JavaMillisClock(), supplier, actions);
         selectableAction.initialize();
 
         verify(actions.get(0), times(1)).start();
@@ -41,7 +43,7 @@ public class SelectableActionTest {
 
         IntSupplier supplier = ()-> 0;
 
-        SelectableAction selectableAction = new SelectableAction(supplier, actions);
+        SelectableAction selectableAction = new SelectableAction(new Scheduler(), new JavaMillisClock(), supplier, actions);
         selectableAction.initialize();
 
         Action runningAction = actions.get(0);
@@ -59,7 +61,7 @@ public class SelectableActionTest {
 
         IntSupplier supplier = ()-> 0;
 
-        SelectableAction selectableAction = new SelectableAction(supplier, actions);
+        SelectableAction selectableAction = new SelectableAction(new Scheduler(), new JavaMillisClock(), supplier, actions);
         selectableAction.initialize();
 
         Action runningAction = actions.get(0);
@@ -77,7 +79,7 @@ public class SelectableActionTest {
 
         IntSupplier supplier = ()-> 0;
 
-        SelectableAction selectableAction = new SelectableAction(supplier, actions);
+        SelectableAction selectableAction = new SelectableAction(new Scheduler(), new JavaMillisClock(), supplier, actions);
         selectableAction.initialize();
 
         Action runningAction = actions.get(0);

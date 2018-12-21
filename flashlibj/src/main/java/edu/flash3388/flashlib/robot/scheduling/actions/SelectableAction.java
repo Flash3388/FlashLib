@@ -1,6 +1,10 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
+import edu.flash3388.flashlib.robot.RobotResources;
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.Time;
 
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -25,9 +29,15 @@ public class SelectableAction extends Action {
 	 * @param actions a list of scheduling to select from
 	 */
 	public SelectableAction(IntSupplier selectionSupplier, List<Action> actions){
-		mSelectionSupplier = selectionSupplier;
-		mActions = actions;
+		this(RobotResources.SCHEDULER.get(), RobotResources.CLOCK.get(), selectionSupplier, actions);
 	}
+
+    /* package */ SelectableAction(Scheduler scheduler, Clock clock, IntSupplier selectionSupplier, List<Action> actions){
+	    super(scheduler, clock, Time.INVALID);
+
+        mSelectionSupplier = selectionSupplier;
+        mActions = actions;
+    }
 
 	/**
 	 * Adds a new action to the action array.

@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.JavaMillisClock;
 import org.junit.Test;
 
 import java.util.function.BooleanSupplier;
@@ -17,7 +19,7 @@ public class ConditionalActionTest {
 
         BooleanSupplier supplier = ()-> true;
 
-        ConditionalAction conditionalAction = new ConditionalAction(supplier, actionTrue, actionFalse);
+        ConditionalAction conditionalAction = new ConditionalAction(new Scheduler(), new JavaMillisClock(), supplier, actionTrue, actionFalse);
         conditionalAction.initialize();
 
         verify(actionTrue, times(1)).start();
@@ -31,7 +33,7 @@ public class ConditionalActionTest {
 
         BooleanSupplier supplier = ()-> false;
 
-        ConditionalAction conditionalAction = new ConditionalAction(supplier, actionTrue, actionFalse);
+        ConditionalAction conditionalAction = new ConditionalAction(new Scheduler(), new JavaMillisClock(), supplier, actionTrue, actionFalse);
         conditionalAction.initialize();
 
         verify(actionTrue, times(0)).start();
@@ -45,7 +47,7 @@ public class ConditionalActionTest {
 
         BooleanSupplier supplier = ()-> true;
 
-        ConditionalAction conditionalAction = new ConditionalAction(supplier, actionTrue, actionFalse);
+        ConditionalAction conditionalAction = new ConditionalAction(new Scheduler(), new JavaMillisClock(), supplier, actionTrue, actionFalse);
         conditionalAction.initialize();
 
         Action runningAction = actionTrue;
@@ -61,7 +63,7 @@ public class ConditionalActionTest {
 
         BooleanSupplier supplier = ()-> true;
 
-        ConditionalAction conditionalAction = new ConditionalAction(supplier, actionTrue, actionFalse);
+        ConditionalAction conditionalAction = new ConditionalAction(new Scheduler(), new JavaMillisClock(), supplier, actionTrue, actionFalse);
         conditionalAction.initialize();
 
         Action runningAction = actionTrue;
@@ -77,7 +79,7 @@ public class ConditionalActionTest {
 
         BooleanSupplier supplier = ()-> true;
 
-        ConditionalAction conditionalAction = new ConditionalAction(supplier, actionTrue, actionFalse);
+        ConditionalAction conditionalAction = new ConditionalAction(new Scheduler(), new JavaMillisClock(), supplier, actionTrue, actionFalse);
         conditionalAction.initialize();
 
         Action runningAction = actionTrue;

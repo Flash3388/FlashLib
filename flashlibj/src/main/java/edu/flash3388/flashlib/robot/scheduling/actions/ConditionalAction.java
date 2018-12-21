@@ -1,6 +1,10 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
+import edu.flash3388.flashlib.robot.RobotResources;
 import edu.flash3388.flashlib.robot.scheduling.Action;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.Time;
 
 import java.util.function.BooleanSupplier;
 
@@ -20,10 +24,16 @@ public class ConditionalAction extends Action {
 	private Action mActionRunning;
 
 	public ConditionalAction(BooleanSupplier condition, Action runOnTrue, Action runOnFalse){
-		mCondition = condition;
-		mActionRunOnTrue = runOnTrue;
-		mActionRunOnFalse = runOnFalse;
+		this(RobotResources.SCHEDULER.get(), RobotResources.CLOCK.get(), condition, runOnTrue, runOnFalse);
 	}
+
+    /* package */ ConditionalAction(Scheduler scheduler, Clock clock, BooleanSupplier condition, Action runOnTrue, Action runOnFalse){
+	    super(scheduler, clock, Time.INVALID);
+
+        mCondition = condition;
+        mActionRunOnTrue = runOnTrue;
+        mActionRunOnFalse = runOnFalse;
+    }
 
 	@Override
 	protected final void initialize() {
