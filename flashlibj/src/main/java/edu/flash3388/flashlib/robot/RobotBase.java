@@ -30,6 +30,9 @@ public abstract class RobotBase implements RobotInterface {
 	final void initialize() throws RobotInitializationException {
 		//setting the JVM thread priority for this thread. Should be highest possible.
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+
+		registerResources(RobotResources.CLOCK, RobotResources.SCHEDULER);
+
         try {
             robotInit();
         } catch (RobotInitializationException | RuntimeException e) {
@@ -52,9 +55,6 @@ public abstract class RobotBase implements RobotInterface {
 
 	private void freeResources() {
         mResourceHolder.freeAll();
-
-        RobotResources.CLOCK.clear();
-        RobotResources.SCHEDULER.clear();
     }
 	
 	//--------------------------------------------------------------------

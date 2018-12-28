@@ -1,11 +1,12 @@
 package edu.flash3388.flashlib.util;
 
 import com.beans.Property;
+import edu.flash3388.flashlib.util.resources.Resource;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Singleton<T> implements Property<T> {
+public class Singleton<T> implements Property<T>, Resource {
 
     private final AtomicReference<T> mInstanceReference;
 
@@ -33,7 +34,8 @@ public class Singleton<T> implements Property<T> {
         mInstanceReference.set(value);
     }
 
-    public void clear() {
+    @Override
+    public void free() {
         mInstanceReference.set(null);
     }
 }
