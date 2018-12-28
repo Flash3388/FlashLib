@@ -4,13 +4,34 @@ import edu.flash3388.flashlib.util.resources.Resource;
 import edu.flash3388.flashlib.util.resources.ResourceHolder;
 
 /**
- * RobotBase provides the base for robots. It contains the robot's main method which should be called when 
- * starting the robot software. When the robot is started, the user implementation of this class is initialized,
- * robot and FlashLib systems are initialized and user robot code is then started by calling {@link #robotMain()}.
- * When the JVM enters stop, this class uses a stop hook to perform ordered robot stop and will
- * allow custom user stop by calling {@link #robotShutdown()}.
+ * <p>
+ *     The base class for robot main classes.
+ * </p>
+ * <p>
+ *     Inheriting robot classes need to implement the following methods:
+ *     <ul>
+ *         <li>{@link #robotInit()}: called when the robot is initialized.
+ *         Should be used to initialize robot components</li>
+ *         <li>{@link #robotMain()}: the robot main method. Called after initialization,
+ *         and should implement the robot logic.</li>
+ *         <li>{@link #robotShutdown()}: called after {@link #robotMain()} is finished. Used
+ *         for freeing resources and components initialized in {@link #robotInit()}.</li>
+ *     </ul>
+ * </p>
+ * <p>
+ *     Use {@link #registerResources(Resource...)} to register {@link Resource}s to be
+ *     freed automatically after {@link #robotShutdown()}.
+ * </p>
+ * <p>
+ *     {@link #robotInit()} can throw {@link RobotInitializationException} if an error
+ *     has occurred while initializing the robot. This will leave to a shutdown of the robot.
+ *     If an exception is thrown from {@link #robotInit()}, all resources registered using
+ *     {@link #registerResources(Resource...)} are freed.
+ * </p>
+ * <p>
+ *     If {@link #robotMain()} throws an exception, {@link #robotShutdown()} is called.
+ * </p>
  *
- * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public abstract class RobotBase implements RobotInterface {
@@ -21,6 +42,17 @@ public abstract class RobotBase implements RobotInterface {
 	    mResourceHolder = ResourceHolder.empty();
 	}
 
+    /**
+     * <p>
+     *     Registers {@link Resource}s to be freed after the robot has finished running.
+     * </p>
+     * <p>
+     *     Resource freeing will occur after {@link #robotShutdown()}, or
+     *     if {@link #robotInit()} throws an exception.
+     * </p>
+     *
+     * @param resources resources to register.
+     */
 	public final void registerResources(Resource... resources) {
 	    for (Resource resource : resources) {
 	        mResourceHolder.add(resource);
@@ -76,7 +108,7 @@ public abstract class RobotBase implements RobotInterface {
 
 	/**
 	 * Called when the robot finishes running, allowing to perform custom stop operations. Should be used
-	 * to free robot systems.
+	 * to free robot components.
 	 */
 	protected abstract void robotShutdown();
 }
