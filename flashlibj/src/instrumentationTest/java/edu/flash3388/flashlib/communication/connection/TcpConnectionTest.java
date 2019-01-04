@@ -3,13 +3,12 @@ package edu.flash3388.flashlib.communication.connection;
 import edu.flash3388.flashlib.communication.connection.socket.TcpClientConnector;
 import edu.flash3388.flashlib.communication.connection.socket.TcpServerConnector;
 import edu.flash3388.flashlib.io.Closer;
-import edu.flash3388.flashlib.util.concurrent.ExecutorTerminator;
+import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.EOFException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.*;
@@ -33,7 +32,7 @@ public class TcpConnectionTest {
         mCloser = Closer.empty();
 
         mExecutorService = Executors.newSingleThreadExecutor();
-        mCloser.add(new ExecutorTerminator(mExecutorService));
+        mCloser.add(new ExecutorCloser(mExecutorService, shutdownTime));
 
         mServerSocket = new ServerSocket(PORT);
         mCloser.add(mServerSocket);

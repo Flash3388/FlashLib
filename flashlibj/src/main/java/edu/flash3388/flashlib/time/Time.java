@@ -17,12 +17,20 @@ public class Time implements Comparable<Time> {
         mUnit = unit;
     }
 
-    public static Time millis(long timeMs) {
+    public static Time milliseconds(long timeMs) {
         return new Time(timeMs, TimeUnit.MILLISECONDS);
+    }
+
+    public static Time seconds(long timeSeconds) {
+        return new Time(timeSeconds, TimeUnit.SECONDS);
     }
 
     public long getValue() {
         return mValue;
+    }
+
+    public TimeUnit getUnit() {
+        return mUnit;
     }
 
     public Time getAsUnit(TimeUnit newTimeUnit) {

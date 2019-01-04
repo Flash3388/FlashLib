@@ -5,7 +5,7 @@ import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
-import edu.flash3388.flashlib.util.concurrent.ExecutorTerminator;
+import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class IterativeRobotTest {
         mCloser = Closer.empty();
 
         mExecutorService = Executors.newSingleThreadExecutor();
-        mCloser.add(new ExecutorTerminator(mExecutorService));
+        mCloser.add(new ExecutorCloser(mExecutorService, shutdownTime));
 
         mScheduler = mock(Scheduler.class);
         mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mock(Sleeper.class)));

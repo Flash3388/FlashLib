@@ -7,7 +7,7 @@ import edu.flash3388.flashlib.communication.connection.socket.TcpServerConnector
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.io.serialization.JavaObjectSerializer;
 import edu.flash3388.flashlib.io.serialization.Serializer;
-import edu.flash3388.flashlib.util.concurrent.ExecutorTerminator;
+import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,7 +110,7 @@ public class JavaSerializedMessageTransferTest {
 
         private void connectClientAndSocket() throws Exception {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            mCloser.add(new ExecutorTerminator(executorService));
+            mCloser.add(new ExecutorCloser(executorService, shutdownTime));
 
             TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), READ_TIMEOUT);
             mCloser.add(clientConnector);

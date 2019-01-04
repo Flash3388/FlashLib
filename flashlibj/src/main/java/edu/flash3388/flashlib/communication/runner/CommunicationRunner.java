@@ -5,7 +5,7 @@ import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.io.serialization.Serializer;
-import edu.flash3388.flashlib.util.concurrent.ExecutorTerminator;
+import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -79,7 +79,7 @@ public class CommunicationRunner {
             Connection connection = mConnectionReference.getAndSet(null);
             closer.add(connection);
 
-            closer.add(new ExecutorTerminator(mExecutorService));
+            closer.add(new ExecutorCloser(mExecutorService, shutdownTime));
 
             closer.close();
         } catch (IOException e) {

@@ -55,9 +55,9 @@ public class ActionTest {
 
     @Test
     public void hasTimeoutReached_timeoutWasReached_returnsTrue() throws Exception {
-        final Time TIMEOUT = Time.millis(1000);
-        final Time START_TIME = Time.millis(500);
-        final Time CLOCK_TIME = Time.millis(2000);
+        final Time TIMEOUT = Time.milliseconds(1000);
+        final Time START_TIME = Time.milliseconds(500);
+        final Time CLOCK_TIME = Time.milliseconds(2000);
 
         mAction.setTimeout(TIMEOUT);
         when(mClock.currentTime()).thenReturn(START_TIME);
@@ -72,9 +72,9 @@ public class ActionTest {
 
     @Test
     public void hasTimeoutReached_timeoutWasNotReached_returnsFalse() throws Exception {
-        final Time TIMEOUT = Time.millis(1000);
-        final Time START_TIME = Time.millis(500);
-        final Time CLOCK_TIME = Time.millis(500);
+        final Time TIMEOUT = Time.milliseconds(1000);
+        final Time START_TIME = Time.milliseconds(500);
+        final Time CLOCK_TIME = Time.milliseconds(500);
 
         when(mClock.currentTime()).thenReturn(START_TIME);
         mAction.setTimeout(TIMEOUT);
