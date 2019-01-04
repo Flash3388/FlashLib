@@ -11,6 +11,5 @@ public class RobotInitializationException extends Exception {
     }
 
     public RobotInitializationException() {
-
     }
 }

@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
 
 /**
- * An extension of {@link RobotBase}. This class provides extended and easier control over robot
+ * An extension of {@link Robot}. This class provides extended and easier control over robot
  * operation by providing a control loop which calls user methods depending on the operation mode.
  * <p>
  * The control loop divides each operation mode into two types
@@ -57,7 +57,7 @@ import edu.flash3388.flashlib.util.concurrent.Sleeper;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class IterativeRobot extends RobotBase {
+public abstract class IterativeRobot extends Robot {
 
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 
