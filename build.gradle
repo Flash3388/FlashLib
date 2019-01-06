@@ -1,3 +1,4 @@
+apply plugin: 'maven'
 
 allprojects {
     group = 'edu.flash3388.flashlib'
@@ -16,6 +17,17 @@ subprojects {
     }
 }
 
-task clean(type: Delete){
-    delete rootProject.buildDir
+subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
+
+task allFlashlib(type: Jar, dependsOn: subprojects.assemble) {
+    baseName = 'flashlib'
+    destinationDir = rootProject.buildDir
+
+    from files(subprojects.collect {
+        it.sourceSets.main.output
+    })
+}
+
+artifacts {
+    archives allFlashlib
 }
