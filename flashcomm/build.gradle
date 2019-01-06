@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply from: rootProject.file('instrumentation-test.gradle')
+apply from: rootProject.file('java-library.gradle')
 
 
 dependencies {
@@ -11,25 +12,4 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.7.22'
     testCompile group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0'
-}
-
-jar {
-    baseName 'flashcomm'
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    baseName 'flashcomm'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    baseName 'flashcomm'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
 }
