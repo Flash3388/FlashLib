@@ -1,0 +1,78 @@
+package edu.flash3388.flashlib.cam.jpeg.server;
+
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import edu.flash3388.flashlib.cam.Camera;
+import edu.flash3388.flashlib.cam.jpeg.JpegCamera;
+import edu.flash3388.flashlib.cam.jpeg.JpegImage;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.time.Time;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.ref.WeakReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class MjpegServerStreamHandler implements HttpHandler {
+
+    private static final String BOUNDARY = "--boundary";
+    private static final String HEADER_FORMAT = String.format("\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n", BOUNDARY);
+
+    private final WeakReference<JpegCamera> mCameraReference;
+    private final Clock mClock;
+    private final Logger mLogger;
+
+    public MjpegServerStreamHandler(JpegCamera camera, Clock clock, Logger logger) {
+        mCameraReference = new WeakReference<>(camera);
+        mClock = clock;
+        mLogger = logger;
+    }
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+        Headers h = httpExchange.getResponseHeaders();
+        h.set("Cache-Control", "no-cache, private");
+        h.set("Content-Type", "multipart/x-mixed-replace;boundary=" + BOUNDARY);
+        httpExchange.sendResponseHeaders(200, 0);
+
+        OutputStream outputStream = httpExchange.getResponseBody();
+        try {
+            streamImages(outputStream);
+        } finally {
+            outputStream.close();
+        }
+    }
+
+    private void streamImages(OutputStream outputStream) throws IOException {
+        while (!Thread.interrupted()) {
+            try {
+                JpegCamera camera = mCameraReference.get();
+                if (camera == null) {
+                    mLogger.log(Level.INFO, "Camera was collected by gc.");
+                    return;
+                }
+
+                Time startTime = mClock.currentTime();
+
+                JpegImage image = camera.capture();
+                byte[] imageBytes = image.toByteArray();
+
+                outputStream.write(String.format(HEADER_FORMAT, imageBytes.length).getBytes());
+                outputStream.write(imageBytes);
+
+                Time timeTaken = mClock.currentTime().sub(startTime);
+                long sleepMillis = timeTaken.getAsMillis() - (1000 / camera.getFps());
+
+                if (sleepMillis > 0) {
+                    Thread.sleep(sleepMillis);
+                }
+            } catch (InterruptedException e) {
+                break;
+            } catch (IOException e) {
+                mLogger.log(Level.SEVERE, "Error in stream handler", e);
+            }
+        }
+    }
+}

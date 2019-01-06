@@ -25,6 +25,10 @@ public class Time implements Comparable<Time> {
         return new Time(timeSeconds, TimeUnit.SECONDS);
     }
 
+    public static Time minutes(long timeMinutes) {
+        return new Time(timeMinutes, TimeUnit.MINUTES);
+    }
+
     public long getValue() {
         return mValue;
     }

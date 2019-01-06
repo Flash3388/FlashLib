@@ -1,5 +1,6 @@
 rootProject.name = 'flashlib'
 
 include 'flashlibj'
-include 'flashcomm'
 include 'flashutil'
+include 'flashcomm'
+include 'flashvision'

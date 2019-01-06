@@ -18,7 +18,7 @@ public class ExecutorCloser implements Closeable {
     }
 
     public ExecutorCloser(ExecutorService executorService) {
-        this(executorService, Time.seconds(DEFAULT_SHUTDOWN_WAIT_MINUTES));
+        this(executorService, Time.minutes(DEFAULT_SHUTDOWN_WAIT_MINUTES));
     }
 
     @Override
