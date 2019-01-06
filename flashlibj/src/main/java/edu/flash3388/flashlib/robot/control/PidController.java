@@ -65,55 +65,6 @@ public class PidController {
 	}
 
 	/**
-	 * Calculates the output to the system to compensate for the error.
-	 *
-     * @param processVariable the process variable of the system.
-     * @param setPoint the desired set point.
-     *
-	 * @return the compensation value from the PID loop calculation
-	 */
-	public double calculate(double processVariable, double setPoint){
-		if(mSetPointRange != 0) {
-			processVariable = Mathf.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
-		}
-
-		double error = setPoint - processVariable;
-		
-		double pOut = mKp.getAsDouble() * error;
-		double fOut = mKf.getAsDouble() * setPoint;
-		
-		if(mIsFirstRun){
-			mIsFirstRun = false;
-			mLastOutput = pOut + fOut;
-			mLastProcessVariable = processVariable;
-		}
-		
-		double iOut = mKi.getAsDouble() * mTotalError;
-		double dOut = -mKd.getAsDouble() * (processVariable - mLastProcessVariable);
-		
-		double output = pOut + iOut + dOut + fOut;
-		
-		mTotalError += error;
-		
-		if(mMinimumOutput != mMaximumOutput && !Mathf.constrained(output, mMinimumOutput, mMaximumOutput)) {
-			mTotalError = error;
-		}
-		
-		if(mOutRampRate != 0 && !Mathf.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
-			mTotalError = error;
-			output = Mathf.constrain(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate);
-		}
-		
-		if(mMinimumOutput != mMaximumOutput) {
-			output = Mathf.constrain(output, mMinimumOutput, mMaximumOutput);
-		}
-		
-		mLastOutput = output;
-		mLastProcessVariable = processVariable;
-
-		return output;
-	}
-	/**
 	 * Resets the controller. This erases the I term buildup, and removes 
 	 * D gain on the next loop.
 	 */
@@ -171,6 +122,7 @@ public class PidController {
 	public void setSetpointRange(double range){
 		mSetPointRange = range;
 	}
+
 	/**
 	 * Gets the maximum output of the loop.
 	 * @return the maximum output
@@ -178,6 +130,7 @@ public class PidController {
 	public double getMaximumOutput(){
 		return mMaximumOutput;
 	}
+
 	/**
 	 * Gets the minimum output of the loop.
 	 * @return the minimum output
@@ -192,19 +145,70 @@ public class PidController {
 	 * @param max maximum output
 	 */
 	public void setOutputLimit(double min, double max){
-		if(max < min)
-			throw new IllegalArgumentException("The min value cannot be bigger than the max");
+		if(max < min) {
+            throw new IllegalArgumentException("The min value cannot be bigger than the max");
+        }
 
 		mMinimumOutput = min;
 		mMaximumOutput = max;
 	}
+
 	/**
 	 * Sets the output limit of the loop. The maximum output will be equal to the given value, while the minimum output
 	 * will be equal to the negative value.
-	 * @param l the output limit
+	 * @param outputLimit the output limit
 	 */
-	public void setOutputLimit(double l){
-		mMaximumOutput = l;
-		mMinimumOutput = -l;
+	public void setOutputLimit(double outputLimit){
+		setOutputLimit(-outputLimit, outputLimit);
 	}
+
+    /**
+     * Calculates the output to the system to compensate for the error.
+     *
+     * @param processVariable the process variable of the system.
+     * @param setPoint the desired set point.
+     *
+     * @return the compensation value from the PID loop calculation
+     */
+    public double calculate(double processVariable, double setPoint){
+        if(mSetPointRange != 0) {
+            processVariable = Mathf.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
+        }
+
+        double error = setPoint - processVariable;
+
+        double pOut = mKp.getAsDouble() * error;
+        double fOut = mKf.getAsDouble() * setPoint;
+
+        if(mIsFirstRun){
+            mIsFirstRun = false;
+            mLastOutput = pOut + fOut;
+            mLastProcessVariable = processVariable;
+        }
+
+        double iOut = mKi.getAsDouble() * mTotalError;
+        double dOut = -mKd.getAsDouble() * (processVariable - mLastProcessVariable);
+
+        double output = pOut + iOut + dOut + fOut;
+
+        mTotalError += error;
+
+        if(mMinimumOutput != mMaximumOutput && !Mathf.constrained(output, mMinimumOutput, mMaximumOutput)) {
+            mTotalError = error;
+        }
+
+        if(mOutRampRate != 0 && !Mathf.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
+            mTotalError = error;
+            output = Mathf.constrain(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate);
+        }
+
+        if(mMinimumOutput != mMaximumOutput) {
+            output = Mathf.constrain(output, mMinimumOutput, mMaximumOutput);
+        }
+
+        mLastOutput = output;
+        mLastProcessVariable = processVariable;
+
+        return output;
+    }
 }
