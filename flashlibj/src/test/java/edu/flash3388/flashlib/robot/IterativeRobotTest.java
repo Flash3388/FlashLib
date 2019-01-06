@@ -34,7 +34,7 @@ public class IterativeRobotTest {
         mCloser = Closer.empty();
 
         mExecutorService = Executors.newSingleThreadExecutor();
-        mCloser.add(new ExecutorCloser(mExecutorService, shutdownTime));
+        mCloser.add(new ExecutorCloser(mExecutorService));
 
         mScheduler = mock(Scheduler.class);
         mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mock(Sleeper.class)));

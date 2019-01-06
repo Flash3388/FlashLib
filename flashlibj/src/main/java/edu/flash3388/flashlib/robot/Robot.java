@@ -8,17 +8,15 @@ import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
  * <p>
  *     The base class for robot main classes.
  * </p>
- * <p>
- *     Inheriting robot classes need to implement the following methods:
- *     <ul>
- *         <li>{@link #robotInit()}: called when the robot is initialized.
- *         Should be used to initialize robot components</li>
- *         <li>{@link #robotMain()}: the robot main method. Called after initialization,
- *         and should implement the robot logic.</li>
- *         <li>{@link #robotShutdown()}: called after {@link #robotMain()} is finished. Used
- *         for freeing resources and components initialized in {@link #robotInit()}.</li>
- *     </ul>
- * </p>
+ * Inheriting robot classes need to implement the following methods:
+ * <ul>
+ *     <li>{@link #robotInit()}: called when the robot is initialized.
+ *          Should be used to initialize robot components</li>
+ *     <li>{@link #robotMain()}: the robot main method. Called after initialization,
+ *           and should implement the robot logic.</li>
+ *     <li>{@link #robotShutdown()}: called after {@link #robotMain()} is finished. Used
+ *           for freeing resources and components initialized in {@link #robotInit()}.</li>
+ * </ul>
  * <p>
  *     If {@link #robotMain()} throws an exception, {@link #robotShutdown()} is called.
  * </p>
