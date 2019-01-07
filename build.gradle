@@ -40,7 +40,7 @@ task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
     })
 }
 
-task flashlib(type: Jar, dependsOn: subprojects.assemble) {
+task flashlib(type: Jar, dependsOn: subprojects.build) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
