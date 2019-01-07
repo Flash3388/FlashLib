@@ -70,7 +70,6 @@ public class JavaSerializedMessageTransferTest {
 
     public static class TransferOverTcpConnectionTest {
 
-        private static final int PORT = 10000;
         private static final int READ_TIMEOUT = 1000;
         private static final int CONNECTION_TIMEOUT = 1000;
 
@@ -112,15 +111,14 @@ public class JavaSerializedMessageTransferTest {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             mCloser.add(new ExecutorCloser(executorService));
 
-            TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), READ_TIMEOUT);
-            mCloser.add(clientConnector);
-
-            ServerSocket serverSocket = new ServerSocket(PORT);
+            ServerSocket serverSocket = new ServerSocket(0);
             mCloser.add(serverSocket);
 
             TcpServerConnector serverConnector = new TcpServerConnector(serverSocket, READ_TIMEOUT);
             mCloser.add(serverConnector);
 
+            TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(serverSocket.getLocalPort()), READ_TIMEOUT);
+            mCloser.add(clientConnector);
 
             CountDownLatch connectionLatch = new CountDownLatch(1);
 
