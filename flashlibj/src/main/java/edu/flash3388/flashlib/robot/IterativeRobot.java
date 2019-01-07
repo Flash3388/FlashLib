@@ -2,12 +2,17 @@ package edu.flash3388.flashlib.robot;
 
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
+import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
+import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
+import edu.flash3388.flashlib.util.resources.ResourceHolder;
+
+import java.util.logging.Logger;
 
 /**
  * An extension of {@link Robot}. This class provides extended and easier control over robot
@@ -61,18 +66,18 @@ public abstract class IterativeRobot extends RobotBase {
 
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 
-	private final Scheduler mScheduler;
 	private final Sleeper mSleeper;
 	private final BooleanProperty mRunLoopProperty;
 
-	protected IterativeRobot(Scheduler scheduler, Sleeper sleeper) {
-	    mScheduler = scheduler;
+	protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder, Sleeper sleeper) {
+        super(clock, scheduler, hidInterface, logger, resourceHolder);
+
 	    mSleeper = sleeper;
         mRunLoopProperty = new SimpleBooleanProperty(true);
     }
 
-    protected IterativeRobot() {
-	    this(RobotResources.SCHEDULER.get(), new Sleeper());
+    protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder) {
+        this(clock, scheduler, hidInterface, logger, resourceHolder, new Sleeper());
     }
 
 	@Override

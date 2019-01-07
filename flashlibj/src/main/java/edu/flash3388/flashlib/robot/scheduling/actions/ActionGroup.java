@@ -1,12 +1,17 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
-import edu.flash3388.flashlib.robot.RobotResources;
+import edu.flash3388.flashlib.robot.RunningRobot;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Provides a series of scheduling to run in a order. Action can run sequentially or parallel to one another.
@@ -36,7 +41,7 @@ public class ActionGroup extends Action {
 	}
 
 	public ActionGroup(ExecutionOrder executionOrder, Collection<Action> actions) {
-	    this(RobotResources.SCHEDULER.get(), RobotResources.CLOCK.get(), executionOrder, actions);
+	    this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), executionOrder, actions);
     }
 
 	/* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions) {

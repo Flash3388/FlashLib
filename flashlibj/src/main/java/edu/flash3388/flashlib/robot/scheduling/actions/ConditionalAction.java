@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.scheduling.actions;
 
-import edu.flash3388.flashlib.robot.RobotResources;
+import edu.flash3388.flashlib.robot.RunningRobot;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.time.Clock;
@@ -24,7 +24,7 @@ public class ConditionalAction extends Action {
 	private Action mActionRunning;
 
 	public ConditionalAction(BooleanSupplier condition, Action runOnTrue, Action runOnFalse){
-		this(RobotResources.SCHEDULER.get(), RobotResources.CLOCK.get(), condition, runOnTrue, runOnFalse);
+		this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), condition, runOnTrue, runOnFalse);
 	}
 
     /* package */ ConditionalAction(Scheduler scheduler, Clock clock, BooleanSupplier condition, Action runOnTrue, Action runOnFalse){

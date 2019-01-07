@@ -3,6 +3,11 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.util.resources.Resource;
+
+import java.util.logging.Logger;
 
 
 public interface Robot {
@@ -55,4 +60,12 @@ public interface Robot {
     }
 
     HidInterface getHidInterface();
+
+    Scheduler getScheduler();
+
+    Clock getClock();
+
+    Logger getLogger();
+
+    void registerResources(Resource... resources);
 }

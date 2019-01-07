@@ -1,5 +1,13 @@
 package edu.flash3388.flashlib.robot;
 
+import edu.flash3388.flashlib.robot.hid.HidInterface;
+import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
+import edu.flash3388.flashlib.util.resources.Resource;
+import edu.flash3388.flashlib.util.resources.ResourceHolder;
+
+import java.util.logging.Logger;
+
 /**
  * <p>
  *     The base class for robot main classes.
@@ -20,6 +28,48 @@ package edu.flash3388.flashlib.robot;
  * @since FlashLib 1.2.0
  */
 public abstract class RobotBase implements Robot {
+
+    protected final Clock mClock;
+    protected final Scheduler mScheduler;
+    protected final HidInterface mHidInterface;
+    protected final Logger mLogger;
+
+    private final ResourceHolder mResourceHolder;
+
+    protected RobotBase(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder) {
+        mClock = clock;
+        mScheduler = scheduler;
+        mHidInterface = hidInterface;
+        mLogger = logger;
+        mResourceHolder = resourceHolder;
+    }
+
+    @Override
+    public Clock getClock() {
+        return mClock;
+    }
+
+    @Override
+    public Scheduler getScheduler() {
+        return mScheduler;
+    }
+
+    @Override
+    public HidInterface getHidInterface() {
+        return mHidInterface;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return mLogger;
+    }
+
+    @Override
+    public void registerResources(Resource... resources) {
+        for(Resource resource : resources) {
+            mResourceHolder.add(resource);
+        }
+    }
 
     /**
      * Called when robot initialization starts, allowing for initialization of user code.

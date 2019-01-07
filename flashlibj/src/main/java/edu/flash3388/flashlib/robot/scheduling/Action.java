@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
-import edu.flash3388.flashlib.robot.RobotResources;
+import edu.flash3388.flashlib.robot.RobotFactory;
+import edu.flash3388.flashlib.robot.RunningRobot;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.CompareResult;
@@ -67,7 +68,7 @@ public abstract class Action {
 	}
 
     public Action(Clock clock, Time timeout) {
-	    this(RobotResources.SCHEDULER.get(), clock, timeout);
+	    this(RunningRobot.INSTANCE.get().getScheduler(), clock, timeout);
     }
 
 	public Action(Clock clock) {
@@ -75,7 +76,7 @@ public abstract class Action {
     }
 
     public Action() {
-	    this(RobotResources.CLOCK.get());
+	    this(RunningRobot.INSTANCE.get().getClock());
     }
 	
 	/**
