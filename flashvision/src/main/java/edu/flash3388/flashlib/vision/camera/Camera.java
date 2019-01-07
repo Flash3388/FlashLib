@@ -3,6 +3,8 @@ package edu.flash3388.flashlib.vision.camera;
 import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImageSource;
 
+import java.util.Optional;
+
 public interface Camera extends ImageSource {
 
     int getFps();
@@ -13,7 +15,7 @@ public interface Camera extends ImageSource {
     Image capture();
 
     @Override
-    default Image get() {
-        return capture();
+    default Optional<Image> get() {
+        return Optional.of(capture());
     }
 }

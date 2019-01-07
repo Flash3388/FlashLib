@@ -1,9 +1,10 @@
 package edu.flash3388.flashlib.vision;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
-public interface ImageSource extends Supplier<Image> {
+public interface ImageSource extends Supplier<Optional<Image>> {
 
     @Override
-    Image get();
+    Optional<Image> get();
 }
