@@ -21,6 +21,14 @@ public class JpegImage {
         return new JpegImage(image);
     }
 
+    public int getHeight() {
+        return mImage.getHeight();
+    }
+
+    public int getWidth() {
+        return mImage.getWidth();
+    }
+
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {

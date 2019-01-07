@@ -1,33 +1,43 @@
 package edu.flash3388.flashlib.cam.jpeg.client;
 
 import edu.flash3388.flashlib.cam.jpeg.JpegImage;
-import edu.flash3388.flashlib.cam.jpeg.reader.JpegReader;
-import edu.flash3388.flashlib.communication.connection.Connection;
+import edu.flash3388.flashlib.cam.jpeg.reader.MjpegReader;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
+import edu.flash3388.flashlib.util.http.HttpConnectionCloser;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MjpegClient {
+public class MjpegClient implements Closeable {
 
+    private final URL mStreamUrl;
     private final ExecutorService mExecutorService;
     private final Logger mLogger;
 
-    private final AtomicReference<JpegReader> mReaderReference;
+    private final AtomicReference<HttpURLConnection> mConnectionReference;
     private final AtomicBoolean mIsTerminated;
 
-    public MjpegClient(ExecutorService executorService, Logger logger) {
+    public MjpegClient(URL streamUrl, ExecutorService executorService, Logger logger) {
+        mStreamUrl = streamUrl;
         mExecutorService = executorService;
         mLogger = logger;
 
-        mReaderReference = new AtomicReference<>();
+        mConnectionReference = new AtomicReference<>();
         mIsTerminated = new AtomicBoolean(false);
+    }
+
+    public static MjpegClient create(URL url, Logger logger) {
+        return new MjpegClient(url, Executors.newSingleThreadExecutor(), logger);
     }
 
     public boolean isTerminated() {
@@ -35,11 +45,11 @@ public class MjpegClient {
     }
 
     public boolean isRunning() {
-        return mReaderReference.get() != null;
+        return mConnectionReference.get() != null;
     }
 
 
-    public void start(JpegReader jpegReader, Consumer<JpegImage> imageConsumer) {
+    public void start(Consumer<JpegImage> imageConsumer) throws IOException {
         if (isTerminated()) {
             throw new IllegalStateException("terminated");
         }
@@ -47,11 +57,14 @@ public class MjpegClient {
             throw new IllegalStateException("already running");
         }
 
-        mReaderReference.set(jpegReader);
-        mExecutorService.submit(new MjpegReadTask(jpegReader, imageConsumer, mLogger));
+        HttpURLConnection connection = (HttpURLConnection) mStreamUrl.openConnection();
+        mConnectionReference.set(connection);
+
+        mExecutorService.submit(new MjpegReadTask(new MjpegReader(connection.getInputStream()), imageConsumer, mLogger));
     }
 
-    public void terminate() {
+    @Override
+    public void close() {
         if (isTerminated()) {
             throw new IllegalStateException("already terminated");
         }
@@ -62,8 +75,8 @@ public class MjpegClient {
         try {
             Closer closer = Closer.empty();
 
-            JpegReader reader = mReaderReference.getAndSet(null);
-            closer.add(reader);
+            HttpURLConnection connection = mConnectionReference.getAndSet(null);
+            closer.add(new HttpConnectionCloser(connection));
 
             closer.add(new ExecutorCloser(mExecutorService));
 

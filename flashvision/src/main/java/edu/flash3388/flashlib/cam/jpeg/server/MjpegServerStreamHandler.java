@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.cam.jpeg.server;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import edu.flash3388.flashlib.cam.Camera;
 import edu.flash3388.flashlib.cam.jpeg.JpegCamera;
 import edu.flash3388.flashlib.cam.jpeg.JpegImage;
 import edu.flash3388.flashlib.time.Clock;
@@ -18,7 +17,7 @@ import java.util.logging.Logger;
 public class MjpegServerStreamHandler implements HttpHandler {
 
     private static final String BOUNDARY = "--boundary";
-    private static final String HEADER_FORMAT = String.format("\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n", BOUNDARY);
+    private static final String HEADER_FORMAT = "\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n";
 
     private final WeakReference<JpegCamera> mCameraReference;
     private final Clock mClock;
@@ -59,8 +58,9 @@ public class MjpegServerStreamHandler implements HttpHandler {
                 JpegImage image = camera.capture();
                 byte[] imageBytes = image.toByteArray();
 
-                outputStream.write(String.format(HEADER_FORMAT, imageBytes.length).getBytes());
+                outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
                 outputStream.write(imageBytes);
+                outputStream.flush();
 
                 Time timeTaken = mClock.currentTime().sub(startTime);
                 long sleepMillis = timeTaken.getAsMillis() - (1000 / camera.getFps());
