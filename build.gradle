@@ -19,14 +19,6 @@ subprojects {
 
 subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
-task allFlashlib(type: Jar, dependsOn: subprojects.assemble) {
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
-
-    from files(subprojects.collect {
-        it.sourceSets.main.output
-    })
-}
 
 task allFlashlibSources(type: Jar, dependsOn: subprojects.classes) {
     baseName = 'flashlib'
@@ -45,6 +37,18 @@ task allFlashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
 
     from files(subprojects.collect {
         it.javadoc.destinationDir
+    })
+}
+
+task allFlashlib(type: Jar, dependsOn: subprojects.assemble) {
+    dependsOn allFlashlibSources
+    dependsOn allFlashlibJavadoc
+
+    baseName = 'flashlib'
+    destinationDir = rootProject.buildDir
+
+    from files(subprojects.collect {
+        it.sourceSets.main.output
     })
 }
 
