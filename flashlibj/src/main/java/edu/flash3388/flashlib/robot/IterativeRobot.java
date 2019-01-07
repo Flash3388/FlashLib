@@ -57,7 +57,7 @@ import edu.flash3388.flashlib.util.concurrent.Sleeper;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class IterativeRobot extends Robot {
+public abstract class IterativeRobot extends RobotBase {
 
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 

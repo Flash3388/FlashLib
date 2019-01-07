@@ -56,7 +56,7 @@ public class RobotProgram {
     }
 
     private void runRobot() throws RobotInitializationException, RobotCreationException {
-        Robot robot = mRobotCreator.create();
+        RobotBase robot = mRobotCreator.create();
 
         robot.robotInit();
         try {

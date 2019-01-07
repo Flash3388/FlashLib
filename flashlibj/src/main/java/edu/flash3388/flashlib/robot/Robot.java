@@ -4,26 +4,8 @@ import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 
-/**
- * <p>
- *     The base class for robot main classes.
- * </p>
- * Inheriting robot classes need to implement the following methods:
- * <ul>
- *     <li>{@link #robotInit()}: called when the robot is initialized.
- *          Should be used to initialize robot components</li>
- *     <li>{@link #robotMain()}: the robot main method. Called after initialization,
- *           and should implement the robot logic.</li>
- *     <li>{@link #robotShutdown()}: called after {@link #robotMain()} is finished. Used
- *           for freeing resources and components initialized in {@link #robotInit()}.</li>
- * </ul>
- * <p>
- *     If {@link #robotMain()} throws an exception, {@link #robotShutdown()} is called.
- * </p>
- *
- * @since FlashLib 1.3.0
- */
-public abstract class Robot {
+
+public interface Robot {
 
     /**
      * Gets the initialized {@link RobotModeSupplier} object for the robot.
@@ -32,7 +14,7 @@ public abstract class Robot {
      *
      * @return robot mode selector, or null if not initialized.
      */
-    public abstract RobotModeSupplier getModeSupplier();
+    RobotModeSupplier getModeSupplier();
 
     /**
      * Gets the current operation mode set by the {@link RobotModeSupplier} object of the robot.
@@ -43,7 +25,7 @@ public abstract class Robot {
      *
      * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
      */
-    public RobotMode getMode(){
+    default RobotMode getMode(){
         return getModeSupplier() == null ? RobotMode.DISABLED : getModeSupplier().getMode();
     }
 
@@ -58,7 +40,7 @@ public abstract class Robot {
      * @return true if the given mode is the current operation mode, false otherwise
      * @see #getMode()
      */
-    public boolean isInMode(RobotMode mode){
+    default boolean isInMode(RobotMode mode){
         return getMode().equals(mode);
     }
 
@@ -68,32 +50,9 @@ public abstract class Robot {
      *
      * @return true if in disabled mode, false otherwise
      */
-    public boolean isDisabled(){
+    default boolean isDisabled(){
         return isInMode(RobotMode.DISABLED);
     }
 
-    public abstract HidInterface getHidInterface();
-
-	//--------------------------------------------------------------------
-	//------------------------Robot Flow----------------------------------
-	//--------------------------------------------------------------------
-
-	/**
-	 * Called when robot initialization starts, allowing for initialization of user code.
-	 *
-	 * @throws RobotInitializationException if an error occurs while initializing
-	 */
-	protected abstract void robotInit() throws RobotInitializationException;
-
-	/**
-	 * Called when {@link Robot} finished initialization and the robot can be started.
-	 * This is the main method of the robot and all operations should be directed from here.
-	 */
-    protected abstract void robotMain();
-
-	/**
-	 * Called when the robot finishes running, allowing to perform custom stop operations. Should be used
-	 * to free robot components.
-	 */
-    protected abstract void robotShutdown();
+    HidInterface getHidInterface();
 }
