@@ -1,7 +1,7 @@
-package edu.flash3388.flashlib.cam.jpeg.reader;
+package edu.flash3388.flashlib.vision.jpeg.reader;
 
-import edu.flash3388.flashlib.cam.jpeg.JpegImage;
-import edu.flash3388.flashlib.cam.jpeg.MjpegFormat;
+import edu.flash3388.flashlib.vision.jpeg.JpegImage;
+import edu.flash3388.flashlib.vision.jpeg.MjpegFormat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

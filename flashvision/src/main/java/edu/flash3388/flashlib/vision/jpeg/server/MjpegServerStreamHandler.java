@@ -1,12 +1,13 @@
-package edu.flash3388.flashlib.cam.jpeg.server;
+package edu.flash3388.flashlib.vision.jpeg.server;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import edu.flash3388.flashlib.cam.jpeg.JpegCamera;
-import edu.flash3388.flashlib.cam.jpeg.JpegImage;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
+import edu.flash3388.flashlib.vision.ImageSource;
+import edu.flash3388.flashlib.vision.camera.Camera;
+import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,11 +20,11 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private static final String BOUNDARY = "--boundary";
     private static final String HEADER_FORMAT = "\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n";
 
-    private final WeakReference<JpegCamera> mCameraReference;
+    private final WeakReference<Camera> mCameraReference;
     private final Clock mClock;
     private final Logger mLogger;
 
-    public MjpegServerStreamHandler(JpegCamera camera, Clock clock, Logger logger) {
+    public MjpegServerStreamHandler(Camera camera, Clock clock, Logger logger) {
         mCameraReference = new WeakReference<>(camera);
         mClock = clock;
         mLogger = logger;
@@ -47,7 +48,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private void streamImages(OutputStream outputStream) throws IOException {
         while (!Thread.interrupted()) {
             try {
-                JpegCamera camera = mCameraReference.get();
+                Camera camera = mCameraReference.get();
                 if (camera == null) {
                     mLogger.log(Level.INFO, "Camera was collected by gc.");
                     return;
@@ -55,8 +56,8 @@ public class MjpegServerStreamHandler implements HttpHandler {
 
                 Time startTime = mClock.currentTime();
 
-                JpegImage image = camera.capture();
-                byte[] imageBytes = image.toByteArray();
+                JpegImage image = camera.capture().toJpeg();
+                byte[] imageBytes = image.getRaw();
 
                 outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
                 outputStream.write(imageBytes);

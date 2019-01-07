@@ -1,10 +1,10 @@
-package edu.flash3388.flashlib.cam.jpeg.client;
+package edu.flash3388.flashlib.vision.jpeg.client;
 
-import edu.flash3388.flashlib.cam.jpeg.JpegImage;
-import edu.flash3388.flashlib.cam.jpeg.reader.MjpegReader;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.http.HttpConnectionCloser;
+import edu.flash3388.flashlib.vision.ImagePipeline;
+import edu.flash3388.flashlib.vision.jpeg.reader.MjpegReader;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,7 +48,7 @@ public class MjpegClient implements Closeable {
     }
 
 
-    public void start(Consumer<JpegImage> imageConsumer) throws IOException {
+    public void start(ImagePipeline imageConsumer) throws IOException {
         if (isTerminated()) {
             throw new IllegalStateException("terminated");
         }

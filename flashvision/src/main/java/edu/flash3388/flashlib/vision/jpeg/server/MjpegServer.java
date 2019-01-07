@@ -1,11 +1,11 @@
-package edu.flash3388.flashlib.cam.jpeg.server;
+package edu.flash3388.flashlib.vision.jpeg.server;
 
 import com.sun.net.httpserver.HttpServer;
-import edu.flash3388.flashlib.cam.jpeg.JpegCamera;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.http.HttpServerCloser;
+import edu.flash3388.flashlib.vision.camera.Camera;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class MjpegServer implements Closeable {
         mServer.start();
     }
 
-    public void setCamera(String name, JpegCamera camera) {
+    public void setCamera(String name, Camera camera) {
         if (!name.startsWith("/")) {
             name = "/" + name;
         }

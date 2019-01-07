@@ -1,12 +1,13 @@
 package edu.flash3388.flashlib.vision.cam.jpeg;
 
-import edu.flash3388.flashlib.cam.jpeg.JpegCamera;
-import edu.flash3388.flashlib.cam.jpeg.JpegImage;
-import edu.flash3388.flashlib.cam.jpeg.client.MjpegClient;
-import edu.flash3388.flashlib.cam.jpeg.server.MjpegServer;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.JavaNanoClock;
+import edu.flash3388.flashlib.vision.Image;
+import edu.flash3388.flashlib.vision.camera.Camera;
+import edu.flash3388.flashlib.vision.jpeg.JpegImage;
+import edu.flash3388.flashlib.vision.jpeg.client.MjpegClient;
+import edu.flash3388.flashlib.vision.jpeg.server.MjpegServer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,10 +42,10 @@ public class JpegStreamingTest {
     @Test
     public void serverAndClientAreUp_imagesAreStreaming_imageTransferredSuccessfully() throws Exception {
         final JpegImage IMAGE = new JpegImage(new BufferedImage(255, 255, BufferedImage.TYPE_3BYTE_BGR));
-        final JpegCamera CAMERA = new StaticImageJpegCamera(IMAGE);
+        final Camera CAMERA = new StaticImageCamera(IMAGE);
 
         Closer closer = Closer.empty();
-        List<JpegImage> resultImages = new ArrayList<>();
+        List<Image> resultImages = new ArrayList<>();
 
         try {
             MjpegServer mjpegServer = MjpegServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), SERVER_PORT), 1, mClock, mLogger);
@@ -69,9 +70,9 @@ public class JpegStreamingTest {
             closer.close();
         }
 
-        List<JpegImage> imageSnapshot = new ArrayList<>(resultImages);
+        List<Image> imageSnapshot = new ArrayList<>(resultImages);
 
         assertTrue(imageSnapshot.size() > 0);
-        assertArrayEquals(IMAGE.toByteArray(), imageSnapshot.get(0).toByteArray());
+        assertArrayEquals(IMAGE.getRaw(), imageSnapshot.get(0).getRaw());
     }
 }

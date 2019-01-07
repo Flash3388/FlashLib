@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.cam.jpeg;
+package edu.flash3388.flashlib.vision.jpeg;
 
 public class MjpegFormat {
 
