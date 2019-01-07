@@ -8,7 +8,7 @@ allprojects {
 subprojects {
     buildDir = rootProject.file("build/${project.name}")
 
-	repositories {
+    repositories {
         mavenCentral()
 
         flatDir {
@@ -19,7 +19,31 @@ subprojects {
 
 subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
-task allFlashlib(type: Jar, dependsOn: subprojects.assemble) {
+
+task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
+    baseName = 'flashlib'
+    destinationDir = rootProject.buildDir
+    classifier = 'sources'
+
+    from files(subprojects.collect {
+        it.sourceSets.main.allSource
+    })
+}
+
+task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
+    baseName = 'flashlib'
+    destinationDir = rootProject.buildDir
+    classifier = 'javadoc'
+
+    from files(subprojects.collect {
+        it.javadoc.destinationDir
+    })
+}
+
+task flashlib(type: Jar, dependsOn: subprojects.build) {
+    dependsOn flashlibSources
+    dependsOn flashlibJavadoc
+
     baseName = 'flashlib'
     destinationDir = rootProject.buildDir
 
@@ -29,5 +53,7 @@ task allFlashlib(type: Jar, dependsOn: subprojects.assemble) {
 }
 
 artifacts {
-    archives allFlashlib
+    archives flashlib
+    archives flashlibSources
+    archives flashlibJavadoc
 }

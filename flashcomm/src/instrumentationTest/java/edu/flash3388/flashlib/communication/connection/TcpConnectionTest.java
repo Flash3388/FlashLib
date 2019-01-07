@@ -18,8 +18,6 @@ import static org.junit.Assert.fail;
 
 public class TcpConnectionTest {
 
-    private static final int PORT = 10000;
-    private static final int PORT_NO_SERVER = 10001;
     private static final int DEFAULT_READ_TIMEOUT = 1000;
     private static final int DEFAULT_CONNECTION_TIMEOUT = 1000;
 
@@ -34,7 +32,7 @@ public class TcpConnectionTest {
         mExecutorService = Executors.newSingleThreadExecutor();
         mCloser.add(new ExecutorCloser(mExecutorService));
 
-        mServerSocket = new ServerSocket(PORT);
+        mServerSocket = new ServerSocket(0);
         mCloser.add(mServerSocket);
     }
 
@@ -133,7 +131,7 @@ public class TcpConnectionTest {
     public void connect_clientHasNoServer_throwsConnectionFailedException() throws Exception {
         final int CONNECTION_TIMEOUT = 200;
 
-        InetSocketAddress address = new InetSocketAddress(PORT_NO_SERVER);
+        InetSocketAddress address = new InetSocketAddress(mServerSocket.getLocalPort() - 1);
         TcpClientConnector clientConnector = new TcpClientConnector(address, DEFAULT_READ_TIMEOUT);
         try {
             tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
@@ -143,7 +141,7 @@ public class TcpConnectionTest {
     }
 
     private void connectAndRun(Function<Connection> serverTask, Function<Connection> clientTask, int connectionTimeout, int readTimeout) throws Exception {
-        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(PORT), readTimeout);
+        TcpClientConnector clientConnector = new TcpClientConnector(new InetSocketAddress(mServerSocket.getLocalPort()), readTimeout);
         mCloser.add(clientConnector);
 
         TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, readTimeout);
