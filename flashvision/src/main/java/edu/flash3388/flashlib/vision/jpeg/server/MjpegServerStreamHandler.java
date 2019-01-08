@@ -20,11 +20,11 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private static final String BOUNDARY = "--boundary";
     private static final String HEADER_FORMAT = "\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n";
 
-    private final WeakReference<Camera> mCameraReference;
+    private final WeakReference<Camera<JpegImage>> mCameraReference;
     private final Clock mClock;
     private final Logger mLogger;
 
-    public MjpegServerStreamHandler(Camera camera, Clock clock, Logger logger) {
+    public MjpegServerStreamHandler(Camera<JpegImage> camera, Clock clock, Logger logger) {
         mCameraReference = new WeakReference<>(camera);
         mClock = clock;
         mLogger = logger;
@@ -48,7 +48,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private void streamImages(OutputStream outputStream) throws IOException {
         while (!Thread.interrupted()) {
             try {
-                Camera camera = mCameraReference.get();
+                Camera<JpegImage> camera = mCameraReference.get();
                 if (camera == null) {
                     mLogger.log(Level.INFO, "Camera was collected by gc.");
                     return;
@@ -56,7 +56,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
 
                 Time startTime = mClock.currentTime();
 
-                JpegImage image = camera.capture().toJpeg();
+                JpegImage image = camera.capture();
                 byte[] imageBytes = image.getRaw();
 
                 outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());

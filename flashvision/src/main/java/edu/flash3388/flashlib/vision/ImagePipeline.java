@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
-public interface ImagePipeline {
+public interface ImagePipeline<T extends Image> {
 
-    void process(Image image);
+    void process(T image);
 }

@@ -5,17 +5,17 @@ import edu.flash3388.flashlib.vision.ImageSource;
 
 import java.util.Optional;
 
-public interface Camera extends ImageSource {
+public interface Camera<T extends Image> extends ImageSource<T> {
 
     int getFps();
 
     int getHeight();
     int getWidth();
 
-    Image capture();
+    T capture();
 
     @Override
-    default Optional<Image> get() {
+    default Optional<T> get() {
         return Optional.of(capture());
     }
 }
