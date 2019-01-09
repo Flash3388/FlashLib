@@ -23,7 +23,7 @@ public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
     }
 
     @Override
-    protected void startController() {
+    protected void startRunner() {
         mExecutorService.scheduleAtFixedRate(
                 new ImageDelegationTask<>(mImageDelegator, mLogger),
                 mDelegationPeriod.getValue(),
@@ -32,7 +32,7 @@ public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
     }
 
     @Override
-    protected void stopController() {
+    protected void stopRunner() {
         mExecutorService.shutdownNow();
     }
 

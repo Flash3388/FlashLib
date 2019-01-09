@@ -30,7 +30,7 @@ public abstract class SingleUseRunner implements Runner, Closeable {
             throw new IllegalStateException("already running");
         }
 
-        startController();
+        startRunner();
 
         mIsRunning = true;
     }
@@ -44,7 +44,7 @@ public abstract class SingleUseRunner implements Runner, Closeable {
             throw new IllegalStateException("not running");
         }
 
-        stopController();
+        stopRunner();
 
         mIsTerminated = true;
         mIsRunning = false;
@@ -55,6 +55,6 @@ public abstract class SingleUseRunner implements Runner, Closeable {
         stop();
     }
 
-    protected abstract void startController();
-    protected abstract void stopController();
+    protected abstract void startRunner();
+    protected abstract void stopRunner();
 }
