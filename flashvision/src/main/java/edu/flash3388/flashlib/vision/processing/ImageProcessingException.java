@@ -1,6 +1,6 @@
-package edu.flash3388.flashlib.vision.processing.exceptions;
+package edu.flash3388.flashlib.vision.processing;
 
-import edu.flash3388.flashlib.vision.exceptions.VisionException;
+import edu.flash3388.flashlib.vision.VisionException;
 
 public class ImageProcessingException extends VisionException {
 

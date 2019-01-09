@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.flow.SingleUseRunner;
-import edu.flash3388.flashlib.vision.exceptions.VisionException;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;

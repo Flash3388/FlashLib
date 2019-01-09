@@ -6,13 +6,12 @@ import com.sun.net.httpserver.HttpHandler;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.vision.camera.Camera;
-import edu.flash3388.flashlib.vision.exceptions.VisionException;
+import edu.flash3388.flashlib.vision.VisionException;
 import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

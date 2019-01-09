@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.vision.exceptions.VisionException;
-
 import java.util.List;
 
 public class ImageDelegator<T extends Image> {

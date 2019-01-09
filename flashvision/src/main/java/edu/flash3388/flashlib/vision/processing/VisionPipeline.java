@@ -4,8 +4,7 @@ import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.processing.analysis.Analysis;
 import edu.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
-import edu.flash3388.flashlib.vision.processing.analysis.exceptions.ImageAnalysingException;
-import edu.flash3388.flashlib.vision.processing.exceptions.ImageProcessingException;
+import edu.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
 import java.util.List;
 import java.util.function.Consumer;

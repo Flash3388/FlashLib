@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.vision.jpeg.client;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 import edu.flash3388.flashlib.vision.jpeg.reader.JpegReader;
-import edu.flash3388.flashlib.vision.processing.exceptions.ImageProcessingException;
+import edu.flash3388.flashlib.vision.processing.ImageProcessingException;
 
 import java.io.IOException;
 import java.util.logging.Level;

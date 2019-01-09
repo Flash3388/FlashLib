@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.vision.exceptions;
+package edu.flash3388.flashlib.vision;
 
 public class VisionException extends Exception {
 

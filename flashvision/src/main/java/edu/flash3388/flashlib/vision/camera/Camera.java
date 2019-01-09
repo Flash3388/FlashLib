@@ -2,9 +2,7 @@ package edu.flash3388.flashlib.vision.camera;
 
 import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImageSource;
-import edu.flash3388.flashlib.vision.exceptions.VisionException;
-
-import java.util.Optional;
+import edu.flash3388.flashlib.vision.VisionException;
 
 public interface Camera<T extends Image> extends ImageSource<T> {
 

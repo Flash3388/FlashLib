@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.vision.processing.exceptions.ImageProcessingException;
+import edu.flash3388.flashlib.vision.processing.ImageProcessingException;
 
 public interface ImagePipeline<T extends Image> {
 
