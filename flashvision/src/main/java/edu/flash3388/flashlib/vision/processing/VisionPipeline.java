@@ -4,6 +4,8 @@ import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.processing.analysis.Analysis;
 import edu.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
+import edu.flash3388.flashlib.vision.processing.analysis.exceptions.ImageAnalysingException;
+import edu.flash3388.flashlib.vision.processing.exceptions.ImageProcessingException;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +39,9 @@ public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
                 image = processor.process(image);
             }
 
-            Optional<Analysis> optionalAnalysis = mImageAnalyser.tryAnalyse(image);
-            if (optionalAnalysis.isPresent()) {
-                mAnalysisConsumer.accept(optionalAnalysis.get());
-            } else {
-                mLogger.log(Level.WARNING, "Analysis creator - no analysis could be created");
-            }
-        } catch (ImageProcessingException e) {
+            Analysis analysis = mImageAnalyser.analyse(image);
+            mAnalysisConsumer.accept(analysis);
+        } catch (ImageProcessingException | ImageAnalysingException e) {
             mLogger.log(Level.SEVERE, "failed to process image", e);
         }
     }
