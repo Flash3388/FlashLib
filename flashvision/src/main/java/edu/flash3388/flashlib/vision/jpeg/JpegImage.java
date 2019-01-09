@@ -18,6 +18,10 @@ public class JpegImage implements Image {
         mImage = image;
     }
 
+    public static JpegImage rgb(int height, int width) {
+        return new JpegImage(new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB));
+    }
+
     public static JpegImage fromBytes(byte[] imageBytes) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
         return new JpegImage(image);
