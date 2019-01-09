@@ -12,6 +12,7 @@ import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,12 +57,17 @@ public class MjpegServerStreamHandler implements HttpHandler {
 
                 Time startTime = mClock.currentTime();
 
-                JpegImage image = camera.capture();
-                byte[] imageBytes = image.getRaw();
+                Optional<JpegImage> optionalJpegImage = camera.capture();
+                if (optionalJpegImage.isPresent()) {
+                    JpegImage image = optionalJpegImage.get();
+                    byte[] imageBytes = image.getRaw();
 
-                outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
-                outputStream.write(imageBytes);
-                outputStream.flush();
+                    outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
+                    outputStream.write(imageBytes);
+                    outputStream.flush();
+                } else {
+                    mLogger.log(Level.WARNING, "camera returned empty image");
+                }
 
                 Time timeTaken = mClock.currentTime().sub(startTime);
                 long sleepMillis = timeTaken.getAsMillis() - (1000 / camera.getFps());
