@@ -4,6 +4,7 @@ import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.http.HttpConnectionCloser;
 import edu.flash3388.flashlib.vision.ImagePipeline;
+import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 import edu.flash3388.flashlib.vision.jpeg.reader.MjpegReader;
 
 import java.io.Closeable;
@@ -48,7 +49,7 @@ public class MjpegClient implements Closeable {
     }
 
 
-    public void start(ImagePipeline imageConsumer) throws IOException {
+    public void start(ImagePipeline<JpegImage> imageConsumer) throws IOException {
         if (isTerminated()) {
             throw new IllegalStateException("terminated");
         }

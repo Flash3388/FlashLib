@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.vision.camera;
 
 import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImageSource;
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
 
 import java.util.Optional;
 
@@ -15,7 +16,7 @@ public interface Camera<T extends Image> extends ImageSource<T> {
     Optional<T> capture();
 
     @Override
-    default Optional<T> get() {
-        return capture();
+    default T get() throws VisionException {
+        return capture().get();
     }
 }

@@ -8,6 +8,4 @@ public interface Image {
     int getWidth();
 
     byte[] getRaw() throws IOException;
-
-    Image toJpeg();
 }
