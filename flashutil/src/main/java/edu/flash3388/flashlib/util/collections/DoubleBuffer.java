@@ -11,14 +11,18 @@ public class DoubleBuffer<T> {
     private final AtomicInteger mReadIndex;
     private final IntUnaryOperator mReadIndexUpdater;
 
-    public DoubleBuffer() {
-        mArray = new AtomicReferenceArray<>(2);
-        mReadIndex = new AtomicInteger(0);
+    DoubleBuffer(AtomicReferenceArray<T> array, AtomicInteger readIndex) {
+        mArray = array;
+        mReadIndex = readIndex;
         mReadIndexUpdater = new XorUpdater();
     }
 
+    public DoubleBuffer() {
+        this(new AtomicReferenceArray<>(2), new AtomicInteger(0));
+    }
+
     public T read() {
-        T value = mArray.get(mReadIndex.getAndUpdate(mReadIndexUpdater));
+        T value = mArray.getAndSet(mReadIndex.getAndUpdate(mReadIndexUpdater), null);
 
         if (value == null) {
             throw new NoSuchElementException("nothing to read");
