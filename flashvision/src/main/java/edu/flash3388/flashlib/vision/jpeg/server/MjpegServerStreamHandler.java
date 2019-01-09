@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
-import edu.flash3388.flashlib.vision.ImageSource;
 import edu.flash3388.flashlib.vision.camera.Camera;
 import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 
@@ -38,11 +37,8 @@ public class MjpegServerStreamHandler implements HttpHandler {
         h.set("Content-Type", "multipart/x-mixed-replace;boundary=" + BOUNDARY);
         httpExchange.sendResponseHeaders(200, 0);
 
-        OutputStream outputStream = httpExchange.getResponseBody();
-        try {
+        try (OutputStream outputStream = httpExchange.getResponseBody()) {
             streamImages(outputStream);
-        } finally {
-            outputStream.close();
         }
     }
 

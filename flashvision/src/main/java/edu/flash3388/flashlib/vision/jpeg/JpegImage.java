@@ -48,7 +48,7 @@ public class JpegImage implements Image {
     }
 
     @Override
-    public JpegImage toJpeg() {
+    public Image toJpeg() {
         return this;
     }
 }

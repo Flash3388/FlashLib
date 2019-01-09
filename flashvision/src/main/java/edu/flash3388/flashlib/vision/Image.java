@@ -1,7 +1,5 @@
 package edu.flash3388.flashlib.vision;
 
-import edu.flash3388.flashlib.vision.jpeg.JpegImage;
-
 import java.io.IOException;
 
 public interface Image {
@@ -11,5 +9,5 @@ public interface Image {
 
     byte[] getRaw() throws IOException;
 
-    JpegImage toJpeg();
+    Image toJpeg();
 }
