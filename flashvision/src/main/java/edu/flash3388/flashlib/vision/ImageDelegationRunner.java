@@ -1,14 +1,14 @@
 package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.time.Time;
-import edu.flash3388.flashlib.util.control.SingleUseController;
+import edu.flash3388.flashlib.util.control.SingleUseRunner;
 import edu.flash3388.flashlib.vision.exceptions.VisionException;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ImageDelegationRunner<T extends Image> extends SingleUseController {
+public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
 
     private final ScheduledExecutorService mExecutorService;
     private final ImageDelegator<T> mImageDelegator;

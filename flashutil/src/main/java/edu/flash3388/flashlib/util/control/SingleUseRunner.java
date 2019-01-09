@@ -2,12 +2,12 @@ package edu.flash3388.flashlib.util.control;
 
 import java.io.Closeable;
 
-public abstract class SingleUseController implements Controller, Closeable {
+public abstract class SingleUseRunner implements Runner, Closeable {
 
     private volatile boolean mIsRunning;
     private volatile boolean mIsTerminated;
 
-    public SingleUseController() {
+    public SingleUseRunner() {
         mIsRunning = false;
         mIsTerminated = false;
     }

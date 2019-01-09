@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.util.control;
 
-public interface Controller {
+public interface Runner {
 
     boolean isRunning();
 
