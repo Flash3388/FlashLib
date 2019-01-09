@@ -2,11 +2,11 @@ package edu.flash3388.flashlib.util.flow;
 
 import java.io.Closeable;
 
-public abstract class SingleUseRunner implements Runner, Closeable {
+public abstract class SingleUseParameterizedRunner<T> implements ParameterizedRunner<T>, Closeable {
 
     private final SingleUseRunnerControl mSingleUseRunnerControl;
 
-    public SingleUseRunner() {
+    protected SingleUseParameterizedRunner() {
         mSingleUseRunnerControl = new SingleUseRunnerControl();
     }
 
@@ -20,10 +20,10 @@ public abstract class SingleUseRunner implements Runner, Closeable {
     }
 
     @Override
-    public final synchronized void start() {
+    public final synchronized void start(T param) {
         mSingleUseRunnerControl.checkCanStart();
 
-        startRunner();
+        startRunner(param);
 
         mSingleUseRunnerControl.markStart();
     }
@@ -42,6 +42,6 @@ public abstract class SingleUseRunner implements Runner, Closeable {
         stop();
     }
 
-    protected abstract void startRunner();
+    protected abstract void startRunner(T param);
     protected abstract void stopRunner();
 }

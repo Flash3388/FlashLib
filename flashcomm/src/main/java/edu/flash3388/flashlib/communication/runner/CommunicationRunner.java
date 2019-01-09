@@ -6,6 +6,7 @@ import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.io.serialization.Serializer;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
+import edu.flash3388.flashlib.util.flow.SingleUseParameterizedRunner;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -17,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CommunicationRunner {
+public class CommunicationRunner extends SingleUseParameterizedRunner<Connection> {
 
     private final ExecutorService mExecutorService;
     private final Serializer mSerializer;
@@ -27,7 +28,6 @@ public class CommunicationRunner {
     private final Supplier<Optional<Message>> mMessagesToSendSupplier;
 
     private final AtomicReference<Connection> mConnectionReference;
-    private final AtomicBoolean mIsTerminated;
 
     public CommunicationRunner(ExecutorService executorService, Serializer serializer, Logger logger, Consumer<Message> newMessageConsumer, Supplier<Optional<Message>> messagesToSendSupplier) {
         mExecutorService = executorService;
@@ -38,25 +38,10 @@ public class CommunicationRunner {
         mMessagesToSendSupplier = messagesToSendSupplier;
 
         mConnectionReference = new AtomicReference<>();
-        mIsTerminated = new AtomicBoolean(false);
     }
 
-    public boolean isTerminated() {
-        return mIsTerminated.get();
-    }
-
-    public boolean isRunning() {
-        return mConnectionReference.get() != null;
-    }
-
-    public synchronized void start(Connection connection) {
-        if (isTerminated()) {
-            throw new IllegalStateException("terminated");
-        }
-        if (isRunning()) {
-            throw new IllegalStateException("already running");
-        }
-
+    @Override
+    protected void startRunner(Connection connection) {
         mConnectionReference.set(connection);
 
         Messenger messenger = new Messenger(connection, mSerializer);
@@ -65,14 +50,8 @@ public class CommunicationRunner {
         mExecutorService.execute(new MessageWriteTask(messenger, mMessagesToSendSupplier, mLogger));
     }
 
-    public synchronized void terminate() {
-        if (isTerminated()) {
-            throw new IllegalStateException("already terminated");
-        }
-        if (!isRunning()) {
-            throw new IllegalStateException("not running");
-        }
-
+    @Override
+    protected void stopRunner() {
         try {
             Closer closer = Closer.empty();
 
