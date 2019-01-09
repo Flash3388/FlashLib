@@ -13,7 +13,7 @@ public class Logging {
 
     private Logging() {}
 
-    public static Logger getLogger(File parentDirectory, String name) throws SecurityException, IOException {
+    public static Logger getLogger(File parentDirectory, String name) throws IOException {
         Logger logger = Logger.getLogger(name);
 
         String directoryPath = getLoggerFileParentPath(parentDirectory, name);
