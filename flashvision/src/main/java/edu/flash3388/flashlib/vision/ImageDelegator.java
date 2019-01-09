@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.vision;
 
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
+
 import java.util.List;
-import java.util.Optional;
 
 public class ImageDelegator<T extends Image> {
 
@@ -18,18 +19,11 @@ public class ImageDelegator<T extends Image> {
         return this;
     }
 
-    public boolean tryDelegate() {
-        Optional<T> optionalImage = mImageSource.get();
-        if (!optionalImage.isPresent()) {
-            return false;
-        }
-
-        T image = optionalImage.get();
+    public void delegate() throws VisionException {
+        T image = mImageSource.get();
 
         for (ImagePipeline<T> pipeline : mImagePipelines) {
             pipeline.process(image);
         }
-
-        return true;
     }
 }

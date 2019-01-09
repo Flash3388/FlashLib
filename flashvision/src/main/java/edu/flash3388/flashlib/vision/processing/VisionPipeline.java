@@ -8,23 +8,18 @@ import edu.flash3388.flashlib.vision.processing.analysis.exceptions.ImageAnalysi
 import edu.flash3388.flashlib.vision.processing.exceptions.ImageProcessingException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
     private final List<ImageProcessor<T>> mImageProcessors;
     private final ImageAnalyser<T> mImageAnalyser;
     private final Consumer<Analysis> mAnalysisConsumer;
-    private final Logger mLogger;
 
-    public VisionPipeline(List<ImageProcessor<T>> imageProcessors, ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, Logger logger) {
+    public VisionPipeline(List<ImageProcessor<T>> imageProcessors, ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer) {
         mImageProcessors = imageProcessors;
         mImageAnalyser = imageAnalyser;
         mAnalysisConsumer = analysisConsumer;
-        mLogger = logger;
     }
 
     public VisionPipeline<T> addProcessor(ImageProcessor<T> imageProcessor) {
@@ -33,7 +28,7 @@ public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
     }
 
     @Override
-    public void process(T image) {
+    public void process(T image) throws ImageProcessingException {
         try {
             for (ImageProcessor<T> processor : mImageProcessors) {
                 image = processor.process(image);
@@ -41,8 +36,8 @@ public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
             Analysis analysis = mImageAnalyser.analyse(image);
             mAnalysisConsumer.accept(analysis);
-        } catch (ImageProcessingException | ImageAnalysingException e) {
-            mLogger.log(Level.SEVERE, "failed to process image", e);
+        } catch (ImageAnalysingException e) {
+            throw new ImageProcessingException(e);
         }
     }
 }

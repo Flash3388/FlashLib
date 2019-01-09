@@ -1,10 +1,8 @@
 package edu.flash3388.flashlib.vision;
 
-import java.util.Optional;
-import java.util.function.Supplier;
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
 
-public interface ImageSource<T extends Image> extends Supplier<Optional<T>> {
+public interface ImageSource<T extends Image> {
 
-    @Override
-    Optional<T> get();
+    T get() throws VisionException;
 }

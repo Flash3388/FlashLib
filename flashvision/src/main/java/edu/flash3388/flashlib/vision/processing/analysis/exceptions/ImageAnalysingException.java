@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.vision.processing.analysis.exceptions;
 
-public class ImageAnalysingException extends Exception {
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
+
+public class ImageAnalysingException extends VisionException {
 
     public ImageAnalysingException(Throwable cause) {
         super(cause);

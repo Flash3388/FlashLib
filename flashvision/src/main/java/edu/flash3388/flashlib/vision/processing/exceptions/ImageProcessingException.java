@@ -1,6 +1,8 @@
 package edu.flash3388.flashlib.vision.processing.exceptions;
 
-public class ImageProcessingException extends Exception {
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
+
+public class ImageProcessingException extends VisionException {
 
     public ImageProcessingException(Throwable cause) {
         super(cause);
