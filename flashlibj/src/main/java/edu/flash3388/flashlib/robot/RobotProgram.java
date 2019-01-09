@@ -40,7 +40,9 @@ public class RobotProgram {
     }
 
     private void runRobot() throws RobotInitializationException, RobotCreationException {
-        RobotBase robot = mRobotCreator.create(mLogger, mResourceHolder);
+        RobotBase robot = mRobotCreator.create();
+        robot.initResources(mResourceHolder, mLogger);
+
         RunningRobot.INSTANCE.set(robot);
 
         robot.robotInit();

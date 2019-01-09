@@ -67,26 +67,28 @@ public abstract class IterativeRobot extends RobotBase {
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 
 	private final Sleeper mSleeper;
+    private final Scheduler mScheduler;
 	private final BooleanProperty mRunLoopProperty;
 
-	protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder, Sleeper sleeper) {
-        super(clock, scheduler, hidInterface, logger, resourceHolder);
+	protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Sleeper sleeper) {
+        super(clock, scheduler, hidInterface);
 
 	    mSleeper = sleeper;
+	    mScheduler = getScheduler();
         mRunLoopProperty = new SimpleBooleanProperty(true);
     }
 
-    protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder) {
-        this(clock, scheduler, hidInterface, logger, resourceHolder, new Sleeper());
+    protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface) {
+        this(clock, scheduler, hidInterface, new Sleeper());
     }
 
 	@Override
-	protected void robotMain() {
+	protected final void robotMain() {
 		robotLoop();
 	}
 
 	@Override
-	protected void robotShutdown(){
+	protected final void robotShutdown(){
         stopRobotLoop();
 
         mScheduler.setRunMode(SchedulerRunMode.DISABLED);
@@ -96,11 +98,7 @@ public abstract class IterativeRobot extends RobotBase {
         robotStop();
 	}
 
-	public Scheduler getScheduler() {
-	    return mScheduler;
-    }
-
-	protected void stopRobotLoop() {
+	protected final void stopRobotLoop() {
         mRunLoopProperty.setAsBoolean(false);
     }
 

@@ -155,7 +155,7 @@ public class IterativeRobotTest {
     private static class FakeIterativeRobot extends IterativeRobot {
 
         private FakeIterativeRobot(Scheduler scheduler, Sleeper sleeper) {
-            super(null, scheduler, null, null, null, sleeper);
+            super(null, scheduler, null, sleeper);
         }
 
         @Override

@@ -29,19 +29,17 @@ import java.util.logging.Logger;
  */
 public abstract class RobotBase implements Robot {
 
-    protected final Clock mClock;
-    protected final Scheduler mScheduler;
-    protected final HidInterface mHidInterface;
-    protected final Logger mLogger;
+    private final Clock mClock;
+    private final Scheduler mScheduler;
+    private final HidInterface mHidInterface;
 
-    private final ResourceHolder mResourceHolder;
+    private ResourceHolder mResourceHolder;
+    private Logger mLogger;
 
-    protected RobotBase(Clock clock, Scheduler scheduler, HidInterface hidInterface, Logger logger, ResourceHolder resourceHolder) {
+    protected RobotBase(Clock clock, Scheduler scheduler, HidInterface hidInterface) {
         mClock = clock;
         mScheduler = scheduler;
         mHidInterface = hidInterface;
-        mLogger = logger;
-        mResourceHolder = resourceHolder;
     }
 
     @Override
@@ -69,6 +67,11 @@ public abstract class RobotBase implements Robot {
         for(Resource resource : resources) {
             mResourceHolder.add(resource);
         }
+    }
+
+    final void initResources(ResourceHolder resourceHolder, Logger logger) {
+        mResourceHolder = resourceHolder;
+        mLogger = logger;
     }
 
     /**
