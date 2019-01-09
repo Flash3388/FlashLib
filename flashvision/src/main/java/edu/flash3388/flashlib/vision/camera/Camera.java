@@ -12,10 +12,10 @@ public interface Camera<T extends Image> extends ImageSource<T> {
     int getHeight();
     int getWidth();
 
-    T capture();
+    Optional<T> capture();
 
     @Override
     default Optional<T> get() {
-        return Optional.of(capture());
+        return capture();
     }
 }

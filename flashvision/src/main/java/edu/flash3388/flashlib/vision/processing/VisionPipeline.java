@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.vision.processing;
 import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.ImagePipeline;
 import edu.flash3388.flashlib.vision.processing.analysis.Analysis;
-import edu.flash3388.flashlib.vision.processing.analysis.AnalysisCreator;
+import edu.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +14,13 @@ import java.util.logging.Logger;
 public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
     private final List<ImageProcessor<T>> mImageProcessors;
-    private final AnalysisCreator<T> mAnalysisCreator;
+    private final ImageAnalyser<T> mImageAnalyser;
     private final Consumer<Analysis> mAnalysisConsumer;
     private final Logger mLogger;
 
-    public VisionPipeline(List<ImageProcessor<T>> imageProcessors, AnalysisCreator<T> analysisCreator, Consumer<Analysis> analysisConsumer, Logger logger) {
+    public VisionPipeline(List<ImageProcessor<T>> imageProcessors, ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, Logger logger) {
         mImageProcessors = imageProcessors;
-        mAnalysisCreator = analysisCreator;
+        mImageAnalyser = imageAnalyser;
         mAnalysisConsumer = analysisConsumer;
         mLogger = logger;
     }
@@ -37,7 +37,7 @@ public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
                 image = processor.process(image);
             }
 
-            Optional<Analysis> optionalAnalysis = mAnalysisCreator.tryCreateAnalysis(image);
+            Optional<Analysis> optionalAnalysis = mImageAnalyser.tryAnalyse(image);
             if (optionalAnalysis.isPresent()) {
                 mAnalysisConsumer.accept(optionalAnalysis.get());
             } else {

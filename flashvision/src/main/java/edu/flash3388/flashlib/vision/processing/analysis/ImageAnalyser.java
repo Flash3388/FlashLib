@@ -4,7 +4,7 @@ import edu.flash3388.flashlib.vision.Image;
 
 import java.util.Optional;
 
-public interface AnalysisCreator<T extends Image> {
+public interface ImageAnalyser<T extends Image> {
 
-    Optional<Analysis> tryCreateAnalysis(T image);
+    Optional<Analysis> tryAnalyse(T image);
 }
