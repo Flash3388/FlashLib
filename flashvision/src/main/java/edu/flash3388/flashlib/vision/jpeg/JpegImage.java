@@ -39,15 +39,11 @@ public class JpegImage implements Image {
 
     @Override
     public byte[] getRaw() throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             ImageIO.write(mImage, JPEG_FORMAT_NAME, byteArrayOutputStream);
 
             byteArrayOutputStream.flush();
             return byteArrayOutputStream.toByteArray();
-        } finally {
-            byteArrayOutputStream.close();
-
         }
     }
 
