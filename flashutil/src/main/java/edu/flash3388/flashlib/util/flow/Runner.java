@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.util.control;
+package edu.flash3388.flashlib.util.flow;
 
 public interface Runner {
 
