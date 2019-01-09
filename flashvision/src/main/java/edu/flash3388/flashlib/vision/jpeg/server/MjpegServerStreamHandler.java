@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.vision.camera.Camera;
+import edu.flash3388.flashlib.vision.exceptions.VisionException;
 import edu.flash3388.flashlib.vision.jpeg.JpegImage;
 
 import java.io.IOException;
@@ -53,17 +54,12 @@ public class MjpegServerStreamHandler implements HttpHandler {
 
                 Time startTime = mClock.currentTime();
 
-                Optional<JpegImage> optionalJpegImage = camera.capture();
-                if (optionalJpegImage.isPresent()) {
-                    JpegImage image = optionalJpegImage.get();
-                    byte[] imageBytes = image.getRaw();
+                JpegImage image = camera.capture();
+                byte[] imageBytes = image.getRaw();
 
-                    outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
-                    outputStream.write(imageBytes);
-                    outputStream.flush();
-                } else {
-                    mLogger.log(Level.WARNING, "camera returned empty image");
-                }
+                outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
+                outputStream.write(imageBytes);
+                outputStream.flush();
 
                 Time timeTaken = mClock.currentTime().sub(startTime);
                 long sleepMillis = timeTaken.getAsMillis() - (1000 / camera.getFps());
@@ -73,7 +69,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
                 }
             } catch (InterruptedException e) {
                 break;
-            } catch (IOException e) {
+            } catch (IOException | VisionException e) {
                 mLogger.log(Level.SEVERE, "Error in stream handler", e);
             }
         }

@@ -13,10 +13,10 @@ public interface Camera<T extends Image> extends ImageSource<T> {
     int getHeight();
     int getWidth();
 
-    Optional<T> capture();
+    T capture() throws VisionException;
 
     @Override
     default T get() throws VisionException {
-        return capture().get();
+        return capture();
     }
 }

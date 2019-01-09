@@ -24,8 +24,8 @@ public class StaticImageCamera implements Camera {
     }
 
     @Override
-    public Optional<Image> capture() {
-        return Optional.of(mImage);
+    public Image capture() {
+        return mImage;
     }
 
     @Override
