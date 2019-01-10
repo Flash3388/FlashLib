@@ -2,17 +2,12 @@ package edu.flash3388.flashlib.robot;
 
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
-import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.scheduling.Action;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
-import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
-import edu.flash3388.flashlib.util.resources.ResourceHolder;
-
-import java.util.logging.Logger;
 
 /**
  * An extension of {@link Robot}. This class provides extended and easier control over robot
@@ -67,19 +62,15 @@ public abstract class IterativeRobot extends RobotBase {
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 
 	private final Sleeper mSleeper;
-    private final Scheduler mScheduler;
 	private final BooleanProperty mRunLoopProperty;
 
-	protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface, Sleeper sleeper) {
-        super(clock, scheduler, hidInterface);
-
-	    mSleeper = sleeper;
-	    mScheduler = getScheduler();
+	protected IterativeRobot(Sleeper sleeper) {
+        mSleeper = sleeper;
         mRunLoopProperty = new SimpleBooleanProperty(true);
     }
 
-    protected IterativeRobot(Clock clock, Scheduler scheduler, HidInterface hidInterface) {
-        this(clock, scheduler, hidInterface, new Sleeper());
+    protected IterativeRobot() {
+        this(new Sleeper());
     }
 
 	@Override
@@ -91,9 +82,9 @@ public abstract class IterativeRobot extends RobotBase {
 	protected final void robotShutdown(){
         stopRobotLoop();
 
-        mScheduler.setRunMode(SchedulerRunMode.DISABLED);
-        mScheduler.removeAllTasks();
-        mScheduler.removeAllActions();
+        getScheduler().setRunMode(SchedulerRunMode.DISABLED);
+        getScheduler().removeAllTasks();
+        getScheduler().removeAllActions();
 
         robotStop();
 	}
@@ -132,13 +123,13 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        mScheduler.removeAllActions();
+        getScheduler().removeAllActions();
 
         if (mode.equals(RobotMode.DISABLED)) {
-            mScheduler.setRunMode(SchedulerRunMode.TASKS_ONLY);
+            getScheduler().setRunMode(SchedulerRunMode.TASKS_ONLY);
             disabledInit();
         } else {
-            mScheduler.setRunMode(SchedulerRunMode.ALL);
+            getScheduler().setRunMode(SchedulerRunMode.ALL);
             modeInit(mode);
         }
     }
@@ -147,7 +138,7 @@ public abstract class IterativeRobot extends RobotBase {
         if (mode.equals(RobotMode.DISABLED)) {
             disabledPeriodic();
         } else {
-            mScheduler.run();
+            getScheduler().run();
             modePeriodic(mode);
         }
 

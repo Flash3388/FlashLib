@@ -5,6 +5,7 @@ import edu.flash3388.flashlib.robot.hid.HidInterface;
 import edu.flash3388.flashlib.robot.modes.RobotMode;
 import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
+import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.concurrent.Sleeper;
 import org.junit.After;
@@ -154,8 +155,12 @@ public class IterativeRobotTest {
 
     private static class FakeIterativeRobot extends IterativeRobot {
 
+        private final Scheduler mScheduler;
+
         private FakeIterativeRobot(Scheduler scheduler, Sleeper sleeper) {
-            super(null, scheduler, null, sleeper);
+            super(sleeper);
+
+            mScheduler = scheduler;
         }
 
         @Override
@@ -195,6 +200,16 @@ public class IterativeRobotTest {
 
         @Override
         public HidInterface getHidInterface() {
+            return null;
+        }
+
+        @Override
+        public Scheduler getScheduler() {
+            return mScheduler;
+        }
+
+        @Override
+        public Clock getClock() {
             return null;
         }
     }
