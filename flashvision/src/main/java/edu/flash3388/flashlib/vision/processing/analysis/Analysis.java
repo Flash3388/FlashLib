@@ -1,16 +1,16 @@
 package edu.flash3388.flashlib.vision.processing.analysis;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class Analysis {
 
-    private final JSONObject mData;
+    private final JsonObject mData;
 
-    public Analysis(JSONObject data) {
+    public Analysis(JsonObject data) {
         mData = data;
     }
 
-    public JSONObject getData() {
+    public JsonObject getData() {
         return mData;
     }
 }

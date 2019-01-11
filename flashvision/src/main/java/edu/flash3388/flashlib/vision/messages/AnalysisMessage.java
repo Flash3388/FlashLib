@@ -1,8 +1,12 @@
 package edu.flash3388.flashlib.vision.messages;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.vision.processing.analysis.Analysis;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -25,7 +29,16 @@ public class AnalysisMessage implements Message {
     }
 
     private void readObject(ObjectInputStream objectInputStream) throws IOException {
-        String rawData = objectInputStream.readUTF();
-        mAnalysis = new Analysis(new JSONObject(rawData));
+        try {
+            String rawData = objectInputStream.readUTF();
+            JsonElement jsonElement = new JsonParser().parse(rawData);
+            if (!jsonElement.isJsonObject()) {
+                throw new IOException("json data is not a json object");
+            }
+
+            mAnalysis = new Analysis(jsonElement.getAsJsonObject());
+        } catch (JsonParseException e) {
+            throw new IOException(e);
+        }
     }
 }
