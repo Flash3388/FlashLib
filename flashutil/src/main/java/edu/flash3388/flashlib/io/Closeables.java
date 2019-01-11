@@ -9,7 +9,7 @@ import java.io.IOException;
 public class Closeables {
     private Closeables() {}
 
-    private static final Logger LOGGER = Logging.getInnerLogger(Closeables.class.getName());
+    private static final Logger LOGGER = Logging.getConsoleLogger(Closeables.class.getName());
 
     public static void closeQuietly(Closeable closeable) {
         try {
