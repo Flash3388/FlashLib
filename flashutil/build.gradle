@@ -4,4 +4,6 @@ apply from: rootProject.file('java-library.gradle')
 dependencies {
     compile name: 'jmath-1.0'
     compile name: 'javabeans-1.0'
+
+    compile 'com.google.code.gson:gson:2.8.5'
 }
