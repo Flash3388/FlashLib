@@ -3,11 +3,10 @@ package edu.flash3388.flashlib.communication.runner;
 import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.communication.message.WriteException;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MessageWriteTask implements Runnable {
 
@@ -33,7 +32,7 @@ public class MessageWriteTask implements Runnable {
                 Message message = optionalMessage.get();
                 mMessenger.writeMessage(message);
             } catch (WriteException e) {
-                mLogger.log(Level.SEVERE, "error while writing message", e);
+                mLogger.warn("error while writing message", e);
             }
         }
     }

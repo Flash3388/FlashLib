@@ -6,8 +6,7 @@ import edu.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import edu.flash3388.flashlib.robot.scheduling.Scheduler;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.util.resources.Resource;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 
 public interface Robot {

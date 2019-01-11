@@ -5,6 +5,7 @@ import edu.flash3388.flashlib.io.serialization.JavaObjectSerializer;
 import edu.flash3388.flashlib.io.serialization.Serializer;
 import edu.flash3388.flashlib.util.collections.BlockingQueueConsumer;
 import edu.flash3388.flashlib.util.collections.BlockingQueueOptionalSupplier;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -12,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 public class CommunicationRunnerFactory {
 

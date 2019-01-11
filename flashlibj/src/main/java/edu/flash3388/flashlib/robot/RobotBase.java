@@ -2,8 +2,7 @@ package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.util.resources.Resource;
 import edu.flash3388.flashlib.util.resources.ResourceHolder;
-
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 /**
  * <p>

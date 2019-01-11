@@ -1,20 +1,21 @@
 package edu.flash3388.flashlib.io;
 
+import edu.flash3388.flashlib.util.logging.Logging;
+import org.slf4j.Logger;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Closeables {
     private Closeables() {}
 
-    private static final Logger LOGGER = Logger.getLogger(Closeables.class.getName());
+    private static final Logger LOGGER = Logging.getInnerLogger(Closeables.class.getName());
 
     public static void closeQuietly(Closeable closeable) {
         try {
             closeable.close();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "error while closing closeable quietly", e);
+            LOGGER.warn("error while closing closeable quietly", e);
         }
     }
 
@@ -22,7 +23,7 @@ public class Closeables {
         try {
             closeable.close();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "error while closing auto closeable quietly", e);
+            LOGGER.warn("error while closing auto closeable quietly", e);
         }
     }
 }

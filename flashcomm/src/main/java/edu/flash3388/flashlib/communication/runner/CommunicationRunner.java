@@ -7,16 +7,14 @@ import edu.flash3388.flashlib.io.Closer;
 import edu.flash3388.flashlib.io.serialization.Serializer;
 import edu.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import edu.flash3388.flashlib.util.flow.SingleUseParameterizedRunner;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CommunicationRunner extends SingleUseParameterizedRunner<Connection> {
 
@@ -62,7 +60,7 @@ public class CommunicationRunner extends SingleUseParameterizedRunner<Connection
 
             closer.close();
         } catch (IOException e) {
-            mLogger.log(Level.SEVERE, "error while closing resources", e);
+            mLogger.warn("error while closing resources", e);
         }
     }
 }

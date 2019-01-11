@@ -1,9 +1,7 @@
 package edu.flash3388.flashlib.robot;
 
 import edu.flash3388.flashlib.util.resources.ResourceHolder;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 public class RobotProgram {
 
@@ -24,11 +22,11 @@ public class RobotProgram {
         try {
             runRobot();
         } catch (RobotCreationException e) {
-            mLogger.log(Level.SEVERE, "Error while creating robot", e);
+            mLogger.error("Error while creating robot", e);
         } catch (RobotInitializationException e) {
-            mLogger.log(Level.SEVERE, "Error while initializing robot", e);
+            mLogger.error("Error while initializing robot", e);
         } catch (Throwable t) {
-            mLogger.log(Level.SEVERE, "Unknown error from robot", t);
+            mLogger.error("Unknown error from robot", t);
         } finally {
             freeRobotResources();
         }

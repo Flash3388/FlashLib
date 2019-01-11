@@ -3,10 +3,9 @@ package edu.flash3388.flashlib.communication.runner;
 import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.communication.message.Messenger;
 import edu.flash3388.flashlib.communication.message.ReadException;
+import org.slf4j.Logger;
 
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MessageReadTask implements Runnable {
 
@@ -27,7 +26,7 @@ public class MessageReadTask implements Runnable {
                 Message message = mMessenger.readMessage();
                 mMessagesConsumer.accept(message);
             } catch (ReadException e) {
-                mLogger.log(Level.SEVERE, "error while reading message", e);
+                mLogger.warn("error while reading message", e);
             }
         }
     }

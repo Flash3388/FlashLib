@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 /**
  * <p>

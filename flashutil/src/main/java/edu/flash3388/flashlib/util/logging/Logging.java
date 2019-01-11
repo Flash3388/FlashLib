@@ -10,11 +10,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 
 public class Logging {
 
     private Logging() {}
+
+    public static Logger getInnerLogger(String name) {
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger(name);
+        logger.addHandler(new ConsoleHandler());
+
+        return new JulLoggerAdapter(logger);
+    }
 
     public static Logger getLogger(File parentDirectory, String name) throws IOException {
         java.util.logging.Logger logger = java.util.logging.Logger.getLogger(name);
