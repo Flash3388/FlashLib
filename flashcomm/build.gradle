@@ -1,12 +1,7 @@
-apply plugin: 'java'
-apply from: rootProject.file('instrumentation-test.gradle')
 apply from: rootProject.file('java-library.gradle')
+apply from: rootProject.file('instrumentation-test.gradle')
 
 
 dependencies {
     compile project(':flashutil')
-
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.7.22'
-    testCompile group: 'org.hamcrest', name: 'java-hamcrest', version: '2.0.0.0'
 }
