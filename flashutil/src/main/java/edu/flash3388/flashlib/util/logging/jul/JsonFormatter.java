@@ -5,14 +5,33 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 public class JsonFormatter extends Formatter {
 
     private final boolean mShouldFormatMessage;
 
+    private boolean wasFirstLogWritten;
+
     public JsonFormatter(boolean shouldFormatMessage) {
         mShouldFormatMessage = shouldFormatMessage;
+        wasFirstLogWritten = false;
+    }
+
+    public JsonFormatter() {
+        this(false);
+    }
+
+    @Override
+    public String getHead(Handler h) {
+        wasFirstLogWritten = false;
+        return "[";
+    }
+
+    @Override
+    public String getTail(Handler h) {
+        return "]";
     }
 
     @Override
@@ -24,7 +43,12 @@ public class JsonFormatter extends Formatter {
         addParameters(root, record);
         addThrowable(root, record);
 
-        return root.toString();
+        if(wasFirstLogWritten) {
+            return ",".concat(root.toString());
+        } else {
+            wasFirstLogWritten = true;
+            return root.toString();
+        }
     }
 
     private void addBasicData(JsonObject root, LogRecord record) {
