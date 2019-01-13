@@ -22,16 +22,6 @@ public class JsonSerializerTest {
         assertTestClassEquals(OBJECT, deserializedObject);
     }
 
-    @Test(expected = TypeException.class)
-    public void deserialize_classTypeDoesNotMatch_throwsTypeException() throws Exception {
-        final TestClass OBJECT = new TestClass(23, 5.0);
-
-        JsonSerializer serializer = new JsonSerializer(new Gson(), Charset.forName("UTF-8"));
-
-        byte[] serializedValue = serializer.serialize(OBJECT);
-        serializer.deserialize(serializedValue, OtherObject.class);
-    }
-
     private void assertTestClassEquals(TestClass expected, TestClass actual) {
         assertEquals(expected.variable1, actual.variable1);
         assertEquals(expected.variable2, actual.variable2, DOUBLE_EQUALS_MARGIN);

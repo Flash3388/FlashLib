@@ -30,7 +30,7 @@ public class JsonSerializer implements Serializer {
     @Override
     public <T> T deserialize(byte[] serializedValue, Class<T> type) throws IOException, TypeException {
         try {
-            Object value = mGson.fromJson(new String(serializedValue, mCharset), Object.class);
+            Object value = mGson.fromJson(new String(serializedValue, mCharset), type);
             return type.cast(value);
         } catch (JsonSyntaxException | JsonIOException e) {
             throw new IOException(e);
