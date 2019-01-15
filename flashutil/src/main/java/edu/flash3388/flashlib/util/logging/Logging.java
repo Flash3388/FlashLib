@@ -19,6 +19,7 @@ public class Logging {
         return new LoggerBuilder(name)
                 .enableFileLogging(true)
                 .setDateBasedFilesParent(parent)
+                .setTimeBasedFilePattern()
                 .build();
     }
 }
