@@ -30,7 +30,7 @@ public class Sleeper {
     }
 
     private long getSleepingPeriodMs(long timeoutMs) {
-        if (timeoutMs < MIN_SLEEP_PERIOD_MS) {
+        if (timeoutMs <= MIN_SLEEP_PERIOD_MS) {
             return MIN_SLEEP_PERIOD_MS;
         }
 
