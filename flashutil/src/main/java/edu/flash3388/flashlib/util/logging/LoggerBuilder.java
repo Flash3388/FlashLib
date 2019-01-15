@@ -1,7 +1,9 @@
 package edu.flash3388.flashlib.util.logging;
 
+import edu.flash3388.flashlib.util.logging.jul.DelegatingHandler;
 import edu.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import edu.flash3388.flashlib.util.logging.jul.JulLoggerAdapter;
+import edu.flash3388.flashlib.util.logging.jul.LogFlushingTask;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -9,14 +11,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 
 public class LoggerBuilder {
 
     private static final int DEFAULT_FILE_SIZE_BYTES = 1048576; // 1 MB
     private static final int DEFAULT_FILE_COUNT = 10;
+    private static final int DEFAULT_DELEGATED_LOGGING_CAPACITY = 1024;
+    private static final int LOG_FLUSHER_STACK_SIZE_KB = 128;
 
     private final String mName;
 
@@ -25,6 +31,9 @@ public class LoggerBuilder {
     private File mLogsParent;
     private Formatter mFileHandlerFormatter;
     private LogFileConfig mLogFileConfig;
+
+    private boolean mEnableDelegatedFileLogging;
+    private int mDelegatedLoggingCapacity;
 
     private boolean mEnableConsoleLogging;
 
@@ -38,6 +47,9 @@ public class LoggerBuilder {
         mLogsParent = null;
         mFileHandlerFormatter = new JsonFormatter();
         mLogFileConfig = new LogFileConfig(DEFAULT_FILE_SIZE_BYTES, DEFAULT_FILE_COUNT);
+
+        mEnableDelegatedFileLogging = false;
+        mDelegatedLoggingCapacity = DEFAULT_DELEGATED_LOGGING_CAPACITY;
 
         mEnableConsoleLogging = false;
 
@@ -55,7 +67,7 @@ public class LoggerBuilder {
     }
 
     public LoggerBuilder setFilePattern(String filePattern) {
-        mFilePattern = filePattern;
+        mFilePattern = Objects.requireNonNull(filePattern);
         return this;
     }
 
@@ -69,7 +81,7 @@ public class LoggerBuilder {
     }
 
     public LoggerBuilder setLogFilesParent(File parent) {
-        mLogsParent = parent;
+        mLogsParent = Objects.requireNonNull(parent);
         return this;
     }
 
@@ -83,17 +95,31 @@ public class LoggerBuilder {
     }
 
     public LoggerBuilder setFileLogFormatter(Formatter formatter) {
-        mFileHandlerFormatter = formatter;
+        mFileHandlerFormatter = Objects.requireNonNull(formatter);
         return this;
     }
 
     public LoggerBuilder setLogFileConfig(LogFileConfig logFileConfig) {
-        mLogFileConfig = logFileConfig;
+        mLogFileConfig = Objects.requireNonNull(logFileConfig);
+        return this;
+    }
+
+    public LoggerBuilder enableDelegatedFileLogging(boolean delegatedFileLogging) {
+        mEnableDelegatedFileLogging = delegatedFileLogging;
+        return this;
+    }
+
+    public LoggerBuilder setDelegatedLoggingCapacity(int delegatedLoggingCapacity) {
+        if (delegatedLoggingCapacity <= 0) {
+            throw new IllegalArgumentException("capacity must be positive");
+        }
+
+        mDelegatedLoggingCapacity = delegatedLoggingCapacity;
         return this;
     }
 
     public LoggerBuilder setLogLevel(LogLevel logLevel) {
-        mLogLevel = logLevel;
+        mLogLevel = Objects.requireNonNull(logLevel);
         return this;
     }
 
@@ -124,7 +150,15 @@ public class LoggerBuilder {
                 fileHandler.setFormatter(mFileHandlerFormatter);
                 fileHandler.setLevel(mLogLevel.getJulLevel());
 
-                logger.addHandler(fileHandler);
+                if (mEnableDelegatedFileLogging) {
+                    Handler delegatedHandler = new DelegatingHandler(fileHandler, mDelegatedLoggingCapacity);
+                    delegatedHandler.setLevel(mLogLevel.getJulLevel());
+
+                    startLogFlusher(delegatedHandler);
+                    logger.addHandler(delegatedHandler);
+                } else {
+                    logger.addHandler(fileHandler);
+                }
             }
 
             logger.setLevel(mLogLevel.getJulLevel());
@@ -137,5 +171,17 @@ public class LoggerBuilder {
 
     public Logger build() {
         return new JulLoggerAdapter(buildJul());
+    }
+
+    private void startLogFlusher(Handler handler) {
+        Thread thread = new Thread(
+                null,
+                new LogFlushingTask(handler),
+                mName.concat("-flusher"),
+                LOG_FLUSHER_STACK_SIZE_KB);
+
+        thread.setDaemon(true);
+
+        thread.start();
     }
 }
