@@ -52,8 +52,28 @@ task flashlib(type: Jar, dependsOn: subprojects.build) {
     })
 }
 
+task flashlibAll(type: Jar, dependsOn: flashlib) {
+    dependsOn flashlibSources
+    dependsOn flashlibJavadoc
+
+    baseName = 'flashlib-all'
+    destinationDir = rootProject.buildDir
+
+    from files(subprojects.collect {
+        it.sourceSets.main.output
+    })
+    from files(subprojects.collect {
+        it.sourceSets.main.allSource
+    })
+    from files(subprojects.collect {
+        it.javadoc.destinationDir
+    })
+}
+
 artifacts {
     archives flashlib
     archives flashlibSources
     archives flashlibJavadoc
+
+    archives flashlibAll
 }
