@@ -15,6 +15,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +28,7 @@ public class IterativeRobotTest {
     private ExecutorService mExecutorService;
     private Closer mCloser;
 
+    private Logger mLogger;
     private Scheduler mScheduler;
     private IterativeRobot mIterativeRobot;
 
@@ -37,8 +39,9 @@ public class IterativeRobotTest {
         mExecutorService = Executors.newSingleThreadExecutor();
         mCloser.add(new ExecutorCloser(mExecutorService));
 
+        mLogger = mock(Logger.class);
         mScheduler = mock(Scheduler.class);
-        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mock(Sleeper.class)));
+        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mLogger, mock(Sleeper.class)));
     }
 
     @After
@@ -156,11 +159,38 @@ public class IterativeRobotTest {
     private static class FakeIterativeRobot extends IterativeRobot {
 
         private final Scheduler mScheduler;
+        private final Logger mLogger;
 
-        private FakeIterativeRobot(Scheduler scheduler, Sleeper sleeper) {
+        private FakeIterativeRobot(Scheduler scheduler, Logger logger, Sleeper sleeper) {
             super(sleeper);
 
             mScheduler = scheduler;
+            mLogger = logger;
+        }
+
+        @Override
+        public RobotModeSupplier getModeSupplier() {
+            return null;
+        }
+
+        @Override
+        public HidInterface getHidInterface() {
+            return null;
+        }
+
+        @Override
+        public Clock getClock() {
+            return null;
+        }
+
+        @Override
+        public Scheduler getScheduler() {
+            return mScheduler;
+        }
+
+        @Override
+        public Logger getLogger() {
+            return mLogger;
         }
 
         @Override
@@ -191,26 +221,6 @@ public class IterativeRobotTest {
         @Override
         protected void modePeriodic(RobotMode mode) {
 
-        }
-
-        @Override
-        public RobotModeSupplier getModeSupplier() {
-            return null;
-        }
-
-        @Override
-        public HidInterface getHidInterface() {
-            return null;
-        }
-
-        @Override
-        public Scheduler getScheduler() {
-            return mScheduler;
-        }
-
-        @Override
-        public Clock getClock() {
-            return null;
         }
     }
 }
