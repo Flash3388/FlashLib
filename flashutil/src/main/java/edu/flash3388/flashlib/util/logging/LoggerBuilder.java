@@ -81,13 +81,15 @@ public class LoggerBuilder {
     public java.util.logging.Logger buildJul() {
         try {
             java.util.logging.Logger logger = java.util.logging.Logger.getLogger(mName);
+            logger.setUseParentHandlers(false);
 
             if (mEnableConsoleLogging) {
                 logger.addHandler(new ConsoleHandler());
             }
 
             if (mEnableFileLogging && mFilePattern != null && mFilePattern.length() > 0) {
-                String pattern = "";
+                String pattern;
+
                 if (mLogsParent != null) {
                     pattern = mLogsParent.getAbsolutePath().concat(File.separator).concat(mFilePattern);
                     Files.createDirectories(mLogsParent.toPath());
