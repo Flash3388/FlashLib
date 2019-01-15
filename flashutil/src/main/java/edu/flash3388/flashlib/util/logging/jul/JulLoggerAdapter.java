@@ -22,7 +22,7 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
 
     @Override
     public void log(Marker marker, String fqcn, int level, String message, Object[] argArray, Throwable t) {
-        Level julLevel = slf4jLevelIntToJULLevel(level);
+        Level julLevel = slf4jLevelIntToJulLevel(level);
 
         if (mLogger.isLoggable(julLevel)) {
             log(fqcn, julLevel, message, t);
@@ -44,14 +44,14 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     @Override
     public void trace(String format, Object arg) {
         if (isTraceEnabled()) {
-            logArgs(SELF, Level.FINEST, format, arg);
+            logArgs(SELF, Level.FINEST, format, new Object[]{arg});
         }
     }
 
     @Override
     public void trace(String format, Object arg1, Object arg2) {
         if (isTraceEnabled()) {
-            logArgs(SELF, Level.FINEST, format, arg1, arg2);
+            logArgs(SELF, Level.FINEST, format, new Object[]{arg1, arg2});
         }
     }
 
@@ -84,14 +84,14 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     @Override
     public void debug(String format, Object arg) {
         if (isDebugEnabled()) {
-            logArgs(SELF, Level.FINE, format, arg);
+            logArgs(SELF, Level.FINE, format, new Object[]{arg});
         }
     }
 
     @Override
     public void debug(String format, Object arg1, Object arg2) {
         if (isDebugEnabled()) {
-            logArgs(SELF, Level.FINE, format, arg1, arg2);
+            logArgs(SELF, Level.FINE, format, new Object[]{arg1, arg2});
         }
     }
 
@@ -124,14 +124,14 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     @Override
     public void info(String format, Object arg) {
         if (isInfoEnabled()) {
-            logArgs(SELF, Level.INFO, format, arg);
+            logArgs(SELF, Level.INFO, format, new Object[]{arg});
         }
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
         if (isInfoEnabled()) {
-            logArgs(SELF, Level.INFO, format, arg1, arg2);
+            logArgs(SELF, Level.INFO, format, new Object[]{arg1, arg2});
         }
     }
 
@@ -164,7 +164,14 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     @Override
     public void warn(String format, Object arg) {
         if (isWarnEnabled()) {
-            logArgs(SELF, Level.WARNING, format, arg);
+            logArgs(SELF, Level.WARNING, format, new Object[]{arg});
+        }
+    }
+
+    @Override
+    public void warn(String format, Object arg1, Object arg2) {
+        if (isWarnEnabled()) {
+            logArgs(SELF, Level.WARNING, format, new Object[]{arg1, arg2});
         }
     }
 
@@ -172,13 +179,6 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     public void warn(String format, Object... arguments) {
         if (isWarnEnabled()) {
             logArgs(SELF, Level.WARNING, format, arguments);
-        }
-    }
-
-    @Override
-    public void warn(String format, Object arg1, Object arg2) {
-        if (isWarnEnabled()) {
-            logArgs(SELF, Level.WARNING, format, arg1, arg2);
         }
     }
 
@@ -204,14 +204,14 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
     @Override
     public void error(String format, Object arg) {
         if (isErrorEnabled()) {
-            logArgs(SELF, Level.SEVERE, format, arg);
+            logArgs(SELF, Level.SEVERE, format, new Object[]{arg});
         }
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
         if (isErrorEnabled()) {
-            logArgs(SELF, Level.SEVERE, format, arg1, arg2);
+            logArgs(SELF, Level.SEVERE, format, new Object[]{arg1, arg2});
         }
     }
 
@@ -229,8 +229,8 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
         }
     }
 
-    private void logArgs(String callerFQCN, Level level, String format, Object... args) {
-        FormattingTuple ft = MessageFormatter.format(format, args);
+    private void logArgs(String callerFQCN, Level level, String format, Object[] args) {
+        FormattingTuple ft = MessageFormatter.arrayFormat(format, args);
 
         LogRecord record = createLogRecord(callerFQCN, level, ft.getMessage(), ft.getThrowable());
         record.setParameters(ft.getArgArray());
@@ -283,7 +283,7 @@ public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwar
         }
     }
 
-    private Level slf4jLevelIntToJULLevel(int slf4jLevelInt) {
+    private Level slf4jLevelIntToJulLevel(int slf4jLevelInt) {
         Level julLevel;
         switch (slf4jLevelInt) {
             case LocationAwareLogger.TRACE_INT:

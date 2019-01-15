@@ -15,12 +15,16 @@ import java.util.logging.Formatter;
 
 public class LoggerBuilder {
 
+    private static final int DEFAULT_FILE_SIZE_BYTES = 1048576; // 1 MB
+    private static final int DEFAULT_FILE_COUNT = 10;
+
     private final String mName;
 
     private boolean mEnableFileLogging;
     private String mFilePattern;
     private File mLogsParent;
     private Formatter mFileHandlerFormatter;
+    private LogFileConfig mLogFileConfig;
 
     private boolean mEnableConsoleLogging;
 
@@ -33,6 +37,7 @@ public class LoggerBuilder {
         mFilePattern = "";
         mLogsParent = null;
         mFileHandlerFormatter = new JsonFormatter();
+        mLogFileConfig = new LogFileConfig(DEFAULT_FILE_SIZE_BYTES, DEFAULT_FILE_COUNT);
 
         mEnableConsoleLogging = false;
 
@@ -82,6 +87,11 @@ public class LoggerBuilder {
         return this;
     }
 
+    public LoggerBuilder setLogFileConfig(LogFileConfig logFileConfig) {
+        mLogFileConfig = logFileConfig;
+        return this;
+    }
+
     public LoggerBuilder setLogLevel(LogLevel logLevel) {
         mLogLevel = logLevel;
         return this;
@@ -109,7 +119,8 @@ public class LoggerBuilder {
                     pattern = mFilePattern;
                 }
 
-                FileHandler fileHandler = new FileHandler(pattern);
+                FileHandler fileHandler = new FileHandler(pattern,
+                        mLogFileConfig.getSizeLimitBytes(), mLogFileConfig.getFileCount());
                 fileHandler.setFormatter(mFileHandlerFormatter);
                 fileHandler.setLevel(mLogLevel.getJulLevel());
 
