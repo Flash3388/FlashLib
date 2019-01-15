@@ -17,9 +17,11 @@ public class RobotProgram {
     }
 
     public void start() {
+        mLogger.info("Initializing robot");
         initializeRobot();
 
         try {
+            mLogger.info("Running robot");
             runRobot();
         } catch (RobotCreationException e) {
             mLogger.error("Error while creating robot", e);
@@ -30,6 +32,8 @@ public class RobotProgram {
         } finally {
             freeRobotResources();
         }
+
+        mLogger.info("Robot finished");
     }
 
     private void initializeRobot() {
@@ -38,15 +42,20 @@ public class RobotProgram {
     }
 
     private void runRobot() throws RobotInitializationException, RobotCreationException {
+        mLogger.debug("Creating user robot class");
+
         RobotBase robot = mRobotCreator.create();
         robot.initResources(mResourceHolder, mLogger);
 
         RunningRobot.INSTANCE.set(robot);
 
+        mLogger.debug("Initializing user robot");
         robot.robotInit();
         try {
+            mLogger.debug("Starting user robot");
             robot.robotMain();
         } finally {
+            mLogger.debug("Shutting down user robot");
             robot.robotShutdown();
         }
     }
