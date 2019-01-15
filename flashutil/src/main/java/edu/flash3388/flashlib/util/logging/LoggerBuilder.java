@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.util.logging;
 
 import edu.flash3388.flashlib.util.logging.jul.DelegatingHandler;
+import edu.flash3388.flashlib.util.logging.jul.FlusherThreadFactory;
 import edu.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import edu.flash3388.flashlib.util.logging.jul.JulLoggerAdapter;
 import edu.flash3388.flashlib.util.logging.jul.LogFlushingTask;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -22,7 +24,6 @@ public class LoggerBuilder {
     private static final int DEFAULT_FILE_SIZE_BYTES = 1048576; // 1 MB
     private static final int DEFAULT_FILE_COUNT = 10;
     private static final int DEFAULT_DELEGATED_LOGGING_CAPACITY = 1024;
-    private static final int LOG_FLUSHER_STACK_SIZE_KB = 128;
 
     private final String mName;
 
@@ -34,6 +35,7 @@ public class LoggerBuilder {
 
     private boolean mEnableDelegatedFileLogging;
     private int mDelegatedLoggingCapacity;
+    private ThreadFactory mFlushingThreadFactory;
 
     private boolean mEnableConsoleLogging;
 
@@ -50,6 +52,7 @@ public class LoggerBuilder {
 
         mEnableDelegatedFileLogging = false;
         mDelegatedLoggingCapacity = DEFAULT_DELEGATED_LOGGING_CAPACITY;
+        mFlushingThreadFactory = new FlusherThreadFactory(name);
 
         mEnableConsoleLogging = false;
 
@@ -118,6 +121,11 @@ public class LoggerBuilder {
         return this;
     }
 
+    public LoggerBuilder setFlushingThreadFactory(ThreadFactory threadFactory) {
+        mFlushingThreadFactory = Objects.requireNonNull(threadFactory);
+        return this;
+    }
+
     public LoggerBuilder setLogLevel(LogLevel logLevel) {
         mLogLevel = Objects.requireNonNull(logLevel);
         return this;
@@ -174,14 +182,7 @@ public class LoggerBuilder {
     }
 
     private void startLogFlusher(Handler handler) {
-        Thread thread = new Thread(
-                null,
-                new LogFlushingTask(handler),
-                mName.concat("-flusher"),
-                LOG_FLUSHER_STACK_SIZE_KB);
-
-        thread.setDaemon(true);
-
+        Thread thread = mFlushingThreadFactory.newThread(new LogFlushingTask(handler));
         thread.start();
     }
 }
