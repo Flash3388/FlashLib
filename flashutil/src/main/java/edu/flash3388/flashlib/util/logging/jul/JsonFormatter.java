@@ -12,11 +12,8 @@ public class JsonFormatter extends Formatter {
 
     private final boolean mShouldFormatMessage;
 
-    private boolean wasFirstLogWritten;
-
     public JsonFormatter(boolean shouldFormatMessage) {
         mShouldFormatMessage = shouldFormatMessage;
-        wasFirstLogWritten = false;
     }
 
     public JsonFormatter() {
@@ -25,8 +22,7 @@ public class JsonFormatter extends Formatter {
 
     @Override
     public String getHead(Handler h) {
-        wasFirstLogWritten = false;
-        return "[";
+        return "[{}";
     }
 
     @Override
@@ -43,12 +39,7 @@ public class JsonFormatter extends Formatter {
         addParameters(root, record);
         addThrowable(root, record);
 
-        if(wasFirstLogWritten) {
-            return ",".concat(root.toString());
-        } else {
-            wasFirstLogWritten = true;
-            return root.toString();
-        }
+        return ",".concat(root.toString());
     }
 
     private void addBasicData(JsonObject root, LogRecord record) {

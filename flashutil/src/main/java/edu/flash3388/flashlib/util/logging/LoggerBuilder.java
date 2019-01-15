@@ -24,6 +24,8 @@ public class LoggerBuilder {
 
     private boolean mEnableConsoleLogging;
 
+    private LogLevel mLogLevel;
+
     public LoggerBuilder(String name) {
         mName = name;
 
@@ -33,6 +35,8 @@ public class LoggerBuilder {
         mFileHandlerFormatter = new JsonFormatter();
 
         mEnableConsoleLogging = false;
+
+        mLogLevel = LogLevel.INFO;
     }
 
     public LoggerBuilder enableConsoleLogging(boolean enable) {
@@ -78,13 +82,21 @@ public class LoggerBuilder {
         return this;
     }
 
+    public LoggerBuilder setLogLevel(LogLevel logLevel) {
+        mLogLevel = logLevel;
+        return this;
+    }
+
     public java.util.logging.Logger buildJul() {
         try {
             java.util.logging.Logger logger = java.util.logging.Logger.getLogger(mName);
             logger.setUseParentHandlers(false);
 
             if (mEnableConsoleLogging) {
-                logger.addHandler(new ConsoleHandler());
+                ConsoleHandler consoleHandler = new ConsoleHandler();
+                consoleHandler.setLevel(mLogLevel.getJulLevel());
+
+                logger.addHandler(consoleHandler);
             }
 
             if (mEnableFileLogging && mFilePattern != null && mFilePattern.length() > 0) {
@@ -99,9 +111,12 @@ public class LoggerBuilder {
 
                 FileHandler fileHandler = new FileHandler(pattern);
                 fileHandler.setFormatter(mFileHandlerFormatter);
+                fileHandler.setLevel(mLogLevel.getJulLevel());
 
                 logger.addHandler(fileHandler);
             }
+
+            logger.setLevel(mLogLevel.getJulLevel());
 
             return logger;
         } catch (IOException e) {

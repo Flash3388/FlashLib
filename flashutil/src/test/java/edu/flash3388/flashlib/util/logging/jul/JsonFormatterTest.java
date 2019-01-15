@@ -35,10 +35,10 @@ public class JsonFormatterTest {
         String formattedLogs = logBuilder.toString();
 
         JsonArray logs = new JsonParser().parse(formattedLogs).getAsJsonArray();
-        assertEquals(LOG_RECORDS.length, logs.size());
+        assertEquals(LOG_RECORDS.length, logs.size() - 1);
 
         for (int i = 0; i < LOG_RECORDS.length; i++) {
-            JsonObject logRecord = logs.get(i).getAsJsonObject();
+            JsonObject logRecord = logs.get(i + 1).getAsJsonObject();
 
             assertEquals(LOG_RECORDS[i].getLevel().toString(), logRecord.get("level").getAsString());
             assertEquals(LOG_RECORDS[i].getMessage(), logRecord.get("message").getAsString());
