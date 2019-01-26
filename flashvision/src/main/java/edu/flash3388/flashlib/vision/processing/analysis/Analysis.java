@@ -13,4 +13,9 @@ public class Analysis {
     public JsonObject getData() {
         return mData;
     }
+
+    @Override
+    public String toString() {
+        return mData.toString();
+    }
 }
