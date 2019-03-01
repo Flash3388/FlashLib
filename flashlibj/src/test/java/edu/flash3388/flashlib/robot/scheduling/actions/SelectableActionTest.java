@@ -11,7 +11,6 @@ import java.util.function.IntSupplier;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 public class SelectableActionTest {
 

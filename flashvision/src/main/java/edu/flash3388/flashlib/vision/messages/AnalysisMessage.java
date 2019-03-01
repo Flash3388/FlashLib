@@ -1,10 +1,8 @@
 package edu.flash3388.flashlib.vision.messages;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import edu.flash3388.flashlib.communication.message.Message;
 import edu.flash3388.flashlib.vision.processing.analysis.Analysis;
 

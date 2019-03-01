@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.scheduling;
 
-import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.RunningRobot;
 import edu.flash3388.flashlib.time.Clock;
 import edu.flash3388.flashlib.time.Time;

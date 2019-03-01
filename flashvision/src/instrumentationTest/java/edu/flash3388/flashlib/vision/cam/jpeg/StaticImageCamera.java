@@ -3,8 +3,6 @@ package edu.flash3388.flashlib.vision.cam.jpeg;
 import edu.flash3388.flashlib.vision.Image;
 import edu.flash3388.flashlib.vision.camera.Camera;
 
-import java.util.Optional;
-
 public class StaticImageCamera implements Camera {
 
     private final Image mImage;
