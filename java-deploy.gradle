@@ -2,7 +2,7 @@ apply plugin: 'maven-publish'
 
 publishing {
     publications {
-        flashlib(MavenPublication) {
+        mavenFlashlib(MavenPublication) {
             from components.java
         }
     }

@@ -78,10 +78,12 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
 
 publishing {
     publications {
-        flashlib(MavenPublication) {
-            artifactId = 'flashlib-all'
+        mavenFlashlib(MavenPublication) {
+            artifactId = 'flashlib'
 
-            artifact flashlibAll
+            artifact flashlib
+            artifact flashlibJavadoc
+            artifact flashlibSources
         }
     }
 }
