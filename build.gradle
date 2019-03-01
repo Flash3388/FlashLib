@@ -1,4 +1,4 @@
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 allprojects {
     group = 'edu.flash3388.flashlib'
@@ -13,6 +13,12 @@ subprojects {
 
         flatDir {
             dirs rootProject.file('libs')
+        }
+    }
+
+    publishing {
+        repositories {
+            mavenLocal()
         }
     }
 }
@@ -68,12 +74,4 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     from files(subprojects.collect {
         it.javadoc.destinationDir
     })
-}
-
-artifacts {
-    archives flashlib
-    archives flashlibSources
-    archives flashlibJavadoc
-
-    archives flashlibAll
 }
