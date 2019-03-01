@@ -1,6 +1,6 @@
 apply from: rootProject.file('java-library.gradle')
 apply from: rootProject.file('instrumentation-test.gradle')
-
+apply from: rootProject.file('java-deploy.gradle')
 
 dependencies {
     compile project(':flashutil')

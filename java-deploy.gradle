@@ -1,0 +1,16 @@
+apply plugin: 'maven-publish'
+
+publishing {
+
+    publications {
+        flashlib(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+
