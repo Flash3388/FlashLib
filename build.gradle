@@ -75,3 +75,13 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
         it.javadoc.destinationDir
     })
 }
+
+publishing {
+    publications {
+        flashlib(MavenPublication) {
+            artifactId = 'flashlib-all'
+
+            artifact flashlibAll
+        }
+    }
+}
