@@ -1,8 +1,8 @@
 apply plugin: 'maven-publish'
 
 allprojects {
-    group = 'edu.flash3388.flashlib'
-    version = '1.3'
+    group = GROUP
+    version = VERSION
 }
 
 subprojects {

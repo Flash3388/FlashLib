@@ -2,8 +2,8 @@ apply from: rootProject.file('java-library.gradle')
 apply from: rootProject.file('java-deploy.gradle')
 
 dependencies {
-    compile name: 'jmath-1.0'
-    compile name: 'javabeans-1.0'
+    compile group: 'com.tomtzook', name: 'jmath', version: '1.0'
+    compile group: 'com.tomtzook', name: 'javabeans', version: '1.0'
 
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
 }
