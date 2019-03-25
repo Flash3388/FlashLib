@@ -2,6 +2,7 @@ package com.flash3388.flashlib.time;
 
 import com.flash3388.flashlib.util.CompareResult;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Time implements Comparable<Time> {
@@ -14,7 +15,7 @@ public class Time implements Comparable<Time> {
 
     public Time(long value, TimeUnit unit) {
         mValue = value;
-        mUnit = unit;
+        mUnit = Objects.requireNonNull(unit, "time unit");
     }
 
     public static Time milliseconds(long timeMs) {
@@ -40,6 +41,9 @@ public class Time implements Comparable<Time> {
     public Time getAsUnit(TimeUnit newTimeUnit) {
         if (!isValid()) {
             return new Time(INVALID_VALUE, newTimeUnit);
+        }
+        if (getUnit().equals(newTimeUnit)) {
+            return this;
         }
 
         long valueInWantedUnits = newTimeUnit.convert(mValue, mUnit);
