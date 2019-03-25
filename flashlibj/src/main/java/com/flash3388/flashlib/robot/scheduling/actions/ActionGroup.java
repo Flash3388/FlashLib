@@ -61,6 +61,7 @@ public class ActionGroup extends Action {
 	 * @return this instance
 	 */
 	public ActionGroup add(Action action){
+	    verifyNotRunning();
 		mActions.add(action);
 		return this;
 	}
@@ -82,6 +83,7 @@ public class ActionGroup extends Action {
      * @return this instance
      */
     public ActionGroup add(Collection<Action> actions){
+        verifyNotRunning();
         mActions.addAll(actions);
         return this;
     }
@@ -168,4 +170,10 @@ public class ActionGroup extends Action {
 			}
 		}
 	}
+
+	private void verifyNotRunning() {
+	    if (isRunning()) {
+	        throw new IllegalStateException("ActionGroup is running");
+        }
+    }
 }
