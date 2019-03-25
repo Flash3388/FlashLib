@@ -1,16 +1,15 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Queue;
 
 /**
@@ -162,13 +161,7 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		List<Action> currentlyRunning = new ArrayList<>(mCurrentlyRunningActions);
-
-		for (Action action : currentlyRunning) {
-			if (!action.isRunning()) {
-				mCurrentlyRunningActions.remove(action);
-			}
-		}
+		mCurrentlyRunningActions.removeIf((action) -> !action.isRunning());
 	}
 
 	private void verifyNotRunning() {
