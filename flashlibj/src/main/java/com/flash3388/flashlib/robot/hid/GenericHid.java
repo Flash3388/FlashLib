@@ -2,7 +2,6 @@ package com.flash3388.flashlib.robot.hid;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class GenericHid implements Hid {
