@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.hid;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class GenericHid implements Hid {
@@ -14,20 +16,23 @@ public class GenericHid implements Hid {
 	public GenericHid(HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
 		mChannel = channel;
 
-        mAxes = new ArrayList<>();
+        List<Axis> axes = new ArrayList<>();
         for(int i = 0; i < axisCount; i++) {
-            mAxes.add(new Axis(hidInterface, channel, i));
+            axes.add(new Axis(hidInterface, channel, i));
         }
+        mAxes = Collections.unmodifiableList(axes);
 
-		mButtons = new ArrayList<>();
+        List<Button> buttons = new ArrayList<>();
 		for(int i = 0; i < buttonCount; i++) {
-			mButtons.add(new HidButton(hidInterface, channel, i));
+            buttons.add(new HidButton(hidInterface, channel, i));
 		}
+		mButtons = Collections.unmodifiableList(buttons);
 
-        mPovs = new ArrayList<>();
+        List<Pov> povs = new ArrayList<>();
         for(int i = 0; i < povsCount; i++) {
-            mPovs.add(new Pov(hidInterface, channel, i));
+            povs.add(new Pov(hidInterface, channel, i));
         }
+        mPovs = Collections.unmodifiableList(povs);
 	}
 
 	@Override
@@ -49,7 +54,12 @@ public class GenericHid implements Hid {
         return mAxes.size();
     }
 
-	@Override
+    @Override
+    public Iterable<Axis> axes() {
+        return mAxes;
+    }
+
+    @Override
 	public Button getButton(int button) {
         if (button < 0 || button >= mButtons.size()) {
             throw new NoSuchButtonException(mChannel, button);
@@ -64,6 +74,11 @@ public class GenericHid implements Hid {
 	}
 
     @Override
+    public Iterable<Button> buttons() {
+        return mButtons;
+    }
+
+    @Override
     public Pov getPov(int pov) {
         if (pov < 0 || pov >= mPovs.size()) {
             throw new NoSuchPovException(mChannel, pov);
@@ -75,5 +90,10 @@ public class GenericHid implements Hid {
     @Override
     public int getPovCount() {
         return mPovs.size();
+    }
+
+    @Override
+    public Iterable<Pov> povs() {
+        return mPovs;
     }
 }

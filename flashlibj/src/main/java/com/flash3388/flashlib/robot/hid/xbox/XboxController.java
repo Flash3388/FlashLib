@@ -12,6 +12,8 @@ import com.flash3388.flashlib.robot.hid.NoSuchPovException;
 import com.flash3388.flashlib.robot.hid.Pov;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -71,7 +73,12 @@ public class XboxController implements Hid {
         return mAxes.size();
     }
 
-	@Override
+    @Override
+    public Iterable<Axis> axes() {
+        return mAxes;
+    }
+
+    @Override
 	public Button getButton(int button) {
 	    if (button < 0 || button >= mButtons.size()) {
 	        throw new NoSuchButtonException(mChannel, button);
@@ -90,6 +97,11 @@ public class XboxController implements Hid {
 	}
 
     @Override
+    public Iterable<Button> buttons() {
+        return mButtons;
+    }
+
+    @Override
     public Pov getPov(int pov) {
         if (pov != DPAD_POV_INDEX) {
             throw new NoSuchPovException(mChannel, pov);
@@ -105,6 +117,11 @@ public class XboxController implements Hid {
     @Override
     public int getPovCount() {
         return 1;
+    }
+
+    @Override
+    public Iterable<Pov> povs() {
+        return Collections.singleton(mDpad);
     }
 }
 

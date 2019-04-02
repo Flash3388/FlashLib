@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
+import java.util.Iterator;
+
 /**
  * Interface for Human Interface Devices.
  * 
@@ -31,6 +33,13 @@ public interface Hid {
      */
 	int getAxisCount();
 
+    /**
+     * Axes on the interface device.
+     *
+     * @return {@link Iterable} object for iterating over the axes.
+     */
+	Iterable<Axis> axes();
+
 	/**
 	 * Gets the button object for the button at the given index.
      *
@@ -47,6 +56,13 @@ public interface Hid {
 	 */
 	int getButtonCount();
 
+    /**
+     * Buttons on the interface device.
+     *
+     * @return {@link Iterable} object for iterating over the buttons.
+     */
+    Iterable<Button> buttons();
+
 	/**
 	 * Gets the Pov object at the given index.
      *
@@ -62,4 +78,11 @@ public interface Hid {
      * @return the amount of POVs.
      */
 	int getPovCount();
+
+    /**
+     * sPOVs on the interface device.
+     *
+     * @return {@link Iterable} object for iterating over the povs.
+     */
+    Iterable<Pov> povs();
 }
