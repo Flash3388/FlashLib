@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.robot.hid;
 
-import java.util.Iterator;
-
 /**
  * Interface for Human Interface Devices.
  * 
