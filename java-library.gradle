@@ -1,6 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -26,24 +24,4 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
 
     from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-
-            artifact javadocJar
-            artifact sourcesJar
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
