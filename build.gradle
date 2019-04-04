@@ -121,12 +121,14 @@ publishing {
                     developerConnection = 'scm:git:ssh://github.com/Flash3388/FlashLib.git'
                     connection = 'https://github.com/Flash3388/FlashLib'
                 }
-            }
 
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                subprojects.each { project ->
-                    def deps = project.configurations.compile.allDependencies.withType(ExternalDependency)
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    def allDependencies = []
+
+                    subprojects.each { project ->
+                        allDependencies.addAll(project.configurations.compile.allDependencies.withType(ExternalDependency))
+                    }
 
                     def comparator = [
                             compare: { first, second ->
@@ -137,7 +139,7 @@ publishing {
                             }
                     ] as Comparator
 
-                    deps.collect().unique(comparator).each { dep ->
+                    allDependencies.collect().unique(comparator).each { dep ->
                         def dependencyNode = dependenciesNode.appendNode('dependency')
                         dependencyNode.appendNode('groupId', dep.group)
                         dependencyNode.appendNode('artifactId', dep.name)
