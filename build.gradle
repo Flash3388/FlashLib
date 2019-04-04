@@ -15,6 +15,10 @@ subprojects {
     }
 }
 
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
 subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
 
