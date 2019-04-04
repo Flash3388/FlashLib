@@ -13,12 +13,6 @@ subprojects {
         mavenCentral()
         mavenLocal()
     }
-
-    publishing {
-        repositories {
-            mavenLocal()
-        }
-    }
 }
 
 subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
@@ -146,18 +140,13 @@ publishing {
 
     repositories {
         maven {
-            name = 'Nexus Staging'
-            url = NEXUS_RELEASE_REPOSITORY_URL
-
-            credentials {
-                username ''
-                password ''
+            if (isReleaseBuild()) {
+                name = 'Nexus Staging'
+                url = NEXUS_RELEASE_REPOSITORY_URL
+            } else {
+                name = 'Nexus Snapshot'
+                url = NEXUS_SNAPSHOT_REPOSITORY_URL
             }
-        }
-
-        maven {
-            name = 'Nexus Snapshot'
-            url = NEXUS_SNAPSHOT_REPOSITORY_URL
 
             credentials {
                 username ''
