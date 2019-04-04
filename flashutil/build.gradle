@@ -1,5 +1,4 @@
 apply from: rootProject.file('java-library.gradle')
-apply from: rootProject.file('java-deploy.gradle')
 
 dependencies {
     compile group: 'com.flash3388.util', name: 'jmath', version: '1.0'
