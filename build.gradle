@@ -11,10 +11,7 @@ subprojects {
 
     repositories {
         mavenCentral()
-
-        flatDir {
-            dirs rootProject.file('libs')
-        }
+        mavenLocal()
     }
 
     publishing {
