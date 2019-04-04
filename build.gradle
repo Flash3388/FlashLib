@@ -80,10 +80,6 @@ artifacts {
     archives flashlibJavadoc
 }
 
-signing {
-    sign configurations.archives
-}
-
 publishing {
     publications {
         mavenFlashlib(MavenPublication) {
@@ -169,4 +165,8 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications.mavenFlashlib
 }
