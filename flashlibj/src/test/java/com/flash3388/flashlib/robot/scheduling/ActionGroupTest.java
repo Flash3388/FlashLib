@@ -1,8 +1,10 @@
-package com.flash3388.flashlib.robot.scheduling.actions;
+package com.flash3388.flashlib.robot.scheduling;
 
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.ActionGroup;
+import com.flash3388.flashlib.robot.scheduling.ExecutionOrder;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.JavaMillisClock;
 import org.junit.Test;
@@ -31,18 +33,18 @@ public class ActionGroupTest {
 
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).start();
-        verify(actions.get(1), times(0)).start();
+        verify(actions.get(0), times(1)).startAction();;
+        verify(actions.get(1), times(0)).startAction();;
 
         actionGroup.execute();
 
-        verify(actions.get(1), times(0)).start();
+        verify(actions.get(1), times(0)).startAction();;
 
         isFirstActionRunning.setAsBoolean(false);
         actionGroup.execute();
         actionGroup.execute();
 
-        verify(actions.get(1), times(1)).start();
+        verify(actions.get(1), times(1)).startAction();;
 
         assertTrue(actionGroup.isFinished());
     }
@@ -58,29 +60,29 @@ public class ActionGroupTest {
 
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).start();
-        verify(actions.get(1), times(0)).start();
+        verify(actions.get(0), times(1)).startAction();;
+        verify(actions.get(1), times(0)).startAction();;
 
         actionGroup.execute();
     }
 
     private Action mockActionNotRunning() {
         Action action = mock(Action.class);
-        when(action.isRunning()).thenReturn(false);
+        when(action.run()).thenReturn(false);
 
         return action;
     }
 
     private Action mockActionRunning() {
         Action action = mock(Action.class);
-        when(action.isRunning()).thenReturn(true);
+        when(action.run()).thenReturn(true);
 
         return action;
     }
 
     private Action mockActionRunningBySupplier(BooleanSupplier supplier) {
         Action action = mock(Action.class);
-        when(action.isRunning()).thenAnswer(new Answer<Boolean>() {
+        when(action.run()).thenAnswer(new Answer<Boolean>() {
             @Override
             public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 return supplier.getAsBoolean();

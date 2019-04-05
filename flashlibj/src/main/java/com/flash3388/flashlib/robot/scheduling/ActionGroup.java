@@ -1,8 +1,7 @@
-package com.flash3388.flashlib.robot.scheduling.actions;
+package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.scheduling.Action;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.robot.scheduling.actions.Actions;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Provides a series of scheduling to run in a order. Action can run sequentially or parallel to one another.
@@ -29,6 +29,8 @@ public class ActionGroup extends Action {
 
 	private final Queue<Action> mActionsQueue;
 	private final Collection<Action> mCurrentlyRunningActions;
+
+	private Runnable mRunWhenInterrupted;
 	
 	/**
 	 * Creates a new empty action group
@@ -61,7 +63,10 @@ public class ActionGroup extends Action {
 	 */
 	public ActionGroup add(Action action){
 	    verifyNotRunning();
+
 		mActions.add(action);
+		action.setParent(this);
+
 		return this;
 	}
 
@@ -83,7 +88,10 @@ public class ActionGroup extends Action {
      */
     public ActionGroup add(Collection<Action> actions){
         verifyNotRunning();
+
         mActions.addAll(actions);
+        actions.forEach((action) -> action.setParent(this));
+
         return this;
     }
 
@@ -99,6 +107,11 @@ public class ActionGroup extends Action {
 
 		return add(action);
 	}
+
+    public ActionGroup whenInterrupted(Runnable runnable) {
+	    mRunWhenInterrupted = runnable;
+	    return this;
+    }
 
 	/*package*/ boolean areAnyActionsRunning() {
 	    return !mCurrentlyRunningActions.isEmpty();
@@ -123,17 +136,25 @@ public class ActionGroup extends Action {
     @Override
     protected final void interrupted() {
         end();
+        whenInterrupted();
     }
 
     @Override
 	protected final void end() {
 		for (Action action : mCurrentlyRunningActions) {
-			action.cancel();
+			action.cancelAction();
+			action.removed();
 		}
 
 		mCurrentlyRunningActions.clear();
 		mActionsQueue.clear();
 	}
+
+	protected void whenInterrupted() {
+	    if (mRunWhenInterrupted != null) {
+	        mRunWhenInterrupted.run();
+        }
+    }
 
 	private void tryStartNextAction() {
 		if (mActionsQueue.isEmpty()) {
@@ -151,17 +172,37 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		nextAction.start();
+		handleConflicts(nextAction);
+		nextAction.startAction();
 
 		mCurrentlyRunningActions.add(nextAction);
 	}
 
-	private void handleCurrentActions() {
+    private void handleConflicts(Action nextAction) {
+        Set<Subsystem> requirements = nextAction.getRequirements();
+        for (Action action : mCurrentlyRunningActions) {
+            for (Subsystem subsystem : action.getRequirements()) {
+                if (requirements.contains(subsystem)) {
+                    action.cancelAction();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void handleCurrentActions() {
 		if (mCurrentlyRunningActions.isEmpty()) {
 			return;
 		}
 
-		mCurrentlyRunningActions.removeIf((action) -> !action.isRunning());
+		mCurrentlyRunningActions.removeIf((action) -> {
+	        if (!action.run()) {
+	            action.removed();
+	            return true;
+            }
+
+            return false;
+        });
 	}
 
 	private void verifyNotRunning() {
