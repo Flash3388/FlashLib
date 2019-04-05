@@ -1,3 +1,6 @@
-include 'flashlibj', 'flashboard', 'hal', 'hal:beagleboneblack', 'hal:test'
-
 rootProject.name = 'flashlib'
+
+include 'flashlibj'
+include 'flashutil'
+include 'flashcomm'
+include 'flashvision'

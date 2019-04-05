@@ -1,0 +1,19 @@
+apply plugin: 'java'
+
+sourceSets {
+    instrumentationTest {
+        compileClasspath += sourceSets.main.output + configurations.testCompile
+        runtimeClasspath += output + compileClasspath + configurations.testRuntime
+    }
+}
+
+task instrumentationTest(type: Test) {
+    description = 'Runs the instrumentation tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.instrumentationTest.output.classesDirs
+    classpath = sourceSets.instrumentationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+    mustRunAfter test
+}
+
+check.dependsOn instrumentationTest
