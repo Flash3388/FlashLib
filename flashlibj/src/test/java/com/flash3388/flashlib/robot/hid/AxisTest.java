@@ -7,7 +7,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +36,7 @@ public class AxisTest {
             final int CHANNEL = 1;
             final int AXIS = 1;
 
-            Axis axis = new Axis(mock(HidInterface.class), CHANNEL, AXIS);
+            LimitedAxis axis = new LimitedAxis(new HidAxis(mock(HidInterface.class), CHANNEL, AXIS));
             axis.setValueThreshold(mThresholdValue);
         }
     }
@@ -70,7 +70,7 @@ public class AxisTest {
 
             HidInterface hidInterface = mockInterfaceWithAxisValue(CHANNEL, AXIS, mAxisValueFromInterface);
 
-            Axis axis = new Axis(hidInterface, CHANNEL, AXIS);
+            LimitedAxis axis = new LimitedAxis(new HidAxis(hidInterface, CHANNEL, AXIS));
             axis.setValueThreshold(mThresholdValue);
 
             double value = axis.get();
@@ -86,7 +86,7 @@ public class AxisTest {
 
         HidInterface hidInterface = mockInterfaceWithAxisValue(CHANNEL, AXIS, VALUE);
 
-        Axis axis = new Axis(hidInterface, CHANNEL, AXIS);
+        Axis axis = new HidAxis(hidInterface, CHANNEL, AXIS);
         axis.setInverted(true);
 
         double value = axis.get();
