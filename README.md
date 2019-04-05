@@ -8,10 +8,10 @@ FlashLib is a robotics software development library for Java, originaly designed
 
 ## Building
 
-Building the library requires gradle 4.1. If you have it, run `gradle build`.
-If you don't, run the gradle wrapper added to this project `gradlew build`.
+FlashLib uses the gradle build system. With the help of gradle-wrapper, all the is needed to build is to
+run `./gradlew build` (on `Linux systems`) or `gradlew.bat build` (on `Windows systems`)
 
-You can find the binary files in the `build/libs` folder.
+You can find the binary files in the `build` folder.
 
 For further information, checkout the Wiki [main page](https://github.com/Flash3388/FlashLib/wiki).
 
