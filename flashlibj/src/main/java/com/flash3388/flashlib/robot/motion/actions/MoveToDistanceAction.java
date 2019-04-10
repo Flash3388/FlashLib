@@ -1,10 +1,10 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
+import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.robot.scheduling.Subsystem;
-import com.flash3388.flashlib.math.Mathf;
-import com.flash3388.flashlib.robot.motion.Movable;
+import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
 
@@ -44,7 +44,7 @@ public class MoveToDistanceAction extends Action {
     @Override
     protected boolean isFinished() {
         double distanceToTarget = Math.abs(mDistanceSupplier.getAsDouble() - mWantedDistance);
-        return Mathf.constrained(distanceToTarget, 0, mDistanceMargin);
+        return ExtendedMath.constrained(distanceToTarget, 0, mDistanceMargin);
     }
 
     @Override

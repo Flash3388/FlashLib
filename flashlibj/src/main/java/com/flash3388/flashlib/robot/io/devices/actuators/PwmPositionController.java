@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.io.devices.actuators;
 
-import com.flash3388.flashlib.math.Mathf;
 import com.flash3388.flashlib.robot.io.Pwm;
+import com.jmath.ExtendedMath;
 
 public class PwmPositionController extends PwmController implements PositionController {
 
@@ -30,11 +30,9 @@ public class PwmPositionController extends PwmController implements PositionCont
      */
     @Override
     public void set(double position) {
-        if(position < 0.0 || position > 1.0) {
+        if(!ExtendedMath.constrained(position, 0.0, 1.0)) {
             throw new IllegalArgumentException("invalid position: " + position);
         }
-
-        position = Mathf.constrain(position, 0.0, 1.0);
 
         PwmBounds bounds = getBounds();
 

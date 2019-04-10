@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.control;
 
 import com.beans.DoubleProperty;
-import com.flash3388.flashlib.math.Mathf;
+import com.jmath.ExtendedMath;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -172,7 +172,7 @@ public class PidController {
      */
     public double calculate(double processVariable, double setPoint){
         if(mSetPointRange != 0) {
-            processVariable = Mathf.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
+            processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
 
         double error = setPoint - processVariable;
@@ -193,17 +193,17 @@ public class PidController {
 
         mTotalError += error;
 
-        if(mMinimumOutput != mMaximumOutput && !Mathf.constrained(output, mMinimumOutput, mMaximumOutput)) {
+        if(mMinimumOutput != mMaximumOutput && !ExtendedMath.constrained(output, mMinimumOutput, mMaximumOutput)) {
             mTotalError = error;
         }
 
-        if(mOutRampRate != 0 && !Mathf.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
+        if(mOutRampRate != 0 && !ExtendedMath.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
             mTotalError = error;
-            output = Mathf.constrain(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate);
+            output = ExtendedMath.constrain(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate);
         }
 
         if(mMinimumOutput != mMaximumOutput) {
-            output = Mathf.constrain(output, mMinimumOutput, mMaximumOutput);
+            output = ExtendedMath.constrain(output, mMinimumOutput, mMaximumOutput);
         }
 
         mLastOutput = output;
