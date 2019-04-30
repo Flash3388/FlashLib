@@ -57,15 +57,15 @@ public class JpegStreamingTest {
 
             MjpegClient mjpegClient = MjpegClient.create(new URL(String.format(CAMERA_CLIENT_URL_FORMAT, SERVER_PORT, CAMERA_NAME)), mLogger);
 
-            CountDownLatch countDownLatch = new CountDownLatch(1);
+            CountDownLatch imageLatch = new CountDownLatch(1);
 
             closer.add(mjpegClient);
             mjpegClient.start((image) -> {
                 resultImages.add(image);
-                countDownLatch.countDown();
+                imageLatch.countDown();
             });
 
-            countDownLatch.await();
+            imageLatch.await();
         } finally {
             closer.close();
         }
