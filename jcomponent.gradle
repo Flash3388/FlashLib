@@ -30,7 +30,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 publishing {
     publications {
-        mavenFlashlibPart(MavenPublication) {
+        mavenFlashlibComponent(MavenPublication) {
             artifactId = project.name
 
             from components.java
@@ -40,7 +40,7 @@ publishing {
 
             pom {
                 name = project.name.capitalize()
-                description = "Robotics development framework - ${project.name.capitalize()} part".toString()
+                description = "Robotics development framework - ${project.name.capitalize()} component".toString()
                 url = 'https://github.com/Flash3388/FlashLib'
 
                 licenses {
@@ -69,5 +69,5 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.mavenFlashlibPart
+    sign publishing.publications.mavenFlashlibComponent
 }
