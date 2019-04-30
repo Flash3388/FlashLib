@@ -1,4 +1,6 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -24,4 +26,48 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
 
     from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenFlashlibPart(MavenPublication) {
+            artifactId = project.name
+
+            from components.java
+
+            artifact javadocJar
+            artifact sourcesJar
+
+            pom {
+                name = project.name.capitalize()
+                description = "Robotics development framework - ${project.name.capitalize()} part".toString()
+                url = 'https://github.com/Flash3388/FlashLib'
+
+                licenses {
+                    license {
+                        name = 'BSD 3-Clause License'
+                        url = 'https://opensource.org/licenses/BSD-3-Clause'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'tomtzook'
+                        name = 'Tom Tzook'
+                        email = 'tomtzook@gmail.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/Flash3388/FlashLib.git'
+                    developerConnection = 'scm:git:ssh://github.com/Flash3388/FlashLib.git'
+                    url = 'https://github.com/Flash3388/FlashLib'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenFlashlibPart
 }
