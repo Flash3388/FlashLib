@@ -10,6 +10,7 @@ import com.flash3388.flashlib.vision.jpeg.client.MjpegClient;
 import com.flash3388.flashlib.vision.jpeg.server.MjpegServer;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.net.InetAddress;
@@ -18,7 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;

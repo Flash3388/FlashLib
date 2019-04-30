@@ -7,14 +7,13 @@ import com.flash3388.flashlib.vision.camera.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
+import org.slf4j.Logger;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MjpegServer implements Closeable {
 
@@ -63,7 +62,7 @@ public class MjpegServer implements Closeable {
 
             closer.close();
         } catch (IOException e) {
-            mLogger.log(Level.SEVERE, "error while stopping mjpeg server", e);
+            mLogger.error("Error while stopping server", e);
         }
     }
 }

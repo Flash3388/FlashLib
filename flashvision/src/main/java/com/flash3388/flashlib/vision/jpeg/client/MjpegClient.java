@@ -2,10 +2,11 @@ package com.flash3388.flashlib.vision.jpeg.client;
 
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
-import com.flash3388.flashlib.vision.ImagePipeline;
 import com.flash3388.flashlib.util.http.HttpConnectionCloser;
+import com.flash3388.flashlib.vision.ImagePipeline;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.reader.MjpegReader;
+import org.slf4j.Logger;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -15,8 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MjpegClient implements Closeable {
 
@@ -82,7 +81,7 @@ public class MjpegClient implements Closeable {
 
             closer.close();
         } catch (IOException e) {
-            mLogger.log(Level.SEVERE, "error while closing resources", e);
+            mLogger.error("Error while closing client", e);
         }
     }
 }
