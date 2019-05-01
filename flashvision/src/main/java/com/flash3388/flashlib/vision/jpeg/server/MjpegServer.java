@@ -2,6 +2,7 @@ package com.flash3388.flashlib.vision.jpeg.server;
 
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.flow.SingleUseRunner;
 import com.flash3388.flashlib.util.http.HttpServerCloser;
 import com.flash3388.flashlib.vision.camera.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
@@ -9,13 +10,12 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import org.slf4j.Logger;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MjpegServer implements Closeable {
+public class MjpegServer extends SingleUseRunner {
 
     private final HttpServer mServer;
     private final Clock mClock;
@@ -35,10 +35,6 @@ public class MjpegServer implements Closeable {
         return new MjpegServer(HttpServer.create(serverAddress, handlerThreads), clock, logger);
     }
 
-    public void start() {
-        mServer.start();
-    }
-
     public void setCamera(String name, Camera<JpegImage> camera) {
         if (!name.startsWith("/")) {
             name = "/" + name;
@@ -54,7 +50,12 @@ public class MjpegServer implements Closeable {
     }
 
     @Override
-    public void close() {
+    protected void startRunner() {
+        mServer.start();
+    }
+
+    @Override
+    protected void stopRunner() {
         try {
             Closer closer = Closer.empty();
 
