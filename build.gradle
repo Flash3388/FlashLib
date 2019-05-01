@@ -1,9 +1,33 @@
-apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 allprojects {
     group = GROUP
     version = VERSION
+
+    apply plugin: 'maven-publish'
+
+    ext.isReleaseBuild = {
+        return version.contains("SNAPSHOT") == false
+    }
+
+    publishing {
+        repositories {
+            maven {
+                if (isReleaseBuild()) {
+                    name = 'NexusStaging'
+                    url = NEXUS_RELEASE_REPOSITORY_URL
+                } else {
+                    name = 'NexusSnapshot'
+                    url = NEXUS_SNAPSHOT_REPOSITORY_URL
+                }
+
+                credentials {
+                    username ''
+                    password ''
+                }
+            }
+        }
+    }
 }
 
 subprojects {
@@ -12,10 +36,6 @@ subprojects {
     repositories {
         mavenCentral()
     }
-}
-
-def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
 }
 
 subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
@@ -137,23 +157,6 @@ publishing {
                         dependencyNode.appendNode('scope', 'runtime')
                     }
                 }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            if (isReleaseBuild()) {
-                name = 'NexusStaging'
-                url = NEXUS_RELEASE_REPOSITORY_URL
-            } else {
-                name = 'NexusSnapshot'
-                url = NEXUS_SNAPSHOT_REPOSITORY_URL
-            }
-
-            credentials {
-                username ''
-                password ''
             }
         }
     }
