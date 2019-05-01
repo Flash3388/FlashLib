@@ -72,6 +72,23 @@ public class Time implements Comparable<Time> {
         return new Time(thisMs - otherMs, TimeUnit.MILLISECONDS);
     }
 
+    public boolean before(Time other) {
+        return compareTo(other) == CompareResult.SMALLER_THAN.getValue();
+    }
+
+    public boolean after(Time other) {
+        return compareTo(other) == CompareResult.GREATER_THAN.getValue();
+    }
+
+    public boolean equals(Time other) {
+        return compareTo(other) == CompareResult.EQUAL_TO.getValue();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Time && equals((Time) obj);
+    }
+
     @Override
     public int compareTo(Time other) {
         long thisMs = getAsMillis();

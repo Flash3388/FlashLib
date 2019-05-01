@@ -15,35 +15,7 @@ import com.jmath.vectors.Vector3;
  */
 public class Mathf {
 	private Mathf(){}
-	
-	/**
-	 * Calculates the average value of an array of double.
-	 * 
-	 * @param ds an array of double values
-	 * @return the average of the array
-	 */
-	public static double avg(double...ds){
-		double res = 0;
 
-		for (double value : ds) {
-            res += value;
-        }
-
-		return res / ds.length;
-	}
-
-	/**
-	 * Gets whether or not a double value is valid, meaning that the value is finite and
-	 * is a number. 
-	 * @param d value to check
-	 * @return true if the value is valid
-	 * @see Double#isNaN(double)
-	 * @see Double#isFinite(double)
-	 */
-	public static boolean validDouble(double d){
-		return !Double.isNaN(d) && Double.isFinite(d);
-	}
-	
 	/**
 	 * Limits a given degree to a range of 0 to 360. The given angle must be in degrees.
 	 * <p>
@@ -89,69 +61,6 @@ public class Mathf {
         }
 
 		return value;
-	}
-	
-	/**
-	 * Insures that a given value is within a given limit. If the value is outside that limit, its value
-	 * will be changed to meet the limit accordingly:
-	 * <ul>
-	 * 	<li>value bigger than max : value = max</li>
-	 * 	<li>value smaller than min : value = min</li>
-	 * </ul>
-	 * 
-	 * @param value The value to limit
-	 * @param min The minimum limit
-	 * @param max The maximum limit
-	 * @return The new value after making sure it is within the given limit.
-	 */
-	public static double constrain(double value, double min, double max){
-		if(value > max) {
-		    value = max;
-        } else if(value < min) {
-		    value = min;
-        }
-
-		return value;
-	}
-
-	/**
-	 * Makes sure that a given value is within a given limit. If the value is outside that limit, its value
-	 * will be changed to meet the limit accordingly:
-	 * value bigger than max : value = max
-	 * value smaller than min : value = min
-	 * <p>
-	 * Compensates for negative values. This is done by constraining the absolute value. If
-	 * the value was initially negative, a negative value is returned, otherwise a positive number is
-	 * returned.
-	 * </p>
-	 * 
-	 * @param value The value to limit
-	 * @param min The minimum limit. must be non-negative
-	 * @param max The maximum limit. must be non-negative
-	 * @return The new value after making sure it is within the given limit.
-	 */
-	public static double constrain2(double value, double min, double max){
-		double mag = Math.abs(value);
-
-		if(mag > max) {
-		    mag = max;
-        } else if(mag < min) {
-		    mag = min;
-        }
-
-		return value >= 0? mag : -mag;
-	}
-
-	/**
-	 * Gets whether a value is between two boundaries.
-	 * 
-	 * @param value value to check
-	 * @param min lower boundary
-	 * @param max upper boundary
-	 * @return true if the value is limited, false otherwise
-	 */
-	public static boolean constrained(double value, double min, double max){
-		return value >= min && value <= max;
 	}
 	
 	/**

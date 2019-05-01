@@ -8,12 +8,11 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.flash3388.flashlib.time.Clock;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MjpegServerStreamHandler implements HttpHandler {
 
@@ -47,7 +46,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
             try {
                 Camera<JpegImage> camera = mCameraReference.get();
                 if (camera == null) {
-                    mLogger.log(Level.INFO, "Camera was collected by gc.");
+                    mLogger.info("Camera collected by GC");
                     return;
                 }
 
@@ -69,7 +68,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
             } catch (InterruptedException e) {
                 break;
             } catch (IOException | VisionException e) {
-                mLogger.log(Level.SEVERE, "Error in stream handler", e);
+                mLogger.error("Error while writing stream", e);
             }
         }
     }

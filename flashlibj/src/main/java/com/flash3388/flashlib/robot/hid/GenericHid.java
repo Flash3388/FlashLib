@@ -17,7 +17,7 @@ public class GenericHid implements Hid {
 
         List<Axis> axes = new ArrayList<>();
         for(int i = 0; i < axisCount; i++) {
-            axes.add(new Axis(hidInterface, channel, i));
+            axes.add(new HidAxis(hidInterface, channel, i));
         }
         mAxes = Collections.unmodifiableList(axes);
 

@@ -10,6 +10,7 @@ import com.flash3388.flashlib.vision.jpeg.client.MjpegClient;
 import com.flash3388.flashlib.vision.jpeg.server.MjpegServer;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.net.InetAddress;
@@ -18,7 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
@@ -57,15 +57,15 @@ public class JpegStreamingTest {
 
             MjpegClient mjpegClient = MjpegClient.create(new URL(String.format(CAMERA_CLIENT_URL_FORMAT, SERVER_PORT, CAMERA_NAME)), mLogger);
 
-            CountDownLatch countDownLatch = new CountDownLatch(1);
+            CountDownLatch imageLatch = new CountDownLatch(1);
 
             closer.add(mjpegClient);
             mjpegClient.start((image) -> {
                 resultImages.add(image);
-                countDownLatch.countDown();
+                imageLatch.countDown();
             });
 
-            countDownLatch.await();
+            imageLatch.await();
         } finally {
             closer.close();
         }

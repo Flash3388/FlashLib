@@ -53,6 +53,8 @@ public abstract class Action {
 	private Time mTimeout;
 	private Time mStartTime;
 
+	private Action mParent;
+
 	public Action(Scheduler scheduler, Clock clock, Time timeout) {
 	    mScheduler = scheduler;
         mClock = clock;
@@ -64,6 +66,8 @@ public abstract class Action {
 
 		mTimeout = timeout;
         mStartTime = Time.INVALID;
+
+        mParent = null;
 	}
 
     public Action(Clock clock, Time timeout) {
@@ -83,11 +87,10 @@ public abstract class Action {
 	 * Scheduler for running. If the action is running than it is not added.
 	 */
 	public void start(){
-		if(!mIsRunning){
-			mIsInitialized = false;
-			mIsCanceled = false;
-			mIsRunning = true;
+	    validateNoParent();
 
+		if(!mIsRunning){
+			startAction();
 			mScheduler.add(this);
 		}
 	}
@@ -96,9 +99,8 @@ public abstract class Action {
 	 * Cancels the operation of the action if it is running.
 	 */
 	public void cancel(){
-		if(isRunning()) {
-			mIsCanceled = true;
-		}
+	    validateNoParent();
+		cancelAction();
 	}
 
 	/**
@@ -194,6 +196,20 @@ public abstract class Action {
 		return mRequirements.contains(subsystem);
 	}
 
+	void startAction() {
+        if(!mIsRunning){
+            mIsInitialized = false;
+            mIsCanceled = false;
+            mIsRunning = true;
+        }
+    }
+
+    void cancelAction() {
+	    if (isRunning()) {
+	        mIsCanceled = true;
+        }
+    }
+
 	void removed(){
 		if(mIsInitialized){
 			if(isCanceled()) {
@@ -228,6 +244,17 @@ public abstract class Action {
 
 		return !isFinished();
 	}
+
+	void setParent(Action parent) {
+	    validateNoParent();
+	    mParent = parent;
+    }
+
+    private void validateNoParent() {
+	    if (mParent != null) {
+	        throw new IllegalStateException("Action has a parent");
+        }
+    }
 
 	private void validateRunning() {
         if (!isRunning()) {

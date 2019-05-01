@@ -4,6 +4,7 @@ import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.DPad;
 import com.flash3388.flashlib.robot.hid.Hid;
+import com.flash3388.flashlib.robot.hid.HidAxis;
 import com.flash3388.flashlib.robot.hid.HidButton;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.hid.NoSuchAxisException;
@@ -38,7 +39,7 @@ public class XboxController implements Hid {
 
 		mAxes = new ArrayList<>(AXES_COUNT);
         for(int i = 0; i < AXES_COUNT; i++) {
-            mAxes.add(new Axis(hidInterface, mChannel, i));
+            mAxes.add(new HidAxis(hidInterface, mChannel, i));
         }
 
 		mButtons = new ArrayList<>(BUTTON_COUNT);
