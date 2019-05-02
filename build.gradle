@@ -154,6 +154,7 @@ publishing {
                         dependencyNode.appendNode('groupId', dep.group)
                         dependencyNode.appendNode('artifactId', dep.name)
                         dependencyNode.appendNode('version', dep.version)
+                        dependencyNode.appendNode('scope', 'compile')
                     }
                 }
             }
