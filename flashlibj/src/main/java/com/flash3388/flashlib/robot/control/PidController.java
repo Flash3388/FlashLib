@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.control;
 
 import com.beans.DoubleProperty;
+import com.beans.properties.SimpleDoubleProperty;
 import com.jmath.ExtendedMath;
 
 /**
@@ -63,6 +64,10 @@ public class PidController {
 
 		mIsFirstRun = true;
 	}
+
+    public PidController(double kp, double ki, double ki, double kf) {
+	    this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kf));
+    }
 
 	/**
 	 * Resets the controller. This erases the I term buildup, and removes 
