@@ -227,7 +227,7 @@ public abstract class Action {
 
 	boolean run(){
 		if(wasTimeoutReached()) {
-			cancel();
+			cancelAction();
 		}
 
 		if(isCanceled()) {
