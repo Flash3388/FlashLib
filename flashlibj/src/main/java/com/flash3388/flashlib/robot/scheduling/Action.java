@@ -248,6 +248,8 @@ public abstract class Action {
 	void setParent(Action parent) {
 	    validateNoParent();
 	    mParent = parent;
+
+        getRequirements().forEach(mParent::requires);
     }
 
     private void validateNoParent() {
