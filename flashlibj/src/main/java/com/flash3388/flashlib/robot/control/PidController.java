@@ -65,8 +65,8 @@ public class PidController {
 		mIsFirstRun = true;
 	}
 
-    public PidController(double kp, double ki, double ki, double kf) {
-	    this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kf));
+    public PidController(double kp, double ki, double kd, double kf) {
+	    this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kd), new SimpleDoubleProperty(kf));
     }
 
 	/**
