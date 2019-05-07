@@ -111,4 +111,9 @@ public class Time implements Comparable<Time> {
 
         return CompareResult.EQUAL_TO.getValue();
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d [%s]", mValue, mUnit.name());
+    }
 }
