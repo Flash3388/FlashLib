@@ -5,6 +5,8 @@ import com.flash3388.flashlib.robot.RunningRobot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GenericHid implements Hid {
 
@@ -17,23 +19,17 @@ public class GenericHid implements Hid {
 	public GenericHid(HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
 		mChannel = channel;
 
-        List<Axis> axes = new ArrayList<>();
-        for(int i = 0; i < axisCount; i++) {
-            axes.add(new HidAxis(hidInterface, channel, i));
-        }
-        mAxes = Collections.unmodifiableList(axes);
+        mAxes = IntStream.range(0, axisCount)
+                .mapToObj((i) -> new HidAxis(hidInterface, channel, i))
+                .collect(Collectors.toList());
 
-        List<Button> buttons = new ArrayList<>();
-		for(int i = 0; i < buttonCount; i++) {
-            buttons.add(new HidButton(hidInterface, channel, i));
-		}
-		mButtons = Collections.unmodifiableList(buttons);
+        mButtons = IntStream.range(0, buttonCount)
+                .mapToObj((i) -> new HidButton(hidInterface, channel, i))
+                .collect(Collectors.toList());
 
-        List<Pov> povs = new ArrayList<>();
-        for(int i = 0; i < povsCount; i++) {
-            povs.add(new Pov(hidInterface, channel, i));
-        }
-        mPovs = Collections.unmodifiableList(povs);
+        mPovs = IntStream.range(0, povsCount)
+                .mapToObj((i) -> new Pov(hidInterface, channel, i))
+                .collect(Collectors.toList());
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {
