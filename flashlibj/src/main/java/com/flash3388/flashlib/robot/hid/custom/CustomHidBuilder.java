@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.hid.custom;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.DPad;
@@ -26,6 +27,10 @@ public class CustomHidBuilder {
         mAxes = new HashMap<>();
         mButtons = new HashMap<>();
         mPovs = new HashMap<>();
+    }
+
+    public CustomHidBuilder(int channel) {
+        this(RunningRobot.INSTANCE.get().getHidInterface(), channel);
     }
 
     public CustomHidBuilder addAxis(int axisNumber, Axis axis) {

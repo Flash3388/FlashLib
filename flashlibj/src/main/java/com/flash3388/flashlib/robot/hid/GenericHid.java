@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
+import com.flash3388.flashlib.robot.RunningRobot;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +35,11 @@ public class GenericHid implements Hid {
         }
         mPovs = Collections.unmodifiableList(povs);
 	}
+
+	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {
+	    this(RunningRobot.INSTANCE.get().getHidInterface(),
+                channel, axisCount, buttonCount, povsCount);
+    }
 
 	@Override
 	public int getChannel(){

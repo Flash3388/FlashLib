@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.hid.xbox;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.DPad;
@@ -49,6 +50,10 @@ public class XboxController implements Hid {
 
         mDpad = new DPad(hidInterface, mChannel, DPAD_POV_INDEX);
 	}
+
+	public XboxController(int channel) {
+	    this(RunningRobot.INSTANCE.get().getHidInterface(), channel);
+    }
 
 	@Override
 	public int getChannel(){
