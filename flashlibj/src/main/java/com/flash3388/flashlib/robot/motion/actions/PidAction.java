@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.scheduling.actions;
+package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
