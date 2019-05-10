@@ -1,6 +1,12 @@
 package com.flash3388.flashlib.robot.io.devices.actuators;
 
-import java.util.*;
+import com.flash3388.flashlib.robot.motion.Direction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A container for multiple speed controllers. Grouping controllers in such manner allows simultaneous 
@@ -18,25 +24,13 @@ public class SpeedControllerGroup implements SpeedController {
 	 * Creates a new container for a list of speed controller.
 	 * 
 	 * @param controllers list of controllers to be contained
-     * @param isInverted whether or not to invert the controllers
 	 */
-	public SpeedControllerGroup(Collection<SpeedController> controllers, boolean isInverted){
+	public SpeedControllerGroup(Collection<SpeedController> controllers){
 		mControllers = Collections.unmodifiableList(new ArrayList<>(controllers));
-
-		setInverted(isInverted);
-		set(0);
 	}
 
-	public SpeedControllerGroup(Collection<SpeedController> controllers) {
-	    this(controllers, false);
-    }
-
-	public SpeedControllerGroup(boolean isInverted, SpeedController... controllers) {
-	    this(Arrays.asList(controllers), isInverted);
-    }
-
-    public SpeedControllerGroup(SpeedController... controllers) {
-	    this(false, controllers);
+	public SpeedControllerGroup(SpeedController... controllers) {
+	    this(Arrays.asList(controllers));
     }
 
     public final List<SpeedController> getControllers() {
@@ -51,8 +45,10 @@ public class SpeedControllerGroup implements SpeedController {
 	 */
 	@Override
 	public void set(double speed) {
+	    Direction direction = mIsInverted ? Direction.BACKWARD : Direction.FORWARD;
+
 		for (SpeedController controller : mControllers) {
-			controller.set(speed);
+			controller.set(speed, direction);
 		}
 	}
 	
@@ -103,9 +99,5 @@ public class SpeedControllerGroup implements SpeedController {
 	@Override
 	public void setInverted(boolean inverted) {
 		mIsInverted = inverted;
-
-		for (SpeedController controller : mControllers) {
-			controller.setInverted(inverted);
-		}
 	}
 }
