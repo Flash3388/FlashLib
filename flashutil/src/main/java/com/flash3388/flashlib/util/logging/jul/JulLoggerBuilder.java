@@ -23,6 +23,7 @@ public class JulLoggerBuilder {
 
     public Logger build() {
         Logger logger = Logger.getLogger(mName);
+        logger.setUseParentHandlers(false);
 
         for (Handler handler : mHandlers) {
             logger.addHandler(handler);
