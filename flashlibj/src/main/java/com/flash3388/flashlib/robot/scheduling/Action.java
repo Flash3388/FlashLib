@@ -269,24 +269,25 @@ public abstract class Action {
 
 	void setParent(Action parent) {
 	    validateNoParent();
-	    mParent = Objects.requireNonNull(parent, "parent is null");
+	    validateNotRunning();
 
+	    mParent = Objects.requireNonNull(parent, "parent is null");
         mParent.requires(getRequirements());
     }
 
-    private void validateNoParent() {
+    protected final void validateNoParent() {
 	    if (mParent != null) {
 	        throw new IllegalStateException("Action has a parent");
         }
     }
 
-	private void validateRunning() {
+    protected final void validateRunning() {
         if (!isRunning()) {
             throw new IllegalStateException("action not running");
         }
     }
 
-    private void validateNotRunning() {
+    protected final void validateNotRunning() {
         if (isRunning()) {
             throw new IllegalStateException("action running");
         }

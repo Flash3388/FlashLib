@@ -86,7 +86,7 @@ public class ActionGroup extends Action {
      * @return this instance
      */
     public ActionGroup add(Collection<Action> actions){
-        verifyNotRunning();
+        validateNotRunning();
 
         Objects.requireNonNull(actions, "actions is null");
 
@@ -192,10 +192,4 @@ public class ActionGroup extends Action {
             return false;
         });
 	}
-
-	private void verifyNotRunning() {
-	    if (isRunning()) {
-	        throw new IllegalStateException("ActionGroup is running");
-        }
-    }
 }
