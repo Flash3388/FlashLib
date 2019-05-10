@@ -161,7 +161,6 @@ public class Scheduler {
 			if (subsystem.hasCurrentAction()) {
 			    Action currentAction = subsystem.getCurrentAction();
 				currentAction.cancel();
-				remove(currentAction);
 			}
 
 			subsystem.setCurrentAction(action);
