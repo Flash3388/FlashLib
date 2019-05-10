@@ -1,12 +1,11 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
-import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 
 import java.util.function.DoubleSupplier;
 
-public class OmniDriveAction extends Action{
+public class OmniDriveAction extends Action {
 	
 	private final OmniDrive mDriveInterface;
 	private final DoubleSupplier mYAxisSource;
@@ -16,10 +15,6 @@ public class OmniDriveAction extends Action{
 		this.mDriveInterface = driveInterface;
 		this.mXAxisSource = x;
 		this.mYAxisSource = y;
-		
-		if(driveInterface instanceof Subsystem) {
-			requires((Subsystem) driveInterface);
-		}
 	}
 	
 	@Override

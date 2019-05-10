@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Action;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDrive;
 
 import java.util.function.DoubleSupplier;
@@ -18,10 +17,6 @@ public class PolarDriveAction extends Action {
 		this.mDirectionSource = direction;
 		this.mMagnitudeSource = magnitude;
 		this.mRotationSource = rotate;
-		
-		if(driveInterface instanceof Subsystem) {
-			requires((Subsystem) driveInterface);
-		}
 	}
 	
 	@Override

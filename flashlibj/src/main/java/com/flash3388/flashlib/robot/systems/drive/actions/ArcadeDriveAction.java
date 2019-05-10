@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Action;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.systems.drive.TankDrive;
 
 import java.util.function.DoubleSupplier;
@@ -16,10 +15,6 @@ public class ArcadeDriveAction extends Action {
 		this.mDriveInterface = driveInterface;
 		this.mRotateAxis = rotate;
 		this.mMoveAxis = move;
-		
-		if(driveInterface instanceof Subsystem) {
-			requires((Subsystem) driveInterface);
-		}
 	}
 	
 	@Override

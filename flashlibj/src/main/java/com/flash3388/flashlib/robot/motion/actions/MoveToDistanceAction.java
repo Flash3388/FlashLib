@@ -3,7 +3,6 @@ package com.flash3388.flashlib.robot.motion.actions;
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.scheduling.Action;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
@@ -24,10 +23,6 @@ public class MoveToDistanceAction extends Action {
         mDistanceMargin = distanceMargin;
 
         mPidController.setOutputLimit(1.0);
-
-        if (movable instanceof Subsystem) {
-            requires(((Subsystem)movable));
-        }
     }
 
     @Override

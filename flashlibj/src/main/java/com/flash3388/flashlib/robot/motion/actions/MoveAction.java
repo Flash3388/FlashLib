@@ -1,8 +1,7 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Action;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.motion.Movable;
+import com.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.function.DoubleSupplier;
 
@@ -14,10 +13,6 @@ public class MoveAction extends Action {
     public MoveAction(Movable movable, DoubleSupplier speedSupplier) {
         mMovable = movable;
         mSpeedSupplier = speedSupplier;
-
-        if(movable instanceof Subsystem) {
-            requires((Subsystem) movable);
-        }
     }
 
     @Override
