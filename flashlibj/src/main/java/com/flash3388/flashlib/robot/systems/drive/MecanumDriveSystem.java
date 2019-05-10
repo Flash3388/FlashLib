@@ -29,6 +29,22 @@ public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
         this(frontRightController, backRightController, frontLeftController, backLeftController, new DriveAlgorithms());
     }
 
+    public final SpeedController getFrontRightController() {
+        return mFrontRightController;
+    }
+
+    public final SpeedController getBackRightController() {
+        return mBackRightController;
+    }
+
+    public final SpeedController getFrontLeftController() {
+        return mFrontLeftController;
+    }
+
+    public final SpeedController getBackLeftController() {
+        return mBackLeftController;
+    }
+
     @Override
     public void mecanumDrive(double frontRight, double backRight, double frontLeft, double backLeft) {
         mFrontRightController.set(frontRight);

@@ -30,6 +30,22 @@ public class OmniDriveSystem extends Subsystem implements OmniDrive {
         this(frontController, rightController, backController, leftController, new DriveAlgorithms());
     }
 
+    public final SpeedController getFrontController() {
+        return mFrontController;
+    }
+
+    public final SpeedController getBackController() {
+        return mBackController;
+    }
+
+    public final SpeedController getRightController() {
+        return mRightController;
+    }
+
+    public final SpeedController getLeftController() {
+        return mLeftController;
+    }
+
     @Override
     public void omniDrive(double front, double right, double back, double left) {
         mFrontController.set(front);

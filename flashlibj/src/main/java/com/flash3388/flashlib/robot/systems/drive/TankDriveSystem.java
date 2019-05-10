@@ -22,6 +22,14 @@ public class TankDriveSystem extends Subsystem implements TankDrive {
         this(rightController, leftController, new DriveAlgorithms());
     }
 
+    public final SpeedController getRightController() {
+        return mRightController;
+    }
+
+    public final SpeedController getLeftController() {
+        return mLeftController;
+    }
+
     @Override
     public void tankDrive(double right, double left) {
         mRightController.set(right);

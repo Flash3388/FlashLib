@@ -13,6 +13,10 @@ public class SingleMotorSystem extends Subsystem implements Movable, Rotatable {
         mController = controller;
     }
 
+    public final SpeedController getController() {
+        return mController;
+    }
+
     @Override
     public void move(double speed) {
         mController.set(speed);
