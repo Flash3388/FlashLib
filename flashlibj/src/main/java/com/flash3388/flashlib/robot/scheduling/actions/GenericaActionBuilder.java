@@ -4,7 +4,7 @@ import com.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.function.BooleanSupplier;
 
-public class GenericaActionBuilder {
+public class GenericaActionBuilder extends ActionBuilder<GenericaActionBuilder> {
 
     private Runnable mOnInitialize;
     private Runnable mOnExecute;
@@ -48,11 +48,21 @@ public class GenericaActionBuilder {
         return this;
     }
 
+    @Override
     public Action build() {
-        return new GenericAction(mOnInitialize,
+        Action action = new GenericAction(mOnInitialize,
                 mOnExecute,
                 mIsFinished,
                 mOnEnd,
                 mRunOnEndWhenInterrupted ? mOnEnd : mOnInterrupted);
+        action.setTimeout(mTimeout);
+        action.requires(mRequirements);
+
+        return action;
+    }
+
+    @Override
+    protected GenericaActionBuilder thisInstance() {
+        return this;
     }
 }

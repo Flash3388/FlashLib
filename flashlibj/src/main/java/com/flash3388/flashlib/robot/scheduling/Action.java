@@ -6,6 +6,7 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.CompareResult;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -163,8 +164,7 @@ public abstract class Action {
 	 * @param subsystem a system used by this action
 	 */
 	public void requires(Subsystem subsystem){
-	    validateNotRunning();
-		mRequirements.add(subsystem);
+	    requires(Collections.singleton(subsystem));
 	}
 
 	/**
@@ -172,9 +172,13 @@ public abstract class Action {
 	 * @param subsystems an array of systems used by this action
 	 */
 	public void requires(Subsystem... subsystems){
-	    validateNotRunning();
-		mRequirements.addAll(Arrays.asList(subsystems));
+	    requires(Arrays.asList(subsystems));
 	}
+
+    public void requires(Collection<Subsystem> requirements) {
+        validateNotRunning();
+        mRequirements.addAll(requirements);
+    }
 
 	/**
 	 * Resets the requirements of this action
