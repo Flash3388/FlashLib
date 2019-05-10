@@ -9,6 +9,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -48,8 +50,8 @@ public class ActionGroup extends Action {
 	/* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions) {
 	    super(scheduler, clock, Time.INVALID);
 
-		mExecutionOrder = executionOrder;
-		mActions = actions;
+		mExecutionOrder = Objects.requireNonNull(executionOrder, "executionOrder is null");
+		mActions = Objects.requireNonNull(actions, "actions is null");
 
 		mActionsQueue = new ArrayDeque<>();
 		mCurrentlyRunningActions = new ArrayList<>();
@@ -62,12 +64,8 @@ public class ActionGroup extends Action {
 	 * @return this instance
 	 */
 	public ActionGroup add(Action action){
-	    verifyNotRunning();
-
-		mActions.add(action);
-		action.setParent(this);
-
-		return this;
+	    Objects.requireNonNull(action, "action is null");
+	    return add(Collections.singleton(action));
 	}
 
 	/**
@@ -77,6 +75,7 @@ public class ActionGroup extends Action {
 	 * @return this instance
 	 */
 	public ActionGroup add(Action... actions){
+	    Objects.requireNonNull(actions, "actions is null");
 		return add(Arrays.asList(actions));
 	}
 
@@ -89,27 +88,16 @@ public class ActionGroup extends Action {
     public ActionGroup add(Collection<Action> actions){
         verifyNotRunning();
 
+        Objects.requireNonNull(actions, "actions is null");
+
         mActions.addAll(actions);
         actions.forEach((action) -> action.setParent(this));
 
         return this;
     }
 
-	/**
-	 * Adds an empty action to run for a given time of milliseconds.
-	 * 
-	 * @param time time for the empty action to run
-	 * @return this instance
-	 */
-	public ActionGroup addWaitAction(Time time){
-	    Action action = Actions.empty();
-	    action.setTimeout(time);
-
-		return add(action);
-	}
-
     public ActionGroup whenInterrupted(Runnable runnable) {
-	    mRunWhenInterrupted = runnable;
+	    mRunWhenInterrupted = Objects.requireNonNull(runnable, "runnable is null");
 	    return this;
     }
 

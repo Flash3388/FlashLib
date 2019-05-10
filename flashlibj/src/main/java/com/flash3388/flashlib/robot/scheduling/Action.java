@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -57,15 +58,15 @@ public abstract class Action {
 	private Action mParent;
 
 	public Action(Scheduler scheduler, Clock clock, Time timeout) {
-	    mScheduler = scheduler;
-        mClock = clock;
+	    mScheduler = Objects.requireNonNull(scheduler, "scheduler is null");
+        mClock = Objects.requireNonNull(clock, "clock is null");
 		mRequirements = new HashSet<>(2);
 
 		mIsRunning = false;
 		mIsCanceled = false;
 		mIsInitialized = false;
 
-		mTimeout = timeout;
+		mTimeout = Objects.requireNonNull(timeout, "timeout is null");
         mStartTime = Time.INVALID;
 
         mParent = null;
@@ -134,6 +135,8 @@ public abstract class Action {
 	 * @param timeout timeout
 	 */
 	public void setTimeout(Time timeout){
+        Objects.requireNonNull(timeout, "timeout is null");
+
 	    validateNotRunning();
         mTimeout = timeout;
 	}
@@ -164,6 +167,7 @@ public abstract class Action {
 	 * @param subsystem a system used by this action
 	 */
 	public void requires(Subsystem subsystem){
+        Objects.requireNonNull(subsystem, "requirement is null");
 	    requires(Collections.singleton(subsystem));
 	}
 
@@ -172,12 +176,15 @@ public abstract class Action {
 	 * @param subsystems an array of systems used by this action
 	 */
 	public void requires(Subsystem... subsystems){
+        Objects.requireNonNull(subsystems, "requirements is null");
 	    requires(Arrays.asList(subsystems));
 	}
 
-    public void requires(Collection<Subsystem> requirements) {
+    public void requires(Collection<Subsystem> subsystems) {
+        Objects.requireNonNull(subsystems, "requirements is null");
+
         validateNotRunning();
-        mRequirements.addAll(requirements);
+        mRequirements.addAll(subsystems);
     }
 
 	/**
@@ -251,9 +258,9 @@ public abstract class Action {
 
 	void setParent(Action parent) {
 	    validateNoParent();
-	    mParent = parent;
+	    mParent = Objects.requireNonNull(parent, "parent is null");
 
-        getRequirements().forEach(mParent::requires);
+        mParent.requires(getRequirements());
     }
 
     private void validateNoParent() {

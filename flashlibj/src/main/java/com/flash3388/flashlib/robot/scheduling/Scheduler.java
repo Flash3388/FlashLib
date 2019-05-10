@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -53,7 +54,7 @@ public class Scheduler {
     }
 
 	public void setRunMode(SchedulerRunMode runMode) {
-		mRunMode = runMode;
+		mRunMode = Objects.requireNonNull(runMode, "runMode is null");
 	}
 
 	public SchedulerRunMode getRunMode() {
@@ -61,10 +62,13 @@ public class Scheduler {
 	}
 
 	public void add(SchedulerTask task) {
+        Objects.requireNonNull(task, "task is null");
 		mTasks.add(task);
 	}
 
 	public void add(Action action) {
+        Objects.requireNonNull(action, "action is null");
+
 		if (mActions.contains(action)) {
 			throw new IllegalArgumentException("action already added");
 		}
@@ -102,6 +106,8 @@ public class Scheduler {
 	}
 
 	public void registerSubsystem(Subsystem subsystem) {
+        Objects.requireNonNull(subsystem, "subsystem is null");
+
 		if (mSubsystems.contains(subsystem)) {
 			throw new IllegalArgumentException("subsystem already registered");
 		}
@@ -149,6 +155,8 @@ public class Scheduler {
 	}
 
 	private void updateRequirementsWithNewRunningAction(Action action) {
+        Objects.requireNonNull(action, "action is null");
+
 		for (Subsystem subsystem : action.getRequirements()) {
 			if (subsystem.hasCurrentAction()) {
 			    Action currentAction = subsystem.getCurrentAction();
@@ -161,6 +169,8 @@ public class Scheduler {
 	}
 
 	private void updateRequirementsNoCurrentAction(Action action) {
+        Objects.requireNonNull(action, "action is null");
+
 		for (Subsystem subsystem : action.getRequirements()) {
 			subsystem.setCurrentAction(null);
 		}

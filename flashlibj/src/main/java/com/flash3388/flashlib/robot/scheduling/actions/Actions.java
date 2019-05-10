@@ -3,6 +3,8 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.time.Time;
 
+import java.util.Objects;
+
 public class Actions {
 
     private Actions() {}
@@ -38,6 +40,8 @@ public class Actions {
      * @return canceling action
      */
     public static Action stopAction(Action action){
+        Objects.requireNonNull(action, "action is null");
+
         return new InstantAction(){
             @Override
             public void execute() {
@@ -48,6 +52,7 @@ public class Actions {
     }
 
     public static Action instantAction(Runnable runnable) {
+        Objects.requireNonNull(runnable, "runnable is null");
         return new InstantAction() {
             @Override
             protected void execute() {
