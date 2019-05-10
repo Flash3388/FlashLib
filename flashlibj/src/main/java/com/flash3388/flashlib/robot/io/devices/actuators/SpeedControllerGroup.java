@@ -18,19 +18,32 @@ public class SpeedControllerGroup implements SpeedController {
 	 * Creates a new container for a list of speed controller.
 	 * 
 	 * @param controllers list of controllers to be contained
+     * @param isInverted whether or not to invert the controllers
 	 */
-	public SpeedControllerGroup(Collection<SpeedController> controllers){
-		mControllers = new ArrayList<>(controllers);
+	public SpeedControllerGroup(Collection<SpeedController> controllers, boolean isInverted){
+		mControllers = Collections.unmodifiableList(new ArrayList<>(controllers));
 
-		setInverted(false);
+		setInverted(isInverted);
 		set(0);
 	}
 
-	public SpeedControllerGroup(SpeedController... controllers) {
-	    this(Arrays.asList(controllers));
+	public SpeedControllerGroup(Collection<SpeedController> controllers) {
+	    this(controllers, false);
     }
-	
-	/**
+
+	public SpeedControllerGroup(boolean isInverted, SpeedController... controllers) {
+	    this(Arrays.asList(controllers), isInverted);
+    }
+
+    public SpeedControllerGroup(SpeedController... controllers) {
+	    this(false, controllers);
+    }
+
+    public List<SpeedController> getControllers() {
+        return mControllers;
+    }
+
+    /**
 	 * {@inheritDoc}
 	 * <p>
 	 * Sets the speed value to all the speed controllers contained in this object.
