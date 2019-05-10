@@ -133,19 +133,23 @@ public abstract class Action {
 	 * Sets the running timeout for this action. When started, if the timeout is not 0 or negative
 	 * time is counted. If the timeout is reached, the action is canceled.
 	 * @param timeout timeout
+     * @return this instance
 	 */
-	public void setTimeout(Time timeout){
+	public Action setTimeout(Time timeout){
         Objects.requireNonNull(timeout, "timeout is null");
 
 	    validateNotRunning();
         mTimeout = timeout;
+
+        return this;
 	}
 
 	/**
 	 * Cancels the timeout set for this action. Done by setting the timeout to an invalid value.
+     * @return this instance
 	 */
-	public void cancelTimeout(){
-		setTimeout(Time.INVALID);
+	public Action cancelTimeout(){
+		return setTimeout(Time.INVALID);
 	}
 
 	/**
@@ -165,34 +169,41 @@ public abstract class Action {
 	/**
 	 * Adds a System that is used by this action.
 	 * @param subsystem a system used by this action
+     * @return this instance
 	 */
-	public void requires(Subsystem subsystem){
+	public Action requires(Subsystem subsystem){
         Objects.requireNonNull(subsystem, "requirement is null");
-	    requires(Collections.singleton(subsystem));
+	    return requires(Collections.singleton(subsystem));
 	}
 
 	/**
 	 * Adds Systems that are used by this action.
 	 * @param subsystems an array of systems used by this action
+     * @return this instance
 	 */
-	public void requires(Subsystem... subsystems){
+	public Action requires(Subsystem... subsystems){
         Objects.requireNonNull(subsystems, "requirements is null");
-	    requires(Arrays.asList(subsystems));
+	    return requires(Arrays.asList(subsystems));
 	}
 
-    public void requires(Collection<Subsystem> subsystems) {
+    public Action requires(Collection<Subsystem> subsystems) {
         Objects.requireNonNull(subsystems, "requirements is null");
 
         validateNotRunning();
         mRequirements.addAll(subsystems);
+
+        return this;
     }
 
 	/**
-	 * Resets the requirements of this action
+	 * Resets the requirements of this action.
+     * @return this instance.
 	 */
-	public void resetRequirements(){
+	public Action resetRequirements(){
 	    validateNotRunning();
 		mRequirements.clear();
+
+		return this;
 	}
 
 	/**
