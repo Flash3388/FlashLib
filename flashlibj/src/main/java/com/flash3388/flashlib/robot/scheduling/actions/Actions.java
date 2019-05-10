@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.time.Time;
 
 public class Actions {
 
@@ -21,6 +22,12 @@ public class Actions {
             protected void end() {
             }
         };
+    }
+
+    public static Action wait(Time waitTime) {
+        Action action = empty();
+        action.setTimeout(waitTime);
+        return action;
     }
 
     /**
