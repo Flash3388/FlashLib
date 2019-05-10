@@ -39,7 +39,7 @@ public class SpeedControllerGroup implements SpeedController {
 	    this(false, controllers);
     }
 
-    public List<SpeedController> getControllers() {
+    public final List<SpeedController> getControllers() {
         return mControllers;
     }
 
