@@ -4,10 +4,6 @@ import com.beans.DoubleProperty;
 import com.beans.properties.SimpleDoubleProperty;
 import com.jmath.ExtendedMath;
 
-import java.util.function.DoubleSupplier;
-
-import static com.jmath.ExtendedMath.constrain;
-
 /**
  * Provides a PID controller for controlling motors more efficiently.
  * <p>
@@ -23,44 +19,63 @@ import static com.jmath.ExtendedMath.constrain;
  */
 public class PidController {
 
-	private final DoubleProperty mKp;
-	private final DoubleProperty mKi;
-	private final DoubleProperty mKd;
-	private final DoubleProperty mKf;
+    private final DoubleProperty mKp;
+    private final DoubleProperty mKi;
+    private final DoubleProperty mKd;
+    private final DoubleProperty mKf;
 
-	private double mMinimumOutput;
-	private double mMaximumOutput;
+    private double mMinimumOutput;
+    private double mMaximumOutput;
 
-	private double mTotalError;
-	private double mLastError;
+    private double mSetPointRange;
+    private double mOutRampRate;
 
-	private boolean mIsFirstRun;
-	
-	/**
-	 * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid mPidSource
-	 * for the feedback data.
-	 * @param kp the proportional constant
-	 * @param ki the integral constant
-	 * @param kd the differential constant
-	 * @param kf the feed forward constant
-	 */
-	public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
-		mKp = kp;
-		mKi = ki;
-		mKd = kd;
-		mKf = kf;
+    private double mTotalError;
 
-		mMinimumOutput = -1;
-		mMaximumOutput = 1;
+    private double mLastOutput;
+    private double mLastProcessVariable;
 
-		mTotalError = 0;
-        mLastError = 0.0;
+    private boolean mIsFirstRun;
 
-		mIsFirstRun = true;
-	}
+    /**
+     * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid mPidSource
+     * for the feedback data.
+     * @param kp the proportional constant
+     * @param ki the integral constant
+     * @param kd the differential constant
+     * @param kf the feed forward constant
+     */
+    public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
+        mKp = kp;
+        mKi = ki;
+        mKd = kd;
+        mKf = kf;
+
+        mMinimumOutput = -1;
+        mMaximumOutput = 1;
+
+        mSetPointRange = 0;
+        mOutRampRate = 0;
+
+        mTotalError = 0;
+
+        mLastProcessVariable = 0.0;
+        mLastOutput = 0.0;
+
+        mIsFirstRun = true;
+    }
 
     public PidController(double kp, double ki, double kd, double kf) {
-	    this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kd), new SimpleDoubleProperty(kf));
+        this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kd), new SimpleDoubleProperty(kf));
+    }
+
+    /**
+     * Resets the controller. This erases the I term buildup, and removes
+     * D gain on the next loop.
+     */
+    public void reset(){
+        mIsFirstRun = true;
+        mTotalError = 0;
     }
 
     /**
@@ -95,70 +110,110 @@ public class PidController {
         return mKf;
     }
 
-    public void setOutputRange(double min, double max) {
+    /**
+     * Set the maximum rate the output can increase per cycle.
+     *
+     * @param rate rate of output change per cycle
+     */
+    public void setOutputRampRate(double rate){
+        mOutRampRate = rate;
+    }
+
+    /**
+     * Set a limit on how far the setpoint can be from the current position.
+     *
+     * @param range range of setpoint
+     */
+    public void setSetpointRange(double range){
+        mSetPointRange = range;
+    }
+
+    /**
+     * Gets the maximum output of the loop.
+     * @return the maximum output
+     */
+    public double getMaximumOutput(){
+        return mMaximumOutput;
+    }
+
+    /**
+     * Gets the minimum output of the loop.
+     * @return the minimum output
+     */
+    public double getMinimumOutput(){
+        return mMinimumOutput;
+    }
+
+    /**
+     * Sets the minimum and maximum outputs of the loop.
+     * @param min minimum output
+     * @param max maximum output
+     */
+    public void setOutputLimit(double min, double max){
+        if(max < min) {
+            throw new IllegalArgumentException("The min value cannot be bigger than the max");
+        }
+
         mMinimumOutput = min;
         mMaximumOutput = max;
     }
 
     /**
-	 * Resets the controller. This erases the I term buildup, and removes 
-	 * D gain on the next loop.
-	 */
-	public void reset(){
-		mIsFirstRun = true;
-		mTotalError = 0.0;
-	}
+     * Sets the output limit of the loop. The maximum output will be equal to the given value, while the minimum output
+     * will be equal to the negative value.
+     * @param outputLimit the output limit
+     */
+    public void setOutputLimit(double outputLimit){
+        setOutputLimit(-outputLimit, outputLimit);
+    }
 
     /**
      * Calculates the output to the system to compensate for the error.
      *
      * @param processVariable the process variable of the system.
      * @param setPoint the desired set point.
-     * @param processType processing type for the controller
      *
      * @return the compensation value from the PID loop calculation
      */
-    public double calculate(double processVariable, double setPoint, PidProcessType processType) {
-        double kp = mKp.getAsDouble();
-        double ki = mKi.getAsDouble();
-        double kd = mKd.getAsDouble();
-        double kf = mKf.getAsDouble();
-
-        double feedForward = kf * setPoint;
+    public double calculate(double processVariable, double setPoint){
+        if(mSetPointRange != 0) {
+            processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
+        }
 
         double error = setPoint - processVariable;
-        double result;
+
+        double pOut = mKp.getAsDouble() * error;
+        double fOut = mKf.getAsDouble() * setPoint;
 
         if(mIsFirstRun){
             mIsFirstRun = false;
-            mLastError = error;
+            mLastOutput = pOut + fOut;
+            mLastProcessVariable = processVariable;
         }
 
-        switch (processType) {
-            case RATE: {
-                if (kd != 0.0) {
-                    mTotalError = constrain(mTotalError + error,
-                            mMinimumOutput / kd, mMaximumOutput / kd);
-                }
+        double iOut = mKi.getAsDouble() * mTotalError;
+        double dOut = -mKd.getAsDouble() * (processVariable - mLastProcessVariable);
 
-                result = kp * mTotalError + kd * error + feedForward;
-                break;
-            }
-            case DISPLACEMENT: {
-                if (ki != 0.0) {
-                    mTotalError = constrain(mTotalError + error,
-                            mMinimumOutput / ki, mMaximumOutput / ki);
-                }
+        double output = pOut + iOut + dOut + fOut;
 
-                result = kp * error + ki * mTotalError + kd * (error - mLastError) + feedForward;
-                break;
-            }
-            default:
-                throw new IllegalArgumentException("unknown process type");
+        mTotalError += error;
+
+        if(mMinimumOutput != mMaximumOutput && !ExtendedMath.constrained(output, mMinimumOutput, mMaximumOutput)) {
+            mTotalError = error;
         }
 
-        mLastError = error;
+        if(mOutRampRate != 0 && !ExtendedMath.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
+            mTotalError = error;
+            output = ExtendedMath.constrain(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate);
+        }
 
-        return constrain(result, mMinimumOutput, mMaximumOutput);
+        if(mMinimumOutput != mMaximumOutput) {
+            output = ExtendedMath.constrain(output, mMinimumOutput, mMaximumOutput);
+        }
+
+        mLastOutput = output;
+        mLastProcessVariable = processVariable;
+
+        return output;
     }
 }
