@@ -114,11 +114,12 @@ public class PidController {
      *
      * @param processVariable the process variable of the system.
      * @param setPoint the desired set point.
-     * @param processType processing type for the controller
      *
      * @return the compensation value from the PID loop calculation
      */
-    public double calculate(double processVariable, double setPoint, PidProcessType processType) {
+    public double calculate(double processVariable, double setPoint) {
+        PidProcessType processType = PidProcessType.DISPLACEMENT;
+
         double kp = mKp.getAsDouble();
         double ki = mKi.getAsDouble();
         double kd = mKd.getAsDouble();
