@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
+import com.flash3388.flashlib.robot.control.PidProcessType;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.jmath.ExtendedMath;
@@ -21,8 +22,6 @@ public class MoveToDistanceAction extends Action {
         mDistanceSupplier = distanceSupplier;
         mWantedDistance = wantedDistance;
         mDistanceMargin = distanceMargin;
-
-        mPidController.setOutputLimit(1.0);
     }
 
     @Override
@@ -32,7 +31,7 @@ public class MoveToDistanceAction extends Action {
 
     @Override
     protected void execute() {
-        double pidResult = mPidController.calculate(mDistanceSupplier.getAsDouble(), mWantedDistance);
+        double pidResult = mPidController.calculate(mDistanceSupplier.getAsDouble(), mWantedDistance, PidProcessType.DISPLACEMENT);
         mMovable.move(pidResult);
     }
 

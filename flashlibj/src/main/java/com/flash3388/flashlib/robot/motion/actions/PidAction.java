@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
+import com.flash3388.flashlib.robot.control.PidProcessType;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.jmath.ExtendedMath;
@@ -32,7 +33,8 @@ public class PidAction extends Action {
     protected void execute() {
         double value = mPidController.calculate(
                 mProcessVariableSupplier.getAsDouble(),
-                mSetPointSupplier.getAsDouble());
+                mSetPointSupplier.getAsDouble(),
+                PidProcessType.DISPLACEMENT);
 
         mMovable.move(value);
     }
