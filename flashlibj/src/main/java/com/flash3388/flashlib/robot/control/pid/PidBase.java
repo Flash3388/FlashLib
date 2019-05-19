@@ -60,4 +60,9 @@ public abstract class PidBase implements Pid {
     public double getD() {
         return mKd.getAsDouble();
     }
+
+    @Override
+    public void setOutputLimit(double min, double max) {
+        throw new UnsupportedOperationException();
+    }
 }

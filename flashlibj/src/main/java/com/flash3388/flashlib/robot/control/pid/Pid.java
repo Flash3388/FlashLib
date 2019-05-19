@@ -11,8 +11,4 @@ public interface Pid {
     void setD(double d);
 
     void setOutputLimit(double min, double max);
-
-    void reset();
-
-    double calculate(double processVariable, double setPoint);
 }
