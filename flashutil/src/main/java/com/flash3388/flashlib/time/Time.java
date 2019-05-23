@@ -90,11 +90,6 @@ public class Time implements Comparable<Time> {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Time && equals((Time) obj);
-    }
-
-    @Override
     public int compareTo(Time other) {
         long otherValue = other.toUnit(mUnit).value();
 
@@ -106,6 +101,16 @@ public class Time implements Comparable<Time> {
         }
 
         return CompareResult.EQUAL_TO.value();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Time && equals((Time) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mValue, mUnit);
     }
 
     @Override
