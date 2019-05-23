@@ -25,6 +25,6 @@ public class HttpServerCloser implements Closeable {
 
     @Override
     public void close() throws IOException {
-        mServer.stop((int) mStopDelay.getAsUnit(TimeUnit.SECONDS).getValue());
+        mServer.stop((int) mStopDelay.toUnit(TimeUnit.SECONDS).value());
     }
 }

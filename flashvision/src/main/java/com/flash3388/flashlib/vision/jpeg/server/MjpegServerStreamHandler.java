@@ -60,7 +60,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
                 outputStream.flush();
 
                 Time timeTaken = mClock.currentTime().sub(startTime);
-                long sleepMillis = timeTaken.getAsMillis() - (1000 / camera.getFps());
+                long sleepMillis = timeTaken.valueAsMillis() - (1000 / camera.getFps());
 
                 if (sleepMillis > 0) {
                     Thread.sleep(sleepMillis);

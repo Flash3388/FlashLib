@@ -25,9 +25,9 @@ public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
     protected void startRunner() {
         mExecutorService.scheduleAtFixedRate(
                 new ImageDelegationTask<>(mImageDelegator, mLogger),
-                mDelegationPeriod.getValue(),
-                mDelegationPeriod.getValue(),
-                mDelegationPeriod.getUnit());
+                mDelegationPeriod.value(),
+                mDelegationPeriod.value(),
+                mDelegationPeriod.unit());
     }
 
     @Override

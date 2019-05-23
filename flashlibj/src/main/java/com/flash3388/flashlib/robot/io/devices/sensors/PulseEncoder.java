@@ -40,7 +40,7 @@ public class PulseEncoder implements Encoder {
 	
 	private void checkRest(){
 		if(mShouldCheckRest){
-			long time = mClock.currentTime().getAsMillis();
+			long time = mClock.currentTime().valueAsMillis();
 			int count = getRaw();
 			
 			if(mLastCheckTime == Time.INVALID_VALUE) {

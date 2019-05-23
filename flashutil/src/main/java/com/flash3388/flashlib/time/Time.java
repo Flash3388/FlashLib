@@ -38,19 +38,20 @@ public class Time implements Comparable<Time> {
         return seconds(timeMinutes * 60);
     }
 
-    public long getValue() {
+    public long value() {
         return mValue;
     }
 
-    public TimeUnit getUnit() {
+    public TimeUnit unit() {
         return mUnit;
     }
 
-    public Time getAsUnit(TimeUnit newTimeUnit) {
+    public Time toUnit(TimeUnit newTimeUnit) {
         if (!isValid()) {
             return new Time(INVALID_VALUE, newTimeUnit);
         }
-        if (getUnit().equals(newTimeUnit)) {
+
+        if (mUnit == newTimeUnit) {
             return this;
         }
 
@@ -58,8 +59,8 @@ public class Time implements Comparable<Time> {
         return new Time(valueInWantedUnits, newTimeUnit);
     }
 
-    public long getAsMillis() {
-        return getAsUnit(TimeUnit.MILLISECONDS).getValue();
+    public long valueAsMillis() {
+        return toUnit(TimeUnit.MILLISECONDS).value();
     }
 
     public boolean isValid() {
@@ -67,17 +68,13 @@ public class Time implements Comparable<Time> {
     }
 
     public Time add(Time other) {
-        long thisMs = getAsMillis();
-        long otherMs = other.getAsMillis();
-
-        return new Time(thisMs + otherMs, TimeUnit.MILLISECONDS);
+        long newValue = mValue + other.toUnit(mUnit).value();
+        return new Time(newValue, mUnit);
     }
 
     public Time sub(Time other) {
-        long thisMs = getAsMillis();
-        long otherMs = other.getAsMillis();
-
-        return new Time(thisMs - otherMs, TimeUnit.MILLISECONDS);
+        long newValue = mValue - other.toUnit(mUnit).value();
+        return new Time(newValue, mUnit);
     }
 
     public boolean before(Time other) {
@@ -99,13 +96,12 @@ public class Time implements Comparable<Time> {
 
     @Override
     public int compareTo(Time other) {
-        long thisMs = getAsMillis();
-        long otherMs = other.getAsMillis();
+        long otherValue = other.toUnit(mUnit).value();
 
-        if (thisMs > otherMs) {
+        if (mValue > otherValue) {
             return CompareResult.GREATER_THAN.value();
         }
-        if (thisMs < otherMs) {
+        if (mValue < otherValue) {
             return CompareResult.SMALLER_THAN.value();
         }
 

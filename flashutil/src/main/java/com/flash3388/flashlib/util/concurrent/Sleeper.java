@@ -15,11 +15,11 @@ public class Sleeper {
     }
 
     public void sleep(Time sleepTime) throws InterruptedException {
-        sleepMs(sleepTime.getAsMillis());
+        sleepMs(sleepTime.valueAsMillis());
     }
 
     public void sleepWhileConditionMet(BooleanSupplier condition, Time sleepTime) throws InterruptedException {
-        long timeoutMs = sleepTime.getAsMillis();
+        long timeoutMs = sleepTime.valueAsMillis();
         long sleepingPeriodMs = getSleepingPeriodMs(timeoutMs);
         long timeWaited = 0;
 

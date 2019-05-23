@@ -26,7 +26,7 @@ public class ExecutorCloser implements Closeable {
         mExecutorService.shutdownNow();
 
         try {
-            while (!mExecutorService.awaitTermination(mShutdownWait.getValue(), mShutdownWait.getUnit()));
+            while (!mExecutorService.awaitTermination(mShutdownWait.value(), mShutdownWait.unit()));
         } catch (InterruptedException e) {
             Interrupts.preserveInterruptState();
         }

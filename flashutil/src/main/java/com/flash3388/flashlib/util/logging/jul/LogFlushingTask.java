@@ -20,7 +20,7 @@ public class LogFlushingTask implements Runnable {
             try {
                 mHandler.flush();
 
-                Thread.sleep(DEFAULT_FLUSHING_PERIOD.getAsMillis());
+                Thread.sleep(DEFAULT_FLUSHING_PERIOD.valueAsMillis());
             } catch (InterruptedException e) {
                 break;
             }
