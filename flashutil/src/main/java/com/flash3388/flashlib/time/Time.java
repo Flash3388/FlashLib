@@ -18,6 +18,10 @@ public class Time implements Comparable<Time> {
         mUnit = Objects.requireNonNull(unit, "time unit");
     }
 
+    public static Time of(long value, TimeUnit unit) {
+        return new Time(value, unit);
+    }
+
     public static Time milliseconds(long timeMs) {
         return new Time(timeMs, TimeUnit.MILLISECONDS);
     }
