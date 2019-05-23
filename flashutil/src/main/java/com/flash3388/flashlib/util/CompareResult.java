@@ -11,13 +11,13 @@ public enum CompareResult {
         mValue = value;
     }
 
-    public int getValue() {
+    public int value() {
         return mValue;
     }
 
     public static CompareResult forValue(int value) {
         for (CompareResult result : values()) {
-            if (result.getValue() == value) {
+            if (result.value() == value) {
                 return result;
             }
         }

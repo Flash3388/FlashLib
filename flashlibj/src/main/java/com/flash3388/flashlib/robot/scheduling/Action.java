@@ -163,7 +163,7 @@ public abstract class Action {
 	        return false;
         }
 
-		return (mClock.currentTime().sub(mStartTime)).compareTo(mTimeout) == CompareResult.GREATER_THAN.getValue();
+		return (mClock.currentTime().sub(mStartTime)).compareTo(mTimeout) == CompareResult.GREATER_THAN.value();
 	}
 
 	/**

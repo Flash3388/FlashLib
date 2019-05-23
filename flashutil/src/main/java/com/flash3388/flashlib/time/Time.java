@@ -81,15 +81,15 @@ public class Time implements Comparable<Time> {
     }
 
     public boolean before(Time other) {
-        return compareTo(other) == CompareResult.SMALLER_THAN.getValue();
+        return compareTo(other) == CompareResult.SMALLER_THAN.value();
     }
 
     public boolean after(Time other) {
-        return compareTo(other) == CompareResult.GREATER_THAN.getValue();
+        return compareTo(other) == CompareResult.GREATER_THAN.value();
     }
 
     public boolean equals(Time other) {
-        return compareTo(other) == CompareResult.EQUAL_TO.getValue();
+        return compareTo(other) == CompareResult.EQUAL_TO.value();
     }
 
     @Override
@@ -103,13 +103,13 @@ public class Time implements Comparable<Time> {
         long otherMs = other.getAsMillis();
 
         if (thisMs > otherMs) {
-            return CompareResult.GREATER_THAN.getValue();
+            return CompareResult.GREATER_THAN.value();
         }
         if (thisMs < otherMs) {
-            return CompareResult.SMALLER_THAN.getValue();
+            return CompareResult.SMALLER_THAN.value();
         }
 
-        return CompareResult.EQUAL_TO.getValue();
+        return CompareResult.EQUAL_TO.value();
     }
 
     @Override
