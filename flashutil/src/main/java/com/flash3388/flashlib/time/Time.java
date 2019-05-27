@@ -72,11 +72,15 @@ public class Time implements Comparable<Time> {
     }
 
     public Time add(Time other) {
+        checkValidForOperation(other);
+
         long newValue = mValue + other.toUnit(mUnit).value();
         return new Time(newValue, mUnit);
     }
 
     public Time sub(Time other) {
+        checkValidForOperation(other);
+
         long newValue = mValue - other.toUnit(mUnit).value();
         return new Time(newValue, mUnit);
     }
@@ -95,6 +99,14 @@ public class Time implements Comparable<Time> {
 
     @Override
     public int compareTo(Time other) {
+        if (!isValid() && !other.isValid()) {
+            return CompareResult.EQUAL_TO.value();
+        } if (!other.isValid()) {
+            return CompareResult.GREATER_THAN.value();
+        } if (!isValid()) {
+            return CompareResult.SMALLER_THAN.value();
+        }
+
         long otherValue = other.toUnit(mUnit).value();
 
         if (mValue > otherValue) {
@@ -120,5 +132,19 @@ public class Time implements Comparable<Time> {
     @Override
     public String toString() {
         return String.format("%d [%s]", mValue, mUnit.name());
+    }
+
+    private void checkValidForOperation(Time other) {
+        if (!isValid()) {
+            throw new IllegalStateException(getNotValidExceptionMessage(this));
+        }
+
+        if (!other.isValid()) {
+            throw new IllegalArgumentException(getNotValidExceptionMessage(other));
+        }
+    }
+
+    private String getNotValidExceptionMessage(Time time) {
+        return String.format("time not valid: %s", time.toString());
     }
 }
