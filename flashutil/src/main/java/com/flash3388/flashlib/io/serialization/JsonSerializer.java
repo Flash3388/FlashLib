@@ -5,6 +5,9 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 public class JsonSerializer implements Serializer {
@@ -18,19 +21,21 @@ public class JsonSerializer implements Serializer {
     }
 
     @Override
-    public <T> byte[] serialize(T value) throws IOException {
+    public <T> void serialize(T value, OutputStream outputStream) throws IOException {
         try {
             String json = mGson.toJson(value);
-            return json.getBytes(mCharset);
+            byte[] bytes = json.getBytes(mCharset);
+            outputStream.write(bytes);
         } catch (JsonIOException e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public <T> T deserialize(byte[] serializedValue, Class<T> type) throws IOException, TypeException {
+    public <T> T deserialize(InputStream inputStream, Class<T> type) throws IOException, TypeException {
         try {
-            Object value = mGson.fromJson(new String(serializedValue, mCharset), type);
+            InputStreamReader reader = new InputStreamReader(inputStream, mCharset);
+            Object value = mGson.fromJson(reader, type);
             return type.cast(value);
         } catch (JsonSyntaxException | JsonIOException e) {
             throw new IOException(e);

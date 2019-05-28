@@ -3,9 +3,12 @@ package com.flash3388.flashlib.io.serialization;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class JavaObjectSerializerTest {
 
@@ -37,6 +40,33 @@ public class JavaObjectSerializerTest {
     public void serialize_objectNotSerializable_throwsIOException() throws Exception {
         JavaObjectSerializer serializer = new JavaObjectSerializer();
         serializer.serialize(new OtherObject());
+    }
+
+    @Test
+    public void serialize_intoOutputStream_streamIsNotClosed() throws Exception {
+        JavaObjectSerializer serializer = new JavaObjectSerializer();
+
+        OutputStream outputStream = mock(OutputStream.class);
+        serializer.serialize(new TestClass(0, 0.0), outputStream);
+
+        verify(outputStream, times(0)).close();
+    }
+
+    @Test
+    public void deserialize_fromInputStream_streamIsNotClosed() throws Exception {
+        JavaObjectSerializer serializer = new JavaObjectSerializer();
+
+        InputStream inputStream = mock(InputStream.class);
+        when(inputStream.read()).thenReturn(0);
+        when(inputStream.available()).thenReturn(0);
+
+        try {
+            serializer.deserialize(inputStream, TestClass.class);
+        } catch (Throwable t) {
+            // ignore
+        }
+
+        verify(inputStream, times(0)).close();
     }
 
     private void assertTestClassEquals(TestClass expected, TestClass actual) {
