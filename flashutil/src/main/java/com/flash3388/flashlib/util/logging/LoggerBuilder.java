@@ -2,14 +2,14 @@ package com.flash3388.flashlib.util.logging;
 
 import com.flash3388.flashlib.util.logging.jul.DelegatingHandler;
 import com.flash3388.flashlib.util.logging.jul.FlusherThreadFactory;
+import com.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import com.flash3388.flashlib.util.logging.jul.JulLoggerAdapter;
 import com.flash3388.flashlib.util.logging.jul.LogFlushingTask;
-import com.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -29,7 +29,7 @@ public class LoggerBuilder {
 
     private boolean mEnableFileLogging;
     private String mFilePattern;
-    private File mLogsParent;
+    private Path mLogsParent;
     private Formatter mFileHandlerFormatter;
     private LogFileConfig mLogFileConfig;
 
@@ -83,18 +83,18 @@ public class LoggerBuilder {
         return setFilePattern(filePattern);
     }
 
-    public LoggerBuilder setLogFilesParent(File parent) {
+    public LoggerBuilder setLogFilesParent(Path parent) {
         mLogsParent = Objects.requireNonNull(parent);
         return this;
     }
 
-    public LoggerBuilder setDateBasedFilesParent(File parent) {
+    public LoggerBuilder setDateBasedFilesParent(Path parent) {
         Date date = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-        String directoryPath = String.format("%s/logs/%s/%s", parent.getAbsolutePath(), mName, dateFormat.format(date));
+        String directoryPath = String.format("/logs/%s/%s", mName, dateFormat.format(date));
 
-        return setLogFilesParent(new File(directoryPath));
+        return setLogFilesParent(parent.resolve(directoryPath));
     }
 
     public LoggerBuilder setFileLogFormatter(Formatter formatter) {
@@ -147,8 +147,8 @@ public class LoggerBuilder {
                 String pattern;
 
                 if (mLogsParent != null) {
-                    pattern = mLogsParent.getAbsolutePath().concat(File.separator).concat(mFilePattern);
-                    Files.createDirectories(mLogsParent.toPath());
+                    pattern = mLogsParent.resolve("/".concat(mFilePattern)).toAbsolutePath().toString();
+                    Files.createDirectories(mLogsParent);
                 } else {
                     pattern = mFilePattern;
                 }
