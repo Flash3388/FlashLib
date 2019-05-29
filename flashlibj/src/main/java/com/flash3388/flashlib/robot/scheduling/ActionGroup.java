@@ -51,7 +51,9 @@ public class ActionGroup extends Action {
 	    super(scheduler, clock, Time.INVALID);
 
 		mExecutionOrder = Objects.requireNonNull(executionOrder, "executionOrder is null");
-		mActions = Objects.requireNonNull(actions, "actions is null");
+
+		mActions = new ArrayList<>();
+		add(Objects.requireNonNull(actions, "actions is null"));
 
 		mActionsQueue = new ArrayDeque<>();
 		mCurrentlyRunningActions = new ArrayList<>();
