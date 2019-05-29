@@ -59,8 +59,9 @@ public class SequentialActionGroupTest {
     }
 
     @Test
-    public void start_nextActionIsSequentialAction_checkForItsNext() throws Exception {
-        SequentialAction secondAction = mock(SequentialAction.class);
+    public void start_nextActionIsSequentialAction_checksForItsNext() throws Exception {
+        Action thirdAction = mock(Action.class);
+        SequentialAction secondAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), thirdAction));
         SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
 
         doNothing().when(firstAction).setParent(any(Action.class));
@@ -77,7 +78,7 @@ public class SequentialActionGroupTest {
         sequentialActionGroup.run();
         sequentialActionGroup.run();
 
-        verify(secondAction, times(1)).getRunNext();
+        verify(thirdAction, times(1)).startAction();
     }
 
     @Test
