@@ -4,6 +4,8 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.JavaMillisClock;
 import org.junit.Test;
 
+import java.util.Collections;
+
 import static org.mockito.Mockito.*;
 
 public class SequentialActionGroupTest {
@@ -54,6 +56,63 @@ public class SequentialActionGroupTest {
         sequentialActionGroup.run();
 
         verify(secondAction, times(1)).startAction();
+    }
+
+    @Test
+    public void start_nextActionIsSequentialAction_checkForItsNext() throws Exception {
+        SequentialAction secondAction = mock(SequentialAction.class);
+        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
+
+        doNothing().when(firstAction).setParent(any(Action.class));
+        when(firstAction.isRunning()).thenReturn(true);
+        when(firstAction.run()).thenReturn(false);
+
+        when(secondAction.isRunning()).thenReturn(true);
+        when(secondAction.run()).thenReturn(false);
+
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+
+        sequentialActionGroup.start();
+        sequentialActionGroup.run();
+        sequentialActionGroup.run();
+        sequentialActionGroup.run();
+
+        verify(secondAction, times(1)).getRunNext();
+    }
+
+    @Test
+    public void cancel_actionIsInterrupted_currentActionIsCanceled() throws Exception {
+        SequentialAction action = mock(SequentialAction.class);
+        when(action.isRunning()).thenReturn(true);
+        when(action.run()).thenReturn(true);
+
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), action);
+
+        sequentialActionGroup.start();
+        sequentialActionGroup.run();
+        sequentialActionGroup.cancel();
+        sequentialActionGroup.removed();
+
+        verify(action, times(1)).cancelAction();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void start_doesNotHaveRequirementsForNextActon_throwsIllegalStateException() throws Exception {
+        Action secondAction = mock(Action.class);
+        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
+
+        doNothing().when(firstAction).setParent(any(Action.class));
+        when(firstAction.isRunning()).thenReturn(true);
+        when(firstAction.run()).thenReturn(false);
+
+        when(secondAction.isRunning()).thenReturn(false);
+        when(secondAction.getRequirements()).thenReturn(Collections.singleton(mock(Subsystem.class)));
+
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+
+        sequentialActionGroup.start();
+        sequentialActionGroup.run();
+        sequentialActionGroup.run();
     }
 
     private static class ActionWithNext extends SequentialAction {
