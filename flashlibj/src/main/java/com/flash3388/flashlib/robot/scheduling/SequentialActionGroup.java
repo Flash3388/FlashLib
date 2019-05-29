@@ -1,5 +1,9 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
+
 import java.util.Collection;
 import java.util.Objects;
 
@@ -10,11 +14,24 @@ public class SequentialActionGroup extends Action {
     private Action mCurrentAction;
 
     public SequentialActionGroup() {
-        mFirstAction = null;
+        this(null);
+    }
+
+    public SequentialActionGroup(SequentialAction firstAction) {
+        this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), firstAction);
+    }
+
+    SequentialActionGroup(Scheduler scheduler, Clock clock, SequentialAction firstAction) {
+        super(scheduler, clock, Time.INVALID);
+
+        if (firstAction != null) {
+            first(firstAction);
+        }
+
         mCurrentAction = null;
     }
 
-    public SequentialActionGroup setFirst(SequentialAction action) {
+    public SequentialActionGroup first(SequentialAction action) {
         validateNotRunning();
 
         mFirstAction = Objects.requireNonNull(action, "action is null");
