@@ -85,8 +85,9 @@ public abstract class Action {
     }
 	
 	/**
-	 * Starts the action. If the Scheduler was initialized, than the action is added to the
-	 * Scheduler for running. If the action is running than it is not added.
+	 * Start the action if it is not running, adding it to the scheduler.
+     *
+     * @throws IllegalStateException if this action has a parent action.
 	 */
 	public void start(){
 	    validateNoParent();
@@ -98,7 +99,9 @@ public abstract class Action {
 	}
 
 	/**
-	 * Cancels the operation of the action if it is running.
+	 * Cancels this action if it is not running.
+     *
+     * @throws IllegalStateException if this action has a parent action.
 	 */
 	public void cancel(){
 	    validateNoParent();
@@ -107,33 +110,47 @@ public abstract class Action {
 
 	/**
 	 * Gets whether or not an action has been canceled. Meaning it did not reach {@link #end()}.
-	 * @return true if the action was canceled, false otherwise
+     * This could occur if one of several things happen:
+     * <ul>
+     *     <li>A call to {@link #cancel()} was made</li>
+     *     <li>A timeout was defined for this action, and that timeout has reached</li>
+     *     <li>Another action with conflicting requirements was started on the same {@link Scheduler}</li>
+     *     <li>The {@link Scheduler} has being requested to remove the action</li>
+     * </ul>
+     *
+	 * @return <b>true</b> if the action was canceled, <b>false</b> otherwise
 	 */
 	public boolean isCanceled(){
 		return mIsCanceled;
 	}
 
 	/**
-	 * Gets whether or not an action is running.
-	 * @return true if the action is running, false otherwise
+	 * Gets whether or not the action is running.
+     *
+	 * @return <b>true</b> if the action is running, <b>false</b> otherwise
 	 */
 	public boolean isRunning(){
 		return mIsRunning;
 	}
 
 	/**
-	 * Gets the running timeout of the action in milliseconds.
-	 * @return the timeout.
+	 * Gets the defined timeout for this action. If no timeout was defined,
+     * then this will return {@link Time#INVALID}.
+     *
+	 * @return the timeout or {@link Time#INVALID} if not defined.
 	 */
 	public Time getTimeout(){
 		return mTimeout;
 	}
 
 	/**
-	 * Sets the running timeout for this action. When started, if the timeout is not 0 or negative
-	 * time is counted. If the timeout is reached, the action is canceled.
-	 * @param timeout timeout
+	 * Sets the run timeout for this action. If the given timeout is valid ({@link Time#isValid()}), then this
+     * action will stop running (be canceled) once that timeout was reached.
+     *
+	 * @param timeout timeout to set, or {@link Time#INVALID} to cancel timeout.
      * @return this instance
+     *
+     * @throws IllegalStateException if the action is running.
 	 */
 	public Action setTimeout(Time timeout){
         Objects.requireNonNull(timeout, "timeout is null");
@@ -145,17 +162,23 @@ public abstract class Action {
 	}
 
 	/**
-	 * Cancels the timeout set for this action. Done by setting the timeout to an invalid value.
+	 * Cancels the timeout set for this action. Calls {@link #setTimeout(Time)} with {@link Time#INVALID}
+     *
      * @return this instance
+     *
+     * @throws IllegalStateException if the action is running.
 	 */
 	public Action cancelTimeout(){
 		return setTimeout(Time.INVALID);
 	}
 
 	/**
-	 * Gets whether or not the action has timed out. Time out is defined when the robot started running and timeout
-	 * is defined.
-	 * @return true if the action timeout, false otherwise
+	 * Gets whether or not this action has reached a run timeout. Timeout is defined when the time since this
+     * action has started running has reached its defined run timeout, if such a value was defined.
+     *
+	 * @return <b>true</b> if the action timeout, <b>false</b> otherwise
+     *
+     * @throws IllegalStateException if the action is not running.
 	 */
 	public boolean wasTimeoutReached(){
         validateRunning();
@@ -163,13 +186,16 @@ public abstract class Action {
 	        return false;
         }
 
-		return (mClock.currentTime().sub(mStartTime)).compareTo(mTimeout) == CompareResult.GREATER_THAN.value();
+		return (mClock.currentTime().sub(mStartTime)).after(mTimeout);
 	}
 
 	/**
-	 * Adds a System that is used by this action.
+	 * Adds a {@link Subsystem} requirement for this action.
+     *
 	 * @param subsystem a system used by this action
      * @return this instance
+     *
+     * @throws IllegalStateException if the action is running.
 	 */
 	public Action requires(Subsystem subsystem){
         Objects.requireNonNull(subsystem, "requirement is null");
@@ -177,15 +203,26 @@ public abstract class Action {
 	}
 
 	/**
-	 * Adds Systems that are used by this action.
+	 * Adds {@link Subsystem} requirements for this action.
+     *
 	 * @param subsystems an array of systems used by this action
      * @return this instance
+     *
+     * @throws IllegalStateException if the action is running.
 	 */
 	public Action requires(Subsystem... subsystems){
         Objects.requireNonNull(subsystems, "requirements is null");
 	    return requires(Arrays.asList(subsystems));
 	}
 
+    /**
+     * Adds {@link Subsystem} requirements for this action.
+     *
+     * @param subsystems collection of subsystems to add.
+     * @return this instance.
+     *
+     * @throws IllegalStateException if the action is running.
+     */
     public Action requires(Collection<Subsystem> subsystems) {
         Objects.requireNonNull(subsystems, "requirements is null");
 
@@ -197,7 +234,10 @@ public abstract class Action {
 
 	/**
 	 * Resets the requirements of this action.
+     *
      * @return this instance.
+     *
+     * @throws IllegalStateException if the action is running.
 	 */
 	public Action resetRequirements(){
 	    validateNotRunning();
@@ -208,14 +248,11 @@ public abstract class Action {
 
 	/**
 	 * Gets the {@link Subsystem}s which are used by this action.
+     *
 	 * @return {@link Set} of the used {@link Subsystem}s.
 	 */
 	public Set<Subsystem> getRequirements(){
 		return Collections.unmodifiableSet(mRequirements);
-	}
-
-	public boolean doesRequire(Subsystem subsystem) {
-		return mRequirements.contains(subsystem);
 	}
 
 	void startAction() {
@@ -275,19 +312,19 @@ public abstract class Action {
         mParent.requires(getRequirements());
     }
 
-    protected final void validateNoParent() {
+    void validateNoParent() {
 	    if (mParent != null) {
 	        throw new IllegalStateException("Action has a parent");
         }
     }
 
-    protected final void validateRunning() {
+    void validateRunning() {
         if (!isRunning()) {
             throw new IllegalStateException("action not running");
         }
     }
 
-    protected final void validateNotRunning() {
+    void validateNotRunning() {
         if (isRunning()) {
             throw new IllegalStateException("action running");
         }
