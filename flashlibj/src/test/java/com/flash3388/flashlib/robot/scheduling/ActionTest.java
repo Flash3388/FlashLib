@@ -20,7 +20,7 @@ public class ActionTest {
         mScheduler = mock(Scheduler.class);
         mClock = mock(Clock.class);
 
-        mAction = new FakeAction(mScheduler, mClock);
+        mAction = spy(new FakeAction(mScheduler, mClock));
     }
 
     @Test
@@ -39,6 +39,15 @@ public class ActionTest {
     }
 
     @Test
+    public void start_actionWasStartedAndStopped_actionAddedToScheduler() throws Exception {
+        mAction.start();
+        mAction.removed();
+        mAction.start();
+
+        verify(mScheduler, times(2)).add(eq(mAction));
+    }
+
+    @Test
     public void start_actionWasNotRunning_actionIsMarkAsRunning() throws Exception {
         mAction.start();
 
@@ -54,18 +63,112 @@ public class ActionTest {
     }
 
     @Test
+    public void run_actionWasNotInitialized_initializeIsCalled() throws Exception {
+        mAction.start();
+        mAction.run();
+
+        verify(mAction, times(1)).initialize();
+    }
+
+    @Test
+    public void run_actionWasAlreadyInitialized_initializeIsNotCalledAgain() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        mAction.run();
+        mAction.run();
+
+        verify(mAction, times(1)).initialize();
+    }
+
+    @Test
+    public void run_actionIsRunning_executeCalledEachTime() throws Exception {
+        final int RUN_TIMES = 10;
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        for (int i = 0; i < RUN_TIMES; i++) {
+            mAction.run();
+        }
+
+        verify(mAction, times(RUN_TIMES)).execute();
+    }
+
+    @Test
+    public void run_actionInitializedAndWasCanceled_interruptedCalled() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        mAction.run();
+        mAction.cancel();
+        mAction.removed();
+
+        verify(mAction, times(1)).interrupted();
+    }
+
+    @Test
+    public void run_actionNotInitializedAndWasCanceled_interruptedNotCalled() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        mAction.cancel();
+        mAction.removed();
+
+        verify(mAction, never()).interrupted();
+    }
+
+    @Test
+    public void run_actionInitializedAndHasEnded_endCalled() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        mAction.run();
+        mAction.removed();
+
+        verify(mAction, times(1)).end();
+    }
+
+    @Test
+    public void run_actionNotInitializedAndHasEnded_endNotCalled() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+
+        mAction.start();
+        mAction.removed();
+
+        verify(mAction, never()).end();
+    }
+
+    @Test
+    public void run_isFinishedReturnsTrue_returnsFalse() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+        mockActionFinished(true);
+
+        mAction.start();
+        assertFalse(mAction.run());
+    }
+
+    @Test
+    public void run_isFinishedReturnsFalse_returnsTrue() throws Exception {
+        mockClockTime(Time.milliseconds(1));
+        mockActionFinished(false);
+
+        mAction.start();
+        assertTrue(mAction.run());
+    }
+
+    @Test
     public void wasTimeoutReached_timeoutWasReached_returnsTrue() throws Exception {
         final Time TIMEOUT = Time.milliseconds(1000);
         final Time START_TIME = Time.milliseconds(500);
         final Time CLOCK_TIME = Time.milliseconds(2000);
 
         mAction.setTimeout(TIMEOUT);
-        when(mClock.currentTime()).thenReturn(START_TIME);
+        mockClockTime(START_TIME);
 
         mAction.start();
         mAction.run();
 
-        when(mClock.currentTime()).thenReturn(CLOCK_TIME);
+        mockClockTime(CLOCK_TIME);
 
         assertTrue(mAction.wasTimeoutReached());
     }
@@ -76,15 +179,23 @@ public class ActionTest {
         final Time START_TIME = Time.milliseconds(500);
         final Time CLOCK_TIME = Time.milliseconds(500);
 
-        when(mClock.currentTime()).thenReturn(START_TIME);
+        mockClockTime(START_TIME);
         mAction.setTimeout(TIMEOUT);
 
         mAction.start();
         mAction.run();
 
-        when(mClock.currentTime()).thenReturn(CLOCK_TIME);
+        mockClockTime(CLOCK_TIME);
 
         assertFalse(mAction.wasTimeoutReached());
+    }
+
+    private void mockClockTime(Time time) {
+        when(mClock.currentTime()).thenReturn(time);
+    }
+
+    private void mockActionFinished(boolean isFinished) {
+        when(mAction.isFinished()).thenReturn(isFinished);
     }
 
     public class FakeAction extends Action {
