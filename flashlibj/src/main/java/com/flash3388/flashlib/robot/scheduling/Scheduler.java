@@ -69,7 +69,7 @@ public class Scheduler {
 	public void add(Action action) {
         Objects.requireNonNull(action, "action is null");
 
-        if (action.isRunning()) {
+        if (mActions.contains(action)) {
             throw new IllegalArgumentException("action already running");
         }
 
