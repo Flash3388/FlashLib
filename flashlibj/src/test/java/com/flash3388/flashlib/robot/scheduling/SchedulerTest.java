@@ -33,7 +33,7 @@ public class SchedulerTest {
         scheduler.run();
 
         verify(action, times(1)).run();
-        verify(task, times(0)).run();
+        verify(task, never()).run();
     }
 
     @Test
@@ -44,7 +44,7 @@ public class SchedulerTest {
         Scheduler scheduler = new Scheduler(Collections.emptySet(), Collections.singleton(action), Collections.singleton(task), SchedulerRunMode.TASKS_ONLY);
         scheduler.run();
 
-        verify(action, times(0)).run();
+        verify(action, never()).run();
         verify(task, times(1)).run();
     }
 
@@ -56,15 +56,15 @@ public class SchedulerTest {
         Scheduler scheduler = new Scheduler(Collections.emptySet(), Collections.singleton(action), Collections.singleton(task), SchedulerRunMode.DISABLED);
         scheduler.run();
 
-        verify(action, times(0)).run();
-        verify(task, times(0)).run();
+        verify(action, never()).run();
+        verify(task, never()).run();
     }
 
     @Test
     public void run_subsystemsWithDefaults_startsDefaultActions() throws Exception {
         Subsystem subsystem = mockSubsystemWithoutAction();
 
-        Scheduler scheduler = new Scheduler(Collections.singleton(subsystem), new ArrayList<Action>(), Collections.emptySet(), SchedulerRunMode.ALL);
+        Scheduler scheduler = new Scheduler(Collections.singleton(subsystem), new ArrayList<>(), Collections.emptySet(), SchedulerRunMode.ALL);
         scheduler.run();
 
         verify(subsystem, times(1)).startDefaultAction();
