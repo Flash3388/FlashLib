@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import static org.hamcrest.Matchers.hasItems;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -34,11 +35,11 @@ public class ActionGroupTest {
         actionGroup.execute();
 
         verify(actions.get(0), times(1)).startAction();
-        verify(actions.get(1), times(0)).startAction();
+        verify(actions.get(1), never()).startAction();
 
         actionGroup.execute();
 
-        verify(actions.get(1), times(0)).startAction();
+        verify(actions.get(1), never()).startAction();
 
         isFirstActionRunning.setAsBoolean(false);
         actionGroup.execute();
@@ -51,9 +52,12 @@ public class ActionGroupTest {
 
     @Test
     public void execute_parallelExecution_executesActionsInParallel() throws Exception {
+        BooleanProperty isFirstActionRunning = new SimpleBooleanProperty(true);
+        BooleanProperty isSecondActionRunning = new SimpleBooleanProperty(true);
+
         List<Action> actions = new ArrayList<>();
-        actions.add(mockActionRunning());
-        actions.add(mockActionRunning());
+        actions.add(mockActionRunningBySupplier(isFirstActionRunning));
+        actions.add(mockActionRunningBySupplier(isSecondActionRunning));
 
         ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.initialize();
@@ -61,9 +65,22 @@ public class ActionGroupTest {
         actionGroup.execute();
 
         verify(actions.get(0), times(1)).startAction();
-        verify(actions.get(1), times(0)).startAction();
+        verify(actions.get(1), never()).startAction();
 
         actionGroup.execute();
+
+        verify(actions.get(0), times(1)).startAction();
+        verify(actions.get(1), times(1)).startAction();
+
+        isFirstActionRunning.setAsBoolean(false);
+
+        actionGroup.execute();
+        assertFalse(actionGroup.isFinished());
+
+        isSecondActionRunning.setAsBoolean(false);
+
+        actionGroup.execute();
+        assertTrue(actionGroup.isFinished());
     }
 
     @Test
