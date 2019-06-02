@@ -1,9 +1,10 @@
 package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.scheduling.actions.Actions;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.logging.Logging;
+import org.slf4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class ActionGroup extends Action {
 	private final Queue<Action> mActionsQueue;
 	private final Collection<Action> mCurrentlyRunningActions;
 
+	private final Logger mLogger;
+
 	private Runnable mRunWhenInterrupted;
 	
 	/**
@@ -44,13 +47,18 @@ public class ActionGroup extends Action {
 	}
 
 	public ActionGroup(ExecutionOrder executionOrder, Collection<Action> actions) {
-	    this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), executionOrder, actions);
+	    this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), executionOrder, actions, RunningRobot.INSTANCE.get().getLogger());
     }
 
-	/* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions) {
+    /* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions) {
+        this(scheduler, clock, executionOrder, actions, Logging.stub());
+    }
+
+	/* package */ ActionGroup(Scheduler scheduler, Clock clock, ExecutionOrder executionOrder, Collection<Action> actions, Logger logger) {
 	    super(scheduler, clock, Time.INVALID);
 
 		mExecutionOrder = Objects.requireNonNull(executionOrder, "executionOrder is null");
+        mLogger = logger;
 
 		mActions = new ArrayList<>();
 		add(Objects.requireNonNull(actions, "actions is null"));
@@ -174,6 +182,10 @@ public class ActionGroup extends Action {
             for (Subsystem subsystem : action.getRequirements()) {
                 if (requirements.contains(subsystem)) {
                     action.cancelAction();
+
+                    mLogger.warn("Requirements conflict in ActionGroup between {} and new action {}",
+                            action.toString(), nextAction.toString());
+
                     break;
                 }
             }

@@ -1,5 +1,9 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.util.logging.Logging;
+import com.flash3388.flashlib.util.logging.StubLogger;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,23 +38,35 @@ public class Scheduler {
 	private final Set<Subsystem> mSubsystems;
 	private final Collection<Action> mActions;
 	private final Collection<SchedulerTask> mTasks;
+	private final Logger mLogger;
 
 	private SchedulerRunMode mRunMode;
 
 	public Scheduler() {
+	    this(Logging.stub());
+    }
+
+	public Scheduler(Logger logger) {
         mSubsystems = new HashSet<>();
         mActions = new ArrayList<>();
 		mTasks = new ArrayList<>();
+		mLogger = logger;
 
         mRunMode = SchedulerRunMode.ALL;
 	}
 
-	// FOR TESTING
+    // FOR TESTING
     /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<SchedulerTask> tasks, SchedulerRunMode runMode) {
+        this(subsystems, actions, tasks, runMode, Logging.stub());
+    }
+
+	// FOR TESTING
+    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<SchedulerTask> tasks, SchedulerRunMode runMode, Logger logger) {
         mSubsystems = subsystems;
         mActions = actions;
         mTasks = tasks;
         mRunMode = runMode;
+        mLogger = logger;
     }
 
 	public void setRunMode(SchedulerRunMode runMode) {
@@ -161,6 +177,9 @@ public class Scheduler {
 			if (subsystem.hasCurrentAction()) {
 			    Action currentAction = subsystem.getCurrentAction();
 				currentAction.cancel();
+
+                mLogger.warn("Requirements conflict in Scheduler between {} and new action {}",
+                        action.toString(), action.toString());
 			}
 
 			subsystem.setCurrentAction(action);

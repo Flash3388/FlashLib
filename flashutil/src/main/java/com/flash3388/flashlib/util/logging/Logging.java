@@ -22,4 +22,8 @@ public class Logging {
                 .setTimeBasedFilePattern()
                 .build();
     }
+
+    public static Logger stub() {
+        return new StubLogger();
+    }
 }
