@@ -45,7 +45,7 @@ public class LoggerBuilder {
         mName = name;
 
         mEnableFileLogging = false;
-        mFilePattern = "";
+        mFilePattern = String.format("%s.log", name);
         mLogsParent = null;
         mFileHandlerFormatter = new JsonFormatter();
         mLogFileConfig = new LogFileConfig(DEFAULT_FILE_SIZE_BYTES, DEFAULT_FILE_COUNT);
