@@ -3,6 +3,7 @@ package com.flash3388.flashlib.util.logging.jul;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import javafx.stage.Stage;
 
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -80,7 +81,7 @@ public class JsonFormatter extends Formatter {
 
         JsonArray parametersJson = new JsonArray();
         for (Object parameter : parameters) {
-            parametersJson.add(new JsonPrimitive(parameter.toString()));
+            parametersJson.add(new JsonPrimitive(String.valueOf(parameter)));
         }
 
         root.add("parameters", parametersJson);
