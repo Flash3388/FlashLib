@@ -12,15 +12,17 @@ import java.util.Collection;
 public class Trigger {
 
     private final Collection<TriggerStateHandler> mTriggerStateHandlers;
+    private TriggerState mCurrentState;
+
+    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers) {
+        mTriggerStateHandlers = triggerStateHandlers;
+        mCurrentState = TriggerState.INACTIVE;
+    }
 
     public Trigger() {
         this(new ArrayList<>());
     }
 
-    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers) {
-        mTriggerStateHandlers = triggerStateHandlers;
-    }
-    
     public Trigger addStateHandler(TriggerStateHandler handler) {
         mTriggerStateHandlers.add(handler);
 
@@ -51,17 +53,26 @@ public class Trigger {
         return addStateHandler(new CancelOnState(TriggerState.INACTIVE, action));
     }
 
+    public void setState(TriggerState newState) {
+        if (mCurrentState == newState) {
+            return;
+        }
+
+        handleStateChange(newState, mCurrentState);
+        mCurrentState = newState;
+    }
+
     public void activate() {
-        handleState(TriggerState.ACTIVE);
+        setState(TriggerState.ACTIVE);
     }
 
     public void deactivate() {
-        handleState(TriggerState.INACTIVE);
+        setState(TriggerState.INACTIVE);
     }
 
-    private void handleState(TriggerState state) {
+    private void handleStateChange(TriggerState newState, TriggerState lastState) {
         for (TriggerStateHandler handler : mTriggerStateHandlers) {
-            handler.handleState(state);
+            handler.handleStateChange(newState, lastState);
         }
     }
 }

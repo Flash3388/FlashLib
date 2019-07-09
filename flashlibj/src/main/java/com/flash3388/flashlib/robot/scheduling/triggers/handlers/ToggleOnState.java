@@ -15,8 +15,8 @@ public class ToggleOnState implements TriggerStateHandler {
     }
 
     @Override
-    public void handleState(TriggerState state) {
-        if (mTriggerState == state) {
+    public void handleStateChange(TriggerState newState, TriggerState lastState) {
+        if (mTriggerState == newState) {
             if (mAction.isRunning()) {
                 mAction.cancel();
             } else {
