@@ -13,7 +13,7 @@ public class TriggerTest {
     public void whenActive_triggerActivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.INACTIVE);
         trigger.whenActive(mockAction);
 
         trigger.activate();
@@ -25,7 +25,7 @@ public class TriggerTest {
     public void whenInactive_triggerDeactivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.ACTIVE);
         trigger.whenInactive(mockAction);
 
         trigger.deactivate();
@@ -37,7 +37,7 @@ public class TriggerTest {
     public void cancelWhenActive_triggerActivates_cancelsAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.INACTIVE);
         trigger.cancelWhenActive(mockAction);
 
         trigger.activate();
@@ -49,7 +49,7 @@ public class TriggerTest {
     public void cancelWhenInactive_triggerDeactivates_cancelsAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.ACTIVE);
         trigger.cancelWhenInactive(mockAction);
 
         trigger.deactivate();
@@ -61,7 +61,7 @@ public class TriggerTest {
     public void whileActive_triggerActivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.INACTIVE);
         trigger.whileActive(mockAction);
 
         trigger.activate();
@@ -73,7 +73,7 @@ public class TriggerTest {
     public void whileActive_triggerDeactivates_cancelsAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        Trigger trigger = new Trigger();
+        Trigger trigger = new Trigger(TriggerState.ACTIVE);
         trigger.whileActive(mockAction);
 
         trigger.deactivate();

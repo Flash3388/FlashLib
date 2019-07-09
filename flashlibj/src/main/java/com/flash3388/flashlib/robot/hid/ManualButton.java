@@ -13,7 +13,7 @@ public class ManualButton extends Button implements BooleanProperty {
 	private boolean mIsDown;
 	private boolean mIsInverted;
 
-	@Override
+    @Override
 	public void setInverted(boolean isInverted) {
 		mIsInverted = isInverted;
 	}

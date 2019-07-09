@@ -14,13 +14,17 @@ public class Trigger {
     private final Collection<TriggerStateHandler> mTriggerStateHandlers;
     private TriggerState mCurrentState;
 
-    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers) {
+    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers, TriggerState initialState) {
         mTriggerStateHandlers = triggerStateHandlers;
-        mCurrentState = TriggerState.INACTIVE;
+        mCurrentState = initialState;
+    }
+
+    public Trigger(TriggerState initialState) {
+        this(new ArrayList<>(), initialState);
     }
 
     public Trigger() {
-        this(new ArrayList<>());
+        this(TriggerState.INACTIVE);
     }
 
     public Trigger addStateHandler(TriggerStateHandler handler) {

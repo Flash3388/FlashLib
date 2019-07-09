@@ -19,7 +19,7 @@ public abstract class DoubleButton extends Button {
 	 * @param button2 the second button
 	 */
 	public DoubleButton(Button button1, Button button2){
-		mButton1 = button1;
+        mButton1 = button1;
 		mButton2 = button2;
 	}
 
