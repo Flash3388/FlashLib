@@ -86,15 +86,33 @@ public class Time implements Comparable<Time> {
     }
 
     public boolean before(Time other) {
-        return compareTo(other) == CompareResult.SMALLER_THAN.value();
+        return lessThan(other);
+    }
+
+    public boolean lessThan(Time other) {
+        return CompareResult.SMALLER_THAN.is(compareTo(other));
+    }
+
+    public boolean lessThanOrEquals(Time other) {
+        int compareResult = compareTo(other);
+        return CompareResult.in(compareResult, CompareResult.SMALLER_THAN, CompareResult.EQUAL_TO);
     }
 
     public boolean after(Time other) {
-        return compareTo(other) == CompareResult.GREATER_THAN.value();
+        return largerThan(other);
+    }
+
+    public boolean largerThan(Time other) {
+        return CompareResult.GREATER_THAN.is(compareTo(other));
+    }
+
+    public boolean largerThanOrEquals(Time other) {
+        int compareResult = compareTo(other);
+        return CompareResult.in(compareResult, CompareResult.GREATER_THAN, CompareResult.EQUAL_TO);
     }
 
     public boolean equals(Time other) {
-        return compareTo(other) == CompareResult.EQUAL_TO.value();
+        return CompareResult.EQUAL_TO.is(compareTo(other));
     }
 
     @Override
