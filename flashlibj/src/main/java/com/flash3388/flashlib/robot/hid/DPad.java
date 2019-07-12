@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 /**
  * Represents a D-Pad from and XBox controller.
@@ -16,15 +17,19 @@ public class DPad extends Pov {
     private final Button mLeft;
     private final Button mFull;
 
-	public DPad(Clock clock, HidInterface hidInterface, int channel, int pov){
+	public DPad(Clock clock, Time buttonPressTime, HidInterface hidInterface, int channel, int pov){
 		super(hidInterface, channel, pov);
 		
-		mUp = new PovButton(clock, hidInterface, channel, pov, PovRange.UP);
-		mDown = new PovButton(clock, hidInterface, channel, pov, PovRange.DOWN);
-		mRight = new PovButton(clock, hidInterface, channel, pov, PovRange.RIGHT);
-		mLeft = new PovButton(clock, hidInterface, channel, pov, PovRange.LEFT);
-		mFull = new PovButton(clock, hidInterface, channel, pov, PovRange.FULL);
+		mUp = new PovButton(clock, buttonPressTime, hidInterface, channel, pov, PovRange.UP);
+		mDown = new PovButton(clock, buttonPressTime, hidInterface, channel, pov, PovRange.DOWN);
+		mRight = new PovButton(clock, buttonPressTime, hidInterface, channel, pov, PovRange.RIGHT);
+		mLeft = new PovButton(clock, buttonPressTime, hidInterface, channel, pov, PovRange.LEFT);
+		mFull = new PovButton(clock, buttonPressTime, hidInterface, channel, pov, PovRange.FULL);
 	}
+
+	public DPad(Clock clock, HidInterface hidInterface, int channel, int pov) {
+	    this(clock, HardwareButton.DEFAULT_MAX_PRESS_TIME, hidInterface, channel, pov);
+    }
 
 	/**
 	 * Gets the up DPad button object

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 /**
  * An extension of {@link Button} for human interface devices. Provides time buffering for activation types.
@@ -16,14 +17,18 @@ public class HidButton extends HardwareButton {
 
 	private boolean mIsInverted;
 
-    public HidButton(Clock clock, HidInterface hidInterface, int channel, int button) {
-        super(clock);
+    public HidButton(Clock clock, Time maxPressTime, HidInterface hidInterface, int channel, int button) {
+        super(clock, maxPressTime);
 
         mHidInterface = hidInterface;
         mChannel = channel;
         mButton = button;
 
         mIsInverted = false;
+    }
+
+    public HidButton(Clock clock, HidInterface hidInterface, int channel, int button) {
+        this(clock, DEFAULT_MAX_PRESS_TIME, hidInterface, channel, button);
     }
 	
 	/**

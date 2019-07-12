@@ -11,11 +11,11 @@ import java.util.Collection;
 
 public class Trigger {
 
-    private final Collection<TriggerStateHandler> mTriggerStateHandlers;
+    private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
 
-    public Trigger(Collection<TriggerStateHandler> triggerStateHandlers, TriggerState initialState) {
-        mTriggerStateHandlers = triggerStateHandlers;
+    public Trigger(Collection<TriggerStateListener> triggerStateListeners, TriggerState initialState) {
+        mTriggerStateListeners = triggerStateListeners;
         mCurrentState = initialState;
     }
 
@@ -27,8 +27,8 @@ public class Trigger {
         this(TriggerState.INACTIVE);
     }
 
-    public Trigger addStateHandler(TriggerStateHandler handler) {
-        mTriggerStateHandlers.add(handler);
+    public Trigger addStateHandler(TriggerStateListener handler) {
+        mTriggerStateListeners.add(handler);
 
         return this;
     }
@@ -59,11 +59,11 @@ public class Trigger {
 
     public void setState(TriggerState newState) {
         if (mCurrentState == newState) {
-            return;
+            updateSameState(mCurrentState);
+        } else {
+            handleStateChange(newState, mCurrentState);
+            mCurrentState = newState;
         }
-
-        handleStateChange(newState, mCurrentState);
-        mCurrentState = newState;
     }
 
     public void activate() {
@@ -74,9 +74,15 @@ public class Trigger {
         setState(TriggerState.INACTIVE);
     }
 
+    private void updateSameState(TriggerState state) {
+        for (TriggerStateListener listener : mTriggerStateListeners) {
+            listener.updateInState(state);
+        }
+    }
+
     private void handleStateChange(TriggerState newState, TriggerState lastState) {
-        for (TriggerStateHandler handler : mTriggerStateHandlers) {
-            handler.handleStateChange(newState, lastState);
+        for (TriggerStateListener listener : mTriggerStateListeners) {
+            listener.onStateChange(newState, lastState);
         }
     }
 }

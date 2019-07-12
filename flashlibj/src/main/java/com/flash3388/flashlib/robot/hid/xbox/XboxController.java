@@ -4,6 +4,7 @@ import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.DPad;
+import com.flash3388.flashlib.robot.hid.HardwareButton;
 import com.flash3388.flashlib.robot.hid.Hid;
 import com.flash3388.flashlib.robot.hid.HidAxis;
 import com.flash3388.flashlib.robot.hid.HidButton;
@@ -13,6 +14,7 @@ import com.flash3388.flashlib.robot.hid.NoSuchButtonException;
 import com.flash3388.flashlib.robot.hid.NoSuchPovException;
 import com.flash3388.flashlib.robot.hid.Pov;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +38,7 @@ public class XboxController implements Hid {
     private final List<Button> mButtons;
     private final DPad mDpad;
 
-	public XboxController(Clock clock, HidInterface hidInterface, int channel){
+	public XboxController(Clock clock, HidInterface hidInterface, int channel, Time buttonPressTime){
 		mChannel = channel;
 
 		mAxes = new ArrayList<>(AXES_COUNT);
@@ -46,11 +48,15 @@ public class XboxController implements Hid {
 
 		mButtons = new ArrayList<>(BUTTON_COUNT);
 		for(int i = 0; i < BUTTON_COUNT; i++) {
-			mButtons.add(new HidButton(clock, hidInterface, mChannel, i));
+			mButtons.add(new HidButton(clock, buttonPressTime, hidInterface, mChannel, i));
 		}
 
-        mDpad = new DPad(clock, hidInterface, mChannel, DPAD_POV_INDEX);
+        mDpad = new DPad(clock, buttonPressTime, hidInterface, mChannel, DPAD_POV_INDEX);
 	}
+
+    public XboxController(Clock clock, HidInterface hidInterface, int channel) {
+	    this(clock, hidInterface, channel, HardwareButton.DEFAULT_MAX_PRESS_TIME);
+    }
 
 	public XboxController(int channel) {
 	    this(RunningRobot.INSTANCE.get().getClock(), RunningRobot.INSTANCE.get().getHidInterface(), channel);

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 /**
  * Representing a button of a Pov such as a D-Pad.
@@ -18,8 +19,8 @@ public class PovButton extends HardwareButton {
 
 	private boolean mIsInverted;
 
-	public PovButton(Clock clock, HidInterface hidInterface, int channel, int pov, PovRange povRange) {
-	    super(clock);
+	public PovButton(Clock clock, Time maxPressTime, HidInterface hidInterface, int channel, int pov, PovRange povRange) {
+	    super(clock, maxPressTime);
 
         mHidInterface = hidInterface;
         mChannel = channel;
@@ -28,6 +29,10 @@ public class PovButton extends HardwareButton {
 
 		mIsInverted = false;
 	}
+
+	public PovButton(Clock clock, HidInterface hidInterface, int channel, int pov, PovRange povRange) {
+	    this(clock, DEFAULT_MAX_PRESS_TIME, hidInterface, channel, pov, povRange);
+    }
 	
 	/**
 	 * Gets the current button state
