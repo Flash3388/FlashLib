@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +17,7 @@ public class GenericHid implements Hid {
 	private final List<Button> mButtons;
     private final List<Pov> mPovs;
 
-	public GenericHid(HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
+	public GenericHid(Clock clock, HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount){
 		mChannel = channel;
 
         mAxes = IntStream.range(0, axisCount)
@@ -24,7 +25,7 @@ public class GenericHid implements Hid {
                 .collect(Collectors.toList());
 
         mButtons = IntStream.range(0, buttonCount)
-                .mapToObj((i) -> new HidButton(hidInterface, channel, i))
+                .mapToObj((i) -> new HidButton(clock, hidInterface, channel, i))
                 .collect(Collectors.toList());
 
         mPovs = IntStream.range(0, povsCount)
@@ -33,7 +34,7 @@ public class GenericHid implements Hid {
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {
-	    this(RunningRobot.INSTANCE.get().getHidInterface(),
+	    this(RunningRobot.INSTANCE.get().getClock(), RunningRobot.INSTANCE.get().getHidInterface(),
                 channel, axisCount, buttonCount, povsCount);
     }
 
