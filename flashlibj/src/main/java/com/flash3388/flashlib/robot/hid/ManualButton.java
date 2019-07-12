@@ -8,7 +8,7 @@ import com.beans.BooleanProperty;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public class ManualButton extends Button implements BooleanProperty {
+public class ManualButton extends SoftwareButton implements BooleanProperty {
 
 	private boolean mIsDown;
 	private boolean mIsInverted;

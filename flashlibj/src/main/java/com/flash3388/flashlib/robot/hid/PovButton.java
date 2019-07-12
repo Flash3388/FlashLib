@@ -1,12 +1,14 @@
 package com.flash3388.flashlib.robot.hid;
 
+import com.flash3388.flashlib.time.Clock;
+
 /**
  * Representing a button of a Pov such as a D-Pad.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class PovButton extends Button {
+public class PovButton extends HardwareButton {
 
     private final HidInterface mHidInterface;
     private final int mChannel;
@@ -16,7 +18,9 @@ public class PovButton extends Button {
 
 	private boolean mIsInverted;
 
-	public PovButton(HidInterface hidInterface, int channel, int pov, PovRange povRange) {
+	public PovButton(Clock clock, HidInterface hidInterface, int channel, int pov, PovRange povRange) {
+	    super(clock);
+
         mHidInterface = hidInterface;
         mChannel = channel;
         mPov = pov;

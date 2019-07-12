@@ -26,14 +26,26 @@ public class HoldStateHandler implements TriggerStateHandler {
     public void handleStateChange(TriggerState newState, TriggerState lastState) {
         switch (newState) {
             case ACTIVE: {
-                mActiveStateTime = mClock.currentTime();
-                break;
-            }
-            case INACTIVE: {
+                if (!mActiveStateTime.isValid()) {
+                    mActiveStateTime = mClock.currentTime();
+                    break;
+                }
+
                 Time timePassed = mClock.currentTime().sub(mActiveStateTime);
                 if (timePassed.largerThanOrEquals(mMinHeldTime) && !mAction.isRunning()) {
                     mAction.start();
                 }
+
+                mActiveStateTime = Time.INVALID;
+
+                break;
+            }
+            case INACTIVE: {
+               if (mAction.isRunning()) {
+                   mAction.cancel();
+               }
+
+               break;
             }
         }
     }
