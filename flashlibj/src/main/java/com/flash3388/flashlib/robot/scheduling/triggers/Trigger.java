@@ -27,34 +27,34 @@ public class Trigger {
         this(TriggerState.INACTIVE);
     }
 
-    public Trigger addStateHandler(TriggerStateListener handler) {
+    public Trigger addStateListener(TriggerStateListener handler) {
         mTriggerStateListeners.add(handler);
 
         return this;
     }
 
     public Trigger whenActive(Action action) {
-        return addStateHandler(new StartOnState(TriggerState.ACTIVE, action));
+        return addStateListener(new StartOnState(TriggerState.ACTIVE, action));
     }
 
     public Trigger cancelWhenActive(Action action) {
-        return addStateHandler(new CancelOnState(TriggerState.ACTIVE, action));
+        return addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
     }
 
     public Trigger toggleWhenActive(Action action) {
-        return addStateHandler(new ToggleOnState(TriggerState.ACTIVE, action));
+        return addStateListener(new ToggleOnState(TriggerState.ACTIVE, action));
     }
 
     public Trigger whileActive(Action action) {
-        return addStateHandler(new RunOnState(TriggerState.ACTIVE, action));
+        return addStateListener(new RunOnState(TriggerState.ACTIVE, action));
     }
 
     public Trigger whenInactive(Action action) {
-        return addStateHandler(new StartOnState(TriggerState.INACTIVE, action));
+        return addStateListener(new StartOnState(TriggerState.INACTIVE, action));
     }
 
     public Trigger cancelWhenInactive(Action action) {
-        return addStateHandler(new CancelOnState(TriggerState.INACTIVE, action));
+        return addStateListener(new CancelOnState(TriggerState.INACTIVE, action));
     }
 
     public void setState(TriggerState newState) {

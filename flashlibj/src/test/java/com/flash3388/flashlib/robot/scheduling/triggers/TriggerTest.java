@@ -3,11 +3,39 @@ package com.flash3388.flashlib.robot.scheduling.triggers;
 import com.flash3388.flashlib.robot.scheduling.Action;
 import org.junit.Test;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class TriggerTest {
+
+    @Test
+    public void setState_stateChanges_updatesListenersWithChange() throws Exception {
+        TriggerStateListener listener = mock(TriggerStateListener.class);
+
+        Trigger trigger = new Trigger(TriggerState.INACTIVE);
+        trigger.addStateListener(listener);
+
+        trigger.setState(TriggerState.ACTIVE);
+
+        verify(listener, times(1)).onStateChange(
+                eq(TriggerState.ACTIVE),
+                eq(TriggerState.INACTIVE));
+    }
+
+    @Test
+    public void setState_stateIsSame_updatesListenersThatStateIsSame() throws Exception {
+        TriggerStateListener listener = mock(TriggerStateListener.class);
+
+        Trigger trigger = new Trigger(TriggerState.INACTIVE);
+        trigger.addStateListener(listener);
+
+        trigger.setState(TriggerState.INACTIVE);
+
+        verify(listener, times(1)).updateInState(
+                eq(TriggerState.INACTIVE));
+    }
 
     @Test
     public void whenActive_triggerActivates_startAction() throws Exception {

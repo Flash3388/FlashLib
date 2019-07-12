@@ -28,7 +28,7 @@ public abstract class HardwareButton extends Button {
     }
 
     public void whenPressed(Action action, Time maxPressTime) {
-        addStateHandler(new PressStateListener(action, mClock, maxPressTime));
+        addStateListener(new PressStateListener(action, mClock, maxPressTime));
     }
 
     @Override
@@ -37,6 +37,6 @@ public abstract class HardwareButton extends Button {
     }
 
     public void whileHeld(Action action, Time minHeldTime) {
-        addStateHandler(new HoldStateListener(action, mClock, minHeldTime));
+        addStateListener(new HoldStateListener(action, mClock, minHeldTime));
     }
 }
