@@ -7,10 +7,13 @@ import com.flash3388.flashlib.util.logging.jul.JulLoggerAdapter;
 import com.flash3388.flashlib.util.logging.jul.LogFlushingTask;
 import org.slf4j.Logger;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
@@ -18,6 +21,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.LogManager;
 
 public class LoggerBuilder {
 
@@ -42,6 +46,10 @@ public class LoggerBuilder {
     private LogLevel mLogLevel;
 
     public LoggerBuilder(String name) {
+        if (hasLoggerWithName(name)) {
+            throw new IllegalArgumentException(String.format("Logger with name %s already exists", name));
+        }
+
         mName = name;
 
         mEnableFileLogging = false;
@@ -143,7 +151,7 @@ public class LoggerBuilder {
                 logger.addHandler(consoleHandler);
             }
 
-            if (mEnableFileLogging && mFilePattern != null && mFilePattern.length() > 0) {
+            if (mEnableFileLogging && mFilePattern != null && !mFilePattern.isEmpty()) {
                 String pattern;
 
                 if (mLogsParent != null) {
@@ -184,5 +192,16 @@ public class LoggerBuilder {
     private void startLogFlusher(Handler handler) {
         Thread thread = mFlushingThreadFactory.newThread(new LogFlushingTask(handler));
         thread.start();
+    }
+
+    private static synchronized boolean hasLoggerWithName(String name) {
+        Collection<String> loggerNames = Collections.list(LogManager.getLogManager().getLoggerNames());
+        for (String loggerName : loggerNames) {
+            if (loggerName.equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
