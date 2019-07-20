@@ -24,7 +24,7 @@ import com.flash3388.flashlib.robot.RunningRobot;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public abstract class Subsystem{
+public abstract class Subsystem {
 	
 	private Action mDefaultAction;
 	private Action mCurrentAction;
