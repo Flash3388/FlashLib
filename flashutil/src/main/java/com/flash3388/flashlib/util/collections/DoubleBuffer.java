@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntUnaryOperator;
 
+/**
+ * A single-consumer, single-producer {@code DoubleBuffer}.
+ *
+ * @param <T> type of data stored
+ */
 public class DoubleBuffer<T> {
 
     private final AtomicReferenceArray<T> mArray;
@@ -22,7 +27,7 @@ public class DoubleBuffer<T> {
     }
 
     public T read() {
-        T value = mArray.getAndSet(mReadIndex.getAndUpdate(mReadIndexUpdater), null);
+        T value = mArray.get(mReadIndex.get());
 
         if (value == null) {
             throw new NoSuchElementException("nothing to read");
@@ -32,7 +37,9 @@ public class DoubleBuffer<T> {
     }
 
     public void write(T value) {
-        mArray.set(mReadIndexUpdater.applyAsInt(mReadIndex.get()), value);
+        int index = mReadIndex.get();
+        mArray.set(index, value);
+        mReadIndex.updateAndGet(mReadIndexUpdater);
     }
 
     private static class XorUpdater implements IntUnaryOperator {

@@ -19,7 +19,20 @@ public class DoubleBufferTest {
 
         doubleBuffer.write(VALUE);
 
-        assertEquals(VALUE, innerArray.get(1));
+        assertEquals(VALUE, innerArray.get(0));
+    }
+
+    @Test
+    public void write_ofObject_swapsWriteIndex() throws Exception {
+        final Object VALUE = new Object();
+
+        AtomicReferenceArray<Object> innerArray = new AtomicReferenceArray<>(2);
+        AtomicInteger readIndex = new AtomicInteger(0);
+        DoubleBuffer<Object> doubleBuffer = new DoubleBuffer<>(innerArray, readIndex);
+
+        doubleBuffer.write(VALUE);
+
+        assertEquals(1, readIndex.get());
     }
 
     @Test(expected = NoSuchElementException.class)
@@ -44,15 +57,17 @@ public class DoubleBufferTest {
     }
 
     @Test
-    public void read_normal_swapsReadIndex() throws Exception {
+    public void read_withIndexOnItem_swapsReadIndex() throws Exception {
+        final Object VALUE = new Object();
+
         AtomicReferenceArray<Object> innerArray = new AtomicReferenceArray<>(2);
-        innerArray.set(0, new Object());
+        innerArray.set(0, VALUE);
 
         AtomicInteger readIndex = new AtomicInteger(0);
         DoubleBuffer<Object> doubleBuffer = new DoubleBuffer<>(innerArray, readIndex);
 
-        doubleBuffer.read();
+        Object value = doubleBuffer.read();
 
-        assertEquals(1, readIndex.get());
+        assertEquals(VALUE, value);
     }
 }
