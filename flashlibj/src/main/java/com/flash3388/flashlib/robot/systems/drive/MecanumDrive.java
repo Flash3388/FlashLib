@@ -16,8 +16,7 @@ public interface MecanumDrive extends HolonomicDrive {
 
     @Override
     default void holonomicCartesian(double y, double x, double rotation) {
-        Vector2 vector = new Vector2(x, y);
-        holonomicPolar(vector.magnitude(), vector.angle(), rotation);
+        holonomicDrive(new Vector2(x, y), rotation);
     }
 
     @Override

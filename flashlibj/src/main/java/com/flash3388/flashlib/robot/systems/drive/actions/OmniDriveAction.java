@@ -2,24 +2,32 @@ package com.flash3388.flashlib.robot.systems.drive.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
+import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class OmniDriveAction extends Action {
 	
 	private final OmniDrive mDriveInterface;
-	private final DoubleSupplier mYAxisSource;
-	private final DoubleSupplier mXAxisSource;
-	
+	private final Supplier<OmniDriveSpeed> mSpeedSupplier;
+
+    public OmniDriveAction(OmniDrive driveInterface, Supplier<OmniDriveSpeed> speedSupplier) {
+        mDriveInterface = driveInterface;
+        mSpeedSupplier = speedSupplier;
+    }
+
 	public OmniDriveAction(OmniDrive driveInterface, DoubleSupplier y, DoubleSupplier x) {
-		this.mDriveInterface = driveInterface;
-		this.mXAxisSource = x;
-		this.mYAxisSource = y;
+		this(driveInterface, ()->new OmniDriveSpeed(y.getAsDouble(), x.getAsDouble()));
 	}
+
+    public OmniDriveAction(OmniDrive driveInterface, DoubleSupplier front, DoubleSupplier right, DoubleSupplier back, DoubleSupplier left) {
+        this(driveInterface, ()->new OmniDriveSpeed(front.getAsDouble(), right.getAsDouble(), back.getAsDouble(), left.getAsDouble()));
+    }
 	
 	@Override
 	protected void execute() {
-		mDriveInterface.omniDrive(mYAxisSource.getAsDouble(), mXAxisSource.getAsDouble());
+		mDriveInterface.omniDrive(mSpeedSupplier.get());
 	}
 
 	@Override

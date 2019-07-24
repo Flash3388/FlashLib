@@ -14,6 +14,10 @@ public class OmniDriveSpeed {
         mLeft = left;
     }
 
+    public OmniDriveSpeed(double y, double x) {
+        this(x, y, x, y);
+    }
+
     public double getFront() {
         return mFront;
     }

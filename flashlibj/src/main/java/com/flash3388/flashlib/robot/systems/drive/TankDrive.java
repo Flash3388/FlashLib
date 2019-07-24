@@ -57,4 +57,8 @@ public interface TankDrive extends Drive, Movable {
 	 * @param rotateValue The value to rotate right or left 1 to -1.
 	 */
 	void arcadeDrive(double moveValue, double rotateValue);
+
+	default void arcadeDrive(ArcadeDriveSpeed driveSpeed) {
+	    arcadeDrive(driveSpeed.getMove(), driveSpeed.getRotate());
+    }
 }

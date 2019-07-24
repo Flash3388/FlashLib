@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.systems.drive;
 
 import com.jmath.vectors.Vector2;
 import com.flash3388.flashlib.robot.motion.Movable2d;
+import com.jmath.vectors.Vector3;
 
 /**
  * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link Drive}.
@@ -41,4 +42,12 @@ public interface HolonomicDrive extends Drive, Movable2d {
      * @param rotation the degree of rotation
      */
     void holonomicCartesian(double y, double x, double rotation);
+
+    default void holonomicDrive(Vector2 vector, double rotation) {
+        holonomicPolar(vector.magnitude(), vector.angle(), rotation);
+    }
+
+    default void holonomicDrive(HolonomicDriveSpeed driveSpeed) {
+        holonomicDrive(driveSpeed.getDriveVector(), driveSpeed.getRotation());
+    }
 }
