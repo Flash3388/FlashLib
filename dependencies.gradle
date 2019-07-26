@@ -1,0 +1,28 @@
+
+ext.gson = {
+    return GSON_LIBRARY_DEPENDENCY
+}
+
+ext.jmath = {
+    return JMATH_LIBRARY_DEPENDENCY
+}
+
+ext.javabeans = {
+    return JAVABEANS_LIBRARY_DEPENDENCY
+}
+
+ext.slf4jApi = {
+    return SLF4J_API_LIBRARY_DEPENDENCY
+}
+
+ext.junit = {
+    return JUNIT_LIBRARY_DEPENDENCY
+}
+
+ext.mockitoCore = {
+    return MOCKITO_CORE_LIBRARY_DEPENDENCY
+}
+
+ext.hamcrest = {
+    return HAMCREST_LIBRARY_DEPENDENCY
+}

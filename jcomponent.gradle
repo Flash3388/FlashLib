@@ -1,13 +1,14 @@
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply from: rootProject.file('dependencies.gradle')
 
 dependencies {
-    compile SLF4J_API_LIBRARY_DEPENDENCY
+    compile slf4jApi()
 
-    testCompile JUNIT_LIBRARY_DEPENDENCY
-    testCompile MOCKITO_CORE_LIBRARY_DEPENDENCY
-    testCompile HAMCREST_LIBRARY_DEPENDENCY
+    testCompile junit()
+    testCompile mockitoCore()
+    testCompile hamcrest()
 }
 
 jar {
