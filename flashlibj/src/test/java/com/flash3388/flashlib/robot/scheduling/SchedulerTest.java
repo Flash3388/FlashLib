@@ -155,6 +155,7 @@ public class SchedulerTest {
     private Subsystem mockSubsystemWithoutAction() {
         Subsystem subsystem = mock(Subsystem.class);
         when(subsystem.hasCurrentAction()).thenReturn(false);
+        when(subsystem.hasDefaultAction()).thenReturn(true);
 
         return subsystem;
     }
