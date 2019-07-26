@@ -4,6 +4,4 @@ apply from: rootProject.file('jcomponent.gradle')
 dependencies {
     compile project(':flashutil')
     compile project(':flashcomm')
-
-    compile GSON_LIBRARY_DEPENDENCY
 }
