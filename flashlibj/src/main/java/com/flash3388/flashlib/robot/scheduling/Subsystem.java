@@ -77,8 +77,12 @@ public abstract class Subsystem {
 		return mCurrentAction;
 	}
 
+	boolean hasDefaultAction() {
+	    return mDefaultAction != null;
+    }
+
 	void startDefaultAction(){
-		if(mDefaultAction != null) {
+		if(hasDefaultAction()) {
 			mDefaultAction.start();
 		}
 	}

@@ -166,7 +166,8 @@ public class Scheduler {
 
 	private void startDefaultSubsystemActions() {
 		for (Subsystem subsystem : mSubsystems) {
-			if (!subsystem.hasCurrentAction()) {
+			if (!subsystem.hasCurrentAction() && subsystem.hasDefaultAction()) {
+			    mLogger.debug("Starting default action for {}", subsystem.toString());
 				subsystem.startDefaultAction();
 			}
 		}
@@ -178,8 +179,8 @@ public class Scheduler {
 			    Action currentAction = subsystem.getCurrentAction();
 				currentAction.cancel();
 
-                mLogger.warn("Requirements conflict in Scheduler between {} and new action {}",
-                        currentAction.toString(), action.toString());
+                mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over subsystem {}",
+                        currentAction.toString(), action.toString(), subsystem.toString());
 			}
 
 			subsystem.setCurrentAction(action);
