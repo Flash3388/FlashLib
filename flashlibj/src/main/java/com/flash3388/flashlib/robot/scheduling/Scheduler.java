@@ -179,7 +179,7 @@ public class Scheduler {
 				currentAction.cancel();
 
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {}",
-                        action.toString(), action.toString());
+                        currentAction.toString(), action.toString());
 			}
 
 			subsystem.setCurrentAction(action);
