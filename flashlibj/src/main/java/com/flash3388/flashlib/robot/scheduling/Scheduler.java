@@ -103,6 +103,8 @@ public class Scheduler {
 	}
 
 	public boolean remove(Action action) {
+        Objects.requireNonNull(action, "action is null");
+
 		if (mActions.remove(action)) {
 			action.removed();
 			updateRequirementsNoCurrentAction(action);
@@ -171,8 +173,6 @@ public class Scheduler {
 	}
 
 	private void updateRequirementsWithNewRunningAction(Action action) {
-        Objects.requireNonNull(action, "action is null");
-
 		for (Subsystem subsystem : action.getRequirements()) {
 			if (subsystem.hasCurrentAction()) {
 			    Action currentAction = subsystem.getCurrentAction();
@@ -187,8 +187,6 @@ public class Scheduler {
 	}
 
 	private void updateRequirementsNoCurrentAction(Action action) {
-        Objects.requireNonNull(action, "action is null");
-
 		for (Subsystem subsystem : action.getRequirements()) {
 			subsystem.setCurrentAction(null);
 		}
