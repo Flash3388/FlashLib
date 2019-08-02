@@ -34,18 +34,18 @@ public class ActionGroupTest {
 
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).startAction();
-        verify(actions.get(1), never()).startAction();
+        verify(actions.get(0), times(1)).markStarted();
+        verify(actions.get(1), never()).markStarted();
 
         actionGroup.execute();
 
-        verify(actions.get(1), never()).startAction();
+        verify(actions.get(1), never()).markStarted();
 
         isFirstActionRunning.setAsBoolean(false);
         actionGroup.execute();
         actionGroup.execute();
 
-        verify(actions.get(1), times(1)).startAction();
+        verify(actions.get(1), times(1)).markStarted();
 
         assertTrue(actionGroup.isFinished());
     }
@@ -64,13 +64,13 @@ public class ActionGroupTest {
 
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).startAction();
-        verify(actions.get(1), never()).startAction();
+        verify(actions.get(0), times(1)).markStarted();
+        verify(actions.get(1), never()).markStarted();
 
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).startAction();
-        verify(actions.get(1), times(1)).startAction();
+        verify(actions.get(0), times(1)).markStarted();
+        verify(actions.get(1), times(1)).markStarted();
 
         isFirstActionRunning.setAsBoolean(false);
 
@@ -94,7 +94,7 @@ public class ActionGroupTest {
         ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.whenInterrupted(INTERRUPTION_TASK);
 
-        actionGroup.startAction();
+        actionGroup.markStarted();
         actionGroup.initialize();
         actionGroup.interrupted();
 
@@ -114,7 +114,7 @@ public class ActionGroupTest {
         actionGroup.removed();
 
         for (Action action : actions) {
-            verify(action, times(1)).cancelAction();
+            verify(action, times(1)).markCanceled();
             verify(action, times(1)).removed();
         }
     }

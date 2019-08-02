@@ -140,7 +140,7 @@ public class ActionGroup extends Action {
     @Override
 	protected final void end() {
 		for (Action action : mCurrentlyRunningActions) {
-			action.cancelAction();
+			action.markCanceled();
 			action.removed();
 		}
 
@@ -171,7 +171,7 @@ public class ActionGroup extends Action {
 		}
 
 		handleConflicts(nextAction);
-		nextAction.startAction();
+		nextAction.markStarted();
 
 		mCurrentlyRunningActions.add(nextAction);
 	}
@@ -181,7 +181,7 @@ public class ActionGroup extends Action {
         for (Action action : mCurrentlyRunningActions) {
             for (Subsystem subsystem : action.getRequirements()) {
                 if (requirements.contains(subsystem)) {
-                    action.cancelAction();
+                    action.markCanceled();
 
                     mLogger.warn("Requirements conflict in ActionGroup between {} and new action {}",
                             action.toString(), nextAction.toString());

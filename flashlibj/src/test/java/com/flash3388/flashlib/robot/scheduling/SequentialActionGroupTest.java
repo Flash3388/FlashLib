@@ -55,7 +55,7 @@ public class SequentialActionGroupTest {
         sequentialActionGroup.run();
         sequentialActionGroup.run();
 
-        verify(secondAction, times(1)).startAction();
+        verify(secondAction, times(1)).markStarted();
     }
 
     @Test
@@ -78,7 +78,7 @@ public class SequentialActionGroupTest {
         sequentialActionGroup.run();
         sequentialActionGroup.run();
 
-        verify(thirdAction, times(1)).startAction();
+        verify(thirdAction, times(1)).markStarted();
     }
 
     @Test
@@ -94,7 +94,7 @@ public class SequentialActionGroupTest {
         sequentialActionGroup.cancel();
         sequentialActionGroup.removed();
 
-        verify(action, times(1)).cancelAction();
+        verify(action, times(1)).markCanceled();
     }
 
     @Test(expected = IllegalStateException.class)

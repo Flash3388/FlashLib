@@ -3,7 +3,6 @@ package com.flash3388.flashlib.robot.scheduling;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.CompareResult;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -93,7 +92,7 @@ public abstract class Action {
 	    validateNoParent();
 
 		if(!mIsRunning){
-			startAction();
+			markStarted();
 			mScheduler.add(this);
 		}
 	}
@@ -105,7 +104,7 @@ public abstract class Action {
 	 */
 	public void cancel(){
 	    validateNoParent();
-		cancelAction();
+		markCanceled();
 	}
 
 	/**
@@ -255,7 +254,7 @@ public abstract class Action {
 		return Collections.unmodifiableSet(mRequirements);
 	}
 
-	void startAction() {
+	void markStarted() {
         if(!mIsRunning){
             mIsInitialized = false;
             mIsCanceled = false;
@@ -263,7 +262,7 @@ public abstract class Action {
         }
     }
 
-    void cancelAction() {
+    void markCanceled() {
 	    if (isRunning()) {
 	        mIsCanceled = true;
         }
@@ -286,7 +285,7 @@ public abstract class Action {
 
 	boolean run(){
 		if(wasTimeoutReached()) {
-			cancelAction();
+			markCanceled();
 		}
 
 		if(isCanceled()) {

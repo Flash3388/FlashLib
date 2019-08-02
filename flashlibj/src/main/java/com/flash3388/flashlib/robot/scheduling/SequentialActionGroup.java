@@ -57,7 +57,7 @@ public class SequentialActionGroup extends Action {
                 ((SequentialAction) mCurrentAction).resetRunNext();
             }
 
-            mCurrentAction.startAction();
+            mCurrentAction.markStarted();
         } else {
             if (!mCurrentAction.run()) {
                 mCurrentAction.removed();
@@ -84,7 +84,7 @@ public class SequentialActionGroup extends Action {
     @Override
     protected final void interrupted() {
         if (mCurrentAction != null && mCurrentAction.isRunning()) {
-            mCurrentAction.cancelAction();
+            mCurrentAction.markCanceled();
             mCurrentAction.removed();
         }
     }
