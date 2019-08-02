@@ -4,7 +4,7 @@ import com.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.function.BooleanSupplier;
 
-public class GenericaActionBuilder extends ActionBuilder<GenericaActionBuilder> {
+public class GenericActionBuilder extends ActionBuilder<GenericActionBuilder> {
 
     private Runnable mOnInitialize;
     private Runnable mOnExecute;
@@ -14,36 +14,36 @@ public class GenericaActionBuilder extends ActionBuilder<GenericaActionBuilder> 
 
     private boolean mRunOnEndWhenInterrupted;
 
-    public GenericaActionBuilder() {
+    public GenericActionBuilder() {
         mRunOnEndWhenInterrupted = false;
     }
 
-    public GenericaActionBuilder onInitialize(Runnable runnable) {
+    public GenericActionBuilder onInitialize(Runnable runnable) {
         mOnInitialize = runnable;
         return this;
     }
 
-    public GenericaActionBuilder onExecute(Runnable runnable) {
+    public GenericActionBuilder onExecute(Runnable runnable) {
         mOnExecute = runnable;
         return this;
     }
 
-    public GenericaActionBuilder isFinished(BooleanSupplier isFinished) {
+    public GenericActionBuilder isFinished(BooleanSupplier isFinished) {
         mIsFinished = isFinished;
         return this;
     }
 
-    public GenericaActionBuilder onEnd(Runnable runnable) {
+    public GenericActionBuilder onEnd(Runnable runnable) {
         mOnEnd = runnable;
         return this;
     }
 
-    public GenericaActionBuilder onInterrupted(Runnable runnable) {
+    public GenericActionBuilder onInterrupted(Runnable runnable) {
         mOnInterrupted = runnable;
         return this;
     }
 
-    public GenericaActionBuilder runOnEndWhenInterrupted() {
+    public GenericActionBuilder runOnEndWhenInterrupted() {
         mRunOnEndWhenInterrupted = true;
         return this;
     }
@@ -62,7 +62,7 @@ public class GenericaActionBuilder extends ActionBuilder<GenericaActionBuilder> 
     }
 
     @Override
-    protected GenericaActionBuilder thisInstance() {
+    protected GenericActionBuilder thisInstance() {
         return this;
     }
 }
