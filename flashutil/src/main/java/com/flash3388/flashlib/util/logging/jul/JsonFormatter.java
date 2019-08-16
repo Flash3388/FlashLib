@@ -3,7 +3,6 @@ package com.flash3388.flashlib.util.logging.jul;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import javafx.stage.Stage;
 
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
