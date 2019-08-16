@@ -49,15 +49,14 @@ public class MjpegClient extends SingleUseThrowingParameterizedRunner<ImagePipel
 
     @Override
     protected void stopRunner() {
-        try {
-            Closer closer = Closer.empty();
-
+        mLogger.debug("Stopping MJPEG Client");
+        try (Closer closer = Closer.empty()) {
             HttpURLConnection connection = mConnectionReference.getAndSet(null);
-            closer.add(new HttpConnectionCloser(connection));
+            if (connection != null) {
+                closer.add(new HttpConnectionCloser(connection));
+            }
 
             closer.add(new ExecutorCloser(mExecutorService));
-
-            closer.close();
         } catch (IOException e) {
             mLogger.error("Error while closing client", e);
         }

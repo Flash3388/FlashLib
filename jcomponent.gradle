@@ -3,12 +3,22 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply from: rootProject.file('dependencies.gradle')
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+
 dependencies {
     compile slf4jApi()
 
     testCompile junit()
     testCompile mockitoCore()
     testCompile hamcrest()
+}
+
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+        showStackTraces true
+    }
 }
 
 jar {

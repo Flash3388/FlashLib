@@ -56,12 +56,9 @@ public class MjpegServer extends SingleUseRunner {
 
     @Override
     protected void stopRunner() {
-        try {
-            Closer closer = Closer.empty();
-
+        mLogger.debug("Closing MJPEG Server");
+        try (Closer closer = Closer.empty()){
             closer.add(new HttpServerCloser(mServer));
-
-            closer.close();
         } catch (IOException e) {
             mLogger.error("Error while stopping server", e);
         }
