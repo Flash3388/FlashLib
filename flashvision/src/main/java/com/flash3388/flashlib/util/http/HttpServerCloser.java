@@ -4,7 +4,6 @@ import com.flash3388.flashlib.time.Time;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class HttpServerCloser implements Closeable {
@@ -24,7 +23,7 @@ public class HttpServerCloser implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         mServer.stop((int) mStopDelay.toUnit(TimeUnit.SECONDS).value());
     }
 }
