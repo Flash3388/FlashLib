@@ -3,6 +3,7 @@ apply plugin: 'signing'
 def setPropertyGlobal(key) {
     if (rootProject.hasProperty(key)) {
         project.setProperty(key, rootProject.getProperty(key))
+        println "$key=${project.getProperty(key)}"
     }
 }
 
