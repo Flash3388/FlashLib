@@ -11,11 +11,11 @@ allprojects {
     }
 
     ext.getNexusUsername = {
-        return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
+        return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
     }
 
     ext.getNexusPassword = {
-        return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
+        return rootProject.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
     }
 
     publishing {
@@ -28,7 +28,7 @@ allprojects {
                     name = 'NexusSnapshot'
                     url = NEXUS_SNAPSHOT_REPOSITORY_URL
                 }
-
+                
                 credentials {
                     username getNexusUsername()
                     password getNexusPassword()
