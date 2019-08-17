@@ -1,5 +1,13 @@
 apply plugin: 'signing'
 
+def setPropertyGlobal(key) {
+    if (rootProject.hasProperty(key)) {
+        project.setProperty(key, rootProject.getProperty(key))
+    }
+
+    println project.getProperty(key)
+}
+
 allprojects {
     group = GROUP
     version = VERSION
@@ -37,17 +45,9 @@ allprojects {
         }
     }
 
-    if (rootProject.hasProperty('signing.keyId')) {
-        project.setProperty('signing.keyId', rootProject.getProperty('signing.keyId'))
-    }
-    
-    if (rootProject.hasProperty('signing.password')) {
-        project.setProperty('signing.password', rootProject.getProperty('signing.password'))
-    }
-
-    if (rootProject.hasProperty('signing.secretKeyRingFile')) {
-        project.setProperty('signing.secretKeyRingFile', rootProject.getProperty('signing.secretKeyRingFile'))
-    }
+    setPropertyGlobal('signing.keyId')
+    setPropertyGlobal('signing.password')
+    setPropertyGlobal('signing.secretKeyRingFile')
 }
 
 subprojects {
