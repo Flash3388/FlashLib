@@ -7,6 +7,14 @@ def setPropertyGlobal(key) {
     }
 }
 
+def setPropertyGlobalFile(key) {
+    if (rootProject.hasProperty(key)) {
+        def file = rootProject.file(rootProject.getProperty(key)).absolutePath
+        project.setProperty(key, file)
+        println "$key=${file}"
+    }
+}
+
 allprojects {
     group = GROUP
     version = VERSION
@@ -46,7 +54,7 @@ allprojects {
 
     setPropertyGlobal('signing.keyId')
     setPropertyGlobal('signing.password')
-    setPropertyGlobal('signing.secretKeyRingFile')
+    setPropertyGlobalFile('signing.secretKeyRingFile')
 }
 
 subprojects {

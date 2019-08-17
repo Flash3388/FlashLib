@@ -6,12 +6,7 @@ install:
   - "./gradlew flashlibAll"
 
 jdk:
-  - oraclejdk9
-  - oraclejdk11
   - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
 
 env:
   global:
