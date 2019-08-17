@@ -38,7 +38,7 @@ deploy:
     script: ./gradlew publish -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg
     skip_cleanup: true
     on:
-      condition: ("$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?") && ("$TRAVIS_JDK_VERSION == openjdk8")
+      condition: ("$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?") && ("$TRAVIS_JDK_VERSION = openjdk8")
       branch: master
       tags: true
   - provider: releases
@@ -50,7 +50,7 @@ deploy:
     skip_cleanup: true
     draft: true
     on:
-      condition: ("$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?") && ("$TRAVIS_JDK_VERSION == "openjdk8")
+      condition: ("$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?") && ("$TRAVIS_JDK_VERSION = openjdk8")
       repo: Flash3388/FlashLib
       branch: master
       tags: true
