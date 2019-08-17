@@ -11,6 +11,7 @@ allprojects {
     }
 
     ext.getNexusUsername = {
+        println System.getenv('NEXUS_USERNAME')
         return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
     }
 
@@ -28,7 +29,7 @@ allprojects {
                     name = 'NexusSnapshot'
                     url = NEXUS_SNAPSHOT_REPOSITORY_URL
                 }
-                
+                println getNexusUsername()
                 credentials {
                     username getNexusUsername()
                     password getNexusPassword()
