@@ -20,7 +20,6 @@ before_install:
   - gpg --import secring.gpg  
 
 script:
-  - ls -l
   - ./gradlew check
 
 before_deploy:

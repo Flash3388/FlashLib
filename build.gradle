@@ -40,7 +40,6 @@ allprojects {
     ext.setPropertyGlobal = { key ->
         if (rootProject.hasProperty(key)) {
             project.setProperty(key, rootProject.getProperty(key))
-            println "$key=${project.getProperty(key)}"
         }
     }
 
@@ -48,7 +47,6 @@ allprojects {
         if (rootProject.hasProperty(key)) {
             def file = rootProject.file(rootProject.getProperty(key)).absolutePath
             project.setProperty(key, file)
-            println "$key=${file}"
         }
     }
 
