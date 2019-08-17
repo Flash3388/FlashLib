@@ -6,7 +6,12 @@ install:
   - "./gradlew flashlibAll"
 
 jdk:
+  - oraclejdk9
+  - oraclejdk11
   - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
 
 env:
   global:
@@ -31,7 +36,7 @@ deploy:
     script: ./gradlew publish -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg
     skip_cleanup: true
     on:
-      condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?"
+      condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?" AND "$TRAVIS_JDK_VERSION = 8"
       branch: master
       tags: true
   - provider: releases
@@ -43,7 +48,7 @@ deploy:
     skip_cleanup: true
     draft: true
     on:
-      condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?"
+      condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?" AND "$TRAVIS_JDK_VERSION = 8"
       repo: Flash3388/FlashLib
       branch: master
       tags: true
