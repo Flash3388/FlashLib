@@ -22,8 +22,8 @@ allprojects {
                 }
 
                 credentials {
-                    username ''
-                    password ''
+                    username NEXUS_USERNAME
+                    password NEXUS_PASSWORD
                 }
             }
         }
