@@ -1,20 +1,5 @@
 apply plugin: 'signing'
 
-def setPropertyGlobal(key) {
-    if (rootProject.hasProperty(key)) {
-        project.setProperty(key, rootProject.getProperty(key))
-        println "$key=${project.getProperty(key)}"
-    }
-}
-
-def setPropertyGlobalFile(key) {
-    if (rootProject.hasProperty(key)) {
-        def file = rootProject.file(rootProject.getProperty(key)).absolutePath
-        project.setProperty(key, file)
-        println "$key=${file}"
-    }
-}
-
 allprojects {
     group = GROUP
     version = VERSION
@@ -49,6 +34,21 @@ allprojects {
                     password getNexusPassword()
                 }
             }
+        }
+    }
+
+    ext.setPropertyGlobal = { key ->
+        if (rootProject.hasProperty(key)) {
+            project.setProperty(key, rootProject.getProperty(key))
+            println "$key=${project.getProperty(key)}"
+        }
+    }
+
+    ext.setPropertyGlobalFile = { key ->
+        if (rootProject.hasProperty(key)) {
+            def file = rootProject.file(rootProject.getProperty(key)).absolutePath
+            project.setProperty(key, file)
+            println "$key=${file}"
         }
     }
 
