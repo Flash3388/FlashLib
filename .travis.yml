@@ -26,6 +26,8 @@ before_install:
 
 script:
   - ./gradlew check
+  - echo "$TRAVIS_JDK_VERSION = openjdk8"
+  - echo $TRAVIS_JDK_VERSION
 
 before_deploy:
   - git config --local user.name "Travis CI"
