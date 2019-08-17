@@ -4,6 +4,10 @@ allprojects {
     group = GROUP
     version = VERSION
 
+    project.setProperty('signing.keyId', rootProject.getProperty('signing.keyId'))
+    project.setProperty('signing.password', rootProject.getProperty('signing.password'))
+    project.setProperty('signing.secretKeyRingFile', rootProject.getProperty('signing.secretKeyRingFile'))
+
     apply plugin: 'maven-publish'
 
     ext.isReleaseBuild = {
@@ -28,10 +32,6 @@ allprojects {
                     name = 'NexusSnapshot'
                     url = NEXUS_SNAPSHOT_REPOSITORY_URL
                 }
-                
-                println hasProperty('signing.keyId')
-                println hasProperty('signing.password')
-                println hasProperty('signing.secretKeyRingFile')
 
                 credentials {
                     username getNexusUsername()
