@@ -61,7 +61,7 @@ task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
     })
 }
 
-task flashlib(type: Jar, dependsOn: subprojects.build) {
+task flashlib(type: Jar, dependsOn: subprojects.assemble) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
@@ -165,5 +165,3 @@ publishing {
 signing {
     sign publishing.publications.mavenFlashlib
 }
-
-build.finalizedBy flashlibAll
