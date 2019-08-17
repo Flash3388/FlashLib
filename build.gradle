@@ -29,9 +29,9 @@ allprojects {
                     url = NEXUS_SNAPSHOT_REPOSITORY_URL
                 }
                 
-                println signing.keyId
-                println signing.password
-                println signing.secretKeyRingFile
+                println hasProperty('signing.keyId')
+                println hasProperty('signing.password')
+                println hasProperty('signing.secretKeyRingFile')
 
                 credentials {
                     username getNexusUsername()
