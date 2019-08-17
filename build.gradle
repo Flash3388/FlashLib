@@ -4,10 +4,6 @@ allprojects {
     group = GROUP
     version = VERSION
 
-    project.setProperty('signing.keyId', rootProject.getProperty('signing.keyId'))
-    project.setProperty('signing.password', rootProject.getProperty('signing.password'))
-    project.setProperty('signing.secretKeyRingFile', rootProject.getProperty('signing.secretKeyRingFile'))
-
     apply plugin: 'maven-publish'
 
     ext.isReleaseBuild = {
@@ -39,6 +35,18 @@ allprojects {
                 }
             }
         }
+    }
+
+    if (rootProject.hasProperty('signing.keyId')) {
+        project.setProperty('signing.keyId', rootProject.getProperty('signing.keyId'))
+    }
+    
+    if (rootProject.hasProperty('signing.password')) {
+        project.setProperty('signing.password', rootProject.getProperty('signing.password'))
+    }
+
+    if (rootProject.hasProperty('signing.secretKeyRingFile')) {
+        project.setProperty('signing.secretKeyRingFile', rootProject.getProperty('signing.secretKeyRingFile'))
     }
 }
 
