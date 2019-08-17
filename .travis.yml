@@ -25,7 +25,8 @@ before_install:
   - gpg --import secring.gpg  
 
 script:
-  - "./gradlew check"
+  - ls -l
+  - ./gradlew check
 
 before_deploy:
   - git config --local user.name "Travis CI"

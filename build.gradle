@@ -4,8 +4,6 @@ def setPropertyGlobal(key) {
     if (rootProject.hasProperty(key)) {
         project.setProperty(key, rootProject.getProperty(key))
     }
-
-    println project.getProperty(key)
 }
 
 allprojects {
