@@ -10,6 +10,14 @@ allprojects {
         return version.contains("SNAPSHOT") == false
     }
 
+    ext.getNexusUsername = {
+        return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
+    }
+
+    ext.getNexusPassword = {
+        return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
+    }
+
     publishing {
         repositories {
             maven {
@@ -22,8 +30,8 @@ allprojects {
                 }
 
                 credentials {
-                    username System.getEnv('NEXUS_USERNAME')
-                    password System.getEnv('NEXUS_PASSWORD')
+                    username getNexusUsername()
+                    password getNexusPassword()
                 }
             }
         }
