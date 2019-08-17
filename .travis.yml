@@ -12,7 +12,8 @@ before_deploy:
   - git config --local user.name "Travis CI"
   - git config --local user.name "build@travis-ci.com"
   - export GIT_TAG=$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER
-  - git tag $TRAVIS_RELEASE_TAG
+  - git tag $GIT_TAG
+  - git push -q https://$TAGPERM@github.com/FlashLib/Flash3388 --tags
 
 deploy:
   provider: script
