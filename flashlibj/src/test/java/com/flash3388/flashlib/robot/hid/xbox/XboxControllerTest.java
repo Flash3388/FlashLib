@@ -4,7 +4,7 @@ import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.EmptyHidInterface;
 import com.flash3388.flashlib.robot.hid.Pov;
-import com.flash3388.flashlib.time.EmptyClock;
+import com.flash3388.flashlib.time.StaticClock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,7 +32,7 @@ public class XboxControllerTest {
 
         @Test
         public void getButtonByType_getButtonByMatchingIndex_returnsSameButton() throws Exception {
-            XboxController xboxController = new XboxController(new EmptyClock(), new EmptyHidInterface(), 0);
+            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
             assertEquals(xboxController.getButton(mButton), xboxController.getButton(mButton.buttonIndex()));
         }
     }
@@ -50,7 +50,7 @@ public class XboxControllerTest {
 
         @Test
         public void getAxisByType_getAxisByMatchingIndex_returnsSameButton() throws Exception {
-            XboxController xboxController = new XboxController(new EmptyClock(), new EmptyHidInterface(), 0);
+            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
             assertEquals(xboxController.getAxis(mAxis), xboxController.getAxis(mAxis.axisIndex()));
         }
     }
@@ -59,7 +59,7 @@ public class XboxControllerTest {
 
         @Test
         public void axes_normal_returnsIterableOfTheAxisCount() throws Exception {
-            XboxController xboxController = new XboxController(new EmptyClock(), new EmptyHidInterface(), 0);
+            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
             Iterable<Axis> axes = xboxController.axes();
 
             assertEquals(xboxController.getAxisCount(), getIterableSize(axes));
@@ -67,7 +67,7 @@ public class XboxControllerTest {
 
         @Test
         public void buttons_normal_returnsIterableOfTheButtonCount() throws Exception {
-            XboxController xboxController = new XboxController(new EmptyClock(), new EmptyHidInterface(), 0);
+            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
             Iterable<Button> buttons = xboxController.buttons();
 
             assertEquals(xboxController.getButtonCount(), getIterableSize(buttons));
@@ -75,7 +75,7 @@ public class XboxControllerTest {
 
         @Test
         public void povs_normal_returnsIterableOfThePovCount() throws Exception {
-            XboxController xboxController = new XboxController(new EmptyClock(), new EmptyHidInterface(), 0);
+            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
             Iterable<Pov> povs = xboxController.povs();
 
             assertEquals(xboxController.getPovCount(), getIterableSize(povs));

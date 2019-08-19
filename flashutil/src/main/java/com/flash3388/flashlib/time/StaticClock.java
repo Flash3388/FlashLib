@@ -1,14 +1,14 @@
 package com.flash3388.flashlib.time;
 
-public class EmptyClock implements Clock {
+public class StaticClock implements Clock {
 
     private final Time mTime;
 
-    public EmptyClock(Time time) {
+    public StaticClock(Time time) {
         mTime = time;
     }
 
-    public EmptyClock() {
+    public StaticClock() {
         this(Time.INVALID);
     }
 

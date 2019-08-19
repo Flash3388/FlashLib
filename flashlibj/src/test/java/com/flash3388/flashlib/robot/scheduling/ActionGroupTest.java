@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot.scheduling;
 
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
-import com.flash3388.flashlib.time.JavaMillisClock;
+import com.flash3388.flashlib.time.SystemMillisClock;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -29,7 +29,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunningBySupplier(isFirstActionRunning));
         actions.add(mockActionNotRunning());
 
-        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.SEQUENTIAL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.SEQUENTIAL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();
@@ -59,7 +59,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunningBySupplier(isFirstActionRunning));
         actions.add(mockActionRunningBySupplier(isSecondActionRunning));
 
-        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.initialize();
 
         actionGroup.execute();
@@ -91,7 +91,7 @@ public class ActionGroupTest {
         actions.add(mockActionRunning());
         actions.add(mockActionRunning());
 
-        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.whenInterrupted(INTERRUPTION_TASK);
 
         actionGroup.markStarted();
@@ -106,7 +106,7 @@ public class ActionGroupTest {
         List<Action> actions = new ArrayList<>();
         actions.add(mockActionRunning());
 
-        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
 
         actionGroup.start();
         actionGroup.run();
@@ -127,7 +127,7 @@ public class ActionGroupTest {
         List<Action> actions = new ArrayList<>();
         actions.add(mockActionWithRequirement(requirements));
 
-        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new JavaMillisClock(), ExecutionOrder.PARALLEL, actions);
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.start();
 
         assertThat(actionGroup.getRequirements(),hasItems(requirements.toArray(new Subsystem[0])));

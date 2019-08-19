@@ -2,11 +2,11 @@ package com.flash3388.flashlib.time;
 
 import java.util.concurrent.TimeUnit;
 
-public class JavaNanoClock implements Clock {
+public class SystemNanoClock implements Clock {
 
     private final long mStartTimeNanos;
 
-    public JavaNanoClock() {
+    public SystemNanoClock() {
         mStartTimeNanos = System.nanoTime();
     }
 

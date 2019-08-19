@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.JavaMillisClock;
+import com.flash3388.flashlib.time.SystemMillisClock;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class SequentialActionGroupTest {
         when(firstAction.isRunning()).thenReturn(true);
         when(firstAction.run()).thenReturn(true);
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), firstAction);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();
@@ -30,7 +30,7 @@ public class SequentialActionGroupTest {
         when(firstAction.isRunning()).thenReturn(true);
         when(firstAction.run()).thenReturn(false);
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), firstAction);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();
@@ -41,7 +41,7 @@ public class SequentialActionGroupTest {
     @Test
     public void start_currentActionHasNextAction_startsTheNewAction() throws Exception {
         Action secondAction = mock(Action.class);
-        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
+        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new SystemMillisClock(), secondAction));
 
         doNothing().when(firstAction).setParent(any(Action.class));
         when(firstAction.isRunning()).thenReturn(true);
@@ -49,7 +49,7 @@ public class SequentialActionGroupTest {
 
         when(secondAction.isRunning()).thenReturn(false);
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), firstAction);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();
@@ -61,8 +61,8 @@ public class SequentialActionGroupTest {
     @Test
     public void start_nextActionIsSequentialAction_checksForItsNext() throws Exception {
         Action thirdAction = mock(Action.class);
-        SequentialAction secondAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), thirdAction));
-        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
+        SequentialAction secondAction = spy(new ActionWithNext(new Scheduler(), new SystemMillisClock(), thirdAction));
+        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new SystemMillisClock(), secondAction));
 
         doNothing().when(firstAction).setParent(any(Action.class));
         when(firstAction.isRunning()).thenReturn(true);
@@ -71,7 +71,7 @@ public class SequentialActionGroupTest {
         when(secondAction.isRunning()).thenReturn(true);
         when(secondAction.run()).thenReturn(false);
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), firstAction);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();
@@ -87,7 +87,7 @@ public class SequentialActionGroupTest {
         when(action.isRunning()).thenReturn(true);
         when(action.run()).thenReturn(true);
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), action);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), action);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();
@@ -100,7 +100,7 @@ public class SequentialActionGroupTest {
     @Test(expected = IllegalStateException.class)
     public void start_doesNotHaveRequirementsForNextActon_throwsIllegalStateException() throws Exception {
         Action secondAction = mock(Action.class);
-        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new JavaMillisClock(), secondAction));
+        SequentialAction firstAction = spy(new ActionWithNext(new Scheduler(), new SystemMillisClock(), secondAction));
 
         doNothing().when(firstAction).setParent(any(Action.class));
         when(firstAction.isRunning()).thenReturn(true);
@@ -109,7 +109,7 @@ public class SequentialActionGroupTest {
         when(secondAction.isRunning()).thenReturn(false);
         when(secondAction.getRequirements()).thenReturn(Collections.singleton(mock(Subsystem.class)));
 
-        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new JavaMillisClock(), firstAction);
+        SequentialActionGroup sequentialActionGroup = new SequentialActionGroup(new Scheduler(), new SystemMillisClock(), firstAction);
 
         sequentialActionGroup.start();
         sequentialActionGroup.run();

@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.vision.cam.jpeg;
 
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.JavaNanoClock;
+import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.camera.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
@@ -44,7 +44,7 @@ public class JpegStreamingTest {
 
     @Before
     public void setUp() throws Exception {
-        mClock = new JavaNanoClock();
+        mClock = new SystemNanoClock();
         mLogger = mock(Logger.class);
     }
 

@@ -2,7 +2,7 @@ package com.flash3388.flashlib.time;
 
 import java.util.concurrent.TimeUnit;
 
-public class JavaMillisClock implements Clock {
+public class SystemMillisClock implements Clock {
 
     @Override
     public Time currentTime() {

@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.time.JavaNanoClock;
+import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
@@ -18,6 +18,6 @@ public class RobotFactory {
     }
 
     public static Clock newDefaultClock() {
-        return new JavaNanoClock();
+        return new SystemNanoClock();
     }
 }
