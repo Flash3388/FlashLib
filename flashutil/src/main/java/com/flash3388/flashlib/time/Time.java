@@ -81,8 +81,9 @@ public class Time implements Comparable<Time> {
     public Time sub(Time other) {
         checkValidForOperation(other);
 
-        long newValue = mValue - other.toUnit(mUnit).value();
-        return new Time(newValue, mUnit);
+        TimeUnit smallerUnit = UnitComparing.smallerUnit(mUnit, other.unit());
+        long newValue = smallerUnit.convert(mValue, mUnit) - other.toUnit(smallerUnit).value();
+        return new Time(newValue, smallerUnit);
     }
 
     public boolean before(Time other) {

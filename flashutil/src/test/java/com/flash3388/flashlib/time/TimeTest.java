@@ -138,13 +138,25 @@ public class TimeTest {
     }
 
     @Test
-    public void sub_withDifferentUnits_returnsTimeWithThisUnit() throws Exception {
-        final TimeUnit THIS_UNIT = TimeUnit.MINUTES;
+    public void sub_otherAsBiggerUnit_returnsTimeWithThisUnit() throws Exception {
+        final TimeUnit THIS_UNIT = TimeUnit.NANOSECONDS;
+        final TimeUnit OTHER_UNIT = TimeUnit.MILLISECONDS;
         final Time THIS = Time.of(1, THIS_UNIT);
-        final Time OTHER = Time.milliseconds(1);
+        final Time OTHER = Time.of(1, OTHER_UNIT);
 
         Time result = THIS.sub(OTHER);
         assertEquals(THIS_UNIT, result.unit());
+    }
+
+    @Test
+    public void sub_otherIsSmallerUnit_returnsTimeWithOtherUnit() throws Exception {
+        final TimeUnit THIS_UNIT = TimeUnit.MINUTES;
+        final TimeUnit OTHER_UNIT = TimeUnit.MILLISECONDS;
+        final Time THIS = Time.of(1, THIS_UNIT);
+        final Time OTHER = Time.of(1, OTHER_UNIT);
+
+        Time result = THIS.sub(OTHER);
+        assertEquals(OTHER_UNIT, result.unit());
     }
 
     @Test(expected = IllegalStateException.class)
