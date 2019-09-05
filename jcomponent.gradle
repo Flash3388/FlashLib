@@ -39,6 +39,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+build.finalizedBy sourcesJar, javadocJar
+
 publishing {
     publications {
         mavenFlashlibComponent(MavenPublication) {
