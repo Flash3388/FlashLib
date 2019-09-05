@@ -1,6 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 apply from: rootProject.file('dependencies.gradle')
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -41,46 +39,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 build.finalizedBy sourcesJar, javadocJar
 
-publishing {
-    publications {
-        mavenFlashlibComponent(MavenPublication) {
-            artifactId = project.name
 
-            from components.java
+if (project.hasProperty("DEPLOY_COMPONENT") && project.property("DEPLOY_COMPONENT") == "true") {
+    apply from: rootProject.file('deploy-component.gradle')
 
-            artifact javadocJar
-            artifact sourcesJar
-
-            pom {
-                name = project.name.capitalize()
-                description = "Robotics development framework - ${project.name.capitalize()} component".toString()
-                url = 'https://github.com/Flash3388/FlashLib'
-
-                licenses {
-                    license {
-                        name = 'BSD 3-Clause License'
-                        url = 'https://opensource.org/licenses/BSD-3-Clause'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'tomtzook'
-                        name = 'Tom Tzook'
-                        email = 'tomtzook@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:git://github.com/Flash3388/FlashLib.git'
-                    developerConnection = 'scm:git:ssh://github.com/Flash3388/FlashLib.git'
-                    url = 'https://github.com/Flash3388/FlashLib'
-                }
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenFlashlibComponent
 }
