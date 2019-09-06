@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.vision;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ImageDelegator<T extends Image> {
@@ -12,9 +13,8 @@ public class ImageDelegator<T extends Image> {
         mImagePipelines = imagePipelines;
     }
 
-    public ImageDelegator addPipeline(ImagePipeline<T> pipeline) {
-        mImagePipelines.add(pipeline);
-        return this;
+    public ImageDelegator(ImageSource<T> imageSource, ImagePipeline<T>... imagePipelines) {
+        this(imageSource, Arrays.asList(imagePipelines));
     }
 
     public void delegate() throws VisionException {
