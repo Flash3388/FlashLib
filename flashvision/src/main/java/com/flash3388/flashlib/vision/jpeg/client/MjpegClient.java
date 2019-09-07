@@ -9,6 +9,7 @@ import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.reader.MjpegReader;
 import org.slf4j.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -40,7 +41,7 @@ public class MjpegClient extends SingleUseThrowingParameterizedRunner<ImagePipel
     @Override
     protected void startRunner(ImagePipeline<JpegImage> imageConsumer) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) mStreamUrl.openConnection();
-        InputStream connectionInputStream = connection.getInputStream();
+        InputStream connectionInputStream = new BufferedInputStream(connection.getInputStream());
 
         mConnectionReference.set(connection);
 
