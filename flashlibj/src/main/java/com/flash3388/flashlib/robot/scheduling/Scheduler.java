@@ -148,9 +148,13 @@ public class Scheduler {
 		List<SchedulerTask> tasks = new ArrayList<>(mTasks);
 
 		for (SchedulerTask task : tasks) {
-			if (!task.run()) {
-				remove(task);
-			}
+			try {
+                if (!task.run()) {
+                    remove(task);
+                }
+            } catch (Throwable t) {
+			    mLogger.error("Error while running a task", t);
+            }
 		}
 	}
 
@@ -158,9 +162,13 @@ public class Scheduler {
 		List<Action> actions = new ArrayList<>(mActions);
 
 		for (Action action : actions) {
-			if (!action.run()) {
-				remove(action);
-			}
+            try {
+                if (!action.run()) {
+                    remove(action);
+                }
+            } catch (Throwable t) {
+                mLogger.error("Error while running an action", t);
+            }
 		}
 	}
 
