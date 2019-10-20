@@ -59,7 +59,7 @@ public abstract class Action {
 	public Action(Scheduler scheduler, Clock clock, Time timeout) {
 	    mScheduler = Objects.requireNonNull(scheduler, "scheduler is null");
         mClock = Objects.requireNonNull(clock, "clock is null");
-		mRequirements = new HashSet<>(2);
+		mRequirements = new HashSet<>(1);
 
 		mIsRunning = false;
 		mIsCanceled = false;
