@@ -48,6 +48,20 @@ public class ActionsMock {
         return action;
     }
 
+    public static Action mockActionIsFinishedMarkedTrue() {
+        Action action = mock(Action.class);
+        when(action.isFinished()).thenReturn(true);
+
+        return action;
+    }
+
+    public static Action mockActionIsFinishedMarkedFalse() {
+        Action action = mock(Action.class);
+        when(action.isFinished()).thenReturn(false);
+
+        return action;
+    }
+
     public static Action mockActionWithRequirement(Subsystem subsystem) {
         return mockActionWithRequirement(Collections.singleton(subsystem));
     }
@@ -68,6 +82,15 @@ public class ActionsMock {
     public static Action mockActionWithoutRequirements() {
         Action action = mock(Action.class);
         when(action.getRequirements()).thenReturn(Collections.emptySet());
+
+        return action;
+    }
+
+    public static Action makeActionCancelable(Action action) {
+        doAnswer((Answer<Void>) invocation -> {
+            when(action.isCanceled()).thenReturn(true);
+            return null;
+        }).when(action).markCanceled();
 
         return action;
     }

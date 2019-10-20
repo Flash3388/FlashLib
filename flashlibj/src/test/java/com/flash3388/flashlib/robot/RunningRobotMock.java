@@ -21,4 +21,9 @@ public class RunningRobotMock {
 
         RunningRobot.INSTANCE.set(robot);
     }
+
+    public static void mockRobotWithClock(Clock clock) {
+        Robot robot = RunningRobot.INSTANCE.get();
+        when(robot.getClock()).thenReturn(clock);
+    }
 }

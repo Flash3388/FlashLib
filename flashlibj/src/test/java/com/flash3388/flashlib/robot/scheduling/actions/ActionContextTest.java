@@ -4,11 +4,10 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 
+import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.makeActionCancelable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,7 +26,7 @@ public class ActionContextTest {
         mAction = mock(Action.class);
         mockActionFinished(false);
         mockActionTimeout(Time.INVALID);
-        mockCancelableAction();
+        makeActionCancelable(mAction);
 
         mClock = mock(Clock.class);
         when(mClock.currentTime()).thenReturn(Time.INVALID);
@@ -171,12 +170,5 @@ public class ActionContextTest {
 
     private void mockActionTimeout(Time timeout) {
         when(mAction.getTimeout()).thenReturn(timeout);
-    }
-
-    private void mockCancelableAction() {
-        doAnswer((Answer<Void>) invocation -> {
-            when(mAction.isCanceled()).thenReturn(true);
-            return null;
-        }).when(mAction).markCanceled();
     }
 }

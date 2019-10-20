@@ -82,24 +82,17 @@ public class SequentialActionGroup extends Action {
         mActions.forEach((action) -> {
             mActionQueue.add(new ActionContext(action, mClock));
         });
+
+        startNextAction();
     }
 
     @Override
     protected final void execute() {
         if (mCurrentAction == null) {
-            if (mActionQueue.isEmpty()) {
-                return;
-            } else {
-                mCurrentAction = mActionQueue.poll();
-                mCurrentAction.prepareForRun();
-            }
+            startNextAction();
         }
 
-        if (!mCurrentAction.run()) {
-            mCurrentAction.runFinished();
-
-            mCurrentAction = null;
-        }
+        handleCurrentAction();
     }
 
     @Override
@@ -122,5 +115,26 @@ public class SequentialActionGroup extends Action {
     @Override
     public final boolean runWhenDisabled() {
         return mRunWhenDisabled;
+    }
+
+    private void startNextAction() {
+        if (mActionQueue.isEmpty()) {
+            return;
+        }
+
+        mCurrentAction = mActionQueue.poll();
+        mCurrentAction.prepareForRun();
+    }
+
+    private void handleCurrentAction() {
+        if (mCurrentAction == null) {
+            return;
+        }
+
+        if (!mCurrentAction.run()) {
+            mCurrentAction.runFinished();
+
+            mCurrentAction = null;
+        }
     }
 }
