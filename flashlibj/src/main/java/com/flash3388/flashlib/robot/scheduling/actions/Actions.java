@@ -60,4 +60,16 @@ public class Actions {
             }
         };
     }
+
+    public static Action runnableAction(Runnable runnable) {
+        Objects.requireNonNull(runnable, "runnable is null");
+        return new Action() {
+            @Override
+            protected void execute() {
+                runnable.run();
+            }
+            @Override
+            protected void end() {}
+        };
+    }
 }
