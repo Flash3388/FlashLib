@@ -34,19 +34,4 @@ public class ActionsMock {
 
         return action;
     }
-
-    public static Subsystem mockSubsystemWithAction() {
-        Subsystem subsystem = mock(Subsystem.class);
-        when(subsystem.hasCurrentAction()).thenReturn(true);
-
-        return subsystem;
-    }
-
-    public static Subsystem mockSubsystemWithoutAction() {
-        Subsystem subsystem = mock(Subsystem.class);
-        when(subsystem.hasCurrentAction()).thenReturn(false);
-        when(subsystem.hasDefaultAction()).thenReturn(true);
-
-        return subsystem;
-    }
 }

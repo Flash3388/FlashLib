@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 
 import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockFinishedAction;
 import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockNonFinishingAction;
-import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockSubsystemWithoutAction;
 import static com.flash3388.flashlib.robot.scheduling.TasksMock.mockRepeatingTask;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -94,12 +93,14 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_subsystemsWithDefaults_startsDefaultActions() throws Exception {
-        Subsystem subsystem = mockSubsystemWithoutAction();
-        mActionsRepositoryMock.registeredSubsystem(subsystem);
+        Subsystem subsystem = mock(Subsystem.class);
+        Action action = mock(Action.class);
+
+        mActionsRepositoryMock.setDefaultAction(subsystem, action);
 
         mSchedulerIteration.run(SchedulerRunMode.ACTIONS_ONLY);
 
-        verify(subsystem, times(1)).startDefaultAction();
+        verify(action, times(1)).start();
     }
 
     @Test

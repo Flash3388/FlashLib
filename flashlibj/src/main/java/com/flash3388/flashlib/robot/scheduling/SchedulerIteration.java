@@ -64,11 +64,8 @@ class SchedulerIteration {
     }
 
     private void startDefaultSubsystemActions() {
-        for (Subsystem subsystem : mActionsRepository.getSubsystems()) {
-            if (!subsystem.hasCurrentAction() && subsystem.hasDefaultAction()) {
-                mLogger.debug("Starting default action for {}", subsystem.toString());
-                subsystem.startDefaultAction();
-            }
+        for (Action action : mActionsRepository.getDefaultActionsToStart()) {
+            action.start();
         }
     }
 

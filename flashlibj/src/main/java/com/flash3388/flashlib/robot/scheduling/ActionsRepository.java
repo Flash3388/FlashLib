@@ -4,26 +4,28 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 class ActionsRepository {
 
-    private final Set<Subsystem> mSubsystems;
+    private final Map<Subsystem, Action> mActionsOnSubsystems;
+    private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
     private final Collection<Action> mRunningActions;
     private final Collection<Action> mNextRunActions;
 
     private final Logger mLogger;
 
-    public ActionsRepository(Set<Subsystem> subsystems, Collection<Action> runningActions, Collection<Action> nextRunActions, Logger logger) {
-        mSubsystems = subsystems;
+    public ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Collection<Action> runningActions, Collection<Action> nextRunActions, Logger logger) {
+        mActionsOnSubsystems = actionsOnSubsystems;
+        mDefaultActionsOnSubsystems = defaultActionsOnSubsystems;
         mRunningActions = runningActions;
         mNextRunActions = nextRunActions;
         mLogger = logger;
     }
 
     public ActionsRepository(Logger logger) {
-        this(new HashSet<>(5), new ArrayList<>(5), new ArrayList<>(2), logger);
+        this(new HashMap<>(5), new HashMap<>(5), new ArrayList<>(5), new ArrayList<>(2), logger);
     }
 
     public void addAction(Action action) {
@@ -37,12 +39,21 @@ class ActionsRepository {
         mNextRunActions.add(action);
     }
 
-    public void registerSubsystem(Subsystem subsystem) {
-        if (mSubsystems.contains(subsystem)) {
-            throw new IllegalArgumentException("subsystem already registered");
+    public Action getActionOnSubsystem(Subsystem subsystem) {
+        Action action = mActionsOnSubsystems.get(subsystem);
+        if (action != null) {
+            return action;
         }
 
-        mSubsystems.add(subsystem);
+        throw new IllegalArgumentException("No action on subsystem");
+    }
+
+    public void setDefaultActionOnSubsystem(Subsystem subsystem, Action action) {
+        if (!action.getRequirements().contains(subsystem)) {
+            action.requires(subsystem);
+        }
+
+        mDefaultActionsOnSubsystems.put(subsystem, action);
     }
 
     public void removeAllActions() {
@@ -63,8 +74,19 @@ class ActionsRepository {
         return mRunningActions;
     }
 
-    public Set<Subsystem> getSubsystems() {
-        return mSubsystems;
+    public Collection<Action> getDefaultActionsToStart() {
+        Collection<Action> actionsToStart = new ArrayList<>();
+
+        for (Map.Entry<Subsystem, Action> entry : mDefaultActionsOnSubsystems.entrySet()) {
+            if (mActionsOnSubsystems.containsKey(entry.getKey())) {
+                continue;
+            }
+
+            actionsToStart.add(entry.getValue());
+            mLogger.debug("Starting default action for {}", entry.getKey().toString());
+        }
+
+        return actionsToStart;
     }
 
     private void internalAdd(Action action) {
@@ -90,21 +112,21 @@ class ActionsRepository {
 
     private void updateRequirementsWithNewRunningAction(Action action) {
         for (Subsystem subsystem : action.getRequirements()) {
-            if (subsystem.hasCurrentAction()) {
-                Action currentAction = subsystem.getCurrentAction();
+            if (mActionsOnSubsystems.containsKey(subsystem)) {
+                Action currentAction = mActionsOnSubsystems.get(subsystem);
                 currentAction.cancel();
 
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over subsystem {}",
                         currentAction.toString(), action.toString(), subsystem.toString());
             }
 
-            subsystem.setCurrentAction(action);
+            mActionsOnSubsystems.put(subsystem, action);
         }
     }
 
     private void updateRequirementsNoCurrentAction(Action action) {
         for (Subsystem subsystem : action.getRequirements()) {
-            subsystem.setCurrentAction(null);
+            mActionsOnSubsystems.remove(subsystem);
         }
     }
 }

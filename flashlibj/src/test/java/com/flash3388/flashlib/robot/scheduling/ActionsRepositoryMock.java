@@ -4,8 +4,8 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -15,12 +15,12 @@ public class ActionsRepositoryMock {
 
     private final ActionsRepository mActionsRepository;
     private final Collection<Action> mRunningActions;
-    private final Set<Subsystem> mSubsystems;
+    private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
 
     public ActionsRepositoryMock(ActionsRepository tasksRepository) {
         mActionsRepository = tasksRepository;
         mRunningActions = new ArrayList<>();
-        mSubsystems = new HashSet<>();
+        mDefaultActionsOnSubsystems = new HashMap<>();
 
         when(mActionsRepository.getRunningActions()).thenReturn(mRunningActions);
         doAnswer((Answer<Void>) invocation -> {
@@ -28,14 +28,14 @@ public class ActionsRepositoryMock {
             return null;
         }).when(mActionsRepository).addAction(any(Action.class));
 
-        when(mActionsRepository.getSubsystems()).thenReturn(mSubsystems);
+        when(mActionsRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems.values());
     }
 
     public void runningAction(Action action) {
         mRunningActions.add(action);
     }
 
-    public void registeredSubsystem(Subsystem subsystem) {
-        mSubsystems.add(subsystem);
+    public void setDefaultAction(Subsystem subsystem, Action action) {
+        mDefaultActionsOnSubsystems.put(subsystem, action);
     }
 }

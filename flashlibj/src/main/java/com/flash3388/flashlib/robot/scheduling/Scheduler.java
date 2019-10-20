@@ -21,8 +21,6 @@ import java.util.Objects;
  * In addition, the scheduler can allow {@link Subsystem} to hold default {@link Action} objects, which
  * run only if no {@link Action} is using the {@link Subsystem} at the moment. When the scheduler runs,
  * it checks all registered {@link Subsystem} objects to see if one does not have an action at the moment.
- * If it doesn't and a default action is defined, the default action is started. Systems are registered
- * by calling {@link #registerSubsystem(Subsystem)}, but this occurs in the {@link Subsystem} constructor.
  * 
  * @author Tom Tzook
  * @since FlashLib 1.0.0
@@ -73,9 +71,15 @@ public class Scheduler {
         mActionsRepository.addAction(action);
 	}
 
-    public void registerSubsystem(Subsystem subsystem) {
+    public void setDefaultAction(Subsystem subsystem, Action action) {
         Objects.requireNonNull(subsystem, "subsystem is null");
-        mActionsRepository.registerSubsystem(subsystem);
+        Objects.requireNonNull(action, "action is null");
+
+        mActionsRepository.setDefaultActionOnSubsystem(subsystem, action);
+    }
+
+    public Action getActionRunningOnSubsystem(Subsystem subsystem) {
+	    return mActionsRepository.getActionOnSubsystem(subsystem);
     }
 
 	public void stopAllActions() {
