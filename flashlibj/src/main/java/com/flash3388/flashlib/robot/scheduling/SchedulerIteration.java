@@ -24,7 +24,7 @@ class SchedulerIteration {
         mActionsToRemove.clear();
 
         runActions(robotMode);
-        startDefaultSubsystemActions();
+        startDefaultSubsystemActions(robotMode);
 
         readyForNextRun();
     }
@@ -47,8 +47,13 @@ class SchedulerIteration {
         }
     }
 
-    private void startDefaultSubsystemActions() {
+    private void startDefaultSubsystemActions(RobotMode robotMode) {
         for (Action action : mActionsRepository.getDefaultActionsToStart()) {
+            if (robotMode.equals(RobotMode.DISABLED) &&
+                    !action.runWhenDisabled()) {
+                continue;
+            }
+
             action.start();
         }
     }
