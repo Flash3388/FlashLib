@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
+import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockActionWithRequirement;
+import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockNotRunningAction;
+import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockRunningAction;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -27,7 +30,7 @@ public class ActionGroupTest {
 
         List<Action> actions = new ArrayList<>();
         actions.add(mockActionRunningBySupplier(isFirstActionRunning));
-        actions.add(mockActionNotRunning());
+        actions.add(mockNotRunningAction());
 
         ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.SEQUENTIAL, actions);
         actionGroup.initialize();
@@ -88,8 +91,8 @@ public class ActionGroupTest {
         final Runnable INTERRUPTION_TASK = mock(Runnable.class);
 
         List<Action> actions = new ArrayList<>();
-        actions.add(mockActionRunning());
-        actions.add(mockActionRunning());
+        actions.add(mockRunningAction());
+        actions.add(mockRunningAction());
 
         ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
         actionGroup.whenInterrupted(INTERRUPTION_TASK);
@@ -104,7 +107,7 @@ public class ActionGroupTest {
     @Test
     public void cancel_actionWasInterrupted_interruptsContainedActions() throws Exception {
         List<Action> actions = new ArrayList<>();
-        actions.add(mockActionRunning());
+        actions.add(mockRunningAction());
 
         ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
 
@@ -133,33 +136,15 @@ public class ActionGroupTest {
         assertThat(actionGroup.getRequirements(),hasItems(requirements.toArray(new Subsystem[0])));
     }
 
-    private Action mockActionWithRequirement(Set<Subsystem> requirements) {
-        Action action = mock(Action.class);
-        when(action.getRequirements()).thenReturn(requirements);
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Action parent = invocation.getArgument(0);
-                parent.requires(requirements);
-                return null;
-            }
-        }).when(action).setParent(any(Action.class));
+    @Test(expected = IllegalArgumentException.class)
+    public void add_parallelActionsWithJointRequirements_throwsIllegalArgumentException() throws Exception {
+        Subsystem subsystem = mock(Subsystem.class);
 
-        return action;
-    }
+        List<Action> actions = new ArrayList<>();
+        actions.add(mockActionWithRequirement(subsystem));
 
-    private Action mockActionNotRunning() {
-        Action action = mock(Action.class);
-        when(action.run()).thenReturn(false);
-
-        return action;
-    }
-
-    private Action mockActionRunning() {
-        Action action = mock(Action.class);
-        when(action.run()).thenReturn(true);
-
-        return action;
+        ActionGroup actionGroup = new ActionGroup(new Scheduler(), new SystemMillisClock(), ExecutionOrder.PARALLEL, actions);
+        actionGroup.add(mockActionWithRequirement(subsystem));
     }
 
     private Action mockActionRunningBySupplier(BooleanSupplier supplier) {
