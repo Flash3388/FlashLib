@@ -27,6 +27,13 @@ public class ActionsMock {
         return action;
     }
 
+    public static Action mockNotAllowedInDisabledAction() {
+        Action action = mock(Action.class);
+        when(action.runWhenDisabled()).thenReturn(false);
+
+        return action;
+    }
+
     public static Action mockNotRunningAction() {
         Action action = mock(Action.class);
         when(action.run()).thenReturn(false);

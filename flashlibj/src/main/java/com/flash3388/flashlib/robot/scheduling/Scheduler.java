@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -86,7 +87,7 @@ public class Scheduler {
         mActionsRepository.removeAllActions();
 	}
 
-	public void run() {
-        mSchedulerIteration.run(mRunMode);
+	public void run(RobotMode robotMode) {
+        mSchedulerIteration.run(mRunMode, robotMode);
 	}
 }

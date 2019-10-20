@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.modes.RobotMode;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ class SchedulerIteration {
         mActionsToRemove = new ArrayList<>(2);
     }
 
-    public void run(SchedulerRunMode runMode) {
+    public void run(SchedulerRunMode runMode, RobotMode robotMode) {
         mTasksToRemove.clear();
         mActionsToRemove.clear();
 
@@ -32,7 +33,7 @@ class SchedulerIteration {
         }
 
         if (runMode.shouldRunActions()) {
-            runActions();
+            runActions(robotMode);
             startDefaultSubsystemActions();
         }
 
@@ -51,8 +52,14 @@ class SchedulerIteration {
         }
     }
 
-    private void runActions() {
+    private void runActions(RobotMode robotMode) {
         for (Action action : mActionsRepository.getRunningActions()) {
+            if (robotMode.equals(RobotMode.DISABLED) &&
+                    !action.runWhenDisabled()) {
+                mActionsToRemove.add(action);
+                continue;
+            }
+
             try {
                 if (!action.run()) {
                     mActionsToRemove.add(action);

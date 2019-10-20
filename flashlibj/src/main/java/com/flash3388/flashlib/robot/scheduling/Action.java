@@ -365,4 +365,12 @@ public abstract class Action {
 	 * Called when {@link #isFinished()} returns true.
 	 */
 	protected abstract void end();
+
+    /**
+     * @return returns <b>false</b> if this action can run when disabled,
+     *      <b>true</b>.
+     */
+	protected boolean runWhenDisabled() {
+	    return false;
+    }
 }

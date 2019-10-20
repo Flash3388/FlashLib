@@ -123,14 +123,11 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        getScheduler().stopAllActions();
         getLogger().trace("Initializing mode {}", mode);
 
         if (mode.equals(RobotMode.DISABLED)) {
-            getScheduler().setRunMode(SchedulerRunMode.TASKS_ONLY);
             disabledInit();
         } else {
-            getScheduler().setRunMode(SchedulerRunMode.ALL);
             modeInit(mode);
         }
     }
@@ -138,10 +135,10 @@ public abstract class IterativeRobot extends RobotBase {
     private void periodicMode(RobotMode mode) {
         getLogger().trace("Periodic mode {}", mode);
 
+        getScheduler().run(mode);
         if (mode.equals(RobotMode.DISABLED)) {
             disabledPeriodic();
         } else {
-            getScheduler().run();
             modePeriodic(mode);
         }
 

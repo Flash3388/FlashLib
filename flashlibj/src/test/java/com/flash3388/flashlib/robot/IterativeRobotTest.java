@@ -97,20 +97,6 @@ public class IterativeRobotTest {
     }
 
     @Test
-    public void run_robotEntersMode_removesActionsFromScheduler() throws Exception {
-        RobotMode STARTING_MODE = new RobotMode("mode2", 2);
-        RobotMode OTHER_MODE = new RobotMode("mode1", 1);
-
-        mockRobotSwitchMode(STARTING_MODE, OTHER_MODE);
-        CountDownLatch runLatch = setupIterationStopper(2);
-        runRobotLoop();
-
-        runLatch.await();
-
-        verify(mScheduler, times(2)).stopAllActions();
-    }
-
-    @Test
     public void run_robotNotDisabled_schedulerIsRan() throws Exception {
         RobotMode MODE = new RobotMode("mode", 2);
 
@@ -120,7 +106,7 @@ public class IterativeRobotTest {
 
         runLatch.await();
 
-        verify(mScheduler, times(1)).run();
+        verify(mScheduler, times(1)).run(any(RobotMode.class));
     }
 
     private void mockRobotInMode(RobotMode mode) throws Exception {
