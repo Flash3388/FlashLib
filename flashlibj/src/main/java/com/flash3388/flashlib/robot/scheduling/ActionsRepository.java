@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -14,25 +16,27 @@ class ActionsRepository {
 
     private final Map<Subsystem, Action> mActionsOnSubsystems;
     private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
-    private final Collection<Action> mRunningActions;
+    private final Map<Action, ActionContext> mRunningActions;
     private final Collection<Action> mNextRunActions;
 
+    private final Clock mClock;
     private final Logger mLogger;
 
-    public ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Collection<Action> runningActions, Collection<Action> nextRunActions, Logger logger) {
+    public ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions, Clock clock, Logger logger) {
         mActionsOnSubsystems = actionsOnSubsystems;
         mDefaultActionsOnSubsystems = defaultActionsOnSubsystems;
         mRunningActions = runningActions;
         mNextRunActions = nextRunActions;
+        mClock = clock;
         mLogger = logger;
     }
 
-    public ActionsRepository(Logger logger) {
-        this(new HashMap<>(5), new HashMap<>(5), new ArrayList<>(5), new ArrayList<>(2), logger);
+    public ActionsRepository(Clock clock, Logger logger) {
+        this(new HashMap<>(5), new HashMap<>(5), new HashMap<>(5), new ArrayList<>(2), clock, logger);
     }
 
     public void addAction(Action action) {
-        if (mRunningActions.contains(action)) {
+        if (mRunningActions.containsKey(action)) {
             throw new IllegalArgumentException("action already running");
         }
         if (mNextRunActions.contains(action)) {
@@ -64,12 +68,15 @@ class ActionsRepository {
     public void removeActionsIf(Predicate<Action> removalPredicate) {
         mNextRunActions.removeIf(removalPredicate);
 
-        Collection<Action> actionsToRemove = mRunningActions.stream()
+        Collection<Action> actionsToRemove = mRunningActions.keySet().stream()
                 .filter(removalPredicate)
                 .collect(Collectors.toList());
 
-        actionsToRemove.forEach(this::onInternalRemove);
-        mRunningActions.removeAll(actionsToRemove);
+        actionsToRemove.forEach((action) -> {
+            ActionContext context = mRunningActions.get(action);
+            onInternalRemove(action, context);
+        });
+        actionsToRemove.forEach(mRunningActions::remove);
     }
 
     public void updateActionsForNextRun(Iterable<Action> actionsToRemove) {
@@ -79,8 +86,8 @@ class ActionsRepository {
         mNextRunActions.clear();
     }
 
-    public Collection<Action> getRunningActions() {
-        return mRunningActions;
+    public Set<Map.Entry<Action, ActionContext>> getRunningActionContexts() {
+        return mRunningActions.entrySet();
     }
 
     public Collection<Action> getDefaultActionsToStart() {
@@ -99,22 +106,26 @@ class ActionsRepository {
     }
 
     private void internalAdd(Action action) {
-        if (mRunningActions.contains(action)) {
+        if (mRunningActions.containsKey(action)) {
             return;
         }
 
         updateRequirementsWithNewRunningAction(action);
 
-        mRunningActions.add(action);
+        ActionContext context = new ActionContext(action, mClock);
+        context.prepareForRun();
+        mRunningActions.put(action, context);
     }
 
     private void internalRemove(Action action) {
-        if (mRunningActions.remove(action)) {
-            onInternalRemove(action);
+        ActionContext context = mRunningActions.remove(action);
+        if (context != null) {
+            onInternalRemove(action, context);
         }
     }
 
-    private void onInternalRemove(Action action) {
+    private void onInternalRemove(Action action, ActionContext context) {
+        context.runFinished();
         action.removed();
         updateRequirementsNoCurrentAction(action);
     }

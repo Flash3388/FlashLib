@@ -39,7 +39,7 @@ public class ActionsRepositoryTest {
         mRunningActions = new ArrayList<>();
         mNextRunActions = new ArrayList<>();
 
-        mActionsRepository = new ActionsRepository(mActionsOnSubsystems, mDefaultActionsOnSubsystems, mRunningActions, mNextRunActions, mock(Logger.class));
+        mActionsRepository = new ActionsRepository(mActionsOnSubsystems, mDefaultActionsOnSubsystems, mRunningActions, mNextRunActions, clock, mock(Logger.class));
     }
 
     @Test

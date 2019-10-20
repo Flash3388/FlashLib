@@ -44,43 +44,33 @@ import java.util.Set;
 public abstract class Action {
 
     private final Scheduler mScheduler;
-	private final Clock mClock;
     private final Set<Subsystem> mRequirements;
 
-	private boolean mIsInitialized;
 	private boolean mIsCanceled;
 	private boolean mIsRunning;
 
 	private Time mTimeout;
-	private Time mStartTime;
 
 	private Action mParent;
 
-	public Action(Scheduler scheduler, Clock clock, Time timeout) {
+	public Action(Scheduler scheduler, Time timeout) {
 	    mScheduler = Objects.requireNonNull(scheduler, "scheduler is null");
-        mClock = Objects.requireNonNull(clock, "clock is null");
-		mRequirements = new HashSet<>(2);
+		mRequirements = new HashSet<>(1);
 
 		mIsRunning = false;
 		mIsCanceled = false;
-		mIsInitialized = false;
 
 		mTimeout = Objects.requireNonNull(timeout, "timeout is null");
-        mStartTime = Time.INVALID;
 
         mParent = null;
 	}
 
-    public Action(Clock clock, Time timeout) {
-	    this(RunningRobot.INSTANCE.get().getScheduler(), clock, timeout);
+    public Action(Time timeout) {
+	    this(RunningRobot.INSTANCE.get().getScheduler(), timeout);
     }
 
-	public Action(Clock clock) {
-	    this(clock, Time.INVALID);
-    }
-
-    public Action() {
-	    this(RunningRobot.INSTANCE.get().getClock());
+	public Action() {
+	    this(Time.INVALID);
     }
 	
 	/**
@@ -172,23 +162,6 @@ public abstract class Action {
 	}
 
 	/**
-	 * Gets whether or not this action has reached a run timeout. Timeout is defined when the time since this
-     * action has started running has reached its defined run timeout, if such a value was defined.
-     *
-	 * @return <b>true</b> if the action timeout, <b>false</b> otherwise
-     *
-     * @throws IllegalStateException if the action is not running.
-	 */
-	public boolean wasTimeoutReached(){
-        validateRunning();
-	    if (!mStartTime.isValid() || !mTimeout.isValid()) {
-	        return false;
-        }
-
-		return (mClock.currentTime().sub(mStartTime)).after(mTimeout);
-	}
-
-	/**
 	 * Adds a {@link Subsystem} requirement for this action.
      *
 	 * @param subsystem a system used by this action
@@ -256,7 +229,6 @@ public abstract class Action {
 
 	void markStarted() {
         if(!mIsRunning){
-            mIsInitialized = false;
             mIsCanceled = false;
             mIsRunning = true;
         }
@@ -269,38 +241,8 @@ public abstract class Action {
     }
 
 	void removed(){
-		if(mIsInitialized){
-			if(isCanceled()) {
-				interrupted();
-			} else {
-				end();
-			}
-		}
-
-		mIsInitialized = false;
 		mIsCanceled = false;
 		mIsRunning = false;
-		mStartTime = Time.INVALID;
-	}
-
-	boolean run(){
-		if(wasTimeoutReached()) {
-			markCanceled();
-		}
-
-		if(isCanceled()) {
-			return false;
-		}
-
-		if(!mIsInitialized) {
-			mIsInitialized = true;
-			mStartTime = mClock.currentTime();
-			initialize();
-		}
-
-		execute();
-
-		return !isFinished();
 	}
 
 	void setParent(Action parent) {

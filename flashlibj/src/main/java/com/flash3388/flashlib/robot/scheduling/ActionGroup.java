@@ -32,7 +32,7 @@ public class ActionGroup extends Action {
 	private final ExecutionOrder mExecutionOrder;
 
 	private final Queue<Action> mActionsQueue;
-	private final Collection<Action> mCurrentlyRunningActions;
+	private final Collection<ActionContext> mCurrentlyRunningActions;
 
 	private final Logger mLogger;
 
@@ -215,7 +215,7 @@ public class ActionGroup extends Action {
 
 		mCurrentlyRunningActions.removeIf((action) -> {
 	        if (!action.run()) {
-	            action.removed();
+	            action.runFinished();
 	            return true;
             }
 

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 class SchedulerIteration {
 
@@ -30,7 +31,10 @@ class SchedulerIteration {
     }
 
     private void runActions(RobotMode robotMode) {
-        for (Action action : mActionsRepository.getRunningActions()) {
+        for (Map.Entry<Action, ActionContext> entry : mActionsRepository.getRunningActionContexts()) {
+            Action action = entry.getKey();
+            ActionContext context = entry.getValue();
+
             try {
                 if (robotMode.equals(RobotMode.DISABLED) &&
                         !action.runWhenDisabled()) {
@@ -38,7 +42,7 @@ class SchedulerIteration {
                     continue;
                 }
 
-                if (!action.run()) {
+                if (!context.run()) {
                     mActionsToRemove.add(action);
                 }
             } catch (Throwable t) {

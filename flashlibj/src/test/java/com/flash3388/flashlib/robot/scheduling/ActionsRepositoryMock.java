@@ -22,7 +22,7 @@ public class ActionsRepositoryMock {
         mRunningActions = new ArrayList<>();
         mDefaultActionsOnSubsystems = new HashMap<>();
 
-        when(mActionsRepository.getRunningActions()).thenReturn(mRunningActions);
+        when(mActionsRepository.getRunningActionContexts()).thenReturn(mRunningActions);
         doAnswer((Answer<Void>) invocation -> {
             mRunningActions.add(invocation.getArgument(0));
             return null;

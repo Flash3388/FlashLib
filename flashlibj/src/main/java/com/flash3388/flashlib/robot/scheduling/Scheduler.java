@@ -39,7 +39,7 @@ public class Scheduler {
     }
 
 	public Scheduler(Logger logger) {
-        mActionsRepository = new ActionsRepository(logger);
+        mActionsRepository = new ActionsRepository(clock, logger);
 
         mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
 	}
