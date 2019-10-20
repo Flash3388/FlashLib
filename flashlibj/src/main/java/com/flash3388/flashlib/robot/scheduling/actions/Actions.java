@@ -1,8 +1,11 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.ActionGroup;
+import com.flash3388.flashlib.robot.scheduling.ExecutionOrder;
 import com.flash3388.flashlib.time.Time;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Actions {
@@ -71,5 +74,13 @@ public class Actions {
             @Override
             protected void end() {}
         };
+    }
+
+    public static ActionGroup sequential(Action... actions) {
+        return new ActionGroup(ExecutionOrder.SEQUENTIAL, Arrays.asList(actions));
+    }
+
+    public static ActionGroup parallel(Action... actions) {
+        return new ActionGroup(ExecutionOrder.PARALLEL, Arrays.asList(actions));
     }
 }
