@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
+import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
 public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
@@ -16,7 +16,6 @@ public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
     public MecanumDriveSystem(SpeedController frontRightController, SpeedController backRightController,
                               SpeedController frontLeftController, SpeedController backLeftController,
                               DriveAlgorithms driveAlgorithms) {
-        super(scheduler);
         mFrontRightController = frontRightController;
         mBackRightController = backRightController;
         mFrontLeftController = frontLeftController;

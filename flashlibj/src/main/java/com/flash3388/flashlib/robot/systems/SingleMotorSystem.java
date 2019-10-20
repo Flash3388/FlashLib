@@ -10,7 +10,6 @@ public class SingleMotorSystem extends Subsystem implements Movable, Rotatable {
     private final SpeedController mController;
 
     public SingleMotorSystem(SpeedController controller) {
-        super(scheduler);
         mController = controller;
     }
 
