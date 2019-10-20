@@ -75,7 +75,18 @@ public class ActionGroup extends Action {
 	 */
 	public ActionGroup add(Action action){
 	    Objects.requireNonNull(action, "action is null");
-	    return add(Collections.singleton(action));
+
+	    validateNotRunning();
+
+        if (mExecutionOrder == ExecutionOrder.PARALLEL &&
+                !Collections.disjoint(getRequirements(), action.getRequirements())) {
+            throw new IllegalArgumentException("Actions in Parallel execution cannot share requirements");
+        }
+
+        mActions.add(action);
+        action.setParent(this);
+
+        return this;
 	}
 
 	/**
@@ -96,12 +107,8 @@ public class ActionGroup extends Action {
      * @return this instance
      */
     public ActionGroup add(Collection<Action> actions){
-        validateNotRunning();
-
         Objects.requireNonNull(actions, "actions is null");
-
-        mActions.addAll(actions);
-        actions.forEach((action) -> action.setParent(this));
+        actions.forEach(this::add);
 
         return this;
     }
