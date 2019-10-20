@@ -1,33 +1,36 @@
-package com.flash3388.flashlib.robot.scheduling;
+package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.time.Clock;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
+import java.util.Queue;
 
-public class ParallelActionGroup extends Action {
+public class SequentialActionGroup extends Action {
 
     private final Clock mClock;
 
     private final Collection<Action> mActions;
-    private final Collection<ActionContext> mCurrentActions;
+    private final Queue<ActionContext> mActionQueue;
 
+    private ActionContext mCurrentAction;
     private boolean mRunWhenDisabled;
 
-    public ParallelActionGroup(Clock clock) {
+    public SequentialActionGroup(Clock clock) {
         mClock = clock;
 
         mActions = new ArrayList<>(3);
-        mCurrentActions = new ArrayList<>(2);
+        mActionQueue = new ArrayDeque<>(3);
 
+        mCurrentAction = null;
         mRunWhenDisabled = false;
     }
 
-    public ParallelActionGroup() {
+    public SequentialActionGroup() {
         this(RunningRobot.INSTANCE.get().getClock());
     }
 
@@ -37,14 +40,10 @@ public class ParallelActionGroup extends Action {
      * @param action action to run
      * @return this instance
      */
-    public ParallelActionGroup add(Action action){
+    public SequentialActionGroup add(Action action){
         Objects.requireNonNull(action, "action is null");
 
         validateNotRunning();
-
-        if (!Collections.disjoint(getRequirements(), action.getRequirements())) {
-            throw new IllegalArgumentException("Actions in Parallel execution cannot share requirements");
-        }
 
         mActions.add(action);
         action.setParent(this);
@@ -60,7 +59,7 @@ public class ParallelActionGroup extends Action {
      * @param actions actions to run
      * @return this instance
      */
-    public ParallelActionGroup add(Action... actions){
+    public SequentialActionGroup add(Action... actions){
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
     }
@@ -71,7 +70,7 @@ public class ParallelActionGroup extends Action {
      * @param actions action to run
      * @return this instance
      */
-    public ParallelActionGroup add(Collection<Action> actions){
+    public SequentialActionGroup add(Collection<Action> actions){
         Objects.requireNonNull(actions, "actions is null");
         actions.forEach(this::add);
 
@@ -80,36 +79,32 @@ public class ParallelActionGroup extends Action {
 
     @Override
     protected final void initialize() {
-        for (Action action : mActions) {
-            ActionContext actionContext = new ActionContext(action, mClock);
-            actionContext.markStarted();
-            actionContext.prepareForRun();
-
-            mCurrentActions.add(actionContext);
-        }
-    }
-
-    @Override
-    protected final void execute() {
-        if (mCurrentActions.isEmpty()) {
-            return;
-        }
-
-        mCurrentActions.removeIf((ctx) -> {
-            if (!ctx.run()) {
-                ctx.runFinished();
-                ctx.removed();
-
-                return true;
-            }
-
-            return false;
+        mActions.forEach((action) -> {
+            mActionQueue.add(new ActionContext(action, mClock));
         });
     }
 
     @Override
+    protected final void execute() {
+        if (mCurrentAction == null) {
+            if (mActionQueue.isEmpty()) {
+                return;
+            } else {
+                mCurrentAction = mActionQueue.poll();
+                mCurrentAction.prepareForRun();
+            }
+        }
+
+        if (!mCurrentAction.run()) {
+            mCurrentAction.runFinished();
+
+            mCurrentAction = null;
+        }
+    }
+
+    @Override
     protected boolean isFinished() {
-        return mCurrentActions.isEmpty();
+        return mCurrentAction == null && mActionQueue.isEmpty();
     }
 
     @Override
@@ -119,16 +114,13 @@ public class ParallelActionGroup extends Action {
 
     @Override
     protected final void interrupted() {
-        for (ActionContext context : mCurrentActions) {
-            context.markCanceled();
-
-            context.runFinished();
-            context.removed();
+        if (mCurrentAction != null) {
+            mCurrentAction.runCanceled();
         }
     }
 
     @Override
-    protected final boolean runWhenDisabled() {
+    public final boolean runWhenDisabled() {
         return mRunWhenDisabled;
     }
 }

@@ -1,8 +1,9 @@
-package com.flash3388.flashlib.robot.scheduling;
+package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -312,7 +313,7 @@ public abstract class Action {
      * @return returns <b>false</b> if this action can run when disabled,
      *      <b>true</b>.
      */
-	protected boolean runWhenDisabled() {
+	public boolean runWhenDisabled() {
 	    return false;
     }
 }

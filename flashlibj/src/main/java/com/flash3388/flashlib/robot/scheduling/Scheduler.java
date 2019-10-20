@@ -1,6 +1,9 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -31,18 +34,20 @@ import java.util.function.Predicate;
 public class Scheduler {
 
 	private final ActionsRepository mActionsRepository;
-
 	private final SchedulerIteration mSchedulerIteration;
 
-	public Scheduler() {
-	    this(Logging.stub());
+    public Scheduler(Clock clock, Logger logger) {
+        mActionsRepository = new ActionsRepository(clock, logger);
+        mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
     }
 
-	public Scheduler(Logger logger) {
-        mActionsRepository = new ActionsRepository(clock, logger);
+    public Scheduler(Logger logger) {
+        this(RunningRobot.INSTANCE.get().getClock(), logger);
+    }
 
-        mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
-	}
+	public Scheduler() {
+	    this(RunningRobot.INSTANCE.get().getClock(), Logging.stub());
+    }
 
 	public void add(Action action) {
         Objects.requireNonNull(action, "action is null");

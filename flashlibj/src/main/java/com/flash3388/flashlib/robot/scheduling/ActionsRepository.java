@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
@@ -126,7 +128,6 @@ class ActionsRepository {
 
     private void onInternalRemove(Action action, ActionContext context) {
         context.runFinished();
-        action.removed();
         updateRequirementsNoCurrentAction(action);
     }
 

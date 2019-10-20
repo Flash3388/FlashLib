@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.scheduling;
+package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -23,6 +23,8 @@ public class ActionContext {
     }
 
     public void prepareForRun() {
+        mAction.markStarted();
+
         mStartTime = mClock.currentTime();
         mTimeout = mAction.getTimeout();
         mIsInitialized = false;
@@ -59,21 +61,20 @@ public class ActionContext {
 
         mIsInitialized = false;
         mStartTime = Time.INVALID;
-    }
 
-    public void markStarted() {
-        mAction.markStarted();
-    }
-
-    public void markCanceled() {
-        mAction.markCanceled();
-    }
-
-    public void removed() {
         mAction.removed();
     }
 
-    private boolean wasTimeoutReached(){
+    public void runCanceled() {
+        mAction.markCanceled();
+        runFinished();
+    }
+
+    public boolean runWhenDisabled() {
+        return mAction.runWhenDisabled();
+    }
+
+    boolean wasTimeoutReached(){
         if (!mStartTime.isValid() || !mTimeout.isValid()) {
             return false;
         }

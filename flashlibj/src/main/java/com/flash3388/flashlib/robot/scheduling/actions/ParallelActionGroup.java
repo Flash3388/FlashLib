@@ -1,36 +1,33 @@
-package com.flash3388.flashlib.robot.scheduling;
+package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.time.Clock;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
-import java.util.Queue;
 
-public class SeActionGroup extends Action {
+public class ParallelActionGroup extends Action {
 
     private final Clock mClock;
 
     private final Collection<Action> mActions;
-    private final Queue<ActionContext> mActionQueue;
+    private final Collection<ActionContext> mCurrentActions;
 
-    private ActionContext mCurrentAction;
     private boolean mRunWhenDisabled;
 
-    public SeActionGroup(Clock clock) {
+    public ParallelActionGroup(Clock clock) {
         mClock = clock;
 
         mActions = new ArrayList<>(3);
-        mActionQueue = new ArrayDeque<>(3);
+        mCurrentActions = new ArrayList<>(2);
 
-        mCurrentAction = null;
         mRunWhenDisabled = false;
     }
 
-    public SeActionGroup() {
+    public ParallelActionGroup() {
         this(RunningRobot.INSTANCE.get().getClock());
     }
 
@@ -40,10 +37,14 @@ public class SeActionGroup extends Action {
      * @param action action to run
      * @return this instance
      */
-    public SeActionGroup add(Action action){
+    public ParallelActionGroup add(Action action){
         Objects.requireNonNull(action, "action is null");
 
         validateNotRunning();
+
+        if (!Collections.disjoint(getRequirements(), action.getRequirements())) {
+            throw new IllegalArgumentException("Actions in Parallel execution cannot share requirements");
+        }
 
         mActions.add(action);
         action.setParent(this);
@@ -59,7 +60,7 @@ public class SeActionGroup extends Action {
      * @param actions actions to run
      * @return this instance
      */
-    public SeActionGroup add(Action... actions){
+    public ParallelActionGroup add(Action... actions){
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
     }
@@ -70,7 +71,7 @@ public class SeActionGroup extends Action {
      * @param actions action to run
      * @return this instance
      */
-    public SeActionGroup add(Collection<Action> actions){
+    public ParallelActionGroup add(Collection<Action> actions){
         Objects.requireNonNull(actions, "actions is null");
         actions.forEach(this::add);
 
@@ -79,34 +80,34 @@ public class SeActionGroup extends Action {
 
     @Override
     protected final void initialize() {
-        mActions.forEach((action) -> {
-            mActionQueue.add(new ActionContext(action, mClock));
-        });
+        for (Action action : mActions) {
+            ActionContext actionContext = new ActionContext(action, mClock);
+            actionContext.prepareForRun();
+
+            mCurrentActions.add(actionContext);
+        }
     }
 
     @Override
     protected final void execute() {
-        if (mCurrentAction == null) {
-            if (mActionQueue.isEmpty()) {
-                return;
-            } else {
-                mCurrentAction = mActionQueue.poll();
-                mCurrentAction.markStarted();
-                mCurrentAction.prepareForRun();
+        if (mCurrentActions.isEmpty()) {
+            return;
+        }
+
+        mCurrentActions.removeIf((ctx) -> {
+            if (!ctx.run()) {
+                ctx.runFinished();
+
+                return true;
             }
-        }
 
-        if (!mCurrentAction.run()) {
-            mCurrentAction.runFinished();
-            mCurrentAction.removed();
-
-            mCurrentAction = null;
-        }
+            return false;
+        });
     }
 
     @Override
     protected boolean isFinished() {
-        return mCurrentAction == null && mActionQueue.isEmpty();
+        return mCurrentActions.isEmpty();
     }
 
     @Override
@@ -116,16 +117,13 @@ public class SeActionGroup extends Action {
 
     @Override
     protected final void interrupted() {
-        if (mCurrentAction != null) {
-            mCurrentAction.markCanceled();
-
-            mCurrentAction.runFinished();
-            mCurrentAction.removed();
+        for (ActionContext context : mCurrentActions) {
+            context.runCanceled();
         }
     }
 
     @Override
-    protected final boolean runWhenDisabled() {
+    public final boolean runWhenDisabled() {
         return mRunWhenDisabled;
     }
 }

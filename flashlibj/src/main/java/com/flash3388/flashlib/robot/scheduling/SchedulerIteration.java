@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ class SchedulerIteration {
 
             try {
                 if (robotMode.equals(RobotMode.DISABLED) &&
-                        !action.runWhenDisabled()) {
+                        !context.runWhenDisabled()) {
                     mActionsToRemove.add(action);
                     continue;
                 }

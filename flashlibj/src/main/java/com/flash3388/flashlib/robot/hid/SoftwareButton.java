@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.hid;
 
-import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
 
 public abstract class SoftwareButton extends Button {
 

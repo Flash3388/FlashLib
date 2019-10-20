@@ -1,6 +1,6 @@
-package com.flash3388.flashlib.robot.scheduling;
+package com.flash3388.flashlib.robot.scheduling.actions;
 
-import org.mockito.invocation.InvocationOnMock;
+import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
@@ -13,18 +13,18 @@ import static org.mockito.Mockito.when;
 
 public class ActionsMock {
 
-    public static Action mockNonFinishingAction() {
-        Action action = mock(Action.class);
-        when(action.run()).thenReturn(true);
+    public static ActionContext mockNonFinishingActionContext() {
+        ActionContext actionContext = mock(ActionContext.class);
+        when(actionContext.run()).thenReturn(true);
 
-        return action;
+        return actionContext;
     }
 
-    public static Action mockFinishedAction() {
-        Action action = mock(Action.class);
-        when(action.run()).thenReturn(false);
+    public static ActionContext mockFinishedActionContext() {
+        ActionContext actionContext = mock(ActionContext.class);
+        when(actionContext.run()).thenReturn(false);
 
-        return action;
+        return actionContext;
     }
 
     public static Action mockNotAllowedInDisabledAction() {
@@ -36,14 +36,14 @@ public class ActionsMock {
 
     public static Action mockNotRunningAction() {
         Action action = mock(Action.class);
-        when(action.run()).thenReturn(false);
+        when(action.isRunning()).thenReturn(false);
 
         return action;
     }
 
     public static Action mockRunningAction() {
         Action action = mock(Action.class);
-        when(action.run()).thenReturn(true);
+        when(action.isRunning()).thenReturn(true);
 
         return action;
     }
