@@ -41,6 +41,8 @@ publishing {
     }
 }
 
-signing {
-    sign publishing.publications.mavenFlashlibComponent
+if (project.hasProperty('SIGN_PUBLISH')) {
+    signing {
+        sign publishing.publications.mavenFlashlibComponent
+    }
 }
