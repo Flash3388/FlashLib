@@ -12,6 +12,7 @@ public class SequentialActionGroup extends Action {
     private SequentialAction mFirstAction;
 
     private Action mCurrentAction;
+    private boolean mRunWhenDisabled;
 
     public SequentialActionGroup() {
         this(null);
@@ -29,6 +30,7 @@ public class SequentialActionGroup extends Action {
         }
 
         mCurrentAction = null;
+        mRunWhenDisabled = false;
     }
 
     public SequentialActionGroup first(SequentialAction action) {
@@ -36,6 +38,8 @@ public class SequentialActionGroup extends Action {
 
         mFirstAction = Objects.requireNonNull(action, "action is null");
         mFirstAction.setParent(this);
+
+        mRunWhenDisabled = mFirstAction.runWhenDisabled();
 
         return this;
     }
@@ -52,7 +56,7 @@ public class SequentialActionGroup extends Action {
         }
 
         if (!mCurrentAction.isRunning()) {
-            insureHasRequirements(mCurrentAction.getRequirements());
+            ensureHasRequirements(mCurrentAction.getRequirements());
             if (mCurrentAction instanceof SequentialAction) {
                 ((SequentialAction) mCurrentAction).resetRunNext();
             }
@@ -64,6 +68,9 @@ public class SequentialActionGroup extends Action {
 
                 if (mCurrentAction instanceof SequentialAction) {
                     mCurrentAction = ((SequentialAction) mCurrentAction).getRunNext();
+                    if (mCurrentAction != null) {
+                        mRunWhenDisabled &= mCurrentAction.runWhenDisabled();
+                    }
                 } else {
                     mCurrentAction = null;
                 }
@@ -89,7 +96,12 @@ public class SequentialActionGroup extends Action {
         }
     }
 
-    private void insureHasRequirements(Collection<Subsystem> requirements) {
+    @Override
+    protected final boolean runWhenDisabled() {
+        return mRunWhenDisabled;
+    }
+
+    private void ensureHasRequirements(Collection<Subsystem> requirements) {
         if (!getRequirements().containsAll(requirements)) {
             throw new IllegalStateException("SequentialActionGroup does not have requirement for action");
         }

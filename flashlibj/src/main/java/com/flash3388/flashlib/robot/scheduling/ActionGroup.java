@@ -25,6 +25,7 @@ import java.util.Set;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
+@SuppressWarnings("jol")
 public class ActionGroup extends Action {
 	
 	private final Collection<Action> mActions;
@@ -36,6 +37,7 @@ public class ActionGroup extends Action {
 	private final Logger mLogger;
 
 	private Runnable mRunWhenInterrupted;
+	private boolean mRunWhenDisabled;
 	
 	/**
 	 * Creates a new empty action group
@@ -65,6 +67,8 @@ public class ActionGroup extends Action {
 
 		mActionsQueue = new ArrayDeque<>();
 		mCurrentlyRunningActions = new ArrayList<>();
+
+		mRunWhenDisabled = true;
 	}
 
 	/**
@@ -85,6 +89,8 @@ public class ActionGroup extends Action {
 
         mActions.add(action);
         action.setParent(this);
+
+        mRunWhenDisabled &= action.runWhenDisabled();
 
         return this;
 	}
@@ -155,7 +161,12 @@ public class ActionGroup extends Action {
 		mActionsQueue.clear();
 	}
 
-	protected void whenInterrupted() {
+    @Override
+    protected final boolean runWhenDisabled() {
+        return mRunWhenDisabled;
+    }
+
+    private void whenInterrupted() {
 	    if (mRunWhenInterrupted != null) {
 	        mRunWhenInterrupted.run();
         }
@@ -186,15 +197,11 @@ public class ActionGroup extends Action {
     private void handleConflicts(Action nextAction) {
         Set<Subsystem> requirements = nextAction.getRequirements();
         for (Action action : mCurrentlyRunningActions) {
-            for (Subsystem subsystem : action.getRequirements()) {
-                if (requirements.contains(subsystem)) {
-                    action.markCanceled();
+            if (!Collections.disjoint(requirements, action.getRequirements())) {
+                action.markCanceled();
 
-                    mLogger.warn("Requirements conflict in ActionGroup between {} and new action {}",
-                            action.toString(), nextAction.toString());
-
-                    break;
-                }
+                mLogger.warn("Requirements conflict in ActionGroup between {} and new action {}",
+                        action.toString(), nextAction.toString());
             }
         }
     }
