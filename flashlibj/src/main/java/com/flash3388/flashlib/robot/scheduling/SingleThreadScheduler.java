@@ -21,12 +21,8 @@ public class SingleThreadScheduler implements Scheduler {
         mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
     }
 
-    public SingleThreadScheduler(Logger logger) {
-        this(RunningRobot.INSTANCE.get().getClock(), logger);
-    }
-
-    public SingleThreadScheduler() {
-        this(RunningRobot.INSTANCE.get().getClock(), Logging.stub());
+    public SingleThreadScheduler(Clock clock) {
+        this(clock, Logging.stub());
     }
 
     @Override

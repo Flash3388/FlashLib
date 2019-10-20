@@ -10,12 +10,12 @@ public class RobotFactory {
 
     private RobotFactory() {}
 
-    public static Scheduler newDefaultScheduler() {
-        return new SingleThreadScheduler();
+    public static Scheduler newDefaultScheduler(Clock clock) {
+        return new SingleThreadScheduler(clock);
     }
 
-    public static Scheduler newDefaultScheduler(Logger logger) {
-        return new SingleThreadScheduler(logger);
+    public static Scheduler newDefaultScheduler(Clock clock, Logger logger) {
+        return new SingleThreadScheduler(clock, logger);
     }
 
     public static Clock newDefaultClock() {
