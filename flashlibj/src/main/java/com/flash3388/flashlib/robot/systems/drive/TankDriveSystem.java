@@ -12,6 +12,7 @@ public class TankDriveSystem extends Subsystem implements TankDrive {
     private final DriveAlgorithms mDriveAlgorithms;
 
     public TankDriveSystem(SpeedController rightController, SpeedController leftController, DriveAlgorithms driveAlgorithms) {
+        super(scheduler);
         mRightController = rightController;
         mLeftController = leftController;
 

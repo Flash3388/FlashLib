@@ -1,7 +1,11 @@
 package com.flash3388.flashlib.robot.scheduling;
 
+import com.flash3388.flashlib.robot.RunningRobot;
+
+import java.util.Optional;
+
 /**
- * Subsystem is the base for robot systems. When defining a class for a system on a robot, extend this class. 
+ * Subsystem is the base for robot systems. When defining a class for a system on a robot, extend this class.
  * Doing so, allows operation of the system with FlashLib's scheduling system. 
  * <p>
  * A subsystem can be defined as a system on a robot which can be used separately from other parts of the robot. 
@@ -15,4 +19,27 @@ package com.flash3388.flashlib.robot.scheduling;
  * @since FlashLib 1.0.0
  */
 public abstract class Subsystem {
+
+    private final Scheduler mScheduler;
+
+    protected Subsystem(Scheduler scheduler) {
+        mScheduler = scheduler;
+    }
+
+    protected Subsystem() {
+        this(RunningRobot.INSTANCE.get().getScheduler());
+    }
+
+    public void setDefaultAction(Action action) {
+        mScheduler.setDefaultAction(this, action);
+    }
+
+    public boolean hasCurrentAction() {
+        return mScheduler.getActionRunningOnSubsystem(this).isPresent();
+    }
+
+    public void cancelCurrentAction() {
+        Optional<Action> currentAction = mScheduler.getActionRunningOnSubsystem(this);
+        currentAction.ifPresent(Action::cancel);
+    }
 }

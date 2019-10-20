@@ -16,6 +16,7 @@ public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
     public MecanumDriveSystem(SpeedController frontRightController, SpeedController backRightController,
                               SpeedController frontLeftController, SpeedController backLeftController,
                               DriveAlgorithms driveAlgorithms) {
+        super(scheduler);
         mFrontRightController = frontRightController;
         mBackRightController = backRightController;
         mFrontLeftController = frontLeftController;

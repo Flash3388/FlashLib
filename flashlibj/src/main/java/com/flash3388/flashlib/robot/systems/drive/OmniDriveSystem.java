@@ -17,6 +17,7 @@ public class OmniDriveSystem extends Subsystem implements OmniDrive {
     public OmniDriveSystem(SpeedController frontController, SpeedController rightController,
                            SpeedController backController, SpeedController leftController,
                            DriveAlgorithms driveAlgorithms) {
+        super(scheduler);
         mFrontController = frontController;
         mRightController = rightController;
         mBackController = backController;
