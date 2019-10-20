@@ -31,13 +31,13 @@ class SchedulerIteration {
 
     private void runActions(RobotMode robotMode) {
         for (Action action : mActionsRepository.getRunningActions()) {
-            if (robotMode.equals(RobotMode.DISABLED) &&
-                    !action.runWhenDisabled()) {
-                mActionsToRemove.add(action);
-                continue;
-            }
-
             try {
+                if (robotMode.equals(RobotMode.DISABLED) &&
+                        !action.runWhenDisabled()) {
+                    mActionsToRemove.add(action);
+                    continue;
+                }
+
                 if (!action.run()) {
                     mActionsToRemove.add(action);
                 }
@@ -49,12 +49,16 @@ class SchedulerIteration {
 
     private void startDefaultSubsystemActions(RobotMode robotMode) {
         for (Action action : mActionsRepository.getDefaultActionsToStart()) {
-            if (robotMode.equals(RobotMode.DISABLED) &&
-                    !action.runWhenDisabled()) {
-                continue;
-            }
+            try {
+                if (robotMode.equals(RobotMode.DISABLED) &&
+                        !action.runWhenDisabled()) {
+                    continue;
+                }
 
-            action.start();
+                action.start();
+            } catch (Throwable t) {
+                mLogger.error("Error when starting default action", t);
+            }
         }
     }
 
