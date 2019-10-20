@@ -62,11 +62,13 @@ public class ActionGroup extends Action {
 		mExecutionOrder = Objects.requireNonNull(executionOrder, "executionOrder is null");
         mLogger = logger;
 
-		mActions = new ArrayList<>();
+		mActions = new ArrayList<>(3);
 		add(Objects.requireNonNull(actions, "actions is null"));
 
-		mActionsQueue = new ArrayDeque<>();
-		mCurrentlyRunningActions = new ArrayList<>();
+		mActionsQueue = new ArrayDeque<>(2);
+		mCurrentlyRunningActions = new ArrayList<>(
+		        executionOrder == ExecutionOrder.PARALLEL ?
+                2 : 1);
 
 		mRunWhenDisabled = true;
 	}
