@@ -28,10 +28,8 @@ import java.util.Objects;
  */
 public class Scheduler {
 
-    private final TasksRepository mTasksRepository;
 	private final ActionsRepository mActionsRepository;
 
-	private SchedulerRunMode mRunMode;
 	private final SchedulerIteration mSchedulerIteration;
 
 	public Scheduler() {
@@ -39,33 +37,10 @@ public class Scheduler {
     }
 
 	public Scheduler(Logger logger) {
-        mTasksRepository = new TasksRepository();
         mActionsRepository = new ActionsRepository(logger);
 
-        mRunMode = SchedulerRunMode.ALL;
-        mSchedulerIteration = new SchedulerIteration(mTasksRepository, mActionsRepository, logger);
+        mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
 	}
-
-	public void setRunMode(SchedulerRunMode runMode) {
-		mRunMode = Objects.requireNonNull(runMode, "runMode is null");
-	}
-
-	public SchedulerRunMode getRunMode() {
-		return mRunMode;
-	}
-
-	public void add(SchedulerTask task) {
-        Objects.requireNonNull(task, "task is null");
-		mTasksRepository.addTask(task);
-	}
-
-    public void remove(SchedulerTask task) {
-        mTasksRepository.removeTask(task);
-    }
-
-    public void removeAllTasks() {
-        mTasksRepository.removeAll();
-    }
 
 	public void add(Action action) {
         Objects.requireNonNull(action, "action is null");
@@ -88,6 +63,6 @@ public class Scheduler {
 	}
 
 	public void run(RobotMode robotMode) {
-        mSchedulerIteration.run(mRunMode, robotMode);
+        mSchedulerIteration.run(robotMode);
 	}
 }

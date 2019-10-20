@@ -9,7 +9,7 @@ public class HidScheduling {
 
     public static void addButtonsUpdateTaskToScheduler(Hid hid, Scheduler scheduler) {
         hid.buttons().forEach((button) -> {
-            scheduler.add(new ButtonSchedulerTask(button));
+            scheduler.add(new ButtonActivationAction(button));
         });
     }
 }

@@ -8,48 +8,25 @@ import java.util.Collection;
 
 class SchedulerIteration {
 
-    private final TasksRepository mTasksRepository;
     private final ActionsRepository mActionsRepository;
     private final Logger mLogger;
 
-    private final Collection<SchedulerTask> mTasksToRemove;
     private final Collection<Action> mActionsToRemove;
 
-    public SchedulerIteration(TasksRepository tasksRepository, ActionsRepository actionsRepository, Logger logger) {
-        mTasksRepository = tasksRepository;
+    public SchedulerIteration(ActionsRepository actionsRepository, Logger logger) {
         mActionsRepository = actionsRepository;
         mLogger = logger;
 
-        mTasksToRemove = new ArrayList<>(2);
         mActionsToRemove = new ArrayList<>(2);
     }
 
-    public void run(SchedulerRunMode runMode, RobotMode robotMode) {
-        mTasksToRemove.clear();
+    public void run(RobotMode robotMode) {
         mActionsToRemove.clear();
 
-        if (runMode.shouldRunTasks()) {
-            runTasks();
-        }
-
-        if (runMode.shouldRunActions()) {
-            runActions(robotMode);
-            startDefaultSubsystemActions();
-        }
+        runActions(robotMode);
+        startDefaultSubsystemActions();
 
         readyForNextRun();
-    }
-
-    private void runTasks() {
-        for (SchedulerTask task : mTasksRepository.getRunningTasks()) {
-            try {
-                if (!task.run()) {
-                    mTasksToRemove.add(task);
-                }
-            } catch (Throwable t) {
-                mLogger.error("Error while running a task", t);
-            }
-        }
     }
 
     private void runActions(RobotMode robotMode) {
@@ -77,7 +54,6 @@ class SchedulerIteration {
     }
 
     private void readyForNextRun() {
-        mTasksRepository.updateTasksForNextRun(mTasksToRemove);
         mActionsRepository.updateActionsForNextRun(mActionsToRemove);
     }
 }

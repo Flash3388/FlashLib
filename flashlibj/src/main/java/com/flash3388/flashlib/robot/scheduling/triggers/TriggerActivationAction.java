@@ -1,21 +1,21 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
-import com.flash3388.flashlib.robot.scheduling.SchedulerTask;
+import com.flash3388.flashlib.robot.scheduling.Action;
 
 import java.util.function.BooleanSupplier;
 
-public class TriggerSchedulerTask implements SchedulerTask {
+public class TriggerActivationAction extends Action {
 
     private final BooleanSupplier mCondition;
     private final Trigger mTrigger;
 
-    public TriggerSchedulerTask(BooleanSupplier condition, Trigger trigger) {
+    public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
         mCondition = condition;
         mTrigger = trigger;
     }
 
     @Override
-    public boolean run() {
+    protected void execute() {
         boolean isConditionMet = mCondition.getAsBoolean();
 
         if (isConditionMet) {
@@ -23,7 +23,10 @@ public class TriggerSchedulerTask implements SchedulerTask {
         } else {
             mTrigger.deactivate();
         }
+    }
 
-        return true;
+    @Override
+    protected void end() {
+
     }
 }

@@ -79,8 +79,6 @@ public abstract class IterativeRobot extends RobotBase {
 	protected final void robotShutdown(){
         stopRobotLoop();
 
-        getScheduler().setRunMode(SchedulerRunMode.DISABLED);
-        getScheduler().removeAllTasks();
         getScheduler().stopAllActions();
 
         robotStop();
