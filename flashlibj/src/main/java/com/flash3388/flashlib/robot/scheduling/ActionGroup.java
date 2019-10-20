@@ -200,7 +200,7 @@ public class ActionGroup extends Action {
         Set<Subsystem> requirements = nextAction.getRequirements();
         for (Action action : mCurrentlyRunningActions) {
             if (!Collections.disjoint(requirements, action.getRequirements())) {
-                action.markCanceled();
+                //action.markCanceled();
 
                 mLogger.warn("Requirements conflict in ActionGroup between {} and new action {}",
                         action.toString(), nextAction.toString());
@@ -213,9 +213,10 @@ public class ActionGroup extends Action {
 			return;
 		}
 
-		mCurrentlyRunningActions.removeIf((action) -> {
-	        if (!action.run()) {
-	            action.runFinished();
+		mCurrentlyRunningActions.removeIf((ctx) -> {
+	        if (!ctx.run()) {
+	            ctx.runFinished();
+	            // action.removed
 	            return true;
             }
 

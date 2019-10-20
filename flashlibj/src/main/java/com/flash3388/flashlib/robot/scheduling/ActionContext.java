@@ -61,6 +61,18 @@ public class ActionContext {
         mStartTime = Time.INVALID;
     }
 
+    public void markStarted() {
+        mAction.markStarted();
+    }
+
+    public void markCanceled() {
+        mAction.markCanceled();
+    }
+
+    public void removed() {
+        mAction.removed();
+    }
+
     private boolean wasTimeoutReached(){
         if (!mStartTime.isValid() || !mTimeout.isValid()) {
             return false;
