@@ -28,7 +28,7 @@ before_deploy:
 
 deploy:
   - provider: script
-    script: ./gradlew publish -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg
+    script: ./gradlew publish -PSIGN_PUBLISH=true -Psigning.keyId=${GPG_KEY_ID} -Psigning.password=${GPG_KEY_PASSPHRASE} -Psigning.secretKeyRingFile=secring.gpg
     skip_cleanup: true
     on:
       condition: "$TRAVIS_TAG =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?"
