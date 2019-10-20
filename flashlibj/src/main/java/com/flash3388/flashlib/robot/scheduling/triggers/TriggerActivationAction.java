@@ -27,6 +27,10 @@ public class TriggerActivationAction extends Action {
 
     @Override
     protected void end() {
+    }
 
+    @Override
+    protected boolean runWhenDisabled() {
+        return true;
     }
 }
