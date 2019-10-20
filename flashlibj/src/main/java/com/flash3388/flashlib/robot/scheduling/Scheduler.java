@@ -5,6 +5,8 @@ import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
@@ -54,13 +56,17 @@ public class Scheduler {
         mActionsRepository.setDefaultActionOnSubsystem(subsystem, action);
     }
 
-    public Action getActionRunningOnSubsystem(Subsystem subsystem) {
+    public Optional<Action> getActionRunningOnSubsystem(Subsystem subsystem) {
 	    return mActionsRepository.getActionOnSubsystem(subsystem);
     }
 
 	public void stopAllActions() {
         mActionsRepository.removeAllActions();
 	}
+
+	public void stopActionsIf(Predicate<Action> removalPredicate) {
+        mActionsRepository.removeActionsIf(removalPredicate);
+    }
 
 	public void run(RobotMode robotMode) {
         mSchedulerIteration.run(robotMode);

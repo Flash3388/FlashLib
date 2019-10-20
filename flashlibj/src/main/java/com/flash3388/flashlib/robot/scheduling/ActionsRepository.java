@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class ActionsRepository {
 
@@ -39,13 +42,8 @@ class ActionsRepository {
         mNextRunActions.add(action);
     }
 
-    public Action getActionOnSubsystem(Subsystem subsystem) {
-        Action action = mActionsOnSubsystems.get(subsystem);
-        if (action != null) {
-            return action;
-        }
-
-        throw new IllegalArgumentException("No action on subsystem");
+    public Optional<Action> getActionOnSubsystem(Subsystem subsystem) {
+        return Optional.ofNullable(mActionsOnSubsystems.get(subsystem));
     }
 
     public void setDefaultActionOnSubsystem(Subsystem subsystem, Action action) {
@@ -61,6 +59,17 @@ class ActionsRepository {
 
         mRunningActions.forEach(this::onInternalRemove);
         mRunningActions.clear();
+    }
+
+    public void removeActionsIf(Predicate<Action> removalPredicate) {
+        mNextRunActions.removeIf(removalPredicate);
+
+        Collection<Action> actionsToRemove = mRunningActions.stream()
+                .filter(removalPredicate)
+                .collect(Collectors.toList());
+
+        actionsToRemove.forEach(this::onInternalRemove);
+        mRunningActions.removeAll(actionsToRemove);
     }
 
     public void updateActionsForNextRun(Iterable<Action> actionsToRemove) {

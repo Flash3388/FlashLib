@@ -13,7 +13,10 @@ import java.util.Map;
 
 import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockActionWithRequirement;
 import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockActionWithoutRequirements;
+import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockNotRunningAction;
+import static com.flash3388.flashlib.robot.scheduling.ActionsMock.mockRunningAction;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
@@ -110,5 +113,60 @@ public class ActionsRepositoryTest {
         mActionsRepository.updateActionsForNextRun(Collections.singletonList(action));
 
         assertThat(mActionsOnSubsystems, not(hasEntry(subsystem, action)));
+    }
+
+    public void removeActionsIf_forRunningActions_removesAllRunning() throws Exception {
+        Action[] toBeRemovedActions = {
+                mockRunningAction(),
+                mockRunningAction(),
+                mockRunningAction(),
+                mockRunningAction()
+        };
+        Action[] toKeepActions = {
+                mockNotRunningAction(),
+                mockNotRunningAction()
+        };
+
+        mRunningActions.addAll(Arrays.asList(toBeRemovedActions));
+        mNextRunActions.addAll(Arrays.asList(toKeepActions));
+
+        mActionsRepository.removeActionsIf(Action::isRunning);
+
+        assertThat(mRunningActions, emptyIterable());
+        assertThat(mNextRunActions, hasItems(toKeepActions));
+    }
+
+    public void removeActionsIf_forActionsWithSpecificRequirements_removesSpecificActions() throws Exception {
+        Subsystem toRemove = mock(Subsystem.class);
+        Subsystem toKeep = mock(Subsystem.class);
+
+        Action[] toKeepRunningActions = {
+                mockActionWithRequirement(toKeep),
+                mockActionWithRequirement(toKeep)
+        };
+        Action[] toKeepNextRunActions = {
+                mockActionWithRequirement(toKeep),
+                mockActionWithRequirement(toKeep)
+        };
+
+        mRunningActions.addAll(Arrays.asList(
+                mockActionWithRequirement(toRemove),
+                mockActionWithRequirement(toRemove)
+        ));
+        mRunningActions.addAll(Arrays.asList(toKeepRunningActions));
+
+        mNextRunActions.addAll(Arrays.asList(
+                mockActionWithRequirement(toRemove),
+                mockActionWithRequirement(toRemove)
+        ));
+        mNextRunActions.addAll(Arrays.asList(toKeepNextRunActions));
+
+        mActionsRepository.removeActionsIf((action) -> action.getRequirements().contains(toRemove));
+
+        assertThat(mRunningActions, hasItems(toKeepRunningActions));
+        assertThat(mRunningActions, hasSize(toKeepRunningActions.length));
+
+        assertThat(mNextRunActions, hasItems(toKeepNextRunActions));
+        assertThat(mNextRunActions, hasSize(toKeepNextRunActions.length));
     }
 }
