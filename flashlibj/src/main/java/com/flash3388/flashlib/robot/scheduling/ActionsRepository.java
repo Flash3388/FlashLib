@@ -24,7 +24,7 @@ class ActionsRepository {
     private final Clock mClock;
     private final Logger mLogger;
 
-    public ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions, Clock clock, Logger logger) {
+    ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions, Clock clock, Logger logger) {
         mActionsOnSubsystems = actionsOnSubsystems;
         mDefaultActionsOnSubsystems = defaultActionsOnSubsystems;
         mRunningActions = runningActions;
