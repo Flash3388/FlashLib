@@ -31,7 +31,6 @@ public class Scheduler {
 
     private final TasksRepository mTasksRepository;
 	private final ActionsRepository mActionsRepository;
-	private final Logger mLogger;
 
 	private SchedulerRunMode mRunMode;
 	private final SchedulerIteration mSchedulerIteration;
@@ -41,7 +40,6 @@ public class Scheduler {
     }
 
 	public Scheduler(Logger logger) {
-		mLogger = logger;
         mTasksRepository = new TasksRepository();
         mActionsRepository = new ActionsRepository(logger);
 

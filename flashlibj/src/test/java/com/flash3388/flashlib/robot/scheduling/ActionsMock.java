@@ -28,6 +28,13 @@ public class ActionsMock {
         return action;
     }
 
+    public static Action mockActionWithoutRequirements() {
+        Action action = mock(Action.class);
+        when(action.getRequirements()).thenReturn(Collections.emptySet());
+
+        return action;
+    }
+
     public static Subsystem mockSubsystemWithAction() {
         Subsystem subsystem = mock(Subsystem.class);
         when(subsystem.hasCurrentAction()).thenReturn(true);
