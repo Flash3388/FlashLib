@@ -107,7 +107,7 @@ public class IterativeRobotTest {
 
         runLatch.await();
 
-        verify(mScheduler, times(2)).removeAllActions();
+        verify(mScheduler, times(2)).stopAllActions();
     }
 
     @Test

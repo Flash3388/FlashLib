@@ -47,7 +47,7 @@ import com.flash3388.flashlib.util.concurrent.Sleeper;
  * The scheduling system is updated by the control loop to allow operation of that system. While the robot
  * is in a mode, the {@link Scheduler#run()} method is executed periodically, insuring correct operation
  * of that system. When operation modes change, all {@link Action} objects are interrupted by calling
- * {@link Scheduler#removeAllActions()} so that unwanted execution will not remain and cause issues. In
+ * {@link Scheduler#stopAllActions()} so that unwanted execution will not remain and cause issues. In
  * addition, when in disabled mode the scheduling enters {@link SchedulerRunMode#TASKS_ONLY} mode so {@link Action} objects
  * are not executed, only tasks are, this is for safety of operation.
  * <p>
@@ -84,7 +84,7 @@ public abstract class IterativeRobot extends RobotBase {
 
         getScheduler().setRunMode(SchedulerRunMode.DISABLED);
         getScheduler().removeAllTasks();
-        getScheduler().removeAllActions();
+        getScheduler().stopAllActions();
 
         robotStop();
 	}
@@ -123,7 +123,7 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        getScheduler().removeAllActions();
+        getScheduler().stopAllActions();
         getLogger().trace("Initializing mode {}", mode);
 
         if (mode.equals(RobotMode.DISABLED)) {

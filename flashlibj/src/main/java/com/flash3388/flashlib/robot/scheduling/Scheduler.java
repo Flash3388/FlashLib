@@ -1,15 +1,9 @@
 package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.util.logging.Logging;
-import com.flash3388.flashlib.util.logging.StubLogger;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
@@ -35,39 +29,25 @@ import java.util.Set;
  */
 public class Scheduler {
 
-	private final Set<Subsystem> mSubsystems;
-	private final Collection<Action> mActions;
-	private final Collection<SchedulerTask> mTasks;
+    private final TasksRepository mTasksRepository;
+	private final ActionsRepository mActionsRepository;
 	private final Logger mLogger;
 
 	private SchedulerRunMode mRunMode;
+	private final SchedulerIteration mSchedulerIteration;
 
 	public Scheduler() {
 	    this(Logging.stub());
     }
 
 	public Scheduler(Logger logger) {
-        mSubsystems = new HashSet<>();
-        mActions = new ArrayList<>();
-		mTasks = new ArrayList<>();
 		mLogger = logger;
+        mTasksRepository = new TasksRepository();
+        mActionsRepository = new ActionsRepository(logger);
 
         mRunMode = SchedulerRunMode.ALL;
+        mSchedulerIteration = new SchedulerIteration(mTasksRepository, mActionsRepository, logger);
 	}
-
-    // FOR TESTING
-    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<SchedulerTask> tasks, SchedulerRunMode runMode) {
-        this(subsystems, actions, tasks, runMode, Logging.stub());
-    }
-
-	// FOR TESTING
-    /*package*/ Scheduler(Set<Subsystem> subsystems, Collection<Action> actions, Collection<SchedulerTask> tasks, SchedulerRunMode runMode, Logger logger) {
-        mSubsystems = subsystems;
-        mActions = actions;
-        mTasks = tasks;
-        mRunMode = runMode;
-        mLogger = logger;
-    }
 
 	public void setRunMode(SchedulerRunMode runMode) {
 		mRunMode = Objects.requireNonNull(runMode, "runMode is null");
@@ -79,125 +59,32 @@ public class Scheduler {
 
 	public void add(SchedulerTask task) {
         Objects.requireNonNull(task, "task is null");
-		mTasks.add(task);
+		mTasksRepository.addTask(task);
 	}
+
+    public void remove(SchedulerTask task) {
+        mTasksRepository.removeTask(task);
+    }
+
+    public void removeAllTasks() {
+        mTasksRepository.removeAll();
+    }
 
 	public void add(Action action) {
         Objects.requireNonNull(action, "action is null");
-
-        if (mActions.contains(action)) {
-            throw new IllegalArgumentException("action already running");
-        }
-
-		updateRequirementsWithNewRunningAction(action);
-
-		mActions.add(action);
+        mActionsRepository.addAction(action);
 	}
 
-	public boolean remove(SchedulerTask task) {
-		return mTasks.remove(task);
-	}
-
-	public void removeAllTasks() {
-		mTasks.clear();
-	}
-
-	public boolean remove(Action action) {
-        Objects.requireNonNull(action, "action is null");
-
-		if (mActions.remove(action)) {
-			action.removed();
-			updateRequirementsNoCurrentAction(action);
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public void removeAllActions() {
-		List<Action> allActions = new ArrayList<>(mActions);
-
-		for (Action action : allActions) {
-			remove(action);
-		}
-	}
-
-	public void registerSubsystem(Subsystem subsystem) {
+    public void registerSubsystem(Subsystem subsystem) {
         Objects.requireNonNull(subsystem, "subsystem is null");
+        mActionsRepository.registerSubsystem(subsystem);
+    }
 
-		if (mSubsystems.contains(subsystem)) {
-			throw new IllegalArgumentException("subsystem already registered");
-		}
-
-		mSubsystems.add(subsystem);
+	public void stopAllActions() {
+        mActionsRepository.removeAllActions();
 	}
 
 	public void run() {
-		if (mRunMode.shouldRunTasks()) {
-			runTasks();
-		}
-
-		if (mRunMode.shouldRunActions()) {
-			runActions();
-			startDefaultSubsystemActions();
-		}
-	}
-
-	private void runTasks() {
-		List<SchedulerTask> tasks = new ArrayList<>(mTasks);
-
-		for (SchedulerTask task : tasks) {
-			try {
-                if (!task.run()) {
-                    remove(task);
-                }
-            } catch (Throwable t) {
-			    mLogger.error("Error while running a task", t);
-            }
-		}
-	}
-
-	private void runActions() {
-		List<Action> actions = new ArrayList<>(mActions);
-
-		for (Action action : actions) {
-            try {
-                if (!action.run()) {
-                    remove(action);
-                }
-            } catch (Throwable t) {
-                mLogger.error("Error while running an action", t);
-            }
-		}
-	}
-
-	private void startDefaultSubsystemActions() {
-		for (Subsystem subsystem : mSubsystems) {
-			if (!subsystem.hasCurrentAction() && subsystem.hasDefaultAction()) {
-			    mLogger.debug("Starting default action for {}", subsystem.toString());
-				subsystem.startDefaultAction();
-			}
-		}
-	}
-
-	private void updateRequirementsWithNewRunningAction(Action action) {
-		for (Subsystem subsystem : action.getRequirements()) {
-			if (subsystem.hasCurrentAction()) {
-			    Action currentAction = subsystem.getCurrentAction();
-				currentAction.cancel();
-
-                mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over subsystem {}",
-                        currentAction.toString(), action.toString(), subsystem.toString());
-			}
-
-			subsystem.setCurrentAction(action);
-		}
-	}
-
-	private void updateRequirementsNoCurrentAction(Action action) {
-		for (Subsystem subsystem : action.getRequirements()) {
-			subsystem.setCurrentAction(null);
-		}
+        mSchedulerIteration.run(mRunMode);
 	}
 }
