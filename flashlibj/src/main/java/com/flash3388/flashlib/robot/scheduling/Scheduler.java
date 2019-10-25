@@ -7,12 +7,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * Scheduler is responsible for executing tasks for robots. Users can add {@link Action} and
- * {@link Runnable} objects to the scheduler which will then be executed by when the {@link Scheduler} 
- * runs. This allows for easy management of robot operations.
- * <p>
- * The scheduler can work with simple {@link Runnable} objects, or tasks, which can be added to run once,
- * or run continuously.
+ * Scheduler is responsible for executing tasks for robots.
  * <p>
  * For more complex operations, the scheduler can use {@link Action} objects. Those objects can be added
  * to the scheduler and then executed as well. Unlike simple tasks, scheduling might depend on {@link Subsystem}
