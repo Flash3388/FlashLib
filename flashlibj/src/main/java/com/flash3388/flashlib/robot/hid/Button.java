@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.robot.control.Invertable;
-import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.Trigger;
 
 import java.util.function.BooleanSupplier;

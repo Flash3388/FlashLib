@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Action;
-
 import java.util.function.BooleanSupplier;
 
 public class GenericAction extends Action {

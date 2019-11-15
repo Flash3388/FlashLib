@@ -48,4 +48,9 @@ public class HidButton extends HardwareButton {
     public boolean isInverted() {
         return mIsInverted;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d->%d", mChannel, mButton);
+    }
 }

@@ -187,6 +187,8 @@ publishing {
     }
 }
 
-signing {
-    sign publishing.publications.mavenFlashlib
+if (project.hasProperty('SIGN_PUBLISH')) {
+	signing {
+		sign publishing.publications.mavenFlashlib
+	}
 }

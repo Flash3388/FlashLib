@@ -2,13 +2,13 @@ package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.robot.hid.triggers.handlers.HoldStateListener;
 import com.flash3388.flashlib.robot.hid.triggers.handlers.PressStateListener;
-import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
 public abstract class HardwareButton extends Button {
 
-    public static final Time DEFAULT_MAX_PRESS_TIME = Time.milliseconds(100);
+    public static final Time DEFAULT_MAX_PRESS_TIME = Time.milliseconds(200);
 
     private final Clock mClock;
     private final Time mDefaultPressTime;

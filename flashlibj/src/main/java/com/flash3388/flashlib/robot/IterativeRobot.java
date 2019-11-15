@@ -3,9 +3,7 @@ package com.flash3388.flashlib.robot;
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.robot.scheduling.SchedulerRunMode;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.Sleeper;
 
@@ -45,11 +43,8 @@ import com.flash3388.flashlib.util.concurrent.Sleeper;
  * 	<li> execution of FlashLib's motor safety </li>
  * </ul>
  * The scheduling system is updated by the control loop to allow operation of that system. While the robot
- * is in a mode, the {@link Scheduler#run()} method is executed periodically, insuring correct operation
- * of that system. When operation modes change, all {@link Action} objects are interrupted by calling
- * {@link Scheduler#removeAllActions()} so that unwanted execution will not remain and cause issues. In
- * addition, when in disabled mode the scheduling enters {@link SchedulerRunMode#TASKS_ONLY} mode so {@link Action} objects
- * are not executed, only tasks are, this is for safety of operation.
+ * is in a mode, the {@link Scheduler#run(RobotMode)} method is executed periodically, insuring correct operation
+ * of that system.
  * <p>
  * When the robot enters stop mode {@link #robotStop()} is called to allow user stop operations.
  * 
@@ -82,9 +77,7 @@ public abstract class IterativeRobot extends RobotBase {
 	protected final void robotShutdown(){
         stopRobotLoop();
 
-        getScheduler().setRunMode(SchedulerRunMode.DISABLED);
-        getScheduler().removeAllTasks();
-        getScheduler().removeAllActions();
+        getScheduler().stopAllActions();
 
         robotStop();
 	}
@@ -123,14 +116,11 @@ public abstract class IterativeRobot extends RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        getScheduler().removeAllActions();
         getLogger().trace("Initializing mode {}", mode);
 
         if (mode.equals(RobotMode.DISABLED)) {
-            getScheduler().setRunMode(SchedulerRunMode.TASKS_ONLY);
             disabledInit();
         } else {
-            getScheduler().setRunMode(SchedulerRunMode.ALL);
             modeInit(mode);
         }
     }
@@ -138,10 +128,10 @@ public abstract class IterativeRobot extends RobotBase {
     private void periodicMode(RobotMode mode) {
         getLogger().trace("Periodic mode {}", mode);
 
+        getScheduler().run(mode);
         if (mode.equals(RobotMode.DISABLED)) {
             disabledPeriodic();
         } else {
-            getScheduler().run();
             modePeriodic(mode);
         }
 

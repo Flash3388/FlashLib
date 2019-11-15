@@ -2,10 +2,10 @@ package com.flash3388.flashlib.vision;
 
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.flow.SingleUseRunner;
+import org.slf4j.Logger;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
 
@@ -19,6 +19,10 @@ public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
         mImageDelegator = imageDelegator;
         mDelegationPeriod = delegationPeriod;
         mLogger = logger;
+    }
+
+    public ImageDelegationRunner(ImageDelegator<T> imageDelegator, Time delegationPeriod, Logger logger) {
+        this(Executors.newSingleThreadScheduledExecutor(), imageDelegator, delegationPeriod, logger);
     }
 
     @Override
@@ -50,7 +54,7 @@ public class ImageDelegationRunner<T extends Image> extends SingleUseRunner {
             try {
                 mImageDelegator.delegate();
             } catch (VisionException e) {
-                mLogger.log(Level.SEVERE, "error in image delegation", e);
+                mLogger.error("error in image delegation", e);
             }
         }
     }

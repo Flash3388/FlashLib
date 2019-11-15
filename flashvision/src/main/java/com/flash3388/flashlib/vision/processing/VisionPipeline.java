@@ -6,24 +6,24 @@ import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.ImagePipeline;
 import com.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
-    private final List<ImageProcessor<T>> mImageProcessors;
     private final ImageAnalyser<T> mImageAnalyser;
     private final Consumer<Analysis> mAnalysisConsumer;
+    private final List<ImageProcessor<T>> mImageProcessors;
 
-    public VisionPipeline(List<ImageProcessor<T>> imageProcessors, ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer) {
-        mImageProcessors = imageProcessors;
+    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, List<ImageProcessor<T>> imageProcessors) {
         mImageAnalyser = imageAnalyser;
         mAnalysisConsumer = analysisConsumer;
+        mImageProcessors = imageProcessors;
     }
 
-    public VisionPipeline<T> addProcessor(ImageProcessor<T> imageProcessor) {
-        mImageProcessors.add(imageProcessor);
-        return this;
+    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, ImageProcessor<T> ... imageProcessors) {
+        this(imageAnalyser, analysisConsumer, Arrays.asList(imageProcessors));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Action;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Objects;
@@ -59,5 +58,27 @@ public class Actions {
                 runnable.run();
             }
         };
+    }
+
+    public static Action runnableAction(Runnable runnable) {
+        Objects.requireNonNull(runnable, "runnable is null");
+        return new Action() {
+            @Override
+            protected void execute() {
+                runnable.run();
+            }
+            @Override
+            protected void end() {}
+        };
+    }
+
+    public static Action sequential(Action... actions) {
+        return new SequentialActionGroup()
+                .add(actions);
+    }
+
+    public static Action parallel(Action... actions) {
+        return new ParallelActionGroup()
+                .add(actions);
     }
 }

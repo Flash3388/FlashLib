@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.triggers.handlers;
 
-import com.flash3388.flashlib.robot.scheduling.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.TriggerState;
 import com.flash3388.flashlib.robot.scheduling.triggers.TriggerStateListener;
 
