@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -140,14 +141,13 @@ public class LoggerBuilder {
 
     public java.util.logging.Logger buildJul() {
         try {
-            java.util.logging.Logger logger = java.util.logging.Logger.getLogger(mName);
-            logger.setUseParentHandlers(false);
+            Collection<Handler> handlers = new ArrayList<>();
 
             if (mEnableConsoleLogging) {
                 ConsoleHandler consoleHandler = new ConsoleHandler();
                 consoleHandler.setLevel(mLogLevel.getJulLevel());
 
-                logger.addHandler(consoleHandler);
+                handlers.add(consoleHandler);
             }
 
             if (mEnableFileLogging && mFilePattern != null && !mFilePattern.isEmpty()) {
@@ -170,13 +170,16 @@ public class LoggerBuilder {
                     delegatedHandler.setLevel(mLogLevel.getJulLevel());
 
                     startLogFlusher(delegatedHandler);
-                    logger.addHandler(delegatedHandler);
+                    handlers.add(delegatedHandler);
                 } else {
-                    logger.addHandler(fileHandler);
+                    handlers.add(fileHandler);
                 }
             }
 
+            java.util.logging.Logger logger = java.util.logging.Logger.getLogger(mName);
+            logger.setUseParentHandlers(false);
             logger.setLevel(mLogLevel.getJulLevel());
+            handlers.forEach(logger::addHandler);
 
             return logger;
         } catch (IOException e) {
