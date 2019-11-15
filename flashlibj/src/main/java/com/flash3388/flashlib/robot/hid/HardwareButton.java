@@ -8,7 +8,7 @@ import com.flash3388.flashlib.time.Time;
 
 public abstract class HardwareButton extends Button {
 
-    public static final Time DEFAULT_MAX_PRESS_TIME = Time.milliseconds(100);
+    public static final Time DEFAULT_MAX_PRESS_TIME = Time.milliseconds(200);
 
     private final Clock mClock;
     private final Time mDefaultPressTime;

@@ -54,13 +54,16 @@ class SchedulerIteration {
     }
 
     private void startDefaultSubsystemActions(RobotMode robotMode) {
-        for (Action action : mActionsRepository.getDefaultActionsToStart()) {
+        for (Map.Entry<Subsystem, Action> entry : mActionsRepository.getDefaultActionsToStart().entrySet()) {
             try {
+                Action action = entry.getValue();
+
                 if (robotMode.equals(RobotMode.DISABLED) &&
                         !action.runWhenDisabled()) {
                     continue;
                 }
 
+                mLogger.debug("Starting default action for {}", entry.getKey());
                 action.start();
             } catch (Throwable t) {
                 mLogger.error("Error when starting default action", t);

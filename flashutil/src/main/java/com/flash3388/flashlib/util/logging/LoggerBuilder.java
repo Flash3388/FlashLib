@@ -7,7 +7,6 @@ import com.flash3388.flashlib.util.logging.jul.JulLoggerAdapter;
 import com.flash3388.flashlib.util.logging.jul.LogFlushingTask;
 import org.slf4j.Logger;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

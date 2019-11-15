@@ -31,7 +31,7 @@ public class ActionsRepositoryMock {
             return null;
         }).when(mActionsRepository).addAction(any(Action.class));
 
-        when(mActionsRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems.values());
+        when(mActionsRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems);
     }
 
     public Action runningAction(ActionContext actionContext) {

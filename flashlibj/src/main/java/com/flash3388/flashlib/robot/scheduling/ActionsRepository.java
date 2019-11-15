@@ -92,16 +92,15 @@ class ActionsRepository {
         return mRunningActions.entrySet();
     }
 
-    public Collection<Action> getDefaultActionsToStart() {
-        Collection<Action> actionsToStart = new ArrayList<>();
+    public Map<Subsystem, Action> getDefaultActionsToStart() {
+        Map<Subsystem, Action> actionsToStart = new HashMap<>();
 
         for (Map.Entry<Subsystem, Action> entry : mDefaultActionsOnSubsystems.entrySet()) {
             if (mActionsOnSubsystems.containsKey(entry.getKey())) {
                 continue;
             }
 
-            actionsToStart.add(entry.getValue());
-            mLogger.debug("Starting default action for {}", entry.getKey().toString());
+            actionsToStart.put(entry.getKey(), entry.getValue());
         }
 
         return actionsToStart;
