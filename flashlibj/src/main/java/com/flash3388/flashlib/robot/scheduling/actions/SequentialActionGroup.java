@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -20,7 +22,8 @@ public class SequentialActionGroup extends Action {
     private ActionContext mCurrentAction;
     private boolean mRunWhenDisabled;
 
-    public SequentialActionGroup(Clock clock) {
+    public SequentialActionGroup(Scheduler scheduler, Clock clock) {
+        super(scheduler);
         mClock = clock;
 
         mActions = new ArrayList<>(3);
@@ -28,6 +31,10 @@ public class SequentialActionGroup extends Action {
 
         mCurrentAction = null;
         mRunWhenDisabled = false;
+    }
+
+    public SequentialActionGroup(Clock clock) {
+        this(RunningRobot.INSTANCE.get().getScheduler(), clock);
     }
 
     public SequentialActionGroup() {
