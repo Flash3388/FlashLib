@@ -41,5 +41,6 @@ task clearBenchmarkResults(type: Delete) {
 }
 
 task benchmark {
-    dependsOn clearBenchmarkResults, jmh
+    dependsOn project.tasks.clearBenchmarkResults,
+            project.tasks.build, project.tasks.jmh
 }
