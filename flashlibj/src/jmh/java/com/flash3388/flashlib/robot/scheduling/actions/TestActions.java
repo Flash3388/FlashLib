@@ -1,8 +1,5 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import benchmark.benchmark.util.GlobalRandom;
-import benchmark.benchmark.util.Range;
-
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Function;
@@ -17,9 +14,9 @@ public class TestActions {
         SHORT_SLEEP((params)->
                 new SleepingAction(params, 1L)),
         SMALL_SINGLE_SEQ_GROUP((params)->
-                new GenericSequentialActionGroup(ActionType.SMALL, new Range(1, 1), params)),
+                new GenericSequentialActionGroup(ActionType.SMALL, 1, params)),
         SMALL_MULTI_SEQ_GROUP((params)->
-                new GenericSequentialActionGroup(ActionType.SMALL, new Range(2, 3), params))
+                new GenericSequentialActionGroup(ActionType.SMALL, 3, params))
         ;
 
         private final Function<TestActionParams, Action> mActionGenerator;
@@ -101,11 +98,10 @@ public class TestActions {
 
     public static class GenericSequentialActionGroup extends TestSequentialActionGroup {
 
-        private GenericSequentialActionGroup(ActionType containedType, Range amountRange,
+        private GenericSequentialActionGroup(ActionType containedType, int actionsCount,
                                              TestActionParams params) {
             super(params);
 
-            int actionsCount = GlobalRandom.nextIntInRange(amountRange);
             IntStream.range(0, actionsCount)
                     .forEach((i)->add(containedType.create(params)));
 
