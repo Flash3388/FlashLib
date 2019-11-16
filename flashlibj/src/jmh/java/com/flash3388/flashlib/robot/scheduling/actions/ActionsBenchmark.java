@@ -35,7 +35,8 @@ public class ActionsBenchmark {
             blackhole.consume(object);
         };
 
-        mAction = mActionType.generate(scheduler, consumer);
+        mAction = mActionType.create(new TestActionParams(scheduler, consumer));
+        mAction.initialize();
     }
 
     @Benchmark

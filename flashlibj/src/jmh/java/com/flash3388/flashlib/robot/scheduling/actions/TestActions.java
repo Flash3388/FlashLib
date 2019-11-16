@@ -2,14 +2,10 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import benchmark.benchmark.util.GlobalRandom;
 import benchmark.benchmark.util.Range;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.time.SystemNanoClock;
-import com.flash3388.flashlib.time.Time;
 
 import java.util.Collection;
 import java.util.Random;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,33 +14,31 @@ public class TestActions {
     public enum ActionType {
         SMALL(SmallSizeAction::new),
         MEDIUM(MediumSizeAction::new),
-        SHORT_SLEEP((scheduler, outputConsumer)->
-                new SleepingAction(scheduler, 1L)),
-        SMALL_SINGLE_SEQ_GROUP((scheduler, outputConsumer)->
-                new GenericSequentialActionGroup(ActionType.SMALL, new Range(1, 1), scheduler, outputConsumer)),
-        SMALL_MULTI_SEQ_GROUP((scheduler, outputConsumer)->
-                new GenericSequentialActionGroup(ActionType.SMALL, new Range(2, 3), scheduler, outputConsumer))
+        SHORT_SLEEP((params)->
+                new SleepingAction(params, 1L)),
+        SMALL_SINGLE_SEQ_GROUP((params)->
+                new GenericSequentialActionGroup(ActionType.SMALL, new Range(1, 1), params)),
+        SMALL_MULTI_SEQ_GROUP((params)->
+                new GenericSequentialActionGroup(ActionType.SMALL, new Range(2, 3), params))
         ;
 
-        private final BiFunction<Scheduler, Consumer<Object>, Action> mActionGenerator;
+        private final Function<TestActionParams, Action> mActionGenerator;
 
-        ActionType(BiFunction<Scheduler, Consumer<Object>, Action> actionGenerator) {
+        ActionType(Function<TestActionParams, Action> actionGenerator) {
             mActionGenerator = actionGenerator;
         }
 
-        public Action generate(Scheduler scheduler, Consumer<Object> outputConsumer) {
-            return mActionGenerator.apply(scheduler, outputConsumer);
+        public Action create(TestActionParams params) {
+            return mActionGenerator.apply(params);
         }
     }
 
-    public static class SmallSizeAction extends Action {
+    public static class SmallSizeAction extends TestAction {
 
-        private final Consumer<Object> mOutputConsumer;
         private final Random mRandom;
 
-        private SmallSizeAction(Scheduler scheduler, Consumer<Object> outputConsumer) {
-            super(scheduler, Time.INVALID);
-            mOutputConsumer = outputConsumer;
+        private SmallSizeAction(TestActionParams params) {
+            super(params);
             mRandom = new Random();
         }
 
@@ -53,21 +47,19 @@ public class TestActions {
             byte[] bytes = new byte[1024];
             mRandom.nextBytes(bytes);
 
-            mOutputConsumer.accept(bytes);
+            output(bytes);
         }
 
         @Override
         protected void end() { }
     }
 
-    public static class MediumSizeAction extends Action {
+    public static class MediumSizeAction extends TestAction {
 
-        private final Consumer<Object> mOutputConsumer;
         private final Random mRandom;
 
-        private MediumSizeAction(Scheduler scheduler, Consumer<Object> outputConsumer) {
-            super(scheduler, Time.INVALID);
-            mOutputConsumer = outputConsumer;
+        private MediumSizeAction(TestActionParams params) {
+            super(params);
             mRandom = new Random();
         }
 
@@ -78,19 +70,19 @@ public class TestActions {
                     .sorted(Integer::compareTo)
                     .collect(Collectors.toList());
 
-            mOutputConsumer.accept(numbers);
+            output(numbers);
         }
 
         @Override
         protected void end() { }
     }
 
-    public static class SleepingAction extends Action {
+    public static class SleepingAction extends TestAction {
 
         private final long mSleepTimeMs;
 
-        private SleepingAction(Scheduler scheduler, long sleepTimeMs) {
-            super(scheduler);
+        private SleepingAction(TestActionParams params, long sleepTimeMs) {
+            super(params);
             mSleepTimeMs = sleepTimeMs;
         }
 
@@ -98,22 +90,24 @@ public class TestActions {
         protected void execute() {
             try {
                 Thread.sleep(mSleepTimeMs);
-            } catch (InterruptedException e) { }
+            } catch (InterruptedException e) {
+                output(e);
+            }
         }
 
         @Override
         protected void end() { }
     }
 
-    public static class GenericSequentialActionGroup extends SequentialActionGroup {
+    public static class GenericSequentialActionGroup extends TestSequentialActionGroup {
 
         private GenericSequentialActionGroup(ActionType containedType, Range amountRange,
-                                             Scheduler scheduler, Consumer<Object> outputConsumer) {
-            super(scheduler, new SystemNanoClock());
+                                             TestActionParams params) {
+            super(params);
 
             int actionsCount = GlobalRandom.nextIntInRange(amountRange);
             IntStream.range(0, actionsCount)
-                    .forEach((i)->add(containedType.generate(scheduler, outputConsumer)));
+                    .forEach((i)->add(containedType.create(params)));
 
         }
     }

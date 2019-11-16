@@ -4,8 +4,8 @@ import com.beans.Property;
 import com.beans.properties.SimpleProperty;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.TestActionParams;
 import com.flash3388.flashlib.robot.scheduling.actions.TestActions;
-import com.flash3388.flashlib.time.SystemNanoClock;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
@@ -17,11 +17,10 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @State(Scope.Thread)
-public class SchedulerBenchmark {
+public class SchedulerExecutionBenchmark {
 
     private static final RobotMode ROBOT_MODE = new RobotMode("test", 1);
 
@@ -38,7 +37,7 @@ public class SchedulerBenchmark {
 
     @Setup(Level.Trial)
     public void setup() {
-        mScheduler = mSchedulerImpl.generate();
+        mScheduler = mSchedulerImpl.create();
 
         Consumer<Object> consumer = (object) -> {
             Blackhole blackhole = mBlackholeProperty.get();
@@ -46,7 +45,7 @@ public class SchedulerBenchmark {
         };
 
         IntStream.range(0, mActionsCount)
-                .mapToObj((i) -> mActionType.generate(mScheduler, consumer))
+                .mapToObj((i) -> mActionType.create(new TestActionParams(mScheduler, consumer)))
                 .forEach(Action::start);
     }
 
@@ -57,20 +56,5 @@ public class SchedulerBenchmark {
 
         Scheduler scheduler = mScheduler;
         scheduler.run(ROBOT_MODE);
-    }
-
-    public enum SchedulerImpl {
-        SINGLE_THREAD(()->new SingleThreadScheduler(new SystemNanoClock()))
-        ;
-
-        private final Supplier<Scheduler> mGenerator;
-
-        SchedulerImpl(Supplier<Scheduler> generator) {
-            mGenerator = generator;
-        }
-
-        Scheduler generate() {
-            return mGenerator.get();
-        }
     }
 }
