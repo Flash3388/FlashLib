@@ -11,9 +11,9 @@ import java.util.function.Supplier;
 public class HolonomicDriveAction extends Action {
 	
 	private final HolonomicDrive mDriveInterface;
-	private final Supplier<HolonomicDriveSpeed> mSpeedSupplier;
+	private final Supplier<? extends HolonomicDriveSpeed> mSpeedSupplier;
 
-    public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<HolonomicDriveSpeed> speedSupplier) {
+    public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<? extends HolonomicDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
     }

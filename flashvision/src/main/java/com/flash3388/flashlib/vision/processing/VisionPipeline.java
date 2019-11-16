@@ -1,25 +1,26 @@
 package com.flash3388.flashlib.vision.processing;
 
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
-import com.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.ImagePipeline;
+import com.flash3388.flashlib.vision.processing.analysis.Analysis;
+import com.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
 import com.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
     private final ImageAnalyser<T> mImageAnalyser;
     private final Consumer<Analysis> mAnalysisConsumer;
-    private final List<ImageProcessor<T>> mImageProcessors;
+    private final Collection<ImageProcessor<T>> mImageProcessors;
 
-    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, List<ImageProcessor<T>> imageProcessors) {
+    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, Collection<ImageProcessor<T>> imageProcessors) {
         mImageAnalyser = imageAnalyser;
         mAnalysisConsumer = analysisConsumer;
-        mImageProcessors = imageProcessors;
+        mImageProcessors = new ArrayList<>(imageProcessors);
     }
 
     public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, ImageProcessor<T> ... imageProcessors) {

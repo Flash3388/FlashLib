@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 public class ArcadeDriveAction extends Action {
 	
 	private final TankDrive mDriveInterface;
-	private final Supplier<ArcadeDriveSpeed> mSpeedSupplier;
+	private final Supplier<? extends ArcadeDriveSpeed> mSpeedSupplier;
 
-    public ArcadeDriveAction(TankDrive driveInterface, Supplier<ArcadeDriveSpeed> speedSupplier) {
+    public ArcadeDriveAction(TankDrive driveInterface, Supplier<? extends ArcadeDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
     }

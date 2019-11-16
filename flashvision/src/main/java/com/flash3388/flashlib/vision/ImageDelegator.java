@@ -1,16 +1,17 @@
 package com.flash3388.flashlib.vision;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 
 public class ImageDelegator<T extends Image> {
 
     private final ImageSource<T> mImageSource;
-    private final List<ImagePipeline<T>> mImagePipelines;
+    private final Collection<ImagePipeline<T>> mImagePipelines;
 
-    public ImageDelegator(ImageSource<T> imageSource, List<ImagePipeline<T>> imagePipelines) {
+    public ImageDelegator(ImageSource<T> imageSource, Collection<ImagePipeline<T>> imagePipelines) {
         mImageSource = imageSource;
-        mImagePipelines = imagePipelines;
+        mImagePipelines = new ArrayList<>(imagePipelines);
     }
 
     public ImageDelegator(ImageSource<T> imageSource, ImagePipeline<T>... imagePipelines) {

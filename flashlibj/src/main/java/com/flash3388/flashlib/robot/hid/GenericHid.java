@@ -21,17 +21,17 @@ public class GenericHid implements Hid {
 	public GenericHid(Clock clock, HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount, Time buttonPressTime){
 		mChannel = channel;
 
-        mAxes = IntStream.range(0, axisCount)
+        mAxes = Collections.unmodifiableList(IntStream.range(0, axisCount)
                 .mapToObj((i) -> new HidAxis(hidInterface, channel, i))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
-        mButtons = IntStream.range(0, buttonCount)
+        mButtons = Collections.unmodifiableList(IntStream.range(0, buttonCount)
                 .mapToObj((i) -> new HidButton(clock, buttonPressTime, hidInterface, channel, i))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 
-        mPovs = IntStream.range(0, povsCount)
+        mPovs = Collections.unmodifiableList(IntStream.range(0, povsCount)
                 .mapToObj((i) -> new Pov(hidInterface, channel, i))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {

@@ -16,9 +16,10 @@ import com.flash3388.flashlib.robot.hid.Pov;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Represents an Xbox 360 controller for use for robot control.
@@ -41,15 +42,13 @@ public class XboxController implements Hid {
 	public XboxController(Clock clock, HidInterface hidInterface, int channel, Time buttonPressTime){
 		mChannel = channel;
 
-		mAxes = new ArrayList<>(AXES_COUNT);
-        for(int i = 0; i < AXES_COUNT; i++) {
-            mAxes.add(new HidAxis(hidInterface, mChannel, i));
-        }
+		mAxes = Collections.unmodifiableList(IntStream.range(0, AXES_COUNT)
+                .mapToObj((i)-> new HidAxis(hidInterface, mChannel, i))
+                .collect(Collectors.toList()));
 
-		mButtons = new ArrayList<>(BUTTON_COUNT);
-		for(int i = 0; i < BUTTON_COUNT; i++) {
-			mButtons.add(new HidButton(clock, buttonPressTime, hidInterface, mChannel, i));
-		}
+        mButtons = Collections.unmodifiableList(IntStream.range(0, BUTTON_COUNT)
+                .mapToObj((i)-> new HidButton(clock, buttonPressTime, hidInterface, mChannel, i))
+                .collect(Collectors.toList()));
 
         mDpad = new DPad(clock, buttonPressTime, hidInterface, mChannel, DPAD_POV_INDEX);
 	}

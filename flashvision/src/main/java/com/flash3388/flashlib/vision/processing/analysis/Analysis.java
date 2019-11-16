@@ -33,7 +33,7 @@ public class Analysis {
 
     public Analysis(Map<String, Object> data) {
         Objects.requireNonNull(data, "data is null");
-        mData = Collections.unmodifiableMap(data);
+        mData = Collections.unmodifiableMap(new HashMap<>(data));
     }
 
     public Map<String, Object> getData() {

@@ -8,6 +8,8 @@ import com.flash3388.flashlib.robot.hid.NoSuchButtonException;
 import com.flash3388.flashlib.robot.hid.NoSuchPovException;
 import com.flash3388.flashlib.robot.hid.Pov;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CustomHid implements Hid {
@@ -19,9 +21,9 @@ public class CustomHid implements Hid {
 
     public CustomHid(int channel, Map<Integer, Axis> axes, Map<Integer, Button> buttons, Map<Integer, Pov> povs) {
         mChannel = channel;
-        mAxes = axes;
-        mButtons = buttons;
-        mPovs = povs;
+        mAxes = new HashMap<>(axes);
+        mButtons = new HashMap<>(buttons);
+        mPovs = new HashMap<>(povs);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class CustomHid implements Hid {
 
     @Override
     public Iterable<Axis> axes() {
-        return mAxes.values();
+        return Collections.unmodifiableCollection(mAxes.values());
     }
 
     @Override
@@ -64,7 +66,7 @@ public class CustomHid implements Hid {
 
     @Override
     public Iterable<Button> buttons() {
-        return mButtons.values();
+        return Collections.unmodifiableCollection(mButtons.values());
     }
 
     @Override
@@ -83,6 +85,6 @@ public class CustomHid implements Hid {
 
     @Override
     public Iterable<Pov> povs() {
-        return mPovs.values();
+        return Collections.unmodifiableCollection(mPovs.values());
     }
 }
