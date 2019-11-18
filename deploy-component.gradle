@@ -14,27 +14,27 @@ publishing {
             pom {
                 name = project.name.capitalize()
                 description = "Robotics development framework - ${project.name.capitalize()} component".toString()
-                url = 'https://github.com/Flash3388/FlashLib'
+                url = POM_URL
 
                 licenses {
                     license {
-                        name = 'BSD 3-Clause License'
-                        url = 'https://opensource.org/licenses/BSD-3-Clause'
+                        name = POM_LICENSE_NAME
+                        url = POM_LICENSE_URL
                     }
                 }
 
                 developers {
                     developer {
-                        id = 'tomtzook'
-                        name = 'Tom Tzook'
-                        email = 'tomtzook@gmail.com'
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_MAIL
                     }
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/Flash3388/FlashLib.git'
-                    developerConnection = 'scm:git:ssh://github.com/Flash3388/FlashLib.git'
-                    url = 'https://github.com/Flash3388/FlashLib'
+                    connection = POM_SCM_CONNECTION
+                    developerConnection = POM_SCM_DEV_CONNECTION
+                    url = POM_URL
                 }
             }
         }
