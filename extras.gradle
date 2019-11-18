@@ -1,0 +1,29 @@
+ext {
+    isReleaseBuild = {
+        return !version.contains("SNAPSHOT")
+    }
+    shouldDeploy = {
+        return project.hasProperty("DEPLOY_COMPONENT") && project.property("DEPLOY_COMPONENT") == "true"
+    }
+    shouldSign = {
+        return project.hasProperty('SIGN_PUBLISH')
+    }
+    getNexusUsername = {
+        return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
+    }
+    getNexusPassword = {
+        return rootProject.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
+    }
+
+    setPropertyGlobal = { key ->
+        if (rootProject.hasProperty(key)) {
+            project.setProperty(key, rootProject.getProperty(key))
+        }
+    }
+    setPropertyGlobalFile = { key ->
+        if (rootProject.hasProperty(key)) {
+            def file = rootProject.file(rootProject.getProperty(key)).absolutePath
+            project.setProperty(key, file)
+        }
+    }
+}

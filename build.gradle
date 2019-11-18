@@ -1,7 +1,6 @@
 apply plugin: 'signing'
 
 buildscript {
-
     repositories {
         jcenter()
         maven {
@@ -10,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.7"
+        classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.0"
     }
 }
 
@@ -19,18 +18,7 @@ allprojects {
     version = VERSION
 
     apply plugin: 'maven-publish'
-
-    ext.isReleaseBuild = {
-        return version.contains("SNAPSHOT") == false
-    }
-
-    ext.getNexusUsername = {
-        return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
-    }
-
-    ext.getNexusPassword = {
-        return rootProject.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
-    }
+    apply from: rootProject.file('extras.gradle')
 
     publishing {
         repositories {
@@ -51,19 +39,6 @@ allprojects {
         }
     }
 
-    ext.setPropertyGlobal = { key ->
-        if (rootProject.hasProperty(key)) {
-            project.setProperty(key, rootProject.getProperty(key))
-        }
-    }
-
-    ext.setPropertyGlobalFile = { key ->
-        if (rootProject.hasProperty(key)) {
-            def file = rootProject.file(rootProject.getProperty(key)).absolutePath
-            project.setProperty(key, file)
-        }
-    }
-
     setPropertyGlobal('signing.keyId')
     setPropertyGlobal('signing.password')
     setPropertyGlobalFile('signing.secretKeyRingFile')
@@ -81,9 +56,9 @@ subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
 
 task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
-    classifier = 'sources'
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('sources')
 
     from files(subprojects.collect {
         it.sourceSets.main.allSource
@@ -91,9 +66,9 @@ task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
 }
 
 task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
-    classifier = 'javadoc'
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('javadoc')
 
     from files(subprojects.collect {
         it.javadoc.destinationDir
@@ -104,8 +79,8 @@ task flashlib(type: Jar, dependsOn: subprojects.assemble) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
 
     from files(subprojects.collect {
         it.sourceSets.main.output
@@ -116,8 +91,8 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
-    archiveName = 'flashlib-all.jar'
-    destinationDir = rootProject.buildDir
+    archiveFileName.set('flashlib-all.jar')
+    destinationDirectory.set(rootProject.buildDir)
 
     from files(subprojects.collect {
         it.sourceSets.main.output
@@ -201,7 +176,7 @@ publishing {
     }
 }
 
-if (project.hasProperty('SIGN_PUBLISH')) {
+if (shouldSign()) {
 	signing {
 		sign publishing.publications.mavenFlashlib
 	}
