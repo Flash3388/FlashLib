@@ -4,9 +4,15 @@ import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.util.resources.CloseableResource;
 import com.flash3388.flashlib.util.resources.Resource;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public interface Robot {
@@ -66,5 +72,20 @@ public interface Robot {
 
     Logger getLogger();
 
-    void registerResources(Resource... resources);
+    void registerResources(Collection<? extends Resource> resources);
+
+    default void registerResources(Resource... resources) {
+        registerResources(Arrays.asList(resources));
+    }
+
+    default void registerCloseables(Collection<? extends AutoCloseable> closeables) {
+        Logger logger = getLogger();
+        registerResources(closeables.stream()
+                .map((c)->new CloseableResource(c, logger))
+                .collect(Collectors.toList()));
+    }
+
+    default void registerCloseables(AutoCloseable... closeables) {
+        registerCloseables(Arrays.asList(closeables));
+    }
 }

@@ -4,6 +4,8 @@ import com.flash3388.flashlib.util.resources.Resource;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
+import java.util.Collection;
+
 /**
  * <p>
  *     The base class for robot main classes.
@@ -36,10 +38,8 @@ public abstract class RobotBase implements Robot {
     }
 
     @Override
-    public void registerResources(Resource... resources) {
-        for(Resource resource : resources) {
-            mResourceHolder.add(resource);
-        }
+    public void registerResources(Collection<? extends Resource> resources) {
+        mResourceHolder.add(resources);
     }
 
     final void initResources(ResourceHolder resourceHolder, Logger logger) {
