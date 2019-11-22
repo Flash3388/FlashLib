@@ -6,22 +6,22 @@ import java.util.Collection;
 
 public class ImageDelegator<T extends Image> {
 
-    private final ImageSource<T> mImageSource;
-    private final Collection<ImagePipeline<T>> mImagePipelines;
+    private final ImageSource<? extends T> mImageSource;
+    private final Collection<ImagePipeline<? super T>> mImagePipelines;
 
-    public ImageDelegator(ImageSource<T> imageSource, Collection<ImagePipeline<T>> imagePipelines) {
+    public ImageDelegator(ImageSource<? extends T> imageSource, Collection<ImagePipeline<? super T>> imagePipelines) {
         mImageSource = imageSource;
         mImagePipelines = new ArrayList<>(imagePipelines);
     }
 
-    public ImageDelegator(ImageSource<T> imageSource, ImagePipeline<T>... imagePipelines) {
+    public ImageDelegator(ImageSource<? extends T> imageSource, ImagePipeline<? super T>... imagePipelines) {
         this(imageSource, Arrays.asList(imagePipelines));
     }
 
     public void delegate() throws VisionException {
         T image = mImageSource.get();
 
-        for (ImagePipeline<T> pipeline : mImagePipelines) {
+        for (ImagePipeline<? super T> pipeline : mImagePipelines) {
             pipeline.process(image);
         }
     }

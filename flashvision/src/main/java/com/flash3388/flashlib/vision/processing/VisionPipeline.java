@@ -14,16 +14,16 @@ import java.util.function.Consumer;
 public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
 
     private final ImageAnalyser<T> mImageAnalyser;
-    private final Consumer<Analysis> mAnalysisConsumer;
+    private final Consumer<? super Analysis> mAnalysisConsumer;
     private final Collection<ImageProcessor<T>> mImageProcessors;
 
-    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, Collection<ImageProcessor<T>> imageProcessors) {
+    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<? super Analysis> analysisConsumer, Collection<ImageProcessor<T>> imageProcessors) {
         mImageAnalyser = imageAnalyser;
         mAnalysisConsumer = analysisConsumer;
         mImageProcessors = new ArrayList<>(imageProcessors);
     }
 
-    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<Analysis> analysisConsumer, ImageProcessor<T> ... imageProcessors) {
+    public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<? super Analysis> analysisConsumer, ImageProcessor<T> ... imageProcessors) {
         this(imageAnalyser, analysisConsumer, Arrays.asList(imageProcessors));
     }
 
