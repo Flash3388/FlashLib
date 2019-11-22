@@ -1,4 +1,4 @@
-package benchmark.benchmark.util;
+package benchmark.util;
 
 import java.util.Random;
 
