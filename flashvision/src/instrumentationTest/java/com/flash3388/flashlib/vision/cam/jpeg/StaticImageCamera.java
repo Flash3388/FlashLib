@@ -30,4 +30,8 @@ public class StaticImageCamera implements Camera {
     public int getFps() {
         return 30;
     }
+
+    @Override
+    public void close() {
+    }
 }
