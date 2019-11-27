@@ -4,10 +4,10 @@ import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ActionTest {
@@ -16,7 +16,7 @@ public class ActionTest {
 
     private Action mAction;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mScheduler = mock(Scheduler.class);
 

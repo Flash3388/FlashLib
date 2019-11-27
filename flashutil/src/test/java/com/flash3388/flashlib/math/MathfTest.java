@@ -1,114 +1,72 @@
 package com.flash3388.flashlib.math;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MathfTest {
 
-    @RunWith(Parameterized.class)
-    public static class TranslateAngleTest {
+    private static final double EQUAL_MARGIN = 0.0001;
 
-        private static final double EQUAL_MARGIN = 0.0001;
-
-        @Parameterized.Parameter(0)
-        public double mAngleToTranslate;
-        @Parameterized.Parameter(1)
-        public double mExpectedResult;
-
-        @Parameterized.Parameters(name = "translateAngle({0}) = {1}")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {0.0, 0.0},
-                    {30.0, 30.0},
-                    {180.0, 180.0},
-                    {280.0, 280.0},
-                    {360.0, 0.0},
-                    {-180.0, 180.0},
-                    {480.0, 120.0},
-                    {1080.0, 0.0},
-                    {-480.0, 240.0}
-            });
-        }
-
-        @Test
-        public void translateAngle_ofParameters_producesExpectedResult() throws Exception {
-            double translated = Mathf.translateAngle(mAngleToTranslate);
-            assertEquals(mExpectedResult, translated, EQUAL_MARGIN);
-        }
+    @ParameterizedTest(name = "translateAngle({0}) = {1}")
+    @MethodSource(value = "translateAngleArguments")
+    public void translateAngle_ofParameters_producesExpectedResult(double angleToTranslate, double expectedResult) throws Exception {
+        double translated = Mathf.translateAngle(angleToTranslate);
+        assertEquals(expectedResult, translated, EQUAL_MARGIN);
     }
 
-    @RunWith(Parameterized.class)
-    public static class TranslateInRangeTest {
-
-        private static final double EQUAL_MARGIN = 0.0001;
-
-        @Parameterized.Parameter(0)
-        public double mValueToTranslate;
-        @Parameterized.Parameter(1)
-        public double mRangeToTranslateIn;
-        @Parameterized.Parameter(2)
-        public boolean mShouldForcePositive;
-        @Parameterized.Parameter(3)
-        public double mExpectedResult;
-
-        @Parameterized.Parameters(name = "translateInRange({0}, {1}, {2}) = {3}")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {0.0, 360.0, true, 0.0},
-                    {30.0, 360.0, true, 30.0},
-                    {180.0, 360.0, true, 180.0},
-                    {280.0, 360.0, true, 280.0},
-                    {360.0, 360.0, true, 0.0},
-                    {-180.0, 360.0, true, 180.0},
-                    {480.0, 360.0, true, 120.0},
-                    {1080.0, 360.0, true, 0.0},
-                    {-480.0, 360.0, true, 240.0},
-                    {-480.0, 360.0, false, -120.0},
-                    {-100.0, 5.0, true, 0.0},
-            });
-        }
-
-        @Test
-        public void translateAngle_ofParameters_producesExpectedResult() throws Exception {
-            double translated = Mathf.translateInRange(mValueToTranslate, mRangeToTranslateIn, mShouldForcePositive);
-            assertEquals(mExpectedResult, translated, EQUAL_MARGIN);
-        }
+    @ParameterizedTest(name = "translateInRange({0}, {1}, {2}) = {3}")
+    @MethodSource(value = "translateInRangeArguments")
+    public void translateAngle_ofParameters_producesExpectedResult(double valueToTranslate, double rangeToTranslateIn, boolean shouldForcePositive, double expectedResult) throws Exception {
+        double translated = Mathf.translateInRange(valueToTranslate, rangeToTranslateIn, shouldForcePositive);
+        assertEquals(expectedResult, translated, EQUAL_MARGIN);
     }
 
-    @RunWith(Parameterized.class)
-    public static class ShortestAngularDistanceTest {
+    @ParameterizedTest(name = "shortestAngularDistance({0}, {1}) = {2}")
+    @MethodSource(value = "angularDistanceArguments")
+    public void shortestAngularDistance_ofParameters_producesExpectedResult(double current, double last, double expectedResult) throws Exception {
+        double distance = Mathf.shortestAngularDistance(current, last);
+        assertEquals(expectedResult, distance, EQUAL_MARGIN);
+    }
 
-        private static final double EQUAL_MARGIN = 0.0001;
+    private static Stream<Arguments> translateAngleArguments() {
+        return Stream.of(
+                Arguments.of(0.0, 0.0),
+                Arguments.of(30.0, 30.0),
+                Arguments.of(180.0, 180.0),
+                Arguments.of(280.0, 280.0),
+                Arguments.of(360.0, 0.0),
+                Arguments.of(-180.0, 180.0),
+                Arguments.of(480.0, 120.0),
+                Arguments.of(1080.0, 0.0),
+                Arguments.of(-480.0, 240.0));
+    }
 
-        @Parameterized.Parameter(0)
-        public double mCurrent;
-        @Parameterized.Parameter(1)
-        public double mLast;
-        @Parameterized.Parameter(2)
-        public double mExpectedResult;
+    private static Stream<Arguments> translateInRangeArguments() {
+        return Stream.of(
+                Arguments.of(0.0, 360.0, true, 0.0),
+                Arguments.of(30.0, 360.0, true, 30.0),
+                Arguments.of(180.0, 360.0, true, 180.0),
+                Arguments.of(280.0, 360.0, true, 280.0),
+                Arguments.of(360.0, 360.0, true, 0.0),
+                Arguments.of(-180.0, 360.0, true, 180.0),
+                Arguments.of(480.0, 360.0, true, 120.0),
+                Arguments.of(1080.0, 360.0, true, 0.0),
+                Arguments.of(-480.0, 360.0, true, 240.0),
+                Arguments.of(-480.0, 360.0, false, -120.0),
+                Arguments.of(-100.0, 5.0, true, 0.0));
+    }
 
-        @Parameterized.Parameters(name = "shortestAngularDistance({0}, {1}) = {2}")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {0.0, 0.0, 0.0},
-                    {180.0, 0.0, 180.0},
-                    {270.0, 0.0, 90.0},
-                    {270.0, 360.0, 90.0},
-                    {90.0, 360.0, 90.0},
-                    {90.0, 0.0, 90.0},
-            });
-        }
-
-        @Test
-        public void shortestAngularDistance_ofParameters_producesExpectedResult() throws Exception {
-            double distance = Mathf.shortestAngularDistance(mCurrent, mLast);
-            assertEquals(mExpectedResult, distance, EQUAL_MARGIN);
-        }
+    private static Stream<Arguments> angularDistanceArguments() {
+        return Stream.of(
+                Arguments.of(0.0, 0.0, 0.0),
+                Arguments.of(180.0, 0.0, 180.0),
+                Arguments.of(270.0, 0.0, 90.0),
+                Arguments.of(90.0, 360.0, 90.0),
+                Arguments.of(90.0, 0.0, 90.0));
     }
 }

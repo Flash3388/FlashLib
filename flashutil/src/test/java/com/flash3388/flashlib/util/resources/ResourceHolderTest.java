@@ -1,9 +1,12 @@
 package com.flash3388.flashlib.util.resources;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ResourceHolderTest {
 

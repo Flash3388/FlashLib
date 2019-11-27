@@ -4,7 +4,8 @@ import com.flash3388.flashlib.communication.connection.Connection;
 import com.flash3388.flashlib.io.serialization.Serializer;
 import com.flash3388.flashlib.util.versioning.IncompatibleVersionException;
 import com.flash3388.flashlib.util.versioning.Version;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -67,18 +68,22 @@ public class MessengerTest {
         inOrder.verify(connection).read(SERIALIZED_DATA.length);
     }
 
-    @Test(expected = IncompatibleVersionException.class)
+    @Test
     public void readMessage_majorVersionIsHigher_throwsIncompatibleVersionException() throws Exception {
-        Version VERSION = new Version(2, 0, 0);
-        Messenger messenger = mockForReturningVersion(VERSION);
-        messenger.readMessage();
+        Assertions.assertThrows(IncompatibleVersionException.class, ()->{
+            Version VERSION = new Version(2, 0, 0);
+            Messenger messenger = mockForReturningVersion(VERSION);
+            messenger.readMessage();
+        });
     }
 
-    @Test(expected = IncompatibleVersionException.class)
+    @Test
     public void readMessage_minorVersionIsHigher_throwsIncompatibleVersionException() throws Exception {
-        Version VERSION = new Version(1, 2, 0);
-        Messenger messenger = mockForReturningVersion(VERSION);
-        messenger.readMessage();
+        Assertions.assertThrows(IncompatibleVersionException.class, ()->{
+            Version VERSION = new Version(1, 2, 0);
+            Messenger messenger = mockForReturningVersion(VERSION);
+            messenger.readMessage();
+        });
     }
 
     @Test

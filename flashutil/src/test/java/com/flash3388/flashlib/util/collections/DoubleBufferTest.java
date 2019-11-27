@@ -1,12 +1,13 @@
 package com.flash3388.flashlib.util.collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DoubleBufferTest {
 
@@ -35,12 +36,14 @@ public class DoubleBufferTest {
         assertEquals(1, readIndex.get());
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void read_initialValues_throwsNoSuchElementException() throws Exception {
-        AtomicReferenceArray<Object> innerArray = new AtomicReferenceArray<>(2);
-        DoubleBuffer<Object> doubleBuffer = new DoubleBuffer<>(innerArray, new AtomicInteger(0));
+        assertThrows(NoSuchElementException.class, ()->{
+            AtomicReferenceArray<Object> innerArray = new AtomicReferenceArray<>(2);
+            DoubleBuffer<Object> doubleBuffer = new DoubleBuffer<>(innerArray, new AtomicInteger(0));
 
-        doubleBuffer.read();
+            doubleBuffer.read();
+        });
     }
 
     @Test

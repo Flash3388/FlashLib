@@ -1,14 +1,18 @@
 package com.flash3388.flashlib.io.serialization;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class JavaObjectSerializerTest {
 
@@ -26,20 +30,24 @@ public class JavaObjectSerializerTest {
         assertTestClassEquals(OBJECT, deserializedObject);
     }
 
-    @Test(expected = TypeException.class)
+    @Test
     public void deserialize_classTypeDoesNotMatch_throwsTypeException() throws Exception {
         final TestClass OBJECT = new TestClass(23, 5.0);
 
-        JavaObjectSerializer serializer = new JavaObjectSerializer();
+        assertThrows(TypeException.class, ()->{
+            JavaObjectSerializer serializer = new JavaObjectSerializer();
 
-        byte[] serializedValue = serializer.serialize(OBJECT);
-        serializer.deserialize(serializedValue, OtherObject.class);
+            byte[] serializedValue = serializer.serialize(OBJECT);
+            serializer.deserialize(serializedValue, OtherObject.class);
+        });
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void serialize_objectNotSerializable_throwsIOException() throws Exception {
-        JavaObjectSerializer serializer = new JavaObjectSerializer();
-        serializer.serialize(new OtherObject());
+        assertThrows(IOException.class, ()->{
+            JavaObjectSerializer serializer = new JavaObjectSerializer();
+            serializer.serialize(new OtherObject());
+        });
     }
 
     @Test

@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.io.serialization;
 
 import com.google.gson.Gson;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class JsonSerializerTest {

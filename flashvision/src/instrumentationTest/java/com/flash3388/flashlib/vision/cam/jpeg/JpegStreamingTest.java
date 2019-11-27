@@ -7,8 +7,8 @@ import com.flash3388.flashlib.vision.camera.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.client.MjpegClient;
 import com.flash3388.flashlib.vision.jpeg.server.MjpegServer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
@@ -27,8 +27,8 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class JpegStreamingTest {
@@ -42,7 +42,7 @@ public class JpegStreamingTest {
     private Clock mClock;
     private Logger mLogger;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mClock = new SystemNanoClock();
         mLogger = mock(Logger.class);

@@ -8,9 +8,9 @@ import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.concurrent.Sleeper;
 import com.flash3388.flashlib.time.Clock;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -32,7 +32,7 @@ public class IterativeRobotTest {
     private Scheduler mScheduler;
     private IterativeRobot mIterativeRobot;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mCloser = Closer.empty();
 
@@ -44,7 +44,7 @@ public class IterativeRobotTest {
         mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mLogger, mock(Sleeper.class)));
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         mIterativeRobot.robotShutdown();
         mCloser.close();

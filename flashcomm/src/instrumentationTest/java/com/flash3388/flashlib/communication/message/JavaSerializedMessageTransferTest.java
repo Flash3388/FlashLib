@@ -8,16 +8,20 @@ import com.flash3388.flashlib.io.serialization.Serializer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.communication.connection.FakeConnection;
 import com.flash3388.flashlib.communication.connection.socket.TcpServerConnector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JavaSerializedMessageTransferTest {
 
@@ -30,7 +34,7 @@ public class JavaSerializedMessageTransferTest {
 
         private Closer mCloser;
 
-        @Before
+        @BeforeEach
         public void setUp() throws Exception {
             mCloser = Closer.empty();
 
@@ -45,7 +49,7 @@ public class JavaSerializedMessageTransferTest {
             mCloser.add(mReadingConnection);
         }
 
-        @After
+        @AfterEach
         public void tearDown() throws Exception {
             mCloser.close();
         }
@@ -79,7 +83,7 @@ public class JavaSerializedMessageTransferTest {
 
         private Closer mCloser;
 
-        @Before
+        @BeforeEach
         public void setUp() throws Exception {
             mCloser = Closer.empty();
 
@@ -87,7 +91,7 @@ public class JavaSerializedMessageTransferTest {
             connectClientAndSocket();
         }
 
-        @After
+        @AfterEach
         public void tearDown() throws Exception {
             mCloser.close();
         }

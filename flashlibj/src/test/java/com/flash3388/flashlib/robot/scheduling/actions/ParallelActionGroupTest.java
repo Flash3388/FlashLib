@@ -2,8 +2,8 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.ClockMock;
 import com.flash3388.flashlib.robot.RunningRobotMock;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 
 public class ParallelActionGroupTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         RunningRobotMock.mockRobotWithDependencies();
         RunningRobotMock.mockRobotWithClock(ClockMock.mockInvalidTimeClock());

@@ -1,40 +1,50 @@
 package com.flash3388.flashlib.util.flow;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SingleUseRunnerTest {
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void start_alreadyStarted_throwsIllegalStateException() throws Exception {
-        SingleUseRunner runner = new FakeSingleUseRunner();
+        assertThrows(IllegalStateException.class, ()->{
+            SingleUseRunner runner = new FakeSingleUseRunner();
 
-        runner.start();
-        runner.start();
+            runner.start();
+            runner.start();
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void start_alreadyStopped_throwsIllegalStateException() throws Exception {
-        SingleUseRunner runner = new FakeSingleUseRunner();
+        assertThrows(IllegalStateException.class, ()->{
+            SingleUseRunner runner = new FakeSingleUseRunner();
 
-        runner.start();
-        runner.stop();
-        runner.start();
+            runner.start();
+            runner.stop();
+            runner.start();
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void stop_alreadyStopped_throwsIllegalStateException() throws Exception {
-        SingleUseRunner runner = new FakeSingleUseRunner();
+        assertThrows(IllegalStateException.class, ()->{
+            SingleUseRunner runner = new FakeSingleUseRunner();
 
-        runner.start();
-        runner.stop();
-        runner.stop();
+            runner.start();
+            runner.stop();
+            runner.stop();
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void stop_notStarted_throwsIllegalStateException() throws Exception {
-        SingleUseRunner runner = new FakeSingleUseRunner();
+        assertThrows(IllegalStateException.class, ()->{
+            SingleUseRunner runner = new FakeSingleUseRunner();
 
-        runner.stop();
+            runner.stop();
+        });
     }
 
     private static class FakeSingleUseRunner extends SingleUseRunner {
