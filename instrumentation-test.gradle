@@ -1,9 +1,7 @@
-apply plugin: 'java'
-
 sourceSets {
     instrumentationTest {
-        compileClasspath += sourceSets.main.output + configurations.testCompile
-        runtimeClasspath += output + compileClasspath + configurations.testRuntime
+        compileClasspath += sourceSets.main.output + configurations.testCompileClasspath
+        runtimeClasspath += output + compileClasspath + configurations.testRuntimeClasspath
     }
 }
 

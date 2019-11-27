@@ -151,7 +151,7 @@ publishing {
                     def allDependencies = []
 
                     subprojects.each { project ->
-                        allDependencies.addAll(project.configurations.compile.allDependencies.withType(ExternalDependency))
+                        allDependencies.addAll(project.configurations.implementation.allDependencies.withType(ExternalDependency))
                     }
 
                     def comparator = [
