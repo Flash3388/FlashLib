@@ -15,9 +15,9 @@ ext.slf4jApi = {
 }
 
 ext.junit = {
-    return ['org.junit.jupiter:junit-jupiter-engine:5.3.1',
+    return ['org.junit.jupiter:junit-jupiter-engine:5.4.2',
             'org.junit.platform:junit-platform-runner:1.2.0',
-            'org.junit.jupiter:junit-jupiter-params:5.3.1']
+            'org.junit.jupiter:junit-jupiter-params:5.4.2']
 }
 
 ext.mockito = {
