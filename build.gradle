@@ -1,5 +1,3 @@
-apply plugin: 'signing'
-
 buildscript {
     repositories {
         jcenter()
@@ -17,31 +15,7 @@ allprojects {
     group = GROUP
     version = VERSION
 
-    apply plugin: 'maven-publish'
     apply from: rootProject.file('extras.gradle')
-
-    publishing {
-        repositories {
-            maven {
-                if (isReleaseBuild()) {
-                    name = 'NexusStaging'
-                    url = NEXUS_RELEASE_REPOSITORY_URL
-                } else {
-                    name = 'NexusSnapshot'
-                    url = NEXUS_SNAPSHOT_REPOSITORY_URL
-                }
-
-                credentials {
-                    username getNexusUsername()
-                    password getNexusPassword()
-                }
-            }
-        }
-    }
-
-    setPropertyGlobal('signing.keyId')
-    setPropertyGlobal('signing.password')
-    setPropertyGlobalFile('signing.secretKeyRingFile')
 }
 
 subprojects {
@@ -105,79 +79,4 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     })
 }
 
-artifacts {
-    archives flashlib
-    archives flashlibSources
-    archives flashlibJavadoc
-}
-
-publishing {
-    publications {
-        mavenFlashlib(MavenPublication) {
-            artifactId = 'flashlib'
-
-            artifact flashlib
-            artifact flashlibJavadoc
-            artifact flashlibSources
-
-            pom {
-                name = 'Flashlib'
-                description = 'Robotics development framework'
-                url = POM_URL
-
-                licenses {
-                    license {
-                        name = POM_LICENSE_NAME
-                        url = POM_LICENSE_URL
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = POM_DEVELOPER_ID
-                        name = POM_DEVELOPER_NAME
-                        email = POM_DEVELOPER_MAIL
-                    }
-                }
-
-                scm {
-                    connection = POM_SCM_CONNECTION
-                    developerConnection = POM_SCM_DEV_CONNECTION
-                    url = POM_URL
-                }
-
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-                    def allDependencies = []
-
-                    subprojects.each { project ->
-                        allDependencies.addAll(project.configurations.implementation.allDependencies.withType(ExternalDependency))
-                    }
-
-                    def comparator = [
-                            compare: { first, second ->
-                                if (first.group != second.group)
-                                    return first.group.compareTo(second.group)
-                                else
-                                    return first.name.compareTo(second.name)
-                            }
-                    ] as Comparator
-
-                    allDependencies.collect().unique(comparator).each { dep ->
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', dep.group)
-                        dependencyNode.appendNode('artifactId', dep.name)
-                        dependencyNode.appendNode('version', dep.version)
-                        dependencyNode.appendNode('scope', 'compile')
-                    }
-                }
-            }
-        }
-    }
-}
-
-if (shouldSign()) {
-	signing {
-		sign publishing.publications.mavenFlashlib
-	}
-}
+apply from: rootProject.file('deploy.gradle')

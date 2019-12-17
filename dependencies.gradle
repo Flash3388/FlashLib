@@ -1,30 +1,26 @@
-ext.gson = {
-    return "com.google.code.gson:gson:2.8.5"
-}
-
-ext.jmath = {
-    return "com.flash3388.util:jmath:1.0"
-}
-
-ext.javabeans = {
-    return "com.flash3388.util:javabeans:1.0"
-}
-
-ext.slf4jApi = {
-    return "org.slf4j:slf4j-api:1.7.25"
-}
-
-ext.junit = {
-    return ['org.junit.jupiter:junit-jupiter-engine:5.4.2',
-            'org.junit.platform:junit-platform-runner:1.2.0',
-            'org.junit.jupiter:junit-jupiter-params:5.4.2']
-}
-
-ext.mockito = {
-    return ['org.mockito:mockito-core:2.23.4',
-            'org.mockito:mockito-junit-jupiter:2.23.0']
-}
-
-ext.hamcrest = {
-    return "org.hamcrest:hamcrest:2.1"
+ext {
+    gson = {
+        return "com.google.code.gson:gson:2.8.5"
+    }
+    jmath = {
+        return "com.flash3388.util:jmath:1.0"
+    }
+    javabeans = {
+        return "com.flash3388.util:javabeans:1.0"
+    }
+    slf4jApi = {
+        return "org.slf4j:slf4j-api:1.7.25"
+    }
+    junit = {
+        return ['org.junit.jupiter:junit-jupiter-engine:5.4.2',
+                'org.junit.platform:junit-platform-runner:1.2.0',
+                'org.junit.jupiter:junit-jupiter-params:5.4.2']
+    }
+    mockito = {
+        return ['org.mockito:mockito-core:2.23.4',
+                'org.mockito:mockito-junit-jupiter:2.23.0']
+    }
+    hamcrest = {
+        return "org.hamcrest:hamcrest:2.1"
+    }
 }

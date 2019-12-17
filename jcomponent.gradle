@@ -40,9 +40,3 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 build.finalizedBy sourcesJar, javadocJar
-
-
-if (shouldDeploy()) {
-    apply from: rootProject.file('deploy-component.gradle')
-
-}

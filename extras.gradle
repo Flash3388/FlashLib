@@ -2,9 +2,6 @@ ext {
     isReleaseBuild = {
         return !version.contains("SNAPSHOT")
     }
-    shouldDeploy = {
-        return project.hasProperty("DEPLOY_COMPONENT") && project.property("DEPLOY_COMPONENT") == "true"
-    }
     shouldSign = {
         return project.hasProperty('SIGN_PUBLISH')
     }
