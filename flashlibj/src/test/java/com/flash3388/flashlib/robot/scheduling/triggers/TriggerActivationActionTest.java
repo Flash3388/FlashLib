@@ -3,7 +3,7 @@ package com.flash3388.flashlib.robot.scheduling.triggers;
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.robot.RunningRobotMock;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;

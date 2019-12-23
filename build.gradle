@@ -1,58 +1,21 @@
-apply plugin: 'signing'
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "me.champeau.gradle:jmh-gradle-plugin:0.5.0"
+    }
+}
 
 allprojects {
     group = GROUP
     version = VERSION
 
-    apply plugin: 'maven-publish'
-
-    ext.isReleaseBuild = {
-        return version.contains("SNAPSHOT") == false
-    }
-
-    ext.getNexusUsername = {
-        return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
-    }
-
-    ext.getNexusPassword = {
-        return rootProject.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('NEXUS_PASSWORD')
-    }
-
-    publishing {
-        repositories {
-            maven {
-                if (isReleaseBuild()) {
-                    name = 'NexusStaging'
-                    url = NEXUS_RELEASE_REPOSITORY_URL
-                } else {
-                    name = 'NexusSnapshot'
-                    url = NEXUS_SNAPSHOT_REPOSITORY_URL
-                }
-
-                credentials {
-                    username getNexusUsername()
-                    password getNexusPassword()
-                }
-            }
-        }
-    }
-
-    ext.setPropertyGlobal = { key ->
-        if (rootProject.hasProperty(key)) {
-            project.setProperty(key, rootProject.getProperty(key))
-        }
-    }
-
-    ext.setPropertyGlobalFile = { key ->
-        if (rootProject.hasProperty(key)) {
-            def file = rootProject.file(rootProject.getProperty(key)).absolutePath
-            project.setProperty(key, file)
-        }
-    }
-
-    setPropertyGlobal('signing.keyId')
-    setPropertyGlobal('signing.password')
-    setPropertyGlobalFile('signing.secretKeyRingFile')
+    apply from: rootProject.file('extras.gradle')
 }
 
 subprojects {
@@ -67,9 +30,9 @@ subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
 
 task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
-    classifier = 'sources'
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('sources')
 
     from files(subprojects.collect {
         it.sourceSets.main.allSource
@@ -77,9 +40,9 @@ task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
 }
 
 task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
-    classifier = 'javadoc'
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('javadoc')
 
     from files(subprojects.collect {
         it.javadoc.destinationDir
@@ -90,8 +53,8 @@ task flashlib(type: Jar, dependsOn: subprojects.assemble) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
-    baseName = 'flashlib'
-    destinationDir = rootProject.buildDir
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
 
     from files(subprojects.collect {
         it.sourceSets.main.output
@@ -102,8 +65,8 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
-    archiveName = 'flashlib-all.jar'
-    destinationDir = rootProject.buildDir
+    archiveFileName.set('flashlib-all.jar')
+    destinationDirectory.set(rootProject.buildDir)
 
     from files(subprojects.collect {
         it.sourceSets.main.output
@@ -116,79 +79,4 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     })
 }
 
-artifacts {
-    archives flashlib
-    archives flashlibSources
-    archives flashlibJavadoc
-}
-
-publishing {
-    publications {
-        mavenFlashlib(MavenPublication) {
-            artifactId = 'flashlib'
-
-            artifact flashlib
-            artifact flashlibJavadoc
-            artifact flashlibSources
-
-            pom {
-                name = 'Flashlib'
-                description = 'Robotics development framework'
-                url = 'https://github.com/Flash3388/FlashLib'
-
-                licenses {
-                    license {
-                        name = 'BSD 3-Clause License'
-                        url = 'https://opensource.org/licenses/BSD-3-Clause'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'tomtzook'
-                        name = 'Tom Tzook'
-                        email = 'tomtzook@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:git://github.com/Flash3388/FlashLib.git'
-                    developerConnection = 'scm:git:ssh://github.com/Flash3388/FlashLib.git'
-                    url = 'https://github.com/Flash3388/FlashLib'
-                }
-
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-                    def allDependencies = []
-
-                    subprojects.each { project ->
-                        allDependencies.addAll(project.configurations.compile.allDependencies.withType(ExternalDependency))
-                    }
-
-                    def comparator = [
-                            compare: { first, second ->
-                                if (first.group != second.group)
-                                    return first.group.compareTo(second.group)
-                                else
-                                    return first.name.compareTo(second.name)
-                            }
-                    ] as Comparator
-
-                    allDependencies.collect().unique(comparator).each { dep ->
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', dep.group)
-                        dependencyNode.appendNode('artifactId', dep.name)
-                        dependencyNode.appendNode('version', dep.version)
-                        dependencyNode.appendNode('scope', 'compile')
-                    }
-                }
-            }
-        }
-    }
-}
-
-if (project.hasProperty('SIGN_PUBLISH')) {
-	signing {
-		sign publishing.publications.mavenFlashlib
-	}
-}
+apply from: rootProject.file('deploy.gradle')

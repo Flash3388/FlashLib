@@ -25,6 +25,15 @@ public class ResourceHolder {
         return this;
     }
 
+    public ResourceHolder add(Resource... resources) {
+        return add(Arrays.asList(resources));
+    }
+
+    public ResourceHolder add(Collection<? extends Resource> resources) {
+        mResources.addAll(resources);
+        return this;
+    }
+
     public void freeAll() {
         RuntimeException unexpectedException = null;
 

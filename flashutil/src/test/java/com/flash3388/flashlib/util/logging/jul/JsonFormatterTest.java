@@ -3,13 +3,13 @@ package com.flash3388.flashlib.util.logging.jul;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class JsonFormatterTest {

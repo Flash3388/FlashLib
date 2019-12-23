@@ -4,6 +4,8 @@ import com.beans.DoubleProperty;
 import com.beans.properties.SimpleDoubleProperty;
 import com.jmath.ExtendedMath;
 
+import java.util.function.DoubleBinaryOperator;
+
 /**
  * Provides a PID controller for controlling motors more efficiently.
  * <p>
@@ -17,7 +19,7 @@ import com.jmath.ExtendedMath;
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController {
+public class PidController implements DoubleBinaryOperator {
 
     private final DoubleProperty mKp;
     private final DoubleProperty mKi;
@@ -215,5 +217,10 @@ public class PidController {
         mLastProcessVariable = processVariable;
 
         return output;
+    }
+
+    @Override
+    public double applyAsDouble(double left, double right) {
+        return calculate(left, right);
     }
 }

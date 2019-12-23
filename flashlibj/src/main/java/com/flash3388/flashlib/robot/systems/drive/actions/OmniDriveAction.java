@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 public class OmniDriveAction extends Action {
 	
 	private final OmniDrive mDriveInterface;
-	private final Supplier<OmniDriveSpeed> mSpeedSupplier;
+	private final Supplier<? extends OmniDriveSpeed> mSpeedSupplier;
 
-    public OmniDriveAction(OmniDrive driveInterface, Supplier<OmniDriveSpeed> speedSupplier) {
+    public OmniDriveAction(OmniDrive driveInterface, Supplier<? extends OmniDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
     }

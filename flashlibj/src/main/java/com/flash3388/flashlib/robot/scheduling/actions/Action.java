@@ -66,6 +66,10 @@ public abstract class Action {
         mParent = null;
 	}
 
+    public Action(Scheduler scheduler) {
+	    this(scheduler, Time.INVALID);
+    }
+
     public Action(Time timeout) {
 	    this(RunningRobot.INSTANCE.get().getScheduler(), timeout);
     }

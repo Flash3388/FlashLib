@@ -1,14 +1,14 @@
 package com.flash3388.flashlib.util.logging.jul;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public class JulLoggerBuilder {
 
     private final String mName;
-    private final List<Handler> mHandlers;
+    private final Collection<Handler> mHandlers;
 
     public JulLoggerBuilder(String name) {
         mName = name;

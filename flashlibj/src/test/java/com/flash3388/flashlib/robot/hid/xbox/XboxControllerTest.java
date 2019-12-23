@@ -5,87 +5,59 @@ import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.EmptyHidInterface;
 import com.flash3388.flashlib.robot.hid.Pov;
 import com.flash3388.flashlib.time.StaticClock;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class XboxControllerTest {
 
-    @RunWith(Parameterized.class)
-    public static class ButtonTypeTest {
-
-        @Parameterized.Parameter(0)
-        public XboxButton mButton;
-
-        @Parameterized.Parameters(name = "Button {0}")
-        public static Collection<Object[]> data() {
-            return Arrays.stream(XboxButton.values()).map((button) -> new Object[] {button}).collect(Collectors.toList());
-        }
-
-        @Test
-        public void getButtonByType_getButtonByMatchingIndex_returnsSameButton() throws Exception {
-            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
-            assertEquals(xboxController.getButton(mButton), xboxController.getButton(mButton.buttonIndex()));
-        }
+    @ParameterizedTest(name = "getButton(type {0}) == getButton(index {0}.index)")
+    @EnumSource(value = XboxButton.class)
+    public void getButtonByType_getButtonByMatchingIndex_returnsSameButton(XboxButton button) throws Exception {
+        XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
+        assertEquals(xboxController.getButton(button), xboxController.getButton(button.buttonIndex()));
     }
 
-    @RunWith(Parameterized.class)
-    public static class AxisTypeTest {
-
-        @Parameterized.Parameter(0)
-        public XboxAxis mAxis;
-
-        @Parameterized.Parameters(name = "Axis {0}")
-        public static Collection<Object[]> data() {
-            return Arrays.stream(XboxAxis.values()).map((button) -> new Object[] {button}).collect(Collectors.toList());
-        }
-
-        @Test
-        public void getAxisByType_getAxisByMatchingIndex_returnsSameButton() throws Exception {
-            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
-            assertEquals(xboxController.getAxis(mAxis), xboxController.getAxis(mAxis.axisIndex()));
-        }
+    @ParameterizedTest(name = "getAxis(type {0}) == getAxis(index {0}.index)")
+    @EnumSource(value = XboxAxis.class)
+    public void getAxisByType_getAxisByMatchingIndex_returnsSameButton(XboxAxis axis) throws Exception {
+        XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
+        assertEquals(xboxController.getAxis(axis), xboxController.getAxis(axis.axisIndex()));
     }
 
-    public static class ComponentsAccessTest {
+    @Test
+    public void axes_normal_returnsIterableOfTheAxisCount() throws Exception {
+        XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
+        Iterable<Axis> axes = xboxController.axes();
 
-        @Test
-        public void axes_normal_returnsIterableOfTheAxisCount() throws Exception {
-            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
-            Iterable<Axis> axes = xboxController.axes();
+        assertEquals(xboxController.getAxisCount(), getIterableSize(axes));
+    }
 
-            assertEquals(xboxController.getAxisCount(), getIterableSize(axes));
-        }
+    @Test
+    public void buttons_normal_returnsIterableOfTheButtonCount() throws Exception {
+        XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
+        Iterable<Button> buttons = xboxController.buttons();
 
-        @Test
-        public void buttons_normal_returnsIterableOfTheButtonCount() throws Exception {
-            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
-            Iterable<Button> buttons = xboxController.buttons();
+        assertEquals(xboxController.getButtonCount(), getIterableSize(buttons));
+    }
 
-            assertEquals(xboxController.getButtonCount(), getIterableSize(buttons));
-        }
+    @Test
+    public void povs_normal_returnsIterableOfThePovCount() throws Exception {
+        XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
+        Iterable<Pov> povs = xboxController.povs();
 
-        @Test
-        public void povs_normal_returnsIterableOfThePovCount() throws Exception {
-            XboxController xboxController = new XboxController(new StaticClock(), new EmptyHidInterface(), 0);
-            Iterable<Pov> povs = xboxController.povs();
+        assertEquals(xboxController.getPovCount(), getIterableSize(povs));
+    }
 
-            assertEquals(xboxController.getPovCount(), getIterableSize(povs));
-        }
+    private <T> int getIterableSize(Iterable<T> iterable) {
+        AtomicInteger count = new AtomicInteger();
+        iterable.forEach((i) -> count.getAndIncrement());
 
-        private <T> int getIterableSize(Iterable<T> iterable) {
-            AtomicInteger count = new AtomicInteger();
-            iterable.forEach((i) -> count.getAndIncrement());
-
-            return count.get();
-        }
+        return count.get();
     }
 }

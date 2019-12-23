@@ -67,7 +67,7 @@ class ActionsRepository {
         mRunningActions.clear();
     }
 
-    public void removeActionsIf(Predicate<Action> removalPredicate) {
+    public void removeActionsIf(Predicate<? super Action> removalPredicate) {
         mNextRunActions.removeIf(removalPredicate);
 
         Collection<Action> actionsToRemove = mRunningActions.keySet().stream()

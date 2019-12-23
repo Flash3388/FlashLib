@@ -2,12 +2,12 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.makeActionCancelable;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -21,7 +21,7 @@ public class ActionContextTest {
 
     private ActionContext mActionContext;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mAction = mock(Action.class);
         mockActionFinished(false);

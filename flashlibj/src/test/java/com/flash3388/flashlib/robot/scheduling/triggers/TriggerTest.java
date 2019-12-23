@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;

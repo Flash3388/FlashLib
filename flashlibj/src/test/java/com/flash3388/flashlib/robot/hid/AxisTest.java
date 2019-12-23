@@ -1,13 +1,15 @@
 package com.flash3388.flashlib.robot.hid;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,67 +17,31 @@ public class AxisTest {
 
     private static final double MARGIN = 0.0001;
 
-    @RunWith(Parameterized.class)
-    public static class InvalidThresholdValueTest {
+    @ParameterizedTest(name = "setThresholdValue({0}) is invalid")
+    @ValueSource(doubles = {-0.1, -1.1, 1.1, 2.0})
+    public void setValueThreshold_invalidThresholdValue_throwsIllegalArgumentException(double thresholdValue) throws Exception {
+        final int CHANNEL = 1;
+        final int AXIS = 1;
 
-        @Parameterized.Parameter(0)
-        public double mThresholdValue;
-
-        @Parameterized.Parameters(name = "invalidThreshold({0})")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {-0.1},
-                    {-1.1},
-                    {1.1},
-                    {2.0}
-            });
-        }
-
-        @Test(expected = IllegalArgumentException.class)
-        public void setValueThreshold_invalidThresholdValue_throwsIllegalArgumentException() throws Exception {
-            final int CHANNEL = 1;
-            final int AXIS = 1;
-
+        assertThrows(IllegalArgumentException.class, ()->{
             LimitedAxis axis = new LimitedAxis(new HidAxis(mock(HidInterface.class), CHANNEL, AXIS));
-            axis.setValueThreshold(mThresholdValue);
-        }
+            axis.setValueThreshold(thresholdValue);
+        });
     }
 
-    @RunWith(Parameterized.class)
-    public static class AxisWithThresholdTest {
+    @ParameterizedTest(name = "axis value {0} -> limit {1} | expected value {2}")
+    @MethodSource("axisWithThresholdValues")
+    public void get_valueWithThreshold_returnsExpectedValue(double axisValueFromInterface, double thresholdValue, double expectedAxisValue) throws Exception {
+        final int CHANNEL = 0;
+        final int AXIS = 0;
 
-        @Parameterized.Parameter(0)
-        public double mAxisValueFromInterface;
-        @Parameterized.Parameter(1)
-        public double mThresholdValue;
-        @Parameterized.Parameter(2)
-        public double mExpectedAxisValue;
+        HidInterface hidInterface = mockInterfaceWithAxisValue(CHANNEL, AXIS, axisValueFromInterface);
 
-        @Parameterized.Parameters(name = "valueWithThreshold({0}, {1}) = {2}")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {-0.1, 0.5, 0.0},
-                    {0.1, 0.5, 0.0},
-                    {-0.1, 0.05, -0.1},
-                    {0.1, 0.05, 0.1},
-                    {-0.1, 0.1, -0.1},
-                    {0.1, 0.1, 0.1}
-            });
-        }
+        LimitedAxis axis = new LimitedAxis(new HidAxis(hidInterface, CHANNEL, AXIS));
+        axis.setValueThreshold(thresholdValue);
 
-        @Test
-        public void get_valueWithThreshold_returnsExcepectedValue() throws Exception {
-            final int CHANNEL = 0;
-            final int AXIS = 0;
-
-            HidInterface hidInterface = mockInterfaceWithAxisValue(CHANNEL, AXIS, mAxisValueFromInterface);
-
-            LimitedAxis axis = new LimitedAxis(new HidAxis(hidInterface, CHANNEL, AXIS));
-            axis.setValueThreshold(mThresholdValue);
-
-            double value = axis.get();
-            assertEquals(mExpectedAxisValue, value, MARGIN);
-        }
+        double value = axis.get();
+        assertEquals(expectedAxisValue, value, MARGIN);
     }
 
     @Test
@@ -98,5 +64,15 @@ public class AxisTest {
         when(hidInterface.getHidAxis(channel, axis)).thenReturn(value);
 
         return hidInterface;
+    }
+
+    private static Stream<Arguments> axisWithThresholdValues() {
+        return Stream.of(
+                Arguments.of(-0.1, 0.5, 0.0),
+                Arguments.of(0.1, 0.5, 0.0),
+                Arguments.of(-0.1, 0.05, -0.1),
+                Arguments.of(0.1, 0.05, 0.1),
+                Arguments.of(-0.1, 0.1, -0.1),
+                Arguments.of(0.1, 0.1, 0.1));
     }
 }

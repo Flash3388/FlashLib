@@ -1,17 +1,19 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply from: rootProject.file('dependencies.gradle')
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    compile slf4jApi()
+    implementation slf4jApi()
 
-    testCompile junit()
-    testCompile mockitoCore()
-    testCompile hamcrest()
+    testImplementation junit()
+    testImplementation mockito()
+    testImplementation hamcrest()
 }
 
 test {
+    useJUnitPlatform()
+
     testLogging {
         events "failed"
         exceptionFormat "full"
@@ -20,27 +22,21 @@ test {
 }
 
 jar {
-    baseName project.name
+    archiveBaseName.set(project.name)
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    baseName project.name
-    classifier = 'sources'
+    archiveBaseName.set(project.name)
+    archiveClassifier.set('sources')
 
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    baseName project.name
-    classifier = 'javadoc'
+    archiveBaseName.set(project.name)
+    archiveClassifier.set('javadoc')
 
     from javadoc.destinationDir
 }
 
 build.finalizedBy sourcesJar, javadocJar
-
-
-if (project.hasProperty("DEPLOY_COMPONENT") && project.property("DEPLOY_COMPONENT") == "true") {
-    apply from: rootProject.file('deploy-component.gradle')
-
-}

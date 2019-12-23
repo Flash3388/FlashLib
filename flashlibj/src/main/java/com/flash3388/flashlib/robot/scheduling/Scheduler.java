@@ -27,7 +27,7 @@ public interface Scheduler {
 
     void stopAllActions();
 
-    void stopActionsIf(Predicate<Action> removalPredicate);
+    void stopActionsIf(Predicate<? super Action> removalPredicate);
 
     void setDefaultAction(Subsystem subsystem, Action action);
 

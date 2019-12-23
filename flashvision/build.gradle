@@ -1,7 +1,9 @@
-apply from: rootProject.file('instrumentation-test.gradle')
 apply from: rootProject.file('jcomponent.gradle')
+apply from: rootProject.file('instrumentation-test.gradle')
 
 dependencies {
-    compile project(':flashutil')
-    compile project(':flashcomm')
+    implementation project(':flashutil')
+    implementation project(':flashcomm')
+    implementation javabeans()
+    implementation jmath()
 }

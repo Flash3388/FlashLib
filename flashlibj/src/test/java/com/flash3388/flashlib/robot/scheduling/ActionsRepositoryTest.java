@@ -5,8 +5,8 @@ import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.time.Clock;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockAc
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockActionWithoutRequirements;
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNotRunningAction;
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockRunningAction;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.hasEntry;
@@ -29,7 +30,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsEmptyIterable.emptyIterable;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class ActionsRepositoryTest {
@@ -43,7 +43,7 @@ public class ActionsRepositoryTest {
 
     private ActionsRepository mActionsRepository;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         mClock = mock(Clock.class);
 

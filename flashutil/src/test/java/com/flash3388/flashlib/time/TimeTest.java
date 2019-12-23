@@ -1,43 +1,19 @@
 package com.flash3388.flashlib.time;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TimeTest {
-
-    @RunWith(Parameterized.class)
-    public static class ValidValueTest {
-
-        @Parameterized.Parameter(0)
-        public long mValue;
-        @Parameterized.Parameter(1)
-        public TimeUnit mTimeUnit;
-        @Parameterized.Parameter(2)
-        public boolean mIsValid;
-
-        @Parameterized.Parameters(name = "time({0},{1}).isValid == {2}")
-        public static Collection<Object[]> data() {
-            return Arrays.asList(new Object[][]{
-                    {0, TimeUnit.MILLISECONDS, true},
-                    {180, TimeUnit.MILLISECONDS, true},
-                    {220, TimeUnit.SECONDS, true},
-                    {-2, TimeUnit.MILLISECONDS, false},
-                    {-164, TimeUnit.SECONDS, false}
-            });
-        }
-
-        @Test
-        public void isValid_forValue_indicatesExpectedResult() throws Exception {
-            assertEquals(mIsValid, Time.of(mValue, mTimeUnit).isValid());
-        }
-    }
 
     @Test
     public void toUnits_forOtherUnits_convertsValueToOtherUnits() throws Exception {
@@ -103,20 +79,24 @@ public class TimeTest {
         assertEquals(OTHER_UNIT, result.unit());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void add_thisNotValid_throwsIllegalStateException() throws Exception {
         final Time THIS = Time.INVALID;
         final Time OTHER = Time.milliseconds(1);
 
-        THIS.add(OTHER);
+        assertThrows(IllegalStateException.class, ()->{
+            THIS.add(OTHER);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void add_otherNotValid_throwsIllegalArgumentException() throws Exception {
         final Time THIS = Time.milliseconds(1);
         final Time OTHER = Time.INVALID;
 
-        THIS.add(OTHER);
+        assertThrows(IllegalArgumentException.class, ()->{
+            THIS.add(OTHER);
+        });
     }
 
     @Test
@@ -171,20 +151,24 @@ public class TimeTest {
         assertEquals(OTHER_UNIT, result.unit());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void sub_thisNotValid_throwsIllegalStateException() throws Exception {
         final Time THIS = Time.INVALID;
         final Time OTHER = Time.milliseconds(1);
 
-        THIS.sub(OTHER);
+        assertThrows(IllegalStateException.class, ()->{
+            THIS.sub(OTHER);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void sub_otherNotValid_throwsIllegalArgumentException() throws Exception {
         final Time THIS = Time.milliseconds(1);
         final Time OTHER = Time.INVALID;
 
-        THIS.sub(OTHER);
+        assertThrows(IllegalArgumentException.class, ()->{
+            THIS.sub(OTHER);
+        });
     }
 
     @Test
@@ -353,5 +337,20 @@ public class TimeTest {
         final Time OTHER = Time.INVALID;
 
         assertFalse(THIS.equals(OTHER));
+    }
+
+    @ParameterizedTest(name = "time({0},{1}) isValid {2}")
+    @MethodSource(value = "timeValidationValues")
+    public void isValid_forValue_indicatesExpectedResult(long value, TimeUnit timeUnit, boolean isValid) throws Exception {
+        assertEquals(isValid, Time.of(value, timeUnit).isValid());
+    }
+
+    private static Stream<Arguments> timeValidationValues() {
+        return Stream.of(
+                Arguments.of(0, TimeUnit.MILLISECONDS, true),
+                Arguments.of(180, TimeUnit.MILLISECONDS, true),
+                Arguments.of(220, TimeUnit.SECONDS, true),
+                Arguments.of(-2, TimeUnit.MILLISECONDS, false),
+                Arguments.of(-164, TimeUnit.SECONDS, false));
     }
 }

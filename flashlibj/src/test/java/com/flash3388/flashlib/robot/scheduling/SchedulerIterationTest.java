@@ -4,8 +4,8 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
 import org.hamcrest.core.IsIterableContaining;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import static com.flash3388.flashlib.robot.modes.RobotModesMock.mockNonDisabledMode;
@@ -26,7 +26,7 @@ public class SchedulerIterationTest {
 
     private ActionsRepositoryMock mActionsRepositoryMock;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         mActionsRepository = mock(ActionsRepository.class);
         mSchedulerIteration = new SchedulerIteration(mActionsRepository, mock(Logger.class));

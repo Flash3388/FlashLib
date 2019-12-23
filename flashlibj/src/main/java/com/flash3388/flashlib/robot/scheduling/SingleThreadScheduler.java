@@ -36,7 +36,7 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
-    public void stopActionsIf(Predicate<Action> removalPredicate) {
+    public void stopActionsIf(Predicate<? super Action> removalPredicate) {
         mActionsRepository.removeActionsIf(removalPredicate);
     }
 

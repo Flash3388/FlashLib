@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayList;
@@ -18,13 +19,18 @@ public class ParallelActionGroup extends Action {
 
     private boolean mRunWhenDisabled;
 
-    public ParallelActionGroup(Clock clock) {
+    public ParallelActionGroup(Scheduler scheduler, Clock clock) {
+        super(scheduler);
         mClock = clock;
 
         mActions = new ArrayList<>(3);
         mCurrentActions = new ArrayList<>(2);
 
         mRunWhenDisabled = false;
+    }
+
+    public ParallelActionGroup(Clock clock) {
+        this(RunningRobot.INSTANCE.get().getScheduler(), clock);
     }
 
     public ParallelActionGroup() {

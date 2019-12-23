@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 public class Move2dAction extends Action {
 
     private final Movable2d mMovable;
-    private final Supplier<Vector2> mMotionVectorSupplier;
+    private final Supplier<? extends Vector2> mMotionVectorSupplier;
 
-    public Move2dAction(Movable2d movable, Supplier<Vector2> motionVectorSupplier) {
+    public Move2dAction(Movable2d movable, Supplier<? extends Vector2> motionVectorSupplier) {
         mMovable = movable;
         mMotionVectorSupplier = motionVectorSupplier;
     }
