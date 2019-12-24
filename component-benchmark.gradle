@@ -31,7 +31,10 @@ jmh {
     warmupMode = 'INDI' // Warmup mode for warming up selected benchmarks. Warmup modes are: [INDI, BULK, BULK_INDI].
     warmupBenchmarks = ['.*Warmup'] // Warmup benchmarks to include in the run in addition to already selected. JMH will not measure these benchmarks, but only use them for the warmup.
 
-    jmhVersion = '1.21' // Specifies JMH version
+    jmhVersion = '1.22' // Specifies JMH version
+
+    includeTests = false
+    duplicateClassesStrategy = 'fail'
 }
 
 task clearBenchmarkResults(type: Delete) {
@@ -42,5 +45,5 @@ task clearBenchmarkResults(type: Delete) {
 
 task benchmark {
     dependsOn project.tasks.clearBenchmarkResults,
-            project.tasks.build, project.tasks.jmh
+            project.tasks.assemble, project.tasks.jmh
 }
