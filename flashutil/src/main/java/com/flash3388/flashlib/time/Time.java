@@ -169,7 +169,7 @@ public class Time implements Comparable<Time> {
     }
 
     private String getNotValidExceptionMessage(Time time) {
-        return String.format("time not valid: %s", time.toString());
+        return String.format("time not valid: %d [%s]", time.mValue, time.mUnit);
     }
 
     public static Time earliest(Time time1, Time time2) {
