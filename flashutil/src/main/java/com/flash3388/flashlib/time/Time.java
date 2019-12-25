@@ -151,6 +151,10 @@ public class Time implements Comparable<Time> {
 
     @Override
     public String toString() {
+        if (!isValid()) {
+            return "Invalid Time";
+        }
+
         return String.format("%d [%s]", mValue, mUnit.name());
     }
 
