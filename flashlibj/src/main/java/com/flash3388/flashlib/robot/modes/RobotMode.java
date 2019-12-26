@@ -1,36 +1,36 @@
 package com.flash3388.flashlib.robot.modes;
 
-public class RobotMode {
+public interface RobotMode {
+    RobotMode DISABLED = create("DISABLED", 0, true);
 
-    public static final RobotMode DISABLED = new RobotMode("DISABLED", 0);
+    String getName();
+    int getKey();
+    boolean isDisabled();
 
-    private final String mName;
-    private final int mKey;
-
-    public RobotMode(String name, int key) {
-        mName = name;
-        mKey = key;
+    default boolean equals(RobotMode other) {
+        return other != null && getKey() == other.getKey();
     }
 
-    public String getName() {
-        return mName;
+    static RobotMode create(String name, int key) {
+        return create(name, key, false);
     }
 
-    public int getKey() {
-        return mKey;
-    }
+    static RobotMode create(String name, int key, boolean isDisabled) {
+        return new RobotMode() {
+            @Override
+            public String getName() {
+                return name;
+            }
 
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(mKey);
-    }
+            @Override
+            public int getKey() {
+                return key;
+            }
 
-    public boolean equals(RobotMode other) {
-        return other != null && mKey == other.mKey;
-    }
-
-    @Override
-    public String toString() {
-        return mName;
+            @Override
+            public boolean isDisabled() {
+                return isDisabled;
+            }
+        };
     }
 }
