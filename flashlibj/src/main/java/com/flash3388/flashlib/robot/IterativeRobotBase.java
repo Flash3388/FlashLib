@@ -42,7 +42,7 @@ public abstract class IterativeRobotBase extends RobotBase {
     private void initMode(RobotMode mode) {
         getLogger().trace("Initializing mode {}", mode);
 
-        if (mode.equals(RobotMode.DISABLED)) {
+        if (mode.isDisabled()) {
             disabledInit();
         } else {
             modeInit(mode);
@@ -53,7 +53,7 @@ public abstract class IterativeRobotBase extends RobotBase {
         getLogger().trace("Periodic mode {}", mode);
 
         getScheduler().run(mode);
-        if (mode.equals(RobotMode.DISABLED)) {
+        if (mode.isDisabled()) {
             disabledPeriodic();
         } else {
             modePeriodic(mode);
