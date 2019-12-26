@@ -5,6 +5,7 @@ import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.concurrent.Sleeper;
 import com.flash3388.flashlib.time.Clock;
@@ -41,7 +42,11 @@ public class IterativeRobotTest {
 
         mLogger = mock(Logger.class);
         mScheduler = mock(Scheduler.class);
-        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mLogger, mock(Sleeper.class)));
+
+        Clock clock = mock(Clock.class);
+        when(clock.currentTime()).thenReturn(Time.milliseconds(1));
+
+        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mLogger, mock(Sleeper.class), clock));
     }
 
     @AfterEach
@@ -146,12 +151,14 @@ public class IterativeRobotTest {
 
         private final Scheduler mScheduler;
         private final Logger mLogger;
+        private final Clock mClock;
 
-        private FakeIterativeRobot(Scheduler scheduler, Logger logger, Sleeper sleeper) {
+        private FakeIterativeRobot(Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
             super(sleeper);
 
             mScheduler = scheduler;
             mLogger = logger;
+            mClock = clock;
         }
 
         @Override
@@ -166,7 +173,7 @@ public class IterativeRobotTest {
 
         @Override
         public Clock getClock() {
-            return null;
+            return mClock;
         }
 
         @Override
