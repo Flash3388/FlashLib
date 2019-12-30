@@ -154,7 +154,7 @@ public class LoggerBuilder {
                 String pattern;
 
                 if (mLogsParent != null) {
-                    pattern = mLogsParent.resolve("/".concat(mFilePattern)).toAbsolutePath().toString();
+                    pattern = mLogsParent.resolve(mFilePattern).toAbsolutePath().toString();
                     Files.createDirectories(mLogsParent);
                 } else {
                     pattern = mFilePattern;
