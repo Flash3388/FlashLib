@@ -8,6 +8,7 @@ import com.flash3388.flashlib.robot.scheduling.triggers.handlers.ToggleOnState;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
 
 public class Trigger {
 
@@ -72,6 +73,10 @@ public class Trigger {
 
     public void deactivate() {
         setState(TriggerState.INACTIVE);
+    }
+
+    public void addToScheduler(BooleanSupplier condition) {
+        new TriggerActivationAction(condition, this).start();
     }
 
     private void updateSameState(TriggerState state) {
