@@ -17,13 +17,21 @@ public class Stick {
 		mAxisX = axisX;
 		mAxisY = axisY;
 	}
-	
-	/**
+
+	public Axis getAxisX() {
+	    return mAxisX;
+    }
+
+    public Axis getAxisY() {
+        return mAxisY;
+    }
+
+    /**
 	 * Gets the value of the x-axis of the controller
 	 * @return the x-axis
 	 */
 	public double getX() {
-		return mAxisX.get();
+		return mAxisX.getAsDouble();
 	}
 
 	/**
@@ -31,7 +39,7 @@ public class Stick {
 	 * @return the y-axis
 	 */
 	public double getY() {
-		return mAxisY.get();
+		return mAxisY.getAsDouble();
 	}
 	
 	/**

@@ -32,7 +32,7 @@ public class HidAxis implements Axis {
      * @return the value of the axis
      */
     @Override
-    public double get(){
+    public double getAsDouble(){
         double raw = mHidInterface.getHidAxis(mChannel, mAxis);
         return mIsInverted ? -raw : raw;
     }
