@@ -11,11 +11,4 @@ import java.util.function.DoubleSupplier;
  * @since FlashLib 1.0.2
  */
 public interface Axis extends DoubleSupplier, Invertable {
-
-    double get();
-
-    @Override
-    default double getAsDouble() {
-        return get();
-    }
 }

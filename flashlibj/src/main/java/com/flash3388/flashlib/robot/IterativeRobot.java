@@ -4,6 +4,7 @@ import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.Sleeper;
 
@@ -52,7 +53,7 @@ import com.flash3388.flashlib.util.concurrent.Sleeper;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class IterativeRobot extends RobotBase {
+public abstract class IterativeRobot extends IterativeRobotBase {
 
 	private static final Time ITERATION_DELAY = Time.milliseconds(5);
 
@@ -70,89 +71,25 @@ public abstract class IterativeRobot extends RobotBase {
 
 	@Override
 	protected final void robotMain() {
-		robotLoop();
+        Clock clock = getClock();
+        while(mRunLoopProperty.getAsBoolean()){
+            Time start = clock.currentTime();
+            robotLoop();
+
+            Time delay = clock.currentTime().sub(start).sub(ITERATION_DELAY);
+
+            if (delay.isValid()) {
+                try {
+                    mSleeper.sleepWhileConditionMet(mRunLoopProperty, delay);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
 	}
 
 	@Override
-	protected final void robotShutdown(){
-        stopRobotLoop();
-
-        getScheduler().stopAllActions();
-
-        robotStop();
-	}
-
 	protected final void stopRobotLoop() {
         mRunLoopProperty.setAsBoolean(false);
     }
-
-    private void robotLoop(){
-	    RobotMode currentMode;
-	    RobotMode lastMode = null;
-
-	    boolean wasModeInitialize = false;
-
-        while(mRunLoopProperty.getAsBoolean()){
-            currentMode = getMode();
-
-            if (!currentMode.equals(lastMode)) {
-                lastMode = currentMode;
-                wasModeInitialize = false;
-            }
-
-            if (!wasModeInitialize) {
-                initMode(currentMode);
-                wasModeInitialize = true;
-            }
-
-            periodicMode(currentMode);
-
-            try {
-                mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-    }
-
-    private void initMode(RobotMode mode) {
-        getLogger().trace("Initializing mode {}", mode);
-
-        if (mode.equals(RobotMode.DISABLED)) {
-            disabledInit();
-        } else {
-            modeInit(mode);
-        }
-    }
-
-    private void periodicMode(RobotMode mode) {
-        getLogger().trace("Periodic mode {}", mode);
-
-        getScheduler().run(mode);
-        if (mode.equals(RobotMode.DISABLED)) {
-            disabledPeriodic();
-        } else {
-            modePeriodic(mode);
-        }
-
-        getLogger().trace("Robot periodic");
-
-        robotPeriodic();
-    }
-
-    //--------------------------------------------------------------------
-    //----------------------Implementable---------------------------------
-    //--------------------------------------------------------------------
-
-	protected void robotStop(){}
-
-	@Override
-	protected abstract void robotInit() throws RobotInitializationException;
-    protected abstract void robotPeriodic();
-
-	protected abstract void disabledInit();
-	protected abstract void disabledPeriodic();
-	
-	protected abstract void modeInit(RobotMode mode);
-	protected abstract void modePeriodic(RobotMode mode);
 }

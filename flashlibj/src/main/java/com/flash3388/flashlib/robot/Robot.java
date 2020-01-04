@@ -61,7 +61,7 @@ public interface Robot {
      * @return true if in disabled mode, false otherwise
      */
     default boolean isDisabled(){
-        return isInMode(RobotMode.DISABLED);
+        return getMode().isDisabled();
     }
 
     HidInterface getHidInterface();

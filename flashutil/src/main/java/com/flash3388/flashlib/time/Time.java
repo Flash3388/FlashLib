@@ -151,6 +151,10 @@ public class Time implements Comparable<Time> {
 
     @Override
     public String toString() {
+        if (!isValid()) {
+            return "Invalid Time";
+        }
+
         return String.format("%d [%s]", mValue, mUnit.name());
     }
 
@@ -165,6 +169,22 @@ public class Time implements Comparable<Time> {
     }
 
     private String getNotValidExceptionMessage(Time time) {
-        return String.format("time not valid: %s", time.toString());
+        return String.format("time not valid: %d [%s]", time.mValue, time.mUnit);
+    }
+
+    public static Time earliest(Time time1, Time time2) {
+        if (time2.before(time1)) {
+            return time2;
+        }
+
+        return time1;
+    }
+
+    public static Time latest(Time time1, Time time2) {
+        if (time2.after(time1)) {
+            return time2;
+        }
+
+        return time1;
     }
 }

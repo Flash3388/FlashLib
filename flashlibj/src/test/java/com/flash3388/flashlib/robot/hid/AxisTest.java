@@ -40,7 +40,7 @@ public class AxisTest {
         LimitedAxis axis = new LimitedAxis(new HidAxis(hidInterface, CHANNEL, AXIS));
         axis.setValueThreshold(thresholdValue);
 
-        double value = axis.get();
+        double value = axis.getAsDouble();
         assertEquals(expectedAxisValue, value, MARGIN);
     }
 
@@ -55,7 +55,7 @@ public class AxisTest {
         Axis axis = new HidAxis(hidInterface, CHANNEL, AXIS);
         axis.setInverted(true);
 
-        double value = axis.get();
+        double value = axis.getAsDouble();
         assertEquals(-VALUE, value, MARGIN);
     }
 

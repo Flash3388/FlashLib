@@ -43,8 +43,8 @@ public class LimitedAxis implements Axis {
     }
 
     @Override
-    public double get() {
-        double value = mAxis.get();
+    public double getAsDouble() {
+        double value = mAxis.getAsDouble();
         if (Math.abs(value) < mValueThreshold) {
             return 0;
         }

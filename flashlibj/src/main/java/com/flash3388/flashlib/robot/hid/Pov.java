@@ -20,12 +20,8 @@ public class Pov implements IntSupplier {
         mPov = pov;
     }
 
-	public int get(){
-		return mHidInterface.getHidPov(mChannel, mPov);
-	}
-
     @Override
     public int getAsInt() {
-	    return get();
+        return mHidInterface.getHidPov(mChannel, mPov);
     }
 }

@@ -71,4 +71,14 @@ public interface SpeedController extends Stoppable, Invertable {
 	 */
 	@Override
 	boolean isInverted();
+
+    /**
+     * Sets the reversing of directions by the motor controller.
+     * @param inverted true to reverse directions, false otherwise.
+     * @return this instance.
+     */
+	default SpeedController inverted(boolean inverted) {
+	    setInverted(inverted);
+	    return this;
+    }
 }
