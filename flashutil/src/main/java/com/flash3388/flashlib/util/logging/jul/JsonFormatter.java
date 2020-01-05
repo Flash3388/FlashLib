@@ -107,8 +107,10 @@ public class JsonFormatter extends Formatter {
             elementObject.add("native", new JsonPrimitive(element.isNativeMethod()));
             elementObject.add("class", new JsonPrimitive(element.getClassName()));
             elementObject.add("method", new JsonPrimitive(element.getMethodName()));
-            elementObject.add("file", new JsonPrimitive(element.getFileName()));
             elementObject.add("line", new JsonPrimitive(element.getLineNumber()));
+
+            String fileName = element.getFileName();
+            elementObject.add("file", new JsonPrimitive(fileName != null ? fileName : "NULL"));
 
             stacktrace.add(elementObject);
         }

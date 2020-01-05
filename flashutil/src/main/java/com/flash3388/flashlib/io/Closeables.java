@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class Closeables {
+public final class Closeables {
     private Closeables() {}
 
     private static final Logger LOGGER = Logging.consoleLogger(Closeables.class.getName());

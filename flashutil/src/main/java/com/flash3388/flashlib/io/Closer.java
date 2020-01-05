@@ -53,11 +53,9 @@ public class Closer implements Closeable {
 	 * Adds a new resource to be closed after operation.
 	 * 
 	 * @param closeable resource to close.
-	 * @return this object.
 	 */
-	public Closer add(Closeable closeable) {
+	public void add(Closeable closeable) {
 		mCloseables.add(closeable);
-		return this;
 	}
 	
 	/**

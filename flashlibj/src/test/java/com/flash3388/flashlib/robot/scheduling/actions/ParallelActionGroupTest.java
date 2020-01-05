@@ -34,9 +34,7 @@ public class ParallelActionGroupTest {
 
         actionGroup.initialize();
 
-        actions.forEach((action) -> {
-            verify(action, times(1)).markStarted();
-        });
+        actions.forEach((action) -> verify(action, times(1)).markStarted());
     }
 
     @Test
@@ -52,9 +50,7 @@ public class ParallelActionGroupTest {
         actionGroup.initialize();
         actionGroup.execute();
 
-        actions.forEach((action) -> {
-            verify(action, times(1)).execute();
-        });
+        actions.forEach((action) -> verify(action, times(1)).execute());
     }
 
     @Test

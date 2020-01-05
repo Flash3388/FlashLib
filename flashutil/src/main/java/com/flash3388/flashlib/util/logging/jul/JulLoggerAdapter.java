@@ -9,9 +9,10 @@ import org.slf4j.spi.LocationAwareLogger;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+@SuppressWarnings("ClassWithTooManyMethods")
 public class JulLoggerAdapter extends MarkerIgnoringBase implements LocationAwareLogger {
 
-    private static String SUPER = MarkerIgnoringBase.class.getName();
+    private static final String SUPER = MarkerIgnoringBase.class.getName();
     private static final String SELF = JulLoggerAdapter.class.getName();
 
     private final java.util.logging.Logger mLogger;

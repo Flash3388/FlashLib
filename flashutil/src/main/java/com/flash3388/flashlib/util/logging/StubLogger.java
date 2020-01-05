@@ -3,6 +3,7 @@ package com.flash3388.flashlib.util.logging;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
+@SuppressWarnings("ClassWithTooManyMethods")
 public class StubLogger implements Logger {
 
     @Override

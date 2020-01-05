@@ -2,7 +2,7 @@ package com.flash3388.flashlib;
 
 import com.flash3388.flashlib.util.versioning.Version;
 
-public class FlashLib {
+public final class FlashLib {
     private FlashLib() {}
 
     /**

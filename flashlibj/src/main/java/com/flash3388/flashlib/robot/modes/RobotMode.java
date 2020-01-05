@@ -15,6 +15,7 @@ public interface RobotMode {
         return create(name, key, false);
     }
 
+    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
     static RobotMode create(String name, int key, boolean isDisabled) {
         return new RobotMode() {
             @Override

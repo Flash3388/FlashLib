@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.vision.jpeg;
 
-public class MjpegFormat {
+public final class MjpegFormat {
 
     private MjpegFormat() {}
 

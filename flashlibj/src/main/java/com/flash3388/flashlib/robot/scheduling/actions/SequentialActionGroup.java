@@ -85,9 +85,7 @@ public class SequentialActionGroup extends Action {
 
     @Override
     protected final void initialize() {
-        mActions.forEach((action) -> {
-            mActionQueue.add(new ActionContext(action, mClock));
-        });
+        mActions.forEach((action) -> mActionQueue.add(new ActionContext(action, mClock)));
 
         startNextAction();
     }

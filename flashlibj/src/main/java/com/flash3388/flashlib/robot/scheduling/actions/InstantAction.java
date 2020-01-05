@@ -8,6 +8,7 @@ package com.flash3388.flashlib.robot.scheduling.actions;
  */
 public abstract class InstantAction extends Action {
 
+    @SuppressWarnings("EmptyMethod")
     @Override
     protected final void initialize() {
     }

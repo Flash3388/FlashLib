@@ -146,7 +146,9 @@ public class Time implements Comparable<Time> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mValue, mUnit);
+        int hash = Long.hashCode(mValue);
+        hash = hash * 31 + mUnit.hashCode();
+        return hash;
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot.hid.scheduling;
 
 import com.flash3388.flashlib.robot.hid.Hid;
 
-public class HidScheduling {
+public final class HidScheduling {
 
     private HidScheduling() {}
 

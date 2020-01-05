@@ -84,9 +84,7 @@ public class TimeTest {
         final Time THIS = Time.INVALID;
         final Time OTHER = Time.milliseconds(1);
 
-        assertThrows(IllegalStateException.class, ()->{
-            THIS.add(OTHER);
-        });
+        assertThrows(IllegalStateException.class, ()-> THIS.add(OTHER));
     }
 
     @Test
@@ -94,9 +92,7 @@ public class TimeTest {
         final Time THIS = Time.milliseconds(1);
         final Time OTHER = Time.INVALID;
 
-        assertThrows(IllegalArgumentException.class, ()->{
-            THIS.add(OTHER);
-        });
+        assertThrows(IllegalArgumentException.class, ()-> THIS.add(OTHER));
     }
 
     @Test
@@ -156,9 +152,7 @@ public class TimeTest {
         final Time THIS = Time.INVALID;
         final Time OTHER = Time.milliseconds(1);
 
-        assertThrows(IllegalStateException.class, ()->{
-            THIS.sub(OTHER);
-        });
+        assertThrows(IllegalStateException.class, ()-> THIS.sub(OTHER));
     }
 
     @Test
@@ -166,9 +160,7 @@ public class TimeTest {
         final Time THIS = Time.milliseconds(1);
         final Time OTHER = Time.INVALID;
 
-        assertThrows(IllegalArgumentException.class, ()->{
-            THIS.sub(OTHER);
-        });
+        assertThrows(IllegalArgumentException.class, ()-> THIS.sub(OTHER));
     }
 
     @Test

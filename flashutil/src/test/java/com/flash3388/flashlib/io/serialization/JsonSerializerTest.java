@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -21,7 +22,7 @@ public class JsonSerializerTest {
     public void serialization_objectStateRemains() throws Exception {
         final TestClass OBJECT = new TestClass(23, 5.0);
 
-        JsonSerializer jsonSerializer = new JsonSerializer(new Gson(), Charset.forName("UTF-8"));
+        JsonSerializer jsonSerializer = new JsonSerializer(new Gson(), StandardCharsets.UTF_8);
         byte[] serialized = jsonSerializer.serialize(OBJECT);
         TestClass deserializedObject = jsonSerializer.deserialize(serialized, TestClass.class);
 
@@ -30,7 +31,7 @@ public class JsonSerializerTest {
 
     @Test
     public void serialize_intoOutputStream_streamIsNotClosed() throws Exception {
-        JsonSerializer serializer = new JsonSerializer(new Gson(), Charset.forName("UTF-8"));
+        JsonSerializer serializer = new JsonSerializer(new Gson(), StandardCharsets.UTF_8);
 
         Object value = new Object();
         OutputStream outputStream = mock(OutputStream.class);
@@ -41,7 +42,7 @@ public class JsonSerializerTest {
 
     @Test
     public void deserialize_fromInputStream_streamIsNotClosed() throws Exception {
-        JsonSerializer serializer = new JsonSerializer(new Gson(), Charset.forName("UTF-8"));
+        JsonSerializer serializer = new JsonSerializer(new Gson(), StandardCharsets.UTF_8);
 
         InputStream inputStream = mock(InputStream.class);
         when(inputStream.read()).thenReturn(0);

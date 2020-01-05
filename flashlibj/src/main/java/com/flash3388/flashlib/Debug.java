@@ -3,7 +3,7 @@ package com.flash3388.flashlib;
 import com.flash3388.flashlib.robot.RunningRobot;
 import org.slf4j.Logger;
 
-public class Debug {
+public final class Debug {
 
     private Debug() {}
 

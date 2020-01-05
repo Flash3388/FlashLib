@@ -23,6 +23,7 @@ public class VisionPipeline<T extends Image> implements ImagePipeline<T> {
         mImageProcessors = new ArrayList<>(imageProcessors);
     }
 
+    @SafeVarargs
     public VisionPipeline(ImageAnalyser<T> imageAnalyser, Consumer<? super Analysis> analysisConsumer, ImageProcessor<T> ... imageProcessors) {
         this(imageAnalyser, analysisConsumer, Arrays.asList(imageProcessors));
     }

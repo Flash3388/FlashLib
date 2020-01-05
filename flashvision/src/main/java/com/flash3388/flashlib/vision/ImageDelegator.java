@@ -14,6 +14,7 @@ public class ImageDelegator<T extends Image> {
         mImagePipelines = new ArrayList<>(imagePipelines);
     }
 
+    @SafeVarargs
     public ImageDelegator(ImageSource<? extends T> imageSource, ImagePipeline<? super T>... imagePipelines) {
         this(imageSource, Arrays.asList(imagePipelines));
     }

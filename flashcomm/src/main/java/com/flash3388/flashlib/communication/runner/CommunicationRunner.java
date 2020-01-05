@@ -50,15 +50,11 @@ public class CommunicationRunner extends SingleUseParameterizedRunner<Connection
 
     @Override
     protected void stopRunner() {
-        try {
-            Closer closer = Closer.empty();
-
+        try (Closer closer = Closer.empty()) {
             Connection connection = mConnectionReference.getAndSet(null);
             closer.add(connection);
 
             closer.add(new ExecutorCloser(mExecutorService));
-
-            closer.close();
         } catch (IOException e) {
             mLogger.warn("error while closing resources", e);
         }

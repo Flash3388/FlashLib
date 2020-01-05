@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.util.concurrent;
 
-public class Interrupts {
+public final class Interrupts {
 
     private Interrupts() {}
 

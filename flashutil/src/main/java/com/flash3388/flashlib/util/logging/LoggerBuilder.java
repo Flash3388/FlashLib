@@ -23,6 +23,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 
+@SuppressWarnings("ClassWithTooManyFields")
 public class LoggerBuilder {
 
     private static final int DEFAULT_FILE_SIZE_BYTES = 1048576; // 1 MB

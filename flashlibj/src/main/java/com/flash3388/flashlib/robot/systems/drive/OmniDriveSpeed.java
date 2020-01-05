@@ -15,6 +15,7 @@ public class OmniDriveSpeed {
     }
 
     public OmniDriveSpeed(double y, double x) {
+        //noinspection SuspiciousNameCombination
         this(x, y, x, y);
     }
 

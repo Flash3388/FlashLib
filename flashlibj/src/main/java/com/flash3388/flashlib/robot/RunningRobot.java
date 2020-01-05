@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.util.Singleton;
 
-public class RunningRobot {
+public final class RunningRobot {
 
     private RunningRobot() {}
 

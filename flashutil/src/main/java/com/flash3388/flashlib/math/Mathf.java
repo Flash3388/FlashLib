@@ -13,7 +13,7 @@ import com.jmath.vectors.Vector3;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public class Mathf {
+public final class Mathf {
 	private Mathf(){}
 
 	/**

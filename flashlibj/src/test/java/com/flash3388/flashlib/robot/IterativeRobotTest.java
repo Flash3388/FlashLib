@@ -134,24 +134,19 @@ public class IterativeRobotTest {
     private CountDownLatch setupIterationStopper(int runCount) {
         CountDownLatch runsLatch = new CountDownLatch(runCount);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                runsLatch.countDown();
-                if (runsLatch.getCount() == 0) {
-                    mIterativeRobot.stopRobotLoop();
-                }
-                return null;
+        doAnswer(invocation -> {
+            runsLatch.countDown();
+            if (runsLatch.getCount() == 0) {
+                mIterativeRobot.stopRobotLoop();
             }
+            return null;
         }).when(mIterativeRobot).robotPeriodic();
 
         return runsLatch;
     }
 
     private void runRobotLoop() throws Exception {
-        mExecutorService.execute(()-> {
-            mIterativeRobot.robotMain();
-        });
+        mExecutorService.execute(()-> mIterativeRobot.robotMain());
     }
 
     private static class FakeIterativeRobot extends IterativeRobot {

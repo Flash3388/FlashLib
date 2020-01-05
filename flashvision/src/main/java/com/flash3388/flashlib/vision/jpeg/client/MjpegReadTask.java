@@ -20,6 +20,7 @@ public class MjpegReadTask implements Runnable {
         mLogger = logger;
     }
 
+    @Override
     public void run() {
         while (!Thread.interrupted()) {
             try {

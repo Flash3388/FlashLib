@@ -10,7 +10,7 @@ import org.slf4j.Logger;
  *
  * @since FlashLib 1.3.0
  */
-public class RobotMain {
+public final class RobotMain {
 
     private RobotMain() {}
 

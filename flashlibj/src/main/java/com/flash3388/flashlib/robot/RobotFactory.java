@@ -6,7 +6,7 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
 import org.slf4j.Logger;
 
-public class RobotFactory {
+public final class RobotFactory {
 
     private RobotFactory() {}
 

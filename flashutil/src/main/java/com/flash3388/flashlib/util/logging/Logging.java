@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class Logging {
+public final class Logging {
 
     private Logging() {}
 

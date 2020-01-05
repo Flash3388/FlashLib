@@ -4,6 +4,7 @@ import com.flash3388.flashlib.communication.connection.socket.TcpClientConnector
 import com.flash3388.flashlib.communication.connection.socket.TcpServerConnector;
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
+import org.junit.internal.Throwables;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,9 +57,7 @@ public class TcpConnectionTest {
             byte[] data = serverConnection.read(DATA.length);
             assertArrayEquals(DATA, data);
         };
-        Function<Connection> clientTask = (clientConnection) -> {
-            clientConnection.write(DATA);
-        };
+        Function<Connection> clientTask = (clientConnection) -> clientConnection.write(DATA);
 
         connectAndRun(serverTask, clientTask,
                 DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -70,77 +69,54 @@ public class TcpConnectionTest {
 
         Function<Connection> serverTask = (serverConnection) -> {
         };
-        Function<Connection> clientTask = (clientConnection) -> {
-            clientConnection.read(1);
-        };
+        Function<Connection> clientTask = (clientConnection) -> clientConnection.read(1);
 
-        assertThrows(TimeoutException.class, ()->{
-            connectAndRun(serverTask, clientTask,
-                    DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
-        });
+        assertThrows(TimeoutException.class, ()-> connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT));
     }
 
     @Test
     public void read_serverNothingToRead_serverThrowsTimeoutException() throws Exception {
         final int READ_TIMEOUT = 200;
 
-        Function<Connection> serverTask = (serverConnection) -> {
-            serverConnection.read(1);
-        };
+        Function<Connection> serverTask = (serverConnection) -> serverConnection.read(1);
         Function<Connection> clientTask = (clientConnection) -> {
         };
 
-        assertThrows(TimeoutException.class, ()->{
-            connectAndRun(serverTask, clientTask,
-                    DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
-        });
+        assertThrows(TimeoutException.class, ()-> connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT));
     }
 
     @Test
     public void read_clientDisconnectedInMiddle_serverThrowsEOFException() throws Exception {
         final int READ_TIMEOUT = 200;
 
-        Function<Connection> serverTask = (serverConnection) -> {
-            serverConnection.read(1);
-        };
-        Function<Connection> clientTask = (clientConnection) -> {
-            clientConnection.close();
-        };
+        Function<Connection> serverTask = (serverConnection) -> serverConnection.read(1);
+        Function<Connection> clientTask = Connection::close;
 
-        assertThrows(EOFException.class, ()->{
-            connectAndRun(serverTask, clientTask,
-                    DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
-        });
+        assertThrows(EOFException.class, ()-> connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT));
     }
 
     @Test
     public void read_serverDisconnectedInMiddle_clientThrowsEOFException() throws Exception {
         final int READ_TIMEOUT = 200;
 
-        Function<Connection> serverTask = (serverConnection) -> {
-            serverConnection.close();
-        };
-        Function<Connection> clientTask = (clientConnection) -> {
-            clientConnection.read(1);
-        };
+        Function<Connection> serverTask = Connection::close;
+        Function<Connection> clientTask = (clientConnection) -> clientConnection.read(1);
 
-        assertThrows(EOFException.class, ()->{
-            connectAndRun(serverTask, clientTask,
-                    DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT);
-        });
+        assertThrows(EOFException.class, ()-> connectAndRun(serverTask, clientTask,
+                DEFAULT_CONNECTION_TIMEOUT, READ_TIMEOUT));
     }
 
     @Test
     public void connect_serverHasNoClient_throwsTimeoutException() throws Exception {
         final int CONNECTION_TIMEOUT = 200;
 
-        TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT);
-        try {
-            assertThrows(TimeoutException.class, ()->{
+        try (TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT)) {
+            assertThrows(TimeoutException.class, () -> {
                 tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT);
             });
-        } finally {
-            serverConnector.close();
         }
     }
 
@@ -150,11 +126,8 @@ public class TcpConnectionTest {
 
         assertThrows(ConnectionFailedException.class, ()->{
             InetSocketAddress address = new InetSocketAddress(mServerSocket.getLocalPort() - 1);
-            TcpClientConnector clientConnector = new TcpClientConnector(address, DEFAULT_READ_TIMEOUT);
-            try {
+            try (TcpClientConnector clientConnector = new TcpClientConnector(address, DEFAULT_READ_TIMEOUT)) {
                 tryConnectExpectFailure(clientConnector, CONNECTION_TIMEOUT);
-            } finally {
-                clientConnector.close();
             }
         });
     }
@@ -169,50 +142,35 @@ public class TcpConnectionTest {
         CountDownLatch connectionLatch = new CountDownLatch(1);
         CyclicBarrier endTasksBarrier = new CyclicBarrier(2);
 
-        Future<Void> clientFuture = mExecutorService.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                connectionLatch.await();
-                Connection connection = clientConnector.connect(connectionTimeout);
-                try {
-                    clientTask.apply(connection);
-                } finally {
-                    endTasksBarrier.await();
-                    connection.close();
-                }
-
-                return null;
+        Future<Void> clientFuture = mExecutorService.submit(() -> {
+            connectionLatch.await();
+            try (Connection connection = clientConnector.connect(connectionTimeout)) {
+                clientTask.apply(connection);
+            } finally {
+                endTasksBarrier.await();
             }
+
+            return null;
         });
 
         connectionLatch.countDown();
-        Connection connection = serverConnector.connect(connectionTimeout);
-        try {
+        try (Connection connection = serverConnector.connect(connectionTimeout)) {
             serverTask.apply(connection);
         } finally {
             endTasksBarrier.await();
-            connection.close();
         }
 
         // to throw an exception if necessary
         try {
             clientFuture.get();
         } catch (ExecutionException e) {
-            Throwable throwable = e.getCause();
-            if (throwable instanceof RuntimeException) {
-                throw (RuntimeException) throwable;
-            } else if(throwable instanceof Exception) {
-                throw (Exception) throwable;
-            }
+            throw Throwables.rethrowAsException(e.getCause());
         }
     }
 
     private void tryConnectExpectFailure(Connector connector, int timeout) throws Exception {
-        Connection connection = connector.connect(timeout);
-        try {
+        try (Connection connection = connector.connect(timeout)) {
             fail("should not have connected");
-        } finally {
-            connection.close();
         }
     }
 

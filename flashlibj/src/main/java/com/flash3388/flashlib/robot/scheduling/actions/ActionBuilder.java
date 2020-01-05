@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public abstract class ActionBuilder<T extends ActionBuilder> {
 
-    protected Collection<Subsystem> mRequirements;
+    protected final Collection<Subsystem> mRequirements;
     protected Time mTimeout;
 
     protected ActionBuilder() {

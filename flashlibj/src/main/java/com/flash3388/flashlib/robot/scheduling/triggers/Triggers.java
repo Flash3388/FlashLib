@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot.scheduling.triggers;
 
 import java.util.function.BooleanSupplier;
 
-public class Triggers {
+public final class Triggers {
 
     private Triggers() {}
 

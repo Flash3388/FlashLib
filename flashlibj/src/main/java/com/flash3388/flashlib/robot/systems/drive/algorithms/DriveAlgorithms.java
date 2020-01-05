@@ -85,7 +85,7 @@ public class DriveAlgorithms {
         double cosD = Math.cos(dirInRad);
         double sinD = Math.sin(dirInRad);
 
-        double wheelSpeeds[] = {
+        double[] wheelSpeeds = {
                 (cosD * magnitude - rotation), // front right
                 (sinD * magnitude + rotation), // front left
                 (sinD * magnitude - rotation),// rear right

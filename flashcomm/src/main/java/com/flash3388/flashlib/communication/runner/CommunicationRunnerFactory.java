@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CommunicationRunnerFactory {
+public final class CommunicationRunnerFactory {
 
     private CommunicationRunnerFactory() {}
 

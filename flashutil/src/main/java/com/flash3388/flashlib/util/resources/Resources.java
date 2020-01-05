@@ -4,7 +4,7 @@ import com.flash3388.flashlib.io.Closeables;
 
 import java.io.Closeable;
 
-public class Resources {
+public final class Resources {
 
     private Resources() {}
 

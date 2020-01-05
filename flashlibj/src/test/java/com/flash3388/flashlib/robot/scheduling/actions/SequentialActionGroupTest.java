@@ -36,9 +36,7 @@ public class SequentialActionGroupTest {
         actionGroup.initialize();
 
         verify(actions.get(0), times(1)).markStarted();
-        actions.stream().skip(1).forEach((action) -> {
-            verify(action, never()).markStarted();
-        });
+        actions.stream().skip(1).forEach((action) -> verify(action, never()).markStarted());
     }
 
     @Test

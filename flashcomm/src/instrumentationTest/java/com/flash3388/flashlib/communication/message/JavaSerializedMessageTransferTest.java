@@ -126,12 +126,9 @@ public class JavaSerializedMessageTransferTest {
 
             CountDownLatch connectionLatch = new CountDownLatch(1);
 
-            Future<Connection> clientConnectionFuture = executorService.submit(new Callable<Connection>() {
-                @Override
-                public Connection call() throws Exception {
-                    connectionLatch.await();
-                    return clientConnector.connect(CONNECTION_TIMEOUT);
-                }
+            Future<Connection> clientConnectionFuture = executorService.submit(() -> {
+                connectionLatch.await();
+                return clientConnector.connect(CONNECTION_TIMEOUT);
             });
 
             connectionLatch.countDown();

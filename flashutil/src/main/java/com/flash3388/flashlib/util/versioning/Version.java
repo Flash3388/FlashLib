@@ -37,7 +37,10 @@ public class Version implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMajor, mMinor, mBuild);
+        int hash = mMajor;
+        hash = hash * 31 + mMinor;
+        hash = hash * 31 + mBuild;
+        return hash;
     }
 
     @Override

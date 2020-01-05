@@ -33,6 +33,7 @@ public interface OmniDrive extends HolonomicDrive {
      * @param x the x-coordinate of the vector
      */
     default void omniDrive(double y, double x) {
+        //noinspection SuspiciousNameCombination
         omniDrive(x, y, x, y);
     }
 

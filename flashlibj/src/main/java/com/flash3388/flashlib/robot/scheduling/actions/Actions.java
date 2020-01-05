@@ -6,7 +6,7 @@ import com.flash3388.flashlib.time.Time;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
-public class Actions {
+public final class Actions {
 
     private Actions() {}
 
@@ -15,6 +15,7 @@ public class Actions {
      *
      * @return an empty action.
      */
+    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
     public static Action empty() {
         return new Action() {
             @Override
@@ -62,6 +63,7 @@ public class Actions {
         };
     }
 
+    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
     public static Action runnableAction(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
         return new Action() {

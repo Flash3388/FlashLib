@@ -65,7 +65,7 @@ public class ActionTest {
         assertTrue(mAction.isCanceled());
     }
 
-    public class FakeAction extends Action {
+    public static class FakeAction extends Action {
 
         FakeAction(Scheduler scheduler) {
             super(scheduler, Time.INVALID);
