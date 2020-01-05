@@ -33,11 +33,11 @@ public class SequentialActionGroup extends Action {
     }
 
     public SequentialActionGroup(Clock clock) {
-        this(RunningRobot.INSTANCE.get().getScheduler(), clock);
+        this(RunningRobot.getInstance().getScheduler(), clock);
     }
 
     public SequentialActionGroup() {
-        this(RunningRobot.INSTANCE.get().getClock());
+        this(RunningRobot.getInstance().getClock());
     }
 
     /**

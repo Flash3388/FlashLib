@@ -71,7 +71,7 @@ public abstract class Action {
     }
 
     public Action(Time timeout) {
-	    this(RunningRobot.INSTANCE.get().getScheduler(), timeout);
+	    this(RunningRobot.getInstance().getScheduler(), timeout);
     }
 
 	public Action() {

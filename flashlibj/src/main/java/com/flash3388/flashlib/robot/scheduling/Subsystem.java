@@ -28,7 +28,7 @@ public abstract class Subsystem {
     }
 
     protected Subsystem() {
-        this(RunningRobot.INSTANCE.get().getScheduler());
+        this(RunningRobot.getInstance().getScheduler());
     }
 
     public void setDefaultAction(Action action) {

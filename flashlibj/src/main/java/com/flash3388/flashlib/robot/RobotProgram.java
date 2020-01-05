@@ -47,7 +47,7 @@ public class RobotProgram {
         RobotBase robot = mRobotCreator.create();
         robot.initResources(mResourceHolder, mLogger);
 
-        RunningRobot.INSTANCE.set(robot);
+        RunningRobot.setInstance(robot);
 
         mLogger.debug("Initializing user robot");
         robot.robotInit();

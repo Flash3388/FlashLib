@@ -30,11 +30,11 @@ public class ParallelActionGroup extends Action {
     }
 
     public ParallelActionGroup(Clock clock) {
-        this(RunningRobot.INSTANCE.get().getScheduler(), clock);
+        this(RunningRobot.getInstance().getScheduler(), clock);
     }
 
     public ParallelActionGroup() {
-        this(RunningRobot.INSTANCE.get().getClock());
+        this(RunningRobot.getInstance().getClock());
     }
 
     /**

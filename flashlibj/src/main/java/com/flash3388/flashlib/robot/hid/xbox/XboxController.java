@@ -62,9 +62,9 @@ public class XboxController implements Hid {
     }
 
 	public XboxController(int channel) {
-	    this(RunningRobot.INSTANCE.get().getScheduler(),
-	            RunningRobot.INSTANCE.get().getClock(),
-                RunningRobot.INSTANCE.get().getHidInterface(),
+	    this(RunningRobot.getInstance().getScheduler(),
+	            RunningRobot.getInstance().getClock(),
+                RunningRobot.getInstance().getHidInterface(),
                 channel);
     }
 

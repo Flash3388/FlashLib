@@ -33,7 +33,7 @@ public class CustomHidBuilder {
     }
 
     public CustomHidBuilder(int channel) {
-        this(RunningRobot.INSTANCE.get().getClock(), RunningRobot.INSTANCE.get().getHidInterface(), channel);
+        this(RunningRobot.getInstance().getClock(), RunningRobot.getInstance().getHidInterface(), channel);
     }
 
     public CustomHidBuilder addAxis(int axisNumber, Axis axis) {

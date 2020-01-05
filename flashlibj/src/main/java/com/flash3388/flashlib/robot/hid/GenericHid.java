@@ -38,7 +38,7 @@ public class GenericHid implements Hid {
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {
-	    this(RunningRobot.INSTANCE.get().getScheduler(), RunningRobot.INSTANCE.get().getClock(), RunningRobot.INSTANCE.get().getHidInterface(),
+	    this(RunningRobot.getInstance().getScheduler(), RunningRobot.getInstance().getClock(), RunningRobot.getInstance().getHidInterface(),
                 channel, axisCount, buttonCount, povsCount, HardwareButton.DEFAULT_MAX_PRESS_TIME);
     }
 

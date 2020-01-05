@@ -19,11 +19,11 @@ public class RunningRobotMock {
         when(robot.getScheduler()).thenReturn(mock(Scheduler.class));
         when(robot.getModeSupplier()).thenReturn(mock(RobotModeSupplier.class));
 
-        RunningRobot.INSTANCE.set(robot);
+        RunningRobot.setInstance(robot);
     }
 
     public static void mockRobotWithClock(Clock clock) {
-        Robot robot = RunningRobot.INSTANCE.get();
+        Robot robot = RunningRobot.getInstance();
         when(robot.getClock()).thenReturn(clock);
     }
 }

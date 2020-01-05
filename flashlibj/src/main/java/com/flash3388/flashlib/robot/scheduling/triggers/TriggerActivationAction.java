@@ -18,7 +18,7 @@ public class TriggerActivationAction extends Action {
     }
 
     public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
-        this(RunningRobot.INSTANCE.get().getScheduler(), condition, trigger);
+        this(RunningRobot.getInstance().getScheduler(), condition, trigger);
     }
 
     @Override
