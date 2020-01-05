@@ -24,7 +24,7 @@ public class SchedulerExecutionBenchmark {
 
     private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
 
-    private Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
+    private final Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
 
     @Param({"10", "30"})
     private int mActionsCount;

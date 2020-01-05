@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 @State(Scope.Thread)
 public class ActionsBenchmark {
 
-    private Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
+    private final Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
 
     @Param({"SMALL", "MEDIUM", "SHORT_SLEEP", "SMALL_SINGLE_SEQ_GROUP", "SMALL_MULTI_SEQ_GROUP"})
     private TestActions.ActionType mActionType;

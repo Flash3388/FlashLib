@@ -11,7 +11,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ActionsMock {
+public final class ActionsMock {
+
+    private ActionsMock() {
+    }
 
     public static ActionContext mockNonFinishingActionContext() {
         ActionContext actionContext = mock(ActionContext.class);

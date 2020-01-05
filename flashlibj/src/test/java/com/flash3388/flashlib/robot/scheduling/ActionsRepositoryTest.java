@@ -37,7 +37,6 @@ public class ActionsRepositoryTest {
     private Clock mClock;
 
     private Map<Subsystem, Action> mActionsOnSubsystems;
-    private Map<Subsystem, Action> mDefaultActionsOnSubsystems;
     private Map<Action, ActionContext> mRunningActions;
     private Collection<Action> mNextRunActions;
 
@@ -48,12 +47,11 @@ public class ActionsRepositoryTest {
         mClock = mock(Clock.class);
 
         mActionsOnSubsystems = new HashMap<>();
-        mDefaultActionsOnSubsystems = new HashMap<>();
         mRunningActions = new HashMap<>();
         mNextRunActions = new ArrayList<>();
 
         mActionsRepository = new ActionsRepository(
-                mActionsOnSubsystems, mDefaultActionsOnSubsystems,
+                mActionsOnSubsystems, new HashMap<>(),
                 mRunningActions, mNextRunActions,
                 mClock, mock(Logger.class));
     }

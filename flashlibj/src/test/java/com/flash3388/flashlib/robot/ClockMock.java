@@ -6,7 +6,10 @@ import com.flash3388.flashlib.time.Time;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ClockMock {
+public final class ClockMock {
+
+    private ClockMock() {
+    }
 
     public static Clock mockInvalidTimeClock() {
         return mockClockWithTime(Time.INVALID);

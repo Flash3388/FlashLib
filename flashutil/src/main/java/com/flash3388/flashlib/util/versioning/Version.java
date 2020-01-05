@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.util.versioning;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 public class Version implements Serializable {
 

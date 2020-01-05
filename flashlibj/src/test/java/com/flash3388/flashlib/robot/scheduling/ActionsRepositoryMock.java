@@ -15,23 +15,21 @@ import static org.mockito.Mockito.when;
 
 public class ActionsRepositoryMock {
 
-    private final ActionsRepository mActionsRepository;
     private final Map<Action, ActionContext> mRunningActions;
     private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
 
     public ActionsRepositoryMock(ActionsRepository tasksRepository) {
-        mActionsRepository = tasksRepository;
         mRunningActions = new HashMap<>();
         mDefaultActionsOnSubsystems = new HashMap<>();
 
-        when(mActionsRepository.getRunningActionContexts()).thenReturn(mRunningActions.entrySet());
+        when(tasksRepository.getRunningActionContexts()).thenReturn(mRunningActions.entrySet());
         doAnswer((Answer<Void>) invocation -> {
             Action action = invocation.getArgument(0);
             mRunningActions.put(action, new ActionContext(action, mock(Clock.class)));
             return null;
-        }).when(mActionsRepository).addAction(any(Action.class));
+        }).when(tasksRepository).addAction(any(Action.class));
 
-        when(mActionsRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems);
+        when(tasksRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems);
     }
 
     public Action runningAction(ActionContext actionContext) {

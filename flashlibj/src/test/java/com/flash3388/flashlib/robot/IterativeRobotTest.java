@@ -14,8 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +34,6 @@ public class IterativeRobotTest {
     private ExecutorService mExecutorService;
     private Closer mCloser;
 
-    private Logger mLogger;
     private Scheduler mScheduler;
     private IterativeRobot mIterativeRobot;
 
@@ -47,13 +44,13 @@ public class IterativeRobotTest {
         mExecutorService = Executors.newSingleThreadExecutor();
         mCloser.add(new ExecutorCloser(mExecutorService));
 
-        mLogger = mock(Logger.class);
+        Logger logger = mock(Logger.class);
         mScheduler = mock(Scheduler.class);
 
         Clock clock = mock(Clock.class);
         when(clock.currentTime()).thenReturn(Time.milliseconds(1));
 
-        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, mLogger, mock(Sleeper.class), clock));
+        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, logger, mock(Sleeper.class), clock));
     }
 
     @AfterEach

@@ -9,7 +9,10 @@ import org.slf4j.Logger;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RunningRobotMock {
+public final class RunningRobotMock {
+
+    private RunningRobotMock() {
+    }
 
     public static void mockRobotWithDependencies() {
         Robot robot = mock(Robot.class);

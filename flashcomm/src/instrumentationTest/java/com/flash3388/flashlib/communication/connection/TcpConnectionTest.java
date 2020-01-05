@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.EOFException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
@@ -114,9 +113,7 @@ public class TcpConnectionTest {
         final int CONNECTION_TIMEOUT = 200;
 
         try (TcpServerConnector serverConnector = new TcpServerConnector(mServerSocket, DEFAULT_READ_TIMEOUT)) {
-            assertThrows(TimeoutException.class, () -> {
-                tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT);
-            });
+            assertThrows(TimeoutException.class, () -> tryConnectExpectFailure(serverConnector, CONNECTION_TIMEOUT));
         }
     }
 
