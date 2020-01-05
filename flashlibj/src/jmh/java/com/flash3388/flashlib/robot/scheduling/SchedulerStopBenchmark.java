@@ -15,7 +15,7 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Thread)
 public class SchedulerStopBenchmark {
 
-    private static final RobotMode ROBOT_MODE = new RobotMode("test", 1);
+    private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
 
     @Param({"SINGLE_THREAD"})
     private SchedulerImpl mSchedulerImpl;

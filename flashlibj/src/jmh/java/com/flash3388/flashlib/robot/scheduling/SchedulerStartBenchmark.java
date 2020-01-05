@@ -15,7 +15,7 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Thread)
 public class SchedulerStartBenchmark {
 
-    private static final RobotMode ROBOT_MODE = new RobotMode("test", 1);
+    private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
 
     @Param({"SINGLE_THREAD"})
     private SchedulerImpl mSchedulerImpl;
@@ -36,13 +36,13 @@ public class SchedulerStartBenchmark {
 
     @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-    public void startAction_withEmptyAction_withConflicState() {
+    public void startAction_withEmptyAction_withConflictState() {
         mAction.start();
     }
 
     @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
-    public void startActionAndIterate_withEmptyAction_withConflicState() {
+    public void startActionAndIterate_withEmptyAction_withConflictState() {
         mAction.start();
         mScheduler.run(ROBOT_MODE);
     }

@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 @State(Scope.Thread)
 public class SchedulerExecutionBenchmark {
 
-    private static final RobotMode ROBOT_MODE = new RobotMode("test", 1);
+    private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
 
     private Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
 
