@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.communication.connection.socket;
 
+import com.flash3388.flashlib.communication.connection.Connection;
+import com.flash3388.flashlib.communication.connection.ConnectionFailedException;
 import com.flash3388.flashlib.communication.connection.Connector;
 import com.flash3388.flashlib.communication.connection.TimeoutException;
 import com.flash3388.flashlib.io.CloseOption;
 import com.flash3388.flashlib.io.Closer;
-import com.flash3388.flashlib.communication.connection.Connection;
-import com.flash3388.flashlib.communication.connection.ConnectionFailedException;
 
 import java.io.IOException;
 import java.net.Socket;

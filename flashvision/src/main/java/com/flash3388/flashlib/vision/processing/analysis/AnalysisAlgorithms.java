@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.vision.processing.analysis;
 
+import com.flash3388.flashlib.vision.Image;
 import com.jmath.vectors.Vector2;
 import com.jmath.vectors.Vector3;
-import com.flash3388.flashlib.vision.Image;
 
 public class AnalysisAlgorithms {
 

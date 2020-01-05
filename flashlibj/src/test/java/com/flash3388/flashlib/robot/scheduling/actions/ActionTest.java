@@ -1,14 +1,17 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
-import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ActionTest {
 

@@ -1,8 +1,7 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
-import com.jmath.vectors.Vector2;
 import com.flash3388.flashlib.robot.motion.Movable2d;
-import com.jmath.vectors.Vector3;
+import com.jmath.vectors.Vector2;
 
 /**
  * Interface for holonomic drive systems, i.e. Mecanum and Omni. Extends {@link Drive}.

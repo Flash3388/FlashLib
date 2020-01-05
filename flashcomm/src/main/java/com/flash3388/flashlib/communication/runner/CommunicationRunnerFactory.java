@@ -1,10 +1,10 @@
 package com.flash3388.flashlib.communication.runner;
 
+import com.flash3388.flashlib.communication.message.Message;
 import com.flash3388.flashlib.io.serialization.JavaObjectSerializer;
 import com.flash3388.flashlib.io.serialization.Serializer;
 import com.flash3388.flashlib.util.collections.BlockingQueueConsumer;
 import com.flash3388.flashlib.util.collections.BlockingQueueOptionalSupplier;
-import com.flash3388.flashlib.communication.message.Message;
 import org.slf4j.Logger;
 
 import java.util.Optional;

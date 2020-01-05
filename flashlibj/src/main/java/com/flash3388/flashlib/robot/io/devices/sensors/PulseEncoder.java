@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.robot.io.devices.sensors;
 
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.robot.io.Counter;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 /**
  * Pulse based encoder sensor.

@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.robot.io.devices.actuators;
 
+import com.flash3388.flashlib.robot.control.Invertable;
 import com.flash3388.flashlib.robot.motion.Direction;
 import com.flash3388.flashlib.robot.motion.Stoppable;
-import com.flash3388.flashlib.robot.control.Invertable;
 
 /**
  * Interface for speed controllers.

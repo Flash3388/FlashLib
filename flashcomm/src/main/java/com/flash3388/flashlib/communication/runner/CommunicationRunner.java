@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.communication.runner;
 
 import com.flash3388.flashlib.communication.connection.Connection;
+import com.flash3388.flashlib.communication.message.Message;
 import com.flash3388.flashlib.communication.message.Messenger;
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.io.serialization.Serializer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
-import com.flash3388.flashlib.communication.message.Message;
 import com.flash3388.flashlib.util.flow.SingleUseParameterizedRunner;
 import org.slf4j.Logger;
 

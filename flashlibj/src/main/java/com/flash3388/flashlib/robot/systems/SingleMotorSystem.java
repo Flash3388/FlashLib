@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.robot.systems;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.motion.Rotatable;
+import com.flash3388.flashlib.robot.scheduling.Subsystem;
 
 public class SingleMotorSystem extends Subsystem implements Movable, Rotatable {
 
