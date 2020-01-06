@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.robot.systems.drive.ArcadeDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.TankDrive;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class ArcadeDriveAction extends Action {
+public class ArcadeDriveAction extends ActionBase {
 	
 	private final TankDrive mDriveInterface;
 	private final Supplier<? extends ArcadeDriveSpeed> mSpeedSupplier;
@@ -22,12 +22,12 @@ public class ArcadeDriveAction extends Action {
 	}
 	
 	@Override
-	protected void execute() {
+	public void execute() {
 		mDriveInterface.arcadeDrive(mSpeedSupplier.get());
 	}
 
 	@Override
-	protected void end() {
+	public void end(boolean wasInterrupted) {
 		mDriveInterface.stop();
 	}
 

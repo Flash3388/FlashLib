@@ -8,6 +8,8 @@ public class ActionContext {
     private final Action mAction;
     private final Clock mClock;
 
+    private final ActionState mActionState;
+
     private Time mStartTime;
     private Time mTimeout;
 
@@ -17,25 +19,26 @@ public class ActionContext {
         mAction = action;
         mClock = clock;
 
+        mActionState = new ActionState();
         mStartTime = Time.INVALID;
         mTimeout = Time.INVALID;
         mIsInitialized = false;
     }
 
     public void prepareForRun() {
-        mAction.markStarted();
+        mActionState.markStarted();
 
         mStartTime = mClock.currentTime();
-        mTimeout = mAction.getTimeout();
+        mTimeout = mAction.getConfiguration().getTimeout();
         mIsInitialized = false;
     }
 
     public boolean run() {
         if(wasTimeoutReached()) {
-            mAction.markCanceled();
+            mActionState.markCanceled();
         }
 
-        if(mAction.isCanceled()) {
+        if(mActionState.isCanceled()) {
             return false;
         }
 
@@ -52,21 +55,17 @@ public class ActionContext {
 
     public void runFinished() {
         if(mIsInitialized){
-            if(mAction.isCanceled()) {
-                mAction.interrupted();
-            } else {
-                mAction.end();
-            }
+            mAction.end(mActionState.isCanceled());
         }
 
         mIsInitialized = false;
         mStartTime = Time.INVALID;
 
-        mAction.removed();
+        mActionState.finished();
     }
 
     public void runCanceled() {
-        mAction.markCanceled();
+        mActionState.markCanceled();
         runFinished();
     }
 
@@ -80,5 +79,9 @@ public class ActionContext {
         }
 
         return (mClock.currentTime().sub(mStartTime)).after(mTimeout);
+    }
+
+    public void cancelAction() {
+        mActionState.markCanceled();
     }
 }

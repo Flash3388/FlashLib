@@ -2,12 +2,12 @@ package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
 
-public class PidAction extends Action {
+public class PidAction extends ActionBase {
 
     private final PidController mPidController;
     private final Movable mMovable;
@@ -24,12 +24,12 @@ public class PidAction extends Action {
     }
 
     @Override
-    protected void initialize() {
+    public void initialize() {
         mPidController.reset();
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         double value = mPidController.calculate(
                 mProcessVariableSupplier.getAsDouble(),
                 mSetPointSupplier.getAsDouble());
@@ -38,7 +38,7 @@ public class PidAction extends Action {
     }
 
     @Override
-    protected boolean isFinished() {
+    public boolean isFinished() {
         double processVariable = mProcessVariableSupplier.getAsDouble();
 
         return ExtendedMath.constrained(
@@ -48,7 +48,7 @@ public class PidAction extends Action {
     }
 
     @Override
-    protected void end() {
+    public void end(boolean wasInterrupted) {
         mMovable.stop();
     }
 }

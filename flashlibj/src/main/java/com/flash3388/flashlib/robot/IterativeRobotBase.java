@@ -18,7 +18,7 @@ public abstract class IterativeRobotBase extends RobotBase {
     protected final void robotShutdown(){
         stopRobotLoop();
 
-        getScheduler().stopAllActions();
+        getScheduler().cancelAllActions();
 
         robotStop();
     }

@@ -15,23 +15,17 @@ public final class Actions {
      *
      * @return an empty action.
      */
-    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
     public static Action empty() {
-        return new Action() {
+        return new ActionBase() {
             @Override
-            protected void execute() {
-            }
-
-            @Override
-            protected void end() {
-            }
+            public void execute() { }
         };
     }
 
     public static Action wait(Time waitTime) {
-        Action action = empty();
-        action.setTimeout(waitTime);
-        return action;
+        return empty().configure()
+                .setTimeout(waitTime)
+                .save();
     }
 
     /**
@@ -41,39 +35,31 @@ public final class Actions {
      * @param action action to cancel
      * @return canceling action
      */
-    public static Action stopAction(Action action){
+    public static Action cancelingAction(Action action){
         Objects.requireNonNull(action, "action is null");
-
-        return new InstantAction(){
-            @Override
-            public void execute() {
-                if(action.isRunning())
-                    action.cancel();
-            }
-        };
+        return new GenericAction.Builder()
+                .onExecute(()-> {
+                    if (action.isRunning()) {
+                        action.cancel();
+                    }
+                })
+                .isFinished(()-> true)
+                .build();
     }
 
-    public static Action instantAction(Runnable runnable) {
+    public static Action instant(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
-        return new InstantAction() {
-            @Override
-            protected void execute() {
-                runnable.run();
-            }
-        };
+        return new GenericAction.Builder()
+                .onExecute(runnable)
+                .isFinished(()-> true)
+                .build();
     }
 
-    @SuppressWarnings("AnonymousInnerClassWithTooManyMethods")
-    public static Action runnableAction(Runnable runnable) {
+    public static Action fromRunnable(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
-        return new Action() {
-            @Override
-            protected void execute() {
-                runnable.run();
-            }
-            @Override
-            protected void end() {}
-        };
+        return new GenericAction.Builder()
+                .onExecute(runnable)
+                .build();
     }
 
     public static Action sequential(Action... actions) {

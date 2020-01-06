@@ -1,12 +1,12 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.motion.Movable2d;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.jmath.vectors.Vector2;
 
 import java.util.function.Supplier;
 
-public class Move2dAction extends Action {
+public class Move2dAction extends ActionBase {
 
     private final Movable2d mMovable;
     private final Supplier<? extends Vector2> mMotionVectorSupplier;
@@ -17,12 +17,12 @@ public class Move2dAction extends Action {
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         mMovable.move(mMotionVectorSupplier.get());
     }
 
     @Override
-    protected void end() {
+    public void end(boolean wasInterrupted) {
         mMovable.stop();
     }
 }

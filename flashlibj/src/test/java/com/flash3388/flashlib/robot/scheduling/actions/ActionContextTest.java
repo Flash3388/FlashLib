@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.makeActionCancelable;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -74,7 +75,7 @@ public class ActionContextTest {
         mActionContext.run();
         mActionContext.runCanceled();
 
-        verify(mAction, times(1)).interrupted();
+        verify(mAction, times(1)).end(eq(true));
     }
 
     @Test
@@ -84,7 +85,7 @@ public class ActionContextTest {
         mActionContext.prepareForRun();
         mActionContext.runCanceled();
 
-        verify(mAction, never()).interrupted();
+        verify(mAction, never()).end(eq(true));
     }
 
     @Test
@@ -95,7 +96,7 @@ public class ActionContextTest {
         mActionContext.run();
         mActionContext.runFinished();
 
-        verify(mAction, times(1)).end();
+        verify(mAction, times(1)).end(eq(false));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class ActionContextTest {
         mActionContext.prepareForRun();
         mActionContext.runFinished();
 
-        verify(mAction, never()).end();
+        verify(mAction, never()).end(eq(false));
     }
 
     @Test
@@ -169,6 +170,9 @@ public class ActionContextTest {
     }
 
     private void mockActionTimeout(Time timeout) {
-        when(mAction.getTimeout()).thenReturn(timeout);
+        ActionConfiguration actionConfiguration = new ActionConfiguration();
+        actionConfiguration.setTimeout(timeout);
+
+        when(mAction.getConfiguration()).thenReturn(actionConfiguration);
     }
 }

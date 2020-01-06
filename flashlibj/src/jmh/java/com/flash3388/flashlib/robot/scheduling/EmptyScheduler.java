@@ -14,12 +14,12 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void stopAllActions() {
+    public void cancelAllActions() {
 
     }
 
     @Override
-    public void stopActionsIf(Predicate<? super Action> removalPredicate) {
+    public void cancelActionsIf(Predicate<? super Action> removalPredicate) {
 
     }
 

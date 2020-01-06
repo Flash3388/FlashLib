@@ -3,8 +3,8 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import org.mockito.stubbing.Answer;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -14,6 +14,76 @@ import static org.mockito.Mockito.when;
 public final class ActionsMock {
 
     private ActionsMock() {
+    }
+
+    public static class ActionMocker {
+
+        private ActionConfiguration mConfiguration;
+        private boolean mIsFinished;
+
+        private ActionMocker() {
+            mConfiguration = new ActionConfiguration();
+            mIsFinished = false;
+        }
+
+        public ActionMocker mockWithConfiguration(ActionConfiguration configuration) {
+            mConfiguration = configuration;
+            return this;
+        }
+
+        public ActionMocker mockWithRequirements(Collection<? extends Subsystem> requirements) {
+            mConfiguration.requires(new HashSet<>(requirements));
+            return this;
+        }
+
+        public ActionMocker mockIsFinished(boolean isFinished) {
+            mIsFinished = isFinished;
+            return this;
+        }
+
+        public Action build() {
+            Action action = mock(Action.class);
+            when(action.isFinished()).thenReturn(mIsFinished);
+            when(action.getConfiguration()).thenReturn(mConfiguration);
+            when(action.configure()).thenAnswer(invocation -> new ActionConfiguration.Editor(action, action.getConfiguration()));
+
+            doAnswer((Answer<Void>) invocation -> {
+                ActionConfiguration configuration = invocation.getArgument(0);
+                when(action.getConfiguration()).thenReturn(configuration);
+                return null;
+            }).when(action).setConfiguration(any(ActionConfiguration.class));
+
+            return action;
+        }
+    }
+
+    public static ActionMocker actionMocker() {
+        return new ActionMocker();
+    }
+
+    public static class ContextMocker {
+
+        private boolean mRunFinished;
+
+        private ContextMocker() {
+            mRunFinished = true;
+        }
+
+        public ContextMocker runFinished(boolean runFinished) {
+            mRunFinished = runFinished;
+            return this;
+        }
+
+        public ActionContext build() {
+            ActionContext actionContext = mock(ActionContext.class);
+            when(actionContext.run()).thenReturn(!mRunFinished);
+
+            return actionContext;
+        }
+    }
+
+    public static ContextMocker contextMocker() {
+        return new ContextMocker();
     }
 
     public static ActionContext mockNonFinishingActionContext() {
@@ -37,20 +107,6 @@ public final class ActionsMock {
         return action;
     }
 
-    public static Action mockNotRunningAction() {
-        Action action = mock(Action.class);
-        when(action.isRunning()).thenReturn(false);
-
-        return action;
-    }
-
-    public static Action mockRunningAction() {
-        Action action = mock(Action.class);
-        when(action.isRunning()).thenReturn(true);
-
-        return action;
-    }
-
     public static Action mockActionIsFinishedMarkedTrue() {
         Action action = mock(Action.class);
         when(action.isFinished()).thenReturn(true);
@@ -58,42 +114,11 @@ public final class ActionsMock {
         return action;
     }
 
-    public static Action mockActionIsFinishedMarkedFalse() {
-        Action action = mock(Action.class);
-        when(action.isFinished()).thenReturn(false);
-
-        return action;
-    }
-
-    public static Action mockActionWithRequirement(Subsystem subsystem) {
-        return mockActionWithRequirement(Collections.singleton(subsystem));
-    }
-
-    public static Action mockActionWithRequirement(Set<Subsystem> subsystems) {
-        Action action = mock(Action.class);
-        when(action.getRequirements()).thenReturn(subsystems);
-
-        doAnswer((Answer<Void>) invocation -> {
-            Action parent = invocation.getArgument(0);
-            parent.requires(subsystems);
-            return null;
-        }).when(action).setParent(any(Action.class));
-
-        return action;
-    }
-
-    public static Action mockActionWithoutRequirements() {
-        Action action = mock(Action.class);
-        when(action.getRequirements()).thenReturn(Collections.emptySet());
-
-        return action;
-    }
-
     public static Action makeActionCancelable(Action action) {
-        doAnswer((Answer<Void>) invocation -> {
+        /*doAnswer((Answer<Void>) invocation -> {
             when(action.isCanceled()).thenReturn(true);
             return null;
-        }).when(action).markCanceled();
+        }).when(action).markCanceled();*/
 
         return action;
     }

@@ -2,12 +2,12 @@ package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
 
-public class MoveToDistanceAction extends Action {
+public class MoveToDistanceAction extends ActionBase {
 
     private final PidController mPidController;
     private final Movable mMovable;
@@ -24,24 +24,24 @@ public class MoveToDistanceAction extends Action {
     }
 
     @Override
-    protected void initialize() {
+    public void initialize() {
         mPidController.reset();
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         double pidResult = mPidController.calculate(mDistanceSupplier.getAsDouble(), mWantedDistance);
         mMovable.move(pidResult);
     }
 
     @Override
-    protected boolean isFinished() {
+    public boolean isFinished() {
         double distanceToTarget = Math.abs(mDistanceSupplier.getAsDouble() - mWantedDistance);
         return ExtendedMath.constrained(distanceToTarget, 0, mDistanceMargin);
     }
 
     @Override
-    protected void end() {
+    public void end(boolean wasInterrupted) {
         mMovable.stop();
     }
 }

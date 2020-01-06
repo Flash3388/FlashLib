@@ -9,7 +9,7 @@ public class TestSequentialActionGroup extends SequentialActionGroup {
     private final Consumer<Object> mOutputConsumer;
 
     public TestSequentialActionGroup(TestActionParams params) {
-        super(params.getScheduler(), new SystemNanoClock());
+        super(params.getScheduler(), new SystemNanoClock(), actionQueue);
         mOutputConsumer = params.getOutputConsumer();
     }
 

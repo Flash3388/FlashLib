@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDrive;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDriveSpeed;
 import com.jmath.vectors.Vector2;
@@ -8,7 +8,7 @@ import com.jmath.vectors.Vector2;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class HolonomicDriveAction extends Action {
+public class HolonomicDriveAction extends ActionBase {
 	
 	private final HolonomicDrive mDriveInterface;
 	private final Supplier<? extends HolonomicDriveSpeed> mSpeedSupplier;
@@ -27,12 +27,12 @@ public class HolonomicDriveAction extends Action {
 	}
 	
 	@Override
-	protected void execute() {
+	public void execute() {
 		mDriveInterface.holonomicDrive(mSpeedSupplier.get());
 	}
 
 	@Override
-	protected void end() {
+    public void end(boolean wasInterrupted) {
 		mDriveInterface.stop();
 	}
 }
