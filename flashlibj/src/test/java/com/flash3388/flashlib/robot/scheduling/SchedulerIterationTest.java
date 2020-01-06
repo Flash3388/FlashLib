@@ -3,15 +3,13 @@ package com.flash3388.flashlib.robot.scheduling;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionsMock;
 import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import static com.flash3388.flashlib.robot.modes.RobotModesMock.mockNonDisabledMode;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockFinishedActionContext;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNonFinishingActionContext;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNotAllowedInDisabledAction;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -37,7 +35,9 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_withActions_runsActions() throws Exception {
-        ActionContext actionContext = mockNonFinishingActionContext();
+        ActionContext actionContext = ActionsMock.contextMocker()
+                .runFinished(false)
+                .build();
         mActionControlMock.runningAction(actionContext);
 
         mSchedulerIteration.run(mockNonDisabledMode());
@@ -59,7 +59,9 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_actionsIsFinished_removesAction() throws Exception {
-        ActionContext actionContext = mockFinishedActionContext();
+        ActionContext actionContext = ActionsMock.contextMocker()
+                .runFinished(true)
+                .build();
         Action action = mActionControlMock.runningAction(actionContext);
 
         mSchedulerIteration.run(mockNonDisabledMode());
@@ -69,7 +71,9 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_disabledMode_removesActionsNotAllowedInDisabled() throws Exception {
-        Action action = mockNotAllowedInDisabledAction();
+        Action action = ActionsMock.actionMocker()
+                .runWhenDisabled(false)
+                .build();
         mActionControlMock.runningAction(action);
 
         mSchedulerIteration.run(RobotMode.DISABLED);
@@ -79,7 +83,9 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_disabledMode_doesNotRunNotAllowedInDisabled() throws Exception {
-        Action action = mockNotAllowedInDisabledAction();
+        Action action = ActionsMock.actionMocker()
+                .runWhenDisabled(false)
+                .build();
         ActionContext actionContext = mActionControlMock.runningAction(action);
 
         mSchedulerIteration.run(RobotMode.DISABLED);

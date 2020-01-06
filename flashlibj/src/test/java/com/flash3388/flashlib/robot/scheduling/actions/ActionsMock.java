@@ -20,29 +20,37 @@ public final class ActionsMock {
 
         private ActionConfiguration mConfiguration;
         private boolean mIsFinished;
+        private boolean mRunWhenDisabled;
 
         private ActionMocker() {
             mConfiguration = new ActionConfiguration();
             mIsFinished = false;
+            mRunWhenDisabled = false;
         }
 
-        public ActionMocker mockWithConfiguration(ActionConfiguration configuration) {
+        public ActionMocker withConfiguration(ActionConfiguration configuration) {
             mConfiguration = configuration;
             return this;
         }
 
-        public ActionMocker mockWithRequirements(Collection<? extends Subsystem> requirements) {
+        public ActionMocker withRequirements(Collection<? extends Subsystem> requirements) {
             mConfiguration.requires(new HashSet<>(requirements));
             return this;
         }
 
-        public ActionMocker mockIsFinished(boolean isFinished) {
+        public ActionMocker isFinished(boolean isFinished) {
             mIsFinished = isFinished;
+            return this;
+        }
+
+        public ActionMocker runWhenDisabled(boolean runWhenDisabled) {
+            mRunWhenDisabled = runWhenDisabled;
             return this;
         }
 
         public Action build() {
             Action action = mock(Action.class);
+            when(action.runWhenDisabled()).thenReturn(mRunWhenDisabled);
             when(action.isFinished()).thenReturn(mIsFinished);
             when(action.getConfiguration()).thenReturn(mConfiguration);
             when(action.configure()).thenAnswer(invocation -> new ActionConfiguration.Editor(action, action.getConfiguration()));
@@ -84,34 +92,6 @@ public final class ActionsMock {
 
     public static ContextMocker contextMocker() {
         return new ContextMocker();
-    }
-
-    public static ActionContext mockNonFinishingActionContext() {
-        ActionContext actionContext = mock(ActionContext.class);
-        when(actionContext.run()).thenReturn(true);
-
-        return actionContext;
-    }
-
-    public static ActionContext mockFinishedActionContext() {
-        ActionContext actionContext = mock(ActionContext.class);
-        when(actionContext.run()).thenReturn(false);
-
-        return actionContext;
-    }
-
-    public static Action mockNotAllowedInDisabledAction() {
-        Action action = mock(Action.class);
-        when(action.runWhenDisabled()).thenReturn(false);
-
-        return action;
-    }
-
-    public static Action mockActionIsFinishedMarkedTrue() {
-        Action action = mock(Action.class);
-        when(action.isFinished()).thenReturn(true);
-
-        return action;
     }
 
     public static Action makeActionCancelable(Action action) {

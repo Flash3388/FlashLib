@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.ClockMock;
 import com.flash3388.flashlib.robot.RunningRobotMock;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class SequentialActionGroupTest {
                 context
         ));
         SequentialActionGroup actionGroup = new SequentialActionGroup(
-                mClock, actions, contexts);
+                mock(Scheduler.class), mClock, actions, contexts);
 
         actionGroup.execute();
 
@@ -68,7 +69,7 @@ public class SequentialActionGroupTest {
     public void execute_actionCurrentlyRunningIsFinished_endsIt() throws Exception {
         List<Action> actions = Arrays.asList(
                 ActionsMock.actionMocker()
-                        .mockIsFinished(true)
+                        .isFinished(true)
                         .build(),
                 ActionsMock.actionMocker().build()
         );
@@ -94,7 +95,7 @@ public class SequentialActionGroupTest {
         ));
 
         SequentialActionGroup actionGroup = new SequentialActionGroup(
-                mClock, actions, contexts);
+                mock(Scheduler.class), mClock, actions, contexts);
 
         actionGroup.execute();
         actionGroup.end(true);

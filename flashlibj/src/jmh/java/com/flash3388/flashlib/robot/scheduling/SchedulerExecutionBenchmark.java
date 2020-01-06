@@ -47,6 +47,8 @@ public class SchedulerExecutionBenchmark {
         IntStream.range(0, mActionsCount)
                 .mapToObj((i) -> mActionType.create(new TestActionParams(mScheduler, consumer)))
                 .forEach(Action::start);
+        // to start running the actions
+        mScheduler.run(ROBOT_MODE);
     }
 
     @Benchmark
@@ -54,7 +56,6 @@ public class SchedulerExecutionBenchmark {
     public void run_withSpecificLoad_iterationThroughput(Blackhole blackhole) throws Exception {
         mBlackholeProperty.set(blackhole);
 
-        Scheduler scheduler = mScheduler;
-        scheduler.run(ROBOT_MODE);
+        mScheduler.run(ROBOT_MODE);
     }
 }

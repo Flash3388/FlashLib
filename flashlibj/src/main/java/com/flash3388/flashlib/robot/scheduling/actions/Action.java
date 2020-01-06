@@ -84,15 +84,7 @@ public interface Action {
         return new ActionConfiguration.Editor(this, getConfiguration());
     }
 
-    default void start() {
-	    RunningRobot.getInstance().getScheduler().start(this);
-    }
-
-    default void cancel() {
-        RunningRobot.getInstance().getScheduler().cancel(this);
-    }
-
-    default boolean isRunning() {
-        return RunningRobot.getInstance().getScheduler().isRunning(this);
-    }
+    void start();
+    void cancel();
+    boolean isRunning();
 }

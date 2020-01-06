@@ -25,7 +25,7 @@ public class SchedulerStartBenchmark {
     private Scheduler mScheduler;
     private Action mAction;
 
-    @Setup(Level.Trial)
+    @Setup(Level.Invocation)
     public void setup() {
         mScheduler = mSchedulerImpl.create();
         mAction = new EmptyAction(mScheduler);
@@ -67,10 +67,14 @@ public class SchedulerStartBenchmark {
 
         private static void generateSingleRequirement(Scheduler scheduler, Action action) {
             Subsystem subsystem = new EmptySubsystem(scheduler);
-            action.requires(subsystem);
+            action.configure()
+                    .requires(subsystem)
+                    .save();
 
             Action conflictingAction = new EmptyAction(scheduler);
-            conflictingAction.requires(subsystem);
+            conflictingAction.configure()
+                    .requires(subsystem)
+                    .save();
             conflictingAction.start();
         }
     }

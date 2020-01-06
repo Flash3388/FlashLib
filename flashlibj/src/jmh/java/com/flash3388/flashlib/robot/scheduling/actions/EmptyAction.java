@@ -3,10 +3,12 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
-public class EmptyAction extends Action {
+import java.util.Collections;
+
+public class EmptyAction extends ActionBase {
 
     public EmptyAction(Scheduler scheduler, Time timeout) {
-        super(scheduler, timeout);
+        super(scheduler, new ActionConfiguration(Collections.emptyList(), timeout));
     }
 
     public EmptyAction(Scheduler scheduler) {
@@ -14,12 +16,7 @@ public class EmptyAction extends Action {
     }
 
     @Override
-    protected void execute() {
-
-    }
-
-    @Override
-    protected void end() {
+    public void execute() {
 
     }
 }

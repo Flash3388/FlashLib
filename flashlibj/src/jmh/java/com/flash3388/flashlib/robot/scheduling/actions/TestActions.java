@@ -40,15 +40,12 @@ public class TestActions {
         }
 
         @Override
-        protected void execute() {
+        public void execute() {
             byte[] bytes = new byte[1024];
             mRandom.nextBytes(bytes);
 
             output(bytes);
         }
-
-        @Override
-        protected void end() { }
     }
 
     public static class MediumSizeAction extends TestAction {
@@ -61,7 +58,7 @@ public class TestActions {
         }
 
         @Override
-        protected void execute() {
+        public void execute() {
             Collection<Integer> numbers = IntStream.range(0, 100)
                     .mapToObj((i) -> mRandom.nextInt())
                     .sorted(Integer::compareTo)
@@ -69,9 +66,6 @@ public class TestActions {
 
             output(numbers);
         }
-
-        @Override
-        protected void end() { }
     }
 
     public static class SleepingAction extends TestAction {
@@ -84,16 +78,13 @@ public class TestActions {
         }
 
         @Override
-        protected void execute() {
+        public void execute() {
             try {
                 Thread.sleep(mSleepTimeMs);
             } catch (InterruptedException e) {
                 output(e);
             }
         }
-
-        @Override
-        protected void end() { }
     }
 
     public static class GenericSequentialActionGroup extends TestSequentialActionGroup {

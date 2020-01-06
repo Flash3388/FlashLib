@@ -61,14 +61,17 @@ public class ActionConfiguration {
     private final Set<Subsystem> mRequirements;
     private Time mTimeout;
 
+    public ActionConfiguration(Collection<Subsystem> requirements, Time timeout) {
+        mRequirements = new HashSet<>(requirements);
+        mTimeout = timeout;
+    }
+
     public ActionConfiguration() {
-        mRequirements = new HashSet<>();
-        mTimeout = Time.INVALID;
+        this(Collections.emptyList(), Time.INVALID);
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        mRequirements = new HashSet<>(other.getRequirements());
-        mTimeout = other.getTimeout();
+        this(other.getRequirements(), other.getTimeout());
     }
 
     public Set<Subsystem> getRequirements() {

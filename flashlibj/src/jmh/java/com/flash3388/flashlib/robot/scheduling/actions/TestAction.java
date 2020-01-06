@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import java.util.function.Consumer;
 
-public abstract class TestAction extends Action {
+public abstract class TestAction extends ActionBase {
 
     private final Consumer<Object> mOutputConsumer;
 

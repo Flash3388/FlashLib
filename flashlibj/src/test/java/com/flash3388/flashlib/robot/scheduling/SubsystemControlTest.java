@@ -48,7 +48,7 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .mockWithRequirements(subsystems)
+                .withRequirements(subsystems)
                 .build();
 
         subsystems.forEach((s) -> mActionsOnSubsystems.put(s, action));
@@ -69,7 +69,7 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .mockWithRequirements(usedSubsystems)
+                .withRequirements(usedSubsystems)
                 .build();
 
         otherSubsystems.forEach((s) -> mActionsOnSubsystems.put(s, mock(Action.class)));
@@ -94,7 +94,7 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .mockWithRequirements(usedSubsystems)
+                .withRequirements(usedSubsystems)
                 .build();
 
         otherSubsystems.forEach((s) -> mActionsOnSubsystems.put(s, mock(Action.class)));
@@ -116,7 +116,7 @@ public class SubsystemControlTest {
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .mockWithRequirements(Collections.singleton(subsystem))
+                .withRequirements(Collections.singleton(subsystem))
                 .build();
 
         mSubsystemControl.updateRequirementsWithNewRunningAction(newAction);
@@ -131,7 +131,7 @@ public class SubsystemControlTest {
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .mockWithRequirements(Collections.singleton(subsystem))
+                .withRequirements(Collections.singleton(subsystem))
                 .build();
 
         mSubsystemControl.updateRequirementsWithNewRunningAction(newAction);
@@ -164,7 +164,7 @@ public class SubsystemControlTest {
         mDefaultActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .mockWithRequirements(Collections.singleton(subsystem))
+                .withRequirements(Collections.singleton(subsystem))
                 .build();
 
         mSubsystemControl.setDefaultActionOnSubsystem(subsystem, newAction);
@@ -177,7 +177,7 @@ public class SubsystemControlTest {
         Subsystem subsystem = mock(Subsystem.class);
 
         Action newAction = ActionsMock.actionMocker()
-                .mockWithRequirements(Collections.singleton(subsystem))
+                .withRequirements(Collections.singleton(subsystem))
                 .build();
 
         mSubsystemControl.setDefaultActionOnSubsystem(subsystem, newAction);
