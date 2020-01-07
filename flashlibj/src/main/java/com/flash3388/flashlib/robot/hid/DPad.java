@@ -3,6 +3,9 @@ package com.flash3388.flashlib.robot.hid;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Represents a D-Pad from and XBox controller.
  * 
@@ -66,4 +69,8 @@ public class DPad extends Pov {
 	public Button getFull() {
 		return mFull;
 	}
+
+    public Iterable<Button> buttons() {
+        return Collections.unmodifiableCollection(Arrays.asList(mUp, mDown, mRight, mLeft, mFull));
+    }
 }
