@@ -82,10 +82,10 @@ class ActionsRepository {
     }
 
     public void updateActionsForNextRun(Iterable<Action> actionsToRemove) {
-        actionsToRemove.forEach(this::internalRemove);
-
         mNextRunActions.forEach(this::internalAdd);
         mNextRunActions.clear();
+
+        actionsToRemove.forEach(this::internalRemove);
     }
 
     public Set<Map.Entry<Action, ActionContext>> getRunningActionContexts() {
@@ -135,6 +135,7 @@ class ActionsRepository {
             if (mActionsOnSubsystems.containsKey(subsystem)) {
                 Action currentAction = mActionsOnSubsystems.get(subsystem);
                 currentAction.cancel();
+                internalRemove(currentAction);
 
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over subsystem {}",
                         currentAction.toString(), action.toString(), subsystem.toString());
