@@ -11,6 +11,14 @@ public interface RobotMode {
         return other != null && getKey() == other.getKey();
     }
 
+    static <T extends RobotMode> T cast(RobotMode robotMode, Class<T> type) {
+        if (type.isInstance(robotMode)) {
+            return type.cast(robotMode);
+        }
+
+        throw new ClassCastException(String.format("Mode is not of type %s", type.getName()));
+    }
+
     static RobotMode create(String name, int key) {
         return create(name, key, false);
     }
