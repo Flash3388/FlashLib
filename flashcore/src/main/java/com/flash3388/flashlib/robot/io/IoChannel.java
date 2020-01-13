@@ -7,6 +7,6 @@ public interface IoChannel {
             return type.cast(channel);
         }
 
-        throw new AssertionError(String.format("Channel is not of type %s", type.getName()));
+        throw new ClassCastException(String.format("Channel is not of type %s", type.getName()));
     }
 }
