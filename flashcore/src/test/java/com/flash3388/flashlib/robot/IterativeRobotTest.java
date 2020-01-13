@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.robot.hid.HidInterface;
+import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
@@ -162,6 +163,11 @@ public class IterativeRobotTest {
 
         @Override
         public RobotModeSupplier getModeSupplier() {
+            return null;
+        }
+
+        @Override
+        public IoInterface getIoInterface() {
             return null;
         }
 

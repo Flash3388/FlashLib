@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.hid.HidInterface;
+import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
@@ -62,6 +63,8 @@ public interface Robot {
     default boolean isDisabled(){
         return getMode().isDisabled();
     }
+
+    IoInterface getIoInterface();
 
     HidInterface getHidInterface();
 
