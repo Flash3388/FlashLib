@@ -49,6 +49,7 @@ class SchedulerIteration {
                 }
             } catch (Throwable t) {
                 mLogger.error("Error while running an action", t);
+                action.cancel();
             }
         }
     }
