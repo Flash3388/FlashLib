@@ -12,9 +12,11 @@ import static com.flash3388.flashlib.robot.modes.RobotModesMock.mockNonDisabledM
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockFinishedActionContext;
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNonFinishingActionContext;
 import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNotAllowedInDisabledAction;
+import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockThrowingAction;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -84,5 +86,16 @@ public class SchedulerIterationTest {
         mSchedulerIteration.run(RobotMode.DISABLED);
 
         verify(actionContext, never()).run();
+    }
+
+    @Test
+    public void run_userExceptionFromAction_cancelsAction() throws Exception {
+        Action action = mock(Action.class);
+        ActionContext actionContext = mActionsRepositoryMock.runningAction(action);
+        when(actionContext.run()).thenThrow(new RuntimeException());
+
+        mSchedulerIteration.run(mockNonDisabledMode());
+
+        verify(action, times(1)).cancel();
     }
 }

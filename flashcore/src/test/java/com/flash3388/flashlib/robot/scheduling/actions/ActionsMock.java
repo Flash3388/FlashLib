@@ -8,6 +8,7 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,13 @@ public final class ActionsMock {
             when(action.isCanceled()).thenReturn(true);
             return null;
         }).when(action).markCanceled();
+
+        return action;
+    }
+
+    public static Action mockThrowingAction() {
+        Action action = mock(Action.class);
+        doThrow(new RuntimeException()).when(action).execute();
 
         return action;
     }
