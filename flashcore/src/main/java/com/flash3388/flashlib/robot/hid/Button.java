@@ -22,6 +22,10 @@ public abstract class Button extends Trigger implements BooleanSupplier, Inverta
         return isDown();
     }
 
+    public void addToScheduler() {
+        addToScheduler(this);
+    }
+
     public abstract void whenPressed(Action action);
     public abstract void whileHeld(Action action);
 }
