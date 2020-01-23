@@ -20,7 +20,7 @@ public class AxisButton extends HardwareButton {
 
     @Override
     public boolean isDown() {
-        return Math.abs(mAxis.getAsDouble() - mValuePressed) > 0 ^ mIsInverted;
+        return (Math.abs(mAxis.getAsDouble()) > mValuePressed) ^ mIsInverted;
     }
 
     @Override
