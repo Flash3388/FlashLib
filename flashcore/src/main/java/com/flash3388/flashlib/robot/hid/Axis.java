@@ -11,4 +11,8 @@ import java.util.function.DoubleSupplier;
  * @since FlashLib 1.0.2
  */
 public interface Axis extends DoubleSupplier, Invertable {
+
+    default Button asButton(double threshold) {
+        return new AxisButton(this, threshold);
+    }
 }
