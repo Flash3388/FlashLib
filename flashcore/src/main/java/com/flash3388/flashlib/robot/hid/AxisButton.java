@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.hid;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.time.Clock;
 
 public class AxisButton extends HardwareButton {
@@ -11,11 +12,18 @@ public class AxisButton extends HardwareButton {
 
     public AxisButton(Clock clock, Axis axis, double valuePressed) {
         super(clock);
+        if (valuePressed <= 0) {
+            throw new IllegalStateException("Value should be an absolute threshold");
+        }
 
         mAxis = axis;
         mValuePressed = valuePressed;
 
         mIsInverted = false;
+    }
+
+    public AxisButton(Axis axis, double valuePressed) {
+        this(RunningRobot.getInstance().getClock(), axis, valuePressed);
     }
 
     @Override
