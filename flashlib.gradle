@@ -1,6 +1,65 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
+def flashlibModules = [
+        project('flashutil'),
+        project('flashvision'),
+        project('flashcomm'),
+        project('flashcore')
+]
+
+flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }
+
+task flashlibSources(type: Jar, dependsOn: flashlibModules.classes) {
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('sources')
+
+    from files(flashlibModules.collect {
+        it.sourceSets.main.allSource
+    })
+}
+
+task flashlibJavadoc(type: Jar, dependsOn: flashlibModules.javadoc) {
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+    archiveClassifier.set('javadoc')
+
+    from files(flashlibModules.collect {
+        it.javadoc.destinationDir
+    })
+}
+
+task flashlib(type: Jar, dependsOn: flashlibModules.assemble) {
+    dependsOn flashlibSources
+    dependsOn flashlibJavadoc
+
+    archiveBaseName.set('flashlib')
+    destinationDirectory.set(rootProject.buildDir)
+
+    from files(flashlibModules.collect {
+        it.sourceSets.main.output
+    })
+}
+
+task flashlibAll(type: Jar, dependsOn: flashlib) {
+    dependsOn flashlibSources
+    dependsOn flashlibJavadoc
+
+    archiveFileName.set('flashlib-all.jar')
+    destinationDirectory.set(rootProject.buildDir)
+
+    from files(flashlibModules.collect {
+        it.sourceSets.main.output
+    })
+    from files(flashlibModules.collect {
+        it.sourceSets.main.allSource
+    })
+    from files(flashlibModules.collect {
+        it.javadoc.destinationDir
+    })
+}
+
 publishing {
     publications {
         mavenFlashlib(MavenPublication) {
@@ -40,8 +99,9 @@ publishing {
                     def dependenciesNode = asNode().appendNode('dependencies')
                     def allDependencies = []
 
-                    subprojects.each { project ->
-                        allDependencies.addAll(project.configurations.implementation.allDependencies.withType(ExternalDependency))
+                    flashlibModules.each { project ->
+                        allDependencies.addAll(project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency))
+                        allDependencies.addAll(project.configurations.compileClasspath.allDependencies.withType(ExternalDependency))
                     }
 
                     def comparator = [
