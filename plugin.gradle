@@ -73,7 +73,9 @@ publishing {
 
                 withXml {
                     def dependenciesNode = asNode().appendNode('dependencies')
-                    def allDependencies = project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency)
+                    def allDependencies = []
+                    allDependencies.addAll(project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency))
+                    allDependencies.addAll(project.configurations.compileClasspath.allDependencies.withType(ExternalDependency))
 
                     def comparator = [
                             compare: { first, second ->

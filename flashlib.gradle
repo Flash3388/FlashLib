@@ -101,6 +101,7 @@ publishing {
 
                     flashlibModules.each { project ->
                         allDependencies.addAll(project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency))
+                        allDependencies.addAll(project.configurations.compileClasspath.allDependencies.withType(ExternalDependency))
                     }
 
                     def comparator = [
