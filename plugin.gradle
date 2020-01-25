@@ -1,18 +1,53 @@
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply from: rootProject.file('dependencies.gradle')
+apply from: rootProject.file('extras.gradle')
+
+group = GROUP
+version = project.property("${project.name.toUpperCase()}_VERSION")
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation junit()
+    testImplementation mockito()
+    testImplementation hamcrest()
+}
+
+jar {
+    archiveBaseName.set(project.name)
+    destinationDirectory.set(project.buildDir)
+}
+
+task createSources(type: Jar, dependsOn: 'classes') {
+    from sourceSets.main.allSource
+
+    archiveBaseName.set(project.name)
+    archiveClassifier.set('sources')
+}
+
+task createJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+
+    archiveBaseName.set(project.name)
+    archiveClassifier.set('javadoc')
+}
 
 publishing {
     publications {
-        mavenFlashlib(MavenPublication) {
-            artifactId = 'flashlib'
-
-            artifact flashlib
-            artifact flashlibJavadoc
-            artifact flashlibSources
+        create("maven${project.name}", MavenPublication) {
+            artifact tasks.jar
+            artifact createJavadoc
+            artifact createSources
 
             pom {
-                name = 'Flashlib'
-                description = 'Robotics development framework'
+                name = project.name.capitalize()
+                description = project.property("${project.name.toUpperCase()}_DESCRIPTION")
                 url = POM_URL
 
                 licenses {
@@ -38,11 +73,7 @@ publishing {
 
                 withXml {
                     def dependenciesNode = asNode().appendNode('dependencies')
-                    def allDependencies = []
-
-                    subprojects.each { project ->
-                        allDependencies.addAll(project.configurations.implementation.allDependencies.withType(ExternalDependency))
-                    }
+                    def allDependencies = project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency)
 
                     def comparator = [
                             compare: { first, second ->
@@ -60,6 +91,12 @@ publishing {
                         dependencyNode.appendNode('version', dep.version)
                         dependencyNode.appendNode('scope', 'compile')
                     }
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', rootProject.property('GROUP'))
+                    dependencyNode.appendNode('artifactId', rootProject.name)
+                    dependencyNode.appendNode('version', rootProject.property('VERSION'))
+                    dependencyNode.appendNode('scope', 'compile')
                 }
             }
         }
@@ -85,6 +122,6 @@ publishing {
 
 if (shouldSign()) {
     signing {
-        sign publishing.publications.mavenFlashlib
+        sign publishing.publications.getByName("maven${project.name}")
     }
 }

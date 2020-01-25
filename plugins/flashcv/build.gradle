@@ -1,0 +1,7 @@
+apply from: rootProject.file('plugin.gradle')
+
+dependencies {
+    api project(':flashvision')
+
+    implementation group: 'org.openpnp', name: 'opencv', version: '3.2.0-0'
+}
