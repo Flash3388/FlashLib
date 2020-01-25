@@ -1,19 +1,15 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
 public class RobotProgram {
 
     private final RobotCreator mRobotCreator;
     private final Logger mLogger;
-    private final ResourceHolder mResourceHolder;
 
     public RobotProgram(RobotCreator robotCreator, Logger logger) {
         mRobotCreator = robotCreator;
         mLogger = logger;
-
-        mResourceHolder = ResourceHolder.empty();
     }
 
     public void start() {
@@ -29,8 +25,6 @@ public class RobotProgram {
             mLogger.error("Error while initializing robot", e);
         } catch (Throwable t) {
             mLogger.error("Unknown error from robot", t);
-        } finally {
-            freeRobotResources();
         }
 
         mLogger.info("Robot finished");
@@ -44,12 +38,19 @@ public class RobotProgram {
     private void runRobot() throws RobotInitializationException, RobotCreationException {
         mLogger.debug("Creating user robot class");
 
-        RobotBase robot = mRobotCreator.create();
-        robot.initResources(mResourceHolder, mLogger);
+        RobotBase robot = mRobotCreator.create(mLogger);
 
         RunningRobot.setInstance(robot);
 
         mLogger.debug("Initializing user robot");
+        try {
+            runRobot(robot);
+        } finally {
+            robot.getResourceHolder().freeAll();
+        }
+    }
+
+    private void runRobot(RobotBase robot) throws RobotInitializationException {
         robot.robotInit();
         try {
             mLogger.debug("Starting user robot");
@@ -58,9 +59,5 @@ public class RobotProgram {
             mLogger.debug("Shutting down user robot");
             robot.robotShutdown();
         }
-    }
-
-    private void freeRobotResources() {
-        mResourceHolder.freeAll();
     }
 }

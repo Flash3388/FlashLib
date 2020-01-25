@@ -2,7 +2,6 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.util.resources.Resource;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
-import org.slf4j.Logger;
 
 import java.util.Collection;
 
@@ -27,24 +26,19 @@ import java.util.Collection;
  */
 public abstract class RobotBase implements Robot {
 
-    private ResourceHolder mResourceHolder;
-    private Logger mLogger;
+    private final ResourceHolder mResourceHolder;
 
-    protected RobotBase() {}
-
-    @Override
-    public Logger getLogger() {
-        return mLogger;
+    protected RobotBase() {
+        mResourceHolder = ResourceHolder.empty();
     }
 
     @Override
-    public void registerResources(Collection<? extends Resource> resources) {
+    public final void registerResources(Collection<? extends Resource> resources) {
         mResourceHolder.add(resources);
     }
 
-    final void initResources(ResourceHolder resourceHolder, Logger logger) {
-        mResourceHolder = resourceHolder;
-        mLogger = logger;
+    final ResourceHolder getResourceHolder() {
+        return mResourceHolder;
     }
 
     /**

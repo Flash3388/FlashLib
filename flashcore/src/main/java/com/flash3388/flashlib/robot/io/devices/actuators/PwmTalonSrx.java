@@ -9,14 +9,14 @@ import com.flash3388.flashlib.robot.io.Pwm;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class TalonSrx extends PwmSpeedController {
+public class PwmTalonSrx extends PwmSpeedController {
 
 	/**
 	 * Creates a new Talon SRX control class for a given Pwm channel.
 	 * 
 	 * @param port Pwm port object.
 	 */
-	public TalonSrx(Pwm port) {
+	public PwmTalonSrx(Pwm port) {
 		super(
 		        port,
                 new PwmBounds(2.004, 1.52, 1.50, 1.48, 0.997, false),

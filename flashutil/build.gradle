@@ -1,7 +1,8 @@
 apply from: rootProject.file('jcomponent.gradle')
 
 dependencies {
-    implementation javabeans()
-    implementation jmath()
-    implementation gson()
+    api slf4jApi()
+    api javabeans()
+    api jmath()
+    api gson()
 }

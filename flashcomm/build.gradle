@@ -2,5 +2,5 @@ apply from: rootProject.file('jcomponent.gradle')
 apply from: rootProject.file('instrumentation-test.gradle')
 
 dependencies {
-    implementation project(':flashutil')
+    api project(':flashutil')
 }

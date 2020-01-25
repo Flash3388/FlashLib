@@ -11,6 +11,13 @@ buildscript {
     }
 }
 
+def flashlibModules = [
+        project('flashutil'),
+        project('flashvision'),
+        project('flashcomm'),
+        project('flashcore')
+]
+
 allprojects {
     group = GROUP
     version = VERSION
@@ -26,37 +33,36 @@ subprojects {
     }
 }
 
-subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
+flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }
 
-
-task flashlibSources(type: Jar, dependsOn: subprojects.classes) {
+task flashlibSources(type: Jar, dependsOn: flashlibModules.classes) {
     archiveBaseName.set('flashlib')
     destinationDirectory.set(rootProject.buildDir)
     archiveClassifier.set('sources')
 
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.sourceSets.main.allSource
     })
 }
 
-task flashlibJavadoc(type: Jar, dependsOn: subprojects.javadoc) {
+task flashlibJavadoc(type: Jar, dependsOn: flashlibModules.javadoc) {
     archiveBaseName.set('flashlib')
     destinationDirectory.set(rootProject.buildDir)
     archiveClassifier.set('javadoc')
 
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.javadoc.destinationDir
     })
 }
 
-task flashlib(type: Jar, dependsOn: subprojects.assemble) {
+task flashlib(type: Jar, dependsOn: flashlibModules.assemble) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
     archiveBaseName.set('flashlib')
     destinationDirectory.set(rootProject.buildDir)
 
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.sourceSets.main.output
     })
 }
@@ -68,13 +74,13 @@ task flashlibAll(type: Jar, dependsOn: flashlib) {
     archiveFileName.set('flashlib-all.jar')
     destinationDirectory.set(rootProject.buildDir)
 
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.sourceSets.main.output
     })
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.sourceSets.main.allSource
     })
-    from files(subprojects.collect {
+    from files(flashlibModules.collect {
         it.javadoc.destinationDir
     })
 }

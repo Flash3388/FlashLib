@@ -9,4 +9,7 @@ public interface IoChannel {
 
         throw new ClassCastException(String.format("Channel is not of type %s", type.getName()));
     }
+
+    class Stub implements IoChannel {
+    }
 }
