@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
+import com.flash3388.flashlib.robot.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.RunOnState;
@@ -10,10 +11,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BooleanSupplier;
 
-public class Trigger {
+public class Trigger extends Subsystem {
 
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
+    private Action mUpdateAction;
 
     public Trigger(Collection<TriggerStateListener> triggerStateListeners, TriggerState initialState) {
         mTriggerStateListeners = triggerStateListeners;
@@ -76,7 +78,17 @@ public class Trigger {
     }
 
     public void addToScheduler(BooleanSupplier condition) {
-        new TriggerActivationAction(condition, this).start();
+        removeFromScheduler();
+
+        mUpdateAction = new TriggerActivationAction(condition, this);
+        mUpdateAction.start();
+    }
+
+    public void removeFromScheduler() {
+        if (mUpdateAction != null) {
+            mUpdateAction.cancel();
+            mUpdateAction = null;
+        }
     }
 
     private void updateSameState(TriggerState state) {

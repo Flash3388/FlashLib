@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.robot.hid;
 
 
+import com.flash3388.flashlib.robot.RunningRobotMock;
 import com.flash3388.flashlib.time.Clock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,6 +12,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AxisButtonTest {
+
+    @BeforeEach
+    public void setup() throws Exception {
+        RunningRobotMock.mockRobotWithDependencies();
+    }
 
     @Test
     public void isDown_valueAboveThreshold_returnsTrue() throws Exception {
