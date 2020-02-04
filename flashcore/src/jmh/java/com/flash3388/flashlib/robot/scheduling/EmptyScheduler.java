@@ -24,12 +24,12 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public void setDefaultAction(Requirement requirement, Action action) {
 
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Subsystem subsystem) {
+    public Optional<Action> getActionRunningOnSubsystem(Requirement requirement) {
         return Optional.empty();
     }
 

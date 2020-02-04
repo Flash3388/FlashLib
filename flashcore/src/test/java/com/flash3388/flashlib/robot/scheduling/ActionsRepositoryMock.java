@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 public class ActionsRepositoryMock {
 
     private final Map<Action, ActionContext> mRunningActions;
-    private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
+    private final Map<Requirement, Action> mDefaultActionsOnSubsystems;
 
     public ActionsRepositoryMock(ActionsRepository tasksRepository) {
         mRunningActions = new HashMap<>();
@@ -46,7 +46,7 @@ public class ActionsRepositoryMock {
         return actionContext;
     }
 
-    public void setDefaultAction(Subsystem subsystem, Action action) {
-        mDefaultActionsOnSubsystems.put(subsystem, action);
+    public void setDefaultAction(Requirement requirement, Action action) {
+        mDefaultActionsOnSubsystems.put(requirement, action);
     }
 }

@@ -54,7 +54,7 @@ class SchedulerIteration {
     }
 
     private void startDefaultSubsystemActions(RobotMode robotMode) {
-        for (Map.Entry<Subsystem, Action> entry : mActionsRepository.getDefaultActionsToStart().entrySet()) {
+        for (Map.Entry<Requirement, Action> entry : mActionsRepository.getDefaultActionsToStart().entrySet()) {
             try {
                 Action action = entry.getValue();
 

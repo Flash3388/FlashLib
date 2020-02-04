@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 class ActionsRepository {
 
-    private final Map<Subsystem, Action> mActionsOnSubsystems;
+    private final Map<Requirement, Action> mActionsOnRequirements;
     private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
     private final Map<Action, ActionContext> mRunningActions;
     private final Collection<Action> mNextRunActions;
@@ -24,8 +24,8 @@ class ActionsRepository {
     private final Clock mClock;
     private final Logger mLogger;
 
-    ActionsRepository(Map<Subsystem, Action> actionsOnSubsystems, Map<Subsystem, Action> defaultActionsOnSubsystems, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions, Clock clock, Logger logger) {
-        mActionsOnSubsystems = actionsOnSubsystems;
+    ActionsRepository(Map<Requirement, Action> actionsOnRequirements, Map<Subsystem, Action> defaultActionsOnSubsystems, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions, Clock clock, Logger logger) {
+        mActionsOnRequirements = actionsOnRequirements;
         mDefaultActionsOnSubsystems = defaultActionsOnSubsystems;
         mRunningActions = runningActions;
         mNextRunActions = nextRunActions;
@@ -48,8 +48,8 @@ class ActionsRepository {
         mNextRunActions.add(action);
     }
 
-    public Optional<Action> getActionOnSubsystem(Subsystem subsystem) {
-        return Optional.ofNullable(mActionsOnSubsystems.get(subsystem));
+    public Optional<Action> getActionOnSubsystem(Requirement requirement) {
+        return Optional.ofNullable(mActionsOnRequirements.get(requirement));
     }
 
     public void setDefaultActionOnSubsystem(Subsystem subsystem, Action action) {
@@ -92,11 +92,11 @@ class ActionsRepository {
         return mRunningActions.entrySet();
     }
 
-    public Map<Subsystem, Action> getDefaultActionsToStart() {
-        Map<Subsystem, Action> actionsToStart = new HashMap<>();
+    public Map<Requirement, Action> getDefaultActionsToStart() {
+        Map<Requirement, Action> actionsToStart = new HashMap<>();
 
         for (Map.Entry<Subsystem, Action> entry : mDefaultActionsOnSubsystems.entrySet()) {
-            if (mActionsOnSubsystems.containsKey(entry.getKey())) {
+            if (mActionsOnRequirements.containsKey(entry.getKey())) {
                 continue;
             }
 
@@ -131,23 +131,23 @@ class ActionsRepository {
     }
 
     private void updateRequirementsWithNewRunningAction(Action action) {
-        for (Subsystem subsystem : action.getRequirements()) {
-            if (mActionsOnSubsystems.containsKey(subsystem)) {
-                Action currentAction = mActionsOnSubsystems.get(subsystem);
+        for (Requirement requirement : action.getRequirements()) {
+            if (mActionsOnRequirements.containsKey(requirement)) {
+                Action currentAction = mActionsOnRequirements.get(requirement);
                 currentAction.cancel();
                 internalRemove(currentAction);
 
-                mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over subsystem {}",
-                        currentAction.toString(), action.toString(), subsystem.toString());
+                mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}",
+                        currentAction.toString(), action.toString(), requirement.toString());
             }
 
-            mActionsOnSubsystems.put(subsystem, action);
+            mActionsOnRequirements.put(requirement, action);
         }
     }
 
     private void updateRequirementsNoCurrentAction(Action action) {
-        for (Subsystem subsystem : action.getRequirements()) {
-            mActionsOnSubsystems.remove(subsystem);
+        for (Requirement requirement : action.getRequirements()) {
+            mActionsOnRequirements.remove(requirement);
         }
     }
 }

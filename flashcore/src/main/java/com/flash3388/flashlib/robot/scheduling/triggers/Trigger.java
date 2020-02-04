@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.RunOnState;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BooleanSupplier;
 
-public class Trigger extends Subsystem {
+public class Trigger implements Requirement {
 
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
