@@ -13,7 +13,6 @@ import com.flash3388.flashlib.robot.hid.NoSuchAxisException;
 import com.flash3388.flashlib.robot.hid.NoSuchButtonException;
 import com.flash3388.flashlib.robot.hid.NoSuchPovException;
 import com.flash3388.flashlib.robot.hid.Pov;
-import com.flash3388.flashlib.robot.hid.scheduling.ButtonActivationAction;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -54,8 +53,8 @@ public class XboxController implements Hid {
 
         mDpad = new DPad(clock, buttonPressTime, hidInterface, mChannel, DPAD_POV_INDEX);
 
-        mButtons.forEach((b)-> new ButtonActivationAction(scheduler, b).start());
-        mDpad.buttons().forEach((b)-> new ButtonActivationAction(scheduler, b).start());
+        mButtons.forEach(Button::addToScheduler);
+        mDpad.buttons().forEach(Button::addToScheduler);
 	}
 
     public XboxController(Scheduler scheduler, Clock clock, HidInterface hidInterface, int channel) {
