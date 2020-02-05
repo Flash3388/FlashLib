@@ -1,30 +1,24 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
-import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 
 import java.util.function.BooleanSupplier;
 
-public class TriggerActivationAction extends Action {
+public class TriggerActivationAction extends ActionBase {
 
     private final BooleanSupplier mCondition;
     private final Trigger mTrigger;
 
-    public TriggerActivationAction(Scheduler scheduler, BooleanSupplier condition, Trigger trigger) {
-        super(scheduler);
+    public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
         mCondition = condition;
         mTrigger = trigger;
 
-        requires(mTrigger);
-    }
-
-    public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
-        this(RunningRobot.getInstance().getScheduler(), condition, trigger);
+        configure().requires(mTrigger)
+                .save();
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         boolean isConditionMet = mCondition.getAsBoolean();
 
         if (isConditionMet) {
@@ -32,10 +26,6 @@ public class TriggerActivationAction extends Action {
         } else {
             mTrigger.deactivate();
         }
-    }
-
-    @Override
-    protected void end() {
     }
 
     @Override

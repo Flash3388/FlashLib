@@ -25,7 +25,7 @@ public class SchedulerStopBenchmark {
     private Scheduler mScheduler;
     private Action mAction;
 
-    @Setup(Level.Trial)
+    @Setup(Level.Iteration)
     public void setup() {
         mScheduler = mSchedulerImpl.create();
         mAction = new EmptyAction(mScheduler);
@@ -51,7 +51,9 @@ public class SchedulerStopBenchmark {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
                 Requirement requirement = new EmptyRequirement();
-                action.requires(requirement);
+                action.configure()
+                        .requires(requirement)
+                        .save();
             }
         },
         THREE_REQUIREMENTS {
@@ -59,7 +61,9 @@ public class SchedulerStopBenchmark {
             void setupRequirements(Scheduler scheduler, Action action) {
                 for (int i = 0; i < 3; i++) {
                     Requirement requirement = new EmptyRequirement();
-                    action.requires(requirement);
+                    action.configure()
+                            .requires(requirement)
+                            .save();
                 }
             }
         }

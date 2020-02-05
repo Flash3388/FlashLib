@@ -3,7 +3,9 @@ package com.flash3388.flashlib.robot.scheduling;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.time.Clock;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.mockito.verification.VerificationMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,23 +15,21 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ActionsRepositoryMock {
+public class ActionControlMock {
 
+    private final ActionControl mMock;
     private final Map<Action, ActionContext> mRunningActions;
-    private final Map<Requirement, Action> mDefaultActionsOnSubsystems;
 
-    public ActionsRepositoryMock(ActionsRepository tasksRepository) {
+    public ActionControlMock(ActionControl actionControl) {
+        mMock = actionControl;
         mRunningActions = new HashMap<>();
-        mDefaultActionsOnSubsystems = new HashMap<>();
 
-        when(tasksRepository.getRunningActionContexts()).thenReturn(mRunningActions.entrySet());
+        when(actionControl.getRunningActionContexts()).thenReturn(mRunningActions.entrySet());
         doAnswer((Answer<Void>) invocation -> {
             Action action = invocation.getArgument(0);
             mRunningActions.put(action, new ActionContext(action, mock(Clock.class)));
             return null;
-        }).when(tasksRepository).addAction(any(Action.class));
-
-        when(tasksRepository.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems);
+        }).when(actionControl).startAction(any(Action.class));
     }
 
     public Action runningAction(ActionContext actionContext) {
@@ -46,7 +46,7 @@ public class ActionsRepositoryMock {
         return actionContext;
     }
 
-    public void setDefaultAction(Requirement requirement, Action action) {
-        mDefaultActionsOnSubsystems.put(requirement, action);
+    public ActionControl verify(VerificationMode verificationMode) {
+        return Mockito.verify(mMock, verificationMode);
     }
 }

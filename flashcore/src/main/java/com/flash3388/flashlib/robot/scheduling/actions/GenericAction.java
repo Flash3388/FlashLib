@@ -1,53 +1,76 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
-public class GenericAction extends Action {
+public class GenericAction extends ActionBase {
+
+    public static class Builder {
+        private Runnable mOnInitialize;
+        private Runnable mOnExecute;
+        private BooleanSupplier mIsFinished;
+        private Consumer<Boolean> mOnEnd;
+
+        public Builder onInitialize(Runnable runnable) {
+            mOnInitialize = runnable;
+            return this;
+        }
+
+        public Builder onExecute(Runnable runnable) {
+            mOnExecute = runnable;
+            return this;
+        }
+
+        public Builder isFinished(BooleanSupplier supplier) {
+            mIsFinished = supplier;
+            return this;
+        }
+
+        public Builder onEnd(Consumer<Boolean> consumer) {
+            mOnEnd = consumer;
+            return this;
+        }
+
+        public Action build() {
+            return new GenericAction(mOnInitialize, mOnExecute, mIsFinished, mOnEnd);
+        }
+    }
 
     private final Runnable mOnInitialize;
     private final Runnable mOnExecute;
     private final BooleanSupplier mIsFinished;
-    private final Runnable mOnEnd;
-    private final Runnable mOnInterrupted;
+    private final Consumer<Boolean> mOnEnd;
 
-    public GenericAction(Runnable onInitialize, Runnable onExecute, BooleanSupplier isFinished, Runnable onEnd, Runnable onInterrupted) {
+    public GenericAction(Runnable onInitialize, Runnable onExecute, BooleanSupplier isFinished, Consumer<Boolean> onEnd) {
         mOnInitialize = onInitialize;
         mOnExecute = onExecute;
         mIsFinished = isFinished;
         mOnEnd = onEnd;
-        mOnInterrupted = onInterrupted;
     }
 
     @Override
-    protected final void initialize() {
+    public final void initialize() {
         if (mOnInitialize != null) {
             mOnInitialize.run();
         }
     }
 
     @Override
-    protected final void execute() {
+    public final void execute() {
         if (mOnExecute != null) {
             mOnExecute.run();
         }
     }
 
     @Override
-    protected final boolean isFinished() {
+    public final boolean isFinished() {
         return mIsFinished != null && mIsFinished.getAsBoolean();
     }
 
     @Override
-    protected final void end() {
+    public void end(boolean wasInterrupted) {
         if (mOnEnd != null) {
-            mOnEnd.run();
-        }
-    }
-
-    @Override
-    protected final void interrupted() {
-        if (mOnInterrupted != null) {
-            mOnInterrupted.run();
+            mOnEnd.accept(wasInterrupted);
         }
     }
 }

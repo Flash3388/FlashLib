@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.motion.Rotatable;
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 
 import java.util.function.DoubleSupplier;
 
-public class RotateAction extends Action {
+public class RotateAction extends ActionBase {
 
 	private final Rotatable mRotatable;
 	private final DoubleSupplier mSpeedSource;
@@ -16,12 +16,12 @@ public class RotateAction extends Action {
 	}
 	
 	@Override
-	protected void execute() {
+	public void execute() {
 		mRotatable.rotate(mSpeedSource.getAsDouble());
 	}
 
 	@Override
-	protected void end() {
+	public void end(boolean wasInterrupted) {
 		mRotatable.stop();
 	}
 }

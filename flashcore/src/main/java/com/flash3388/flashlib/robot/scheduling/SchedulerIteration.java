@@ -11,13 +11,15 @@ import java.util.Map;
 
 class SchedulerIteration {
 
-    private final ActionsRepository mActionsRepository;
+    private final ActionControl mActionControl;
+    private final RequirementsControl mRequirementsControl;
     private final Logger mLogger;
 
     private final Collection<Action> mActionsToRemove;
 
-    public SchedulerIteration(ActionsRepository actionsRepository, Logger logger) {
-        mActionsRepository = actionsRepository;
+    SchedulerIteration(ActionControl actionControl, RequirementsControl requirementsControl, Logger logger) {
+        mActionControl = actionControl;
+        mRequirementsControl = requirementsControl;
         mLogger = logger;
 
         mActionsToRemove = new ArrayList<>(2);
@@ -33,7 +35,7 @@ class SchedulerIteration {
     }
 
     private void runActions(RobotMode robotMode) {
-        for (Map.Entry<Action, ActionContext> entry : mActionsRepository.getRunningActionContexts()) {
+        for (Map.Entry<Action, ActionContext> entry : mActionControl.getRunningActionContexts()) {
             Action action = entry.getKey();
             ActionContext context = entry.getValue();
 
@@ -55,7 +57,7 @@ class SchedulerIteration {
     }
 
     private void startDefaultSubsystemActions(RobotMode robotMode) {
-        for (Map.Entry<Requirement, Action> entry : mActionsRepository.getDefaultActionsToStart().entrySet()) {
+        for (Map.Entry<Subsystem, Action> entry : mRequirementsControl.getDefaultActionsToStart().entrySet()) {
             try {
                 Action action = entry.getValue();
 
@@ -73,6 +75,6 @@ class SchedulerIteration {
     }
 
     private void readyForNextRun() {
-        mActionsRepository.updateActionsForNextRun(mActionsToRemove);
+        mActionControl.updateActionsForNextRun(mActionsToRemove);
     }
 }

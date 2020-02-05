@@ -1,0 +1,94 @@
+package com.flash3388.flashlib.robot.scheduling.actions;
+
+import com.flash3388.flashlib.robot.scheduling.Requirement;
+import com.flash3388.flashlib.time.Time;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+public class ActionConfiguration {
+
+    public static class Editor {
+
+        private final Action mAction;
+        private final ActionConfiguration mConfiguration;
+
+        Editor(Action action, ActionConfiguration originalConfiguration) {
+            mAction = action;
+            mConfiguration = new ActionConfiguration(originalConfiguration);
+        }
+
+        /**
+         * Sets the run timeout for this action. If the given timeout is valid ({@link Time#isValid()}), then this
+         * action will stop running (be canceled) once that timeout was reached.
+         *
+         * @param timeout timeout to set, or {@link Time#INVALID} to cancel timeout.
+         * @return this instance
+         */
+        public Editor setTimeout(Time timeout){
+            Objects.requireNonNull(timeout, "timeout is null");
+            mConfiguration.setTimeout(timeout);
+
+            return this;
+        }
+
+        /**
+         * Cancels the timeout set for this action. Calls {@link #setTimeout(Time)} with {@link Time#INVALID}
+         *
+         * @return this instance
+         */
+        public Editor cancelTimeout(){
+            return setTimeout(Time.INVALID);
+        }
+
+        public Editor requires(Requirement... requirements){
+            Objects.requireNonNull(requirements, "requirements is null");
+            mConfiguration.requires(Arrays.asList(requirements));
+
+            return this;
+        }
+
+        public Action save() {
+            mAction.setConfiguration(mConfiguration);
+            return mAction;
+        }
+    }
+
+    private final Set<Requirement> mRequirements;
+    private Time mTimeout;
+
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout) {
+        mRequirements = new HashSet<>(requirements);
+        mTimeout = timeout;
+    }
+
+    public ActionConfiguration() {
+        this(Collections.emptyList(), Time.INVALID);
+    }
+
+    public ActionConfiguration(ActionConfiguration other) {
+        this(other.getRequirements(), other.getTimeout());
+    }
+
+    public Set<Requirement> getRequirements() {
+        return Collections.unmodifiableSet(mRequirements);
+    }
+
+    public Time getTimeout() {
+        return mTimeout;
+    }
+
+    public void setTimeout(Time timeout){
+        Objects.requireNonNull(timeout, "timeout is null");
+        mTimeout = timeout;
+    }
+
+    public void requires(Collection<? extends Requirement> requirements) {
+        Objects.requireNonNull(requirements, "requirements is null");
+        mRequirements.addAll(requirements);
+    }
+}

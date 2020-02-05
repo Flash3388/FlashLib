@@ -2,63 +2,57 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.ClockMock;
 import com.flash3388.flashlib.robot.RunningRobotMock;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockActionIsFinishedMarkedTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class SequentialActionGroupTest {
 
+    private Clock mClock;
+
     @BeforeEach
     public void setup() {
+        mClock = ClockMock.mockInvalidTimeClock();
+
         RunningRobotMock.mockRobotWithDependencies();
-        RunningRobotMock.mockRobotWithClock(ClockMock.mockInvalidTimeClock());
-    }
-
-    @Test
-    public void initialize_withMultipleActions_startsFirstAction() throws Exception {
-        List<Action> actions = Arrays.asList(
-                mock(Action.class),
-                mock(Action.class)
-        );
-
-        SequentialActionGroup actionGroup = new SequentialActionGroup()
-                .add(actions);
-
-        actionGroup.initialize();
-
-        verify(actions.get(0), times(1)).markStarted();
-        actions.stream().skip(1).forEach((action) -> verify(action, never()).markStarted());
+        RunningRobotMock.mockRobotWithClock(mClock);
     }
 
     @Test
     public void execute_noActionCurrentlyRunning_startsNextAction() throws Exception {
-        List<Action> actions = Arrays.asList(
-                mockActionIsFinishedMarkedTrue(),
-                mock(Action.class)
+        List<Action> actions = Collections.singletonList(
+                ActionsMock.actionMocker().build()
         );
 
-        SequentialActionGroup actionGroup = new SequentialActionGroup()
-                .add(actions);
+        ActionContext context = mock(ActionContext.class);
+        Deque<ActionContext> contexts = new ArrayDeque<>(Collections.singleton(
+                context
+        ));
+        SequentialActionGroup actionGroup = new SequentialActionGroup(
+                mock(Scheduler.class), mClock, actions, contexts);
 
-        actionGroup.initialize();
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).markStarted();
+        verify(context, times(1)).prepareForRun();
     }
 
     @Test
     public void execute_actionCurrentlyRunning_executesIt() throws Exception {
         List<Action> actions = Arrays.asList(
-                mock(Action.class),
+                ActionsMock.actionMocker().build(),
                 mock(Action.class)
         );
 
@@ -74,8 +68,10 @@ public class SequentialActionGroupTest {
     @Test
     public void execute_actionCurrentlyRunningIsFinished_endsIt() throws Exception {
         List<Action> actions = Arrays.asList(
-                mockActionIsFinishedMarkedTrue(),
-                mock(Action.class)
+                ActionsMock.actionMocker()
+                        .mockIsFinished(true)
+                        .build(),
+                ActionsMock.actionMocker().build()
         );
 
         SequentialActionGroup actionGroup = new SequentialActionGroup()
@@ -84,21 +80,26 @@ public class SequentialActionGroupTest {
         actionGroup.initialize();
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).end();
+        verify(actions.get(0), times(1)).end(eq(false));
     }
 
     @Test
     public void interrupted_actionIsRunning_cancelsIt() throws Exception {
-        List<Action> actions = Collections.singletonList(
-                mock(Action.class)
-        );
+        List<Action> actions = new ArrayList<>();
 
-        SequentialActionGroup actionGroup = new SequentialActionGroup()
-                .add(actions);
+        ActionContext context = ActionsMock.contextMocker()
+                .runFinished(false)
+                .build();
+        Deque<ActionContext> contexts = new ArrayDeque<>(Collections.singletonList(
+                context
+        ));
 
-        actionGroup.initialize();
-        actionGroup.interrupted();
+        SequentialActionGroup actionGroup = new SequentialActionGroup(
+                mock(Scheduler.class), mClock, actions, contexts);
 
-        verify(actions.get(0), times(1)).markCanceled();
+        actionGroup.execute();
+        actionGroup.end(true);
+
+        verify(context, times(1)).runCanceled();
     }
 }

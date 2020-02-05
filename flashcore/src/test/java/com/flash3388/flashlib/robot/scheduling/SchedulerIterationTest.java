@@ -3,16 +3,13 @@ package com.flash3388.flashlib.robot.scheduling;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.actions.ActionContext;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionsMock;
 import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 import static com.flash3388.flashlib.robot.modes.RobotModesMock.mockNonDisabledMode;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockFinishedActionContext;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNonFinishingActionContext;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockNotAllowedInDisabledAction;
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.mockThrowingAction;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,24 +19,27 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class SchedulerIterationTest {
 
-    private ActionsRepository mActionsRepository;
-
     private SchedulerIteration mSchedulerIteration;
 
-    private ActionsRepositoryMock mActionsRepositoryMock;
+    private ActionControlMock mActionControlMock;
+    private SubsystemControlMock mSubsystemControlMock;
 
     @BeforeEach
     public void setup() throws Exception {
-        mActionsRepository = mock(ActionsRepository.class);
-        mSchedulerIteration = new SchedulerIteration(mActionsRepository, mock(Logger.class));
+        ActionControl actionControl = mock(ActionControl.class);
+        RequirementsControl requirementsControl = mock(RequirementsControl.class);
+        mSchedulerIteration = new SchedulerIteration(actionControl, requirementsControl, mock(Logger.class));
 
-        mActionsRepositoryMock = new ActionsRepositoryMock(mActionsRepository);
+        mActionControlMock = new ActionControlMock(actionControl);
+        mSubsystemControlMock = new SubsystemControlMock(requirementsControl);
     }
 
     @Test
     public void run_withActions_runsActions() throws Exception {
-        ActionContext actionContext = mockNonFinishingActionContext();
-        mActionsRepositoryMock.runningAction(actionContext);
+        ActionContext actionContext = ActionsMock.contextMocker()
+                .runFinished(false)
+                .build();
+        mActionControlMock.runningAction(actionContext);
 
         mSchedulerIteration.run(mockNonDisabledMode());
 
@@ -48,10 +48,10 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_subsystemsWithDefaults_startsDefaultActions() throws Exception {
-        Requirement requirement = mock(Requirement.class);
+        Subsystem subsystem = mock(Subsystem.class);
         Action action = mock(Action.class);
 
-        mActionsRepositoryMock.setDefaultAction(requirement, action);
+        mSubsystemControlMock.setDefaultAction(subsystem, action);
 
         mSchedulerIteration.run(mockNonDisabledMode());
 
@@ -60,28 +60,34 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_actionsIsFinished_removesAction() throws Exception {
-        ActionContext actionContext = mockFinishedActionContext();
-        Action action = mActionsRepositoryMock.runningAction(actionContext);
+        ActionContext actionContext = ActionsMock.contextMocker()
+                .runFinished(true)
+                .build();
+        Action action = mActionControlMock.runningAction(actionContext);
 
         mSchedulerIteration.run(mockNonDisabledMode());
 
-        verify(mActionsRepository, times(1)).updateActionsForNextRun(argThat(IsIterableContaining.hasItems(action)));
+        mActionControlMock.verify(times(1)).updateActionsForNextRun(argThat(IsIterableContaining.hasItems(action)));
     }
 
     @Test
     public void run_disabledMode_removesActionsNotAllowedInDisabled() throws Exception {
-        Action action = mockNotAllowedInDisabledAction();
-        mActionsRepositoryMock.runningAction(action);
+        Action action = ActionsMock.actionMocker()
+                .mockRunWhenDisabled(false)
+                .build();
+        mActionControlMock.runningAction(action);
 
         mSchedulerIteration.run(RobotMode.DISABLED);
 
-        verify(mActionsRepository, times(1)).updateActionsForNextRun(argThat(IsIterableContaining.hasItems(action)));
+        mActionControlMock.verify(times(1)).updateActionsForNextRun(argThat(IsIterableContaining.hasItems(action)));
     }
 
     @Test
     public void run_disabledMode_doesNotRunNotAllowedInDisabled() throws Exception {
-        Action action = mockNotAllowedInDisabledAction();
-        ActionContext actionContext = mActionsRepositoryMock.runningAction(action);
+        Action action = ActionsMock.actionMocker()
+                .mockRunWhenDisabled(false)
+                .build();
+        ActionContext actionContext = mActionControlMock.runningAction(action);
 
         mSchedulerIteration.run(RobotMode.DISABLED);
 
@@ -90,8 +96,10 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_userExceptionFromAction_cancelsAction() throws Exception {
-        Action action = mock(Action.class);
-        ActionContext actionContext = mActionsRepositoryMock.runningAction(action);
+        Action action = ActionsMock.actionMocker()
+                .mockRunWhenDisabled(false)
+                .build();
+        ActionContext actionContext = mActionControlMock.runningAction(action);
         when(actionContext.run()).thenThrow(new RuntimeException());
 
         mSchedulerIteration.run(mockNonDisabledMode());

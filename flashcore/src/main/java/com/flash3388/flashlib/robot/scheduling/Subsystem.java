@@ -1,8 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling;
 
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.scheduling.Requirement;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 
 import java.util.Optional;
@@ -38,11 +36,11 @@ public class Subsystem implements Requirement {
     }
 
     public boolean hasCurrentAction() {
-        return mScheduler.getActionRunningOnSubsystem(this).isPresent();
+        return mScheduler.getActionRunningOnRequirement(this).isPresent();
     }
 
     public void cancelCurrentAction() {
-        Optional<Action> currentAction = mScheduler.getActionRunningOnSubsystem(this);
+        Optional<Action> currentAction = mScheduler.getActionRunningOnRequirement(this);
         currentAction.ifPresent(Action::cancel);
     }
 }

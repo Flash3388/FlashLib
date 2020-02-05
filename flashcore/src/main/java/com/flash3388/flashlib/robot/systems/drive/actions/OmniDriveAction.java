@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
-import com.flash3388.flashlib.robot.scheduling.actions.Action;
+import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class OmniDriveAction extends Action {
+public class OmniDriveAction extends ActionBase {
 	
 	private final OmniDrive mDriveInterface;
 	private final Supplier<? extends OmniDriveSpeed> mSpeedSupplier;
@@ -26,12 +26,12 @@ public class OmniDriveAction extends Action {
     }
 	
 	@Override
-	protected void execute() {
+	public void execute() {
 		mDriveInterface.omniDrive(mSpeedSupplier.get());
 	}
 
 	@Override
-	protected void end() {
+    public void end(boolean wasInterrupted) {
 		mDriveInterface.stop();
 	}
 }

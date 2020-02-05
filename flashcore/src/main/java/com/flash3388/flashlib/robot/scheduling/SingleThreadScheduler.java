@@ -8,16 +8,17 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public class SingleThreadScheduler implements Scheduler {
 
-    private final ActionsRepository mActionsRepository;
+    private final RequirementsControl mRequirementsControl;
+    private final ActionControl mActionControl;
     private final SchedulerIteration mSchedulerIteration;
 
     public SingleThreadScheduler(Clock clock, Logger logger) {
-        mActionsRepository = new ActionsRepository(clock, logger);
-        mSchedulerIteration = new SchedulerIteration(mActionsRepository, logger);
+        mRequirementsControl = new RequirementsControl(logger);
+        mActionControl = new ActionControl(clock, mRequirementsControl);
+        mSchedulerIteration = new SchedulerIteration(mActionControl, mRequirementsControl, logger);
     }
 
     public SingleThreadScheduler(Clock clock) {
@@ -25,19 +26,26 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
-    public void add(Action action) {
+    public void start(Action action) {
         Objects.requireNonNull(action, "action is null");
-        mActionsRepository.addAction(action);
+        mActionControl.startAction(action);
     }
 
     @Override
-    public void stopAllActions() {
-        mActionsRepository.removeAllActions();
+    public void cancel(Action action) {
+        Objects.requireNonNull(action, "action is null");
+        mActionControl.cancelAction(action);
     }
 
     @Override
-    public void stopActionsIf(Predicate<? super Action> removalPredicate) {
-        mActionsRepository.removeActionsIf(removalPredicate);
+    public boolean isRunning(Action action) {
+        Objects.requireNonNull(action, "action is null");
+        return mActionControl.isActionRunning(action);
+    }
+
+    @Override
+    public void cancelAllActions() {
+        mActionControl.stopAllActions();
     }
 
     @Override
@@ -45,16 +53,18 @@ public class SingleThreadScheduler implements Scheduler {
         Objects.requireNonNull(subsystem, "subsystem is null");
         Objects.requireNonNull(action, "action is null");
 
-        mActionsRepository.setDefaultActionOnSubsystem(subsystem, action);
+        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, action);
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Requirement requirement) {
-        return mActionsRepository.getActionOnSubsystem(requirement);
+    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+        Objects.requireNonNull(requirement, "requirement is null");
+        return mRequirementsControl.getActionOnRequirement(requirement);
     }
 
     @Override
     public void run(RobotMode robotMode) {
+        Objects.requireNonNull(robotMode, "robotmode is null");
         mSchedulerIteration.run(robotMode);
     }
 }

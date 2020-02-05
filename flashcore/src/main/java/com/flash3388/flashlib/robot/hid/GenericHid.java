@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
@@ -18,7 +17,7 @@ public class GenericHid implements Hid {
 	private final List<Button> mButtons;
     private final List<Pov> mPovs;
 
-	public GenericHid(Scheduler scheduler, Clock clock, HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount, Time buttonPressTime){
+	public GenericHid(Clock clock, HidInterface hidInterface, int channel, int axisCount, int buttonCount, int povsCount, Time buttonPressTime){
 		mChannel = channel;
 
         mAxes = Collections.unmodifiableList(IntStream.range(0, axisCount)
@@ -37,7 +36,7 @@ public class GenericHid implements Hid {
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {
-	    this(RunningRobot.getInstance().getScheduler(), RunningRobot.getInstance().getClock(), RunningRobot.getInstance().getHidInterface(),
+	    this(RunningRobot.getInstance().getClock(), RunningRobot.getInstance().getHidInterface(),
                 channel, axisCount, buttonCount, povsCount, HardwareButton.DEFAULT_MAX_PRESS_TIME);
     }
 

@@ -4,22 +4,27 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public class EmptyScheduler implements Scheduler {
 
+
     @Override
-    public void add(Action action) {
+    public void start(Action action) {
 
     }
 
     @Override
-    public void stopAllActions() {
+    public void cancel(Action action) {
 
     }
 
     @Override
-    public void stopActionsIf(Predicate<? super Action> removalPredicate) {
+    public boolean isRunning(Action action) {
+        return false;
+    }
+
+    @Override
+    public void cancelAllActions() {
 
     }
 
@@ -29,7 +34,7 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Requirement requirement) {
+    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
         return Optional.empty();
     }
 
