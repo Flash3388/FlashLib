@@ -50,7 +50,7 @@ public class SchedulerStopBenchmark {
         ONE_REQUIREMENTS {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
-                Requirement requirement = new EmptyRequirement(scheduler);
+                Requirement requirement = new EmptyRequirement();
                 action.requires(requirement);
             }
         },
@@ -58,7 +58,7 @@ public class SchedulerStopBenchmark {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
                 for (int i = 0; i < 3; i++) {
-                    Requirement requirement = new EmptyRequirement(scheduler);
+                    Requirement requirement = new EmptyRequirement();
                     action.requires(requirement);
                 }
             }
