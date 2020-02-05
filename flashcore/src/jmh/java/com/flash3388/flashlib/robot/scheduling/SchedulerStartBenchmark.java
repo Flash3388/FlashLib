@@ -66,7 +66,7 @@ public class SchedulerStartBenchmark {
         }
 
         private static void generateSingleRequirement(Scheduler scheduler, Action action) {
-            Requirement requirement = new EmptyRequirement(scheduler);
+            Requirement requirement = new EmptyRequirement();
             action.requires(requirement);
 
             Action conflictingAction = new EmptyAction(scheduler);

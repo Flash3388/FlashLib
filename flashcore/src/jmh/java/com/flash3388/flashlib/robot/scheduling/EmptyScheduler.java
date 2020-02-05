@@ -24,7 +24,7 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Requirement requirement, Action action) {
+    public void setDefaultAction(Subsystem subsystem, Action action) {
 
     }
 
