@@ -75,13 +75,6 @@ public interface Action {
 
     ActionConfiguration getConfiguration();
     void setConfiguration(ActionConfiguration configuration);
-
-    default ActionConfiguration.Editor configure() {
-        return new ActionConfiguration.Editor(this, getConfiguration());
-    }
-
-    default Action requires(Requirement... requirements) {
-        configure().requires(requirements).save();
-        return this;
-    }
+    ActionConfiguration.Editor configure();
+    Action requires(Requirement... requirements);
 }

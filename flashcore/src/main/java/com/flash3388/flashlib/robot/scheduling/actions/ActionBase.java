@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 
 public abstract class ActionBase implements Action {
@@ -22,6 +23,21 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
+    public void start() {
+        mScheduler.start(this);
+    }
+
+    @Override
+    public void cancel() {
+        mScheduler.cancel(this);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mScheduler.isRunning(this);
+    }
+
+    @Override
     public ActionConfiguration getConfiguration() {
         return mConfiguration;
     }
@@ -36,17 +52,13 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public void start() {
-        mScheduler.start(this);
+    public ActionConfiguration.Editor configure() {
+        return new ActionConfiguration.Editor(this, getConfiguration());
     }
 
     @Override
-    public void cancel() {
-        mScheduler.cancel(this);
-    }
-
-    @Override
-    public boolean isRunning() {
-        return mScheduler.isRunning(this);
+    public Action requires(Requirement... requirements) {
+        configure().requires(requirements).save();
+        return this;
     }
 }
