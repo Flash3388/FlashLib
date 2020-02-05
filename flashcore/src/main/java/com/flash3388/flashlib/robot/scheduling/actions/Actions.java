@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.triggers.Triggers;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Objects;
@@ -60,6 +62,29 @@ public final class Actions {
         return new GenericAction.Builder()
                 .onExecute(runnable)
                 .build();
+    }
+
+    public static Action periodic(Runnable runnable, Time period) {
+        Objects.requireNonNull(runnable, "runnable is null");
+        return new ActionBase() {
+            private final Clock mClock = RunningRobot.getInstance().getClock();
+            private Time mLastRun;
+
+            @Override
+            public void initialize() {
+                mLastRun = Time.INVALID;
+            }
+
+            @Override
+            public void execute() {
+                Time now = mClock.currentTime();
+                if (!mLastRun.isValid() || now.sub(mLastRun).largerThanOrEquals(period)) {
+                    mLastRun = now;
+
+                    runnable.run();
+                }
+            }
+        };
     }
 
     public static Action sequential(Action... actions) {

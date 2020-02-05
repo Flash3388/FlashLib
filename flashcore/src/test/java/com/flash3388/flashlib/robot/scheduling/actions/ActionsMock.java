@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collection;
@@ -25,33 +25,32 @@ public final class ActionsMock {
         private ActionMocker() {
             mConfiguration = new ActionConfiguration();
             mIsFinished = false;
-            mRunWhenDisabled = false;
         }
 
-        public ActionMocker withConfiguration(ActionConfiguration configuration) {
+        public ActionMocker mockWithConfiguration(ActionConfiguration configuration) {
             mConfiguration = configuration;
             return this;
         }
 
-        public ActionMocker withRequirements(Collection<? extends Subsystem> requirements) {
+        public ActionMocker mockWithRequirements(Collection<? extends Requirement> requirements) {
             mConfiguration.requires(new HashSet<>(requirements));
             return this;
         }
 
-        public ActionMocker isFinished(boolean isFinished) {
+        public ActionMocker mockIsFinished(boolean isFinished) {
             mIsFinished = isFinished;
             return this;
         }
 
-        public ActionMocker runWhenDisabled(boolean runWhenDisabled) {
+        public ActionMocker mockRunWhenDisabled(boolean runWhenDisabled) {
             mRunWhenDisabled = runWhenDisabled;
             return this;
         }
 
         public Action build() {
             Action action = mock(Action.class);
-            when(action.runWhenDisabled()).thenReturn(mRunWhenDisabled);
             when(action.isFinished()).thenReturn(mIsFinished);
+            when(action.runWhenDisabled()).thenReturn(mRunWhenDisabled);
             when(action.getConfiguration()).thenReturn(mConfiguration);
             when(action.configure()).thenAnswer(invocation -> new ActionConfiguration.Editor(action, action.getConfiguration()));
 
@@ -92,6 +91,34 @@ public final class ActionsMock {
 
     public static ContextMocker contextMocker() {
         return new ContextMocker();
+    }
+
+    public static ActionContext mockNonFinishingActionContext() {
+        ActionContext actionContext = mock(ActionContext.class);
+        when(actionContext.run()).thenReturn(true);
+
+        return actionContext;
+    }
+
+    public static ActionContext mockFinishedActionContext() {
+        ActionContext actionContext = mock(ActionContext.class);
+        when(actionContext.run()).thenReturn(false);
+
+        return actionContext;
+    }
+
+    public static Action mockNotAllowedInDisabledAction() {
+        Action action = mock(Action.class);
+        when(action.runWhenDisabled()).thenReturn(false);
+
+        return action;
+    }
+
+    public static Action mockActionIsFinishedMarkedTrue() {
+        Action action = mock(Action.class);
+        when(action.isFinished()).thenReturn(true);
+
+        return action;
     }
 
     public static Action makeActionCancelable(Action action) {

@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Arrays;
@@ -45,9 +45,9 @@ public class ActionConfiguration {
             return setTimeout(Time.INVALID);
         }
 
-        public Editor requires(Subsystem... subsystems){
-            Objects.requireNonNull(subsystems, "requirements is null");
-            mConfiguration.requires(Arrays.asList(subsystems));
+        public Editor requires(Requirement... requirements){
+            Objects.requireNonNull(requirements, "requirements is null");
+            mConfiguration.requires(Arrays.asList(requirements));
 
             return this;
         }
@@ -58,10 +58,10 @@ public class ActionConfiguration {
         }
     }
 
-    private final Set<Subsystem> mRequirements;
+    private final Set<Requirement> mRequirements;
     private Time mTimeout;
 
-    public ActionConfiguration(Collection<Subsystem> requirements, Time timeout) {
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout) {
         mRequirements = new HashSet<>(requirements);
         mTimeout = timeout;
     }
@@ -74,7 +74,7 @@ public class ActionConfiguration {
         this(other.getRequirements(), other.getTimeout());
     }
 
-    public Set<Subsystem> getRequirements() {
+    public Set<Requirement> getRequirements() {
         return Collections.unmodifiableSet(mRequirements);
     }
 
@@ -87,8 +87,8 @@ public class ActionConfiguration {
         mTimeout = timeout;
     }
 
-    public void requires(Collection<Subsystem> subsystems) {
-        Objects.requireNonNull(subsystems, "requirements is null");
-        mRequirements.addAll(subsystems);
+    public void requires(Collection<? extends Requirement> requirements) {
+        Objects.requireNonNull(requirements, "requirements is null");
+        mRequirements.addAll(requirements);
     }
 }

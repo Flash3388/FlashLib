@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public abstract class ActionBuilder<T extends ActionBuilder> {
 
-    protected final Collection<Subsystem> mRequirements;
+    protected final Collection<Requirement> mRequirements;
     protected Time mTimeout;
 
     protected ActionBuilder() {
@@ -22,13 +22,13 @@ public abstract class ActionBuilder<T extends ActionBuilder> {
         return thisInstance();
     }
 
-    public T requires(Subsystem subsystem) {
-        mRequirements.add(subsystem);
+    public T requires(Requirement requirement) {
+        mRequirements.add(requirement);
         return thisInstance();
     }
 
-    public T requires(Subsystem... subsystems) {
-        mRequirements.addAll(Arrays.asList(subsystems));
+    public T requires(Requirement... requirements) {
+        mRequirements.addAll(Arrays.asList(requirements));
         return thisInstance();
     }
 

@@ -11,14 +11,14 @@ import java.util.Optional;
 
 public class SingleThreadScheduler implements Scheduler {
 
-    private final SubsystemControl mSubsystemControl;
+    private final RequirementsControl mRequirementsControl;
     private final ActionControl mActionControl;
     private final SchedulerIteration mSchedulerIteration;
 
     public SingleThreadScheduler(Clock clock, Logger logger) {
-        mSubsystemControl = new SubsystemControl(logger);
-        mActionControl = new ActionControl(clock, mSubsystemControl);
-        mSchedulerIteration = new SchedulerIteration(mActionControl, mSubsystemControl, logger);
+        mRequirementsControl = new RequirementsControl(logger);
+        mActionControl = new ActionControl(clock, mRequirementsControl);
+        mSchedulerIteration = new SchedulerIteration(mActionControl, mRequirementsControl, logger);
     }
 
     public SingleThreadScheduler(Clock clock) {
@@ -53,13 +53,13 @@ public class SingleThreadScheduler implements Scheduler {
         Objects.requireNonNull(subsystem, "subsystem is null");
         Objects.requireNonNull(action, "action is null");
 
-        mSubsystemControl.setDefaultActionOnSubsystem(subsystem, action);
+        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, action);
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Subsystem subsystem) {
-        Objects.requireNonNull(subsystem, "subsystem is null");
-        return mSubsystemControl.getActionOnSubsystem(subsystem);
+    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+        Objects.requireNonNull(requirement, "requirement is null");
+        return mRequirementsControl.getActionOnRequirement(requirement);
     }
 
     @Override

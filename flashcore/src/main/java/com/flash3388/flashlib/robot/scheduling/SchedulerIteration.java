@@ -12,14 +12,14 @@ import java.util.Map;
 class SchedulerIteration {
 
     private final ActionControl mActionControl;
-    private final SubsystemControl mSubsystemControl;
+    private final RequirementsControl mRequirementsControl;
     private final Logger mLogger;
 
     private final Collection<Action> mActionsToRemove;
 
-    SchedulerIteration(ActionControl actionControl, SubsystemControl subsystemControl, Logger logger) {
+    SchedulerIteration(ActionControl actionControl, RequirementsControl requirementsControl, Logger logger) {
         mActionControl = actionControl;
-        mSubsystemControl = subsystemControl;
+        mRequirementsControl = requirementsControl;
         mLogger = logger;
 
         mActionsToRemove = new ArrayList<>(2);
@@ -56,7 +56,7 @@ class SchedulerIteration {
     }
 
     private void startDefaultSubsystemActions(RobotMode robotMode) {
-        for (Map.Entry<Subsystem, Action> entry : mSubsystemControl.getDefaultActionsToStart().entrySet()) {
+        for (Map.Entry<Subsystem, Action> entry : mRequirementsControl.getDefaultActionsToStart().entrySet()) {
             try {
                 Action action = entry.getValue();
 

@@ -8,5 +8,5 @@ public final class FlashLib {
     /**
      * The current version of FlashLib.
      */
-    public static final Version VERSION = new Version(2, 1, 0);
+    public static final Version VERSION = new Version(2, 2, 0);
 }

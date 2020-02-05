@@ -5,7 +5,6 @@ import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.EmptyHidInterface;
 import com.flash3388.flashlib.robot.hid.Pov;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.StaticClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 
 public class XboxControllerTest {

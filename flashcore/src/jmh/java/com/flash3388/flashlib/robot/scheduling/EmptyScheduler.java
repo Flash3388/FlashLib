@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public class EmptyScheduler implements Scheduler {
 
+
     @Override
     public void start(Action action) {
 
@@ -33,7 +34,7 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Subsystem subsystem) {
+    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
         return Optional.empty();
     }
 

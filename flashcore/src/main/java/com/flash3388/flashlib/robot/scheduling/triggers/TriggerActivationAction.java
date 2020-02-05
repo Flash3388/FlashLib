@@ -12,6 +12,9 @@ public class TriggerActivationAction extends ActionBase {
     public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
         mCondition = condition;
         mTrigger = trigger;
+
+        configure().requires(mTrigger)
+                .save();
     }
 
     @Override

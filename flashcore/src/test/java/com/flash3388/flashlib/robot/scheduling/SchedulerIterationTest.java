@@ -26,11 +26,11 @@ public class SchedulerIterationTest {
     @BeforeEach
     public void setup() throws Exception {
         ActionControl actionControl = mock(ActionControl.class);
-        SubsystemControl subsystemControl = mock(SubsystemControl.class);
-        mSchedulerIteration = new SchedulerIteration(actionControl, subsystemControl, mock(Logger.class));
+        RequirementsControl requirementsControl = mock(RequirementsControl.class);
+        mSchedulerIteration = new SchedulerIteration(actionControl, requirementsControl, mock(Logger.class));
 
         mActionControlMock = new ActionControlMock(actionControl);
-        mSubsystemControlMock = new SubsystemControlMock(subsystemControl);
+        mSubsystemControlMock = new SubsystemControlMock(requirementsControl);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class SchedulerIterationTest {
     @Test
     public void run_disabledMode_removesActionsNotAllowedInDisabled() throws Exception {
         Action action = ActionsMock.actionMocker()
-                .runWhenDisabled(false)
+                .mockRunWhenDisabled(false)
                 .build();
         mActionControlMock.runningAction(action);
 
@@ -84,7 +84,7 @@ public class SchedulerIterationTest {
     @Test
     public void run_disabledMode_doesNotRunNotAllowedInDisabled() throws Exception {
         Action action = ActionsMock.actionMocker()
-                .runWhenDisabled(false)
+                .mockRunWhenDisabled(false)
                 .build();
         ActionContext actionContext = mActionControlMock.runningAction(action);
 

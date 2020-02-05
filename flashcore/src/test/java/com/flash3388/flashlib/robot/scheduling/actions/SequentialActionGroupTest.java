@@ -69,7 +69,7 @@ public class SequentialActionGroupTest {
     public void execute_actionCurrentlyRunningIsFinished_endsIt() throws Exception {
         List<Action> actions = Arrays.asList(
                 ActionsMock.actionMocker()
-                        .isFinished(true)
+                        .mockIsFinished(true)
                         .build(),
                 ActionsMock.actionMocker().build()
         );

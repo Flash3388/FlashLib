@@ -50,9 +50,9 @@ public class SchedulerStopBenchmark {
         ONE_REQUIREMENTS {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
-                Subsystem subsystem = new EmptySubsystem(scheduler);
+                Requirement requirement = new EmptyRequirement();
                 action.configure()
-                        .requires(subsystem)
+                        .requires(requirement)
                         .save();
             }
         },
@@ -60,9 +60,9 @@ public class SchedulerStopBenchmark {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
                 for (int i = 0; i < 3; i++) {
-                    Subsystem subsystem = new EmptySubsystem(scheduler);
+                    Requirement requirement = new EmptyRequirement();
                     action.configure()
-                            .requires(subsystem)
+                            .requires(requirement)
                             .save();
                 }
             }

@@ -48,7 +48,7 @@ public class ParallelActionGroupTest {
     @Test
     public void execute_actionCurrentlyRunningIsFinished_endsIt() throws Exception {
         List<Action> actions = Collections.singletonList(
-                ActionsMock.actionMocker().isFinished(true).build()
+                ActionsMock.actionMocker().mockIsFinished(true).build()
         );
 
         ParallelActionGroup actionGroup = new ParallelActionGroup()

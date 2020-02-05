@@ -3,14 +3,6 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.Subsystem;
-import com.flash3388.flashlib.time.Time;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * An Action is something that can be executed on the robot. This can include any operation on the robot,
@@ -36,16 +28,16 @@ import java.util.Set;
  * used (multiple systems can be required). By doing so, the {@link Scheduler} now knows to stop any other action
  * with at least one similar system requirement. If an action is running and another starts with a similar system
  * requirement, the previous action is canceled, invoking a call to {@link #end(boolean) end(true)}.
- * 
+ *
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public interface Action {
 
-	/**
-	 * Called once when the action is started.
-	 */
-	default void initialize() {
+    /**
+     * Called once when the action is started.
+     */
+    default void initialize() {
     }
 
     /**
@@ -53,28 +45,28 @@ public interface Action {
      */
     void execute();
 
-	/**
-	 * Returns true when the action should end.
-	 * @return true when the action should end, false otherwise.
-	 */
-	default boolean isFinished() {
-		return false;
-	}
+    /**
+     * Returns true when the action should end.
+     * @return true when the action should end, false otherwise.
+     */
+    default boolean isFinished() {
+        return false;
+    }
 
-	/**
+    /**
      * Called when the action ends run.
      * @param wasInterrupted <b>true</b> if the action ended was before {@link #isFinished()} returns true,
      *                      <b>false</b> otherwise.
-	 */
-	default void end(boolean wasInterrupted) {
+     */
+    default void end(boolean wasInterrupted) {
     }
 
     /**
      * @return returns <b>false</b> if this action can run when disabled,
      *      <b>true</b>.
      */
-	default boolean runWhenDisabled() {
-	    return false;
+    default boolean runWhenDisabled() {
+        return false;
     }
 
     ActionConfiguration getConfiguration();
@@ -84,7 +76,15 @@ public interface Action {
         return new ActionConfiguration.Editor(this, getConfiguration());
     }
 
-    void start();
-    void cancel();
-    boolean isRunning();
+    default void start() {
+        RunningRobot.getInstance().getScheduler().start(this);
+    }
+
+    default void cancel() {
+        RunningRobot.getInstance().getScheduler().cancel(this);
+    }
+
+    default boolean isRunning() {
+        return RunningRobot.getInstance().getScheduler().isRunning(this);
+    }
 }

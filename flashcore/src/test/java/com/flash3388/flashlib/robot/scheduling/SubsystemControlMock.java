@@ -11,10 +11,11 @@ public class SubsystemControlMock {
 
     private final Map<Subsystem, Action> mDefaultActionsOnSubsystems;
 
-    public SubsystemControlMock(SubsystemControl subsystemControl) {
+    public SubsystemControlMock(RequirementsControl requirementsControl) {
         mDefaultActionsOnSubsystems = new HashMap<>();
 
-        when(subsystemControl.getDefaultActionsToStart()).thenReturn(mDefaultActionsOnSubsystems);
+        when(requirementsControl.getDefaultActionsToStart())
+                .thenReturn(mDefaultActionsOnSubsystems);
     }
 
     public void setDefaultAction(Subsystem subsystem, Action action) {

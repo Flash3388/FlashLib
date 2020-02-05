@@ -27,18 +27,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SubsystemControlTest {
+public class RequirementsControlTest {
 
-    private Map<Subsystem, Action> mActionsOnSubsystems;
+    private Map<Requirement, Action> mActionsOnSubsystems;
     private Map<Subsystem, Action> mDefaultActionsOnSubsystems;
 
-    private SubsystemControl mSubsystemControl;
+    private RequirementsControl mRequirementsControl;
 
     @BeforeEach
     public void setup() throws Exception {
         mActionsOnSubsystems = new HashMap<>();
         mDefaultActionsOnSubsystems = new HashMap<>();
-        mSubsystemControl = new SubsystemControl(Logging.stub(), mActionsOnSubsystems, mDefaultActionsOnSubsystems);
+        mRequirementsControl = new RequirementsControl(Logging.stub(), mActionsOnSubsystems, mDefaultActionsOnSubsystems);
     }
 
     @Test
@@ -48,12 +48,12 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .withRequirements(subsystems)
+                .mockWithRequirements(subsystems)
                 .build();
 
         subsystems.forEach((s) -> mActionsOnSubsystems.put(s, action));
 
-        mSubsystemControl.updateRequirementsNoCurrentAction(action);
+        mRequirementsControl.updateRequirementsNoCurrentAction(action);
 
         assertThat(mActionsOnSubsystems, IsMapWithSize.anEmptyMap());
     }
@@ -69,13 +69,13 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .withRequirements(usedSubsystems)
+                .mockWithRequirements(usedSubsystems)
                 .build();
 
         otherSubsystems.forEach((s) -> mActionsOnSubsystems.put(s, mock(Action.class)));
         usedSubsystems.forEach((s) -> mActionsOnSubsystems.put(s, action));
 
-        mSubsystemControl.updateRequirementsNoCurrentAction(action);
+        mRequirementsControl.updateRequirementsNoCurrentAction(action);
 
         assertThat(mActionsOnSubsystems.keySet(),
                 IsIterableWithSize.iterableWithSize(otherSubsystems.size()));
@@ -94,12 +94,12 @@ public class SubsystemControlTest {
                 mock(Subsystem.class),
                 mock(Subsystem.class));
         Action action = ActionsMock.actionMocker()
-                .withRequirements(usedSubsystems)
+                .mockWithRequirements(usedSubsystems)
                 .build();
 
         otherSubsystems.forEach((s) -> mActionsOnSubsystems.put(s, mock(Action.class)));
 
-        mSubsystemControl.updateRequirementsWithNewRunningAction(action);
+        mRequirementsControl.updateRequirementsWithNewRunningAction(action);
 
         assertThat(mActionsOnSubsystems, IsMapWithSize.aMapWithSize(usedSubsystems.size() + otherSubsystems.size()));
         otherSubsystems.forEach((s)-> assertThat(mActionsOnSubsystems,
@@ -116,10 +116,10 @@ public class SubsystemControlTest {
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .withRequirements(Collections.singleton(subsystem))
+                .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
 
-        mSubsystemControl.updateRequirementsWithNewRunningAction(newAction);
+        mRequirementsControl.updateRequirementsWithNewRunningAction(newAction);
 
         verify(action, times(1)).cancel();
     }
@@ -131,10 +131,10 @@ public class SubsystemControlTest {
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .withRequirements(Collections.singleton(subsystem))
+                .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
 
-        mSubsystemControl.updateRequirementsWithNewRunningAction(newAction);
+        mRequirementsControl.updateRequirementsWithNewRunningAction(newAction);
 
         assertThat(mActionsOnSubsystems, Matchers.not(IsMapContaining.hasEntry(action, subsystem)));
     }
@@ -145,7 +145,7 @@ public class SubsystemControlTest {
         Action action = mock(Action.class);
         mActionsOnSubsystems.put(subsystem, action);
 
-        Optional<Action> optionalAction = mSubsystemControl.getActionOnSubsystem(subsystem);
+        Optional<Action> optionalAction = mRequirementsControl.getActionOnRequirement(subsystem);
         assertThat(optionalAction.get(), equalTo(action));
     }
 
@@ -153,7 +153,7 @@ public class SubsystemControlTest {
     public void getActionOnSubsystem_subsystemHasNoAction_returnsEmpty() throws Exception {
         Subsystem subsystem = mock(Subsystem.class);
 
-        Optional<Action> optionalAction = mSubsystemControl.getActionOnSubsystem(subsystem);
+        Optional<Action> optionalAction = mRequirementsControl.getActionOnRequirement(subsystem);
         assertFalse(optionalAction.isPresent());
     }
 
@@ -164,10 +164,10 @@ public class SubsystemControlTest {
         mDefaultActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
-                .withRequirements(Collections.singleton(subsystem))
+                .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
 
-        mSubsystemControl.setDefaultActionOnSubsystem(subsystem, newAction);
+        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, newAction);
 
         assertThat(mDefaultActionsOnSubsystems, IsMapContaining.hasEntry(subsystem, newAction));
     }
@@ -177,10 +177,10 @@ public class SubsystemControlTest {
         Subsystem subsystem = mock(Subsystem.class);
 
         Action newAction = ActionsMock.actionMocker()
-                .withRequirements(Collections.singleton(subsystem))
+                .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
 
-        mSubsystemControl.setDefaultActionOnSubsystem(subsystem, newAction);
+        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, newAction);
 
         assertThat(mDefaultActionsOnSubsystems, IsMapContaining.hasEntry(subsystem, newAction));
     }
@@ -190,7 +190,7 @@ public class SubsystemControlTest {
         Subsystem subsystem = mock(Subsystem.class);
         Action newAction = ActionsMock.actionMocker().build();
 
-        mSubsystemControl.setDefaultActionOnSubsystem(subsystem, newAction);
+        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, newAction);
 
         assertThat(newAction.getConfiguration().getRequirements(), IsIterableContaining.hasItem(subsystem));
     }
@@ -203,7 +203,7 @@ public class SubsystemControlTest {
 
         mDefaultActionsOnSubsystems.putAll(defaultActions);
 
-        Map<Subsystem, Action> defaultActionsToStart = mSubsystemControl.getDefaultActionsToStart();
+        Map<Subsystem, Action> defaultActionsToStart = mRequirementsControl.getDefaultActionsToStart();
 
         assertThat(defaultActionsToStart, IsMapWithSize.aMapWithSize(defaultActions.size()));
         defaultActions.forEach((s, a) -> assertThat(defaultActionsToStart, IsMapContaining.hasEntry(s, a)));
@@ -224,7 +224,7 @@ public class SubsystemControlTest {
 
         mActionsOnSubsystems.putAll(running);
 
-        Map<Subsystem, Action> defaultActionsToStart = mSubsystemControl.getDefaultActionsToStart();
+        Map<Subsystem, Action> defaultActionsToStart = mRequirementsControl.getDefaultActionsToStart();
 
         assertThat(defaultActionsToStart, IsMapWithSize.aMapWithSize(notRunning.size()));
         notRunning.forEach((s, a) -> assertThat(defaultActionsToStart, IsMapContaining.hasEntry(s, a)));
