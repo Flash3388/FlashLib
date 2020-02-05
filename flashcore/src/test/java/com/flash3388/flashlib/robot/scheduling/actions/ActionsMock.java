@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collections;
@@ -66,17 +66,17 @@ public final class ActionsMock {
         return action;
     }
 
-    public static Action mockActionWithRequirement(Subsystem subsystem) {
-        return mockActionWithRequirement(Collections.singleton(subsystem));
+    public static Action mockActionWithRequirement(Requirement requirement) {
+        return mockActionWithRequirement(Collections.singleton(requirement));
     }
 
-    public static Action mockActionWithRequirement(Set<Subsystem> subsystems) {
+    public static Action mockActionWithRequirement(Set<Requirement> requirements) {
         Action action = mock(Action.class);
-        when(action.getRequirements()).thenReturn(subsystems);
+        when(action.getRequirements()).thenReturn(requirements);
 
         doAnswer((Answer<Void>) invocation -> {
             Action parent = invocation.getArgument(0);
-            parent.requires(subsystems);
+            parent.requires(requirements);
             return null;
         }).when(action).setParent(any(Action.class));
 

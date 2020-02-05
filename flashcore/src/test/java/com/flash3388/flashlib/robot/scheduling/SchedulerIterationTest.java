@@ -48,10 +48,10 @@ public class SchedulerIterationTest {
 
     @Test
     public void run_subsystemsWithDefaults_startsDefaultActions() throws Exception {
-        Subsystem subsystem = mock(Subsystem.class);
+        Requirement requirement = mock(Requirement.class);
         Action action = mock(Action.class);
 
-        mActionsRepositoryMock.setDefaultAction(subsystem, action);
+        mActionsRepositoryMock.setDefaultAction(requirement, action);
 
         mSchedulerIteration.run(mockNonDisabledMode());
 

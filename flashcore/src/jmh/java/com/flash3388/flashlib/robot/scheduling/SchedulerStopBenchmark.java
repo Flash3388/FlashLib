@@ -50,16 +50,16 @@ public class SchedulerStopBenchmark {
         ONE_REQUIREMENTS {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
-                Subsystem subsystem = new EmptySubsystem(scheduler);
-                action.requires(subsystem);
+                Requirement requirement = new EmptyRequirement(scheduler);
+                action.requires(requirement);
             }
         },
         THREE_REQUIREMENTS {
             @Override
             void setupRequirements(Scheduler scheduler, Action action) {
                 for (int i = 0; i < 3; i++) {
-                    Subsystem subsystem = new EmptySubsystem(scheduler);
-                    action.requires(subsystem);
+                    Requirement requirement = new EmptyRequirement(scheduler);
+                    action.requires(requirement);
                 }
             }
         }

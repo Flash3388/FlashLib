@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.robot.hid.scheduling.ButtonActivationAction;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -34,7 +33,7 @@ public class GenericHid implements Hid {
                 .mapToObj((i) -> new Pov(hidInterface, channel, i))
                 .collect(Collectors.toList()));
 
-        mButtons.forEach((b)-> new ButtonActivationAction(scheduler, b).start());
+        mButtons.forEach(Button::addToScheduler);
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {

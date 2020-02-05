@@ -15,6 +15,8 @@ public class TriggerActivationAction extends Action {
         super(scheduler);
         mCondition = condition;
         mTrigger = trigger;
+
+        requires(mTrigger);
     }
 
     public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {

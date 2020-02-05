@@ -36,7 +36,7 @@ public class ActionsRepositoryTest {
 
     private Clock mClock;
 
-    private Map<Subsystem, Action> mActionsOnSubsystems;
+    private Map<Requirement, Action> mActionsOnSubsystems;
     private Map<Action, ActionContext> mRunningActions;
     private Collection<Action> mNextRunActions;
 
@@ -107,27 +107,27 @@ public class ActionsRepositoryTest {
 
     @Test
     public void updateActionsForNextRun_actionsForNextRunWithRequirements_updatesRequirementsWithRunningActions() throws Exception {
-        Subsystem subsystem = mock(Subsystem.class);
+        Requirement requirement = mock(Requirement.class);
 
-        Action action = mockActionWithRequirement(subsystem);
+        Action action = mockActionWithRequirement(requirement);
         mNextRunActions.addAll(Collections.singletonList(action));
 
         mActionsRepository.updateActionsForNextRun(Collections.emptyList());
 
-        assertThat(mActionsOnSubsystems, hasEntry(subsystem, action));
+        assertThat(mActionsOnSubsystems, hasEntry(requirement, action));
     }
 
     @Test
     public void updateActionsForNextRun_actionRunningWithRequirements_updatesRequirementsWithNotRunningActions() throws Exception {
-        Subsystem subsystem = mock(Subsystem.class);
-        Action action = mockActionWithRequirement(subsystem);
+        Requirement requirement = mock(Requirement.class);
+        Action action = mockActionWithRequirement(requirement);
 
-        mActionsOnSubsystems.put(subsystem, action);
+        mActionsOnSubsystems.put(requirement, action);
         mRunningActions.put(action, contextForAction(action));
 
         mActionsRepository.updateActionsForNextRun(Collections.singletonList(action));
 
-        assertThat(mActionsOnSubsystems, not(hasEntry(subsystem, action)));
+        assertThat(mActionsOnSubsystems, not(hasEntry(requirement, action)));
     }
 
     @Test
@@ -154,8 +154,8 @@ public class ActionsRepositoryTest {
 
     @Test
     public void removeActionsIf_forActionsWithSpecificRequirements_removesSpecificActions() throws Exception {
-        Subsystem toRemove = mock(Subsystem.class);
-        Subsystem toKeep = mock(Subsystem.class);
+        Requirement toRemove = mock(Requirement.class);
+        Requirement toKeep = mock(Requirement.class);
 
         Collection<Action> toKeepRunningActions = Arrays.asList(
                 mockActionWithRequirement(toKeep),

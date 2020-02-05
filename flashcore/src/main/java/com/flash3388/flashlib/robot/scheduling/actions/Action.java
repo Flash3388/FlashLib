@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot.scheduling.actions;
 
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Arrays;
@@ -32,9 +32,9 @@ import java.util.Set;
  * An action can have a timeout. If the time since the action started running has passed a given timeout, the
  * action is canceled, invoking a call to {@link #interrupted()}. Set the timeout by calling {@link #setTimeout(Time)}.
  * <p>
- * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Subsystem} object
+ * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Requirement} object
  * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
- * that system. To do that, users must explicitly call {@link #requires(Subsystem)} and pass a system which is
+ * that system. To do that, users must explicitly call {@link #requires(Requirement)} and pass a system which is
  * used (multiple systems can be required). By doing so, the {@link Scheduler} now knows to stop any other action
  * with at least one similar system requirement. If an action is running and another starts with a similar system
  * requirement, the previous action is canceled, invoking a call to {@link #interrupted()}.
@@ -45,7 +45,7 @@ import java.util.Set;
 public abstract class Action {
 
     private final Scheduler mScheduler;
-    private final Set<Subsystem> mRequirements;
+    private final Set<Requirement> mRequirements;
 
 	private boolean mIsCanceled;
 	private boolean mIsRunning;
@@ -167,44 +167,44 @@ public abstract class Action {
 	}
 
 	/**
-	 * Adds a {@link Subsystem} requirement for this action.
+	 * Adds a {@link Requirement} requirement for this action.
      *
-	 * @param subsystem a system used by this action
+	 * @param requirement a system used by this action
      * @return this instance
      *
      * @throws IllegalStateException if the action is running.
 	 */
-	public Action requires(Subsystem subsystem){
-        Objects.requireNonNull(subsystem, "requirement is null");
-	    return requires(Collections.singleton(subsystem));
+	public Action requires(Requirement requirement){
+        Objects.requireNonNull(requirement, "requirement is null");
+	    return requires(Collections.singleton(requirement));
 	}
 
 	/**
-	 * Adds {@link Subsystem} requirements for this action.
+	 * Adds {@link Requirement} requirements for this action.
      *
-	 * @param subsystems an array of systems used by this action
+	 * @param requirements an array of systems used by this action
      * @return this instance
      *
      * @throws IllegalStateException if the action is running.
 	 */
-	public Action requires(Subsystem... subsystems){
-        Objects.requireNonNull(subsystems, "requirements is null");
-	    return requires(Arrays.asList(subsystems));
+	public Action requires(Requirement... requirements){
+        Objects.requireNonNull(requirements, "requirements is null");
+	    return requires(Arrays.asList(requirements));
 	}
 
     /**
-     * Adds {@link Subsystem} requirements for this action.
+     * Adds {@link Requirement} requirements for this action.
      *
-     * @param subsystems collection of subsystems to add.
+     * @param requirements collection of subsystems to add.
      * @return this instance.
      *
      * @throws IllegalStateException if the action is running.
      */
-    public Action requires(Collection<Subsystem> subsystems) {
-        Objects.requireNonNull(subsystems, "requirements is null");
+    public Action requires(Collection<Requirement> requirements) {
+        Objects.requireNonNull(requirements, "requirements is null");
 
         validateNotRunning();
-        mRequirements.addAll(subsystems);
+        mRequirements.addAll(requirements);
 
         return this;
     }
@@ -224,11 +224,11 @@ public abstract class Action {
 	}
 
 	/**
-	 * Gets the {@link Subsystem}s which are used by this action.
+	 * Gets the {@link Requirement}s which are used by this action.
      *
-	 * @return {@link Set} of the used {@link Subsystem}s.
+	 * @return {@link Set} of the used {@link Requirement}s.
 	 */
-	public Set<Subsystem> getRequirements(){
+	public Set<Requirement> getRequirements(){
 		return Collections.unmodifiableSet(mRequirements);
 	}
 

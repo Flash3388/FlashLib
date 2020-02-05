@@ -66,11 +66,11 @@ public class SchedulerStartBenchmark {
         }
 
         private static void generateSingleRequirement(Scheduler scheduler, Action action) {
-            Subsystem subsystem = new EmptySubsystem(scheduler);
-            action.requires(subsystem);
+            Requirement requirement = new EmptyRequirement(scheduler);
+            action.requires(requirement);
 
             Action conflictingAction = new EmptyAction(scheduler);
-            conflictingAction.requires(subsystem);
+            conflictingAction.requires(requirement);
             conflictingAction.start();
         }
     }

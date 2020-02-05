@@ -1,11 +1,13 @@
 package com.flash3388.flashlib.robot.hid.xbox;
 
+import com.flash3388.flashlib.robot.RunningRobotMock;
 import com.flash3388.flashlib.robot.hid.Axis;
 import com.flash3388.flashlib.robot.hid.Button;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.hid.Pov;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.StaticClock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -17,6 +19,11 @@ import static org.mockito.Mockito.mock;
 
 
 public class XboxControllerTest {
+
+    @BeforeEach
+    public void setup() throws Exception {
+        RunningRobotMock.mockRobotWithDependencies();
+    }
 
     @ParameterizedTest(name = "getButton(type {0}) == getButton(index {0}.index)")
     @EnumSource(value = XboxButton.class)

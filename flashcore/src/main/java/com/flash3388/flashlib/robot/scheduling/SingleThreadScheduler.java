@@ -49,8 +49,8 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
-    public Optional<Action> getActionRunningOnSubsystem(Subsystem subsystem) {
-        return mActionsRepository.getActionOnSubsystem(subsystem);
+    public Optional<Action> getActionRunningOnSubsystem(Requirement requirement) {
+        return mActionsRepository.getActionOnSubsystem(requirement);
     }
 
     @Override
