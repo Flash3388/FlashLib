@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
-import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.Subsystem;
 
@@ -69,22 +68,14 @@ public interface Action {
         return false;
     }
 
+    void start();
+    void cancel();
+    boolean isRunning();
+
     ActionConfiguration getConfiguration();
     void setConfiguration(ActionConfiguration configuration);
 
     default ActionConfiguration.Editor configure() {
         return new ActionConfiguration.Editor(this, getConfiguration());
-    }
-
-    default void start() {
-        RunningRobot.getInstance().getScheduler().start(this);
-    }
-
-    default void cancel() {
-        RunningRobot.getInstance().getScheduler().cancel(this);
-    }
-
-    default boolean isRunning() {
-        return RunningRobot.getInstance().getScheduler().isRunning(this);
     }
 }
