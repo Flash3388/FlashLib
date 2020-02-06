@@ -8,7 +8,7 @@ public final class Triggers {
 
     public static Trigger onCondition(BooleanSupplier condition) {
         Trigger trigger = new Trigger();
-        trigger.addToScheduler(condition);
+        trigger.schedule(condition);
 
         return trigger;
     }

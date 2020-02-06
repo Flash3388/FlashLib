@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.scheduling.triggers;
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.robot.RunningRobotMock;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,8 @@ public class TriggerActivationActionTest {
         Trigger trigger = mock(Trigger.class);
         BooleanProperty condition = new SimpleBooleanProperty(false);
 
-        TriggerActivationAction triggerActivationAction = new TriggerActivationAction(condition, trigger);
+        TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
+                condition, trigger);
         triggerActivationAction.execute(); // not met
 
         condition.setAsBoolean(true);
@@ -34,7 +36,8 @@ public class TriggerActivationActionTest {
         Trigger trigger = mock(Trigger.class);
         BooleanProperty condition = new SimpleBooleanProperty(true);
 
-        TriggerActivationAction triggerActivationAction = new TriggerActivationAction(condition, trigger);
+        TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
+                condition, trigger);
         triggerActivationAction.execute(); // is met
 
         condition.setAsBoolean(false);

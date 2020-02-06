@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
 
 import java.util.function.BooleanSupplier;
@@ -9,7 +10,8 @@ public class TriggerActivationAction extends ActionBase {
     private final BooleanSupplier mCondition;
     private final Trigger mTrigger;
 
-    public TriggerActivationAction(BooleanSupplier condition, Trigger trigger) {
+    public TriggerActivationAction(Scheduler scheduler, BooleanSupplier condition, Trigger trigger) {
+        super(scheduler);
         mCondition = condition;
         mTrigger = trigger;
 

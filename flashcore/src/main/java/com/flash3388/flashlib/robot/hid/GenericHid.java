@@ -32,7 +32,7 @@ public class GenericHid implements Hid {
                 .mapToObj((i) -> new Pov(hidInterface, channel, i))
                 .collect(Collectors.toList()));
 
-        mButtons.forEach(Button::addToScheduler);
+        mButtons.forEach(Button::schedule);
 	}
 
 	public GenericHid(int channel, int axisCount, int buttonCount, int povsCount) {

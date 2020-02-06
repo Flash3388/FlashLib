@@ -15,8 +15,8 @@ import java.util.function.BooleanSupplier;
  */
 public abstract class Button extends Trigger implements BooleanSupplier, Invertable {
 
-    public void addToScheduler() {
-        super.addToScheduler(this);
+    public void schedule() {
+        super.schedule(this);
     }
 
     public abstract boolean isDown();

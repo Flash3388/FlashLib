@@ -24,6 +24,8 @@ public class CustomHid implements Hid {
         mAxes = new HashMap<>(axes);
         mButtons = new HashMap<>(buttons);
         mPovs = new HashMap<>(povs);
+
+        mButtons.values().forEach(Button::schedule);
     }
 
     @Override

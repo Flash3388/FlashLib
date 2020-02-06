@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.scheduling.triggers;
 
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Requirement;
+import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.RunOnState;
@@ -13,60 +15,24 @@ import java.util.function.BooleanSupplier;
 
 public class Trigger implements Requirement {
 
+    private final Scheduler mScheduler;
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
     private Action mUpdateAction;
 
-    public Trigger(Collection<TriggerStateListener> triggerStateListeners, TriggerState initialState) {
+    public Trigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners, TriggerState currentState) {
+        mScheduler = scheduler;
         mTriggerStateListeners = triggerStateListeners;
-        mCurrentState = initialState;
+        mCurrentState = currentState;
+        mUpdateAction = null;
     }
 
-    public Trigger(TriggerState initialState) {
-        this(new ArrayList<>(), initialState);
+    public Trigger(TriggerState currentState) {
+        this(RunningRobot.getInstance().getScheduler(), new ArrayList<>(), currentState);
     }
 
     public Trigger() {
         this(TriggerState.INACTIVE);
-    }
-
-    public Trigger addStateListener(TriggerStateListener handler) {
-        mTriggerStateListeners.add(handler);
-
-        return this;
-    }
-
-    public Trigger whenActive(Action action) {
-        return addStateListener(new StartOnState(TriggerState.ACTIVE, action));
-    }
-
-    public Trigger cancelWhenActive(Action action) {
-        return addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
-    }
-
-    public Trigger toggleWhenActive(Action action) {
-        return addStateListener(new ToggleOnState(TriggerState.ACTIVE, action));
-    }
-
-    public Trigger whileActive(Action action) {
-        return addStateListener(new RunOnState(TriggerState.ACTIVE, action));
-    }
-
-    public Trigger whenInactive(Action action) {
-        return addStateListener(new StartOnState(TriggerState.INACTIVE, action));
-    }
-
-    public Trigger cancelWhenInactive(Action action) {
-        return addStateListener(new CancelOnState(TriggerState.INACTIVE, action));
-    }
-
-    public void setState(TriggerState newState) {
-        if (mCurrentState == newState) {
-            updateSameState(mCurrentState);
-        } else {
-            handleStateChange(newState, mCurrentState);
-            mCurrentState = newState;
-        }
     }
 
     public void activate() {
@@ -77,17 +43,58 @@ public class Trigger implements Requirement {
         setState(TriggerState.INACTIVE);
     }
 
-    public void addToScheduler(BooleanSupplier condition) {
-        removeFromScheduler();
+    public boolean isActive() {
+        return mCurrentState == TriggerState.ACTIVE;
+    }
 
-        mUpdateAction = new TriggerActivationAction(condition, this);
+    public void schedule(BooleanSupplier activeCondition) {
+        stopScheduling();
+
+        mUpdateAction = new TriggerActivationAction(mScheduler, activeCondition, this);
         mUpdateAction.start();
     }
 
-    public void removeFromScheduler() {
+    public void stopScheduling() {
         if (mUpdateAction != null) {
             mUpdateAction.cancel();
             mUpdateAction = null;
+        }
+    }
+
+    public void addStateListener(TriggerStateListener handler) {
+        mTriggerStateListeners.add(handler);
+    }
+
+    public void whenActive(Action action) {
+        addStateListener(new StartOnState(TriggerState.ACTIVE, action));
+    }
+
+    public void cancelWhenActive(Action action) {
+        addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
+    }
+
+    public void toggleWhenActive(Action action) {
+        addStateListener(new ToggleOnState(TriggerState.ACTIVE, action));
+    }
+
+    public void whileActive(Action action) {
+        addStateListener(new RunOnState(TriggerState.ACTIVE, action));
+    }
+
+    public void whenInactive(Action action) {
+        addStateListener(new StartOnState(TriggerState.INACTIVE, action));
+    }
+
+    public void cancelWhenInactive(Action action) {
+        addStateListener(new CancelOnState(TriggerState.INACTIVE, action));
+    }
+
+    void setState(TriggerState newState) {
+        if (mCurrentState == newState) {
+            updateSameState(mCurrentState);
+        } else {
+            handleStateChange(newState, mCurrentState);
+            mCurrentState = newState;
         }
     }
 

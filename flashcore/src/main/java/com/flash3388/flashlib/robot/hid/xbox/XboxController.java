@@ -52,8 +52,8 @@ public class XboxController implements Hid {
 
         mDpad = new DPad(clock, buttonPressTime, hidInterface, mChannel, DPAD_POV_INDEX);
 
-        mButtons.forEach(Button::addToScheduler);
-        mDpad.buttons().forEach(Button::addToScheduler);
+        mButtons.forEach(Button::schedule);
+        mDpad.buttons().forEach(Button::schedule);
 	}
 
     public XboxController(Clock clock, HidInterface hidInterface, int channel) {
