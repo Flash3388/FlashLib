@@ -11,10 +11,15 @@ public class PeriodicAction extends ActionBase {
     private final Time mPeriod;
     private Time mNextRun;
 
-    public PeriodicAction(Clock clock, Runnable runnable, Time period) {
+    PeriodicAction(Clock clock, Runnable runnable, Time period, Time nextRun) {
         mClock = clock;
         mRunnable = runnable;
         mPeriod = period;
+        mNextRun = nextRun;
+    }
+
+    public PeriodicAction(Clock clock, Runnable runnable, Time period) {
+        this(clock, runnable, period, Time.INVALID);
     }
 
     public PeriodicAction(Runnable runnable, Time period) {
