@@ -5,7 +5,6 @@ import com.flash3388.flashlib.time.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.flash3388.flashlib.robot.scheduling.actions.ActionsMock.makeActionCancelable;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,7 +26,6 @@ public class ActionContextTest {
         mAction = mock(Action.class);
         mockActionFinished(false);
         mockActionTimeout(Time.INVALID);
-        makeActionCancelable(mAction);
 
         mClock = mock(Clock.class);
         when(mClock.currentTime()).thenReturn(Time.INVALID);

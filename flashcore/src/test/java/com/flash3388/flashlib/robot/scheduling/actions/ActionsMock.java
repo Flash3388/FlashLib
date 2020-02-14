@@ -122,15 +122,6 @@ public final class ActionsMock {
         return action;
     }
 
-    public static Action makeActionCancelable(Action action) {
-        /*doAnswer((Answer<Void>) invocation -> {
-            when(action.isCanceled()).thenReturn(true);
-            return null;
-        }).when(action).markCanceled();*/
-
-        return action;
-    }
-
     public static Action mockThrowingAction() {
         Action action = mock(Action.class);
         doThrow(new RuntimeException()).when(action).execute();
