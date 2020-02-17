@@ -30,7 +30,6 @@ public class ActionConfiguration {
          * @return this instance
          */
         public Editor setTimeout(Time timeout){
-            Objects.requireNonNull(timeout, "timeout is null");
             mConfiguration.setTimeout(timeout);
 
             return this;
@@ -52,6 +51,11 @@ public class ActionConfiguration {
             return this;
         }
 
+        public Editor setName(String name) {
+            mConfiguration.setName(name);
+            return this;
+        }
+
         public Action save() {
             mAction.setConfiguration(mConfiguration);
             return mAction;
@@ -60,18 +64,19 @@ public class ActionConfiguration {
 
     private final Set<Requirement> mRequirements;
     private Time mTimeout;
+    private String mName;
 
-    public ActionConfiguration(Collection<Requirement> requirements, Time timeout) {
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name) {
         mRequirements = new HashSet<>(requirements);
         mTimeout = timeout;
     }
 
     public ActionConfiguration() {
-        this(Collections.emptyList(), Time.INVALID);
+        this(Collections.emptyList(), Time.INVALID, "");
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        this(other.getRequirements(), other.getTimeout());
+        this(other.getRequirements(), other.getTimeout(), "");
     }
 
     public Set<Requirement> getRequirements() {
@@ -82,13 +87,22 @@ public class ActionConfiguration {
         return mTimeout;
     }
 
-    public void setTimeout(Time timeout){
-        Objects.requireNonNull(timeout, "timeout is null");
-        mTimeout = timeout;
+    public String getName() {
+        return mName;
     }
 
     public void requires(Collection<? extends Requirement> requirements) {
         Objects.requireNonNull(requirements, "requirements is null");
         mRequirements.addAll(requirements);
+    }
+
+    public void setTimeout(Time timeout){
+        Objects.requireNonNull(timeout, "timeout is null");
+        mTimeout = timeout;
+    }
+
+    public void setName(String name) {
+        Objects.requireNonNull(name, "name is null");
+        mName = name;
     }
 }

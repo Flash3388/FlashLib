@@ -61,4 +61,9 @@ public abstract class ActionBase implements Action {
         configure().requires(requirements).save();
         return this;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s - %s", getClass().getSimpleName(), mConfiguration.getName());
+    }
 }
