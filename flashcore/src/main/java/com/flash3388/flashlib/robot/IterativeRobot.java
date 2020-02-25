@@ -71,19 +71,13 @@ public abstract class IterativeRobot extends IterativeRobotBase {
 
 	@Override
 	protected final void robotMain() {
-        Clock clock = getClock();
         while(mRunLoopProperty.getAsBoolean()){
-            Time start = clock.currentTime();
             robotLoop();
 
-            Time delay = clock.currentTime().sub(start).sub(ITERATION_DELAY);
-
-            if (delay.isValid()) {
-                try {
-                    mSleeper.sleepWhileConditionMet(mRunLoopProperty, delay);
-                } catch (InterruptedException e) {
-                    break;
-                }
+            try {
+                mSleeper.sleepWhileConditionMet(mRunLoopProperty, ITERATION_DELAY);
+            } catch (InterruptedException e) {
+                break;
             }
         }
 	}
