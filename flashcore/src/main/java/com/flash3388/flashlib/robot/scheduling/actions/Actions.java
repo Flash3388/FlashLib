@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.scheduling.actions;
 
+import com.flash3388.flashlib.robot.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.robot.scheduling.triggers.Triggers;
 import com.flash3388.flashlib.time.Time;
 
@@ -35,7 +36,7 @@ public final class Actions {
      * @param action action to cancel
      * @return canceling action
      */
-    public static Action cancelingAction(Action action){
+    public static Action canceling(Action action){
         Objects.requireNonNull(action, "action is null");
         return new GenericAction.Builder()
                 .onExecute(()-> {
@@ -77,10 +78,10 @@ public final class Actions {
                 .add(actions);
     }
 
-    public static Action conditional(BooleanSupplier condition, Action action) {
-        Triggers.onCondition(condition)
-                .whenActive(action);
+    public static Trigger conditional(BooleanSupplier condition, Action action) {
+        Trigger trigger = Triggers.onCondition(condition);
+        trigger.whenActive(action);
 
-        return action;
+        return trigger;
     }
 }
