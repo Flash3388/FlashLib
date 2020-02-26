@@ -44,14 +44,13 @@ public final class ActionsMock {
         }
 
         public ActionMocker mockRunWhenDisabled(boolean runWhenDisabled) {
-            mRunWhenDisabled = runWhenDisabled;
+            mConfiguration.setRunWhenDisabled(runWhenDisabled);
             return this;
         }
 
         public Action build() {
             Action action = mock(Action.class);
             when(action.isFinished()).thenReturn(mIsFinished);
-            when(action.runWhenDisabled()).thenReturn(mRunWhenDisabled);
             when(action.getConfiguration()).thenReturn(mConfiguration);
             when(action.configure()).thenAnswer(invocation -> new ActionConfiguration.Editor(action, action.getConfiguration()));
 
@@ -106,13 +105,6 @@ public final class ActionsMock {
         when(actionContext.run()).thenReturn(false);
 
         return actionContext;
-    }
-
-    public static Action mockNotAllowedInDisabledAction() {
-        Action action = mock(Action.class);
-        when(action.runWhenDisabled()).thenReturn(false);
-
-        return action;
     }
 
     public static Action mockActionIsFinishedMarkedTrue() {

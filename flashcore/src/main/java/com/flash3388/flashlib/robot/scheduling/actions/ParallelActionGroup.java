@@ -47,16 +47,22 @@ public class ParallelActionGroup extends ActionBase implements ActionGroup {
     public ParallelActionGroup add(Action action){
         Objects.requireNonNull(action, "action is null");
 
+        ActionConfiguration configuration = action.getConfiguration();
+
         if (!Collections.disjoint(getConfiguration().getRequirements(),
-                action.getConfiguration().getRequirements())) {
+                configuration.getRequirements())) {
             throw new IllegalArgumentException("Actions in Parallel execution cannot share requirements");
         }
 
         if (mActions.isEmpty()) {
-            mRunWhenDisabled = action.runWhenDisabled();
+            mRunWhenDisabled = configuration.shouldRunWhenDisabled();
         } else {
-            mRunWhenDisabled &= action.runWhenDisabled();
+            mRunWhenDisabled &= configuration.shouldRunWhenDisabled();
         }
+
+        configure()
+                .setRunWhenDisabled(mRunWhenDisabled)
+                .save();
 
         mActions.add(action);
 
@@ -120,11 +126,6 @@ public class ParallelActionGroup extends ActionBase implements ActionGroup {
                 context.runCanceled();
             }
         }
-    }
-
-    @Override
-    public final boolean runWhenDisabled() {
-        return mRunWhenDisabled;
     }
 
     private static class ContextRunner implements Predicate<ActionContext> {

@@ -61,14 +61,6 @@ public interface Action {
     default void end(boolean wasInterrupted) {
     }
 
-    /**
-     * @return returns <b>false</b> if this action can run when disabled,
-     *      <b>true</b>.
-     */
-    default boolean runWhenDisabled() {
-        return false;
-    }
-
     void start();
     void cancel();
     boolean isRunning();

@@ -31,7 +31,6 @@ public class ActionConfiguration {
          */
         public Editor setTimeout(Time timeout){
             mConfiguration.setTimeout(timeout);
-
             return this;
         }
 
@@ -47,12 +46,16 @@ public class ActionConfiguration {
         public Editor requires(Requirement... requirements){
             Objects.requireNonNull(requirements, "requirements is null");
             mConfiguration.requires(Arrays.asList(requirements));
-
             return this;
         }
 
         public Editor setName(String name) {
             mConfiguration.setName(name);
+            return this;
+        }
+
+        public Editor setRunWhenDisabled(boolean runWhenDisabled) {
+            mConfiguration.setRunWhenDisabled(runWhenDisabled);
             return this;
         }
 
@@ -65,18 +68,20 @@ public class ActionConfiguration {
     private final Set<Requirement> mRequirements;
     private Time mTimeout;
     private String mName;
+    private boolean mRunWhenDisabled;
 
-    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name) {
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, boolean runWhenDisabled) {
         mRequirements = new HashSet<>(requirements);
         mTimeout = timeout;
+        mRunWhenDisabled = runWhenDisabled;
     }
 
     public ActionConfiguration() {
-        this(Collections.emptyList(), Time.INVALID, "");
+        this(Collections.emptyList(), Time.INVALID, "", false);
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        this(other.getRequirements(), other.getTimeout(), other.getName());
+        this(other.getRequirements(), other.getTimeout(), other.getName(), other.shouldRunWhenDisabled());
     }
 
     public Set<Requirement> getRequirements() {
@@ -89,6 +94,10 @@ public class ActionConfiguration {
 
     public String getName() {
         return mName;
+    }
+
+    public boolean shouldRunWhenDisabled() {
+        return mRunWhenDisabled;
     }
 
     public void requires(Collection<? extends Requirement> requirements) {
@@ -104,5 +113,9 @@ public class ActionConfiguration {
     public void setName(String name) {
         Objects.requireNonNull(name, "name is null");
         mName = name;
+    }
+
+    public void setRunWhenDisabled(boolean runWhenDisabled) {
+        mRunWhenDisabled = runWhenDisabled;
     }
 }

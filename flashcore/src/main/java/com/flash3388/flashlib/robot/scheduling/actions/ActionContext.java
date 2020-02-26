@@ -70,7 +70,7 @@ public class ActionContext {
     }
 
     public boolean runWhenDisabled() {
-        return mAction.runWhenDisabled();
+        return mAction.getConfiguration().shouldRunWhenDisabled();
     }
 
     boolean wasTimeoutReached(){

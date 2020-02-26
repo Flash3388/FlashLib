@@ -15,7 +15,9 @@ public class TriggerActivationAction extends ActionBase {
         mCondition = condition;
         mTrigger = trigger;
 
-        configure().requires(mTrigger)
+        configure()
+                .requires(mTrigger)
+                .setRunWhenDisabled(true)
                 .save();
     }
 
@@ -28,10 +30,5 @@ public class TriggerActivationAction extends ActionBase {
         } else {
             mTrigger.deactivate();
         }
-    }
-
-    @Override
-    public boolean runWhenDisabled() {
-        return true;
     }
 }

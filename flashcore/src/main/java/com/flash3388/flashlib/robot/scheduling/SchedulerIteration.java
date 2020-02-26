@@ -62,7 +62,7 @@ class SchedulerIteration {
                 Action action = entry.getValue();
 
                 if (robotMode.equals(RobotMode.DISABLED) &&
-                        !action.runWhenDisabled()) {
+                        !action.getConfiguration().shouldRunWhenDisabled()) {
                     continue;
                 }
 

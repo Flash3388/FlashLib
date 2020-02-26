@@ -53,7 +53,7 @@ public class SequentialActionGroupTest {
     public void execute_actionCurrentlyRunning_executesIt() throws Exception {
         List<Action> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
-                mock(Action.class)
+                ActionsMock.actionMocker().build()
         );
 
         SequentialActionGroup actionGroup = new SequentialActionGroup()

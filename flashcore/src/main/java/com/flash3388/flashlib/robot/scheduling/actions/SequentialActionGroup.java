@@ -52,11 +52,17 @@ public class SequentialActionGroup extends ActionBase implements ActionGroup {
     public SequentialActionGroup add(Action action) {
         Objects.requireNonNull(action, "action is null");
 
+        ActionConfiguration configuration = action.getConfiguration();
+
         if (mActions.isEmpty()) {
-            mRunWhenDisabled = action.runWhenDisabled();
+            mRunWhenDisabled = configuration.shouldRunWhenDisabled();
         } else {
-            mRunWhenDisabled &= action.runWhenDisabled();
+            mRunWhenDisabled &= configuration.shouldRunWhenDisabled();
         }
+
+        configure()
+                .setRunWhenDisabled(mRunWhenDisabled)
+                .save();
 
         mActions.add(action);
 
@@ -114,11 +120,6 @@ public class SequentialActionGroup extends ActionBase implements ActionGroup {
         if (wasInterrupted && mCurrentAction != null) {
             mCurrentAction.runCanceled();
         }
-    }
-
-    @Override
-    public final boolean runWhenDisabled() {
-        return mRunWhenDisabled;
     }
 
     private void startNextAction() {
