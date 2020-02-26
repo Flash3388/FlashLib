@@ -2,7 +2,7 @@ package robot;
 
 import com.flash3388.flashlib.math.Mathf;
 import com.flash3388.flashlib.robot.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.IterativeRobotControl;
+import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.control.PidController;
@@ -19,7 +19,7 @@ import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
 
-public class UserRobotControl extends DelegatingRobotControl implements IterativeRobotControl {
+public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 
     private final OmniDriveSystem mDriveSystem;
     private final SingleMotorSystem mShooter;
@@ -29,7 +29,7 @@ public class UserRobotControl extends DelegatingRobotControl implements Iterativ
 
     private final PidController mTurretPidController;
 
-    public UserRobotControl(RobotControl robotControl) throws RobotInitializationException {
+    public UserRobot(RobotControl robotControl) throws RobotInitializationException {
         super(robotControl);
 
         mDriveSystem = new OmniDriveSystem(

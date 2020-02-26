@@ -22,7 +22,7 @@ import java.util.Collection;
  *     If {@link #robotMain()} throws an exception, {@link #robotShutdown()} is called.
  * </p>
  *
- * @since FlashLib 1.2.0
+ * @since FlashLib 3.0.0
  */
 public abstract class RobotControlBase implements RobotControl {
 

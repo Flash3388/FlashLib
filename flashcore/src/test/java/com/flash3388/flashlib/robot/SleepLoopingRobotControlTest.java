@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.io.Closer;
+import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -37,7 +38,7 @@ public class SleepLoopingRobotControlTest {
 
     private Scheduler mScheduler;
     private SleepLoopingRobotControl mSleepLoopingRobot;
-    private IterativeRobotControl mRobot;
+    private IterativeRobot mRobot;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -52,7 +53,7 @@ public class SleepLoopingRobotControlTest {
         Clock clock = mock(Clock.class);
         when(clock.currentTime()).thenReturn(Time.milliseconds(1));
 
-        mRobot = mock(IterativeRobotControl.class);
+        mRobot = mock(IterativeRobot.class);
         mSleepLoopingRobot = spy(new FakeSleepLoopingRobotControl(mRobot, mScheduler, logger, mock(Sleeper.class), clock));
     }
 
@@ -162,7 +163,7 @@ public class SleepLoopingRobotControlTest {
         private final Logger mLogger;
         private final Clock mClock;
 
-        private FakeSleepLoopingRobotControl(IterativeRobotControl robot, Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
+        private FakeSleepLoopingRobotControl(IterativeRobot robot, Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
             super((r)-> robot, sleeper);
 
             mScheduler = scheduler;

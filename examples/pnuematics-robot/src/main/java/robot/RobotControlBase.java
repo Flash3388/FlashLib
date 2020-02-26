@@ -22,7 +22,7 @@ public class RobotControlBase extends SleepLoopingRobotControl {
     private final Clock mClock;
 
     protected RobotControlBase(Logger logger) {
-        super(MyRobotControl::new);
+        super(MyRobot::new);
         mLogger = logger;
         mRobotModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
         mIoInterface = new IoInterface.Stub();

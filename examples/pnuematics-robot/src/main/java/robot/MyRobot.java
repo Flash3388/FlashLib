@@ -1,7 +1,7 @@
 package robot;
 
 import com.flash3388.flashlib.robot.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.IterativeRobotControl;
+import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
 import com.flash3388.flashlib.robot.hid.xbox.XboxController;
@@ -15,13 +15,13 @@ import com.flash3388.flashlib.robot.systems.pneumatics.actions.ClosePistonAction
 import com.flash3388.flashlib.robot.systems.pneumatics.actions.OpenPistonAction;
 import robot.pnuematics.StubSolenoid;
 
-public class MyRobotControl extends DelegatingRobotControl implements IterativeRobotControl {
+public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
 
     private final SingleMotorSystem mShooter;
     private final SingleSolenoidSystem mShooterDirector;
     private final XboxController mController;
 
-    public MyRobotControl(RobotControl robotControl) {
+    public MyRobot(RobotControl robotControl) {
         super(robotControl);
         mShooter = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)));
         mShooterDirector = new SingleSolenoidSystem(new SolenoidGroup(
