@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
-public interface Robot {
+public interface RobotControl {
 
     /**
      * Gets the initialized {@link Supplier} object for {@link RobotMode} of the robot.

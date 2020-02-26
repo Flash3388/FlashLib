@@ -11,42 +11,42 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class DelegatingRobot implements Robot {
+public class DelegatingRobotControl implements RobotControl {
 
-    private final Robot mRobot;
+    private final RobotControl mRobotControl;
 
-    protected DelegatingRobot(Robot robot) {
-        mRobot = robot;
+    protected DelegatingRobotControl(RobotControl robotControl) {
+        mRobotControl = robotControl;
     }
 
     @Override
     public Supplier<? extends RobotMode> getModeSupplier() {
-        return mRobot.getModeSupplier();
+        return mRobotControl.getModeSupplier();
     }
 
     @Override
     public IoInterface getIoInterface() {
-        return mRobot.getIoInterface();
+        return mRobotControl.getIoInterface();
     }
 
     @Override
     public HidInterface getHidInterface() {
-        return mRobot.getHidInterface();
+        return mRobotControl.getHidInterface();
     }
 
     @Override
     public Scheduler getScheduler() {
-        return mRobot.getScheduler();
+        return mRobotControl.getScheduler();
     }
 
     @Override
     public Clock getClock() {
-        return mRobot.getClock();
+        return mRobotControl.getClock();
     }
 
     @Override
     public Logger getLogger() {
-        return mRobot.getLogger();
+        return mRobotControl.getLogger();
     }
 
     @Override

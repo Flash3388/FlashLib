@@ -1,9 +1,8 @@
 package robot;
 
-import com.flash3388.flashlib.robot.DelegatingRobot;
-import com.flash3388.flashlib.robot.IterativeRobot;
-import com.flash3388.flashlib.robot.Robot;
-import com.flash3388.flashlib.robot.RobotInitializationException;
+import com.flash3388.flashlib.robot.DelegatingRobotControl;
+import com.flash3388.flashlib.robot.IterativeRobotControl;
+import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
 import com.flash3388.flashlib.robot.hid.xbox.XboxController;
 import com.flash3388.flashlib.robot.io.devices.actuators.PwmTalonSrx;
@@ -14,17 +13,16 @@ import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import com.flash3388.flashlib.robot.systems.pneumatics.SingleSolenoidSystem;
 import com.flash3388.flashlib.robot.systems.pneumatics.actions.ClosePistonAction;
 import com.flash3388.flashlib.robot.systems.pneumatics.actions.OpenPistonAction;
-import org.slf4j.Logger;
 import robot.pnuematics.StubSolenoid;
 
-public class MyRobot extends DelegatingRobot implements IterativeRobot {
+public class MyRobotControl extends DelegatingRobotControl implements IterativeRobotControl {
 
     private final SingleMotorSystem mShooter;
     private final SingleSolenoidSystem mShooterDirector;
     private final XboxController mController;
 
-    public MyRobot(Robot robot) {
-        super(robot);
+    public MyRobotControl(RobotControl robotControl) {
+        super(robotControl);
         mShooter = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)));
         mShooterDirector = new SingleSolenoidSystem(new SolenoidGroup(
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID1),

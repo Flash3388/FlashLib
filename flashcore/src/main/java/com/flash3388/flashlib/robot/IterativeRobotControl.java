@@ -2,11 +2,11 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
-public interface IterativeRobot extends Robot {
+public interface IterativeRobotControl extends RobotControl {
 
     @FunctionalInterface
     interface Initializer {
-        IterativeRobot init(Robot robot) throws RobotInitializationException;
+        IterativeRobotControl init(RobotControl robotControl) throws RobotInitializationException;
     }
 
     void disabledInit();

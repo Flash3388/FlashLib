@@ -24,11 +24,11 @@ import java.util.Collection;
  *
  * @since FlashLib 1.2.0
  */
-public abstract class RobotBase implements Robot {
+public abstract class RobotControlBase implements RobotControl {
 
     private final ResourceHolder mResourceHolder;
 
-    protected RobotBase() {
+    protected RobotControlBase() {
         mResourceHolder = ResourceHolder.empty();
     }
 
@@ -49,7 +49,7 @@ public abstract class RobotBase implements Robot {
     protected abstract void robotInit() throws RobotInitializationException;
 
     /**
-     * Called when {@link Robot} finished initialization and the robot can be started.
+     * Called when {@link RobotControl} finished initialization and the robot can be started.
      * This is the main method of the robot and all operations should be directed from here.
      */
     protected abstract void robotMain();

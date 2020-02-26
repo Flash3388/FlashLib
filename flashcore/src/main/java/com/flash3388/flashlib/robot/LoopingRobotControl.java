@@ -2,16 +2,16 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
-public abstract class LoopingRobotBase extends RobotBase {
+public abstract class LoopingRobotControl extends RobotControlBase {
 
-    private final IterativeRobot.Initializer mRobotInitializer;
+    private final IterativeRobotControl.Initializer mRobotInitializer;
 
-    private IterativeRobot mRobot;
+    private IterativeRobotControl mRobot;
     private RobotMode mCurrentMode;
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
-    protected LoopingRobotBase(IterativeRobot.Initializer robotInitializer) {
+    protected LoopingRobotControl(IterativeRobotControl.Initializer robotInitializer) {
         mRobotInitializer = robotInitializer;
 
         mCurrentMode = null;

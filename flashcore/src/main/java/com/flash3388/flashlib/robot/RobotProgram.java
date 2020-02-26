@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 
 public class RobotProgram {
 
-    private final RobotBaseCreator mRobotBaseCreator;
+    private final RobotControlCreator mRobotControlCreator;
     private final Logger mLogger;
 
-    public RobotProgram(RobotBaseCreator robotBaseCreator, Logger logger) {
-        mRobotBaseCreator = robotBaseCreator;
+    public RobotProgram(RobotControlCreator robotControlCreator, Logger logger) {
+        mRobotControlCreator = robotControlCreator;
         mLogger = logger;
     }
 
@@ -38,7 +38,7 @@ public class RobotProgram {
     private void runRobot() throws RobotInitializationException, RobotCreationException {
         mLogger.debug("Creating user robot class");
 
-        RobotBase robot = mRobotBaseCreator.create(mLogger);
+        RobotControlBase robot = mRobotControlCreator.create(mLogger);
 
         RunningRobot.setInstance(robot);
 
@@ -50,7 +50,7 @@ public class RobotProgram {
         }
     }
 
-    private void runRobot(RobotBase robot) throws RobotInitializationException {
+    private void runRobot(RobotControlBase robot) throws RobotInitializationException {
         robot.robotInit();
         try {
             mLogger.debug("Starting user robot");

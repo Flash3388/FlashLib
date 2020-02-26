@@ -6,14 +6,14 @@ public final class RunningRobot {
 
     private RunningRobot() {}
 
-    private static final AtomicReference<Robot> sInstance = new AtomicReference<>(null);
+    private static final AtomicReference<RobotControl> sInstance = new AtomicReference<>(null);
 
-    public static Robot getInstance() {
+    public static RobotControl getInstance() {
         return sInstance.get();
     }
 
-    public static void setInstance(Robot instance) {
-        Robot previousInstance = sInstance.getAndSet(instance);
+    public static void setInstance(RobotControl instance) {
+        RobotControl previousInstance = sInstance.getAndSet(instance);
         if (previousInstance != null) {
             previousInstance.getLogger().warn("RunningRobot instance replaced");
         }

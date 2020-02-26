@@ -1,9 +1,9 @@
 package robot;
 
 import com.flash3388.flashlib.math.Mathf;
-import com.flash3388.flashlib.robot.DelegatingRobot;
-import com.flash3388.flashlib.robot.IterativeRobot;
-import com.flash3388.flashlib.robot.Robot;
+import com.flash3388.flashlib.robot.DelegatingRobotControl;
+import com.flash3388.flashlib.robot.IterativeRobotControl;
+import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
@@ -18,9 +18,8 @@ import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
-import org.slf4j.Logger;
 
-public class UserRobot extends DelegatingRobot implements IterativeRobot {
+public class UserRobotControl extends DelegatingRobotControl implements IterativeRobotControl {
 
     private final OmniDriveSystem mDriveSystem;
     private final SingleMotorSystem mShooter;
@@ -30,8 +29,8 @@ public class UserRobot extends DelegatingRobot implements IterativeRobot {
 
     private final PidController mTurretPidController;
 
-    public UserRobot(Robot robot) throws RobotInitializationException {
-        super(robot);
+    public UserRobotControl(RobotControl robotControl) throws RobotInitializationException {
+        super(robotControl);
 
         mDriveSystem = new OmniDriveSystem(
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_FRONT)),

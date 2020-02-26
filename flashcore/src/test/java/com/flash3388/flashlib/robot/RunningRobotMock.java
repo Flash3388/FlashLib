@@ -17,18 +17,18 @@ public final class RunningRobotMock {
 
     @SuppressWarnings("unchecked")
     public static void mockRobotWithDependencies() {
-        Robot robot = mock(Robot.class);
-        when(robot.getClock()).thenReturn(mock(Clock.class));
-        when(robot.getHidInterface()).thenReturn(mock(HidInterface.class));
-        when(robot.getLogger()).thenReturn(mock(Logger.class));
-        when(robot.getScheduler()).thenReturn(mock(Scheduler.class));
-        when(robot.getModeSupplier()).thenReturn(mock(Supplier.class));
+        RobotControl robotControl = mock(RobotControl.class);
+        when(robotControl.getClock()).thenReturn(mock(Clock.class));
+        when(robotControl.getHidInterface()).thenReturn(mock(HidInterface.class));
+        when(robotControl.getLogger()).thenReturn(mock(Logger.class));
+        when(robotControl.getScheduler()).thenReturn(mock(Scheduler.class));
+        when(robotControl.getModeSupplier()).thenReturn(mock(Supplier.class));
 
-        RunningRobot.setInstance(robot);
+        RunningRobot.setInstance(robotControl);
     }
 
     public static void mockRobotWithClock(Clock clock) {
-        Robot robot = RunningRobot.getInstance();
-        when(robot.getClock()).thenReturn(clock);
+        RobotControl robotControl = RunningRobot.getInstance();
+        when(robotControl.getClock()).thenReturn(clock);
     }
 }
