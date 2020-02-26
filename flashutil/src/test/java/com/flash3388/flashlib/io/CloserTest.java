@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 public class CloserTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeAlwaysNoError_closesAll() throws Exception {
         Closer closer = Closer.empty();
@@ -27,6 +28,7 @@ public class CloserTest {
         verify(mockCloseable, times(1)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeAlwaysErrorOccurredInRunnable_closesAllAndThrows() throws Exception {
         Closer closer = Closer.empty();
@@ -45,6 +47,7 @@ public class CloserTest {
         verify(mockCloseable, times(1)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeOnErrorErrorOccurred_closes() throws Exception {
         Closer closer = Closer.empty();
@@ -63,6 +66,7 @@ public class CloserTest {
         verify(mockCloseable, times(1)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeOnErrorNoError_doesNotClose() throws Exception {
         Closer closer = Closer.empty();
@@ -75,6 +79,7 @@ public class CloserTest {
         verify(mockCloseable, times(0)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeOnSuccessNoError_closes() throws Exception {
         Closer closer = Closer.empty();
@@ -87,6 +92,7 @@ public class CloserTest {
         verify(mockCloseable, times(1)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_closeOnErrorErrorOccurred_doesNotClose() throws Exception {
         Closer closer = Closer.empty();
@@ -105,6 +111,7 @@ public class CloserTest {
         verify(mockCloseable, times(0)).close();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void run_errorOccurredInRunnableAndClose_suppressesCloseException() throws Exception {
         Closer closer = Closer.empty();

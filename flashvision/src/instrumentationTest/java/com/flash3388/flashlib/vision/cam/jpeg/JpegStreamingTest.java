@@ -48,6 +48,7 @@ public class JpegStreamingTest {
         mLogger = mock(Logger.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void serverAndClientAreUp_imagesAreStreaming_imageTransferredSuccessfully() throws Exception {
         final JpegImage IMAGE = new JpegImage(new BufferedImage(255, 255, BufferedImage.TYPE_3BYTE_BGR));

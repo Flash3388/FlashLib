@@ -15,6 +15,7 @@ public final class RunningRobotMock {
     private RunningRobotMock() {
     }
 
+    @SuppressWarnings("unchecked")
     public static void mockRobotWithDependencies() {
         Robot robot = mock(Robot.class);
         when(robot.getClock()).thenReturn(mock(Clock.class));
