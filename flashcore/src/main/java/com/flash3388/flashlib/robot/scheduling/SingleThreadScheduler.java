@@ -51,7 +51,7 @@ public class SingleThreadScheduler implements Scheduler {
 
     @Override
     public void cancelAllActions() {
-        mActionControl.stopAllActions();
+        mActionControl.cancelAllActions();
     }
 
     @Override

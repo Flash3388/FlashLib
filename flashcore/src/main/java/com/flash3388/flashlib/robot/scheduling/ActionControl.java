@@ -79,7 +79,7 @@ class ActionControl {
         toRemove.forEach(mRunningActions::remove);
     }
 
-    public void stopAllActions() {
+    public void cancelAllActions() {
         mNextRunActions.clear();
 
         mRunningActions.forEach(this::onInternalRemove);

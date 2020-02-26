@@ -170,7 +170,7 @@ public class ActionControlTest {
 
         mRunningActions.putAll(actions);
 
-        mActionControl.stopAllActions();
+        mActionControl.cancelAllActions();
 
         actions.values().forEach((ctx)-> verify(ctx, times(1)).runFinished());
     }
@@ -183,7 +183,7 @@ public class ActionControlTest {
 
         mRunningActions.putAll(actions);
 
-        mActionControl.stopAllActions();
+        mActionControl.cancelAllActions();
 
         ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         verify(mRequirementsControl, times(actions.size())).updateRequirementsNoCurrentAction(captor.capture());
