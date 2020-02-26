@@ -52,8 +52,13 @@ public class ParallelActionGroup extends ActionBase implements ActionGroup {
             throw new IllegalArgumentException("Actions in Parallel execution cannot share requirements");
         }
 
+        if (mActions.isEmpty()) {
+            mRunWhenDisabled = action.runWhenDisabled();
+        } else {
+            mRunWhenDisabled &= action.runWhenDisabled();
+        }
+
         mActions.add(action);
-        mRunWhenDisabled &= action.runWhenDisabled();
 
         return this;
     }

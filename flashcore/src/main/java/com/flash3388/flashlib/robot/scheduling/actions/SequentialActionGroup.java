@@ -52,8 +52,13 @@ public class SequentialActionGroup extends ActionBase implements ActionGroup {
     public SequentialActionGroup add(Action action) {
         Objects.requireNonNull(action, "action is null");
 
+        if (mActions.isEmpty()) {
+            mRunWhenDisabled = action.runWhenDisabled();
+        } else {
+            mRunWhenDisabled &= action.runWhenDisabled();
+        }
+
         mActions.add(action);
-        mRunWhenDisabled &= action.runWhenDisabled();
 
         return this;
     }
