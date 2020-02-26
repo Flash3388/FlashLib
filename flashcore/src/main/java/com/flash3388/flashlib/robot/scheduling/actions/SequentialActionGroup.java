@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Queue;
 
-public class SequentialActionGroup extends ActionBase {
+public class SequentialActionGroup extends ActionBase implements ActionGroup {
 
     private final Clock mClock;
 
@@ -48,6 +48,7 @@ public class SequentialActionGroup extends ActionBase {
      * @param action action to run
      * @return this instance
      */
+    @Override
     public SequentialActionGroup add(Action action) {
         Objects.requireNonNull(action, "action is null");
 
@@ -63,6 +64,7 @@ public class SequentialActionGroup extends ActionBase {
      * @param actions actions to run
      * @return this instance
      */
+    @Override
     public SequentialActionGroup add(Action... actions) {
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
@@ -74,6 +76,7 @@ public class SequentialActionGroup extends ActionBase {
      * @param actions action to run
      * @return this instance
      */
+    @Override
     public SequentialActionGroup add(Collection<Action> actions) {
         Objects.requireNonNull(actions, "actions is null");
         actions.forEach(this::add);

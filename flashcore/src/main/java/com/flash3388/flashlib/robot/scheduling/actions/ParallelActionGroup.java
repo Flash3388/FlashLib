@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class ParallelActionGroup extends ActionBase {
+public class ParallelActionGroup extends ActionBase implements ActionGroup {
 
     private final Clock mClock;
 
@@ -43,6 +43,7 @@ public class ParallelActionGroup extends ActionBase {
      * @param action action to run
      * @return this instance
      */
+    @Override
     public ParallelActionGroup add(Action action){
         Objects.requireNonNull(action, "action is null");
 
@@ -63,6 +64,7 @@ public class ParallelActionGroup extends ActionBase {
      * @param actions actions to run
      * @return this instance
      */
+    @Override
     public ParallelActionGroup add(Action... actions){
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
@@ -74,6 +76,7 @@ public class ParallelActionGroup extends ActionBase {
      * @param actions action to run
      * @return this instance
      */
+    @Override
     public ParallelActionGroup add(Collection<Action> actions){
         Objects.requireNonNull(actions, "actions is null");
         actions.forEach(this::add);
