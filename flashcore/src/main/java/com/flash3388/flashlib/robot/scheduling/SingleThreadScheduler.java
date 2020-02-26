@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class SingleThreadScheduler implements Scheduler {
 
@@ -41,6 +42,11 @@ public class SingleThreadScheduler implements Scheduler {
     public boolean isRunning(Action action) {
         Objects.requireNonNull(action, "action is null");
         return mActionControl.isActionRunning(action);
+    }
+
+    @Override
+    public void cancelActionsIf(Predicate<? super Action> predicate) {
+        mActionControl.cancelActionsIf(predicate);
     }
 
     @Override

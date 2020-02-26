@@ -4,6 +4,7 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Scheduler is responsible for executing tasks for robots.
@@ -26,6 +27,7 @@ public interface Scheduler {
     void cancel(Action action);
     boolean isRunning(Action action);
 
+    void cancelActionsIf(Predicate<? super Action> predicate);
     void cancelAllActions();
 
     void setDefaultAction(Subsystem subsystem, Action action);

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 class ActionControl {
 
@@ -62,6 +63,20 @@ class ActionControl {
 
         mNextRunActions.forEach(this::internalAdd);
         mNextRunActions.clear();
+    }
+
+    public void cancelActionsIf(Predicate<? super Action> predicate) {
+        mNextRunActions.removeIf(predicate);
+
+        Collection<Action> toRemove = new ArrayList<>();
+        for (Map.Entry<Action, ActionContext> entry : mRunningActions.entrySet()) {
+            if (predicate.test(entry.getKey())) {
+                onInternalRemove(entry.getKey(), entry.getValue());
+                toRemove.add(entry.getKey());
+            }
+        }
+
+        toRemove.forEach(mRunningActions::remove);
     }
 
     public void stopAllActions() {
