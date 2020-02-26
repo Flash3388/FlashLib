@@ -51,6 +51,6 @@ public class DelegatingRobotControl implements RobotControl {
 
     @Override
     public void registerResources(Collection<? extends Resource> resources) {
-
+        mRobotControl.registerResources(resources);
     }
 }
