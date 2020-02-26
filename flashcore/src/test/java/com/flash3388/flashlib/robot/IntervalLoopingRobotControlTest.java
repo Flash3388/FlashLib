@@ -31,13 +31,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class SleepLoopingRobotControlTest {
+public class IntervalLoopingRobotControlTest {
 
     private ExecutorService mExecutorService;
     private Closer mCloser;
 
     private Scheduler mScheduler;
-    private SleepLoopingRobotControl mSleepLoopingRobot;
+    private IntervalLoopingRobotControl mSleepLoopingRobot;
     private IterativeRobot mRobot;
 
     @BeforeEach
@@ -54,7 +54,7 @@ public class SleepLoopingRobotControlTest {
         when(clock.currentTime()).thenReturn(Time.milliseconds(1));
 
         mRobot = mock(IterativeRobot.class);
-        mSleepLoopingRobot = spy(new FakeSleepLoopingRobotControl(mRobot, mScheduler, logger, mock(Sleeper.class), clock));
+        mSleepLoopingRobot = spy(new FakeIntervalLoopingRobotControl(mRobot, mScheduler, logger, mock(Sleeper.class), clock));
     }
 
     @AfterEach
@@ -157,14 +157,14 @@ public class SleepLoopingRobotControlTest {
         });
     }
 
-    private static class FakeSleepLoopingRobotControl extends SleepLoopingRobotControl {
+    private static class FakeIntervalLoopingRobotControl extends IntervalLoopingRobotControl {
 
         private final Scheduler mScheduler;
         private final Logger mLogger;
         private final Clock mClock;
 
-        private FakeSleepLoopingRobotControl(IterativeRobot robot, Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
-            super((r)-> robot, sleeper);
+        private FakeIntervalLoopingRobotControl(IterativeRobot robot, Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
+            super((r)-> robot, sleeper, Time.seconds(1));
 
             mScheduler = scheduler;
             mLogger = logger;

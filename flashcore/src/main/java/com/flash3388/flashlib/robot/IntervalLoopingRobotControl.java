@@ -54,21 +54,23 @@ import com.flash3388.flashlib.util.concurrent.Sleeper;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public abstract class SleepLoopingRobotControl extends LoopingRobotControl {
+public abstract class IntervalLoopingRobotControl extends LoopingRobotControl {
 
-	private static final Time ITERATION_DELAY = Time.milliseconds(5);
+	private static final Time DEFAULT_ITERATION_INTERVAL = Time.milliseconds(20);
 
 	private final Sleeper mSleeper;
+	private final Time mIterationInterval;
 	private final BooleanProperty mRunLoopProperty;
 
-	protected SleepLoopingRobotControl(IterativeRobot.Initializer initializer, Sleeper sleeper) {
+	protected IntervalLoopingRobotControl(IterativeRobot.Initializer initializer, Sleeper sleeper, Time iterationInterval) {
         super(initializer);
         mSleeper = sleeper;
+        mIterationInterval = iterationInterval;
         mRunLoopProperty = new SimpleBooleanProperty(true);
     }
 
-    protected SleepLoopingRobotControl(IterativeRobot.Initializer initializer) {
-        this(initializer, new Sleeper());
+    protected IntervalLoopingRobotControl(IterativeRobot.Initializer initializer) {
+        this(initializer, new Sleeper(), DEFAULT_ITERATION_INTERVAL);
     }
 
 	@Override
@@ -78,7 +80,7 @@ public abstract class SleepLoopingRobotControl extends LoopingRobotControl {
             Time start = clock.currentTime();
             robotLoop();
 
-            Time delay = clock.currentTime().sub(start).sub(ITERATION_DELAY);
+            Time delay = mIterationInterval.sub(clock.currentTime().sub(start));
 
             if (delay.isValid()) {
                 try {
