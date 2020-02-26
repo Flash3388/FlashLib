@@ -76,7 +76,7 @@ public class ActionConfiguration {
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        this(other.getRequirements(), other.getTimeout(), "");
+        this(other.getRequirements(), other.getTimeout(), other.getName());
     }
 
     public Set<Requirement> getRequirements() {
