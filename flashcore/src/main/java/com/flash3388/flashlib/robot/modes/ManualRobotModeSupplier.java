@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.modes;
 
-public class ManualRobotModeSupplier implements RobotModeSupplier {
+import com.beans.Property;
+
+public class ManualRobotModeSupplier implements Property<RobotMode> {
 
 	private RobotMode mCurrentMode;
 
@@ -9,11 +11,12 @@ public class ManualRobotModeSupplier implements RobotModeSupplier {
 	}
 
 	@Override
-	public RobotMode getMode() {
+	public RobotMode get() {
 		return mCurrentMode;
 	}
 
-	public void setMode(RobotMode mode) {
+	@Override
+	public void set(RobotMode mode) {
 		mCurrentMode = mode;
 	}
 }

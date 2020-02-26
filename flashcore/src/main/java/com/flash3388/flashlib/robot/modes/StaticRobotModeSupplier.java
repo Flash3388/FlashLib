@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.modes;
 
-public class StaticRobotModeSupplier implements RobotModeSupplier {
+import java.util.function.Supplier;
+
+public class StaticRobotModeSupplier implements Supplier<RobotMode> {
 
     private final RobotMode mRobotMode;
 
@@ -9,7 +11,7 @@ public class StaticRobotModeSupplier implements RobotModeSupplier {
     }
 
     @Override
-    public RobotMode getMode() {
+    public RobotMode get() {
         return mRobotMode;
     }
 }

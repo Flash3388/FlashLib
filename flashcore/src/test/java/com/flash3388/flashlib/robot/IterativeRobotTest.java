@@ -4,7 +4,6 @@ import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -162,7 +162,7 @@ public class IterativeRobotTest {
         }
 
         @Override
-        public RobotModeSupplier getModeSupplier() {
+        public Supplier<? extends RobotMode> getModeSupplier() {
             return null;
         }
 

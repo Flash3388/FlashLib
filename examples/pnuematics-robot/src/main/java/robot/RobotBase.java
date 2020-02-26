@@ -5,16 +5,17 @@ import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
+import java.util.function.Supplier;
+
 public abstract class RobotBase extends IterativeRobot {
 
     private final Logger mLogger;
-    private final RobotModeSupplier mRobotModeSupplier;
+    private final Supplier<? extends RobotMode> mRobotModeSupplier;
     private final IoInterface mIoInterface;
     private final HidInterface mHidInterface;
     private final Scheduler mScheduler;
@@ -35,7 +36,7 @@ public abstract class RobotBase extends IterativeRobot {
     }
 
     @Override
-    public final RobotModeSupplier getModeSupplier() {
+    public final Supplier<? extends RobotMode> getModeSupplier() {
         return mRobotModeSupplier;
     }
 
