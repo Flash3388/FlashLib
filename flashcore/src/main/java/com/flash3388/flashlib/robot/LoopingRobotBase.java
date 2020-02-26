@@ -2,16 +2,26 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
-public abstract class IterativeRobotBase extends RobotBase {
+public abstract class LoopingRobotBase extends RobotBase {
 
+    private final IterativeRobot.Initializer mRobotInitializer;
+
+    private IterativeRobot mRobot;
     private RobotMode mCurrentMode;
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
-    protected IterativeRobotBase() {
+    protected LoopingRobotBase(IterativeRobot.Initializer robotInitializer) {
+        mRobotInitializer = robotInitializer;
+
         mCurrentMode = null;
         mLastMode = null;
         mWasCurrentModeInitialized = false;
+    }
+
+    @Override
+    protected final void robotInit() throws RobotInitializationException {
+        mRobot = mRobotInitializer.init(this);
     }
 
     @Override
@@ -20,7 +30,7 @@ public abstract class IterativeRobotBase extends RobotBase {
 
         getScheduler().cancelAllActions();
 
-        robotStop();
+        mRobot.robotStop();
     }
 
     protected final void robotLoop(){
@@ -44,9 +54,9 @@ public abstract class IterativeRobotBase extends RobotBase {
 
         if (mode.isDisabled()) {
             getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
-            disabledInit();
+            mRobot.disabledInit();
         } else {
-            modeInit(mode);
+            mRobot.modeInit(mode);
         }
     }
 
@@ -55,31 +65,15 @@ public abstract class IterativeRobotBase extends RobotBase {
 
         getScheduler().run(mode);
         if (mode.isDisabled()) {
-            disabledPeriodic();
+            mRobot.disabledPeriodic();
         } else {
-            modePeriodic(mode);
+            mRobot.modePeriodic(mode);
         }
 
         getLogger().trace("Robot periodic");
 
-        robotPeriodic();
+        mRobot.robotPeriodic();
     }
 
-    //--------------------------------------------------------------------
-    //----------------------Implementable---------------------------------
-    //--------------------------------------------------------------------
-
     protected abstract void stopRobotLoop();
-
-    protected void robotStop(){}
-
-    @Override
-    protected abstract void robotInit() throws RobotInitializationException;
-    protected abstract void robotPeriodic();
-
-    protected abstract void disabledInit();
-    protected abstract void disabledPeriodic();
-
-    protected abstract void modeInit(RobotMode mode);
-    protected abstract void modePeriodic(RobotMode mode);
 }

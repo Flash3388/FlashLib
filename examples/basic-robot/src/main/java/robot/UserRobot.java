@@ -1,6 +1,9 @@
 package robot;
 
 import com.flash3388.flashlib.math.Mathf;
+import com.flash3388.flashlib.robot.DelegatingRobot;
+import com.flash3388.flashlib.robot.IterativeRobot;
+import com.flash3388.flashlib.robot.Robot;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
@@ -17,20 +20,19 @@ import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
 import org.slf4j.Logger;
 
-public class Robot extends RobotBase {
+public class UserRobot extends DelegatingRobot implements IterativeRobot {
 
-    public Robot(Logger logger) { super(logger); }
+    private final OmniDriveSystem mDriveSystem;
+    private final SingleMotorSystem mShooter;
+    private final SingleMotorSystem mTurret;
+    private final Gyro mTurretGyro;
+    private final XboxController mController;
 
-    private OmniDriveSystem mDriveSystem;
-    private SingleMotorSystem mShooter;
-    private SingleMotorSystem mTurret;
-    private Gyro mTurretGyro;
-    private XboxController mController;
+    private final PidController mTurretPidController;
 
-    private PidController mTurretPidController;
+    public UserRobot(Robot robot) throws RobotInitializationException {
+        super(robot);
 
-    @Override
-    protected void robotInit() throws RobotInitializationException {
         mDriveSystem = new OmniDriveSystem(
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_FRONT)),
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_RIGHT)),
@@ -65,27 +67,32 @@ public class Robot extends RobotBase {
     }
 
     @Override
-    protected void robotPeriodic() {
+    public void robotPeriodic() {
 
     }
 
     @Override
-    protected void disabledInit() {
+    public void robotStop() {
 
     }
 
     @Override
-    protected void disabledPeriodic() {
+    public void disabledInit() {
 
     }
 
     @Override
-    protected void modeInit(RobotMode mode) {
+    public void disabledPeriodic() {
 
     }
 
     @Override
-    protected void modePeriodic(RobotMode mode) {
+    public void modeInit(RobotMode mode) {
+
+    }
+
+    @Override
+    public void modePeriodic(RobotMode mode) {
 
     }
 

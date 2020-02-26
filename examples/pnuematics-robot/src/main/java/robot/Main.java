@@ -10,6 +10,6 @@ public class Main {
         Logger logger = new LoggerBuilder("robot")
                 .build();
 
-        RobotMain.start(Robot::new, logger);
+        RobotMain.start(RobotBase::new, logger);
     }
 }

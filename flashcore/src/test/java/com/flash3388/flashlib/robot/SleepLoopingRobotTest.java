@@ -30,13 +30,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class IterativeRobotTest {
+public class SleepLoopingRobotTest {
 
     private ExecutorService mExecutorService;
     private Closer mCloser;
 
     private Scheduler mScheduler;
-    private IterativeRobot mIterativeRobot;
+    private SleepLoopingRobot mSleepLoopingRobot;
+    private IterativeRobot mRobot;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -51,12 +52,13 @@ public class IterativeRobotTest {
         Clock clock = mock(Clock.class);
         when(clock.currentTime()).thenReturn(Time.milliseconds(1));
 
-        mIterativeRobot = spy(new FakeIterativeRobot(mScheduler, logger, mock(Sleeper.class), clock));
+        mRobot = mock(IterativeRobot.class);
+        mSleepLoopingRobot = spy(new FakeSleepLoopingRobot(mRobot, mScheduler, logger, mock(Sleeper.class), clock));
     }
 
     @AfterEach
     public void tearDown() throws Exception {
-        mIterativeRobot.robotShutdown();
+        mSleepLoopingRobot.robotShutdown();
         mCloser.close();
     }
 
@@ -68,9 +70,9 @@ public class IterativeRobotTest {
 
         runLatch.await();
 
-        InOrder inOrder = Mockito.inOrder(mIterativeRobot);
-        inOrder.verify(mIterativeRobot, times(1)).disabledInit();
-        inOrder.verify(mIterativeRobot, times(2)).disabledPeriodic();
+        InOrder inOrder = Mockito.inOrder(mRobot);
+        inOrder.verify(mRobot, times(1)).disabledInit();
+        inOrder.verify(mRobot, times(2)).disabledPeriodic();
     }
 
     @Test
@@ -83,9 +85,9 @@ public class IterativeRobotTest {
 
         runLatch.await();
 
-        InOrder inOrder = Mockito.inOrder(mIterativeRobot);
-        inOrder.verify(mIterativeRobot, times(1)).modeInit(eq(MODE));
-        inOrder.verify(mIterativeRobot, times(2)).modePeriodic(eq(MODE));
+        InOrder inOrder = Mockito.inOrder(mRobot);
+        inOrder.verify(mRobot, times(1)).modeInit(eq(MODE));
+        inOrder.verify(mRobot, times(2)).modePeriodic(eq(MODE));
     }
 
     @Test
@@ -99,11 +101,11 @@ public class IterativeRobotTest {
 
         runLatch.await();
 
-        InOrder inOrder = Mockito.inOrder(mIterativeRobot);
-        inOrder.verify(mIterativeRobot, times(1)).modeInit(eq(STARTING_MODE));
-        inOrder.verify(mIterativeRobot, times(1)).modePeriodic(eq(STARTING_MODE));
-        inOrder.verify(mIterativeRobot, times(1)).modeInit(eq(OTHER_MODE));
-        inOrder.verify(mIterativeRobot, times(1)).modePeriodic(eq(OTHER_MODE));
+        InOrder inOrder = Mockito.inOrder(mRobot);
+        inOrder.verify(mRobot, times(1)).modeInit(eq(STARTING_MODE));
+        inOrder.verify(mRobot, times(1)).modePeriodic(eq(STARTING_MODE));
+        inOrder.verify(mRobot, times(1)).modeInit(eq(OTHER_MODE));
+        inOrder.verify(mRobot, times(1)).modePeriodic(eq(OTHER_MODE));
     }
 
     @Test
@@ -120,11 +122,11 @@ public class IterativeRobotTest {
     }
 
     private void mockRobotInMode(RobotMode mode) throws Exception {
-        when(mIterativeRobot.getMode()).thenReturn(mode);
+        when(mSleepLoopingRobot.getMode()).thenReturn(mode);
     }
 
     private void mockRobotSwitchMode(RobotMode originalMode, RobotMode newMode) throws Exception {
-        when(mIterativeRobot.getMode())
+        when(mSleepLoopingRobot.getMode())
                 .thenReturn(originalMode)
                 .thenReturn(newMode);
     }
@@ -135,26 +137,33 @@ public class IterativeRobotTest {
         doAnswer(invocation -> {
             runsLatch.countDown();
             if (runsLatch.getCount() == 0) {
-                mIterativeRobot.stopRobotLoop();
+                mSleepLoopingRobot.stopRobotLoop();
             }
             return null;
-        }).when(mIterativeRobot).robotPeriodic();
+        }).when(mRobot).robotPeriodic();
 
         return runsLatch;
     }
 
     private void runRobotLoop() throws Exception {
-        mExecutorService.execute(()-> mIterativeRobot.robotMain());
+        mExecutorService.execute(()-> {
+            try {
+                mSleepLoopingRobot.robotInit();
+                mSleepLoopingRobot.robotMain();
+            } catch (RobotInitializationException e) {
+                throw new Error(e);
+            }
+        });
     }
 
-    private static class FakeIterativeRobot extends IterativeRobot {
+    private static class FakeSleepLoopingRobot extends SleepLoopingRobot {
 
         private final Scheduler mScheduler;
         private final Logger mLogger;
         private final Clock mClock;
 
-        private FakeIterativeRobot(Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
-            super(sleeper);
+        private FakeSleepLoopingRobot(IterativeRobot robot, Scheduler scheduler, Logger logger, Sleeper sleeper, Clock clock) {
+            super((r)-> robot, sleeper);
 
             mScheduler = scheduler;
             mLogger = logger;
@@ -189,36 +198,6 @@ public class IterativeRobotTest {
         @Override
         public Logger getLogger() {
             return mLogger;
-        }
-
-        @Override
-        protected void robotInit() throws RobotInitializationException {
-
-        }
-
-        @Override
-        protected void robotPeriodic() {
-
-        }
-
-        @Override
-        protected void disabledInit() {
-
-        }
-
-        @Override
-        protected void disabledPeriodic() {
-
-        }
-
-        @Override
-        protected void modeInit(RobotMode mode) {
-
-        }
-
-        @Override
-        protected void modePeriodic(RobotMode mode) {
-
         }
     }
 }
