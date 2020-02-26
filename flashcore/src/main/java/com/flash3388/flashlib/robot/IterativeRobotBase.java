@@ -43,6 +43,7 @@ public abstract class IterativeRobotBase extends RobotBase {
         getLogger().trace("Initializing mode {}", mode);
 
         if (mode.isDisabled()) {
+            getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
             disabledInit();
         } else {
             modeInit(mode);
