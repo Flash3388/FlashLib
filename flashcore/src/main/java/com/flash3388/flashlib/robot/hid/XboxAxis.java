@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.hid.xbox;
+package com.flash3388.flashlib.robot.hid;
 
 public enum XboxAxis {
     LeftStickX(0),

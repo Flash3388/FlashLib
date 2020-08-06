@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.scheduling.triggers;
 import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.robot.scheduling.Requirement;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.robot.scheduling.Trigger;
 import com.flash3388.flashlib.robot.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.robot.scheduling.triggers.handlers.RunOnState;
@@ -13,25 +14,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BooleanSupplier;
 
-public class Trigger implements Requirement {
+public class SchedulerTrigger implements Trigger, Requirement {
 
     private final Scheduler mScheduler;
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
     private Action mUpdateAction;
 
-    public Trigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners, TriggerState currentState) {
+    public SchedulerTrigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners, TriggerState currentState) {
         mScheduler = scheduler;
         mTriggerStateListeners = triggerStateListeners;
         mCurrentState = currentState;
         mUpdateAction = null;
     }
 
-    public Trigger(TriggerState currentState) {
+    public SchedulerTrigger(TriggerState currentState) {
         this(RunningRobot.getInstance().getScheduler(), new ArrayList<>(), currentState);
     }
 
-    public Trigger() {
+    public SchedulerTrigger() {
         this(TriggerState.INACTIVE);
     }
 
@@ -65,26 +66,27 @@ public class Trigger implements Requirement {
         mTriggerStateListeners.add(handler);
     }
 
+    @Override
     public void whenActive(Action action) {
         addStateListener(new StartOnState(TriggerState.ACTIVE, action));
     }
-
+    @Override
     public void cancelWhenActive(Action action) {
         addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
     }
-
+    @Override
     public void toggleWhenActive(Action action) {
         addStateListener(new ToggleOnState(TriggerState.ACTIVE, action));
     }
-
+    @Override
     public void whileActive(Action action) {
         addStateListener(new RunOnState(TriggerState.ACTIVE, action));
     }
-
+    @Override
     public void whenInactive(Action action) {
         addStateListener(new StartOnState(TriggerState.INACTIVE, action));
     }
-
+    @Override
     public void cancelWhenInactive(Action action) {
         addStateListener(new CancelOnState(TriggerState.INACTIVE, action));
     }

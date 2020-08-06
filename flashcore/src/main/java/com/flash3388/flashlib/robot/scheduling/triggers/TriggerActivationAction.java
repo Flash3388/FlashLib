@@ -8,9 +8,9 @@ import java.util.function.BooleanSupplier;
 public class TriggerActivationAction extends ActionBase {
 
     private final BooleanSupplier mCondition;
-    private final Trigger mTrigger;
+    private final SchedulerTrigger mTrigger;
 
-    public TriggerActivationAction(Scheduler scheduler, BooleanSupplier condition, Trigger trigger) {
+    public TriggerActivationAction(Scheduler scheduler, BooleanSupplier condition, SchedulerTrigger trigger) {
         super(scheduler);
         mCondition = condition;
         mTrigger = trigger;

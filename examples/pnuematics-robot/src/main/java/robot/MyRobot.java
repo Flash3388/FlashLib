@@ -3,8 +3,8 @@ package robot;
 import com.flash3388.flashlib.robot.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
-import com.flash3388.flashlib.robot.hid.xbox.XboxController;
+import com.flash3388.flashlib.robot.hid.XboxAxis;
+import com.flash3388.flashlib.robot.hid.XboxController;
 import com.flash3388.flashlib.robot.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.robot.io.devices.pneumatics.SolenoidGroup;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -28,7 +28,7 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID1),
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID2)));
 
-        mController = new XboxController(0);
+        mController = getHidInterface().newXboxController(RobotMap.MAIN_CONTROLLER);
 
         // default actions
         mShooter.setDefaultAction(new RotateAction(mShooter,
@@ -36,11 +36,10 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
                 .requires(mShooter));
 
         // hid actions
-        mController.getDPad().getUp().whenPressed(
-                new OpenPistonAction(mShooterDirector)
+        mController.getDpad().up().whenActive(new OpenPistonAction(mShooterDirector)
                     .requires(mShooterDirector, mShooter));
-        mController.getDPad().getDown().whenPressed(
-                new ClosePistonAction(mShooterDirector)
+
+        mController.getDpad().down().whenActive(new ClosePistonAction(mShooterDirector)
                         .requires(mShooterDirector, mShooter));
     }
 

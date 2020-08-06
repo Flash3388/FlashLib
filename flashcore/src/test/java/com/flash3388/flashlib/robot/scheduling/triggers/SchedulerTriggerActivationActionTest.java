@@ -10,13 +10,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class TriggerActivationActionTest {
+public class SchedulerTriggerActivationActionTest {
 
     @Test
     public void execute_conditionNotMetLastAndIsMetNow_triggerActivates() throws Exception {
         RunningRobotMock.mockRobotWithDependencies();
 
-        Trigger trigger = mock(Trigger.class);
+        SchedulerTrigger trigger = mock(SchedulerTrigger.class);
         BooleanProperty condition = new SimpleBooleanProperty(false);
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
@@ -33,7 +33,7 @@ public class TriggerActivationActionTest {
     public void execute_conditionMetLastAndNotMetNow_triggerDeactivates() throws Exception {
         RunningRobotMock.mockRobotWithDependencies();
 
-        Trigger trigger = mock(Trigger.class);
+        SchedulerTrigger trigger = mock(SchedulerTrigger.class);
         BooleanProperty condition = new SimpleBooleanProperty(true);
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),

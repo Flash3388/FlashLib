@@ -1,86 +1,123 @@
 package com.flash3388.flashlib.robot.hid;
 
-/**
- * Interface for Human Interface Devices.
- * 
- * @author Tom Tzook
- * @since FlashLib 1.0.0
- */
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public interface Hid {
-	
-	/**
-	 * Gets the Hid channel number.
-     *
-	 * @return channel
-	 */
-	int getChannel();
 
-    /**
-     * Gets the axis object at the given index.
-     *
-     * @param axis axis index, from 0.
-     *
-     * @return axis
-     */
-	Axis getAxis(int axis);
+    Axis getAxis(int axis);
+    int getAxisCount();
+    Iterable<Axis> axes();
 
-    /**
-     * Gets the amount of axes on the interface device.
-     *
-     * @return the amount of axes.
-     */
-	int getAxisCount();
-
-    /**
-     * Axes on the interface device.
-     *
-     * @return {@link Iterable} object for iterating over the axes.
-     */
-	Iterable<Axis> axes();
-
-	/**
-	 * Gets the button object for the button at the given index.
-     *
-	 * @param button button index, from 0.
-     *
-	 * @return button
-	 */
-	Button getButton(int button);
-
-	/**
-	 * Gets the amount of buttons on the interface device.
-     *
-	 * @return the amount of buttons
-	 */
-	int getButtonCount();
-
-    /**
-     * Buttons on the interface device.
-     *
-     * @return {@link Iterable} object for iterating over the buttons.
-     */
+    Button getButton(int button);
+    int getButtonCount();
     Iterable<Button> buttons();
 
-	/**
-	 * Gets the Pov object at the given index.
-     *
-     * @param pov pov index, from 0.
-     *
-	 * @return Pov
-	 */
-	Pov getPov(int pov);
-
-    /**
-     * Gets the amount of POVs on the interface device.
-     *
-     * @return the amount of POVs.
-     */
-	int getPovCount();
-
-    /**
-     * sPOVs on the interface device.
-     *
-     * @return {@link Iterable} object for iterating over the povs.
-     */
+    Pov getPov(int pov);
+    int getPovCount();
     Iterable<Pov> povs();
+
+    class Builder {
+        private final Map<Integer, Axis> mAxes;
+        private final Map<Integer, Button> mButtons;
+        private final Map<Integer, Pov> mPovs;
+
+        public Builder() {
+            mAxes = new HashMap<>();
+            mButtons = new HashMap<>();
+            mPovs = new HashMap<>();
+        }
+
+        public Builder addAxis(int axisIndex, Axis axis) {
+            mAxes.put(axisIndex, axis);
+            return this;
+        }
+
+        public Builder addButton(int buttonIndex, Button button) {
+            mButtons.put(buttonIndex, button);
+            return this;
+        }
+
+        public Builder addPov(int povIndex, Pov pov) {
+            mPovs.put(povIndex, pov);
+            return this;
+        }
+
+        public Hid build() {
+            return new Custom(mAxes, mButtons, mPovs);
+        }
+    }
+
+    class Custom implements Hid {
+
+        private final Map<Integer, Axis> mAxes;
+        private final Map<Integer, Button> mButtons;
+        private final Map<Integer, Pov> mPovs;
+
+        public Custom(Map<Integer, Axis> axes, Map<Integer, Button> buttons, Map<Integer, Pov> povs) {
+            mAxes = new HashMap<>(axes);
+            mButtons = new HashMap<>(buttons);
+            mPovs = new HashMap<>(povs);
+        }
+
+        @Override
+        public Axis getAxis(int axis) {
+            if (!mAxes.containsKey(axis)) {
+                throw new IllegalArgumentException("Unknown axis " + axis);
+            }
+
+            return mAxes.get(axis);
+        }
+
+        @Override
+        public int getAxisCount() {
+            return mAxes.size();
+        }
+
+        @Override
+        public Iterable<Axis> axes() {
+            return Collections.unmodifiableCollection(mAxes.values());
+        }
+
+        @Override
+        public Button getButton(int button) {
+            if (!mButtons.containsKey(button)) {
+                throw new IllegalArgumentException("Unknown button " + button);
+            }
+
+            return mButtons.get(button);
+        }
+
+        @Override
+        public int getButtonCount() {
+            return mButtons.size();
+        }
+
+        @Override
+        public Iterable<Button> buttons() {
+            return Collections.unmodifiableCollection(mButtons.values());
+        }
+
+        @Override
+        public Pov getPov(int pov) {
+            if (!mPovs.containsKey(pov)) {
+                throw new IllegalArgumentException("Unknown pov " + pov);
+            }
+
+            return mPovs.get(pov);
+        }
+
+        @Override
+        public int getPovCount() {
+            return mPovs.size();
+        }
+
+        @Override
+        public Iterable<Pov> povs() {
+            return Collections.unmodifiableCollection(mPovs.values());
+        }
+    }
+
+
 }

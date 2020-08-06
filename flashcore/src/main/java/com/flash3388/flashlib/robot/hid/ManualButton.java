@@ -1,49 +1,55 @@
 package com.flash3388.flashlib.robot.hid;
 
 import com.beans.BooleanProperty;
+import com.flash3388.flashlib.robot.scheduling.triggers.SchedulerTrigger;
 
-/**
- * An extension of {@link Button} for manually control.
- * 
- * @author Tom Tzook
- * @since FlashLib 1.0.2
- */
-public class ManualButton extends SoftwareButton implements BooleanProperty {
+public class ManualButton extends SchedulerTrigger implements Button, BooleanProperty {
 
-	private boolean mIsDown;
-	private boolean mIsInverted;
+    private boolean mIsInverted;
 
-    @Override
-	public void setInverted(boolean isInverted) {
-		mIsInverted = isInverted;
-	}
+    public ManualButton() {
+        mIsInverted = false;
 
-	@Override
-	public boolean isInverted() {
-		return mIsInverted;
-	}
-
-	@Override
-	public boolean isDown() {
-		return mIsDown ^ mIsInverted;
-	}
-
-	public void setDown(boolean isDown) {
-        mIsDown = isDown;
-	}
-
-    @Override
-    public void setAsBoolean(boolean value) {
-        setDown(value);
+        schedule(this);
     }
 
     @Override
     public Boolean get() {
-        return isDown();
+        return getAsBoolean();
+    }
+
+    @Override
+    public boolean getAsBoolean() {
+        return isActive() ^ mIsInverted;
     }
 
     @Override
     public void set(Boolean value) {
-	    setDown(value != null ? value : false);
+        setAsBoolean(value != null && value);
+    }
+
+    @Override
+    public void setAsBoolean(boolean value) {
+        value ^= mIsInverted;
+
+        if (value == isActive()) {
+            return;
+        }
+
+        if (value) {
+            activate();
+        } else {
+            deactivate();
+        }
+    }
+
+    @Override
+    public void setInverted(boolean inverted) {
+        mIsInverted = inverted;
+    }
+
+    @Override
+    public boolean isInverted() {
+        return mIsInverted;
     }
 }

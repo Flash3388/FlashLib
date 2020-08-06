@@ -2,12 +2,12 @@ package robot;
 
 import com.flash3388.flashlib.math.Mathf;
 import com.flash3388.flashlib.robot.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
+import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.control.PidController;
-import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
-import com.flash3388.flashlib.robot.hid.xbox.XboxController;
+import com.flash3388.flashlib.robot.hid.XboxAxis;
+import com.flash3388.flashlib.robot.hid.XboxController;
 import com.flash3388.flashlib.robot.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.robot.io.devices.sensors.AnalogGyro;
 import com.flash3388.flashlib.robot.io.devices.sensors.Gyro;
@@ -42,7 +42,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         mTurret = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.TURRET_MOTOR)));
         mTurretGyro = new AnalogGyro(getIoInterface().newAnalogInput(RobotMap.TURRET_GYRO));
 
-        mController = new XboxController(0);
+        mController = getHidInterface().newXboxController(RobotMap.MAIN_CONTROLLER);
 
         mTurretPidController = new PidController(1.0, 0.2, 0.3, 0.0);
 
@@ -59,10 +59,10 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
                 .requires(mTurret));
 
         // hid actions
-        mController.getDPad().getUp().whenPressed(turretAngleRotationAction(0.0));
-        mController.getDPad().getRight().whenPressed(turretAngleRotationAction(90.0));
-        mController.getDPad().getDown().whenPressed(turretAngleRotationAction(180.0));
-        mController.getDPad().getLeft().whenPressed(turretAngleRotationAction(270.0));
+        mController.getDpad().up().whenActive(turretAngleRotationAction(0.0));
+        mController.getDpad().right().whenActive(turretAngleRotationAction(90.0));
+        mController.getDpad().down().whenActive(turretAngleRotationAction(180.0));
+        mController.getDpad().left().whenActive(turretAngleRotationAction(270.0));
     }
 
     @Override
