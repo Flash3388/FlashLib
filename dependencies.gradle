@@ -3,10 +3,10 @@ ext {
         return "com.google.code.gson:gson:2.8.5"
     }
     jmath = {
-        return "com.flash3388.util:jmath:1.0"
+        return "com.github.tomtzook:jmath:1.1.0"
     }
     javabeans = {
-        return "com.flash3388.util:javabeans:1.0"
+        return "com.github.tomtzook:javabeans:1.2.0"
     }
     castle = {
         return "com.github.tomtzook:castle:1.0.0"
