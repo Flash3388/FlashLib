@@ -2,9 +2,13 @@ package com.flash3388.flashlib.robot.base.iterative;
 
 import com.flash3388.flashlib.robot.BaseRobot;
 import com.flash3388.flashlib.robot.RobotInitializationException;
+import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
+import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.util.resources.ResourceHolder;
+import org.slf4j.Logger;
 
-public abstract class LoopingRobotControl implements BaseRobot {
+public class LoopingRobotControl extends GenericRobotControl implements BaseRobot {
 
     private final IterativeRobot.Initializer mRobotInitializer;
     private final RobotLooper mRobotLooper;
@@ -14,7 +18,9 @@ public abstract class LoopingRobotControl implements BaseRobot {
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
-    protected LoopingRobotControl(IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
+    public LoopingRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider,
+            IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
+        super(logger, resourceHolder, dependencyProvider);
         mRobotInitializer = robotInitializer;
         mRobotLooper = robotLooper;
 
@@ -23,8 +29,9 @@ public abstract class LoopingRobotControl implements BaseRobot {
         mWasCurrentModeInitialized = false;
     }
 
-    protected LoopingRobotControl(IterativeRobot.Initializer robotInitializer) {
-        this(robotInitializer, new RobotIntervalLooper());
+    public LoopingRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider,
+                                  IterativeRobot.Initializer robotInitializer) {
+        this(logger, resourceHolder, dependencyProvider, robotInitializer, new RobotIntervalLooper());
     }
 
     @Override

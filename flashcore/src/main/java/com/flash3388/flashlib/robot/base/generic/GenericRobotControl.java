@@ -1,11 +1,9 @@
-package robot;
+package com.flash3388.flashlib.robot.base.generic;
 
-import com.flash3388.flashlib.robot.RobotFactory;
-import com.flash3388.flashlib.robot.base.iterative.LoopingRobotControl;
+import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
 import com.flash3388.flashlib.robot.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.resources.Resource;
@@ -15,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class RobotControlBase extends LoopingRobotControl {
+public class GenericRobotControl implements RobotControl {
 
     private final Logger mLogger;
     private final ResourceHolder mResourceHolder;
@@ -25,17 +23,14 @@ public class RobotControlBase extends LoopingRobotControl {
     private final Scheduler mScheduler;
     private final Clock mClock;
 
-    protected RobotControlBase(Logger logger, ResourceHolder resourceHolder) {
-        super(MyRobot::new);
-
+    protected GenericRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider) {
         mLogger = logger;
         mResourceHolder = resourceHolder;
-
-        mRobotModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
-        mIoInterface = new IoInterface.Stub();
-        mHidInterface = new HidInterface.Stub();
-        mClock = RobotFactory.newDefaultClock();
-        mScheduler = RobotFactory.newDefaultScheduler(mClock, mLogger);
+        mRobotModeSupplier = dependencyProvider.getRobotModeSupplier();
+        mIoInterface = dependencyProvider.getIoInterface();
+        mHidInterface = dependencyProvider.getHidInterface();
+        mScheduler = dependencyProvider.getScheduler();
+        mClock = dependencyProvider.getClock();
     }
 
     @Override
