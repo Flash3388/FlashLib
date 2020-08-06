@@ -57,20 +57,27 @@ public class JpegStreamingTest {
         List<Image> resultImages = new ArrayList<>();
 
         Server server = createServer();
-        try (MjpegServer mjpegServer = server.mMjpegServer) {
+        MjpegServer mjpegServer = server.mMjpegServer;
+        try {
             mjpegServer.setCamera(CAMERA_NAME, CAMERA);
             mjpegServer.start();
 
-            try (MjpegClient mjpegClient = MjpegClient.create(new URL(String.format(CAMERA_CLIENT_URL_FORMAT, server.mPort, CAMERA_NAME)), mLogger)) {
-                CountDownLatch imageLatch = new CountDownLatch(1);
-
-                mjpegClient.start((image) -> {
-                    resultImages.add(image);
-                    imageLatch.countDown();
-                });
-
+            CountDownLatch imageLatch = new CountDownLatch(1);
+            MjpegClient mjpegClient = MjpegClient.create(
+                    new URL(String.format(CAMERA_CLIENT_URL_FORMAT, server.mPort, CAMERA_NAME)),
+                    (image) -> {
+                        resultImages.add(image);
+                        imageLatch.countDown();
+                    },
+                    mLogger);
+            try {
+                mjpegClient.start();
                 imageLatch.await(1, TimeUnit.MINUTES);
+            } finally {
+                mjpegClient.stop();
             }
+        } finally {
+            mjpegServer.stop();
         }
 
         List<Image> imageSnapshot = new ArrayList<>(resultImages);

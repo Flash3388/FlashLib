@@ -8,6 +8,9 @@ ext {
     javabeans = {
         return "com.flash3388.util:javabeans:1.0"
     }
+    castle = {
+        return "com.github.tomtzook:castle:1.0.0"
+    }
     slf4jApi = {
         return "org.slf4j:slf4j-api:1.7.25"
     }

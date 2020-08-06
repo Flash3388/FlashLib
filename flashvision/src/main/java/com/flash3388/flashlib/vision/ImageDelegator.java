@@ -1,5 +1,9 @@
 package com.flash3388.flashlib.vision;
 
+import com.castle.concurrent.service.PeriodicTaskService;
+import com.castle.concurrent.service.Service;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +28,26 @@ public class ImageDelegator<T extends Image> {
 
         for (ImagePipeline<? super T> pipeline : mImagePipelines) {
             pipeline.process(image);
+        }
+    }
+
+    private static class ImageDelegationTask<T extends Image> implements Runnable {
+
+        private final ImageDelegator<T> mImageDelegator;
+        private final Logger mLogger;
+
+        private ImageDelegationTask(ImageDelegator<T> imageDelegator, Logger logger) {
+            mImageDelegator = imageDelegator;
+            mLogger = logger;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mImageDelegator.delegate();
+            } catch (VisionException e) {
+                mLogger.error("error in image delegation", e);
+            }
         }
     }
 }

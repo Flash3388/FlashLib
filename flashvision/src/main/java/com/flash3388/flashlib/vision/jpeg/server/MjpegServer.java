@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.vision.jpeg.server;
 
+import com.castle.concurrent.service.SingleUseService;
 import com.flash3388.flashlib.io.Closer;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
-import com.flash3388.flashlib.util.flow.SingleUseRunner;
 import com.flash3388.flashlib.util.http.HttpServerCloser;
 import com.flash3388.flashlib.vision.camera.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MjpegServer extends SingleUseRunner {
+public class MjpegServer extends SingleUseService {
 
     private final HttpServer mServer;
     private final ExecutorService mExecutorService;
@@ -58,12 +58,12 @@ public class MjpegServer extends SingleUseRunner {
     }
 
     @Override
-    protected void startRunner() {
+    protected void startRunning() {
         mServer.start();
     }
 
     @Override
-    protected void stopRunner() {
+    protected void stopRunning() {
         mLogger.debug("Closing MJPEG Server");
         try (Closer closer = Closer.empty()){
             closer.add(new ExecutorCloser(mExecutorService));
