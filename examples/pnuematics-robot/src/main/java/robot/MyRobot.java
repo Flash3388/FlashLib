@@ -1,7 +1,7 @@
 package robot;
 
 import com.flash3388.flashlib.robot.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.base.IterativeRobot;
+import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.hid.xbox.XboxAxis;
 import com.flash3388.flashlib.robot.hid.xbox.XboxController;

@@ -1,8 +1,7 @@
-package com.flash3388.flashlib.robot.base.loop;
+package com.flash3388.flashlib.robot.base.iterative;
 
 import com.flash3388.flashlib.robot.BaseRobot;
 import com.flash3388.flashlib.robot.RobotInitializationException;
-import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
 public abstract class LoopingRobotControl implements BaseRobot {

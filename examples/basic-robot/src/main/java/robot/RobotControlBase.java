@@ -1,7 +1,7 @@
 package robot;
 
 import com.flash3388.flashlib.robot.RobotFactory;
-import com.flash3388.flashlib.robot.base.loop.LoopingRobotControl;
+import com.flash3388.flashlib.robot.base.iterative.LoopingRobotControl;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
