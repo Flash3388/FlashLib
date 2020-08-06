@@ -1,7 +1,7 @@
 package robot;
 
-import com.flash3388.flashlib.robot.IntervalLoopingRobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
+import com.flash3388.flashlib.robot.base.loop.LoopingRobotControl;
 import com.flash3388.flashlib.robot.hid.HidInterface;
 import com.flash3388.flashlib.robot.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
-public class RobotControlBase extends IntervalLoopingRobotControl {
+public class RobotControlBase extends LoopingRobotControl {
 
     private final Logger mLogger;
     private final Supplier<? extends RobotMode> mRobotModeSupplier;
@@ -23,6 +23,7 @@ public class RobotControlBase extends IntervalLoopingRobotControl {
 
     protected RobotControlBase(Logger logger) {
         super(MyRobot::new);
+
         mLogger = logger;
         mRobotModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
         mIoInterface = new IoInterface.Stub();

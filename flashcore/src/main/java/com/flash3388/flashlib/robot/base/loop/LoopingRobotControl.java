@@ -1,23 +1,31 @@
-package com.flash3388.flashlib.robot;
+package com.flash3388.flashlib.robot.base.loop;
 
+import com.flash3388.flashlib.robot.RobotControlBase;
+import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
 public abstract class LoopingRobotControl extends RobotControlBase {
 
     private final IterativeRobot.Initializer mRobotInitializer;
+    private final RobotLooper mRobotLooper;
 
     private IterativeRobot mRobot;
     private RobotMode mCurrentMode;
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
-    protected LoopingRobotControl(IterativeRobot.Initializer robotInitializer) {
+    protected LoopingRobotControl(IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
         mRobotInitializer = robotInitializer;
+        mRobotLooper = robotLooper;
 
         mCurrentMode = null;
         mLastMode = null;
         mWasCurrentModeInitialized = false;
+    }
+
+    protected LoopingRobotControl(IterativeRobot.Initializer robotInitializer) {
+        this(robotInitializer, new RobotIntervalLooper());
     }
 
     @Override
@@ -26,11 +34,15 @@ public abstract class LoopingRobotControl extends RobotControlBase {
     }
 
     @Override
+    protected final void robotMain() {
+        mRobotLooper.doLoop(getClock(), this::robotLoop);
+    }
+
+    @Override
     protected final void robotShutdown(){
-        stopRobotLoop();
+        mRobotLooper.stopLoop();
 
         getScheduler().cancelAllActions();
-
         mRobot.robotStop();
     }
 
@@ -75,6 +87,4 @@ public abstract class LoopingRobotControl extends RobotControlBase {
 
         mRobot.robotPeriodic();
     }
-
-    protected abstract void stopRobotLoop();
 }
