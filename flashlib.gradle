@@ -4,7 +4,6 @@ apply plugin: 'signing'
 def flashlibModules = [
         project('flashutil'),
         project('flashvision'),
-        project('flashcomm'),
         project('flashcore')
 ]
 
