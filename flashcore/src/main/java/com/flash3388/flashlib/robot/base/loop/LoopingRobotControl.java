@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.robot.base.loop;
 
-import com.flash3388.flashlib.robot.RobotControlBase;
+import com.flash3388.flashlib.robot.BaseRobot;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
-public abstract class LoopingRobotControl extends RobotControlBase {
+public abstract class LoopingRobotControl implements BaseRobot {
 
     private final IterativeRobot.Initializer mRobotInitializer;
     private final RobotLooper mRobotLooper;
@@ -29,17 +29,17 @@ public abstract class LoopingRobotControl extends RobotControlBase {
     }
 
     @Override
-    protected final void robotInit() throws RobotInitializationException {
+    public final void robotInit() throws RobotInitializationException {
         mRobot = mRobotInitializer.init(this);
     }
 
     @Override
-    protected final void robotMain() {
+    public final void robotMain() {
         mRobotLooper.doLoop(getClock(), this::robotLoop);
     }
 
     @Override
-    protected final void robotShutdown(){
+    public final void robotShutdown(){
         mRobotLooper.stopLoop();
 
         getScheduler().cancelAllActions();
