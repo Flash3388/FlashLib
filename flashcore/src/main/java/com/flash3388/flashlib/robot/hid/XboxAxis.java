@@ -17,4 +17,8 @@ public enum XboxAxis {
     public int axisIndex() {
         return mAxisIndex;
     }
+
+    public static int count() {
+        return values().length;
+    }
 }

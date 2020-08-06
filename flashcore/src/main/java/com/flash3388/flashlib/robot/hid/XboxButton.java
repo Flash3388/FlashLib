@@ -21,4 +21,8 @@ public enum XboxButton {
     public int buttonIndex() {
         return mButtonIndex;
     }
+
+    public static int count() {
+        return values().length;
+    }
 }
