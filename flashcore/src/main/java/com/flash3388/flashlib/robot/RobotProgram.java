@@ -37,15 +37,13 @@ public class RobotProgram {
     }
 
     private void runRobot() throws RobotInitializationException, RobotCreationException {
-        mLogger.debug("Creating user robot class");
-
         ResourceHolder resourceHolder = ResourceHolder.empty();
-        BaseRobot robot = mRobotCreator.create(mLogger, resourceHolder);
-
-        RunningRobot.setInstance(robot);
-
-        mLogger.debug("Initializing user robot");
         try {
+            mLogger.debug("Creating user robot class");
+            BaseRobot robot = mRobotCreator.create(mLogger, resourceHolder);
+            RunningRobot.setInstance(robot);
+
+            mLogger.debug("Initializing user robot");
             runRobot(robot);
         } finally {
             resourceHolder.freeAll();
