@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
-import com.flash3388.flashlib.robot.io.devices.actuators.SpeedController;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.io.devices.actuators.SpeedController;
+import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 
 public class TankDriveSystem extends Subsystem implements TankDrive {

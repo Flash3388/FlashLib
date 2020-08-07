@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.robot.hid.HidInterface;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 

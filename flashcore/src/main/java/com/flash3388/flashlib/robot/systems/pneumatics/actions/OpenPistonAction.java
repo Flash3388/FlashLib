@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.systems.pneumatics.actions;
 
-import com.flash3388.flashlib.robot.scheduling.actions.InstantAction;
+import com.flash3388.flashlib.scheduling.actions.InstantAction;
 import com.flash3388.flashlib.robot.systems.pneumatics.Piston;
 
 public class OpenPistonAction extends InstantAction {

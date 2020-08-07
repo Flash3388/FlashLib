@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.systems.pneumatics;
 
-import com.flash3388.flashlib.robot.io.devices.pneumatics.Solenoid;
-import com.flash3388.flashlib.robot.scheduling.Subsystem;
+import com.flash3388.flashlib.io.devices.pneumatics.Solenoid;
+import com.flash3388.flashlib.scheduling.Subsystem;
 
 public class SingleSolenoidSystem extends Subsystem implements Piston {
 

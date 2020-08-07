@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.robot.hid.HidInterface;
-import com.flash3388.flashlib.robot.io.IoInterface;
+import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.resources.CloseableResource;
 import com.flash3388.flashlib.util.resources.Resource;

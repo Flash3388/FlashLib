@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
-import com.flash3388.flashlib.robot.control.PidController;
+import com.flash3388.flashlib.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
-import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;

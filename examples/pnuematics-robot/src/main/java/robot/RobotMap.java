@@ -1,7 +1,7 @@
 package robot;
 
-import com.flash3388.flashlib.robot.hid.HidChannel;
-import com.flash3388.flashlib.robot.io.IoChannel;
+import com.flash3388.flashlib.hid.HidChannel;
+import com.flash3388.flashlib.io.IoChannel;
 
 public class RobotMap {
 

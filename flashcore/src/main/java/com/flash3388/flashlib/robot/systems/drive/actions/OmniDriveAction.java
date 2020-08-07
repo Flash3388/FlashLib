@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
-import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
 

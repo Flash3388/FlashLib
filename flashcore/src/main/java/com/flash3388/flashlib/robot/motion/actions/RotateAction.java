@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.motion.Rotatable;
-import com.flash3388.flashlib.robot.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
 import java.util.function.DoubleSupplier;
 
