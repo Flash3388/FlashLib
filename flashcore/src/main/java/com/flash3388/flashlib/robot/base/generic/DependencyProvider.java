@@ -65,7 +65,22 @@ public interface DependencyProvider {
         @Override
         public Supplier<? extends RobotMode> getRobotModeSupplier() {
             initializeIfNeeded();
-            return mDependencyHolder.get(Supplier.class);
+            Supplier<?> foundDependency = null;
+
+            for (Supplier<?> dependency : mDependencyHolder.getAll(Supplier.class)) {
+                Object value = dependency.get();
+                if (value instanceof RobotMode) {
+                    foundDependency = dependency;
+                    break;
+                }
+            }
+
+            if (foundDependency == null) {
+                throw new ClassCastException("Didn't find robotmode supplier");
+            }
+
+            //noinspection unchecked
+            return (Supplier<? extends RobotMode>) foundDependency;
         }
         @Override
         public IoInterface getIoInterface() {

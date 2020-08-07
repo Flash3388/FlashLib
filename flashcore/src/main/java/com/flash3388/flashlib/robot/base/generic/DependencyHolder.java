@@ -46,4 +46,17 @@ public class DependencyHolder {
 
         return Optional.of(type.cast(instance));
     }
+
+    public <T> Iterable<T> getAll(Class<T> type) {
+        Collection<T> dependencies = new ArrayList<>();
+        for (Object dependency : mDependencies) {
+            if (!type.isInstance(dependency)) {
+                continue;
+            }
+
+            dependencies.add(type.cast(dependency));
+        }
+
+        return dependencies;
+    }
 }
