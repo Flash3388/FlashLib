@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.vision.jpeg.client;
 
 import com.castle.concurrent.service.SingleUseService;
-import com.flash3388.flashlib.io.Closer;
+import com.castle.util.closeables.Closer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.http.HttpConnectionCloser;
 import com.flash3388.flashlib.vision.ImagePipeline;
@@ -65,7 +65,7 @@ public class MjpegClient extends SingleUseService {
             }
 
             closer.add(new ExecutorCloser(mExecutorService));
-        } catch (IOException e) {
+        } catch (Exception e) {
             mLogger.error("Error while closing client", e);
         }
     }

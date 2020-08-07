@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.vision.jpeg.server;
 
 import com.castle.concurrent.service.SingleUseService;
-import com.flash3388.flashlib.io.Closer;
+import com.castle.util.closeables.Closer;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.http.HttpServerCloser;
@@ -68,7 +68,7 @@ public class MjpegServer extends SingleUseService {
         try (Closer closer = Closer.empty()){
             closer.add(new ExecutorCloser(mExecutorService));
             closer.add(new HttpServerCloser(mServer));
-        } catch (IOException e) {
+        } catch (Exception e) {
             mLogger.error("Error while stopping server", e);
         }
     }
