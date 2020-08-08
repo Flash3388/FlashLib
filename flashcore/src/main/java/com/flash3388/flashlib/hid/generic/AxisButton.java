@@ -1,19 +1,19 @@
 package com.flash3388.flashlib.hid.generic;
 
+import com.flash3388.flashlib.hid.Axis;
+
 public class AxisButton extends GenericButtonBase {
 
-    private final RawHidInterface mInterface;
-    private final int mChannel;
-    private final int mAxis;
+    private final Axis mAxis;
     private final double mThreshold;
+    private final boolean mIsDirectional;
 
     private boolean mIsInverted;
 
-    public AxisButton(RawHidInterface anInterface, int channel, int axis, double threshold) {
-        mInterface = anInterface;
-        mChannel = channel;
+    public AxisButton(Axis axis, double threshold, boolean isDirectional) {
         mAxis = axis;
         mThreshold = threshold;
+        mIsDirectional = isDirectional;
 
         schedule(this);
 
@@ -32,7 +32,13 @@ public class AxisButton extends GenericButtonBase {
 
     @Override
     public boolean getAsBoolean() {
-        boolean value = Math.abs(mInterface.getAxisValue(mChannel, mAxis)) > mThreshold;
+        double axisValue = mAxis.getAsDouble();
+        boolean value = Math.abs(axisValue) > Math.abs(mThreshold);
+
+        if (mIsDirectional) {
+            value &= Math.signum(axisValue) == Math.signum(mThreshold);
+        }
+
         return value ^ mIsInverted;
     }
 }

@@ -36,7 +36,7 @@ public class LimitedAxis implements Axis {
     }
 
     @Override
-    public Button asButton(double threshold) {
-        return mAxis.asButton(threshold);
+    public Button asButton(double threshold, boolean isDirectional) {
+        return mAxis.asButton(threshold, isDirectional);
     }
 }

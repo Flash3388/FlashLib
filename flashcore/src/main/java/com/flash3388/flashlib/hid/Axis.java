@@ -11,5 +11,5 @@ public interface Axis extends DoubleSupplier, Invertable {
         return new LimitedAxis(this, valueThreshold, maxValue);
     }
 
-    Button asButton(double threshold);
+    Button asButton(double threshold, boolean isDirectional);
 }

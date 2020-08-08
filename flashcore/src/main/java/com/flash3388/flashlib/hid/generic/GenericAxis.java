@@ -20,8 +20,8 @@ public class GenericAxis implements Axis {
     }
 
     @Override
-    public Button asButton(double threshold) {
-        return null;
+    public Button asButton(double threshold, boolean isDirectional) {
+        return new AxisButton(this, threshold, isDirectional);
     }
 
     @Override
