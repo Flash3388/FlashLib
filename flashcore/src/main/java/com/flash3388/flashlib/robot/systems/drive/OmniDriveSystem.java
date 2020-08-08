@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
 import com.flash3388.flashlib.io.devices.actuators.SpeedController;
-import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
+import com.flash3388.flashlib.scheduling.Subsystem;
 import com.jmath.vectors.Vector2;
 
 public class OmniDriveSystem extends Subsystem implements OmniDrive {

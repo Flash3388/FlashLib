@@ -5,14 +5,11 @@ import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.resources.CloseableResource;
-import com.flash3388.flashlib.util.resources.Resource;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 
 public interface RobotControl {
@@ -83,18 +80,7 @@ public interface RobotControl {
 
     Logger getLogger();
 
-    void registerResources(Collection<? extends Resource> resources);
-
-    default void registerResources(Resource... resources) {
-        registerResources(Arrays.asList(resources));
-    }
-
-    default void registerCloseables(Collection<? extends AutoCloseable> closeables) {
-        Logger logger = getLogger();
-        registerResources(closeables.stream()
-                .map((c)->new CloseableResource(c, logger))
-                .collect(Collectors.toList()));
-    }
+    void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
     default void registerCloseables(AutoCloseable... closeables) {
         registerCloseables(Arrays.asList(closeables));

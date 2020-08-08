@@ -11,39 +11,39 @@ import static org.mockito.Mockito.verify;
 public class ResourceHolderTest {
 
     @Test
-    public void freeAll_resourcesAdded_allResourcesFreed() throws Exception {
-        Resource[] RESOURCES = {
-            mock(Resource.class),
-            mock(Resource.class)
+    public void freeAll_resourcesAdded_allResourcesFreed() throws Throwable {
+        AutoCloseable[] RESOURCES = {
+            mock(AutoCloseable.class),
+            mock(AutoCloseable.class)
         };
 
         ResourceHolder resourceHolder = ResourceHolder.with(RESOURCES);
         resourceHolder.freeAll();
 
-        for (Resource resource : RESOURCES) {
-            verify(resource, times(1)).free();
+        for (AutoCloseable resource : RESOURCES) {
+            verify(resource, times(1)).close();
         }
     }
 
     @Test
-    public void freeAll_unexpectedExceptionThrown_allResourcesFreed() throws Exception {
-        Resource[] RESOURCES = {
-                mock(Resource.class),
-                mock(Resource.class)
+    public void freeAll_unexpectedExceptionThrown_allResourcesFreed() throws Throwable {
+        AutoCloseable[] RESOURCES = {
+                mock(AutoCloseable.class),
+                mock(AutoCloseable.class)
         };
 
-        doThrow(new RuntimeException()).when(RESOURCES[0]).free();
+        doThrow(new RuntimeException()).when(RESOURCES[0]).close();
 
         ResourceHolder resourceHolder = ResourceHolder.with(RESOURCES);
         try {
             resourceHolder.freeAll();
             fail("expected exception");
-        } catch (RuntimeException e) {
+        } catch (Throwable t) {
             // expected
         }
 
-        for (Resource resource : RESOURCES) {
-            verify(resource, times(1)).free();
+        for (AutoCloseable resource : RESOURCES) {
+            verify(resource, times(1)).close();
         }
     }
 }

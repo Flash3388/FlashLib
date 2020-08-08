@@ -48,7 +48,11 @@ public class RobotProgram {
             mLogger.debug("Initializing user robot");
             runRobot(robot);
         } finally {
-            resourceHolder.freeAll();
+            try {
+                resourceHolder.freeAll();
+            }  catch (Throwable t) {
+                mLogger.warn("Resource close error", t);
+            }
         }
     }
 

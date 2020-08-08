@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
-import com.flash3388.flashlib.robot.base.BaseRobot;
 import com.flash3388.flashlib.robot.RobotInitializationException;
+import com.flash3388.flashlib.robot.base.BaseRobot;
 import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
 import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;

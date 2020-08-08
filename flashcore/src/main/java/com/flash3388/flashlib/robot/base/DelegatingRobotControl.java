@@ -6,7 +6,6 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.resources.Resource;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -51,7 +50,7 @@ public class DelegatingRobotControl implements RobotControl {
     }
 
     @Override
-    public void registerResources(Collection<? extends Resource> resources) {
-        mRobotControl.registerResources(resources);
+    public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
+        mRobotControl.registerCloseables(closeables);
     }
 }

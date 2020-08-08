@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
-import com.flash3388.flashlib.util.resources.Resource;
 
 import java.io.Closeable;
 import java.io.IOException;
