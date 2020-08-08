@@ -4,4 +4,5 @@ import java.util.function.IntSupplier;
 
 public interface Pov extends IntSupplier {
 
+    Button asButton();
 }

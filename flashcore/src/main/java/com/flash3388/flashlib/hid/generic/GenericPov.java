@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.hid.generic;
 
+import com.flash3388.flashlib.hid.Button;
 import com.flash3388.flashlib.hid.Pov;
 
 public class GenericPov implements Pov {
@@ -17,5 +18,10 @@ public class GenericPov implements Pov {
     @Override
     public int getAsInt() {
         return mInterface.getPovValue(mChannel, mPov);
+    }
+
+    @Override
+    public Button asButton() {
+        return new PovButton(mInterface, mChannel, mPov, PovRange.FULL);
     }
 }
