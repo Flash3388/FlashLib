@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation project(':flashcore')
+    implementation project(':flashlib.core.robot')
 }
 
 mainClassName = 'robot.Main'

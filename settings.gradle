@@ -1,7 +1,10 @@
 rootProject.name = 'flashlib'
 
-include 'flashcore'
-include 'flashutil'
-include 'flashvision'
+include 'flashlib.core'
+include 'flashlib.core.io'
+include 'flashlib.core.robot'
+
+include 'flashlib.vision.core'
+
 include 'examples:basic-robot'
 include 'examples:pnuematics-robot'

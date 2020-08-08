@@ -2,9 +2,10 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 def flashlibModules = [
-        project('flashutil'),
-        project('flashvision'),
-        project('flashcore')
+        project('flashlib.core'),
+        project('flashlib.core.io'),
+        project('flashlib.core.robot'),
+        project('flashlib.vision.core')
 ]
 
 flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }

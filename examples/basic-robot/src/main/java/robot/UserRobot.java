@@ -5,7 +5,7 @@ import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
-import com.flash3388.flashlib.control.PidController;
+import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.hid.XboxAxis;
 import com.flash3388.flashlib.hid.XboxController;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
