@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
-import com.flash3388.flashlib.util.resources.Resource;
+import java.io.Closeable;
 
 /**
  * Interface for gyroscope sensors. Gyroscope sensors measure angular rotation and are used to measure
@@ -9,7 +9,7 @@ import com.flash3388.flashlib.util.resources.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Gyro extends Resource {
+public interface Gyro extends Closeable {
 	
 	/**
 	 * Resets the sensor values.

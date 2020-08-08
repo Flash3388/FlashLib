@@ -4,6 +4,8 @@ import com.flash3388.flashlib.io.Counter;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
+import java.io.IOException;
+
 /**
  * Pulse based encoder sensor.
  * 
@@ -163,9 +165,9 @@ public class PulseEncoder implements Encoder {
 	 * Releases the pulse counter object used.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if(mCounter != null) {
-			mCounter.free();
+			mCounter.close();
 			mCounter = null;
 		}
 	}

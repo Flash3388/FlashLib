@@ -1,7 +1,11 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
+import com.castle.util.closeables.Closer;
+import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.io.Counter;
 import com.flash3388.flashlib.io.DigitalOutput;
+
+import java.io.IOException;
 
 /**
  * Control class for an ultrasonic range finder sensor. Range finders are sensors used to measure distances between
@@ -46,17 +50,25 @@ public class Ultrasonic implements RangeFinder {
 	 * Releases both the counter and the ping channel.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
+        Closer closer = Closer.empty();
+
 		if (mCounter != null) {
-			mCounter.free();
-			mCounter = null;
+			closer.add(mCounter);
+            mCounter = null;
 		}
 
 		if (mPingPort != null) {
-			mPingPort.free();
-			mPingPort = null;
+			closer.add(mPingPort);
+            mPingPort = null;
 		}
-	}
+
+        try {
+            closer.close();
+        } catch (Exception e) {
+            Throwables.throwAsType(e, IOException.class, IOException::new);
+        }
+    }
 	
 	/**
 	 * Sends a pulse to the ultrasonic sending our a sound wave.

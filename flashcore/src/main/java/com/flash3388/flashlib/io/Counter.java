@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.io;
 
-import com.flash3388.flashlib.util.resources.Resource;
+import java.io.Closeable;
 
 /**
  * Interface for a pulse counter. A pulse counter is used to
@@ -12,7 +12,7 @@ import com.flash3388.flashlib.util.resources.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.0.2
  */
-public interface Counter extends Resource {
+public interface Counter extends Closeable {
 
 	/**
 	 * Resets the counter, setting the pulse count to zero.

@@ -3,6 +3,7 @@ package com.flash3388.flashlib.io.devices.sensors;
 import com.flash3388.flashlib.io.AnalogAccumulator;
 import com.flash3388.flashlib.io.AnalogInput;
 
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -174,9 +175,9 @@ public class AnalogGyro implements Gyro {
 	 * Releases the analog input port.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if (mInputPort != null) {
-			mInputPort.free();
+			mInputPort.close();
 			mInputPort = null;
 			mAccumulator = null;
 		}

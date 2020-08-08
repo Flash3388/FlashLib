@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
-import com.flash3388.flashlib.util.resources.Resource;
-
+import java.io.Closeable;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -12,7 +11,7 @@ import java.util.function.DoubleSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface RangeFinder extends Resource, DoubleSupplier {
+public interface RangeFinder extends Closeable, DoubleSupplier {
 
 	/**
 	 * Gets the distance measured by the sensor in centimeters. 

@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
-import com.flash3388.flashlib.util.resources.Resource;
+import java.io.Closeable;
 
 /**
  * Interface for accelerometer sensors. Accelerometers are used for measuring acceleration of the robot.
@@ -8,7 +8,7 @@ import com.flash3388.flashlib.util.resources.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Accelerometer extends Resource {
+public interface Accelerometer extends Closeable {
 	/**
 	 * Gets the x-axis acceleration
 	 * @return acceleration along the x-axis

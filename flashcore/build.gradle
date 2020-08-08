@@ -5,4 +5,5 @@ dependencies {
     api project(':flashutil')
     api javabeans()
     api jmath()
+    api castle()
 }

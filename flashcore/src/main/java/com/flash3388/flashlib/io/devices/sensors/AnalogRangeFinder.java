@@ -2,6 +2,8 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
 
+import java.io.IOException;
+
 /**
  * Control class for an analog range finder sensor. Range finders are sensors used to measure distances between
  * them and an object in front of them. There are several ways range finders measure distances, for example: sound waves,
@@ -41,9 +43,9 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * Releases the analog input port.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if(mInput != null) {
-			mInput.free();
+			mInput.close();
 			mInput = null;
 		}
 	}

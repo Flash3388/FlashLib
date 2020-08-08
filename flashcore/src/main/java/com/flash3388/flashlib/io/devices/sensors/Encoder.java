@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
-import com.flash3388.flashlib.util.resources.Resource;
+import java.io.Closeable;
 
 /**
  * Interface for relative encoder sensors. Relative encoders measure the rotation of wheels axes and are used to get the 
@@ -13,7 +13,7 @@ import com.flash3388.flashlib.util.resources.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Encoder extends Resource {
+public interface Encoder extends Closeable {
 	
 	/**
 	 * Resets the encoder. 

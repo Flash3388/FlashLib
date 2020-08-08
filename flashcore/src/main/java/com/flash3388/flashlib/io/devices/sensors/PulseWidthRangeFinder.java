@@ -2,6 +2,8 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.Counter;
 
+import java.io.IOException;
+
 /**
  * Control class for a pulse width range finder sensor. Range finders are sensors used to measure distances between
  * them and an object in front of them. There are several ways range finders measure distances, for example: sound waves,
@@ -81,9 +83,9 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * Releases the pulse counter object used.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if (mCounter != null) {
-			mCounter.free();
+			mCounter.close();
 			mCounter = null;
 		}
 	}

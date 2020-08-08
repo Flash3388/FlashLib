@@ -20,7 +20,8 @@ public class Talon extends PwmSpeedController {
 	 */
 	public Talon(Pwm port) {
 		super(port,
-                new PwmBounds(2.037, 1.539, 1.513, 1.487, 0.989, false),
+                new PwmBounds(2.037, 1.539, 1.513,
+                        1.487, 0.989, false),
                 333.0);
 	}
 }

@@ -3,6 +3,8 @@ package com.flash3388.flashlib.io.devices.sensors;
 import com.flash3388.flashlib.io.AnalogInput;
 import com.flash3388.flashlib.util.resources.Resource;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -18,7 +20,7 @@ import java.util.function.DoubleSupplier;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class AnalogAccelerometer implements Resource, DoubleSupplier {
+public class AnalogAccelerometer implements Closeable, DoubleSupplier {
 
 	private static final double DEFAULT_SENSITIVITY = 1.0;
 	private static final double DEFAULT_ZERO_VOLTAGE = 2.5;
@@ -63,9 +65,9 @@ public class AnalogAccelerometer implements Resource, DoubleSupplier {
 	 * Releases the analog input port.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if(mInput != null) {
-			mInput.free();
+			mInput.close();
 			mInput = null;
 		}
 	}

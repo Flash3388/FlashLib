@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
-import com.flash3388.flashlib.util.resources.Resource;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Control class for Pwm-controlled electronic devices. This class should be extended by electronic devices who use
@@ -10,7 +12,7 @@ import com.flash3388.flashlib.util.resources.Resource;
  * @author Tom Tzook
  * @since FlashLib 1.2.0
  */
-public class PwmController implements Resource {
+public class PwmController implements Closeable {
 
 	private Pwm mPort;
 	private final PwmBounds mBounds;
@@ -48,9 +50,9 @@ public class PwmController implements Resource {
 	 * Releases the Pwm port used.
 	 */
 	@Override
-	public void free() {
+	public void close() throws IOException {
 		if (mPort != null) {
-			mPort.free();
+			mPort.close();
 			mPort = null;
 		}
 	}
