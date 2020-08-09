@@ -1,10 +1,14 @@
 package com.flash3388.flashlib.robot.modes;
 
-public interface RobotMode {
+import com.flash3388.flashlib.scheduling.SchedulerMode;
+
+public interface RobotMode extends SchedulerMode {
     RobotMode DISABLED = create("DISABLED", 0, true);
 
     String getName();
     int getKey();
+
+    @Override
     boolean isDisabled();
 
     default boolean equals(RobotMode other) {
