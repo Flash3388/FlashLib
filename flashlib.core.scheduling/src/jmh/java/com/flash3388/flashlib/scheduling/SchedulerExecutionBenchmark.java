@@ -2,7 +2,6 @@ package com.flash3388.flashlib.scheduling;
 
 import com.beans.Property;
 import com.beans.properties.SimpleProperty;
-import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.TestActionParams;
 import com.flash3388.flashlib.scheduling.actions.TestActions;
@@ -22,7 +21,7 @@ import java.util.stream.IntStream;
 @State(Scope.Thread)
 public class SchedulerExecutionBenchmark {
 
-    private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
+    private static final SchedulerMode SCHEDULER_MODE = new SchedulerModeImpl(false);
 
     private final Property<Blackhole> mBlackholeProperty = new SimpleProperty<>();
 
@@ -48,7 +47,7 @@ public class SchedulerExecutionBenchmark {
                 .mapToObj((i) -> mActionType.create(new TestActionParams(mScheduler, consumer)))
                 .forEach(Action::start);
         // to start running the actions
-        mScheduler.run(ROBOT_MODE);
+        mScheduler.run(SCHEDULER_MODE);
     }
 
     @Benchmark
@@ -56,6 +55,6 @@ public class SchedulerExecutionBenchmark {
     public void run_withSpecificLoad_iterationThroughput(Blackhole blackhole) throws Exception {
         mBlackholeProperty.set(blackhole);
 
-        mScheduler.run(ROBOT_MODE);
+        mScheduler.run(SCHEDULER_MODE);
     }
 }

@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.EmptyAction;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -15,7 +14,7 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Thread)
 public class SchedulerStartBenchmark {
 
-    private static final RobotMode ROBOT_MODE = RobotMode.create("test", 1);
+    private static final SchedulerMode SCHEDULER_MODE = new SchedulerModeImpl(false);
 
     @Param({"SINGLE_THREAD"})
     private SchedulerImpl mSchedulerImpl;
@@ -31,7 +30,7 @@ public class SchedulerStartBenchmark {
         mAction = new EmptyAction(mScheduler);
         mConflictState.generateConflicts(mScheduler, mAction);
 
-        mScheduler.run(ROBOT_MODE);
+        mScheduler.run(SCHEDULER_MODE);
     }
 
     @Benchmark
@@ -44,7 +43,7 @@ public class SchedulerStartBenchmark {
     @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
     public void startActionAndIterate_withEmptyAction_withConflictState() {
         mAction.start();
-        mScheduler.run(ROBOT_MODE);
+        mScheduler.run(SCHEDULER_MODE);
     }
 
     public enum ConflictState {

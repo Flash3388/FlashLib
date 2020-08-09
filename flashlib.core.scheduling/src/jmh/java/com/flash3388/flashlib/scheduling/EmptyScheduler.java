@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.util.Optional;
@@ -44,7 +43,7 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void run(RobotMode robotMode) {
+    public void run(SchedulerMode mode) {
 
     }
 }
