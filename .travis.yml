@@ -3,7 +3,7 @@ language: java
 install:
   - "./gradlew clean"
   - "./gradlew assemble"
-  - "./gradlew flashlibAll"
+  - "./gradlew flashlib"
 
 jdk:
   - openjdk8
@@ -38,7 +38,9 @@ deploy:
     api_key:
       secure: YYgG8TieQ9qBjLyHX1p+MxJBP2YoCUoJvrVi0VpikZyvODb6LF+S9WF5Yiy1swFPvfQOzcoU1Goij7NSJQbzQ+a0a4DKMOGGfz+M6cwNSrRmvGJC58XMIQP6c9rk5Q+hQIEU7FTfxbKQruy4h8tr5dohts0c5/N1s8kOxiQzDRhiuo2r083xdvV340UUjw3wum3hwogP2GurB9PeHCdd9CRJ9XIWpqXT4MIbySFapZr1CkpE/5nTsmGuKKwAX6l5J58TOKed+EDaOdmBBnBBl1tetvt08XSlHn8NiGAQjXGCPYrZl7t/BvExbmARytd72aw7HWNHuSlPiJP5XZHK4kx8zp5Na07P2pkFfHDV8gySPQmOp+DK78hBVPG67dO8zKVdZVtwGWskZuLApBbSPjsAUvtJH86uFqN76+p7Y3FNmZg6amOcWZVoaCNHuxuNZqgCylxAEu8AeQbuUHQUdAyO8CJVlKMG2CJfJOVWaRDcESQwWhkoBjb4ilEfdD6Y6N+psZUl+9P3gwr5HASbcGxLa1vjWJh1e7QBUNBNNZbOREXWy5ViUqy03hdaEslOA/mKDK9ImxUs/erVJunAZHU/gCrmxkQkGx18uTMHZkJOh8yg7PI65EZad5EViwBAVeH6om42OOxptw/cOigFsMKi7P2KgJ6Qv7oeoGYykN0=
     file:
-      - build/flashlib-all.jar
+      - build/flashlib.jar
+      - build/flashlib-sources.jar
+      - build/flashlib-javadoc.jar
       - README.md
     skip_cleanup: true
     draft: true

@@ -3,17 +3,18 @@ apply plugin: 'signing'
 
 def flashlibModules = [
         project('flashlib.core'),
+        project('flashlib.core.hid'),
         project('flashlib.core.io'),
         project('flashlib.core.robot'),
+        project('flashlib.core.scheduling'),
         project('flashlib.vision.core')
 ]
 
 flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }
 
 task flashlibSources(type: Jar, dependsOn: flashlibModules.classes) {
-    archiveBaseName.set('flashlib')
+    archiveFileName.set('flashlib-sources.jar')
     destinationDirectory.set(rootProject.buildDir)
-    archiveClassifier.set('sources')
 
     from files(flashlibModules.collect {
         it.sourceSets.main.allSource
@@ -21,9 +22,8 @@ task flashlibSources(type: Jar, dependsOn: flashlibModules.classes) {
 }
 
 task flashlibJavadoc(type: Jar, dependsOn: flashlibModules.javadoc) {
-    archiveBaseName.set('flashlib')
+    archiveFileName.set('flashlib-javadoc.jar')
     destinationDirectory.set(rootProject.buildDir)
-    archiveClassifier.set('javadoc')
 
     from files(flashlibModules.collect {
         it.javadoc.destinationDir
@@ -34,117 +34,10 @@ task flashlib(type: Jar, dependsOn: flashlibModules.assemble) {
     dependsOn flashlibSources
     dependsOn flashlibJavadoc
 
-    archiveBaseName.set('flashlib')
+    archiveFileName.set('flashlib.jar')
     destinationDirectory.set(rootProject.buildDir)
 
     from files(flashlibModules.collect {
         it.sourceSets.main.output
     })
-}
-
-task flashlibAll(type: Jar, dependsOn: flashlib) {
-    dependsOn flashlibSources
-    dependsOn flashlibJavadoc
-
-    archiveFileName.set('flashlib-all.jar')
-    destinationDirectory.set(rootProject.buildDir)
-
-    from files(flashlibModules.collect {
-        it.sourceSets.main.output
-    })
-    from files(flashlibModules.collect {
-        it.sourceSets.main.allSource
-    })
-    from files(flashlibModules.collect {
-        it.javadoc.destinationDir
-    })
-}
-
-publishing {
-    publications {
-        mavenFlashlib(MavenPublication) {
-            artifactId = 'flashlib'
-
-            artifact flashlib
-            artifact flashlibJavadoc
-            artifact flashlibSources
-
-            pom {
-                name = 'Flashlib'
-                description = 'Robotics development framework'
-                url = POM_URL
-
-                licenses {
-                    license {
-                        name = POM_LICENSE_NAME
-                        url = POM_LICENSE_URL
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = POM_DEVELOPER_ID
-                        name = POM_DEVELOPER_NAME
-                        email = POM_DEVELOPER_MAIL
-                    }
-                }
-
-                scm {
-                    connection = POM_SCM_CONNECTION
-                    developerConnection = POM_SCM_DEV_CONNECTION
-                    url = POM_URL
-                }
-
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-                    def allDependencies = []
-
-                    flashlibModules.each { project ->
-                        allDependencies.addAll(project.configurations.runtimeClasspath.allDependencies.withType(ExternalDependency))
-                        allDependencies.addAll(project.configurations.compileClasspath.allDependencies.withType(ExternalDependency))
-                    }
-
-                    def comparator = [
-                            compare: { first, second ->
-                                if (first.group != second.group)
-                                    return first.group.compareTo(second.group)
-                                else
-                                    return first.name.compareTo(second.name)
-                            }
-                    ] as Comparator
-
-                    allDependencies.collect().unique(comparator).each { dep ->
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', dep.group)
-                        dependencyNode.appendNode('artifactId', dep.name)
-                        dependencyNode.appendNode('version', dep.version)
-                        dependencyNode.appendNode('scope', 'compile')
-                    }
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            if (isReleaseBuild()) {
-                name = 'NexusStaging'
-                url = NEXUS_RELEASE_REPOSITORY_URL
-            } else {
-                name = 'NexusSnapshot'
-                url = NEXUS_SNAPSHOT_REPOSITORY_URL
-            }
-
-            credentials {
-                username getNexusUsername()
-                password getNexusPassword()
-            }
-        }
-    }
-}
-
-if (shouldSign()) {
-    signing {
-        sign publishing.publications.mavenFlashlib
-    }
 }

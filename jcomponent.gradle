@@ -1,5 +1,9 @@
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
 apply from: rootProject.file('dependencies.gradle')
+apply from: rootProject.file('extras.gradle')
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -40,3 +44,64 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 build.finalizedBy sourcesJar, javadocJar
+
+publishing {
+    publications {
+        mavenFlashlib(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = project.name
+                description = "Robotics development framework (${project.name})"
+                url = POM_URL
+
+                licenses {
+                    license {
+                        name = POM_LICENSE_NAME
+                        url = POM_LICENSE_URL
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_MAIL
+                    }
+                }
+
+                scm {
+                    connection = POM_SCM_CONNECTION
+                    developerConnection = POM_SCM_DEV_CONNECTION
+                    url = POM_URL
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            if (isReleaseBuild()) {
+                name = 'NexusStaging'
+                url = NEXUS_RELEASE_REPOSITORY_URL
+            } else {
+                name = 'NexusSnapshot'
+                url = NEXUS_SNAPSHOT_REPOSITORY_URL
+            }
+
+            credentials {
+                username getNexusUsername()
+                password getNexusPassword()
+            }
+        }
+    }
+}
+
+if (shouldSign()) {
+    signing {
+        sign publishing.publications.mavenFlashlib
+    }
+}
