@@ -1,12 +1,12 @@
 package com.flash3388.flashlib.vision.processing.color;
 
-public class ColorSettings {
+public class HsvColorSettings {
 
     private final ColorRange mHue;
     private final ColorRange mSaturation;
     private final ColorRange mValue;
 
-    public ColorSettings(ColorRange hue, ColorRange saturation, ColorRange value) {
+    public HsvColorSettings(ColorRange hue, ColorRange saturation, ColorRange value) {
         mHue = hue;
         mSaturation = saturation;
         mValue = value;
