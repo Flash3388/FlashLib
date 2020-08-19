@@ -10,3 +10,4 @@ include 'flashlib.vision.core'
 
 include 'examples:basic-robot'
 include 'examples:pnuematics-robot'
+include 'examples:basic-vision'

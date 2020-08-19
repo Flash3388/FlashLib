@@ -3,7 +3,7 @@ package com.flash3388.flashlib.vision.jpeg.server;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.VisionException;
-import com.flash3388.flashlib.vision.camera.Camera;
+import com.flash3388.flashlib.vision.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;

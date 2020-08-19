@@ -5,7 +5,7 @@ import com.castle.util.closeables.Closer;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.http.HttpServerCloser;
-import com.flash3388.flashlib.vision.camera.Camera;
+import com.flash3388.flashlib.vision.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;

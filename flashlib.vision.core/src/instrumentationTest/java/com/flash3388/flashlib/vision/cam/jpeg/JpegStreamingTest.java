@@ -3,7 +3,7 @@ package com.flash3388.flashlib.vision.cam.jpeg;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.vision.Image;
-import com.flash3388.flashlib.vision.camera.Camera;
+import com.flash3388.flashlib.vision.Camera;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.client.MjpegClient;
 import com.flash3388.flashlib.vision.jpeg.server.MjpegServer;
