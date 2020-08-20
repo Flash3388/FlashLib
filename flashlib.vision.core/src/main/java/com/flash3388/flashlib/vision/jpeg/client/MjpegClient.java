@@ -4,7 +4,7 @@ import com.castle.concurrent.service.SingleUseService;
 import com.castle.util.closeables.Closer;
 import com.flash3388.flashlib.util.concurrent.ExecutorCloser;
 import com.flash3388.flashlib.util.http.HttpConnectionCloser;
-import com.flash3388.flashlib.vision.ImagePipeline;
+import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.reader.MjpegReader;
 import org.slf4j.Logger;
@@ -22,12 +22,12 @@ public class MjpegClient extends SingleUseService {
 
     private final URL mStreamUrl;
     private final ExecutorService mExecutorService;
-    private final ImagePipeline<JpegImage> mImageConsumer;
+    private final Pipeline<JpegImage> mImageConsumer;
     private final Logger mLogger;
 
     private final AtomicReference<HttpURLConnection> mConnectionReference;
 
-    public MjpegClient(URL streamUrl, ExecutorService executorService, ImagePipeline<JpegImage> imageConsumer, Logger logger) {
+    public MjpegClient(URL streamUrl, ExecutorService executorService, Pipeline<JpegImage> imageConsumer, Logger logger) {
         mStreamUrl = streamUrl;
         mExecutorService = executorService;
         mImageConsumer = imageConsumer;
@@ -36,7 +36,7 @@ public class MjpegClient extends SingleUseService {
         mConnectionReference = new AtomicReference<>();
     }
 
-    public static MjpegClient create(URL url, ImagePipeline<JpegImage> imageConsumer, Logger logger) {
+    public static MjpegClient create(URL url, Pipeline<JpegImage> imageConsumer, Logger logger) {
         return new MjpegClient(url, Executors.newSingleThreadExecutor(), imageConsumer, logger);
     }
 

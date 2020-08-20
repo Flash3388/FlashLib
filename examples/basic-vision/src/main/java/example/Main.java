@@ -31,8 +31,8 @@ public class Main {
             Future<?> future = imageSource.asyncPollAtFixedRate(executorService,
                     Time.milliseconds(50),
                     imageHolder.divergeTo(new VisionPipeline.Builder<>()
-                                    .addProcessors()
-                                    .analyser((img)-> Optional.empty())
+                                    .process((img) -> img)
+                                    .analyse((img)-> Optional.empty())
                                     .analysisTo(System.out::println)
                                     .build()),
                     Throwables.silentHandler());

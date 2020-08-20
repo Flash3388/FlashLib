@@ -4,7 +4,7 @@ import com.flash3388.flashlib.util.collections.DoubleBuffer;
 
 import java.util.NoSuchElementException;
 
-public class DoubleBufferImageHolder<T extends Image> implements ImageSource<T>, ImagePipeline<T> {
+public class DoubleBufferImageHolder<T extends Image> implements ImageSource<T>, Pipeline<T> {
 
     private final DoubleBuffer<T> mBuffer;
 

@@ -12,14 +12,14 @@ public interface ImageSource<T extends Image> {
     T get() throws VisionException;
 
     default Future<?> asyncPoll(ExecutorService executorService,
-                                ImagePipeline<? super T> pipeline,
+                                Pipeline<? super T> pipeline,
                                 ThrowableHandler throwableHandler) {
         return executorService.submit(new ImagePoller<>(this, pipeline, throwableHandler));
     }
 
     default Future<?> asyncPollAtFixedRate(ScheduledExecutorService executorService,
                                            Time rate,
-                                           ImagePipeline<? super T> pipeline,
+                                           Pipeline<? super T> pipeline,
                                            ThrowableHandler throwableHandler) {
         return executorService.scheduleAtFixedRate(
                 new ImagePoller<>(this, pipeline, throwableHandler),

@@ -5,14 +5,14 @@ import com.castle.util.throwables.ThrowableHandler;
 public class ImagePoller<T extends Image> implements Runnable {
 
     private final ImageSource<? extends T> mImageSource;
-    private final ImagePipeline<? super T> mImagePipeline;
+    private final Pipeline<? super T> mPipeline;
     private final ThrowableHandler mThrowableHandler;
 
     public ImagePoller(ImageSource<? extends T> imageSource,
-                       ImagePipeline<? super T> imagePipeline,
+                       Pipeline<? super T> pipeline,
                        ThrowableHandler throwableHandler) {
         mImageSource = imageSource;
-        mImagePipeline = imagePipeline;
+        mPipeline = pipeline;
         mThrowableHandler = throwableHandler;
     }
 
@@ -20,7 +20,7 @@ public class ImagePoller<T extends Image> implements Runnable {
     public void run() {
         try {
             T image = mImageSource.get();
-            mImagePipeline.process(image);
+            mPipeline.process(image);
         } catch (Throwable t) {
             mThrowableHandler.handle(t);
         }
