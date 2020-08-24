@@ -8,4 +8,6 @@ public interface Image {
     int getWidth();
 
     byte[] getRaw() throws IOException;
+
+    java.awt.Image toAwt();
 }

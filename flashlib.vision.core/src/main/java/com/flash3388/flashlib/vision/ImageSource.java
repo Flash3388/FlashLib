@@ -3,6 +3,8 @@ package com.flash3388.flashlib.vision;
 import com.castle.util.throwables.ThrowableHandler;
 import com.flash3388.flashlib.time.Time;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,10 +25,14 @@ public interface ImageSource<T extends Image> {
                                            ThrowableHandler throwableHandler) {
         return executorService.scheduleAtFixedRate(
                 new ImagePoller<>(this, pipeline, throwableHandler),
-                rate.value(), rate.value(), rate.unit());
+                0, rate.value(), rate.unit());
     }
 
     static <T extends Image> ImageSource<T> of(T... images) {
         return new ImageQueue<T>(images);
+    }
+
+    static <T extends Image> ImageSource<T> of(Collection<T> images) {
+        return new ImageQueue<T>(new ArrayDeque<>(images));
     }
 }

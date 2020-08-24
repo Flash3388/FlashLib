@@ -46,4 +46,9 @@ public class JpegImage implements Image {
             return byteArrayOutputStream.toByteArray();
         }
     }
+
+    @Override
+    public java.awt.Image toAwt() {
+        return mImage;
+    }
 }
