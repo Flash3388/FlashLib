@@ -12,6 +12,10 @@ public abstract class ActionBase implements Action {
     protected ActionBase(Scheduler scheduler, ActionConfiguration configuration) {
         mScheduler = scheduler;
         mConfiguration = configuration;
+
+        if (mConfiguration.getName() == null) {
+            mConfiguration.setName(getClass().getSimpleName());
+        }
     }
 
     protected ActionBase(Scheduler scheduler) {
