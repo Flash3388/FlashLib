@@ -135,27 +135,27 @@ public class ActionControlTest {
     }
 
     @Test
-    public void updateActionsForNextRun_withActionsToStart_startsActions() throws Exception {
+    public void startNewActions_withActionsToStart_startsActions() throws Exception {
         Collection<Action> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
                 ActionsMock.actionMocker().build()
         );
         mNextRunActions.addAll(actions);
 
-        mActionControl.updateActionsForNextRun(Collections.emptyList());
+        mActionControl.startNewActions();
 
         MatcherAssert.assertThat(mRunningActions.keySet(), IsIterableContainingInAnyOrder.containsInAnyOrder(actions.toArray()));
     }
 
     @Test
-    public void updateActionsForNextRun_withActionsToStart_updatesRequirements() throws Exception {
+    public void startNewActions_withActionsToStart_updatesRequirements() throws Exception {
         Collection<Action> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
                 ActionsMock.actionMocker().build()
         );
         mNextRunActions.addAll(actions);
 
-        mActionControl.updateActionsForNextRun(Collections.emptyList());
+        mActionControl.startNewActions();
 
         ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         verify(mRequirementsControl, times(actions.size())).updateRequirementsWithNewRunningAction(captor.capture());

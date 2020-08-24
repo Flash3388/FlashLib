@@ -58,11 +58,13 @@ class ActionControl {
         return mRunningActions.containsKey(action);
     }
 
-    public void updateActionsForNextRun(Iterable<Action> actionsToRemove) {
-        actionsToRemove.forEach(this::internalRemove);
-
+    public void startNewActions() {
         mNextRunActions.forEach(this::internalAdd);
         mNextRunActions.clear();
+    }
+
+    public void updateActionsForNextRun(Iterable<Action> actionsToRemove) {
+        actionsToRemove.forEach(this::internalRemove);
     }
 
     public void cancelActionsIf(Predicate<? super Action> predicate) {

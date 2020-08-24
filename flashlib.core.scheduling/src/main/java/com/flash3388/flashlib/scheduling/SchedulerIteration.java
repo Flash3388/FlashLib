@@ -26,6 +26,7 @@ class SchedulerIteration {
 
     public void run(SchedulerMode mode) {
         mActionsToRemove.clear();
+        startNewActions();
 
         runActions(mode);
         startDefaultSubsystemActions(mode);
@@ -71,6 +72,10 @@ class SchedulerIteration {
                 mLogger.error("Error when starting default action", t);
             }
         }
+    }
+
+    private void startNewActions() {
+        mActionControl.startNewActions();
     }
 
     private void readyForNextRun() {

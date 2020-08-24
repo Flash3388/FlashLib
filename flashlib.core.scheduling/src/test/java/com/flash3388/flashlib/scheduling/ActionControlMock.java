@@ -19,10 +19,12 @@ public class ActionControlMock {
 
     private final ActionControl mMock;
     private final Map<Action, ActionContext> mRunningActions;
+    private final Map<Action, ActionContext> mPendingActions;
 
     public ActionControlMock(ActionControl actionControl) {
         mMock = actionControl;
         mRunningActions = new HashMap<>();
+        mPendingActions = new HashMap<>();
 
         when(actionControl.getRunningActionContexts()).thenReturn(mRunningActions.entrySet());
         doAnswer((Answer<Void>) invocation -> {
@@ -30,6 +32,11 @@ public class ActionControlMock {
             mRunningActions.put(action, new ActionContext(action, mock(Clock.class)));
             return null;
         }).when(actionControl).startAction(any(Action.class));
+        doAnswer((Answer<Void>) invocation -> {
+            mRunningActions.putAll(mPendingActions);
+            mPendingActions.clear();
+            return null;
+        }).when(actionControl).startNewActions();
     }
 
     public Action runningAction(ActionContext actionContext) {
@@ -42,6 +49,13 @@ public class ActionControlMock {
     public ActionContext runningAction(Action action) {
         ActionContext actionContext = mock(ActionContext.class);
         mRunningActions.put(action, actionContext);
+
+        return actionContext;
+    }
+
+    public ActionContext pendingAction(Action action) {
+        ActionContext actionContext = mock(ActionContext.class);
+        mPendingActions.put(action, actionContext);
 
         return actionContext;
     }

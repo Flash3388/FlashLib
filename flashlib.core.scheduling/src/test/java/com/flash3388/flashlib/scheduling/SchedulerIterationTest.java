@@ -104,4 +104,16 @@ public class SchedulerIterationTest {
 
         verify(action, times(1)).cancel();
     }
+
+    @Test
+    public void run_newActionsReady_startsThem() throws Exception {
+        Action action = ActionsMock.actionMocker()
+                .mockRunWhenDisabled(false)
+                .build();
+        ActionContext actionContext = mActionControlMock.pendingAction(action);
+
+        mSchedulerIteration.run(SchedulerModeMock.mockNotDisabledMode());
+
+        verify(actionContext, times(1)).run();
+    }
 }
