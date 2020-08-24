@@ -29,6 +29,10 @@ public final class Actions {
                 .save();
     }
 
+    public static GenericAction.Builder builder() {
+        return new GenericAction.Builder();
+    }
+
     /**
      * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link Action#cancel()}
      * for a given action when started.
