@@ -3,6 +3,7 @@ package com.flash3388.flashlib.scheduling.actions;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.Subsystem;
+import com.flash3388.flashlib.time.Time;
 
 /**
  * An Action is something that can be executed on the robot. This can include any operation on the robot,
@@ -68,5 +69,35 @@ public interface Action {
     ActionConfiguration getConfiguration();
     void setConfiguration(ActionConfiguration configuration);
     ActionConfiguration.Editor configure();
-    Action requires(Requirement... requirements);
+
+    // convenience methods for configuring
+
+    default Action requires(Requirement... requirements) {
+        return configure()
+                .requires(requirements)
+                .save();
+    }
+
+    default Action withTimeout(Time timeout) {
+        return configure()
+                .setTimeout(timeout)
+                .save();
+    }
+
+    // convenience methods for grouping
+    // they reference subclasses, but that's how you decorate, so...
+
+    @SuppressWarnings("ClassReferencesSubclass")
+    default SequentialActionGroup andThen(Action... actions) {
+        return new SequentialActionGroup()
+                .add(this)
+                .add(actions);
+    }
+
+    @SuppressWarnings("ClassReferencesSubclass")
+    default ParallelActionGroup alongWith(Action... actions) {
+        return new ParallelActionGroup()
+                .add(this)
+                .add(actions);
+    }
 }

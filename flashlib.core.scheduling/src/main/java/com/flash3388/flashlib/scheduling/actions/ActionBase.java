@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
-import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 
 public abstract class ActionBase implements Action {
@@ -58,12 +57,6 @@ public abstract class ActionBase implements Action {
     @Override
     public ActionConfiguration.Editor configure() {
         return new ActionConfiguration.Editor(this, getConfiguration());
-    }
-
-    @Override
-    public Action requires(Requirement... requirements) {
-        configure().requires(requirements).save();
-        return this;
     }
 
     @Override
