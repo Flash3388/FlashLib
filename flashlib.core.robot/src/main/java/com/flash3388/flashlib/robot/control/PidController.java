@@ -18,10 +18,7 @@ import java.util.function.DoubleBinaryOperator;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
- *
- * @deprecated controller doesn't function well enough, and should not be used
  */
-@Deprecated
 public class PidController implements DoubleBinaryOperator {
 
     private final DoubleProperty mKp;
