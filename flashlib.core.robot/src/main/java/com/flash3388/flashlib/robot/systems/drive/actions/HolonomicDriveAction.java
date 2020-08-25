@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
+import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDrive;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDriveSpeed;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
@@ -16,6 +17,18 @@ public class HolonomicDriveAction extends ActionBase {
     public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<? extends HolonomicDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
+    }
+
+    public HolonomicDriveAction(HolonomicDrive driveInterface, HolonomicDriveSpeed driveSpeed) {
+        this(driveInterface, Suppliers.of(driveSpeed));
+    }
+
+    public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<? extends Vector2> vectorSupplier, DoubleSupplier rotate) {
+        this(driveInterface, ()->new HolonomicDriveSpeed(vectorSupplier.get(), rotate.getAsDouble()));
+    }
+
+    public HolonomicDriveAction(HolonomicDrive driveInterface, Vector2 vector, double rotate) {
+        this(driveInterface, new HolonomicDriveSpeed(vector, rotate));
     }
 
     public static HolonomicDriveAction cartesian(HolonomicDrive driveInterface, DoubleSupplier y, DoubleSupplier x, DoubleSupplier rotate) {

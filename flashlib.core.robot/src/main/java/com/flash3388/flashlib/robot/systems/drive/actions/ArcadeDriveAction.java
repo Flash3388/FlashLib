@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
+import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.ArcadeDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.TankDrive;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
@@ -20,6 +21,14 @@ public class ArcadeDriveAction extends ActionBase {
 	public ArcadeDriveAction(TankDrive driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
 		this(driveInterface, ()->new ArcadeDriveSpeed(move.getAsDouble(), rotate.getAsDouble()));
 	}
+
+    public ArcadeDriveAction(TankDrive driveInterface, ArcadeDriveSpeed driveSpeed) {
+        this(driveInterface, Suppliers.of(driveSpeed));
+    }
+
+    public ArcadeDriveAction(TankDrive driveInterface, double move, double rotate) {
+        this(driveInterface, new ArcadeDriveSpeed(move, rotate));
+    }
 	
 	@Override
 	public void execute() {

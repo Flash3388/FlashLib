@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
+import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.motion.Rotatable;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
@@ -14,6 +15,10 @@ public class RotateAction extends ActionBase {
 		this.mRotatable = rotatable;
 		this.mSpeedSource = speedSource;
 	}
+
+    public RotateAction(Rotatable rotatable, double speed) {
+	    this(rotatable, Suppliers.of(speed));
+    }
 	
 	@Override
 	public void execute() {

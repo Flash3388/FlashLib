@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive.actions;
 
+import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
@@ -17,12 +18,24 @@ public class OmniDriveAction extends ActionBase {
         mSpeedSupplier = speedSupplier;
     }
 
+    public OmniDriveAction(OmniDrive driveInterface, OmniDriveSpeed driveSpeed) {
+        this(driveInterface, Suppliers.of(driveSpeed));
+    }
+
 	public OmniDriveAction(OmniDrive driveInterface, DoubleSupplier y, DoubleSupplier x) {
 		this(driveInterface, ()->new OmniDriveSpeed(y.getAsDouble(), x.getAsDouble()));
 	}
 
+    public OmniDriveAction(OmniDrive driveInterface, double y, double x) {
+        this(driveInterface, new OmniDriveSpeed(y, x));
+    }
+
     public OmniDriveAction(OmniDrive driveInterface, DoubleSupplier front, DoubleSupplier right, DoubleSupplier back, DoubleSupplier left) {
         this(driveInterface, ()->new OmniDriveSpeed(front.getAsDouble(), right.getAsDouble(), back.getAsDouble(), left.getAsDouble()));
+    }
+
+    public OmniDriveAction(OmniDrive driveInterface, double front, double right, double back, double left) {
+        this(driveInterface, ()->new OmniDriveSpeed(front, right, back, left));
     }
 	
 	@Override

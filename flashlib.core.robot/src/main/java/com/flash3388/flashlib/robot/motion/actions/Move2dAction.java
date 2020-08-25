@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
+import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.motion.Movable2d;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.jmath.vectors.Vector2;
@@ -14,6 +15,10 @@ public class Move2dAction extends ActionBase {
     public Move2dAction(Movable2d movable, Supplier<? extends Vector2> motionVectorSupplier) {
         mMovable = movable;
         mMotionVectorSupplier = motionVectorSupplier;
+    }
+
+    public Move2dAction(Movable2d movable, Vector2 vector) {
+        this(movable, Suppliers.of(vector));
     }
 
     @Override
