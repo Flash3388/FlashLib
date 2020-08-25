@@ -15,7 +15,7 @@ public interface Processor<T, R> {
         return new InProcessorJunction<>(this, pipeline);
     }
 
-    default Processor<T, R> pipeOut(Pipeline<? super R> pipeline) {
+    default Processor<T, R> divergeOut(Pipeline<? super R> pipeline) {
         return new OutProcessorJunction<>(this, pipeline);
     }
 
