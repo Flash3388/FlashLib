@@ -38,9 +38,11 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class Main {
 
-    private static final double TARGET_REAL_WIDTH_CM = 20;
-    private static final double CAMERA_FOV_RAD = 30;
-    private static final double EXPECTED_RATIO = 0.0;
+    private static final double TARGET_HEIGHT_TO_WIDTH_RATIO = 42/92.0;
+    private static final double REAL_TARGET_WIDTH_CM = 92;
+    private static final double MIN_CONTOUR_SIZE = 1000;
+    private static final double MIN_SCORE = 0.6;
+    private static final double CAM_FOV_RADIANS = 1.229061;
 
     public static void main(String[] args) throws Exception {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -96,34 +98,54 @@ public class Main {
         return imageSource.asyncPollAtFixedRate(executorService,
                 Time.milliseconds(1000), // polling rate
                 guiPipeline.divergeTo(new VisionPipeline.Builder<CvImage, Optional<TargetScorable>>()
+                        // we start to define the processors
+                        // we will build them in a cascading manner, each processor making a change
+                        // and passing to the other
+
+                        // we start with the color processor, which filters for pixels in a specific
+                        // range. It will also convert the image to HSV format
                         .process(new HsvRangeProcessor(
                                 new HsvColorSettings(
                                         new ColorRange(0, 180),
                                         new ColorRange(100, 255),
                                         new ColorRange(105, 255)),
                                 cvProcessing)
-                                .pipeTo(new RectProcessor(cvProcessing, (rect)-> rect.area() > 1000)
+                                // now we move to the rect processor, which extracts rectangles from remaining
+                                // pixel groups, excluding rects which don't pass the limiting predicate (by size)
+                                .pipeTo(new RectProcessor(cvProcessing, (rect)-> rect.area() > MIN_CONTOUR_SIZE)
+                                        // next we convert the rects into TargetScorable object, which allow
+                                        // scoring of results. TargetScorable is defined as an inner class in this class.
+                                        // we filter out scorables with a low score
                                         .pipeTo(new ScoringProcessor<Rect, TargetScorable>(
-                                                        (rect) -> new TargetScorable(rect, EXPECTED_RATIO),
-                                                        (scorable)-> scorable.score() > 0.6)
+                                                        (rect) -> new TargetScorable(rect, TARGET_HEIGHT_TO_WIDTH_RATIO),
+                                                        (scorable)-> scorable.score() > MIN_SCORE)
+                                                // now we find the best scorable (highest score) assuming there are any
                                                 .pipeTo(new BestScoreProcessor<>())))
                         )
+                        // this is the end of the processing phase. from an image input, we will receive a
+                        // scorable as an output.
+                        // we know need to extract what we want from the scorable into an Analysis object,
+                        // which will contain vision-result information
                         .analyse((image, best)-> {
                             if (!best.isPresent()) {
                                 return Optional.empty();
                             }
 
                             TargetScorable scorable = best.get();
+
+                            // take the distance and angle to the found scorable
                             double distance = AnalysisAlgorithms.measureDistance(scorable.getWidth(), image.getWidth(),
-                                    TARGET_REAL_WIDTH_CM, CAMERA_FOV_RAD);
+                                    REAL_TARGET_WIDTH_CM, CAM_FOV_RADIANS);
                             double angle = AnalysisAlgorithms.calculateHorizontalOffsetDegrees2(scorable.getCenter().x(),
-                                    image.getWidth(), CAMERA_FOV_RAD);
+                                    image.getWidth(), CAM_FOV_RADIANS);
 
                             return Optional.of(new Analysis.Builder()
                                     .put("distance", distance)
                                     .put("angle", angle)
                                     .build());
                         })
+                        // normally we would pass the Analysis to some where important, like the robot
+                        // here we simply print it out so we can see it
                         .analysisTo(System.out::println)
                         .build()),
                 // if there is an error, it will be ignored. Normally not recommended, but it's okay for an example

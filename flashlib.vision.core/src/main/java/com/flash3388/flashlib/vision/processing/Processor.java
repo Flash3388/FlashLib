@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.vision.processing;
 
-import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 
 public interface Processor<T, R> {
