@@ -12,10 +12,6 @@ public interface Pipeline<T> {
         return new SyncDivergingPipeline<>(Arrays.asList(this, pipeline));
     }
 
-    static <T> Pipeline<T> end() {
-        return EmptyPipeTail.instance();
-    }
-
     class SyncDivergingPipeline<T> implements Pipeline<T> {
 
         private final Collection<Pipeline<? super T>> mPipelines;
@@ -30,17 +26,5 @@ public interface Pipeline<T> {
                 pipeline.process(input);
             }
         }
-    }
-
-    final class EmptyPipeTail {
-
-        private static final Pipeline INSTANCE = input -> { };
-
-        @SuppressWarnings("unchecked")
-        static <T> Pipeline<T> instance() {
-            return (Pipeline<T>) INSTANCE;
-        }
-
-        private EmptyPipeTail() {}
     }
 }
