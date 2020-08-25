@@ -13,8 +13,8 @@ public class DoubleBufferImageHolder<T extends Image> implements ImageSource<T>,
     }
 
     @Override
-    public void process(T image) {
-        mBuffer.write(image);
+    public void process(T input) {
+        mBuffer.write(input);
     }
 
     @Override

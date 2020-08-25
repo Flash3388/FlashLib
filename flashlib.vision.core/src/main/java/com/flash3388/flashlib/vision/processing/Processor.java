@@ -3,11 +3,11 @@ package com.flash3388.flashlib.vision.processing;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 
-public interface Processor<T extends Image, R extends Image> {
+public interface Processor<T, R> {
 
-    R process(T image) throws ProcessingException;
+    R process(T input) throws ProcessingException;
 
-    default <R2 extends Image> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
+    default <R2> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
         return new ProcessorChain<T, R, R2>(this, processor);
     }
 
@@ -19,7 +19,7 @@ public interface Processor<T extends Image, R extends Image> {
         return new OutDiverging<>(this, pipeline);
     }
 
-    class ProcessorChain<T extends Image, R extends Image, R2 extends Image> implements Processor<T, R2> {
+    class ProcessorChain<T, R, R2> implements Processor<T, R2> {
 
         private final Processor<T, R> mIn;
         private final Processor<? super R, R2> mOut;
@@ -36,7 +36,7 @@ public interface Processor<T extends Image, R extends Image> {
         }
     }
 
-    class InDiverging<T extends Image, R extends Image> implements Processor<T, R> {
+    class InDiverging<T, R> implements Processor<T, R> {
 
         private final Processor<T, R> mProcessor;
         private final Pipeline<? super T> mPipeline;
@@ -53,7 +53,7 @@ public interface Processor<T extends Image, R extends Image> {
         }
     }
 
-    class OutDiverging<T extends Image, R extends Image> implements Processor<T, R> {
+    class OutDiverging<T, R> implements Processor<T, R> {
 
         private final Processor<T, R> mProcessor;
         private final Pipeline<? super R> mPipeline;

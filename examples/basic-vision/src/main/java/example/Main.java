@@ -99,7 +99,7 @@ public class Main {
                             // return the result image to be used by the next processor or by the analyzer;
                             return img;
                         })
-                        .analyse((img)-> {
+                        .analyse((original, postProcess)-> {
                             // analyze the image for the information we want
                             // and return an analysis if possible
                             return Optional.of(new Analysis.Builder()

@@ -6,19 +6,19 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @FunctionalInterface
-public interface Pipeline<T extends Image> {
+public interface Pipeline<T> {
 
-    void process(T image) throws ProcessingException;
+    void process(T input) throws ProcessingException;
 
     default Pipeline<T> divergeTo(Pipeline<? super T> pipeline) {
         return new SyncDivergingPipeline<>(Arrays.asList(this, pipeline));
     }
 
-    static <T extends Image> Pipeline<T> end() {
+    static <T> Pipeline<T> end() {
         return EmptyPipeTail.instance();
     }
 
-    class SyncDivergingPipeline<T extends Image> implements Pipeline<T> {
+    class SyncDivergingPipeline<T> implements Pipeline<T> {
 
         private final Collection<Pipeline<? super T>> mPipelines;
 
@@ -27,19 +27,19 @@ public interface Pipeline<T extends Image> {
         }
 
         @Override
-        public void process(T image) throws ProcessingException {
+        public void process(T input) throws ProcessingException {
             for (Pipeline<? super T> pipeline : mPipelines) {
-                pipeline.process(image);
+                pipeline.process(input);
             }
         }
     }
 
     final class EmptyPipeTail {
 
-        private static final Pipeline INSTANCE = image -> { };
+        private static final Pipeline INSTANCE = input -> { };
 
         @SuppressWarnings("unchecked")
-        static <T extends Image> Pipeline<T> instance() {
+        static <T> Pipeline<T> instance() {
             return (Pipeline<T>) INSTANCE;
         }
 

@@ -3,23 +3,23 @@ package com.flash3388.flashlib.vision.processing;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
-import com.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
+import com.flash3388.flashlib.vision.processing.analysis.Analyser;
 import com.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class VisionPipeline<T extends Image, R extends Image> implements Pipeline<T> {
+public class VisionPipeline<T extends Image, R> implements Pipeline<T> {
 
-    public static class Builder<T extends Image, R extends Image> {
+    public static class Builder<T extends Image, R> {
 
         private Processor<T, R> mProcessor;
-        private ImageAnalyser<? super R> mImageAnalyser;
+        private Analyser<? super T, ? super R> mAnalyser;
         private Consumer<? super Analysis> mAnalysisConsumer;
 
         public Builder() {
             mProcessor = (t) -> {throw new AssertionError("unimplemented");};
-            mImageAnalyser = (t) -> Optional.empty();
+            mAnalyser = (Analyser<T, R>) (input, input2) -> Optional.empty();
             mAnalysisConsumer = (a) -> {};
         }
 
@@ -28,8 +28,8 @@ public class VisionPipeline<T extends Image, R extends Image> implements Pipelin
             return this;
         }
 
-        public Builder<T, R> analyse(ImageAnalyser<? super R> analyser) {
-            mImageAnalyser = analyser;
+        public Builder<T, R> analyse(Analyser<? super T, ? super R> analyser) {
+            mAnalyser = analyser;
             return this;
         }
 
@@ -39,26 +39,27 @@ public class VisionPipeline<T extends Image, R extends Image> implements Pipelin
         }
 
         public VisionPipeline<T, R> build() {
-            return new VisionPipeline<>(mProcessor, mImageAnalyser, mAnalysisConsumer);
+            return new VisionPipeline<>(mProcessor, mAnalyser, mAnalysisConsumer);
         }
     }
 
     private final Processor<T, R> mProcessor;
-    private final ImageAnalyser<? super R> mImageAnalyser;
+    private final Analyser<? super T, ? super R> mAnalyser;
     private final Consumer<? super Analysis> mAnalysisConsumer;
 
-    public VisionPipeline(Processor<T, R> processor, ImageAnalyser<? super R> imageAnalyser, Consumer<? super Analysis> analysisConsumer) {
+    public VisionPipeline(Processor<T, R> processor, Analyser<? super T, ? super R> analyser,
+                          Consumer<? super Analysis> analysisConsumer) {
         mProcessor = processor;
-        mImageAnalyser = imageAnalyser;
+        mAnalyser = analyser;
         mAnalysisConsumer = analysisConsumer;
     }
 
     @Override
-    public void process(T image) throws ProcessingException {
+    public void process(T input) throws ProcessingException {
         try {
-            R outImage = mProcessor.process(image);
+            R out = mProcessor.process(input);
 
-            Optional<Analysis> analysis = mImageAnalyser.analyse(outImage);
+            Optional<Analysis> analysis = mAnalyser.analyse(input, out);
             analysis.ifPresent(mAnalysisConsumer);
         } catch (ImageAnalysingException e) {
             throw new ProcessingException(e);

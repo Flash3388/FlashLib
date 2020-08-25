@@ -1,21 +1,20 @@
 package com.flash3388.flashlib.vision.cv.processing.analysis;
 
 import com.beans.util.function.Suppliers;
+import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.template.ScaledTemplateMatchingResult;
 import com.flash3388.flashlib.vision.cv.template.SingleTemplateMatcher;
 import com.flash3388.flashlib.vision.cv.template.TemplateMatchingException;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
-import com.flash3388.flashlib.vision.processing.analysis.ImageAnalyser;
+import com.flash3388.flashlib.vision.processing.analysis.Analyser;
 import com.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 
-public class TemplateMatchingAnalyser implements ImageAnalyser<CvImage> {
+public class TemplateMatchingAnalyser<T> implements Analyser<T, CvImage> {
 
     private final SingleTemplateMatcher mTemplateMatcher;
     private final DoubleSupplier mScaleFactor;
@@ -42,9 +41,9 @@ public class TemplateMatchingAnalyser implements ImageAnalyser<CvImage> {
     }
 
     @Override
-    public Optional<Analysis> analyse(CvImage image) throws ImageAnalysingException {
+    public Optional<Analysis> analyse(T original, CvImage input) throws ImageAnalysingException {
         try {
-            ScaledTemplateMatchingResult templateMatchingResult = mTemplateMatcher.matchWithScaling(image.getMat(), mScaleFactor.getAsDouble());
+            ScaledTemplateMatchingResult templateMatchingResult = mTemplateMatcher.matchWithScaling(input.getMat(), mScaleFactor.getAsDouble());
             Analysis analysis = mAnalysisFactory.apply(templateMatchingResult);
             return Optional.of(analysis);
         } catch (TemplateMatchingException e) {

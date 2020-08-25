@@ -14,6 +14,10 @@ public class CvCamera implements Camera<CvImage> {
         mVideoCapture = videoCapture;
     }
 
+    public CvCamera(int dev) {
+        this(new VideoCapture(0));
+    }
+
     @Override
     public int getFps() {
         return (int) mVideoCapture.get(Videoio.CAP_PROP_FPS);

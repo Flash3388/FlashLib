@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.cv.processing.analysis;
+package com.flash3388.flashlib.vision.cv.processing;
 
 import com.jmath.vectors.Vector2;
 
