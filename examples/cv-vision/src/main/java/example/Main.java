@@ -8,11 +8,11 @@ import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
-import com.flash3388.flashlib.vision.cv.processing.BestScoreProcessor;
 import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
 import com.flash3388.flashlib.vision.cv.processing.RectProcessor;
 import com.flash3388.flashlib.vision.cv.processing.Scorable;
-import com.flash3388.flashlib.vision.cv.processing.ScoringProcessor;
+import com.flash3388.flashlib.vision.processing.BestProcessor;
+import com.flash3388.flashlib.vision.processing.MappingProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.flash3388.flashlib.vision.processing.analysis.AnalysisAlgorithms;
@@ -116,11 +116,11 @@ public class Main {
                                         // next we convert the rects into TargetScorable object, which allow
                                         // scoring of results. TargetScorable is defined as an inner class in this class.
                                         // we filter out scorables with a low score
-                                        .pipeTo(new ScoringProcessor<Rect, TargetScorable>(
+                                        .pipeTo(new MappingProcessor<Rect, TargetScorable>(
                                                         (rect) -> new TargetScorable(rect, TARGET_HEIGHT_TO_WIDTH_RATIO),
                                                         (scorable)-> scorable.score() > MIN_SCORE)
                                                 // now we find the best scorable (highest score) assuming there are any
-                                                .pipeTo(new BestScoreProcessor<>())))
+                                                .pipeTo(new BestProcessor<>(Scorable::compareTo))))
                         )
                         // this is the end of the processing phase. from an image input, we will receive a
                         // scorable as an output.
