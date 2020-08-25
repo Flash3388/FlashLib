@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Supplier;
 
 public interface ImageSource<T extends Image> {
 
@@ -26,6 +27,17 @@ public interface ImageSource<T extends Image> {
         return executorService.scheduleAtFixedRate(
                 new ImagePoller<>(this, pipeline, throwableHandler),
                 0, rate.value(), rate.unit());
+    }
+
+    default Supplier<T> asSupplier(ThrowableHandler throwableHandler) {
+        return ()-> {
+            try {
+                return this.get();
+            } catch (VisionException e) {
+                throwableHandler.handle(e);
+                return null;
+            }
+        };
     }
 
     static <T extends Image> ImageSource<T> of(T... images) {

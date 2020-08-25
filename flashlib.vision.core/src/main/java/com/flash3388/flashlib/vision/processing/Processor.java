@@ -1,7 +1,10 @@
 package com.flash3388.flashlib.vision.processing;
 
+import com.castle.util.throwables.ThrowableHandler;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
+
+import java.util.function.Function;
 
 public interface Processor<T, R> {
 
@@ -19,4 +22,14 @@ public interface Processor<T, R> {
         return new OutProcessorJunction<>(this, pipeline);
     }
 
+    default Function<T, R> asFunction(ThrowableHandler throwableHandler) {
+        return (input)-> {
+            try {
+                return this.process(input);
+            } catch (VisionException e) {
+                throwableHandler.handle(e);
+                return null;
+            }
+        };
+    }
 }
