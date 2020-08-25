@@ -30,10 +30,7 @@ public class Sleeper {
     }
 
     private long getSleepingPeriodMs(long timeoutMs) {
-        if (timeoutMs <= MIN_SLEEP_PERIOD_MS) {
-            return MIN_SLEEP_PERIOD_MS;
-        }
-
-        return (long) Mathf.scale(timeoutMs, MIN_SLEEP_PERIOD_MS, MAX_SLEEP_PERIOD_MS);
+        timeoutMs = (long) Mathf.scale(timeoutMs, MIN_SLEEP_PERIOD_MS, MAX_SLEEP_PERIOD_MS);
+        return Math.max(timeoutMs, MIN_SLEEP_PERIOD_MS);
     }
 }
