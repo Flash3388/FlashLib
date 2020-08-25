@@ -82,10 +82,14 @@ public final class Actions {
                 .add(actions);
     }
 
-    public static Trigger conditional(BooleanSupplier condition, Action action) {
+    public static Trigger onCondition(BooleanSupplier condition, Action action) {
         Trigger trigger = Triggers.onCondition(condition);
         trigger.whenActive(action);
 
         return trigger;
+    }
+
+    public static Action when(BooleanSupplier condition) {
+        return new ConditionalAction(condition, null, null);
     }
 }
