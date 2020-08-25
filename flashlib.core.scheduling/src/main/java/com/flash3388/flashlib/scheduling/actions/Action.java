@@ -88,15 +88,22 @@ public interface Action {
     // they reference subclasses, but that's how you decorate, so...
 
     @SuppressWarnings("ClassReferencesSubclass")
-    default SequentialActionGroup andThen(Action... actions) {
+    default ActionGroup andThen(Action... actions) {
         return new SequentialActionGroup()
                 .add(this)
                 .add(actions);
     }
 
     @SuppressWarnings("ClassReferencesSubclass")
-    default ParallelActionGroup alongWith(Action... actions) {
+    default ActionGroup alongWith(Action... actions) {
         return new ParallelActionGroup()
+                .add(this)
+                .add(actions);
+    }
+
+    @SuppressWarnings("ClassReferencesSubclass")
+    default ActionGroup raceWith(Action... actions) {
+        return new ParallelRaceActionGroup()
                 .add(this)
                 .add(actions);
     }

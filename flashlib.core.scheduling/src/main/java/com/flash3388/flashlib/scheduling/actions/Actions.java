@@ -72,13 +72,18 @@ public final class Actions {
         return new PeriodicAction(runnable, period);
     }
 
-    public static SequentialActionGroup sequential(Action... actions) {
+    public static ActionGroup sequential(Action... actions) {
         return new SequentialActionGroup()
                 .add(actions);
     }
 
-    public static ParallelActionGroup parallel(Action... actions) {
+    public static ActionGroup parallel(Action... actions) {
         return new ParallelActionGroup()
+                .add(actions);
+    }
+
+    public static ActionGroup race(Action... actions) {
+        return new ParallelRaceActionGroup()
                 .add(actions);
     }
 

@@ -11,22 +11,19 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Queue;
 
-public class SequentialActionGroup extends ActionBase implements ActionGroup {
+public class SequentialActionGroup extends ActionGroupBase {
 
     private final Clock mClock;
 
-    private final Collection<Action> mActions;
     private final Queue<ActionContext> mActionQueue;
 
     private ActionContext mCurrentAction;
-    private boolean mRunWhenDisabled;
 
     SequentialActionGroup(Scheduler scheduler, Clock clock,
                           Collection<Action> actions, Queue<ActionContext> actionQueue) {
-        super(scheduler);
-        mClock = clock;
+        super(scheduler, actions, true);
 
-        mActions = actions;
+        mClock = clock;
         mActionQueue = actionQueue;
 
         mCurrentAction = null;
@@ -42,56 +39,21 @@ public class SequentialActionGroup extends ActionBase implements ActionGroup {
         this(GlobalDependencies.getClock());
     }
 
-    /**
-     * Adds an action to run.
-     *
-     * @param action action to run
-     * @return this instance
-     */
     @Override
     public SequentialActionGroup add(Action action) {
-        Objects.requireNonNull(action, "action is null");
-
-        ActionConfiguration configuration = action.getConfiguration();
-
-        if (mActions.isEmpty()) {
-            mRunWhenDisabled = configuration.shouldRunWhenDisabled();
-        } else {
-            mRunWhenDisabled &= configuration.shouldRunWhenDisabled();
-        }
-
-        configure()
-                .setRunWhenDisabled(mRunWhenDisabled)
-                .save();
-
-        mActions.add(action);
-
+        super.add(action);
         return this;
     }
 
-    /**
-     * Adds an array of scheduling to run.
-     *
-     * @param actions actions to run
-     * @return this instance
-     */
     @Override
     public SequentialActionGroup add(Action... actions) {
-        Objects.requireNonNull(actions, "actions is null");
-        return add(Arrays.asList(actions));
+        super.add(actions);
+        return this;
     }
 
-    /**
-     * Adds an array of scheduling to run.
-     *
-     * @param actions action to run
-     * @return this instance
-     */
     @Override
     public SequentialActionGroup add(Collection<Action> actions) {
-        Objects.requireNonNull(actions, "actions is null");
-        actions.forEach(this::add);
-
+        super.add(actions);
         return this;
     }
 

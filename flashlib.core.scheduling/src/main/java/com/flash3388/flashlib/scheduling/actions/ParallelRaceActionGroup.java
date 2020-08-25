@@ -4,20 +4,18 @@ import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.function.Predicate;
 
-public class ParallelActionGroup extends ActionGroupBase {
+public class ParallelRaceActionGroup extends ActionGroupBase {
 
     private final Clock mClock;
 
     private final Collection<ActionContext> mCurrentActions;
     private final ActionContextRunner mContextRunner;
 
-    ParallelActionGroup(Clock clock, Collection<Action> actions, Collection<ActionContext> currentActions) {
+    private ActionContext mFinishedCommand;
+
+    ParallelRaceActionGroup(Clock clock, Collection<Action> actions, Collection<ActionContext> currentActions) {
         super(actions, false);
 
         mClock = clock;
@@ -25,30 +23,31 @@ public class ParallelActionGroup extends ActionGroupBase {
 
         mContextRunner = new ActionContextRunner();
         mRunWhenDisabled = false;
+        mFinishedCommand = null;
     }
 
-    public ParallelActionGroup(Clock clock) {
+    public ParallelRaceActionGroup(Clock clock) {
         this(clock, new ArrayList<>(3), new ArrayList<>(2));
     }
 
-    public ParallelActionGroup() {
+    public ParallelRaceActionGroup() {
         this(GlobalDependencies.getClock());
     }
 
     @Override
-    public ParallelActionGroup add(Action action) {
+    public ParallelRaceActionGroup add(Action action) {
         super.add(action);
         return this;
     }
 
     @Override
-    public ParallelActionGroup add(Action... actions) {
+    public ParallelRaceActionGroup add(Action... actions) {
         super.add(actions);
         return this;
     }
 
     @Override
-    public ParallelActionGroup add(Collection<Action> actions) {
+    public ParallelRaceActionGroup add(Collection<Action> actions) {
         super.add(actions);
         return this;
     }
@@ -61,6 +60,8 @@ public class ParallelActionGroup extends ActionGroupBase {
 
             mCurrentActions.add(actionContext);
         }
+
+        mFinishedCommand = null;
     }
 
     @Override
@@ -69,20 +70,29 @@ public class ParallelActionGroup extends ActionGroupBase {
             return;
         }
 
-        mCurrentActions.removeIf(mContextRunner);
+        for (ActionContext context : mCurrentActions) {
+            if (!mContextRunner.test(context)) {
+                mFinishedCommand = context;
+                break;
+            }
+        }
     }
 
     @Override
     public boolean isFinished() {
-        return mCurrentActions.isEmpty();
+        return mFinishedCommand != null;
     }
 
     @Override
     public void end(boolean wasInterrupted) {
-        if (wasInterrupted) {
-            for (ActionContext context : mCurrentActions) {
+        for (ActionContext context : mCurrentActions) {
+            if (wasInterrupted || !context.equals(mFinishedCommand)) {
                 context.runCanceled();
             }
+        }
+
+        if (!wasInterrupted && mFinishedCommand != null) {
+            mFinishedCommand.runFinished();
         }
     }
 }
