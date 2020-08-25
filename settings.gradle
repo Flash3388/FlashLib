@@ -7,6 +7,7 @@ include 'flashlib.core.hid'
 include 'flashlib.core.robot'
 
 include 'flashlib.vision.core'
+include 'flashlib.vision.cv'
 
 include 'examples:basic-robot'
 include 'examples:pnuematics-robot'
