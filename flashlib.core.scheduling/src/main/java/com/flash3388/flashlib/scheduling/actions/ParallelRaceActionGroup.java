@@ -53,6 +53,11 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     }
 
     @Override
+    public ParallelRaceActionGroup alongWith(Action... actions) {
+        return add(actions);
+    }
+
+    @Override
     public final void initialize() {
         for (Action action : mActions) {
             ActionContext actionContext = new ActionContext(action, mClock);

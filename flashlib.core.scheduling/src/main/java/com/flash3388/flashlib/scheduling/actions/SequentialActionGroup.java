@@ -58,6 +58,11 @@ public class SequentialActionGroup extends ActionGroupBase {
     }
 
     @Override
+    public SequentialActionGroup andThen(Action... actions) {
+        return add(actions);
+    }
+
+    @Override
     public final void initialize() {
         mActions.forEach((action) -> mActionQueue.add(new ActionContext(action, mClock)));
         startNextAction();
