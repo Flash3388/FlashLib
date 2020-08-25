@@ -7,12 +7,8 @@ import java.util.function.BooleanSupplier;
 
 public class Sleeper {
 
-    private static final long MIN_SLEEP_PERIOD_MS = 5;
+    static final long MIN_SLEEP_PERIOD_MS = 5;
     private static final long MAX_SLEEP_PERIOD_MS = 1000;
-
-    public void sleepMs(long sleepTimeMs) throws InterruptedException {
-        Thread.sleep(sleepTimeMs);
-    }
 
     public void sleep(Time sleepTime) throws InterruptedException {
         sleepMs(sleepTime.valueAsMillis());
@@ -27,6 +23,10 @@ public class Sleeper {
             sleepMs(sleepingPeriodMs);
             timeWaited += sleepingPeriodMs;
         }
+    }
+
+    void sleepMs(long sleepTimeMs) throws InterruptedException {
+        Thread.sleep(sleepTimeMs);
     }
 
     private long getSleepingPeriodMs(long timeoutMs) {
