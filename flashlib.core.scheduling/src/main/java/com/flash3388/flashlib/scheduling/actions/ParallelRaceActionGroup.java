@@ -53,7 +53,7 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     }
 
     @Override
-    public ParallelRaceActionGroup alongWith(Action... actions) {
+    public ParallelRaceActionGroup raceWith(Action... actions) {
         return add(actions);
     }
 
