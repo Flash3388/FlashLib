@@ -29,6 +29,10 @@ public class TankDriveAction extends ActionBase {
     public TankDriveAction(TankDrive driveInterface, double right, double left) {
         this(driveInterface, new TankDriveSpeed(right, left));
     }
+
+    public TankDriveAction(TankDrive driveInterface, double speed) {
+        this(driveInterface, speed, speed);
+    }
 	
 	@Override
 	public void execute() {
