@@ -1,7 +1,10 @@
 package com.flash3388.flashlib.vision.processing;
 
+import com.flash3388.flashlib.vision.VisionException;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -44,6 +47,23 @@ class ProcessorChainTest {
         for (int i = 0; i < PROCESSORS.length; i++) {
             verify(PROCESSORS[i], times(1)).process(eq(DATA[i]));
         }
+    }
+
+    @Test
+    public void process_withTypedProcessors_producesCorrectEndResult() throws Exception {
+        final Processor[] PROCESSORS = {
+                (Processor<Object, Integer>) Object::hashCode,
+                (Processor<Integer, String>) String::valueOf,
+                (Processor<String, Character>) input -> input.charAt(0)
+        };
+
+        final Object INPUT = new Object();
+        final Object EXPECTED_RESULT = String.valueOf(INPUT.hashCode()).charAt(0);
+
+        ProcessorChain processorChain = new ProcessorChain(PROCESSORS);
+        Object output = processorChain.process(INPUT);
+
+        assertThat(output, equalTo(EXPECTED_RESULT));
     }
 
     private Processor<Object, Object> mockProcessorWithInputOutput(Object input, Object output) throws Exception {
