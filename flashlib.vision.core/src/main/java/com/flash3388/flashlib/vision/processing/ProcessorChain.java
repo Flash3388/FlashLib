@@ -2,19 +2,39 @@ package com.flash3388.flashlib.vision.processing;
 
 import com.flash3388.flashlib.vision.VisionException;
 
-public class ProcessorChain<T, R, R2> implements Processor<T, R2> {
+import java.util.Arrays;
+import java.util.Collection;
 
-    private final Processor<T, R> mIn;
-    private final Processor<? super R, R2> mOut;
+public class ProcessorChain implements Processor {
 
-    public ProcessorChain(Processor<T, R> in, Processor<? super R, R2> out) {
-        mIn = in;
-        mOut = out;
+    private final Collection<Processor> mProcessors;
+
+    ProcessorChain(Collection<Processor> processors) {
+        mProcessors = processors;
+    }
+
+    ProcessorChain(Processor... processors) {
+        this(Arrays.asList(processors));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, R, R2> Processor<T, R2> create(Processor<T, R> in, Processor<? super R, R2> out) {
+        return new ProcessorChain(in, out);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object process(Object input) throws VisionException {
+        Object out = input;
+        for (Processor processor : mProcessors) {
+            out = processor.process(out);
+        }
+        return out;
     }
 
     @Override
-    public R2 process(T input) throws VisionException {
-        R out = mIn.process(input);
-        return mOut.process(out);
+    public Processor pipeTo(Processor processor) {
+        mProcessors.add(processor);
+        return this;
     }
 }

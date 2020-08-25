@@ -8,7 +8,7 @@ public interface Processor<T, R> {
     R process(T input) throws VisionException;
 
     default <R2> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
-        return new ProcessorChain<T, R, R2>(this, processor);
+        return ProcessorChain.create(this, processor);
     }
 
     default Processor<T, R> divergeIn(Pipeline<? super T> pipeline) {
