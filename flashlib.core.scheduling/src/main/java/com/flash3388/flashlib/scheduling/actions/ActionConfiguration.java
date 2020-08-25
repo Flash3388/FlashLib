@@ -73,6 +73,7 @@ public class ActionConfiguration {
     public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, boolean runWhenDisabled) {
         mRequirements = new HashSet<>(requirements);
         mTimeout = timeout;
+        mName = name;
         mRunWhenDisabled = runWhenDisabled;
     }
 
