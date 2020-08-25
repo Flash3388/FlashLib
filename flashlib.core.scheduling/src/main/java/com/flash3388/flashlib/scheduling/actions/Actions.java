@@ -93,8 +93,4 @@ public final class Actions {
 
         return trigger;
     }
-
-    public static ConditionalAction when(BooleanSupplier condition) {
-        return new ConditionalAction(condition, null, null);
-    }
 }
