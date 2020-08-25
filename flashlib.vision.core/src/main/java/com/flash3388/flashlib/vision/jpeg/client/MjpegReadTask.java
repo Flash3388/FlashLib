@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.vision.jpeg.client;
 
 import com.flash3388.flashlib.vision.Pipeline;
+import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.jpeg.reader.JpegReader;
-import com.flash3388.flashlib.vision.processing.ProcessingException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class MjpegReadTask implements Runnable {
             try {
                 JpegImage image = mJpegReader.read();
                 mPipeline.process(image);
-            } catch (IOException | ProcessingException e) {
+            } catch (IOException | VisionException e) {
                 mLogger.error("Error reading and handling image", e);
             }
         }

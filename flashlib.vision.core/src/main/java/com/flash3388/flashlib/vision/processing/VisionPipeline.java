@@ -2,9 +2,9 @@ package com.flash3388.flashlib.vision.processing;
 
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
+import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.flash3388.flashlib.vision.processing.analysis.Analyser;
-import com.flash3388.flashlib.vision.processing.analysis.ImageAnalysingException;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -55,14 +55,10 @@ public class VisionPipeline<T extends Image, R> implements Pipeline<T> {
     }
 
     @Override
-    public void process(T input) throws ProcessingException {
-        try {
-            R out = mProcessor.process(input);
+    public void process(T input) throws VisionException {
+        R out = mProcessor.process(input);
 
-            Optional<Analysis> analysis = mAnalyser.analyse(input, out);
-            analysis.ifPresent(mAnalysisConsumer);
-        } catch (ImageAnalysingException e) {
-            throw new ProcessingException(e);
-        }
+        Optional<Analysis> analysis = mAnalyser.analyse(input, out);
+        analysis.ifPresent(mAnalysisConsumer);
     }
 }

@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.vision.cv.processing;
 
-import com.flash3388.flashlib.vision.processing.ProcessingException;
 import com.flash3388.flashlib.vision.processing.Processor;
 
 import java.util.function.Function;
@@ -18,7 +17,7 @@ public class ScoringProcessor<T, R extends Scorable> implements Processor<Stream
     }
 
     @Override
-    public Stream<R> process(Stream<T> input) throws ProcessingException {
+    public Stream<R> process(Stream<T> input) {
         return input.map(mScorableFactory)
                 .filter(mScorableFilter);
     }

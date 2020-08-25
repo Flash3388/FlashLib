@@ -1,14 +1,12 @@
 package com.flash3388.flashlib.vision;
 
-import com.flash3388.flashlib.vision.processing.ProcessingException;
-
 import java.util.Arrays;
 import java.util.Collection;
 
 @FunctionalInterface
 public interface Pipeline<T> {
 
-    void process(T input) throws ProcessingException;
+    void process(T input) throws VisionException;
 
     default Pipeline<T> divergeTo(Pipeline<? super T> pipeline) {
         return new SyncDivergingPipeline<>(Arrays.asList(this, pipeline));
@@ -27,7 +25,7 @@ public interface Pipeline<T> {
         }
 
         @Override
-        public void process(T input) throws ProcessingException {
+        public void process(T input) throws VisionException {
             for (Pipeline<? super T> pipeline : mPipelines) {
                 pipeline.process(input);
             }

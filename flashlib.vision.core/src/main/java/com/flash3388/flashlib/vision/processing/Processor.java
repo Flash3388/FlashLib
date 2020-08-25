@@ -1,10 +1,11 @@
 package com.flash3388.flashlib.vision.processing;
 
 import com.flash3388.flashlib.vision.Pipeline;
+import com.flash3388.flashlib.vision.VisionException;
 
 public interface Processor<T, R> {
 
-    R process(T input) throws ProcessingException;
+    R process(T input) throws VisionException;
 
     default <R2> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
         return new ProcessorChain<T, R, R2>(this, processor);
@@ -29,7 +30,7 @@ public interface Processor<T, R> {
         }
 
         @Override
-        public R2 process(T image) throws ProcessingException {
+        public R2 process(T image) throws VisionException {
             R out = mIn.process(image);
             return mOut.process(out);
         }
@@ -46,7 +47,7 @@ public interface Processor<T, R> {
         }
 
         @Override
-        public R process(T image) throws ProcessingException {
+        public R process(T image) throws VisionException {
             mPipeline.process(image);
             return mProcessor.process(image);
         }
@@ -63,7 +64,7 @@ public interface Processor<T, R> {
         }
 
         @Override
-        public R process(T image) throws ProcessingException {
+        public R process(T image) throws VisionException {
             R out = mProcessor.process(image);
             mPipeline.process(out);
             return out;
