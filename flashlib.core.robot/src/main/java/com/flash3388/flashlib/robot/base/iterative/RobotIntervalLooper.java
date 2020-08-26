@@ -25,7 +25,7 @@ public class RobotIntervalLooper implements RobotLooper {
     }
 
     @Override
-	public void doLoop(Clock clock, Runnable loopTask) {
+	public void startLooping(Clock clock, Runnable loopTask) {
         while(mRunLoopProperty.getAsBoolean()){
             Time start = clock.currentTime();
             loopTask.run();
@@ -43,7 +43,7 @@ public class RobotIntervalLooper implements RobotLooper {
 	}
 
 	@Override
-	public void stopLoop() {
+	public void stop() {
         mRunLoopProperty.setAsBoolean(false);
     }
 }

@@ -41,12 +41,12 @@ public class LoopingRobotControl extends GenericRobotControl implements BaseRobo
 
     @Override
     public final void robotMain() {
-        mRobotLooper.doLoop(getClock(), this::robotLoop);
+        mRobotLooper.startLooping(getClock(), this::robotLoop);
     }
 
     @Override
     public final void robotShutdown(){
-        mRobotLooper.stopLoop();
+        mRobotLooper.stop();
 
         getScheduler().cancelAllActions();
         mRobot.robotStop();

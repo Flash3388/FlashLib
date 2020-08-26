@@ -4,6 +4,6 @@ import com.flash3388.flashlib.time.Clock;
 
 public interface RobotLooper {
 
-    void doLoop(Clock clock, Runnable loopTask);
-    void stopLoop();
+    void startLooping(Clock clock, Runnable loopTask);
+    void stop();
 }
