@@ -54,6 +54,7 @@ public abstract class ActionGroupBase extends ActionBase implements ActionGroup 
 
         configure()
                 .setRunWhenDisabled(mRunWhenDisabled)
+                .requires(configuration.getRequirements())
                 .save();
 
         mActions.add(action);

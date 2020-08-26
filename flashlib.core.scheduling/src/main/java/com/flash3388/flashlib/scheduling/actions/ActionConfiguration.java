@@ -43,10 +43,15 @@ public class ActionConfiguration {
             return setTimeout(Time.INVALID);
         }
 
+        public Editor requires(Collection<? extends Requirement> requirements){
+            Objects.requireNonNull(requirements, "requirements is null");
+            mConfiguration.requires(requirements);
+            return this;
+        }
+
         public Editor requires(Requirement... requirements){
             Objects.requireNonNull(requirements, "requirements is null");
-            mConfiguration.requires(Arrays.asList(requirements));
-            return this;
+            return requires(Arrays.asList(requirements));
         }
 
         public Editor setName(String name) {
