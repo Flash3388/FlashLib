@@ -67,6 +67,11 @@ public class Time implements Comparable<Time> {
         return toUnit(TimeUnit.MILLISECONDS).value();
     }
 
+    public double valueAsSeconds() {
+        long millis = valueAsMillis();
+        return millis * 1e-3;
+    }
+
     public boolean isValid() {
         return mValue >= 0;
     }
