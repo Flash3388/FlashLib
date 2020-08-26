@@ -1,0 +1,41 @@
+def flashlibModules = [
+        project('flashlib.core'),
+        project('flashlib.core.hid'),
+        project('flashlib.core.io'),
+        project('flashlib.core.robot'),
+        project('flashlib.core.scheduling'),
+        project('flashlib.vision.core'),
+        project('flashlib.vision.cv')
+]
+
+flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }
+
+task flashlibSources(type: Jar, dependsOn: flashlibModules.classes) {
+    archiveFileName.set('flashlib-sources.jar')
+    destinationDirectory.set(rootProject.buildDir)
+
+    from files(flashlibModules.collect {
+        it.sourceSets.main.allSource
+    })
+}
+
+task flashlibJavadoc(type: Jar, dependsOn: flashlibModules.javadoc) {
+    archiveFileName.set('flashlib-javadoc.jar')
+    destinationDirectory.set(rootProject.buildDir)
+
+    from files(flashlibModules.collect {
+        it.javadoc.destinationDir
+    })
+}
+
+task flashlib(type: Jar, dependsOn: flashlibModules.assemble) {
+    dependsOn flashlibSources
+    dependsOn flashlibJavadoc
+
+    archiveFileName.set('flashlib.jar')
+    destinationDirectory.set(rootProject.buildDir)
+
+    from files(flashlibModules.collect {
+        it.sourceSets.main.output
+    })
+}

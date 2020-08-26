@@ -1,0 +1,7 @@
+apply from: rootProject.file('jcomponent.gradle')
+apply from: rootProject.file('instrumentation-test.gradle')
+
+dependencies {
+    api project(':flashlib.vision.core')
+    api group: 'org.openpnp', name: 'opencv', version: '3.4.2-2'
+}

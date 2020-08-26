@@ -1,0 +1,9 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':flashlib.vision.core')
+}
+
+mainClassName = 'example.Main'

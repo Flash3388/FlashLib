@@ -1,0 +1,9 @@
+apply from: rootProject.file('jcomponent.gradle')
+
+dependencies {
+    api project(':flashlib.core')
+    api project(':flashlib.core.scheduling')
+
+    api javabeans()
+    api jmath()
+}

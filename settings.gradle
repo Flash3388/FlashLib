@@ -1,6 +1,21 @@
 rootProject.name = 'flashlib'
 
-include 'flashcore'
-include 'flashutil'
-include 'flashcomm'
-include 'flashvision'
+include 'flashlib.core'
+include 'flashlib.core.scheduling'
+include 'flashlib.core.io'
+include 'flashlib.core.hid'
+include 'flashlib.core.robot'
+
+include 'flashlib.vision.core'
+include 'flashlib.vision.cv'
+
+include 'examples:tankdrive'
+include 'examples:tankdrive-modes'
+include 'examples:tankdrive-system'
+include 'examples:tankdrive-system-custom'
+include 'examples:tankdrive-system-xbox'
+include 'examples:pnuematics-system'
+include 'examples:basic-robot'
+
+include 'examples:basic-vision'
+include 'examples:cv-vision'

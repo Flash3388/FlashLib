@@ -1,7 +1,0 @@
-apply from: rootProject.file('jcomponent.gradle')
-
-dependencies {
-    implementation javabeans()
-    implementation jmath()
-    implementation gson()
-}

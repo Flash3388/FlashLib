@@ -1,0 +1,8 @@
+apply from: rootProject.file('jcomponent.gradle')
+apply from: rootProject.file('component-benchmark.gradle')
+
+dependencies {
+    api project(':flashlib.core')
+
+    api jmath()
+}
