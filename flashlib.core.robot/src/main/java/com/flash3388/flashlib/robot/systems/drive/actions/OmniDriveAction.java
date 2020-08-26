@@ -16,6 +16,8 @@ public class OmniDriveAction extends ActionBase {
     public OmniDriveAction(OmniDrive driveInterface, Supplier<? extends OmniDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
+
+        requires(driveInterface);
     }
 
     public OmniDriveAction(OmniDrive driveInterface, OmniDriveSpeed driveSpeed) {

@@ -21,6 +21,8 @@ public class PidAction extends ActionBase {
         mProcessVariableSupplier = processVariableSupplier;
         mSetPointSupplier = setPointSupplier;
         mThresholdMargin = thresholdMargin;
+
+        requires(movable);
     }
 
     @Override

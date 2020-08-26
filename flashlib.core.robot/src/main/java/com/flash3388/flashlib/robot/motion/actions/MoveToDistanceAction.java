@@ -21,6 +21,8 @@ public class MoveToDistanceAction extends ActionBase {
         mDistanceSupplier = distanceSupplier;
         mWantedDistance = wantedDistance;
         mDistanceMargin = distanceMargin;
+
+        requires(movable);
     }
 
     @Override

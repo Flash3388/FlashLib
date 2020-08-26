@@ -32,8 +32,7 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
 
         // default actions
         mShooter.setDefaultAction(new RotateAction(mShooter,
-                mController.getAxis(XboxAxis.RT))
-                .requires(mShooter));
+                mController.getAxis(XboxAxis.RT)));
 
         // hid actions
         mController.getDpad().up().whenActive(new OpenPistonAction(mShooterDirector)

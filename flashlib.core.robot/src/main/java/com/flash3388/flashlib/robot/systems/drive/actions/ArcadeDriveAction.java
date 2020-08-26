@@ -16,6 +16,8 @@ public class ArcadeDriveAction extends ActionBase {
     public ArcadeDriveAction(TankDrive driveInterface, Supplier<? extends ArcadeDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
+
+        requires(driveInterface);
     }
 
 	public ArcadeDriveAction(TankDrive driveInterface, DoubleSupplier move, DoubleSupplier rotate) {

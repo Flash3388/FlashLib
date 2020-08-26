@@ -49,14 +49,11 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // default actions
         mDriveSystem.setDefaultAction(new OmniDriveAction(mDriveSystem,
                 mController.getAxis(XboxAxis.LeftStickY),
-                mController.getAxis(XboxAxis.LeftStickX))
-                .requires(mDriveSystem));
+                mController.getAxis(XboxAxis.LeftStickX)));
         mShooter.setDefaultAction(new RotateAction(mShooter,
-                mController.getAxis(XboxAxis.RT))
-                .requires(mShooter));
+                mController.getAxis(XboxAxis.RT)));
         mTurret.setDefaultAction(new RotateAction(mTurret,
-                mController.getAxis(XboxAxis.RightStickX))
-                .requires(mTurret));
+                mController.getAxis(XboxAxis.RightStickX)));
 
         // hid actions
         mController.getDpad().up().whenActive(turretAngleRotationAction(0.0));

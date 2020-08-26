@@ -15,6 +15,8 @@ public class RotateAction extends ActionBase {
 	public RotateAction(Rotatable rotatable, DoubleSupplier speedSource) {
 		this.mRotatable = rotatable;
 		this.mSpeedSource = speedSource;
+
+		requires(rotatable);
 	}
 
     public RotateAction(Rotatable rotatable, double speed) {

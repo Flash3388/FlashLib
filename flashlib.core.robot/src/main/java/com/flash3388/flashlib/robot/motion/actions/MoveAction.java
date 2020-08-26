@@ -14,6 +14,8 @@ public class MoveAction extends ActionBase {
     public MoveAction(Movable movable, DoubleSupplier speedSupplier) {
         mMovable = movable;
         mSpeedSupplier = speedSupplier;
+
+        requires(movable);
     }
 
     public MoveAction(Movable movable, double speed) {

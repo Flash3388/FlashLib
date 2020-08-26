@@ -17,6 +17,8 @@ public class HolonomicDriveAction extends ActionBase {
     public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<? extends HolonomicDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
+
+        requires(driveInterface);
     }
 
     public HolonomicDriveAction(HolonomicDrive driveInterface, HolonomicDriveSpeed driveSpeed) {

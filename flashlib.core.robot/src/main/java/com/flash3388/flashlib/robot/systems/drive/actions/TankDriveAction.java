@@ -16,6 +16,8 @@ public class TankDriveAction extends ActionBase {
     public TankDriveAction(TankDrive driveInterface, Supplier<? extends TankDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
+
+        requires(driveInterface);
     }
 
     public TankDriveAction(TankDrive driveInterface, TankDriveSpeed driveSpeed) {

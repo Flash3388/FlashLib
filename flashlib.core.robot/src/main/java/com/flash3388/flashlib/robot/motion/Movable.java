@@ -2,8 +2,9 @@ package com.flash3388.flashlib.robot.motion;
 
 import com.flash3388.flashlib.control.Direction;
 import com.flash3388.flashlib.control.Stoppable;
+import com.flash3388.flashlib.scheduling.Requirement;
 
-public interface Movable extends Stoppable {
+public interface Movable extends Stoppable, Requirement {
 
     void move(double speed);
 

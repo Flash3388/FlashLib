@@ -15,6 +15,8 @@ public class Move2dAction extends ActionBase {
     public Move2dAction(Movable2d movable, Supplier<? extends Vector2> motionVectorSupplier) {
         mMovable = movable;
         mMotionVectorSupplier = motionVectorSupplier;
+
+        requires(movable);
     }
 
     public Move2dAction(Movable2d movable, Vector2 vector) {

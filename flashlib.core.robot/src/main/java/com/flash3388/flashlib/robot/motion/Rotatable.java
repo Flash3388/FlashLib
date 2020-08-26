@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.motion;
 
 import com.flash3388.flashlib.control.Direction;
 import com.flash3388.flashlib.control.Stoppable;
+import com.flash3388.flashlib.scheduling.Requirement;
 
 /**
  * Interface for object with the capability to rotate.
@@ -9,7 +10,7 @@ import com.flash3388.flashlib.control.Stoppable;
  * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
-public interface Rotatable extends Stoppable {
+public interface Rotatable extends Stoppable, Requirement {
 	
 	/**
 	 * Rotates the system at a speed to a given direction.
