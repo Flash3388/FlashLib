@@ -3,7 +3,7 @@ package example;
 import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Camera;
-import com.flash3388.flashlib.vision.ImageSource;
+import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
@@ -90,12 +90,12 @@ public class Main {
         }
     }
 
-    private static Future<?> startVisionPipeline(ImageSource<CvImage> imageSource, Pipeline<CvImage> guiPipeline,
+    private static Future<?> startVisionPipeline(Source<CvImage> source, Pipeline<CvImage> guiPipeline,
                                                  ScheduledExecutorService executorService) {
         CvProcessing cvProcessing = new CvProcessing();
 
         // we'll poll images from imageSource with executeService
-        return imageSource.asyncPollAtFixedRate(executorService,
+        return source.asyncPollAtFixedRate(executorService,
                 Time.milliseconds(1000), // polling rate
                 guiPipeline.divergeTo(new VisionPipeline.Builder<CvImage, Optional<TargetScorable>>()
                         // we start to define the processors

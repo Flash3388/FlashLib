@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.vision;
 
-public interface Camera<T extends Image> extends ImageSource<T>, AutoCloseable {
+public interface Camera<T extends Image> extends Source<T>, AutoCloseable {
 
     int getFps();
 

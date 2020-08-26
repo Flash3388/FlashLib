@@ -2,16 +2,16 @@ package com.flash3388.flashlib.vision;
 
 import com.castle.util.throwables.ThrowableHandler;
 
-public class ImagePoller<T extends Image> implements Runnable {
+public class SourcePoller<T> implements Runnable {
 
-    private final ImageSource<? extends T> mImageSource;
+    private final Source<? extends T> mSource;
     private final Pipeline<? super T> mPipeline;
     private final ThrowableHandler mThrowableHandler;
 
-    public ImagePoller(ImageSource<? extends T> imageSource,
-                       Pipeline<? super T> pipeline,
-                       ThrowableHandler throwableHandler) {
-        mImageSource = imageSource;
+    public SourcePoller(Source<? extends T> source,
+                        Pipeline<? super T> pipeline,
+                        ThrowableHandler throwableHandler) {
+        mSource = source;
         mPipeline = pipeline;
         mThrowableHandler = throwableHandler;
     }
@@ -19,8 +19,8 @@ public class ImagePoller<T extends Image> implements Runnable {
     @Override
     public void run() {
         try {
-            T image = mImageSource.get();
-            mPipeline.process(image);
+            T data = mSource.get();
+            mPipeline.process(data);
         } catch (Throwable t) {
             mThrowableHandler.handle(t);
         }

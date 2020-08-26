@@ -4,16 +4,16 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Queue;
 
-public class ImageQueue<T extends Image> implements ImageSource<T> {
+public class QueueSource<T extends Image> implements Source<T> {
 
     private final Queue<T> mImageQueue;
 
-    public ImageQueue(Queue<T> imageQueue) {
+    public QueueSource(Queue<T> imageQueue) {
         mImageQueue = imageQueue;
     }
 
     @SafeVarargs
-    public ImageQueue(T... images) {
+    public QueueSource(T... images) {
         this(new ArrayDeque<>(Arrays.asList(images)));
     }
 

@@ -10,14 +10,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-public interface ImageSource<T extends Image> {
+public interface Source<T> {
 
     T get() throws VisionException;
 
     default Future<?> asyncPoll(ExecutorService executorService,
                                 Pipeline<? super T> pipeline,
                                 ThrowableHandler throwableHandler) {
-        return executorService.submit(new ImagePoller<>(this, pipeline, throwableHandler));
+        return executorService.submit(new SourcePoller<>(this, pipeline, throwableHandler));
     }
 
     default Future<?> asyncPollAtFixedRate(ScheduledExecutorService executorService,
@@ -25,7 +25,7 @@ public interface ImageSource<T extends Image> {
                                            Pipeline<? super T> pipeline,
                                            ThrowableHandler throwableHandler) {
         return executorService.scheduleAtFixedRate(
-                new ImagePoller<>(this, pipeline, throwableHandler),
+                new SourcePoller<>(this, pipeline, throwableHandler),
                 0, rate.value(), rate.unit());
     }
 
@@ -40,11 +40,11 @@ public interface ImageSource<T extends Image> {
         };
     }
 
-    static <T extends Image> ImageSource<T> of(T... images) {
-        return new ImageQueue<T>(images);
+    static <T extends Image> Source<T> of(T... images) {
+        return new QueueSource<T>(images);
     }
 
-    static <T extends Image> ImageSource<T> of(Collection<T> images) {
-        return new ImageQueue<T>(new ArrayDeque<>(images));
+    static <T extends Image> Source<T> of(Collection<T> images) {
+        return new QueueSource<T>(new ArrayDeque<>(images));
     }
 }

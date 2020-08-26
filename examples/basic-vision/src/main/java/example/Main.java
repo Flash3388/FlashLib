@@ -3,7 +3,7 @@ package example;
 import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
-import com.flash3388.flashlib.vision.ImageSource;
+import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
@@ -45,7 +45,7 @@ public class Main {
 
         // we'll use a set of premade images from some folder
         // this "static" ImageSource will provide the images one-by-one when polled.
-        ImageSource<Image> imageSource = ImageSource.of(loadImages(imageFolderPath));
+        Source<Image> source = Source.of(loadImages(imageFolderPath));
         // we need something to run the actual polling action and vision code
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         try {
@@ -71,7 +71,7 @@ public class Main {
             };
 
             // let's config and start the vision code
-            Future<?> future = startVisionPipeline(imageSource, guiPipeline, executorService);
+            Future<?> future = startVisionPipeline(source, guiPipeline, executorService);
 
             // when the window is closed, we should stop the vision code
             frame.addWindowListener(new WindowAdapter() {
@@ -88,10 +88,10 @@ public class Main {
         }
     }
 
-    private static Future<?> startVisionPipeline(ImageSource<Image> imageSource, Pipeline<Image> guiPipeline,
+    private static Future<?> startVisionPipeline(Source<Image> source, Pipeline<Image> guiPipeline,
                                                  ScheduledExecutorService executorService) {
         // we'll poll images from imageSource with executeService
-        return imageSource.asyncPollAtFixedRate(executorService,
+        return source.asyncPollAtFixedRate(executorService,
                 Time.milliseconds(1000), // polling rate
                 guiPipeline.divergeTo(new VisionPipeline.Builder<>()
                         .process((img) -> {
