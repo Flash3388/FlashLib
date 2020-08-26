@@ -1,65 +1,83 @@
 package robot;
 
-import com.flash3388.flashlib.math.Mathf;
-import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
-import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
-import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.hid.XboxAxis;
 import com.flash3388.flashlib.hid.XboxController;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.sensors.AnalogGyro;
-import com.flash3388.flashlib.io.devices.sensors.Gyro;
+import com.flash3388.flashlib.io.devices.actuators.SpeedControllerGroup;
+import com.flash3388.flashlib.robot.RobotControl;
+import com.flash3388.flashlib.robot.RobotInitializationException;
+import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
+import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.motion.actions.PidAction;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
-import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
+import com.flash3388.flashlib.robot.systems.pneumatics.SingleSolenoidSystem;
+import com.flash3388.flashlib.robot.systems.pneumatics.actions.ClosePistonAction;
+import com.flash3388.flashlib.robot.systems.pneumatics.actions.OpenPistonAction;
+import robot.pnuematics.StubSolenoid;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 
     private final OmniDriveSystem mDriveSystem;
     private final SingleMotorSystem mShooter;
-    private final SingleMotorSystem mTurret;
-    private final Gyro mTurretGyro;
-    private final XboxController mController;
+    private final SingleSolenoidSystem mShooterPiston;
 
-    private final PidController mTurretPidController;
+    private final XboxController mController;
 
     public UserRobot(RobotControl robotControl) throws RobotInitializationException {
         super(robotControl);
 
+        // This examples showcases a robot with several systems, controlled
+        // directly by the user with HIDs.
+
+        // Our robot will have an Omni-based drive, with one speed controller
+        // for each side (front, right, back and left).
         mDriveSystem = new OmniDriveSystem(
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_FRONT)),
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_RIGHT)),
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_BACK)),
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.DRIVE_MOTOR_LEFT))
         );
-        mShooter = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)));
-        mTurret = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.TURRET_MOTOR)));
-        mTurretGyro = new AnalogGyro(getIoInterface().newAnalogInput(RobotMap.TURRET_GYRO));
+        // We also have a shooter, based  on 2 motors. We'll use a SpeedControllerGroup
+        // to combine them.
+        mShooter = new SingleMotorSystem(new SpeedControllerGroup(
+                new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)),
+                new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR2))
+        ));
+        // Out shooter has a piston bellow it, which raises or lowers it.
+        // When the piston is open, we'll shoot high.
+        // When it's closed, we'll shoot low.
+        // To control pistons, se use solenoids. Let's assume we have 1 piston
+        // and thus 1 solenoid and create a system to control that.
+        mShooterPiston = new SingleSolenoidSystem(new StubSolenoid(RobotMap.SHOOTER_SOLENOID));
 
-        mController = getHidInterface().newXboxController(RobotMap.MAIN_CONTROLLER);
+        // We'll use an xbox controller to control the robot.
+        mController = getHidInterface().newXboxController(RobotMap.XBOX);
 
-        mTurretPidController = new PidController(1.0, 0.2, 0.3, 0.0);
-
-        // default actions
+        // The drive system can have a default action, which simply
+        // moves it based on the xbox controller.
         mDriveSystem.setDefaultAction(new OmniDriveAction(mDriveSystem,
-                mController.getAxis(XboxAxis.LeftStickY),
-                mController.getAxis(XboxAxis.LeftStickX)));
-        mShooter.setDefaultAction(new RotateAction(mShooter,
-                mController.getAxis(XboxAxis.RT)));
-        mTurret.setDefaultAction(new RotateAction(mTurret,
+                mController.getAxis(XboxAxis.RightStickY),
                 mController.getAxis(XboxAxis.RightStickX)));
 
-        // hid actions
-        mController.getDpad().up().whenActive(turretAngleRotationAction(0.0));
-        mController.getDpad().right().whenActive(turretAngleRotationAction(90.0));
-        mController.getDpad().down().whenActive(turretAngleRotationAction(180.0));
-        mController.getDpad().left().whenActive(turretAngleRotationAction(270.0));
+        // We'll control the shooter by holding down the RT.
+        // This is something that we usually do with buttons and RT is an Axis,
+        // so we'll need to make a button out of it.
+        // This is quite simple, we just need to provide some threshold in the axis
+        // value that would indicate that the button is "active".
+        // We also need to indicate if it's directional, i.e. if the button can be
+        // active if it passes the threshold to either side (- and +). However, RT
+        // has only 0->1 values, so it can't be directional.
+        mController.getAxis(XboxAxis.RT).asButton(0.8, false)
+                .whileActive(new RotateAction(mShooter, 0.6));
+
+        // We'll use the DPad to control the shooter piston.
+        // The DPad as 4 buttons: up, down, left, right. We'll use UP to raise and DOWN to
+        // lower the shooter, i.e. open and close the piston respectively.
+        mController.getDpad().up().whenActive(new OpenPistonAction(mShooterPiston));
+        mController.getDpad().down().whenActive(new ClosePistonAction(mShooterPiston));
     }
 
     @Override
@@ -90,12 +108,5 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
     @Override
     public void modePeriodic(RobotMode mode) {
 
-    }
-
-    private Action turretAngleRotationAction(double destinationAngle) {
-        return new PidAction(mTurretPidController, mTurret,
-                ()-> Mathf.shortestAngularDistance(mTurretGyro.getAngle(), destinationAngle),
-                ()-> 0.0, 1.0)
-                .requires(mTurret);
     }
 }

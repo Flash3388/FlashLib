@@ -11,5 +11,5 @@ public class RobotMap {
     public static final IoChannel SHOOTER_SOLENOID2 = new IoChannel.Stub();
     public static final IoChannel SHOOTER_MOTOR = new IoChannel.Stub();
 
-    public static final HidChannel MAIN_CONTROLLER = new HidChannel.Stub();
+    public static final HidChannel STICK = new HidChannel.Stub();
 }

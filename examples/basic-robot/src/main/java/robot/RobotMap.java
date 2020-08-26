@@ -12,8 +12,8 @@ public class RobotMap {
     public static final IoChannel DRIVE_MOTOR_BACK = new IoChannel.Stub();
     public static final IoChannel DRIVE_MOTOR_LEFT = new IoChannel.Stub();
     public static final IoChannel SHOOTER_MOTOR = new IoChannel.Stub();
-    public static final IoChannel TURRET_MOTOR = new IoChannel.Stub();
-    public static final IoChannel TURRET_GYRO = new IoChannel.Stub();
+    public static final IoChannel SHOOTER_MOTOR2 = new IoChannel.Stub();
+    public static final IoChannel SHOOTER_SOLENOID = new IoChannel.Stub();
 
-    public static final HidChannel MAIN_CONTROLLER = new HidChannel.Stub();
+    public static final HidChannel XBOX = new HidChannel.Stub();
 }
