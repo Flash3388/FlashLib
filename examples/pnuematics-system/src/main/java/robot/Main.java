@@ -1,11 +1,11 @@
 package robot;
 
-import com.flash3388.flashlib.robot.base.RobotFactory;
-import com.flash3388.flashlib.robot.RobotMain;
-import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
-import com.flash3388.flashlib.robot.base.iterative.LoopingRobotControl;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.robot.RobotMain;
+import com.flash3388.flashlib.robot.base.RobotFactory;
+import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
+import com.flash3388.flashlib.robot.base.iterative.LoopingRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
 import com.flash3388.flashlib.time.Clock;

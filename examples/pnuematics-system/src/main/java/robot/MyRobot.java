@@ -1,12 +1,11 @@
 package robot;
 
 import com.flash3388.flashlib.hid.Hid;
-import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
-import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
-import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.hid.XboxAxis;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.io.devices.pneumatics.SolenoidGroup;
+import com.flash3388.flashlib.robot.RobotControl;
+import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
+import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
