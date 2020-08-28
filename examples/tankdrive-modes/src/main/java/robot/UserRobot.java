@@ -1,6 +1,6 @@
 package robot;
 
-import com.flash3388.flashlib.hid.Hid;
+import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.io.devices.actuators.SpeedController;
@@ -15,8 +15,8 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
     private final SpeedController mDriveRight;
     private final SpeedController mDriveLeft;
 
-    private final Hid mStickRight;
-    private final Hid mStickLeft;
+    private final Joystick mStickRight;
+    private final Joystick mStickLeft;
 
     public UserRobot(RobotControl robotControl) throws RobotInitializationException {
         super(robotControl);
@@ -31,8 +31,8 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
 
         // Creating the joysticks.
         // We will use these joysticks to control the motions of the drive system.
-        mStickRight = getHidInterface().newGenericHid(RobotMap.HID_RIGHT);
-        mStickLeft = getHidInterface().newGenericHid(RobotMap.HID_LEFT);
+        mStickRight = getHidInterface().newJoystick(RobotMap.HID_RIGHT);
+        mStickLeft = getHidInterface().newJoystick(RobotMap.HID_LEFT);
 
         // Go to modePeriodic
     }

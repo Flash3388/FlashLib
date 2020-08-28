@@ -5,6 +5,7 @@ import com.flash3388.flashlib.hid.Button;
 import com.flash3388.flashlib.hid.Hid;
 import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.Pov;
 import com.flash3388.flashlib.hid.XboxController;
 
@@ -50,6 +51,15 @@ public class GenericHidInterface implements HidInterface {
 
         ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.HID);
         return new GenericHid(mInterface, channelInt);
+    }
+
+    @Override
+    public Joystick newJoystick(HidChannel channel) {
+        GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
+        int channelInt = genericHidChannel.intValue();
+
+        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.JOYSTICK);
+        return new GenericJoystick(mInterface, channelInt);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package robot;
 
-import com.flash3388.flashlib.hid.Hid;
+import com.flash3388.flashlib.hid.Joystick;
+import com.flash3388.flashlib.hid.JoystickButton;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.io.devices.pneumatics.SolenoidGroup;
 import com.flash3388.flashlib.robot.RobotControl;
@@ -19,7 +20,7 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
     private final SingleMotorSystem mShooter;
     private final SingleSolenoidSystem mShooterDirector;
 
-    private final Hid mStick;
+    private final Joystick mStick;
 
     public MyRobot(RobotControl robotControl) {
         super(robotControl);
@@ -37,10 +38,10 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID2)));
 
         // We'll create some joystick to control our small robot.
-        mStick = getHidInterface().newGenericHid(RobotMap.STICK);
+        mStick = getHidInterface().newJoystick(RobotMap.STICK);
 
-        // To shoot, we'll use the trigger button from the joystick (usually numbered 0).
-        mStick.getButton(0).whileActive(new RotateAction(mShooter, 0.6));
+        // To shoot, we'll use the trigger button from the joystick.
+        mStick.getButton(JoystickButton.TRIGGER).whileActive(new RotateAction(mShooter, 0.6));
 
         // Let's also make buttons to control the pistons, allowing us to raise
         // or lower our shooter.

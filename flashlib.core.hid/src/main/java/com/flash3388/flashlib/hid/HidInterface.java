@@ -7,6 +7,7 @@ public interface HidInterface {
     Pov newPov(HidChannel channel);
 
     Hid newGenericHid(HidChannel channel);
+    Joystick newJoystick(HidChannel channel);
     XboxController newXboxController(HidChannel channel);
 
     class Stub implements HidInterface {
@@ -28,6 +29,11 @@ public interface HidInterface {
 
         @Override
         public Hid newGenericHid(HidChannel channel) {
+            throw new UnsupportedOperationException("stub");
+        }
+
+        @Override
+        public Joystick newJoystick(HidChannel channel) {
             throw new UnsupportedOperationException("stub");
         }
 

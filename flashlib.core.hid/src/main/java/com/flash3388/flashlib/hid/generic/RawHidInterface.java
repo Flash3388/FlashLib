@@ -7,7 +7,9 @@ public interface RawHidInterface {
         BUTTON,
         POV,
         HID,
-        XBOX
+        XBOX,
+        JOYSTICK
+        ;
     }
 
     int NO_HID_CHANNEL = -1;
