@@ -16,7 +16,6 @@ import java.util.function.BooleanSupplier;
 public interface Button extends BooleanSupplier, Invertable, Trigger {
 
     /**
-     * {@inheritDoc}
      * <p>
      *     Gets the button value. <b>true</b> if active, <b>false</b> otherwise.
      * </p>

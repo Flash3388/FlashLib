@@ -3,6 +3,12 @@ package com.flash3388.flashlib.hid;
 import com.beans.BooleanProperty;
 import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
 
+/**
+ * A {@link Button} implementation which is modified directly from user code and has to be
+ * manually updated using {@link #setAsBoolean(boolean)}, hence: <em>manual</em>.
+ *
+ * @since FlashLib 3.0.0
+ */
 public class ManualButton extends SchedulerTrigger implements Button, BooleanProperty {
 
     private boolean mIsInverted;

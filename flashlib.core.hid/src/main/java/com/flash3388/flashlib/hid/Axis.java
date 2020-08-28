@@ -23,7 +23,6 @@ import java.util.function.DoubleSupplier;
 public interface Axis extends DoubleSupplier, Invertable {
 
     /**
-     * {@inheritDoc}
      * <p>
      *     Gets the value from the axis, normally ranging between -1 and 1 as an indication of
      *     power in percentages (0.3 = 30%) and direction (-0.3 = backward, 0.3 = forward).
@@ -47,8 +46,7 @@ public interface Axis extends DoubleSupplier, Invertable {
     void setInverted(boolean inverted);
 
     /**
-     * Returns a limited version of this {@link Axis}. This new version,
-     * limits the values returned by the axis.
+     * Returns a limited version of this {@link Axis}. This new version limits the values returned by the axis.
      * There are two types of limits:
      * <ul>
      *     <li>Threshold indicates the minimum absolute value an axis can produce. If the actual value is bellow
