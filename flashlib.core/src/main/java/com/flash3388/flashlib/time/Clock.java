@@ -10,15 +10,14 @@ public interface Clock {
     /**
      * Gets the current time. This doesn't necessarily represent any real world time,
      * but rather a timestamp. It's meaning depends on the implementation.
+     * <p>At any given time, this code conforms to:</p>
+     * <pre>
+     *     Time time = clock.currentTime();
+     *     Time time2 = clock.currentTime();
+     *
+     *     assert time2.largerThanOrEquals(time);
+     * </pre>
      * <p>
-     *     At any given time, this code conforms to:
-     *     <pre>
-     *         Time time = clock.currentTime();
-     *         Time time2 = clock.currentTime();
-     *
-     *         assert time2.largerThanOrEquals(time);
-     *     </pre>
-     *
      *     Whether <code>time2</code> is actually larger than <code>time</code> depends on the precision
      *     of the clock.
      * </p>

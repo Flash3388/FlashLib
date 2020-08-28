@@ -16,7 +16,7 @@ public interface Pov extends IntSupplier {
     /**
      * {@inheritDoc}
      * <p>
-     *     Gets the value from the POV, ranging from 0 -> 360 if the switch is used,
+     *     Gets the value from the POV, ranging from 0 -&gt; 360 if the switch is used,
      *     or <code>-1</code> if the switch is not used.
      * </p>
      */

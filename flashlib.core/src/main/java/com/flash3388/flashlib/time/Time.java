@@ -18,7 +18,7 @@ public class Time implements Comparable<Time> {
     private final long mValue;
     private final TimeUnit mUnit;
 
-    private Time(long value, TimeUnit unit) {
+    Time(long value, TimeUnit unit) {
         mValue = value;
         mUnit = Objects.requireNonNull(unit, "time unit");
     }
@@ -147,12 +147,11 @@ public class Time implements Comparable<Time> {
 
     /**
      * Returns {@link #value()} in {@link TimeUnit#MILLISECONDS}.
-     * <p>
-     *     Equivalent to using:
-     *     <pre>
-     *         time.toUnit(TimeUnit.MILLISECONDS).value()
-     *     </pre>
-     * </p>
+     * <p>Equivalent to using:</p>
+     * <pre>
+     *     time.toUnit(TimeUnit.MILLISECONDS).value()
+     * </pre>
+     *
      *
      * @return value in milliseconds.
      */
@@ -163,12 +162,11 @@ public class Time implements Comparable<Time> {
     /**
      * Returns {@link #value()} in {@link TimeUnit#SECONDS}, as a floating point value,
      * maintaining the data if the value is lower than <b>1</b> seconds.
-     * <p>
-     *     Equivalent to using:
-     *     <pre>
-     *         time.valueAsMillis() * 1e-3
-     *     </pre>
-     * </p>
+     * <p>Equivalent to using:</p>
+     * <pre>
+     *     time.valueAsMillis() * 1e-3
+     * </pre>
+     *
      *
      * @return value in seconds.
      */
@@ -184,22 +182,23 @@ public class Time implements Comparable<Time> {
      *      is replacement for using <b>null</b> values to indicate a lack of value, and
      *      can be used when initializing or setting {@link Time} objects to <em>empty</em>.
      *      So instead of:
-     *      <pre>
-     *          private Time timeout;
+     * </p>
+     * <pre>
+     *     private Time timeout;
      *
-     *          public void clearTimeoutValue() {
-     *               timeout = null;
-     *          }
-     *      </pre>
-     *      This can be done:
-     *      <pre>
-     *          private Time timeout;
+     *     public void clearTimeoutValue() {
+     *         timeout = null;
+     *     }
+     * </pre>
+     * <p>This can be done:</p>
+     * <pre>
+     *     private Time timeout;
      *
-     *          public void clearTimeoutValue() {
-     *               timeout = Time.INVALID;
-     *          }
-     *      </pre>
-     *
+     *     public void clearTimeoutValue() {
+     *         timeout = Time.INVALID;
+     *     }
+     * </pre>
+     * <p>
      *      The advantage of {@link Time#INVALID} is that it won't cause a {@link NullPointerException}. However
      *      some operations may fail when using it, so it is recommended to check this method before.
      * </p>
@@ -259,7 +258,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this < other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &lt; other</code>, <b>false</b> otherwise.
      *
      * @see #lessThan(Time)
      */
@@ -276,7 +275,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this < other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &lt; other</code>, <b>false</b> otherwise.
      *
      * @see #lessThanOrEquals(Time)
      * @see #largerThan(Time)
@@ -294,7 +293,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this <= other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &lt;= other</code>, <b>false</b> otherwise.
      *
      * @see #lessThan(Time)
      * @see #largerThan(Time)
@@ -309,7 +308,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this > other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &gt; other</code>, <b>false</b> otherwise.
      *
      * @see #largerThan(Time)
      */
@@ -326,7 +325,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this > other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &gt; other</code>, <b>false</b> otherwise.
      *
      * @see #lessThan(Time)
      * @see #largerThanOrEquals(Time)
@@ -344,7 +343,7 @@ public class Time implements Comparable<Time> {
      *
      * @param other time to compare against.
      *
-     * @return <b>true</b> if <code>this >= other</code>, <b>false</b> otherwise.
+     * @return <b>true</b> if <code>this &gt;= other</code>, <b>false</b> otherwise.
      *
      * @see #lessThan(Time)
      * @see #largerThan(Time)

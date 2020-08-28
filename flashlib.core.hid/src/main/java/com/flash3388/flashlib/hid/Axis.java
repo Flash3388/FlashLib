@@ -13,7 +13,7 @@ import java.util.function.DoubleSupplier;
  *     Joystick). It is possible to use {@link #setInverted(boolean)} to remedy that if needed.
  * </p>
  * <p>
- *     Some special axes may produce a half range (-1 -> 0 or 0 -> 1), like
+ *     Some special axes may produce a half range (-1 -&gt; 0 or 0 -&gt; 1), like
  *     the Xbox's Right and Left Triggers. Those are considered half-axes, but
  *     are still represented by this class.
  * </p>
@@ -30,7 +30,7 @@ public interface Axis extends DoubleSupplier, Invertable {
      * </p>
      * <p>
      *     If {@link #isInverted()} is <b>true</b>, the direction is reversed, i.e.
-     *     <code>-0.5 -> 0.5</code>.
+     *     <code>-0.5 -&gt; 0.5</code>.
      * </p>
      */
     @Override
@@ -40,7 +40,7 @@ public interface Axis extends DoubleSupplier, Invertable {
      * {@inheritDoc}
      * <p>
      *     If inverted <b>true</b>: any values from {@link #getAsDouble()} will be reversed in sign,
-     *     i.e. <code>-0.5 -> 0.5</code>.
+     *     i.e. <code>-0.5 -&gt; 0.5</code>.
      * </p>
      */
     @Override
@@ -71,8 +71,8 @@ public interface Axis extends DoubleSupplier, Invertable {
      * (i.e. <b>true</b>) if:
      * <ul>
      *     <li>If isDirectional <b>true</b>:
-     *     <code>|axisValue| > |threshold| && signum(axisValue) == signum(threshold)</code></li>
-     *     <li>If isDirectional <b>false</b> <code>|axisValue| > |threshold|</code></li>
+     *     <code>|axisValue| &gt; |threshold| and signum(axisValue) == signum(threshold)</code></li>
+     *     <li>If isDirectional <b>false</b> <code>|axisValue| &gt; |threshold|</code></li>
      * </ul>
      *
      * @param threshold minimum value for the axis for the button to be considered <em>activated</em>.

@@ -2,15 +2,14 @@ package com.flash3388.flashlib.control;
 
 /**
  * Defines a direction of motion.
- * <p>
- *     Can be used with conjecture of absolute speeds.
- *     <pre>
- *         <b>double</b> absoluteSpeed = 0.2;
- *         Direction direction = Direction.FORWARD;
+ * <p>Can be used with conjecture of absolute speeds.</p>
+ * <pre>
+ *    <b>double</b> absoluteSpeed = 0.2;
+ *    Direction direction = Direction.FORWARD;
  *
- *         <b>double</b> nonAbsolute = absoluteSpeed * direction.sign();
- *     </pre>
- * </p>
+ *    <b>double</b> nonAbsolute = absoluteSpeed * direction.sign();
+ * </pre>
+ *
  *
  * @since FlashLib 2.0.0
  */
