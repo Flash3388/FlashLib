@@ -48,7 +48,7 @@ public class SchedulerTrigger implements Trigger, Requirement {
         return mCurrentState == TriggerState.ACTIVE;
     }
 
-    public void schedule(BooleanSupplier activeCondition) {
+    public void scheduleAutoUpdate(BooleanSupplier activeCondition) {
         stopScheduling();
 
         mUpdateAction = new TriggerActivationAction(mScheduler, activeCondition, this);

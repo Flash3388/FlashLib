@@ -15,8 +15,6 @@ public class ManualButton extends SchedulerTrigger implements Button, BooleanPro
 
     public ManualButton() {
         mIsInverted = false;
-
-        schedule(this);
     }
 
     @Override

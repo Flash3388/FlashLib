@@ -10,7 +10,7 @@ public final class Triggers {
 
     public static Trigger onCondition(BooleanSupplier condition) {
         SchedulerTrigger trigger = new SchedulerTrigger();
-        trigger.schedule(condition);
+        trigger.scheduleAutoUpdate(condition);
 
         return trigger;
     }
