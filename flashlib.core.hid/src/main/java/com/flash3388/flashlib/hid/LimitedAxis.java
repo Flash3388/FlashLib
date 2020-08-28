@@ -1,5 +1,12 @@
 package com.flash3388.flashlib.hid;
 
+/**
+ * A wrapping implementation of {@link Axis} which limits the values
+ * of a given axis object, as defined by {@link Axis#limit(double, double)}.
+ * All axis calls are delegated to the wrapped axis.
+ *
+ * @since FlashLib 3.0.0
+ */
 public class LimitedAxis implements Axis {
 
     private final Axis mAxis;
@@ -33,6 +40,11 @@ public class LimitedAxis implements Axis {
     @Override
     public boolean isInverted() {
         return mAxis.isInverted();
+    }
+
+    @Override
+    public Axis limit(double valueThreshold, double maxValue) {
+        return mAxis.limit(valueThreshold, maxValue);
     }
 
     @Override
