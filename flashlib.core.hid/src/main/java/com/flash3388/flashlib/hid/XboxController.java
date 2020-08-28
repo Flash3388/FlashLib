@@ -7,6 +7,7 @@ public interface XboxController extends Hid {
     default Axis getAxis(XboxAxis axis) {
         return getAxis(axis.axisIndex());
     }
+
     default Button getButton(XboxButton button) {
         return getButton(button.buttonIndex());
     }
@@ -18,10 +19,12 @@ public interface XboxController extends Hid {
         }
         return getDpad();
     }
+
     @Override
     default int getPovCount() {
         return 1;
     }
+
     @Override
     default Iterable<Pov> povs() {
         return Collections.singleton(getDpad());
