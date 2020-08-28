@@ -25,6 +25,6 @@ public class SystemNanoClock implements Clock {
     @Override
     public Time currentTime() {
         long timeNanos = System.nanoTime() - mStartTimeNanos;
-        return new Time(timeNanos, TimeUnit.NANOSECONDS);
+        return Time.of(timeNanos, TimeUnit.NANOSECONDS);
     }
 }

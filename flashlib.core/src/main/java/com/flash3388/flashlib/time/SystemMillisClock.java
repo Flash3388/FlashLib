@@ -18,6 +18,6 @@ public class SystemMillisClock implements Clock {
      */
     @Override
     public Time currentTime() {
-        return new Time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        return Time.of(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 }
