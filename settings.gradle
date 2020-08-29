@@ -16,6 +16,7 @@ include 'examples:tankdrive-system-custom'
 include 'examples:tankdrive-system-xbox'
 include 'examples:pnuematics-system'
 include 'examples:basic-robot'
+include 'examples:robot-manual-mode-control'
 
 include 'examples:basic-vision'
 include 'examples:cv-vision'
