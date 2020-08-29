@@ -5,6 +5,7 @@ import com.beans.properties.SimpleDoubleProperty;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleSupplier;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -15,16 +16,16 @@ import java.util.function.DoubleBinaryOperator;
  * and a measured process variable and applies a correction based on proportional, integral, and derivative 
  * terms (sometimes denoted P, I, and D respectively) which give their name to the controller type.
  * </p>
- * @author Tom Tzook
- * @since FlashLib 1.0.0
+ * @author Tom Tzook and Daniel Mikhailov
+ * @since FlashLib 3.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
 public class PidController implements DoubleBinaryOperator {
 
-    private final DoubleProperty mKp;
-    private final DoubleProperty mKi;
-    private final DoubleProperty mKd;
-    private final DoubleProperty mKf;
+    private final DoubleSupplier mKp;
+    private final DoubleSupplier mKi;
+    private final DoubleSupplier mKd;
+    private final DoubleSupplier mKf;
 
     private double mMinimumOutput;
     private double mMaximumOutput;
@@ -47,7 +48,7 @@ public class PidController implements DoubleBinaryOperator {
      * @param kd the differential constant
      * @param kf the feed forward constant
      */
-    public PidController(DoubleProperty kp, DoubleProperty ki, DoubleProperty kd, DoubleProperty kf){
+    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
         mKp = kp;
         mKi = ki;
         mKd = kd;
@@ -78,38 +79,6 @@ public class PidController implements DoubleBinaryOperator {
     public void reset(){
         mIsFirstRun = true;
         mTotalError = 0;
-    }
-
-    /**
-     * The proportional constant property
-     * @return the proportional property
-     */
-    public DoubleProperty kpProperty(){
-        return mKp;
-    }
-
-    /**
-     * The integral constant property
-     * @return the integral property
-     */
-    public DoubleProperty kiProperty(){
-        return mKi;
-    }
-
-    /**
-     * The differential constant property
-     * @return the differential property
-     */
-    public DoubleProperty kdProperty(){
-        return mKd;
-    }
-
-    /**
-     * The feed forward constant property
-     * @return the feed forward property
-     */
-    public DoubleProperty kfProperty(){
-        return mKf;
     }
 
     /**
