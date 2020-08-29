@@ -20,4 +20,8 @@ public class FullySuppliedPidController extends ProcessVariableSupplierPidContro
     public double getAsDouble() {
         return applyAsDouble(mSetpoint.getAsDouble());
     }
+
+    public boolean hasReached(double margin) {
+        return hasReached(mSetpoint.getAsDouble(), margin);
+    }
 }
