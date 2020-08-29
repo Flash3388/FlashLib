@@ -52,7 +52,9 @@ public interface RobotControl {
      * returned value is null, {@link RobotMode#DISABLED} is returned, otherwise {@link Supplier#get()}
      * is returned.
      *
-     * @param <T> type of the {@link RobotMode} desired. Should be a class implementing it.
+     * @param type class object representing the type of the {@link RobotMode} desired.
+     *             Should be a class implementing it.
+     * @param <T> type parameter of the {@link RobotMode} desired. Should be a class implementing it.
      *
      * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
      *

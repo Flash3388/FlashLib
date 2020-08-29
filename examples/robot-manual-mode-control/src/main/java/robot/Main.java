@@ -24,11 +24,14 @@ public class Main {
                 .build();
 
         RobotMain.start((l, resourceHolder)-> {
+            // We'll use ManualRobotModeSupplier, it will allow us to set the value from the robot
+            // only using set(RobotMode).
             ManualRobotModeSupplier manualRobotModeSupplier = new ManualRobotModeSupplier();
             manualRobotModeSupplier.set(RobotMode.DISABLED);
 
             RobotControl robotControl = new GenericRobotControl(l, resourceHolder,
                     DependencyProvider.cascadingInitializationBuilder(l, resourceHolder)
+                            // Still need to pass the mode supplier here to the robot control.
                             .add(()-> manualRobotModeSupplier)
                             .add(IoInterface.Stub::new)
                             .add(HidInterface.Stub::new)
@@ -38,6 +41,9 @@ public class Main {
                                 return RobotFactory.newDefaultScheduler(clock, l);
                             })
                             .build());
+
+            // When defining the creation of UserRobot, we make sure to pass the manual mode supplier to
+            // the constructor, so it could be used.
             RobotBase robotBase = new LoopingRobotBase(rc -> new UserRobot(rc, manualRobotModeSupplier));
 
             return new RobotImpl(robotControl, robotBase);
