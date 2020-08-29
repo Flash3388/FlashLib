@@ -13,9 +13,9 @@ import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
-import com.flash3388.flashlib.robot.systems.pneumatics.SingleSolenoidSystem;
-import com.flash3388.flashlib.robot.systems.pneumatics.actions.ClosePistonAction;
-import com.flash3388.flashlib.robot.systems.pneumatics.actions.OpenPistonAction;
+import com.flash3388.flashlib.robot.systems.valves.SingleSolenoidSystem;
+import com.flash3388.flashlib.robot.systems.valves.actions.CloseValveAction;
+import com.flash3388.flashlib.robot.systems.valves.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
@@ -76,8 +76,8 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // We'll use the DPad to control the shooter piston.
         // The DPad as 4 buttons: up, down, left, right. We'll use UP to raise and DOWN to
         // lower the shooter, i.e. open and close the piston respectively.
-        mController.getDpad().up().whenActive(new OpenPistonAction(mShooterPiston));
-        mController.getDpad().down().whenActive(new ClosePistonAction(mShooterPiston));
+        mController.getDpad().up().whenActive(new OpenValveAction(mShooterPiston));
+        mController.getDpad().down().whenActive(new CloseValveAction(mShooterPiston));
     }
 
     @Override

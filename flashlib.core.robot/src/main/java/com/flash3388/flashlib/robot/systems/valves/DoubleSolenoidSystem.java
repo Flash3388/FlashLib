@@ -1,9 +1,9 @@
-package com.flash3388.flashlib.robot.systems.pneumatics;
+package com.flash3388.flashlib.robot.systems.valves;
 
 import com.flash3388.flashlib.io.devices.valve.DoubleSolenoid;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
-public class DoubleSolenoidSystem extends Subsystem implements Piston {
+public class DoubleSolenoidSystem extends Subsystem implements Valve {
 
     private final DoubleSolenoid mDoubleSolenoid;
 
