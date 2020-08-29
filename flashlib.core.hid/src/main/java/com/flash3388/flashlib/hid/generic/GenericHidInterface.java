@@ -22,7 +22,7 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.AXIS);
+        ensureExistsChannelOfType(channelInt, ChannelType.AXIS);
         return new GenericAxis(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
     }
 
@@ -31,7 +31,7 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.BUTTON);
+        ensureExistsChannelOfType(channelInt, ChannelType.BUTTON);
         return new GenericButton(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
     }
 
@@ -40,7 +40,7 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.POV);
+        ensureExistsChannelOfType(channelInt, ChannelType.POV);
         return new GenericPov(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
     }
 
@@ -49,7 +49,7 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.HID);
+        ensureExistsChannelOfType(channelInt, ChannelType.HID);
         return new GenericHid(mInterface, channelInt);
     }
 
@@ -58,7 +58,7 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.JOYSTICK);
+        ensureExistsChannelOfType(channelInt, ChannelType.JOYSTICK);
         return new GenericJoystick(mInterface, channelInt);
     }
 
@@ -67,16 +67,16 @@ public class GenericHidInterface implements HidInterface {
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
-        ensureExistsChannelOfType(channelInt, RawHidInterface.ChannelType.XBOX);
+        ensureExistsChannelOfType(channelInt, ChannelType.XBOX);
         return new GenericXboxController(mInterface, channelInt);
     }
 
-    private void ensureExistsChannelOfType(int channel, RawHidInterface.ChannelType wantedType) {
+    private void ensureExistsChannelOfType(int channel, ChannelType wantedType) {
         if (!mInterface.hasChannel(channel)) {
             throw new IllegalArgumentException("No such channel " + channel);
         }
 
-        RawHidInterface.ChannelType actualType = mInterface.getChannelType(channel);
+        ChannelType actualType = mInterface.getChannelType(channel);
         if (!actualType.doesSupport(wantedType)) {
             throw new IllegalArgumentException(
                     String.format("Incompatible channel type %s, for channel %d (is %s)",
