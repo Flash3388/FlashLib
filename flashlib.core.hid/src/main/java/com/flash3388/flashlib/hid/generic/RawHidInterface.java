@@ -6,10 +6,19 @@ public interface RawHidInterface {
         AXIS,
         BUTTON,
         POV,
-        HID,
+        HID {
+            @Override
+            public boolean doesSupport(ChannelType other) {
+                return other == HID || other == XBOX || other == JOYSTICK;
+            }
+        },
         XBOX,
         JOYSTICK
         ;
+
+        public boolean doesSupport(ChannelType other) {
+            return this == other;
+        }
     }
 
     int NO_HID_CHANNEL = -1;

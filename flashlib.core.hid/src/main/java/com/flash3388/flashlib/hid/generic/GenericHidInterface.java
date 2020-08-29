@@ -77,7 +77,7 @@ public class GenericHidInterface implements HidInterface {
         }
 
         RawHidInterface.ChannelType actualType = mInterface.getChannelType(channel);
-        if (actualType != wantedType) {
+        if (!actualType.doesSupport(wantedType)) {
             throw new IllegalArgumentException(
                     String.format("Incompatible channel type %s, for channel %d (is %s)",
                             actualType, channel, wantedType));
