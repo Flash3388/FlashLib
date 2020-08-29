@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.control;
 
+import com.flash3388.flashlib.time.Clock;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
@@ -8,21 +9,24 @@ import java.util.function.DoubleUnaryOperator;
 public class ProcessVariableSupplierPidController extends PidController implements DoubleUnaryOperator {
 
     private final DoubleSupplier mProcessVariable;
+    private final Clock mClock;
 
-    public ProcessVariableSupplierPidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf, DoubleSupplier processVariable) {
+    public ProcessVariableSupplierPidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf, DoubleSupplier processVariable, Clock clock) {
         super(kp, ki, kd, kf);
         mProcessVariable = processVariable;
+        mClock = clock;
     }
 
-    public ProcessVariableSupplierPidController(double kp, double ki, double kd, double kf, DoubleSupplier processVariable) {
+    public ProcessVariableSupplierPidController(double kp, double ki, double kd, double kf, DoubleSupplier processVariable, Clock clock) {
         super(kp, ki, kd, kf);
         mProcessVariable = processVariable;
+        mClock = clock;
     }
 
 
     @Override
     public double applyAsDouble(double setpoint) {
-        return applyAsDouble(mProcessVariable.getAsDouble(), setpoint);
+        return calculate(mProcessVariable.getAsDouble(), setpoint, mClock.currentTime().valueAsSeconds());
     }
 
     public boolean hasReached(double setpoint, double margin) {

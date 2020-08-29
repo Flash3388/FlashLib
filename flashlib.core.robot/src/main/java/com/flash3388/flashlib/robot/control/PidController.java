@@ -2,9 +2,7 @@ package com.flash3388.flashlib.robot.control;
 
 import com.jmath.ExtendedMath;
 
-import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
-import java.util.function.DoubleUnaryOperator;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -19,7 +17,7 @@ import java.util.function.DoubleUnaryOperator;
  * @since FlashLib 3.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController implements DoubleBinaryOperator {
+public class PidController {
 
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
@@ -33,10 +31,10 @@ public class PidController implements DoubleBinaryOperator {
     private double mOutRampRate;
 
     private double mTotalError;
-    private double mPrevError;
+    private double mLastError;
+    private double mLastTimeSeconds;
 
     private double mLastOutput;
-    private double mLastProcessVariable;
 
     private boolean mIsFirstRun;
 
@@ -61,10 +59,10 @@ public class PidController implements DoubleBinaryOperator {
         mOutRampRate = 0;
 
         mTotalError = 0;
-        mPrevError = 0;
+        mLastError = 0;
+        mLastTimeSeconds = 0;
 
-        mLastProcessVariable = 0.0;
-        mLastOutput = 0.0;
+        mLastOutput = 0;
 
         mIsFirstRun = true;
     }
@@ -80,7 +78,8 @@ public class PidController implements DoubleBinaryOperator {
     public void reset(){
         mIsFirstRun = true;
         mTotalError = 0;
-        mPrevError = 0;
+        mLastError = 0;
+        mLastTimeSeconds = 0;
     }
 
     /**
@@ -148,8 +147,7 @@ public class PidController implements DoubleBinaryOperator {
      *
      * @return the compensation value from the PID loop calculation
      */
-    @Override
-    public double applyAsDouble(double processVariable, double setpoint) {
+    public double calculate(double processVariable, double setpoint, double currentTimeSeconds) {
         if(mSetPointRange != 0) {
             processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
@@ -162,16 +160,17 @@ public class PidController implements DoubleBinaryOperator {
         if(mIsFirstRun){
             mIsFirstRun = false;
             mLastOutput = pOut + fOut;
-            mLastProcessVariable = processVariable;
+            mLastError = error;
+            mLastTimeSeconds = currentTimeSeconds - 1;
         }
 
         double iOut = mKi.getAsDouble() * mTotalError;
-        double dOut = -mKd.getAsDouble() * (error - mPrevError);
+        double dOut = mKd.getAsDouble() * ((error - mLastError)/(currentTimeSeconds-mLastOutput));
 
         double output = pOut + iOut + dOut + fOut;
 
         mTotalError += error;
-        mPrevError = error;
+        mLastError = error;
 
         if(mMinimumOutput != mMaximumOutput && !ExtendedMath.constrained(output, mMinimumOutput, mMaximumOutput)) {
             mTotalError = error;
@@ -187,7 +186,7 @@ public class PidController implements DoubleBinaryOperator {
         }
 
         mLastOutput = output;
-        mLastProcessVariable = processVariable;
+        mLastTimeSeconds = currentTimeSeconds;
 
         return output;
     }
