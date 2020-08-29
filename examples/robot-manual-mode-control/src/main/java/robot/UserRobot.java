@@ -45,7 +45,19 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
 
     @Override
     public void robotPeriodic() {
+        // Let's say that we want to change modes when the user
+        // presses a button.
+        // The following if, will be true if the button is down
+        if (mStickRight.getButton(1).getAsBoolean()) {
+            // switch between the modes depending on which mode
+            // we used.
+            RobotMode newMode = getMode().equals(RobotMode.DISABLED) ?
+                    RUN_ROBOT : RobotMode.DISABLED;
 
+            // After changing this, the next run while call the new
+            // mode.
+            mRobotModeSupplier.set(newMode);
+        }
     }
 
     @Override
@@ -84,18 +96,6 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
             // We do the same for the left side.
             double left = mStickLeft.getAxis(JoystickAxis.Y).getAsDouble();
             mDriveLeft.set(left);
-        }
-
-        // Let's say that we want to change modes when the user
-        // presses a button.
-        // The following if, will be true if the button is down
-        if (mStickRight.getButton(1).getAsBoolean()) {
-            // switch between the modes depending on which mode
-            // we used.
-            RobotMode newMode = mode.equals(RobotMode.DISABLED) ?
-                    RUN_ROBOT : RobotMode.DISABLED;
-
-            mRobotModeSupplier.set(newMode);
         }
     }
 }
