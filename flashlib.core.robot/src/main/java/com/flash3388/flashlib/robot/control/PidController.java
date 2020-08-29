@@ -33,6 +33,7 @@ public class PidController implements DoubleBinaryOperator {
     private double mOutRampRate;
 
     private double mTotalError;
+    private double mPrevError;
 
     private double mLastOutput;
     private double mLastProcessVariable;
@@ -60,6 +61,7 @@ public class PidController implements DoubleBinaryOperator {
         mOutRampRate = 0;
 
         mTotalError = 0;
+        mPrevError = 0;
 
         mLastProcessVariable = 0.0;
         mLastOutput = 0.0;
@@ -78,6 +80,7 @@ public class PidController implements DoubleBinaryOperator {
     public void reset(){
         mIsFirstRun = true;
         mTotalError = 0;
+        mPrevError = 0;
     }
 
     /**
@@ -163,11 +166,12 @@ public class PidController implements DoubleBinaryOperator {
         }
 
         double iOut = mKi.getAsDouble() * mTotalError;
-        double dOut = -mKd.getAsDouble() * (processVariable - mLastProcessVariable);
+        double dOut = -mKd.getAsDouble() * (error - mPrevError);
 
         double output = pOut + iOut + dOut + fOut;
 
         mTotalError += error;
+        mPrevError = error;
 
         if(mMinimumOutput != mMaximumOutput && !ExtendedMath.constrained(output, mMinimumOutput, mMaximumOutput)) {
             mTotalError = error;
