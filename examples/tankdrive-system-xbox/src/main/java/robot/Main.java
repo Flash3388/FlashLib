@@ -6,7 +6,7 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.RobotMain;
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.RobotImpl;
+import com.flash3388.flashlib.robot.RobotImplementation;
 import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
 import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.LoopingRobotBase;
@@ -36,7 +36,7 @@ public class Main {
                             .build());
             RobotBase robotBase = new LoopingRobotBase(UserRobot::new);
 
-            return new RobotImpl(robotControl, robotBase);
+            return new RobotImplementation(robotControl, robotBase);
         }, logger);
     }
 }

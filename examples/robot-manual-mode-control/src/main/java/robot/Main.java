@@ -6,13 +6,12 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.RobotMain;
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.RobotImpl;
+import com.flash3388.flashlib.robot.RobotImplementation;
 import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
 import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.LoopingRobotBase;
 import com.flash3388.flashlib.robot.modes.ManualRobotModeSupplier;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.LoggerBuilder;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public class Main {
             // the constructor, so it could be used.
             RobotBase robotBase = new LoopingRobotBase(rc -> new UserRobot(rc, manualRobotModeSupplier));
 
-            return new RobotImpl(robotControl, robotBase);
+            return new RobotImplementation(robotControl, robotBase);
         }, logger);
     }
 }

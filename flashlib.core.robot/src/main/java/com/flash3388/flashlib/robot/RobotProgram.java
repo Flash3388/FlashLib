@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.base.RobotCreationException;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
@@ -42,7 +41,7 @@ public class RobotProgram {
         ResourceHolder resourceHolder = ResourceHolder.empty();
         try {
             mLogger.debug("Creating user robot class");
-            RobotImpl robot = mRobotCreator.create(mLogger, resourceHolder);
+            RobotImplementation robot = mRobotCreator.create(mLogger, resourceHolder);
             RunningRobot.setInstance(robot.getRobotControl());
 
             mLogger.debug("Initializing user robot");

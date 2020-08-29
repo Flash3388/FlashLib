@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.base;
+package com.flash3388.flashlib.robot;
 
 public class RobotCreationException extends Exception {
 
