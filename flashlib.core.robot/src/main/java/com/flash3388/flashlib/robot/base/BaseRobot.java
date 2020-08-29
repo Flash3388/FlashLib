@@ -3,6 +3,14 @@ package com.flash3388.flashlib.robot.base;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 
+/**
+ * Base interface for defining robot behaviour. User robot
+ * code should implement this, or an extension related to it.
+ *
+ * @since FlashLib 3.0.0
+ *
+ * @see com.flash3388.flashlib.robot.base.iterative.LoopingRobotControl
+ */
 public interface BaseRobot extends RobotControl {
 
     /**
