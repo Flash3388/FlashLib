@@ -40,14 +40,14 @@ public interface DoubleSolenoid {
     /**
      * Sets the value to the solenoid.
      *
-     * @param value {@link Value) indicating which solenoid to apply current to.
+     * @param value {@link Value} indicating which solenoid to apply current to.
      */
     void set(Value value);
 
     /**
      * Gets the current value of the solenoid.
      *
-     * @return {@link Value) indicating which solenoid has current applied to it.
+     * @return {@link Value} indicating which solenoid has current applied to it.
      */
     Value get();
 }
