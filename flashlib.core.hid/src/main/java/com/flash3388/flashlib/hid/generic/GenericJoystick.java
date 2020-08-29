@@ -18,9 +18,9 @@ public class GenericJoystick extends GenericHid implements Joystick {
     }
 
     @Override
-    public Pov getPov(int pov) {
-        if (pov != 0) {
-            throw new IllegalArgumentException("Unknown pov " + pov);
+    public Pov getPov(int index) {
+        if (index != 0) {
+            throw new IllegalArgumentException("Unknown pov " + index);
         }
         return mPov;
     }

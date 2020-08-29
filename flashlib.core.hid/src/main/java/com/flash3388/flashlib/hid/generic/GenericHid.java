@@ -43,12 +43,12 @@ public class GenericHid implements Hid {
     }
 
     @Override
-    public Axis getAxis(int axis) {
-        if (axis < 0 || axis >= mAxes.size()) {
-            throw new IllegalArgumentException("Unknown axis " + axis);
+    public Axis getAxis(int index) {
+        if (index < 0 || index >= mAxes.size()) {
+            throw new IllegalArgumentException("Unknown axis " + index);
         }
 
-        return mAxes.get(axis);
+        return mAxes.get(index);
     }
 
     @Override
@@ -62,12 +62,12 @@ public class GenericHid implements Hid {
     }
 
     @Override
-    public Button getButton(int button) {
-        if (button < 0 || button >= mButtons.size()) {
-            throw new IllegalArgumentException("Unknown button " + button);
+    public Button getButton(int index) {
+        if (index < 0 || index >= mButtons.size()) {
+            throw new IllegalArgumentException("Unknown button " + index);
         }
 
-        return mButtons.get(button);
+        return mButtons.get(index);
     }
 
     @Override
@@ -81,12 +81,12 @@ public class GenericHid implements Hid {
     }
 
     @Override
-    public Pov getPov(int pov) {
-        if (pov < 0 || pov >= mPovs.size()) {
-            throw new IllegalArgumentException("Unknown pov " + pov);
+    public Pov getPov(int index) {
+        if (index < 0 || index >= mPovs.size()) {
+            throw new IllegalArgumentException("Unknown pov " + index);
         }
 
-        return mPovs.get(pov);
+        return mPovs.get(index);
     }
 
     @Override
