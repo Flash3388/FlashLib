@@ -32,7 +32,7 @@ public class PidAction extends ActionBase {
 
     @Override
     public void execute() {
-        double value = mPidController.calculate(
+        double value = mPidController.applyAsDouble(
                 mProcessVariableSupplier.getAsDouble(),
                 mSetPointSupplier.getAsDouble());
 

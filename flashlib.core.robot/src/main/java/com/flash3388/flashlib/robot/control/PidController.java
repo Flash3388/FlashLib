@@ -19,13 +19,12 @@ import java.util.function.DoubleUnaryOperator;
  * @since FlashLib 3.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator {
+public class PidController implements DoubleBinaryOperator {
 
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
     private final DoubleSupplier mKd;
     private final DoubleSupplier mKf;
-    private final DoubleSupplier mProcessVariable;
 
     private double mMinimumOutput;
     private double mMaximumOutput;
@@ -47,14 +46,12 @@ public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator 
      * @param ki the integral constant
      * @param kd the differential constant
      * @param kf the feed forward constant
-     * @param processVariable the process value supplier
      */
-    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf, DoubleSupplier processVariable){
+    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
         mKp = kp;
         mKi = ki;
         mKd = kd;
         mKf = kf;
-        mProcessVariable = processVariable;
 
         mMinimumOutput = -1;
         mMaximumOutput = 1;
@@ -70,16 +67,8 @@ public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator 
         mIsFirstRun = true;
     }
 
-    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
-        this(kp, ki, kd, kf, () -> 0.0);
-    }
-
-    public PidController(double kp, double ki, double kd, double kf, DoubleSupplier processVariable) {
-        this(() -> kp, () -> ki, () ->  kd, () -> kf, processVariable);
-    }
-
     public PidController(double kp, double ki, double kd, double kf) {
-        this(kp, ki, kd, kf, () -> 0.0);
+        this(() -> kp, () -> ki, () ->  kd, () -> kf);
     }
 
     /**
@@ -149,18 +138,6 @@ public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator 
     }
 
     /**
-     * Calculates the output to the system to compensate for the error using the given process value supplier.
-     *
-     * @param setpoint the desired set point.
-     *
-     * @return the compensation value from the PID loop calculation
-     */
-    @Override
-    public double applyAsDouble(double setpoint) {
-        return applyAsDouble(mProcessVariable.getAsDouble(), setpoint);
-    }
-
-    /**
      * Calculates the output to the system to compensate for the error.
      *
      * @param processVariable the process variable of the system.
@@ -170,18 +147,14 @@ public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator 
      */
     @Override
     public double applyAsDouble(double processVariable, double setpoint) {
-        return calculate(processVariable, setpoint);
-    }
-
-    private double calculate(double processVariable, double setPoint){
         if(mSetPointRange != 0) {
             processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
 
-        double error = setPoint - processVariable;
+        double error = setpoint - processVariable;
 
         double pOut = mKp.getAsDouble() * error;
-        double fOut = mKf.getAsDouble() * setPoint;
+        double fOut = mKf.getAsDouble() * setpoint;
 
         if(mIsFirstRun){
             mIsFirstRun = false;

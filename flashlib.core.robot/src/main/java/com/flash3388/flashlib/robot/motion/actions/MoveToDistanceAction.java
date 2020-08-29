@@ -32,7 +32,7 @@ public class MoveToDistanceAction extends ActionBase {
 
     @Override
     public void execute() {
-        double pidResult = mPidController.calculate(mDistanceSupplier.getAsDouble(), mWantedDistance);
+        double pidResult = mPidController.applyAsDouble(mDistanceSupplier.getAsDouble(), mWantedDistance);
         mMovable.move(pidResult);
     }
 
