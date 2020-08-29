@@ -11,6 +11,41 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+/**
+ * A helper class for robot bases to allow them having a more comfortable
+ * syntax for using {@link RobotControl}.
+ * By extending this, robot bases can now access {@link RobotControl} methods
+ * by calling this class, so instead of:
+ * <pre>
+ *     class Robot {
+ *         private final RobotControl mRobotControl;
+ *
+ *         public Robot(RobotControl robotControl) {
+ *             mRobotControl = robotControl;
+ *         }
+ *
+ *         void someMethod() {
+ *             Time now = mRobotControl.getClock().currentTime();
+ *             ....
+ *         }
+ *     }
+ * </pre>
+ * It is possible to:
+ * <pre>
+ *     class Robot extends DelegatingRobotControl {
+ *         public Robot(RobotControl robotControl) {
+ *             super(robotControl);
+ *         }
+ *
+ *         void someMethod() {
+ *             Time now = getClock().currentTime();
+ *             ....
+ *         }
+ *     }
+ * </pre>
+ *
+ * @since FlashLib 2.0.0
+ */
 public class DelegatingRobotControl implements RobotControl {
 
     private final RobotControl mRobotControl;

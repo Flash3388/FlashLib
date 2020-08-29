@@ -5,6 +5,14 @@ import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
+/**
+ * A {@link RobotBase} implementation for loop-based (iterative) robots.
+ * Perfect when using with mode-oriented algorithms.
+ *
+ * @since FlashLib 2.0.0
+ *
+ * @see IterativeRobot
+ */
 public class LoopingRobotBase implements RobotBase {
 
     private final IterativeRobot.Initializer mRobotInitializer;
@@ -16,6 +24,12 @@ public class LoopingRobotBase implements RobotBase {
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
+    /**
+     * Creates a new looping base.
+     *
+     * @param robotInitializer initializer for user robot logic.
+     * @param robotLooper looper object to run the loops periodically.
+     */
     public LoopingRobotBase(IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
         mRobotInitializer = robotInitializer;
         mRobotLooper = robotLooper;
@@ -26,6 +40,17 @@ public class LoopingRobotBase implements RobotBase {
         mWasCurrentModeInitialized = false;
     }
 
+    /**
+     * Creates a new looping base.
+     * <p>
+     *     Loops at a period of <em>20ms</em> using {@link Thread#sleep(long)} to
+     *     wait the time between each runs.
+     * </p>
+     *
+     * @param robotInitializer initializer for user robot logic.
+     *
+     * @see RobotIntervalLooper
+     */
     public LoopingRobotBase(IterativeRobot.Initializer robotInitializer) {
         this(robotInitializer, new RobotIntervalLooper());
     }
