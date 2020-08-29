@@ -11,8 +11,7 @@ import java.util.List;
 /**
  * A container for multiple speed controllers. Grouping controllers in such manner allows simultaneous 
  * control of several motors. When motors should be activated together, this container is extremely useful.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public class SpeedControllerGroup implements SpeedController {
@@ -31,10 +30,6 @@ public class SpeedControllerGroup implements SpeedController {
 
 	public SpeedControllerGroup(SpeedController... controllers) {
 	    this(Arrays.asList(controllers));
-    }
-
-    public final List<SpeedController> getControllers() {
-        return mControllers;
     }
 
     /**

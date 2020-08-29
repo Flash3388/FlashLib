@@ -5,8 +5,7 @@ import com.flash3388.flashlib.io.Pwm;
 /**
  * Control class for a Pwm-controlled speed controller device. This class integrates
  * {@link PwmController} and {@link SpeedController} into one.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class PwmSpeedController extends PwmController implements SpeedController {

@@ -2,13 +2,19 @@ package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.control.Stoppable;
 
+/**
+ * Represents controller component for position-based actuator,
+ * such as a <em>Servo</em>, <em>Stepper</em> and such.
+ *
+ * @since FlashLib 2.0.0
+ */
 public interface PositionController extends Stoppable {
-    // TODO: COMPILE A STRONGER CONTRACT FOR THIS INTERFACE: values ranges, and meaning.
 
     /**
-     * Sets the position of the component controlled by this object. <em>Position</em> is a decimal which indicates the position of the object.
+     * Sets the position of the component controlled by this object.
      *
-     * @param position the position to set the controlled object.
+     * @param position the position to set the controlled object between 0 and 1,
+     *                 representing percentages from initial position to max position.
      */
     void set(double position);
 

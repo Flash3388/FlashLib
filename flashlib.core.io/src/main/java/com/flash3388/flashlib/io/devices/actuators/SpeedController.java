@@ -6,8 +6,7 @@ import com.flash3388.flashlib.control.Stoppable;
 
 /**
  * Interface for speed controllers.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public interface SpeedController extends Stoppable, Invertable {

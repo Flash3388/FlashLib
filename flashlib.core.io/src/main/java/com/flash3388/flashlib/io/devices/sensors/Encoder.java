@@ -9,8 +9,7 @@ import java.io.Closeable;
  * In reality, relative encoder simply measure parts of rotations and send a pulse through a digital channel, 
  * but use those it is possible to calculate a lot of data. For example, to calculate rotation rate, the time between
  * 2 pulses is calculated and then the amount of degrees passed during those 2 pulses is divided by the time.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public interface Encoder extends Closeable {

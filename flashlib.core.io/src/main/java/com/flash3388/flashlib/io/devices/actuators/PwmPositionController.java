@@ -3,6 +3,12 @@ package com.flash3388.flashlib.io.devices.actuators;
 import com.flash3388.flashlib.io.Pwm;
 import com.jmath.ExtendedMath;
 
+/**
+ * A {@link PositionController} connected via a {@link Pwm} port, where the duty
+ * cycle represents the position.
+ *
+ * @since FlashLib 2.0.0
+ */
 public class PwmPositionController extends PwmController implements PositionController {
 
     /**

@@ -7,8 +7,7 @@ import com.flash3388.flashlib.io.Pwm;
  * controller uses a Pwm port for control and is those a {@link PwmSpeedController}.
  * <p>
  * Note that this speed controller has been discontinued by CTRE.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class Talon extends PwmSpeedController {

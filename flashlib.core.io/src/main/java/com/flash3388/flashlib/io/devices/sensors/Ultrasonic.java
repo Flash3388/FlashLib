@@ -18,8 +18,7 @@ import java.io.IOException;
  * short ~10 us pulse to send a sound wave, the echo channel is used to receive a pulse until the sound wave is returned.
  * The length of the pulse measured in the echo channel is the time the passed from when the sound wave was sent until the time
  * it was received. This time value is then divided by 2 and multiplied by the speed of sound.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class Ultrasonic implements RangeFinder {
@@ -43,32 +42,6 @@ public class Ultrasonic implements RangeFinder {
 		this.mCounter = counter;
 		this.mPingPort = pingChannel;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Releases both the counter and the ping channel.
-	 */
-	@Override
-	public void close() throws IOException {
-        Closer closer = Closer.empty();
-
-		if (mCounter != null) {
-			closer.add(mCounter);
-            mCounter = null;
-		}
-
-		if (mPingPort != null) {
-			closer.add(mPingPort);
-            mPingPort = null;
-		}
-
-        try {
-            closer.close();
-        } catch (Exception e) {
-            Throwables.throwAsType(e, IOException.class, IOException::new);
-        }
-    }
 	
 	/**
 	 * Sends a pulse to the ultrasonic sending our a sound wave.
@@ -98,11 +71,37 @@ public class Ultrasonic implements RangeFinder {
 	 * 0.0 is returned.
 	 */
 	@Override
-	public double getRangeCM() {
+	public double getRangeCm() {
 		if(!isRangeValid()) {
 			return 0.0;
 		}
 
 		return mCounter.getPulseLength() * SPEED_OF_SOUND * 0.5;
 	}
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Releases both the counter and the ping channel.
+     */
+    @Override
+    public void close() throws IOException {
+        Closer closer = Closer.empty();
+
+        if (mCounter != null) {
+            closer.add(mCounter);
+            mCounter = null;
+        }
+
+        if (mPingPort != null) {
+            closer.add(mPingPort);
+            mPingPort = null;
+        }
+
+        try {
+            closer.close();
+        } catch (Exception e) {
+            Throwables.throwAsType(e, IOException.class, IOException::new);
+        }
+    }
 }

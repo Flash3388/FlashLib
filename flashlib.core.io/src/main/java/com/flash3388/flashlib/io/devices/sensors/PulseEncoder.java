@@ -8,8 +8,7 @@ import java.io.IOException;
 
 /**
  * Pulse based encoder sensor.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class PulseEncoder implements Encoder {
@@ -38,24 +37,6 @@ public class PulseEncoder implements Encoder {
         mLastCheckTime = Time.INVALID_VALUE;
 
 		reset();
-	}
-	
-	private void checkRest(){
-		if(mShouldCheckRest){
-			long time = mClock.currentTime().valueAsMillis();
-			int count = getRaw();
-			
-			if(mLastCheckTime == Time.INVALID_VALUE) {
-				mLastCheckTime = time;
-			}
-
-			if(mLastCount == count && time - mLastCheckTime >= mRestTimeout) {
-				reset();
-			}
-			
-			mLastCheckTime = time;
-			mLastCount = count;
-		}
 	}
 	
 	/**
@@ -158,19 +139,6 @@ public class PulseEncoder implements Encoder {
 	public long getRestTimeout(){
 		return mRestTimeout;
 	}
-			
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Releases the pulse counter object used.
-	 */
-	@Override
-	public void close() throws IOException {
-		if(mCounter != null) {
-			mCounter.close();
-			mCounter = null;
-		}
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -243,4 +211,35 @@ public class PulseEncoder implements Encoder {
 	public boolean getDirection(){
 		return mCounter.getDirection();
 	}
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Releases the pulse counter object used.
+     */
+    @Override
+    public void close() throws IOException {
+        if(mCounter != null) {
+            mCounter.close();
+            mCounter = null;
+        }
+    }
+
+    private void checkRest(){
+        if(mShouldCheckRest){
+            long time = mClock.currentTime().valueAsMillis();
+            int count = getRaw();
+
+            if(mLastCheckTime == Time.INVALID_VALUE) {
+                mLastCheckTime = time;
+            }
+
+            if(mLastCount == count && time - mLastCheckTime >= mRestTimeout) {
+                reset();
+            }
+
+            mLastCheckTime = time;
+            mLastCount = count;
+        }
+    }
 }

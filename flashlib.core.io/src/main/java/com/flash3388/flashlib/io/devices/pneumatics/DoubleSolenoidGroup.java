@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * A group of {@link DoubleSolenoid} controlled as one.
+ *
+ * @since FlashLib 3.0.0.
+ */
 public class DoubleSolenoidGroup implements DoubleSolenoid {
 
     private final Collection<DoubleSolenoid> mSolenoids;

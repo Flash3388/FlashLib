@@ -8,8 +8,7 @@ import java.io.IOException;
 /**
  * Control class for Pwm-controlled electronic devices. This class should be extended by electronic devices who use
  * Pwm and not instantiated.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class PwmController implements Closeable {

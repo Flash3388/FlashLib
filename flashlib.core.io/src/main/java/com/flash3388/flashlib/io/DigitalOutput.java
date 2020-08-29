@@ -3,8 +3,7 @@ package com.flash3388.flashlib.io;
 /**
  * Interface for digital output ports. This interface is used by devices
  * which require digital output ports for output, allowing for different implementations.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public interface DigitalOutput extends IoPort {
@@ -23,6 +22,7 @@ public interface DigitalOutput extends IoPort {
 	 * @param high digital output value: true for HIGH, false for low.
 	 */
 	void set(boolean high);
+
 	/**
 	 * Sets the digital port to HIGH output for a given time, creating
 	 * a digital pulse.

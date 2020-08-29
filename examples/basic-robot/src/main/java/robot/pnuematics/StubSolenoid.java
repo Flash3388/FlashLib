@@ -13,7 +13,7 @@ public class StubSolenoid implements Solenoid {
     }
 
     @Override
-    public void set(boolean on) {
+    public void set(boolean open) {
 
     }
 

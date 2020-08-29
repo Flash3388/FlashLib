@@ -5,8 +5,7 @@ import com.flash3388.flashlib.io.devices.sensors.AnalogAccelerometer;
 /**
  * Interface for analog input ports. This interface is used by devices
  * which require analog input ports for input, allowing for different implementations.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public interface AnalogInput extends IoPort {
@@ -18,6 +17,7 @@ public interface AnalogInput extends IoPort {
 	 * @return analog input value
 	 */
 	int getValue();
+
 	/**
 	 * Gets the current analog voltage measured on the port.
 	 * 
@@ -47,6 +47,7 @@ public interface AnalogInput extends IoPort {
 	 * @return maximum voltage on the port in volts.
 	 */
 	double getMaxVoltage();
+
 	/**
 	 * Gets the maximum raw value of the port. This value corresponds to
 	 * a voltage value and depends on the used implementation.
@@ -69,6 +70,7 @@ public interface AnalogInput extends IoPort {
 	default int voltsToValue(double volts){
 		return (int) (volts / getMaxVoltage() * getMaxValue());
 	}
+
 	/**
 	 * Converts a given analog value to voltage in volts according to this port's analog input
 	 * configuration. 

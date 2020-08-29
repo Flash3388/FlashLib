@@ -5,8 +5,7 @@ import java.io.Closeable;
 /**
  * Interface for gyroscope sensors. Gyroscope sensors measure angular rotation and are used to measure
  * the angular position in one or more axes of an object they are placed on.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public interface Gyro extends Closeable {

@@ -1,29 +1,24 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import java.io.Closeable;
+import java.util.function.DoubleSupplier;
 
 /**
  * Interface for accelerometer sensors. Accelerometers are used for measuring acceleration of the robot.
- * 
- * @author Tom Tzook
- * @since FlashLib 1.0.0
+ *
+ * @since FlashLib 3.0.0
  */
-public interface Accelerometer extends Closeable {
-	/**
-	 * Gets the x-axis acceleration
-	 * @return acceleration along the x-axis
-	 */
-	double getX();
+public interface Accelerometer extends Closeable, DoubleSupplier {
 
-	/**
-	 * Gets the y-axis acceleration
-	 * @return acceleration along the y-axis
-	 */
-	double getY();
+    /**
+     * Gets the acceleration value measured by the sensor in G (9.8 meters per second squared).
+     *
+     * @return acceleration in G.
+     */
+    double getAcceleration();
 
-	/**
-	 * Gets the z-axis acceleration
-	 * @return acceleration along the z-axis
-	 */
-	double getZ();
+    @Override
+    default double getAsDouble() {
+        return getAcceleration();
+    }
 }

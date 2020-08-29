@@ -81,7 +81,7 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * to convert it from volts to centimeters.
 	 */
 	@Override
-	public double getRangeCM() {
+	public double getRangeCm() {
 		return mInput.getVoltage() / mSensitivity;
 	}
 }

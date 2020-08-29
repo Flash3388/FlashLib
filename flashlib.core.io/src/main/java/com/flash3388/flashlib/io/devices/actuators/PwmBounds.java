@@ -1,5 +1,11 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
+/**
+ * Defines boundaries for communication over PWM with
+ * an actuator controller.
+ *
+ * @since FlashLib 1.0.0
+ */
 public class PwmBounds {
 
     private static final double CENTER_OFFSET = 0.01;

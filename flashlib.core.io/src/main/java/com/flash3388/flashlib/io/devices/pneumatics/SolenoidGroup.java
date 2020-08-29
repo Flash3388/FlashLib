@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * A group of {@link Solenoid} controlled as one.
+ *
+ * @since FlashLib 3.0.0.
+ */
 public class SolenoidGroup implements Solenoid {
 
     private final Collection<Solenoid> mSolenoids;
@@ -22,9 +27,9 @@ public class SolenoidGroup implements Solenoid {
     }
 
     @Override
-    public void set(boolean on) {
+    public void set(boolean open) {
         for (Solenoid solenoid : mSolenoids) {
-            solenoid.set(on);
+            solenoid.set(open);
         }
     }
 
