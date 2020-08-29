@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.base;
+package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SingleThreadScheduler;

@@ -2,7 +2,7 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
-import com.flash3388.flashlib.robot.base.BaseRobot;
+import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
@@ -177,7 +177,7 @@ public interface RobotControl {
      *
      * @param closeables collection of resources to close on robot stop.
      *
-     * @see BaseRobot#robotShutdown()
+     * @see RobotBase#robotShutdown()
      */
     void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
@@ -187,7 +187,7 @@ public interface RobotControl {
      *
      * @param closeables resources to close on robot stop.
      *
-     * @see BaseRobot#robotShutdown()
+     * @see RobotBase#robotShutdown()
      */
     default void registerCloseables(AutoCloseable... closeables) {
         registerCloseables(Arrays.asList(closeables));

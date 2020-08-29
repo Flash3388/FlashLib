@@ -1,59 +1,56 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
+import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
-import com.flash3388.flashlib.robot.base.BaseRobot;
-import com.flash3388.flashlib.robot.base.generic.DependencyProvider;
-import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
+import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.util.resources.ResourceHolder;
-import org.slf4j.Logger;
 
-public class LoopingRobotControl extends GenericRobotControl implements BaseRobot {
+public class LoopingRobotBase implements RobotBase {
 
     private final IterativeRobot.Initializer mRobotInitializer;
     private final RobotLooper mRobotLooper;
 
+    private RobotControl mRobotControl;
     private IterativeRobot mRobot;
     private RobotMode mCurrentMode;
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
 
-    public LoopingRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider,
-            IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
-        super(logger, resourceHolder, dependencyProvider);
+    public LoopingRobotBase(IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
         mRobotInitializer = robotInitializer;
         mRobotLooper = robotLooper;
 
+        mRobotControl = null;
         mCurrentMode = null;
         mLastMode = null;
         mWasCurrentModeInitialized = false;
     }
 
-    public LoopingRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider,
-                                  IterativeRobot.Initializer robotInitializer) {
-        this(logger, resourceHolder, dependencyProvider, robotInitializer, new RobotIntervalLooper());
+    public LoopingRobotBase(IterativeRobot.Initializer robotInitializer) {
+        this(robotInitializer, new RobotIntervalLooper());
     }
 
     @Override
-    public final void robotInit() throws RobotInitializationException {
-        mRobot = mRobotInitializer.init(this);
+    public final void robotInit(RobotControl robotControl) throws RobotInitializationException {
+        mRobotControl = robotControl;
+        mRobot = mRobotInitializer.init(robotControl);
     }
 
     @Override
     public final void robotMain() {
-        mRobotLooper.startLooping(getClock(), this::robotLoop);
+        mRobotLooper.startLooping(mRobotControl.getClock(), this::robotLoop);
     }
 
     @Override
     public final void robotShutdown(){
         mRobotLooper.stop();
 
-        getScheduler().cancelAllActions();
+        mRobotControl.getScheduler().cancelAllActions();
         mRobot.robotStop();
     }
 
     protected final void robotLoop(){
-        mCurrentMode = getMode();
+        mCurrentMode = mRobotControl.getMode();
 
         if (!mCurrentMode.equals(mLastMode)) {
             mLastMode = mCurrentMode;
@@ -69,10 +66,10 @@ public class LoopingRobotControl extends GenericRobotControl implements BaseRobo
     }
 
     private void initMode(RobotMode mode) {
-        getLogger().trace("Initializing mode {}", mode);
+        mRobotControl.getLogger().trace("Initializing mode {}", mode);
 
         if (mode.isDisabled()) {
-            getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
+            mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
             mRobot.disabledInit();
         } else {
             mRobot.modeInit(mode);
@@ -80,16 +77,16 @@ public class LoopingRobotControl extends GenericRobotControl implements BaseRobo
     }
 
     private void periodicMode(RobotMode mode) {
-        getLogger().trace("Periodic mode {}", mode);
+        mRobotControl.getLogger().trace("Periodic mode {}", mode);
 
-        getScheduler().run(mode);
+        mRobotControl.getScheduler().run(mode);
         if (mode.isDisabled()) {
             mRobot.disabledPeriodic();
         } else {
             mRobot.modePeriodic(mode);
         }
 
-        getLogger().trace("Robot periodic");
+        mRobotControl.getLogger().trace("Robot periodic");
 
         mRobot.robotPeriodic();
     }

@@ -1,7 +1,7 @@
-package com.flash3388.flashlib.robot.base;
+package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.robot.RobotInitializationException;
-import com.flash3388.flashlib.robot.RunningRobot;
+import com.flash3388.flashlib.robot.base.RobotBase;
+import com.flash3388.flashlib.robot.base.RobotCreationException;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
@@ -42,11 +42,11 @@ public class RobotProgram {
         ResourceHolder resourceHolder = ResourceHolder.empty();
         try {
             mLogger.debug("Creating user robot class");
-            BaseRobot robot = mRobotCreator.create(mLogger, resourceHolder);
-            RunningRobot.setInstance(robot);
+            RobotImpl robot = mRobotCreator.create(mLogger, resourceHolder);
+            RunningRobot.setInstance(robot.getRobotControl());
 
             mLogger.debug("Initializing user robot");
-            runRobot(robot);
+            runRobot(robot.getRobotControl(), robot.getRobotBase());
         } finally {
             try {
                 resourceHolder.freeAll();
@@ -56,14 +56,14 @@ public class RobotProgram {
         }
     }
 
-    private void runRobot(BaseRobot robot) throws RobotInitializationException {
-        robot.robotInit();
+    private void runRobot(RobotControl robotControl, RobotBase robotBase) throws RobotInitializationException {
+        robotBase.robotInit(robotControl);
         try {
             mLogger.debug("Starting user robot");
-            robot.robotMain();
+            robotBase.robotMain();
         } finally {
             mLogger.debug("Shutting down user robot");
-            robot.robotShutdown();
+            robotBase.robotShutdown();
         }
     }
 }

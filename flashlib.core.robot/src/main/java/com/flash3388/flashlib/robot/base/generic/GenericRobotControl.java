@@ -22,7 +22,7 @@ public class GenericRobotControl implements RobotControl {
     private final Scheduler mScheduler;
     private final Clock mClock;
 
-    protected GenericRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider) {
+    public GenericRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider) {
         mLogger = logger;
         mResourceHolder = resourceHolder;
         mRobotModeSupplier = dependencyProvider.getRobotModeSupplier();
