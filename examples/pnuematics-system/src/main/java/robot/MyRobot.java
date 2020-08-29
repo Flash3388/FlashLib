@@ -3,7 +3,7 @@ package robot;
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickButton;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.pneumatics.SolenoidGroup;
+import com.flash3388.flashlib.io.devices.valve.SolenoidGroup;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;

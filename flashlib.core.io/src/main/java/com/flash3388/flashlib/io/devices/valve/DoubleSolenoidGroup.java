@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.io.devices.pneumatics;
+package com.flash3388.flashlib.io.devices.valve;
 
 import java.util.ArrayList;
 import java.util.Arrays;

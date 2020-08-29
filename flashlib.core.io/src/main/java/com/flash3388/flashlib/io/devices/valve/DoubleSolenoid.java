@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.io.devices.pneumatics;
+package com.flash3388.flashlib.io.devices.valve;
 
 /**
  * Represents a double solenoid valve.
