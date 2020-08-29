@@ -1,11 +1,10 @@
 package com.flash3388.flashlib.robot.control;
 
-import com.beans.DoubleProperty;
-import com.beans.properties.SimpleDoubleProperty;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
+import java.util.function.DoubleUnaryOperator;
 
 /**
  * Provides a PID controller for controlling motors more efficiently.
@@ -20,12 +19,13 @@ import java.util.function.DoubleSupplier;
  * @since FlashLib 3.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController implements DoubleBinaryOperator {
+public class PidController implements DoubleBinaryOperator, DoubleUnaryOperator {
 
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
     private final DoubleSupplier mKd;
     private final DoubleSupplier mKf;
+    private final DoubleSupplier mProcessVariable;
 
     private double mMinimumOutput;
     private double mMaximumOutput;
@@ -47,12 +47,14 @@ public class PidController implements DoubleBinaryOperator {
      * @param ki the integral constant
      * @param kd the differential constant
      * @param kf the feed forward constant
+     * @param processVariable the process value supplier
      */
-    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
+    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf, DoubleSupplier processVariable){
         mKp = kp;
         mKi = ki;
         mKd = kd;
         mKf = kf;
+        mProcessVariable = processVariable;
 
         mMinimumOutput = -1;
         mMaximumOutput = 1;
@@ -68,8 +70,16 @@ public class PidController implements DoubleBinaryOperator {
         mIsFirstRun = true;
     }
 
+    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
+        this(kp, ki, kd, kf, () -> 0.0);
+    }
+
+    public PidController(double kp, double ki, double kd, double kf, DoubleSupplier processVariable) {
+        this(() -> kp, () -> ki, () ->  kd, () -> kf, processVariable);
+    }
+
     public PidController(double kp, double ki, double kd, double kf) {
-        this(new SimpleDoubleProperty(kp), new SimpleDoubleProperty(ki), new SimpleDoubleProperty(kd), new SimpleDoubleProperty(kf));
+        this(kp, ki, kd, kf, () -> 0.0);
     }
 
     /**
@@ -139,14 +149,31 @@ public class PidController implements DoubleBinaryOperator {
     }
 
     /**
-     * Calculates the output to the system to compensate for the error.
+     * Calculates the output to the system to compensate for the error using the given process value supplier.
      *
-     * @param processVariable the process variable of the system.
-     * @param setPoint the desired set point.
+     * @param setpoint the desired set point.
      *
      * @return the compensation value from the PID loop calculation
      */
-    public double calculate(double processVariable, double setPoint){
+    @Override
+    public double applyAsDouble(double setpoint) {
+        return applyAsDouble(mProcessVariable.getAsDouble(), setpoint);
+    }
+
+    /**
+     * Calculates the output to the system to compensate for the error.
+     *
+     * @param processVariable the process variable of the system.
+     * @param setpoint the desired set point.
+     *
+     * @return the compensation value from the PID loop calculation
+     */
+    @Override
+    public double applyAsDouble(double processVariable, double setpoint) {
+        return calculate(processVariable, setpoint);
+    }
+
+    private double calculate(double processVariable, double setPoint){
         if(mSetPointRange != 0) {
             processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
@@ -186,10 +213,5 @@ public class PidController implements DoubleBinaryOperator {
         mLastProcessVariable = processVariable;
 
         return output;
-    }
-
-    @Override
-    public double applyAsDouble(double left, double right) {
-        return calculate(left, right);
     }
 }
