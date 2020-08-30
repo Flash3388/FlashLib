@@ -2,8 +2,8 @@ package robot;
 
 import com.flash3388.flashlib.hid.XboxAxis;
 import com.flash3388.flashlib.hid.XboxController;
+import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.actuators.SpeedControllerGroup;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
@@ -11,11 +11,11 @@ import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.MotorSystem;
+import com.flash3388.flashlib.robot.systems.SolenoidSystem;
+import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
+import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
-import com.flash3388.flashlib.robot.systems.valves.SolenoidSystem;
-import com.flash3388.flashlib.robot.systems.valves.actions.CloseValveAction;
-import com.flash3388.flashlib.robot.systems.valves.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {

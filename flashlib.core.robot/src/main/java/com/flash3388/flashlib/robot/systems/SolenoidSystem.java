@@ -1,7 +1,7 @@
-package com.flash3388.flashlib.robot.systems.valves;
+package com.flash3388.flashlib.robot.systems;
 
-import com.flash3388.flashlib.io.devices.valve.Solenoid;
-import com.flash3388.flashlib.io.devices.valve.SolenoidGroup;
+import com.flash3388.flashlib.io.devices.Solenoid;
+import com.flash3388.flashlib.io.devices.SolenoidGroup;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
 /**

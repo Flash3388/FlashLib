@@ -1,8 +1,7 @@
-package com.flash3388.flashlib.robot.systems.valves.actions;
+package com.flash3388.flashlib.robot.systems.actions;
 
-import com.flash3388.flashlib.robot.systems.valves.Valve;
+import com.flash3388.flashlib.robot.systems.Valve;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.flash3388.flashlib.scheduling.actions.InstantAction;
 
 public class CloseValveAction extends ActionBase {
 

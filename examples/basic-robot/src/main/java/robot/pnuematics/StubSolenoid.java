@@ -1,7 +1,7 @@
 package robot.pnuematics;
 
 import com.flash3388.flashlib.io.IoChannel;
-import com.flash3388.flashlib.io.devices.valve.Solenoid;
+import com.flash3388.flashlib.io.devices.Solenoid;
 import com.flash3388.flashlib.time.Time;
 
 public class StubSolenoid implements Solenoid {

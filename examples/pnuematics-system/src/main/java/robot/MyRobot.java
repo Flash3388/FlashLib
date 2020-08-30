@@ -2,17 +2,17 @@ package robot;
 
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickButton;
+import com.flash3388.flashlib.io.devices.SolenoidGroup;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.valve.SolenoidGroup;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.MotorSystem;
-import com.flash3388.flashlib.robot.systems.valves.SolenoidSystem;
-import com.flash3388.flashlib.robot.systems.valves.actions.CloseValveAction;
-import com.flash3388.flashlib.robot.systems.valves.actions.OpenValveAction;
+import com.flash3388.flashlib.robot.systems.SolenoidSystem;
+import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
+import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class MyRobot extends DelegatingRobotControl implements IterativeRobot {

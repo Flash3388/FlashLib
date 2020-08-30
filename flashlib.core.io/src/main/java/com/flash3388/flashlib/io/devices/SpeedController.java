@@ -1,7 +1,7 @@
-package com.flash3388.flashlib.io.devices.actuators;
+package com.flash3388.flashlib.io.devices;
 
-import com.flash3388.flashlib.control.Invertable;
 import com.flash3388.flashlib.control.Direction;
+import com.flash3388.flashlib.control.Invertable;
 import com.flash3388.flashlib.control.Stoppable;
 
 /**

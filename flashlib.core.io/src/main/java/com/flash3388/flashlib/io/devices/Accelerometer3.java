@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.io.devices.sensors;
+package com.flash3388.flashlib.io.devices;
 
 import java.io.Closeable;
 

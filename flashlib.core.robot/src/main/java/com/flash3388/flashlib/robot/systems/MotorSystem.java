@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.systems;
 
-import com.flash3388.flashlib.io.devices.actuators.SpeedController;
-import com.flash3388.flashlib.io.devices.actuators.SpeedControllerGroup;
+import com.flash3388.flashlib.io.devices.SpeedController;
+import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.motion.Rotatable;
 import com.flash3388.flashlib.scheduling.Subsystem;

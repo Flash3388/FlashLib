@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.Counter;
+import com.flash3388.flashlib.io.devices.Encoder;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 

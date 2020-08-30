@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.systems.valves;
+package com.flash3388.flashlib.robot.systems;
 
 import com.flash3388.flashlib.scheduling.Requirement;
 

@@ -2,6 +2,7 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogAccumulator;
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.Gyro;
 
 import java.io.IOException;
 import java.util.Objects;

@@ -1,10 +1,9 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.Accelerometer;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.util.function.DoubleSupplier;
 
 /**
  * Control class for an analog accelerometer sensor. Accelerometer is a linear acceleration sensor,

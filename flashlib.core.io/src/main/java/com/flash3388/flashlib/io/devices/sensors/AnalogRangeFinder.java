@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
 

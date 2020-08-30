@@ -1,6 +1,6 @@
 package robot.subsystems;
 
-import com.flash3388.flashlib.io.devices.actuators.SpeedController;
+import com.flash3388.flashlib.io.devices.SpeedController;
 import com.flash3388.flashlib.robot.systems.drive.TankDrive;
 import com.flash3388.flashlib.robot.systems.drive.TankDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
