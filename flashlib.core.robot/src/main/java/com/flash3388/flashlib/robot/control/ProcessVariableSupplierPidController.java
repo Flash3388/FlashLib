@@ -26,7 +26,7 @@ public class ProcessVariableSupplierPidController extends PidController implemen
 
     @Override
     public double applyAsDouble(double setpoint) {
-        return calculate(mProcessVariable.getAsDouble(), setpoint, mClock.currentTime());
+        return applyAsDouble(mProcessVariable.getAsDouble(), setpoint, mClock.currentTime());
     }
 
     public boolean hasReached(double setpoint, double margin) {

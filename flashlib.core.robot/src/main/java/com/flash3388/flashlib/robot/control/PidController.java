@@ -14,8 +14,7 @@ import java.util.function.DoubleSupplier;
  * and a measured process variable and applies a correction based on proportional, integral, and derivative 
  * terms (sometimes denoted P, I, and D respectively) which give their name to the controller type.
  * </p>
- * @author Tom Tzook and Daniel Mikhailov
- * @since FlashLib 3.0.0
+ * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
 public class PidController {
@@ -145,7 +144,7 @@ public class PidController {
      *
      * @return the compensation value from the PID loop calculation
      */
-    public double calculate(double processVariable, double setpoint, Time currentTimeSeconds) {
+    public double applyAsDouble(double processVariable, double setpoint, Time currentTimeSeconds) {
         if(mSetPointRange != 0) {
             processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
