@@ -17,7 +17,6 @@ import java.util.function.Predicate;
  * run only if no {@link Action} is using the {@link Subsystem} at the moment. When the scheduler runs,
  * it checks all registered {@link Requirement} objects to see if one does not have an action at the moment.
  *
- * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public interface Scheduler {

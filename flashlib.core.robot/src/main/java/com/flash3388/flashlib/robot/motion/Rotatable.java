@@ -6,8 +6,7 @@ import com.flash3388.flashlib.scheduling.Requirement;
 
 /**
  * Interface for object with the capability to rotate.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public interface Rotatable extends Stoppable, Requirement {

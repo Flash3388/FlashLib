@@ -3,8 +3,7 @@ package com.flash3388.flashlib.io;
 /**
  * Interface for analog output ports. This interface is used by devices
  * which require analog output ports for output, allowing for different implementations.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public interface AnalogOutput extends IoPort {
