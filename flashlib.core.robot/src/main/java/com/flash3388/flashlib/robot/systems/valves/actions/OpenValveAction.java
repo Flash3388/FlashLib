@@ -9,6 +9,8 @@ public class OpenValveAction extends InstantAction {
 
     public OpenValveAction(Valve valve) {
         mValve = valve;
+
+        requires(valve);
     }
 
     @Override
