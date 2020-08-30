@@ -59,7 +59,7 @@ class SleeperTest {
         long passed = (long) ((System.nanoTime() - start) * 1e-6);
 
         long difference = Math.abs(passed - SLEEP_TIME_MS);
-        assertThat(difference, lessThanOrEqualTo(SLEEP_TIME_MS / 15));
+        assertThat(difference, lessThanOrEqualTo(SLEEP_TIME_MS / 5));
     }
 
 }
