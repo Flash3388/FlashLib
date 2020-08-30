@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.control;
 
+import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleSupplier;
@@ -32,7 +33,7 @@ public class PidController {
 
     private double mTotalError;
     private double mLastError;
-    private double mLastTimeSeconds;
+    private Time mLastTimeSeconds;
 
     private double mLastOutput;
 
@@ -60,7 +61,7 @@ public class PidController {
 
         mTotalError = 0;
         mLastError = 0;
-        mLastTimeSeconds = 0;
+        mLastTimeSeconds = Time.seconds(0);
 
         mLastOutput = 0;
 
@@ -77,9 +78,6 @@ public class PidController {
      */
     public void reset(){
         mIsFirstRun = true;
-        mTotalError = 0;
-        mLastError = 0;
-        mLastTimeSeconds = 0;
     }
 
     /**
@@ -147,7 +145,7 @@ public class PidController {
      *
      * @return the compensation value from the PID loop calculation
      */
-    public double calculate(double processVariable, double setpoint, double currentTimeSeconds) {
+    public double calculate(double processVariable, double setpoint, Time currentTimeSeconds) {
         if(mSetPointRange != 0) {
             processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
         }
@@ -159,13 +157,14 @@ public class PidController {
 
         if(mIsFirstRun){
             mIsFirstRun = false;
+            mTotalError = 0;
             mLastOutput = pOut + fOut;
             mLastError = error;
-            mLastTimeSeconds = currentTimeSeconds - 1;
+            mLastTimeSeconds = currentTimeSeconds.sub(Time.seconds(1));
         }
 
         double iOut = mKi.getAsDouble() * mTotalError;
-        double dOut = mKd.getAsDouble() * ((error - mLastError)/(currentTimeSeconds-mLastOutput));
+        double dOut = mKd.getAsDouble() * ((error - mLastError)/(currentTimeSeconds.sub(mLastTimeSeconds).valueAsSeconds()));
 
         double output = pOut + iOut + dOut + fOut;
 
