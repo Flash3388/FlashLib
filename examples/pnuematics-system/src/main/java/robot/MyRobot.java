@@ -9,16 +9,16 @@ import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
-import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
-import com.flash3388.flashlib.robot.systems.valves.SingleSolenoidSystem;
+import com.flash3388.flashlib.robot.systems.MotorSystem;
+import com.flash3388.flashlib.robot.systems.valves.SolenoidSystem;
 import com.flash3388.flashlib.robot.systems.valves.actions.CloseValveAction;
 import com.flash3388.flashlib.robot.systems.valves.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
 
-    private final SingleMotorSystem mShooter;
-    private final SingleSolenoidSystem mShooterDirector;
+    private final MotorSystem mShooter;
+    private final SolenoidSystem mShooterDirector;
 
     private final Joystick mStick;
 
@@ -26,14 +26,14 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
         super(robotControl);
 
         // Let's define a shooter system, which uses a motor to shoot
-        mShooter = new SingleMotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)));
+        mShooter = new MotorSystem(new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)));
 
         // Out shooter has a piston bellow it, which raises or lowers it.
         // When the piston is open, we'll shoot high.
         // When it's closed, we'll shoot low.
         // To control pistons, se use solenoids. Let's assume we have 2 pistons,
         // and thus 2 solenoids and create a system to control that.
-        mShooterDirector = new SingleSolenoidSystem(new SolenoidGroup(
+        mShooterDirector = new SolenoidSystem(new SolenoidGroup(
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID1),
                 new StubSolenoid(RobotMap.SHOOTER_SOLENOID2)));
 

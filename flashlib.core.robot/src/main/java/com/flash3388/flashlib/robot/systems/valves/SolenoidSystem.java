@@ -1,14 +1,24 @@
 package com.flash3388.flashlib.robot.systems.valves;
 
 import com.flash3388.flashlib.io.devices.valve.Solenoid;
+import com.flash3388.flashlib.io.devices.valve.SolenoidGroup;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
-public class SingleSolenoidSystem extends Subsystem implements Valve {
+/**
+ * A robot system made up of solenoids, controlling a valve.
+ *
+ * @since FlashLib 3.0.0
+ */
+public class SolenoidSystem extends Subsystem implements Valve {
 
     private final Solenoid mSolenoid;
 
-    public SingleSolenoidSystem(Solenoid solenoid) {
+    public SolenoidSystem(Solenoid solenoid) {
         mSolenoid = solenoid;
+    }
+
+    public SolenoidSystem(Solenoid... solenoids) {
+        this(new SolenoidGroup(solenoids));
     }
 
     @Override
