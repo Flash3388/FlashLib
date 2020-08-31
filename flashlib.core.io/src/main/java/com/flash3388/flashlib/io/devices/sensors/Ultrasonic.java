@@ -4,6 +4,7 @@ import com.castle.util.closeables.Closer;
 import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.io.Counter;
 import com.flash3388.flashlib.io.DigitalOutput;
+import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
 

@@ -1,14 +1,24 @@
-package com.flash3388.flashlib.robot.systems.pneumatics;
+package com.flash3388.flashlib.robot.systems;
 
-import com.flash3388.flashlib.io.devices.valve.DoubleSolenoid;
+import com.flash3388.flashlib.io.devices.DoubleSolenoid;
+import com.flash3388.flashlib.io.devices.DoubleSolenoidGroup;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
-public class DoubleSolenoidSystem extends Subsystem implements Piston {
+/**
+ * A robot system made up of double-solenoids, controlling a valve.
+ *
+ * @since FlashLib 3.0.0
+ */
+public class DoubleSolenoidSystem extends Subsystem implements Valve {
 
     private final DoubleSolenoid mDoubleSolenoid;
 
     public DoubleSolenoidSystem(DoubleSolenoid doubleSolenoid) {
         mDoubleSolenoid = doubleSolenoid;
+    }
+
+    public DoubleSolenoidSystem(DoubleSolenoid... doubleSolenoids) {
+        this(new DoubleSolenoidGroup(doubleSolenoids));
     }
 
     @Override

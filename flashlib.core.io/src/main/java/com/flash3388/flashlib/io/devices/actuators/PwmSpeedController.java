@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.devices.SpeedController;
 
 /**
  * Control class for a Pwm-controlled speed controller device. This class integrates

@@ -1,5 +1,5 @@
 # FlashLib
-![Maven Central](https://img.shields.io/maven-central/v/com.flash3388.flashlib/flashlib.svg)
+![Maven Central](https://img.shields.io/maven-central/v/com.flash3388.flashlib/flashlib.core.svg)
 ![Travis (.org) branch](https://img.shields.io/travis/Flash3388/FlashLib/master.svg)
 ![GitHub](https://img.shields.io/github/license/FLASH3388/FlashLib.svg)
 

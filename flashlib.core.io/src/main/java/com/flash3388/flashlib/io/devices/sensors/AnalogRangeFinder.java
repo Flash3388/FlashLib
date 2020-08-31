@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
 
@@ -13,8 +14,7 @@ import java.io.IOException;
  * and can be converted to centimeters by dividing it by a sensitivity value. The sensitivity value is measured by 
  * volts/centimeter.
  * 
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class AnalogRangeFinder implements RangeFinder {

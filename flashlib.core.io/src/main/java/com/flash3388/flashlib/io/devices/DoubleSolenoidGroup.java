@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.io.devices.valve;
+package com.flash3388.flashlib.io.devices;
 
 import java.util.ArrayList;
 import java.util.Arrays;

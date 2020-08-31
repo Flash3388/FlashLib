@@ -19,7 +19,7 @@ public interface IoChannel {
      * </p>
      * <pre>
      *     void newChannel(IoChannel channel) {
-     *         MyIoChannel myChannel = IoChannel.cast(channel, MyIoChannel.cast);
+     *         MyIoChannel myChannel = IoChannel.cast(channel, MyIoChannel.class);
      *         myChannel.getData();
      *     }
      * </pre>

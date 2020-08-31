@@ -16,6 +16,8 @@ allprojects {
     version = VERSION
 
     apply from: rootProject.file('extras.gradle')
+
+    setPropertyGlobalFile('signing.secretKeyRingFile')
 }
 
 subprojects {

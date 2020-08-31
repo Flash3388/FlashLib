@@ -16,7 +16,6 @@ import java.util.Optional;
  * <p>
  * Each subsystem should have only one instance in our robot code.
  *
- * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public class Subsystem implements Requirement {

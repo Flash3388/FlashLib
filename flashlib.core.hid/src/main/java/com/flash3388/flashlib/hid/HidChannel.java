@@ -19,7 +19,7 @@ public interface HidChannel {
      * </p>
      * <pre>
      *     void newChannel(HidChannel channel) {
-     *         MyHidChannel myChannel = HidChannel.cast(channel, MyHidChannel.cast);
+     *         MyHidChannel myChannel = HidChannel.cast(channel, MyHidChannel.class);
      *         myChannel.getData();
      *     }
      * </pre>

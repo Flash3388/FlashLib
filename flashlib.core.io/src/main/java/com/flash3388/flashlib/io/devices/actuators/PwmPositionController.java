@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.devices.PositionController;
 import com.jmath.ExtendedMath;
 
 /**

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.Counter;
+import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
 
@@ -13,8 +14,7 @@ import java.io.IOException;
  * the distance measured by the sensor. The sensitivity of the sensor is the conversion factor from pulse length
  * in microseconds to distance in centimeter. The value indicates the amount of microseconds per one centimeter of distance.
  * 
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class PulseWidthRangeFinder implements RangeFinder {

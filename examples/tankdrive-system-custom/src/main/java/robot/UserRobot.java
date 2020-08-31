@@ -2,8 +2,8 @@ package robot;
 
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
+import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.actuators.SpeedControllerGroup;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;

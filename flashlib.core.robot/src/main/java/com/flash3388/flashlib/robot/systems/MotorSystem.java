@@ -1,16 +1,26 @@
 package com.flash3388.flashlib.robot.systems;
 
-import com.flash3388.flashlib.io.devices.actuators.SpeedController;
+import com.flash3388.flashlib.io.devices.SpeedController;
+import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.robot.motion.Rotatable;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
-public class SingleMotorSystem extends Subsystem implements Movable, Rotatable {
+/**
+ * A robot subsystem made up of a motor. Multiple motor may be used with {@link SpeedControllerGroup}.
+ *
+ * @since FlashLib 1.0.0
+ */
+public class MotorSystem extends Subsystem implements Movable, Rotatable {
 
     private final SpeedController mController;
 
-    public SingleMotorSystem(SpeedController controller) {
+    public MotorSystem(SpeedController controller) {
         mController = controller;
+    }
+
+    public MotorSystem(SpeedController... controllers) {
+        this(new SpeedControllerGroup(controllers));
     }
 
     public final SpeedController getController() {
