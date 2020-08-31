@@ -8,7 +8,7 @@ public final class Debug {
     private Debug() {}
 
     public static Logger getLogger() {
-        return RunningRobot.getInstance().getLogger();
+        return RunningRobot.getControl().getLogger();
     }
 
     public static void print(String msg) {

@@ -42,7 +42,7 @@ public class RobotProgram {
         try {
             mLogger.debug("Creating user robot class");
             RobotImplementation robot = mRobotCreator.create(mLogger, resourceHolder);
-            RunningRobot.setInstance(robot.getRobotControl());
+            RunningRobot.setControlInstance(robot.getRobotControl());
 
             mLogger.debug("Initializing user robot");
             runRobot(robot.getRobotControl(), robot.getRobotBase());
