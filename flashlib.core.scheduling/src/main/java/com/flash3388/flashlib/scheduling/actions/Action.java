@@ -30,7 +30,6 @@ import com.flash3388.flashlib.time.Time;
  * with at least one similar system requirement. If an action is running and another starts with a similar system
  * requirement, the previous action is canceled, invoking a call to {@link #end(boolean) end(true)}.
  *
- * @author Tom Tzook
  * @since FlashLib 1.0.0
  */
 public interface Action {

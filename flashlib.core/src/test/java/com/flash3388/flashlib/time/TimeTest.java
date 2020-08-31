@@ -334,7 +334,7 @@ public class TimeTest {
     @ParameterizedTest(name = "time({0},{1}) isValid {2}")
     @MethodSource(value = "timeValidationValues")
     public void isValid_forValue_indicatesExpectedResult(long value, TimeUnit timeUnit, boolean isValid) throws Exception {
-        assertEquals(isValid, Time.of(value, timeUnit).isValid());
+        assertEquals(isValid, new Time(value, timeUnit).isValid());
     }
 
     private static Stream<Arguments> timeValidationValues() {

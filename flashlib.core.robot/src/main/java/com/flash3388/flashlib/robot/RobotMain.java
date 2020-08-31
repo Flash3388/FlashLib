@@ -1,12 +1,10 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.robot.base.RobotCreator;
-import com.flash3388.flashlib.robot.base.RobotProgram;
 import org.slf4j.Logger;
 
 /**
  * <p>
- *     Launcher for robot classes extending {@link RobotControl}.
+ *     Launcher for robot classes. Robot should be started through here.
  *     Call {@link #start(RobotCreator, Logger)}.
  * </p>
  *
@@ -25,7 +23,7 @@ public final class RobotMain {
      * </p>
      *
      * @param robotCreator creator for the robot class.
-     * @param logger logger to log any errors into.
+     * @param logger logger to be used by the robot.
      */
     public static void start(RobotCreator robotCreator, Logger logger) {
         RobotProgram robotProgram = new RobotProgram(robotCreator, logger);

@@ -10,27 +10,27 @@ import java.util.Collections;
 
 public class GenericXboxController extends GenericHid implements XboxController {
 
-    private static final int DPAD_POV_INDEX = 0;
-
     private final Dpad mDpad;
 
     public GenericXboxController(RawHidInterface rawHidInterface, int channel) {
         super(rawHidInterface, channel, XboxAxis.count(), XboxButton.count(), 0);
 
-        mDpad = new GenericDpad(rawHidInterface, channel, DPAD_POV_INDEX);
+        mDpad = new GenericDpad(rawHidInterface, channel, 0);
     }
 
     @Override
-    public Pov getPov(int pov) {
-        if (pov != DPAD_POV_INDEX) {
-            throw new IllegalArgumentException("Unknown pov " + pov);
+    public Pov getPov(int index) {
+        if (index != 0) {
+            throw new IllegalArgumentException("Unknown pov " + index);
         }
         return mDpad;
     }
+
     @Override
     public int getPovCount() {
         return 1;
     }
+
     @Override
     public Iterable<Pov> povs() {
         return Collections.singleton(getDpad());
@@ -38,6 +38,6 @@ public class GenericXboxController extends GenericHid implements XboxController 
 
     @Override
     public Dpad getDpad() {
-        return null;
+        return mDpad;
     }
 }

@@ -2,21 +2,38 @@ package com.flash3388.flashlib.robot.systems.drive;
 
 import com.jmath.vectors.Vector2;
 
+/**
+ * Interface for omni drive systems.
+ *
+ * @since FlashLib 1.2.0
+ */
 public interface OmniDrive extends HolonomicDrive {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default void move(Vector2 motionVector) {
         omniDrive(motionVector.y(), motionVector.x());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default void rotate(double speed) {
         omniDrive(speed, speed, -speed, -speed);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void holonomicCartesian(double y, double x, double rotation);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     void holonomicPolar(double magnitude, double direction, double rotation);
 

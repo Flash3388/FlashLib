@@ -5,8 +5,7 @@ import com.flash3388.flashlib.io.Pwm;
 /**
  * Control class for the Talon SRX speed controller from Cross the Road Electronics. This
  * controller uses a Pwm port for control and is those a {@link PwmSpeedController}.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class PwmTalonSrx extends PwmSpeedController {

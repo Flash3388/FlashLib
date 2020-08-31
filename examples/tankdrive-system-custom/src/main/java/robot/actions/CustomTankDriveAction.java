@@ -1,6 +1,6 @@
 package robot.actions;
 
-import com.flash3388.flashlib.hid.Hid;
+import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import robot.subsystems.CustomTankDrive;
@@ -10,13 +10,13 @@ public class CustomTankDriveAction extends ActionBase {
     // To implement an action, we first extend ActionBase.
 
     private final CustomTankDrive mDrive;
-    private final Hid mStickRight;
-    private final Hid mStickLeft;
+    private final Joystick mStickRight;
+    private final Joystick mStickLeft;
 
     // In the constructor, we receive the systems and parameters we need to perform the action.
     // Here we need the drive system, and the joysticks.
     // We will store those values in instance variables.
-    public CustomTankDriveAction(CustomTankDrive drive, Hid stickRight, Hid stickLeft) {
+    public CustomTankDriveAction(CustomTankDrive drive, Joystick stickRight, Joystick stickLeft) {
         mDrive = drive;
         mStickRight = stickRight;
         mStickLeft = stickLeft;

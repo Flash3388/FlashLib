@@ -8,8 +8,7 @@ import java.io.Closeable;
  * <p>
  * This interface is used by devices which require pulse counting for input, 
  * allowing for different implementations.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.2
  */
 public interface Counter extends Closeable {

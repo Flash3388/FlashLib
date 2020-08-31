@@ -2,27 +2,27 @@ package robot;
 
 import com.flash3388.flashlib.hid.XboxAxis;
 import com.flash3388.flashlib.hid.XboxController;
+import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
-import com.flash3388.flashlib.io.devices.actuators.SpeedControllerGroup;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.motion.actions.RotateAction;
-import com.flash3388.flashlib.robot.systems.SingleMotorSystem;
+import com.flash3388.flashlib.robot.systems.MotorSystem;
+import com.flash3388.flashlib.robot.systems.SolenoidSystem;
+import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
+import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
-import com.flash3388.flashlib.robot.systems.pneumatics.SingleSolenoidSystem;
-import com.flash3388.flashlib.robot.systems.pneumatics.actions.ClosePistonAction;
-import com.flash3388.flashlib.robot.systems.pneumatics.actions.OpenPistonAction;
 import robot.pnuematics.StubSolenoid;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 
     private final OmniDriveSystem mDriveSystem;
-    private final SingleMotorSystem mShooter;
-    private final SingleSolenoidSystem mShooterPiston;
+    private final MotorSystem mShooter;
+    private final SolenoidSystem mShooterPiston;
 
     private final XboxController mController;
 
@@ -42,7 +42,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         );
         // We also have a shooter, based  on 2 motors. We'll use a SpeedControllerGroup
         // to combine them.
-        mShooter = new SingleMotorSystem(new SpeedControllerGroup(
+        mShooter = new MotorSystem(new SpeedControllerGroup(
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR)),
                 new PwmTalonSrx(getIoInterface().newPwm(RobotMap.SHOOTER_MOTOR2))
         ));
@@ -51,7 +51,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // When it's closed, we'll shoot low.
         // To control pistons, se use solenoids. Let's assume we have 1 piston
         // and thus 1 solenoid and create a system to control that.
-        mShooterPiston = new SingleSolenoidSystem(new StubSolenoid(RobotMap.SHOOTER_SOLENOID));
+        mShooterPiston = new SolenoidSystem(new StubSolenoid(RobotMap.SHOOTER_SOLENOID));
 
         // We'll use an xbox controller to control the robot.
         mController = getHidInterface().newXboxController(RobotMap.XBOX);
@@ -76,8 +76,8 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // We'll use the DPad to control the shooter piston.
         // The DPad as 4 buttons: up, down, left, right. We'll use UP to raise and DOWN to
         // lower the shooter, i.e. open and close the piston respectively.
-        mController.getDpad().up().whenActive(new OpenPistonAction(mShooterPiston));
-        mController.getDpad().down().whenActive(new ClosePistonAction(mShooterPiston));
+        mController.getDpad().up().whenActive(new OpenValveAction(mShooterPiston));
+        mController.getDpad().down().whenActive(new CloseValveAction(mShooterPiston));
     }
 
     @Override

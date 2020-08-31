@@ -2,14 +2,6 @@ package com.flash3388.flashlib.hid.generic;
 
 public interface RawHidInterface {
 
-    enum ChannelType {
-        AXIS,
-        BUTTON,
-        POV,
-        HID,
-        XBOX
-    }
-
     int NO_HID_CHANNEL = -1;
 
     boolean hasChannel(int channel);

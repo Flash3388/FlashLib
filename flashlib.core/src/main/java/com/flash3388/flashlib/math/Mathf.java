@@ -9,8 +9,7 @@ import com.jmath.vectors.Vector3;
  * <p>
  * Methods in this class handle many math topics, including by not limited to: integrals, derivatives,
  * complex numbers, vectors, matrices and much more.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.0.0
  */
 public final class Mathf {

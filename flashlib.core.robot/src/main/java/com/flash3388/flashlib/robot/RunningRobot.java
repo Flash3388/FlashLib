@@ -8,14 +8,19 @@ public final class RunningRobot {
 
     private RunningRobot() {}
 
-    private static final AtomicReference<RobotControl> sInstance = new AtomicReference<>(null);
+    private static final AtomicReference<RobotControl> sControlInstance = new AtomicReference<>(null);
 
-    public static RobotControl getInstance() {
-        return sInstance.get();
+    public static RobotControl getControl() {
+        RobotControl control = sControlInstance.get();
+        if (control == null) {
+            throw new IllegalStateException("no robotcontrol was set");
+        }
+
+        return control;
     }
 
-    public static void setInstance(RobotControl instance) {
-        RobotControl previousInstance = sInstance.getAndSet(instance);
+    public static void setControlInstance(RobotControl instance) {
+        RobotControl previousInstance = sControlInstance.getAndSet(instance);
 
         GlobalDependencies.setSchedulerInstance(instance.getScheduler());
         GlobalDependencies.setClockInstance(instance.getClock());

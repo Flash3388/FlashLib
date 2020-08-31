@@ -4,8 +4,7 @@ package com.flash3388.flashlib.io;
  * An accumulator for an {@link AnalogInput} port. This is used to accumulate values from the port,
  * allowing view of all data throughout time, which is extremely useful when rapid sampling of the port
  * is required.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public interface AnalogAccumulator {

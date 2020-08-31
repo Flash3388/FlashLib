@@ -2,6 +2,7 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogAccumulator;
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.Gyro;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -17,8 +18,7 @@ import java.util.Objects;
  * <p>
  * In order to keep the sensor value updated as necessary, this classes uses an {@link AnalogAccumulator} object
  * which accumulates the speed values read from the port.
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
 public class AnalogGyro implements Gyro {
@@ -33,7 +33,49 @@ public class AnalogGyro implements Gyro {
 	private double mSensitivity;
 	private int mCenter;
 
-	
+    /**
+     * Creates a new analog gyroscope sensor for a given analog input port.
+     * <p>
+     * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
+     * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
+     * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
+     * <p>
+     * For gyroscope sensitivity, gyro center voltage and gyro offset given values are used.
+     *
+     * @param port an analog input port
+     * @param sensitivity sensor sensitivity in volts per degree per second
+     * @param center uncalibrated sensor center voltage.
+     * @param offset uncalibrated sensor offset voltage.
+     */
+    public AnalogGyro(AnalogInput port, double sensitivity, double center, double offset) {
+        mInputPort = port;
+        mSensitivity = sensitivity;
+        mCenter = port.voltsToValue(center);
+        mOffset = port.voltsToValue(offset);
+
+        mAccumulator = port.getAccumulator();
+        Objects.requireNonNull(mAccumulator, "Failed to retrieve accumulator for port, cannot use analog gyro");
+
+        mAccumulator.enable();
+    }
+
+    /**
+     * Creates a new analog gyroscope sensor for a given analog input port.
+     * <p>
+     * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
+     * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
+     * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
+     * <p>
+     * For gyro center voltage and gyro offset given values are used. Sensor sensitivity used is {@value #DEFAULT_SENSITIVITY}.
+     *
+     * @param port an analog input port
+     * @param center uncalibrated sensor center voltage.
+     * @param offset uncalibrated sensor offset voltage.
+     */
+    public AnalogGyro(AnalogInput port, double center, double offset){
+        this(port, DEFAULT_SENSITIVITY, center, offset);
+    }
+
 	/**
 	 * Creates a new analog gyroscope sensor for a given analog input port.
 	 * <p>
@@ -48,49 +90,6 @@ public class AnalogGyro implements Gyro {
 	public AnalogGyro(AnalogInput port) {
 		mInputPort = port;
 		mSensitivity = DEFAULT_SENSITIVITY;
-		
-		mAccumulator = port.getAccumulator();
-		Objects.requireNonNull(mAccumulator, "Failed to retrieve accumulator for port, cannot use analog gyro");
-
-		mAccumulator.enable();
-	}
-
-	/**
-	 * Creates a new analog gyroscope sensor for a given analog input port.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
-	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
-	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
-	 * <p>
-	 * For gyro center voltage and gyro offset given values are used. Sensor sensitivity used is {@value #DEFAULT_SENSITIVITY}.
-	 * 
-	 * @param port an analog input port 
-	 * @param center uncalibrated sensor center voltage.
-	 * @param offset uncalibrated sensor offset voltage.
-	 */
-	public AnalogGyro(AnalogInput port, double center, double offset){
-		this(port, DEFAULT_SENSITIVITY, center, offset);
-	}
-
-	/**
-	 * Creates a new analog gyroscope sensor for a given analog input port.
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into angular rotation. A valid port must have
-	 * an {@link AnalogAccumulator} object returned when calling {@link AnalogInput#getAccumulator()}. If this call returns
-	 * null, the port is not valid to be used for this class and an {@link IllegalArgumentException} is thrown.
-	 * <p>
-	 * For gyroscope sensitivity, gyro center voltage and gyro offset given values are used.
-	 * 
-	 * @param port an analog input port 
-	 * @param sensitivity sensor sensitivity in volts per degree per second
-	 * @param center uncalibrated sensor center voltage.
-	 * @param offset uncalibrated sensor offset voltage.
-	 */
-	public AnalogGyro(AnalogInput port, double sensitivity, double center, double offset) {
-		mInputPort = port;
-		mSensitivity = sensitivity;
-		mCenter = port.voltsToValue(center);
-		mOffset = port.voltsToValue(offset);
 		
 		mAccumulator = port.getAccumulator();
 		Objects.requireNonNull(mAccumulator, "Failed to retrieve accumulator for port, cannot use analog gyro");
@@ -168,20 +167,6 @@ public class AnalogGyro implements Gyro {
 	public int getCenter(){
 		return mCenter;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Releases the analog input port.
-	 */
-	@Override
-	public void close() throws IOException {
-		if (mInputPort != null) {
-			mInputPort.close();
-			mInputPort = null;
-			mAccumulator = null;
-		}
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -219,4 +204,18 @@ public class AnalogGyro implements Gyro {
 				mInputPort.getMaxVoltage();
 		return (value / mSensitivity);
 	}
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Releases the analog input port.
+     */
+    @Override
+    public void close() throws IOException {
+        if (mInputPort != null) {
+            mInputPort.close();
+            mInputPort = null;
+            mAccumulator = null;
+        }
+    }
 }

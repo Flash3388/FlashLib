@@ -1,7 +1,7 @@
 package robot.pnuematics;
 
 import com.flash3388.flashlib.io.IoChannel;
-import com.flash3388.flashlib.io.devices.pneumatics.Solenoid;
+import com.flash3388.flashlib.io.devices.Solenoid;
 import com.flash3388.flashlib.time.Time;
 
 public class StubSolenoid implements Solenoid {
@@ -13,7 +13,7 @@ public class StubSolenoid implements Solenoid {
     }
 
     @Override
-    public void set(boolean on) {
+    public void set(boolean open) {
 
     }
 

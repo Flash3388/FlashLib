@@ -1,10 +1,9 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.Accelerometer;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.util.function.DoubleSupplier;
 
 /**
  * Control class for an analog accelerometer sensor. Accelerometer is a linear acceleration sensor,
@@ -15,11 +14,10 @@ import java.util.function.DoubleSupplier;
  * measured in G by dividing the it by a scale factor of voltage per G. The sensor has a zero G voltage which is
  * the voltage when acceleration is 0.
  * 
- * 
- * @author Tom Tzook
+ *
  * @since FlashLib 1.2.0
  */
-public class AnalogAccelerometer implements Closeable, DoubleSupplier {
+public class AnalogAccelerometer implements Accelerometer {
 
 	private static final double DEFAULT_SENSITIVITY = 1.0;
 	private static final double DEFAULT_ZERO_VOLTAGE = 2.5;
@@ -27,6 +25,23 @@ public class AnalogAccelerometer implements Closeable, DoubleSupplier {
 	private AnalogInput mInput;
 	private double mZeroGvoltage;
 	private double mVoltsPerG;
+
+    /**
+     * Creates a new analog accelerometer sensor for a given analog input port.
+     * <p>
+     * The given port is used to read voltage from the sensor to convert into acceleration. The other 2 parameters
+     * are configuration parameters of the sensor. The first is the voltage output by the sensor when the
+     * acceleration is 0, the second is the conversion value from volts to acceleration is G.
+     *
+     * @param input analog input port to which the sensor is connected
+     * @param zeroGVoltage voltage when acceleration is 0
+     * @param voltsPerG conversion factor from volts to G acceleration.
+     */
+    public AnalogAccelerometer(AnalogInput input, double zeroGVoltage, double voltsPerG) {
+        this.mInput = input;
+        this.mZeroGvoltage = zeroGVoltage;
+        this.mVoltsPerG = voltsPerG;
+    }
 
 	/**
 	 * Creates a new analog accelerometer sensor for a given analog input port. 
@@ -39,36 +54,6 @@ public class AnalogAccelerometer implements Closeable, DoubleSupplier {
 	 */
 	public AnalogAccelerometer(AnalogInput input) {
 		this(input, DEFAULT_ZERO_VOLTAGE, DEFAULT_SENSITIVITY);
-	}
-
-	/**
-	 * Creates a new analog accelerometer sensor for a given analog input port. 
-	 * <p>
-	 * The given port is used to read voltage from the sensor to convert into acceleration. The other 2 parameters
-	 * are configuration parameters of the sensor. The first is the voltage output by the sensor when the
-	 * acceleration is 0, the second is the conversion value from volts to acceleration is G.
-	 * 
-	 * @param input analog input port to which the sensor is connected
-	 * @param zeroGVoltage voltage when acceleration is 0
-	 * @param voltsPerG conversion factor from volts to G acceleration.
-	 */
-	public AnalogAccelerometer(AnalogInput input, double zeroGVoltage, double voltsPerG) {
-		this.mInput = input;
-		this.mZeroGvoltage = zeroGVoltage;
-		this.mVoltsPerG = voltsPerG;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Releases the analog input port.
-	 */
-	@Override
-	public void close() throws IOException {
-		if(mInput != null) {
-			mInput.close();
-			mInput = null;
-		}
 	}
 	
 	/**
@@ -123,12 +108,21 @@ public class AnalogAccelerometer implements Closeable, DoubleSupplier {
 	 * 
 	 * @return acceleration in G.
 	 */
+    @Override
 	public double getAcceleration(){
 		return (mInput.getVoltage() - mZeroGvoltage) / mVoltsPerG;
 	}
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Releases the analog input port.
+     */
     @Override
-    public double getAsDouble() {
-        return getAcceleration();
+    public void close() throws IOException {
+        if(mInput != null) {
+            mInput.close();
+            mInput = null;
+        }
     }
 }
