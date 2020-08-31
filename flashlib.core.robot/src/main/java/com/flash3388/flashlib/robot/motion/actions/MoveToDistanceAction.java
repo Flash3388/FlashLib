@@ -1,20 +1,17 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
-import com.flash3388.flashlib.robot.control.ProcessVariableSupplierPidController;
+import com.flash3388.flashlib.robot.control.PartiallySupplierPidController;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.jmath.ExtendedMath;
-
-import java.util.function.DoubleSupplier;
 
 public class MoveToDistanceAction extends ActionBase {
 
-    private final ProcessVariableSupplierPidController mPidController;
+    private final PartiallySupplierPidController mPidController;
     private final Movable mMovable;
     private final double mWantedDistance;
     private final double mDistanceMargin;
 
-    public MoveToDistanceAction(ProcessVariableSupplierPidController pidController, Movable movable, double wantedDistance, double distanceMargin) {
+    public MoveToDistanceAction(PartiallySupplierPidController pidController, Movable movable, double wantedDistance, double distanceMargin) {
         mPidController = pidController;
         mMovable = movable;
         mWantedDistance = wantedDistance;

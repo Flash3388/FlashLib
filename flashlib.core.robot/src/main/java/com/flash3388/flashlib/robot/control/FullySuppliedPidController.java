@@ -1,29 +1,59 @@
 package com.flash3388.flashlib.robot.control;
 
-import com.flash3388.flashlib.time.Clock;
-
 import java.util.function.DoubleSupplier;
 
-public class FullySuppliedPidController extends ProcessVariableSupplierPidController implements DoubleSupplier {
+public class FullySuppliedPidController implements DoubleSupplier {
 
+    private final PartiallySupplierPidController mPidController;
     private final DoubleSupplier mSetpoint;
 
-    public FullySuppliedPidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf, DoubleSupplier processVariable, DoubleSupplier setpoint, Clock clock) {
-        super(kp, ki, kd, kf, processVariable, clock);
-        mSetpoint = setpoint;
+    public FullySuppliedPidController(PartiallySupplierPidController pidController, DoubleSupplier mSetpoint) {
+        this.mPidController = pidController;
+        this.mSetpoint = mSetpoint;
     }
 
-    public FullySuppliedPidController(double kp, double ki, double kd, double kf, DoubleSupplier processVariable, DoubleSupplier setpoint, Clock clock) {
-        super(kp, ki, kd, kf, processVariable, clock);
-        mSetpoint = setpoint;
+    public FullySuppliedPidController(DoubleSupplier kP, DoubleSupplier kI, DoubleSupplier kD, DoubleSupplier kF, DoubleSupplier processVariable, DoubleSupplier setpoint) {
+        this(new PartiallySupplierPidController(kP, kI, kD, kF, processVariable), setpoint);
+    }
+
+    public FullySuppliedPidController(double kP, double kI, double kD, double kF, DoubleSupplier processVariable, DoubleSupplier setpoint) {
+        this(new PartiallySupplierPidController(kP, kI, kD, kF, processVariable), setpoint);
+    }
+
+    public boolean hasReached(double margin) {
+        return mPidController.hasReached(mSetpoint.getAsDouble(), margin);
+    }
+
+    public void reset() {
+        mPidController.reset();
+    }
+
+    public void setOutputRampRate(double rate) {
+        mPidController.setOutputRampRate(rate);
+    }
+
+    public void setSetpointRange(double range) {
+        mPidController.setSetpointRange(range);
+    }
+
+    public double getMaximumOutput() {
+        return mPidController.getMaximumOutput();
+    }
+
+    public double getMinimumOutput() {
+        return mPidController.getMinimumOutput();
+    }
+
+    public void setOutputLimit(double min, double max) {
+        mPidController.setOutputLimit(min, max);
+    }
+
+    public void setOutputLimit(double outputLimit) {
+        mPidController.setOutputLimit(outputLimit);
     }
 
     @Override
     public double getAsDouble() {
-        return applyAsDouble(mSetpoint.getAsDouble());
-    }
-
-    public boolean hasReached(double margin) {
-        return hasReached(mSetpoint.getAsDouble(), margin);
+        return mPidController.applyAsDouble(mSetpoint.getAsDouble());
     }
 }
