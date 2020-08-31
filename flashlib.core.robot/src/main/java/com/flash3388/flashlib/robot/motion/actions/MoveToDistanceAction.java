@@ -1,17 +1,17 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
-import com.flash3388.flashlib.robot.control.PartiallySupplierPidController;
+import com.flash3388.flashlib.robot.control.PartiallySuppliedPidController;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
 public class MoveToDistanceAction extends ActionBase {
 
-    private final PartiallySupplierPidController mPidController;
+    private final PartiallySuppliedPidController mPidController;
     private final Movable mMovable;
     private final double mWantedDistance;
     private final double mDistanceMargin;
 
-    public MoveToDistanceAction(PartiallySupplierPidController pidController, Movable movable, double wantedDistance, double distanceMargin) {
+    public MoveToDistanceAction(PartiallySuppliedPidController pidController, Movable movable, double wantedDistance, double distanceMargin) {
         mPidController = pidController;
         mMovable = movable;
         mWantedDistance = wantedDistance;

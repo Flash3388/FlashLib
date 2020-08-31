@@ -4,20 +4,20 @@ import java.util.function.DoubleSupplier;
 
 public class FullySuppliedPidController implements DoubleSupplier {
 
-    private final PartiallySupplierPidController mPidController;
+    private final PartiallySuppliedPidController mPidController;
     private final DoubleSupplier mSetpoint;
 
-    public FullySuppliedPidController(PartiallySupplierPidController pidController, DoubleSupplier mSetpoint) {
+    public FullySuppliedPidController(PartiallySuppliedPidController pidController, DoubleSupplier mSetpoint) {
         this.mPidController = pidController;
         this.mSetpoint = mSetpoint;
     }
 
     public FullySuppliedPidController(DoubleSupplier kP, DoubleSupplier kI, DoubleSupplier kD, DoubleSupplier kF, DoubleSupplier processVariable, DoubleSupplier setpoint) {
-        this(new PartiallySupplierPidController(kP, kI, kD, kF, processVariable), setpoint);
+        this(new PartiallySuppliedPidController(kP, kI, kD, kF, processVariable), setpoint);
     }
 
     public FullySuppliedPidController(double kP, double kI, double kD, double kF, DoubleSupplier processVariable, DoubleSupplier setpoint) {
-        this(new PartiallySupplierPidController(kP, kI, kD, kF, processVariable), setpoint);
+        this(new PartiallySuppliedPidController(kP, kI, kD, kF, processVariable), setpoint);
     }
 
     public boolean hasReached(double margin) {

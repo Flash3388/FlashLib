@@ -5,21 +5,21 @@ import com.jmath.ExtendedMath;
 import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 
-public class PartiallySupplierPidController implements DoubleUnaryOperator {
+public class PartiallySuppliedPidController implements DoubleUnaryOperator {
 
     private final PidController mPidController;
     private final DoubleSupplier mProcessVariable;
 
-    public PartiallySupplierPidController(PidController pidController, DoubleSupplier processVariable) {
+    public PartiallySuppliedPidController(PidController pidController, DoubleSupplier processVariable) {
         mPidController = pidController;
         mProcessVariable = processVariable;
     }
 
-    public PartiallySupplierPidController(DoubleSupplier kP, DoubleSupplier kI, DoubleSupplier kD, DoubleSupplier kF, DoubleSupplier processVariable) {
+    public PartiallySuppliedPidController(DoubleSupplier kP, DoubleSupplier kI, DoubleSupplier kD, DoubleSupplier kF, DoubleSupplier processVariable) {
         this(new PidController(kP, kI, kD, kF), processVariable);
     }
 
-    public PartiallySupplierPidController(double kP, double kI, double kD, double kF, DoubleSupplier processVariable) {
+    public PartiallySuppliedPidController(double kP, double kI, double kD, double kF, DoubleSupplier processVariable) {
         this(new PidController(kP, kI, kD, kF), processVariable);
     }
 
