@@ -15,8 +15,6 @@ public class AxisButton extends GenericButtonBase {
         mThreshold = threshold;
         mIsDirectional = isDirectional;
 
-        scheduleAutoUpdate(this);
-
         mIsInverted = false;
     }
 
