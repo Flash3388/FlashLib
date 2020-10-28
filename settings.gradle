@@ -19,4 +19,4 @@ include 'examples:robot:basic-robot'
 include 'examples:robot:robot-manual-mode-control'
 
 include 'examples:vision:basic-vision'
-include 'examples:vision:cv-vision'
+include 'examples:vision:cv-2020-vision'
