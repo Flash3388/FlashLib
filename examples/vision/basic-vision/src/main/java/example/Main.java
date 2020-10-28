@@ -50,16 +50,8 @@ public class Main {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         try {
             // let's set up the window, with a single label in the center where we will set the icon.
-            JFrame frame = new JFrame();
-            frame.setLayout(new FlowLayout());
-            frame.setSize(500, 500);
-            JLabel lbl = new JLabel();
-            lbl.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-            lbl.setSize(500, 500);
-            lbl.setVisible(true);
-            frame.add(lbl);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+            JFrame frame = createWindow();
+            JLabel lbl = createImageHolder(frame);
             frame.setVisible(true);
 
             // this pipeline will be used to set the image to the gui from the vision thread
@@ -134,5 +126,25 @@ public class Main {
         try (InputStream inputStream = new FileInputStream(path.toFile())) {
             return new JpegImage(ImageIO.read(inputStream));
         }
+    }
+
+    private static JFrame createWindow() {
+        JFrame frame = new JFrame();
+        frame.setLayout(new FlowLayout());
+        frame.setSize(500, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        return frame;
+    }
+
+    private static JLabel createImageHolder(JFrame frame) {
+        JLabel lbl = new JLabel();
+        lbl.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        lbl.setSize(500, 500);
+        lbl.setVisible(true);
+
+        frame.add(lbl);
+
+        return lbl;
     }
 }

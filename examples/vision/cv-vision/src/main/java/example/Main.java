@@ -52,16 +52,8 @@ public class Main {
         // we'll use a camera, interfaced using OpenCv
         try (Camera<CvImage> camera = new CvCamera(0)) {
             // let's set up the window, with a single label in the center where we will set the icon.
-            JFrame frame = new JFrame();
-            frame.setLayout(new FlowLayout());
-            frame.setSize(500, 500);
-            JLabel lbl = new JLabel();
-            lbl.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-            lbl.setSize(500, 500);
-            lbl.setVisible(true);
-            frame.add(lbl);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+            JFrame frame = createWindow();
+            JLabel lbl = createImageHolder(frame);
             frame.setVisible(true);
 
             // this pipeline will be used to set the image to the gui from the vision thread
@@ -150,6 +142,26 @@ public class Main {
                         .build()),
                 // if there is an error, it will be ignored. Normally not recommended, but it's okay for an example
                 Throwables.silentHandler());
+    }
+
+    private static JFrame createWindow() {
+        JFrame frame = new JFrame();
+        frame.setLayout(new FlowLayout());
+        frame.setSize(500, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        return frame;
+    }
+
+    private static JLabel createImageHolder(JFrame frame) {
+        JLabel lbl = new JLabel();
+        lbl.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        lbl.setSize(500, 500);
+        lbl.setVisible(true);
+
+        frame.add(lbl);
+
+        return lbl;
     }
 
     private static class TargetScorable implements Scorable {
