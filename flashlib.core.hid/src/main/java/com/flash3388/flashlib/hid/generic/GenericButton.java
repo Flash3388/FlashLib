@@ -13,8 +13,6 @@ public class GenericButton extends GenericButtonBase {
         mChannel = channel;
         mButton = button;
 
-        scheduleAutoUpdate(this);
-
         mIsInverted = false;
     }
 

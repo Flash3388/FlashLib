@@ -1,17 +1,16 @@
 package com.flash3388.flashlib.vision.processing;
 
-import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.flash3388.flashlib.vision.processing.analysis.Analyser;
+import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class VisionPipeline<T extends Image, R> implements Pipeline<T> {
+public class VisionPipeline<T, R> implements Pipeline<T> {
 
-    public static class Builder<T extends Image, R> {
+    public static class Builder<T, R> {
 
         private Processor<T, R> mProcessor;
         private Analyser<? super T, ? super R> mAnalyser;

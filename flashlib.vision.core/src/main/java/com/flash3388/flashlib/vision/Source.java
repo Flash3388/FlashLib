@@ -20,6 +20,14 @@ public interface Source<T> {
         return executorService.submit(new SourcePoller<>(this, pipeline, throwableHandler));
     }
 
+    default void asyncPoll(Pipeline<? super T> pipeline,
+                           ThrowableHandler throwableHandler) {
+        Thread thread = new Thread(new SourcePoller<>(this, pipeline, throwableHandler),
+                toString() + "-poller");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     default Future<?> asyncPollAtFixedRate(ScheduledExecutorService executorService,
                                            Time rate,
                                            Pipeline<? super T> pipeline,
@@ -27,6 +35,15 @@ public interface Source<T> {
         return executorService.scheduleAtFixedRate(
                 new SourcePoller<>(this, pipeline, throwableHandler),
                 0, rate.value(), rate.unit());
+    }
+
+    default void asyncPollAtFixedRate(Time rate,
+                                      Pipeline<? super T> pipeline,
+                                      ThrowableHandler throwableHandler) {
+        Thread thread = new Thread(new PeriodicPoller<>(this, rate, pipeline, throwableHandler),
+                toString() + "-poller");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     default Supplier<T> asSupplier(ThrowableHandler throwableHandler) {
@@ -40,6 +57,7 @@ public interface Source<T> {
         };
     }
 
+    @SafeVarargs
     static <T extends Image> Source<T> of(T... images) {
         return new QueueSource<T>(images);
     }
