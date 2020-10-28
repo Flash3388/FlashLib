@@ -57,6 +57,7 @@ public interface Source<T> {
         };
     }
 
+    @SafeVarargs
     static <T extends Image> Source<T> of(T... images) {
         return new QueueSource<T>(images);
     }
