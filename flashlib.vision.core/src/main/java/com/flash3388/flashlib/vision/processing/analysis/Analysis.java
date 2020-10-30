@@ -40,6 +40,19 @@ public class Analysis {
         return mData;
     }
 
+    public boolean has(String key) {
+        return mData.containsKey(key);
+    }
+
+    public Object get(String key) {
+        return mData.get(key);
+    }
+
+    public <T> T get(String key, Class<T> type) {
+        Object value = get(key);
+        return value == null ? null : type.cast(value);
+    }
+
     @Override
     public String toString() {
         return mData.toString();
