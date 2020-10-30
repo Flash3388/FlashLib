@@ -60,4 +60,9 @@ public class VisionPipeline<T, R> implements Pipeline<T> {
         Optional<Analysis> analysis = mAnalyser.analyse(input, out);
         analysis.ifPresent(mAnalysisConsumer);
     }
+
+    public Optional<Analysis> processAndReturn(T input) throws VisionException {
+        R out = mProcessor.process(input);
+        return mAnalyser.analyse(input, out);
+    }
 }
