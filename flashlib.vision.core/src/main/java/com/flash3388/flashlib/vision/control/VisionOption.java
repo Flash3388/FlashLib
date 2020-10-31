@@ -5,6 +5,10 @@ public interface VisionOption<T> {
     String name();
     Class<T> valueType();
 
+    static <T> VisionOption<T> create(String name, Class<T> valueType) {
+        return new Impl<>(name, valueType);
+    }
+
     class Impl<T> implements VisionOption<T> {
 
         private final String mName;
