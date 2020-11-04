@@ -14,6 +14,10 @@ public interface Processor<T, R> {
         return ProcessorChain.create(this, processor);
     }
 
+    default Pipeline<T> pipeTo(Pipeline<? super R> pipeline) {
+        return new ProcessorEnd<>(this, pipeline);
+    }
+
     default Processor<T, R> divergeIn(Pipeline<? super T> pipeline) {
         return new InProcessorJunction<>(this, pipeline);
     }

@@ -1,25 +1,21 @@
 package com.flash3388.flashlib.vision.processing;
 
-import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.processing.analysis.Analyser;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
-public class VisionPipeline<T, R> implements Pipeline<T> {
+public class VisionProcessor<T, R> implements Processor<T, Optional<Analysis>> {
 
     public static class Builder<T, R> {
 
         private Processor<T, R> mProcessor;
         private Analyser<? super T, ? super R> mAnalyser;
-        private Consumer<? super Analysis> mAnalysisConsumer;
 
         public Builder() {
             mProcessor = (t) -> {throw new AssertionError("unimplemented");};
             mAnalyser = (Analyser<T, R>) (input, input2) -> Optional.empty();
-            mAnalysisConsumer = (a) -> {};
         }
 
         public Builder<T, R> process(Processor<T, R> processor) {
@@ -32,32 +28,22 @@ public class VisionPipeline<T, R> implements Pipeline<T> {
             return this;
         }
 
-        public Builder<T, R> analysisTo(Consumer<? super Analysis> consumer) {
-            mAnalysisConsumer = consumer;
-            return this;
-        }
-
-        public VisionPipeline<T, R> build() {
-            return new VisionPipeline<>(mProcessor, mAnalyser, mAnalysisConsumer);
+        public VisionProcessor<T, R> build() {
+            return new VisionProcessor<>(mProcessor, mAnalyser);
         }
     }
 
     private final Processor<T, R> mProcessor;
     private final Analyser<? super T, ? super R> mAnalyser;
-    private final Consumer<? super Analysis> mAnalysisConsumer;
 
-    public VisionPipeline(Processor<T, R> processor, Analyser<? super T, ? super R> analyser,
-                          Consumer<? super Analysis> analysisConsumer) {
+    public VisionProcessor(Processor<T, R> processor, Analyser<? super T, ? super R> analyser) {
         mProcessor = processor;
         mAnalyser = analyser;
-        mAnalysisConsumer = analysisConsumer;
     }
 
     @Override
-    public void process(T input) throws VisionException {
+    public Optional<Analysis> process(T input) throws VisionException {
         R out = mProcessor.process(input);
-
-        Optional<Analysis> analysis = mAnalyser.analyse(input, out);
-        analysis.ifPresent(mAnalysisConsumer);
+        return mAnalyser.analyse(input, out);
     }
 }
