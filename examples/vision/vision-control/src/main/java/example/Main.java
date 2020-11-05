@@ -82,15 +82,13 @@ public class Main {
         VisionControl control = SingleThreadVisionControl.<CvImage>withExecutorService(executorService, Time.milliseconds(1000))
                 .source(source)
                 .preProcess(guiPipeline)
-                .processor(new VisionProcessor.Builder<VisionData<CvImage>, CvImage>()
-                        .process(Processor.<VisionData<CvImage>, CvImage>mapper(VisionData::getData)
-                                .andThen(new HsvRangeProcessor(
-                                        new HsvColorSettings(
-                                                new ColorRange(0, 180),
-                                                new ColorRange(100, 255),
-                                                new ColorRange(105, 255)),
-                                        cvProcessing, true))
-                        )
+                .processor(new VisionProcessor.Builder<CvImage, CvImage>()
+                        .process(new HsvRangeProcessor(
+                                new HsvColorSettings(
+                                        new ColorRange(0, 180),
+                                        new ColorRange(100, 255),
+                                        new ColorRange(105, 255)),
+                                cvProcessing, true))
                         .analyse((data, result)-> Optional.empty())
                         .build())
                 .build();

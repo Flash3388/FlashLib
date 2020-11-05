@@ -67,12 +67,17 @@ public class SingleThreadVisionControl<S> implements VisionControl {
         }
 
         public Builder<S> preProcess(Pipeline<S> pipeline) {
-            mPreProcessPipeline = (data)-> pipeline.process(data.getData());
+            mPreProcessPipeline = Pipeline.mapper(pipeline, VisionData::getData);
             return this;
         }
 
-        public Builder<S> processor(Processor<VisionData<S>, Optional<Analysis>> processor) {
+        public Builder<S> processorWithOptions(Processor<VisionData<S>, Optional<Analysis>> processor) {
             mProcessor = processor;
+            return this;
+        }
+
+        public Builder<S> processor(Processor<S, Optional<Analysis>> processor) {
+            mProcessor = Processor.mapper(processor, VisionData::getData);
             return this;
         }
 

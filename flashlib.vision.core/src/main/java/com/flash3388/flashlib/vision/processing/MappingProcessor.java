@@ -6,9 +6,9 @@ import java.util.function.Function;
 
 public class MappingProcessor<T, R> implements Processor<T, R> {
 
-    private final Function<T, R> mMapper;
+    private final Function<? super T, ? extends R> mMapper;
 
-    public MappingProcessor(Function<T, R> mapper) {
+    public MappingProcessor(Function<? super T, ? extends R> mapper) {
         mMapper = mapper;
     }
 

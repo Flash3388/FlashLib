@@ -42,4 +42,8 @@ public interface Processor<T, R> {
     static <T, R> Processor<T, R> mapper(Function<T, R> mapper) {
         return new MappingProcessor<>(mapper);
     }
+
+    static <T, T2, R> Processor<T, R> mapper(Processor<T2, R> processor, Function<? super T, ? extends T2> mapper) {
+        return new MappingProcessor<T, T2>(mapper).andThen(processor);
+    }
 }
