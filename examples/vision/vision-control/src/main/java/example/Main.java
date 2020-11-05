@@ -12,7 +12,11 @@ import com.flash3388.flashlib.vision.control.VisionData;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
+import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
+import com.flash3388.flashlib.vision.processing.Processor;
 import com.flash3388.flashlib.vision.processing.VisionProcessor;
+import com.flash3388.flashlib.vision.processing.color.ColorRange;
+import com.flash3388.flashlib.vision.processing.color.HsvColorSettings;
 import org.opencv.core.Core;
 
 import javax.swing.BorderFactory;
@@ -74,13 +78,19 @@ public class Main {
                                                  Pipeline<CvImage> guiPipeline,
                                                  ScheduledExecutorService executorService) {
         CvProcessing cvProcessing = new CvProcessing();
-        Clock clock = new SystemNanoClock();
 
         VisionControl control = SingleThreadVisionControl.<CvImage>withExecutorService(executorService, Time.milliseconds(1000))
                 .source(source)
                 .preProcess(guiPipeline)
                 .processor(new VisionProcessor.Builder<VisionData<CvImage>, CvImage>()
-                        .process((data)-> data.getData())
+                        .process(Processor.<VisionData<CvImage>, CvImage>mapper(VisionData::getData)
+                                .andThen(new HsvRangeProcessor(
+                                        new HsvColorSettings(
+                                                new ColorRange(0, 180),
+                                                new ColorRange(100, 255),
+                                                new ColorRange(105, 255)),
+                                        cvProcessing, true))
+                        )
                         .analyse((data, result)-> Optional.empty())
                         .build())
                 .build();

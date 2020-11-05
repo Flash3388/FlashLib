@@ -33,7 +33,7 @@ public class ProcessorChain implements Processor {
     }
 
     @Override
-    public Processor pipeTo(Processor processor) {
+    public Processor andThen(Processor processor) {
         mProcessors.add(processor);
         return this;
     }

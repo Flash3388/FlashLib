@@ -98,7 +98,7 @@ public class Main {
                                 cvProcessing, true)
                                 // Now we define another processor which will run after the color filter.
                                 // This processor will detect contours on the image and return a list of them.
-                                .pipeTo((image)-> cvProcessing.detectContours(image.getMat()))
+                                .andThen((image)-> cvProcessing.detectContours(image.getMat()))
                         )
                         // After we're finished processing the image, we can draw the contours we found on it.
                         // Usually the analyse phase is used to extract information from the result of the processors.

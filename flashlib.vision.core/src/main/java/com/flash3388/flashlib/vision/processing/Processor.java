@@ -4,13 +4,15 @@ import com.castle.util.throwables.ThrowableHandler;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
 
+import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public interface Processor<T, R> {
 
     R process(T input) throws VisionException;
 
-    default <R2> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
+    default <R2> Processor<T, R2> andThen(Processor<? super R, R2> processor) {
         return ProcessorChain.create(this, processor);
     }
 
@@ -35,5 +37,9 @@ public interface Processor<T, R> {
                 return null;
             }
         };
+    }
+
+    static <T, R> Processor<T, R> mapper(Function<T, R> mapper) {
+        return new MappingProcessor<>(mapper);
     }
 }
