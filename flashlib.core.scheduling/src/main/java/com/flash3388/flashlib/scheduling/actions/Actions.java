@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.scheduling.Trigger;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
 import com.flash3388.flashlib.time.Time;
 

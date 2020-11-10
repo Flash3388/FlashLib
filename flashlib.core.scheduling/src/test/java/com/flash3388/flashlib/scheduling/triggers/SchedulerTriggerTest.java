@@ -25,19 +25,6 @@ public class SchedulerTriggerTest {
     }
 
     @Test
-    public void setState_stateIsSame_updatesListenersThatStateIsSame() throws Exception {
-        TriggerStateListener listener = mock(TriggerStateListener.class);
-
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
-        trigger.addStateListener(listener);
-
-        trigger.setState(TriggerState.INACTIVE);
-
-        verify(listener, times(1)).updateInState(
-                eq(TriggerState.INACTIVE));
-    }
-
-    @Test
     public void whenActive_triggerActivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
