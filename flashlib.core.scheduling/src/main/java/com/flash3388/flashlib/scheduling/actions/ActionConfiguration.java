@@ -19,7 +19,7 @@ public class ActionConfiguration {
 
         Editor(Action action, ActionConfiguration originalConfiguration) {
             mAction = action;
-            mConfiguration = new ActionConfiguration(originalConfiguration);
+            mConfiguration = originalConfiguration;
         }
 
         /**
@@ -106,22 +106,22 @@ public class ActionConfiguration {
         return mRunWhenDisabled;
     }
 
-    public void requires(Collection<? extends Requirement> requirements) {
+    void requires(Collection<? extends Requirement> requirements) {
         Objects.requireNonNull(requirements, "requirements is null");
         mRequirements.addAll(requirements);
     }
 
-    public void setTimeout(Time timeout){
+    void setTimeout(Time timeout){
         Objects.requireNonNull(timeout, "timeout is null");
         mTimeout = timeout;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         Objects.requireNonNull(name, "name is null");
         mName = name;
     }
 
-    public void setRunWhenDisabled(boolean runWhenDisabled) {
+    void setRunWhenDisabled(boolean runWhenDisabled) {
         mRunWhenDisabled = runWhenDisabled;
     }
 }

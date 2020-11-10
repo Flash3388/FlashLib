@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -57,6 +58,22 @@ public interface Scheduler {
      * @return <b>true</b> if running, <b>false</b> otherwise.
      */
     boolean isRunning(Action action);
+
+    /**
+     * <p>
+     *     Gets the total time passed since the given {@link Action} started running.
+     * </p>
+     * <p>
+     *     The action must be running.
+     * </p>
+     *
+     * @param action action to get runtime for.
+     *
+     * @return {@link Time} passed since the action started running.
+     *
+     * @throws IllegalStateException if the action is not running.
+     */
+    Time getActionRunTime(Action action);
 
     /**
      * <p>

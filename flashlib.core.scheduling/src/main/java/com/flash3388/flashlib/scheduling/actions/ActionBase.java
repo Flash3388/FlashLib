@@ -26,27 +26,27 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public void start() {
+    public final void start() {
         mScheduler.start(this);
     }
 
     @Override
-    public void cancel() {
+    public final void cancel() {
         mScheduler.cancel(this);
     }
 
     @Override
-    public boolean isRunning() {
+    public final boolean isRunning() {
         return mScheduler.isRunning(this);
     }
 
     @Override
-    public ActionConfiguration getConfiguration() {
+    public final ActionConfiguration getConfiguration() {
         return mConfiguration;
     }
 
     @Override
-    public void setConfiguration(ActionConfiguration configuration) {
+    public final void setConfiguration(ActionConfiguration configuration) {
         if (isRunning()) {
             throw new IllegalStateException("Action is running, cannot change configuration");
         }
@@ -55,12 +55,16 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public ActionConfiguration.Editor configure() {
+    public final ActionConfiguration.Editor configure() {
+        if (isRunning()) {
+            throw new IllegalStateException("Action is running, cannot change configuration");
+        }
+
         return new ActionConfiguration.Editor(this, getConfiguration());
     }
 
     @Override
     public String toString() {
-        return String.format("%s - %s", getClass().getSimpleName(), mConfiguration.getName());
+        return String.format("%s{%s}", mConfiguration.getName(), getClass().getSimpleName());
     }
 }
