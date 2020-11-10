@@ -24,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -187,13 +188,13 @@ public class RequirementsControlTest {
     }
 
     @Test
-    public void setDefaultActionOnSubsystem_subsystemNotInRequirements_subsystemAdded() throws Exception {
-        Subsystem subsystem = mock(Subsystem.class);
-        Action newAction = ActionsMock.actionMocker().build();
+    public void setDefaultActionOnSubsystem_subsystemNotInRequirements_throwsIllegalArguementException() throws Exception {
+        assertThrows(IllegalArgumentException.class, ()-> {
+            Subsystem subsystem = mock(Subsystem.class);
+            Action newAction = ActionsMock.actionMocker().build();
 
-        mRequirementsControl.setDefaultActionOnSubsystem(subsystem, newAction);
-
-        MatcherAssert.assertThat(newAction.getConfiguration().getRequirements(), IsIterableContaining.hasItem(subsystem));
+            mRequirementsControl.setDefaultActionOnSubsystem(subsystem, newAction);
+        });
     }
 
     @Test

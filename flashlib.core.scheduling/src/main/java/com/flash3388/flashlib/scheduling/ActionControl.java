@@ -49,7 +49,7 @@ class ActionControl {
         ActionContext context = mRunningActions.get(action);
         if (context != null) {
             context.cancelAction();
-        } else {
+        } else if (!mNextRunActions.remove(action)) {
             throw new IllegalStateException("action is not running");
         }
     }

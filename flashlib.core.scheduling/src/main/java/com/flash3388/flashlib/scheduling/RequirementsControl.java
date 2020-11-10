@@ -50,12 +50,13 @@ class RequirementsControl {
 
     public void setDefaultActionOnSubsystem(Subsystem subsystem, Action action) {
         if (!action.getConfiguration().getRequirements().contains(subsystem)) {
-            action.configure()
-                    .requires(subsystem)
-                    .save();
+            throw new IllegalArgumentException("Action should require the default subsystem");
         }
 
-        mDefaultActionsOnSubsystems.put(subsystem, action);
+        Action old = mDefaultActionsOnSubsystems.put(subsystem, action);
+        if (old != null && old.isRunning()) {
+            old.cancel();
+        }
     }
 
     public Map<Subsystem, Action> getDefaultActionsToStart() {
