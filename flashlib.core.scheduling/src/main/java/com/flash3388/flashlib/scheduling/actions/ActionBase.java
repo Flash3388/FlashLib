@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.time.Time;
 
 public abstract class ActionBase implements Action {
 
@@ -66,5 +67,9 @@ public abstract class ActionBase implements Action {
     @Override
     public String toString() {
         return String.format("%s{%s}", mConfiguration.getName(), getClass().getSimpleName());
+    }
+
+    public final Time getRunTime() {
+        return mScheduler.getActionRunTime(this);
     }
 }
