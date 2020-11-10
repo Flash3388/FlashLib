@@ -4,13 +4,15 @@ import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
+import java.lang.ref.WeakReference;
+
 public abstract class ActionBase implements Action {
 
-    private final Scheduler mScheduler;
+    private final WeakReference<Scheduler> mScheduler;
     private ActionConfiguration mConfiguration;
 
     protected ActionBase(Scheduler scheduler, ActionConfiguration configuration) {
-        mScheduler = scheduler;
+        mScheduler = new WeakReference<>(scheduler);
         mConfiguration = configuration;
 
         if (mConfiguration.getName() == null) {
@@ -28,17 +30,29 @@ public abstract class ActionBase implements Action {
 
     @Override
     public final void start() {
-        mScheduler.start(this);
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        scheduler.start(this);
     }
 
     @Override
     public final void cancel() {
-        mScheduler.cancel(this);
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        scheduler.cancel(this);
     }
 
     @Override
     public final boolean isRunning() {
-        return mScheduler.isRunning(this);
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        return scheduler.isRunning(this);
     }
 
     @Override
@@ -70,6 +84,10 @@ public abstract class ActionBase implements Action {
     }
 
     public final Time getRunTime() {
-        return mScheduler.getActionRunTime(this);
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        return scheduler.getActionRunTime(this);
     }
 }
