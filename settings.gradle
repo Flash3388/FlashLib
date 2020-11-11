@@ -17,6 +17,7 @@ include 'examples:robot:tankdrive-system-xbox'
 include 'examples:robot:pnuematics-system'
 include 'examples:robot:basic-robot'
 include 'examples:robot:robot-manual-mode-control'
+include 'examples:robot:basic-trigger'
 
 include 'examples:vision:basic-vision'
 include 'examples:vision:cv-2020-vision'
