@@ -12,6 +12,11 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.function.Supplier;
 
+/**
+ * A simple implementation of {@link RobotControl} which receives all required components via the constructor.
+ *
+ * @since FlashLib 3.0.0
+ */
 public class GenericRobotControl implements RobotControl {
 
     private final Logger mLogger;

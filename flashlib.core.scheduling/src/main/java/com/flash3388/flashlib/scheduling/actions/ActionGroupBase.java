@@ -27,12 +27,6 @@ public abstract class ActionGroupBase extends ActionBase implements ActionGroup 
         mRunWhenDisabled = false;
     }
 
-    /**
-     * Adds an action to run.
-     *
-     * @param action action to run
-     * @return this instance
-     */
     @Override
     public ActionGroupBase add(Action action){
         Objects.requireNonNull(action, "action is null");
@@ -62,24 +56,12 @@ public abstract class ActionGroupBase extends ActionBase implements ActionGroup 
         return this;
     }
 
-    /**
-     * Adds an array of scheduling to run.
-     *
-     * @param actions actions to run
-     * @return this instance
-     */
     @Override
     public ActionGroupBase add(Action... actions){
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
     }
 
-    /**
-     * Adds an array of scheduling to run.
-     *
-     * @param actions action to run
-     * @return this instance
-     */
     @Override
     public ActionGroupBase add(Collection<Action> actions){
         Objects.requireNonNull(actions, "actions is null");

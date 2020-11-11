@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -44,7 +45,14 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
+    public Time getActionRunTime(Action action) {
+        Objects.requireNonNull(action, "action is null");
+        return mActionControl.getActionRunTime(action);
+    }
+
+    @Override
     public void cancelActionsIf(Predicate<? super Action> predicate) {
+        Objects.requireNonNull(predicate, "predicate is null");
         mActionControl.cancelActionsIf(predicate);
     }
 

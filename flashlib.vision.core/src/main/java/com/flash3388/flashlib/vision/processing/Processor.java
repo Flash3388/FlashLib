@@ -4,14 +4,20 @@ import com.castle.util.throwables.ThrowableHandler;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
 
+import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public interface Processor<T, R> {
 
     R process(T input) throws VisionException;
 
-    default <R2> Processor<T, R2> pipeTo(Processor<? super R, R2> processor) {
+    default <R2> Processor<T, R2> andThen(Processor<? super R, R2> processor) {
         return ProcessorChain.create(this, processor);
+    }
+
+    default Pipeline<T> pipeTo(Pipeline<? super R> pipeline) {
+        return new ProcessorEnd<>(this, pipeline);
     }
 
     default Processor<T, R> divergeIn(Pipeline<? super T> pipeline) {
@@ -31,5 +37,13 @@ public interface Processor<T, R> {
                 return null;
             }
         };
+    }
+
+    static <T, R> Processor<T, R> mapper(Function<T, R> mapper) {
+        return new MappingProcessor<>(mapper);
+    }
+
+    static <T, T2, R> Processor<T, R> mapper(Processor<T2, R> processor, Function<? super T, ? extends T2> mapper) {
+        return new MappingProcessor<T, T2>(mapper).andThen(processor);
     }
 }

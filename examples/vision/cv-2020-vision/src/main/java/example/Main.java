@@ -12,7 +12,7 @@ import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
 import com.flash3388.flashlib.vision.cv.processing.RectProcessor;
 import com.flash3388.flashlib.vision.cv.processing.Scorable;
 import com.flash3388.flashlib.vision.processing.BestProcessor;
-import com.flash3388.flashlib.vision.processing.MappingProcessor;
+import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.flash3388.flashlib.vision.processing.analysis.AnalysisAlgorithms;
@@ -104,15 +104,15 @@ public class Main {
                                 cvProcessing)
                                 // now we move to the rect processor, which extracts rectangles from remaining
                                 // pixel groups, excluding rects which don't pass the limiting predicate (by size)
-                                .pipeTo(new RectProcessor(cvProcessing, (rect)-> rect.area() > MIN_CONTOUR_SIZE)
+                                .andThen(new RectProcessor(cvProcessing, (rect)-> rect.area() > MIN_CONTOUR_SIZE)
                                         // next we convert the rects into TargetScorable object, which allow
                                         // scoring of results. TargetScorable is defined as an inner class in this class.
                                         // we filter out scorables with a low score
-                                        .pipeTo(new MappingProcessor<Rect, TargetScorable>(
+                                        .andThen(new StreamMappingProcessor<Rect, TargetScorable>(
                                                         (rect) -> new TargetScorable(rect, TARGET_HEIGHT_TO_WIDTH_RATIO),
                                                         (scorable)-> scorable.score() > MIN_SCORE)
                                                 // now we find the best scorable (highest score) assuming there are any
-                                                .pipeTo(new BestProcessor<>(Scorable::compareTo))))
+                                                .andThen(new BestProcessor<>(Scorable::compareTo))))
                         )
                         // this is the end of the processing phase. from an image input, we will receive a
                         // scorable as an output.

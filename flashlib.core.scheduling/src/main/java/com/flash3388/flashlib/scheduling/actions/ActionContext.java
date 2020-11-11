@@ -73,15 +73,19 @@ public class ActionContext {
         return mAction.getConfiguration().shouldRunWhenDisabled();
     }
 
+    public void cancelAction() {
+        mActionState.markCanceled();
+    }
+
+    public Time getRunTime() {
+        return mClock.currentTime().sub(mStartTime);
+    }
+
     boolean wasTimeoutReached(){
         if (!mStartTime.isValid() || !mTimeout.isValid()) {
             return false;
         }
 
-        return (mClock.currentTime().sub(mStartTime)).after(mTimeout);
-    }
-
-    public void cancelAction() {
-        mActionState.markCanceled();
+        return getRunTime().after(mTimeout);
     }
 }

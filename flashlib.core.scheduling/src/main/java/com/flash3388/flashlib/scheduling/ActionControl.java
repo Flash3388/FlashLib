@@ -3,6 +3,7 @@ package com.flash3388.flashlib.scheduling;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,13 +50,22 @@ class ActionControl {
         ActionContext context = mRunningActions.get(action);
         if (context != null) {
             context.cancelAction();
-        } else {
+        } else if (!mNextRunActions.remove(action)) {
             throw new IllegalStateException("action is not running");
         }
     }
 
     public boolean isActionRunning(Action action) {
         return mRunningActions.containsKey(action);
+    }
+
+    public Time getActionRunTime(Action action) {
+        ActionContext context = mRunningActions.get(action);
+        if (context != null) {
+            return context.getRunTime();
+        } else {
+            throw new IllegalStateException("action is not running");
+        }
     }
 
     public void startNewActions() {

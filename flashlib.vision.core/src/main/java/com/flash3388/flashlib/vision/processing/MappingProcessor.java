@@ -3,22 +3,17 @@ package com.flash3388.flashlib.vision.processing;
 import com.flash3388.flashlib.vision.VisionException;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-public class MappingProcessor<T, R> implements Processor<Stream<T>, Stream<R>> {
+public class MappingProcessor<T, R> implements Processor<T, R> {
 
-    private final Function<T, R> mMapper;
-    private final Predicate<? super R> mFilter;
+    private final Function<? super T, ? extends R> mMapper;
 
-    public MappingProcessor(Function<T, R> mapper, Predicate<? super R> filter) {
+    public MappingProcessor(Function<? super T, ? extends R> mapper) {
         mMapper = mapper;
-        mFilter = filter;
     }
 
     @Override
-    public Stream<R> process(Stream<T> input) throws VisionException {
-        return input.map(mMapper)
-                .filter(mFilter);
+    public R process(T input) throws VisionException {
+        return mMapper.apply(input);
     }
 }

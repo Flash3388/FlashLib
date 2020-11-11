@@ -2,14 +2,17 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.time.Time;
+
+import java.lang.ref.WeakReference;
 
 public abstract class ActionBase implements Action {
 
-    private final Scheduler mScheduler;
+    private final WeakReference<Scheduler> mScheduler;
     private ActionConfiguration mConfiguration;
 
     protected ActionBase(Scheduler scheduler, ActionConfiguration configuration) {
-        mScheduler = scheduler;
+        mScheduler = new WeakReference<>(scheduler);
         mConfiguration = configuration;
 
         if (mConfiguration.getName() == null) {
@@ -26,27 +29,39 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public void start() {
-        mScheduler.start(this);
+    public final void start() {
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        scheduler.start(this);
     }
 
     @Override
-    public void cancel() {
-        mScheduler.cancel(this);
+    public final void cancel() {
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        scheduler.cancel(this);
     }
 
     @Override
-    public boolean isRunning() {
-        return mScheduler.isRunning(this);
+    public final boolean isRunning() {
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        return scheduler.isRunning(this);
     }
 
     @Override
-    public ActionConfiguration getConfiguration() {
+    public final ActionConfiguration getConfiguration() {
         return mConfiguration;
     }
 
     @Override
-    public void setConfiguration(ActionConfiguration configuration) {
+    public final void setConfiguration(ActionConfiguration configuration) {
         if (isRunning()) {
             throw new IllegalStateException("Action is running, cannot change configuration");
         }
@@ -55,12 +70,24 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public ActionConfiguration.Editor configure() {
+    public final ActionConfiguration.Editor configure() {
+        if (isRunning()) {
+            throw new IllegalStateException("Action is running, cannot change configuration");
+        }
+
         return new ActionConfiguration.Editor(this, getConfiguration());
     }
 
     @Override
     public String toString() {
-        return String.format("%s - %s", getClass().getSimpleName(), mConfiguration.getName());
+        return String.format("%s{%s}", mConfiguration.getName(), getClass().getSimpleName());
+    }
+
+    public final Time getRunTime() {
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler was garbage collected");
+        }
+        return scheduler.getActionRunTime(this);
     }
 }

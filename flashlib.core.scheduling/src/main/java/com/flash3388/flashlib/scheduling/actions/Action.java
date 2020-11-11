@@ -5,6 +5,9 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.time.Time;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 /**
  * An Action is something that can be executed on the robot. This can include any operation on the robot,
  * depending on what users want. When started, the action is added to the {@link Scheduler} which is responsible
@@ -61,31 +64,120 @@ public interface Action {
     default void end(boolean wasInterrupted) {
     }
 
+    /**
+     * <p>
+     *     Starts the action.
+     * </p>
+     *
+     * @throws IllegalStateException if the action is already running.
+     */
     void start();
+
+    /**
+     * <p>
+     *     Cancels the action.
+     * </p>
+     *
+     * @throws IllegalStateException if the action is not running.
+     */
     void cancel();
+
+    /**
+     * <p>
+     *     Gets whether or not the action is running.
+     * </p>
+     *
+     * @return <b>true</b> if the action is running, <b>false</b> otherwise.
+     */
     boolean isRunning();
 
+    /**
+     * <p>
+     *     Gets the configuration of this action.
+     * </p>
+     *
+     * @return {@link ActionConfiguration} for this action.
+     */
     ActionConfiguration getConfiguration();
+
+    /**
+     * <p>
+     *     Sets the configuration of this action.
+     * </p>
+     * <p>
+     *      Configuration cannot be modified while the action is running.
+     * </p>
+     *
+     * @param configuration {@link ActionConfiguration} to set.
+     *
+     * @throws IllegalStateException if the action is running.
+     */
     void setConfiguration(ActionConfiguration configuration);
+
+    /**
+     * <p>
+     *     Opens a configuration editor context, allowing to edit
+     *     the current configuration.
+     * </p>
+     * <p>
+     *      Configuration cannot be modified while the action is running.
+     * </p>
+     *
+     * @return {@link ActionConfiguration.Editor} editor for configuration.
+     *
+     * @throws IllegalStateException if the action is running.
+     */
     ActionConfiguration.Editor configure();
 
     // convenience methods for configuring
 
+    /**
+     * <p>
+     *     Updates the requirements of the current action. Effectively updates
+     *     the configuration of the action.
+     * </p>
+     *
+     * @param requirements requirements to add.
+     *
+     * @return this
+     * @see ActionConfiguration.Editor#requires(Collection)
+     */
     default Action requires(Requirement... requirements) {
-        return configure()
-                .requires(requirements)
-                .save();
+        getConfiguration().requires(Arrays.asList(requirements));
+        return this;
     }
 
+    /**
+     * <p>
+     *     Updates the timeout of the current action. Effectively updates
+     *     the configuration of the action.
+     * </p>
+     *
+     * @param timeout timeout to set for this action.
+     *
+     * @return this
+     * @see ActionConfiguration.Editor#setTimeout(Time)
+     */
     default Action withTimeout(Time timeout) {
-        return configure()
-                .setTimeout(timeout)
-                .save();
+        getConfiguration().setTimeout(timeout);
+        return this;
     }
 
     // convenience methods for grouping
     // they reference subclasses, but that's how you decorate, so...
 
+    /**
+     * <p>
+     *     Groups this actions with the given actions to run
+     *     in a sequential order, such that this action runs first,
+     *     and the given actions run in order of the given arguments.
+     * </p>
+     *
+     * @param actions actions to group with this one.
+     *
+     * @return this
+     * @see SequentialActionGroup
+     */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup andThen(Action... actions) {
         return new SequentialActionGroup()
@@ -93,6 +185,18 @@ public interface Action {
                 .add(actions);
     }
 
+    /**
+     * <p>
+     *     Groups this actions with the given actions to run
+     *     in a parallel order, such that this actions runs in parallel
+     *     of the given arguments.
+     * </p>
+     *
+     * @param actions actions to group with this one.
+     *
+     * @return this
+     * @see ParallelActionGroup
+     */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup alongWith(Action... actions) {
         return new ParallelActionGroup()
@@ -100,6 +204,23 @@ public interface Action {
                 .add(actions);
     }
 
+    /**
+     * <p>
+     *     Groups this actions with the given actions to run
+     *     in a parallel order, such that this actions runs in parallel
+     *     of the given arguments.
+     * </p>
+     * <p>
+     *     Unlike normal parallel groups, <code>race</code> groups will
+     *     stop when the first action in group stops, rather then waiting for
+     *     all of the to finish.
+     * </p>
+     *
+     * @param actions actions to group with this one.
+     *
+     * @return this
+     * @see ParallelRaceActionGroup
+     */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup raceWith(Action... actions) {
         return new ParallelRaceActionGroup()
