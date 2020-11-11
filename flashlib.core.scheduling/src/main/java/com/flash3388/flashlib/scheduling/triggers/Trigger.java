@@ -2,6 +2,14 @@ package com.flash3388.flashlib.scheduling.triggers;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 
+/**
+ * A trigger is an object which can be either active or inactive. It is possible
+ * to link {@link Action Actions} to be done depending on the state of a trigger.
+ *
+ * @since FlashLib 1.2.0
+ *
+ * @see Triggers
+ */
 public interface Trigger {
 
     /**

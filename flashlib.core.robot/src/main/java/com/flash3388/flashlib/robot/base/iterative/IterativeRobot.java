@@ -22,9 +22,33 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 public interface IterativeRobot {
 
     /**
-     * Initializer for creating {@link IterativeRobot} robot from {@link RobotControl}.
-     * This is generally where the implementing {@link IterativeRobot} should
-     * perform initializing to robot control and systems.
+     * <p>
+     *      Initializer for creating {@link IterativeRobot} robot from {@link RobotControl}.
+     *      This is generally where the implementing {@link IterativeRobot} should
+     *      perform initializing to robot control and systems.
+     * </p>
+     * <p>
+     *     Generally, it is recommended to utilize a constructor for the implementation,
+     *     so that the initialization of the robot is done in the constructor of the
+     *     robot class.
+     * </p>
+     * <pre>
+     *     class Robot implements IterativeRobot {
+     *
+     *         private final RobotControl robotControl;
+     *
+     *         public Robot(RobotControl robotControl) {
+     *              this.robotControl = robotControl;
+     *         }
+     *     }
+     * </pre>
+     * <p>
+     *     Thus, it is possible to create an initializer using
+     *     a simple method reference:
+     * </p>
+     * <pre>
+     *     IterativeRobot.Initializer initializer = Robot::new
+     * </pre>
      *
      * @since FlashLib 2.0.0
      */
@@ -59,6 +83,8 @@ public interface IterativeRobot {
 
     /**
      * Called periodically after the mode-specific operations.
+     * Use this to perform mode-global periodic code, such as dashboard updates and such.
+     * Motion and motor operations are not recommended.
      */
     void robotPeriodic();
 
