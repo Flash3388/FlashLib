@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.base.RobotBase;
+import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
@@ -15,9 +16,17 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 /**
- * Provides access to control and status components of the robot.
+ * Provides access to control and status components of the robot. A robot can only have one instance of this type.
+ * Using this instance, the robot code can then utilize the different methods from this interface in order to
+ * control different parts of the robot.
+ * <p>
+ *     The actual implementation used should suit the specific needs of the robot. This can be affected by many things,
+ *     such as platform, driver control architecture and more. Thus, it is best to be aware of the implementation.
+ * </p>
  *
  * @since FlashLib 3.0.0
+ *
+ * @see GenericRobotControl
  */
 public interface RobotControl {
 

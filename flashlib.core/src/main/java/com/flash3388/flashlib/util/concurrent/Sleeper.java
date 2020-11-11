@@ -37,7 +37,7 @@ public class Sleeper {
      *     is not entirely accurate.
      * </p>
      * <p>
-     *     For more accurate waking up and sleeping, it is based to used a solution based on locks,
+     *     For more accurate waking up and sleeping, it is best to used a solution based on locks,
      *     or utilize java's {@link java.util.concurrent.ExecutorService} and {@link java.util.concurrent.Future}
      *     API's (depending on the need).
      * </p>
