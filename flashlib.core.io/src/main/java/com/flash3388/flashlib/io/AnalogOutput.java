@@ -6,7 +6,7 @@ package com.flash3388.flashlib.io;
  *
  * @since FlashLib 1.2.0
  */
-public interface AnalogOutput extends IoPort {
+public interface AnalogOutput extends AnalogPort {
 
 	/**
 	 * Sets the analog output value for the port. This corresponds to

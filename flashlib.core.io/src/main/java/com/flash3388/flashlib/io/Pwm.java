@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.io;
 
 /**
- * Interface for Pwm ports. This interface is used by devices
- * which require analog Pwm for output, allowing for different implementations.
+ * Interface for PWM ports. This interface is used by devices
+ * which require PWM for output, allowing for different implementations.
  *
  * @since FlashLib 1.2.0
  */
@@ -22,21 +22,29 @@ public interface Pwm extends IoPort {
      */
     double getDuty();
 
-	/**
-	 * Sets the Pwm port output raw value. This corresponds to
-	 * a duty cycle value and depends on the used implementation.
-	 * 
-	 * @param raw raw Pwm output value
-	 */
-	void setRaw(int raw);
+    /**
+     * Sets the pwm output value for the port. This corresponds to
+     * a duty cycle value and depends on the used implementation.
+     *
+     * @param value pwm value
+     */
+	void setValue(int value);
 
-	/**
-	 * Gets the Pwm port output raw value. This corresponds to
-	 * a duty cycle value and depends on the used implementation.
-	 * 
-	 * @return raw Pwm output value
-	 */
-	int getRaw();
+    /**
+     * Gets the current pwm value measured set in the port. This corresponds to
+     * a duty cycle value and depends on the used implementation.
+     *
+     * @return pwm value
+     */
+	int getValue();
+
+    /**
+     * Gets the maximum raw value of the port. This value corresponds to
+     * a duty cycle value and depends on the used implementation.
+     *
+     * @return maximum raw value.
+     */
+	int getMaxValue();
 	
 	/**
 	 * Sets the Pwm port's frequency.
