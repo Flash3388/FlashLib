@@ -78,7 +78,6 @@ public class SeparateThreadScheduler implements Scheduler {
             throw new IllegalStateException("action not running");
         }
 
-        mRunningActions.remove(action);
         mUserRequests.actionToCancel(action);
     }
 
@@ -93,7 +92,12 @@ public class SeparateThreadScheduler implements Scheduler {
     public Time getActionRunTime(Action action) {
         Objects.requireNonNull(action, "action is null");
 
-        throw new UnsupportedOperationException("for now");
+        if (!mRunningActions.contains(action)) {
+            throw new IllegalStateException("action not running");
+        }
+
+        Time startTime = mSchedulerStatus.getStartTime(action);
+        return mClock.currentTime().sub(startTime);
     }
 
     @Override
@@ -109,7 +113,7 @@ public class SeparateThreadScheduler implements Scheduler {
 
     @Override
     public void cancelAllActions() {
-        throw new UnsupportedOperationException("for now");
+        mUserRequests.actionsToCancel(mRunningActions);
     }
 
     @Override
@@ -138,7 +142,7 @@ public class SeparateThreadScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         Objects.requireNonNull(mode, "mode is null");
 
-        Collection<Action> actionsFinished = mSchedulerStatus.getActionsFinished();
+        Collection<Action> actionsFinished = mSchedulerStatus.getAndClearActionsFinished();
         if (!actionsFinished.isEmpty()) {
             mLogger.debug("Scheduler finished actions {}", actionsFinished);
         }

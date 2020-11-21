@@ -22,6 +22,11 @@ public class AtomicActionState implements ActionState {
     }
 
     @Override
+    public boolean isRunning() {
+        return false;
+    }
+
+    @Override
     public boolean isCanceled() {
         return mIsCancelled.get();
     }

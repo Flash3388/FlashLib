@@ -1,9 +1,8 @@
 package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.scheduling.Requirement;
-import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -20,7 +19,9 @@ public class SchedulingTask implements Runnable {
     private final Logger mLogger;
 
     private final Map<Action, SynchronousActionContext> mActionsContexts;
-    private final Collection<Action> mFinished;
+
+    private final Collection<Action> mFinishedCached;
+    private final Map<Action, Time> mActionStartTimesCached;
 
     public SchedulingTask(UserRequests userRequests, SchedulerStatus schedulerStatus, Clock clock, Logger logger) {
         mUserRequests = userRequests;
@@ -29,7 +30,9 @@ public class SchedulingTask implements Runnable {
         mLogger = logger;
 
         mActionsContexts = new HashMap<>();
-        mFinished = new ArrayList<>(3);
+
+        mFinishedCached = new ArrayList<>(3);
+        mActionStartTimesCached = new HashMap<>(5);
     }
 
     @Override
@@ -40,20 +43,27 @@ public class SchedulingTask implements Runnable {
     }
 
     private void startNewActions() {
-        Collection<Action> actionsToStart = mUserRequests.getActionsToStart();
+        Collection<Action> actionsToStart = mUserRequests.getAndClearActionsToStart();
         if (!actionsToStart.isEmpty()) {
             mLogger.debug("Scheduler starting actions {}", actionsToStart);
         }
+
+        mActionStartTimesCached.clear();
 
         for (Action action : actionsToStart) {
             SynchronousActionContext context = new SynchronousActionContext(action, mClock);
             context.startRun();
             mActionsContexts.put(action, context);
+            mActionStartTimesCached.put(action, context.getStartTime());
+        }
+
+        if (!mActionStartTimesCached.isEmpty()) {
+            mSchedulerStatus.actionsStarted(mActionStartTimesCached);
         }
     }
 
     private void cancelRequestedActions() {
-        Collection<Action> actionsToCancel = mUserRequests.getActionsToCancel();
+        Collection<Action> actionsToCancel = mUserRequests.getAndClearActionsToCancel();
         if (!actionsToCancel.isEmpty()) {
             mLogger.debug("Scheduler canceling actions {}", actionsToCancel);
         }
@@ -67,7 +77,7 @@ public class SchedulingTask implements Runnable {
     }
 
     private void runActions() {
-        mFinished.clear();
+        mFinishedCached.clear();
 
         for (Iterator<Map.Entry<Action, SynchronousActionContext>> entryIterator = mActionsContexts.entrySet().iterator();
              entryIterator.hasNext();) {
@@ -76,18 +86,20 @@ public class SchedulingTask implements Runnable {
             // TODO: LOCKING
             try {
                 if (!context.run()) {
-                    mFinished.add(entry.getKey());
+                    mFinishedCached.add(entry.getKey());
                     entryIterator.remove();
                 }
             } catch (Throwable t) {
                 mLogger.error(String.format("Error while running an action %s", context), t);
                 cancelAction(context);
-                mFinished.add(entry.getKey());
+                mFinishedCached.add(entry.getKey());
                 entryIterator.remove();
             }
         }
 
-        mSchedulerStatus.actionsFinished(mFinished);
+        if (!mFinishedCached.isEmpty()) {
+            mSchedulerStatus.actionsFinished(mFinishedCached);
+        }
     }
 
     private void cancelAction(SynchronousActionContext context) {

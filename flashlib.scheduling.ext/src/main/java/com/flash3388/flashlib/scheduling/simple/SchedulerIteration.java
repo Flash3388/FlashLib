@@ -33,14 +33,14 @@ public class SchedulerIteration {
             Action action = entry.getKey();
             ActionContext context = entry.getValue();
 
-            if (mode.isDisabled() && !context.shouldRunWhenDisabled()) {
+            /*if (mode.isDisabled() && !context.shouldRunWhenDisabled()) {
                 mActionsToRemove.add(action);
                 continue;
             }
 
             if (!context.run()) {
                 mActionsToRemove.add(action);
-            }
+            }*/
         }
     }
 }

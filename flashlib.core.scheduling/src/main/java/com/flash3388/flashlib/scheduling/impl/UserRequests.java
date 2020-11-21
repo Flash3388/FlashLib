@@ -19,7 +19,7 @@ public class UserRequests {
         this(new ArrayList<>(2), new ArrayList<>(2));
     }
 
-    public Collection<Action> getActionsToStart() {
+    public Collection<Action> getAndClearActionsToStart() {
         synchronized (mActionsToStart) {
             Collection<Action> copy = new ArrayList<>(mActionsToStart);
             mActionsToStart.clear();
@@ -27,7 +27,7 @@ public class UserRequests {
         }
     }
 
-    public Collection<Action> getActionsToCancel() {
+    public Collection<Action> getAndClearActionsToCancel() {
         synchronized (mActionsToCancel) {
             Collection<Action> copy = new ArrayList<>(mActionsToCancel);
             mActionsToCancel.clear();
@@ -44,6 +44,12 @@ public class UserRequests {
     public void actionToCancel(Action action) {
         synchronized (mActionsToCancel) {
             mActionsToCancel.add(action);
+        }
+    }
+
+    public void actionsToCancel(Collection<Action> runningActions) {
+        synchronized (mActionsToCancel) {
+            mActionsToCancel.addAll(runningActions);
         }
     }
 }

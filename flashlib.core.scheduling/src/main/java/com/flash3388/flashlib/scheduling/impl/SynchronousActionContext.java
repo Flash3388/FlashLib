@@ -30,10 +30,6 @@ public class SynchronousActionContext {
         this(action, clock, new SynchronousActionState());
     }
 
-    public Action getUnderlyingAction() {
-        return mAction;
-    }
-
     public ActionConfiguration getConfiguration() {
         return mConfiguration;
     }
@@ -44,6 +40,10 @@ public class SynchronousActionContext {
 
     public boolean isRunning() {
         return mActionState.isInitialized() && mActionState.isRunning();
+    }
+
+    public Time getStartTime() {
+        return mStartTime;
     }
 
     public Time getRunTime() {
