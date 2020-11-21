@@ -16,7 +16,7 @@ public class SynchronousActionContext {
     private Time mStartTime;
     private Time mTimeout;
 
-    public SynchronousActionContext(Action action, Clock clock, ActionState actionState) {
+    SynchronousActionContext(Action action, Clock clock, ActionState actionState) {
         mAction = action;
         mClock = clock;
         mActionState = actionState;
@@ -28,6 +28,10 @@ public class SynchronousActionContext {
 
     public SynchronousActionContext(Action action, Clock clock) {
         this(action, clock, new SynchronousActionState());
+    }
+
+    public Action getUnderlyingAction() {
+        return mAction;
     }
 
     public ActionConfiguration getConfiguration() {

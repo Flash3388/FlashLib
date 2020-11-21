@@ -18,13 +18,13 @@ public class SynchronousActionState implements ActionState {
     }
 
     @Override
-    public boolean isInitialized() {
-        return mIsInitialized;
+    public boolean isRunning() {
+        return mIsRunning;
     }
 
     @Override
-    public boolean isRunning() {
-        return mIsRunning;
+    public boolean isInitialized() {
+        return mIsInitialized;
     }
 
     @Override

@@ -92,6 +92,7 @@ public class SequentialActionGroup extends ActionGroupBase {
         }
 
         mCurrentAction = mActionQueue.poll();
+        System.out.println("starting: " + mCurrentAction);
         mCurrentAction.startRun();
     }
 
