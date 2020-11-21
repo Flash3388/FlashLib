@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+@Deprecated
 class SchedulerIteration {
 
     private final ActionControl mActionControl;

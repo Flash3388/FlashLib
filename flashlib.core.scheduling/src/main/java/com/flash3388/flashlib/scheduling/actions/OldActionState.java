@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+@Deprecated
 class OldActionState {
 
     private boolean mIsCanceled;

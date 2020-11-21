@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+@Deprecated
 class ActionControl {
 
     private final Clock mClock;

@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import java.util.function.Predicate;
 
+@Deprecated
 class ActionContextRunner implements Predicate<ActionContext> {
 
     @Override

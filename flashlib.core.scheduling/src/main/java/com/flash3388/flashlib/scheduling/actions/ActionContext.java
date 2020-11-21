@@ -3,6 +3,7 @@ package com.flash3388.flashlib.scheduling.actions;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
+@Deprecated
 public class ActionContext {
 
     private final Action mAction;
