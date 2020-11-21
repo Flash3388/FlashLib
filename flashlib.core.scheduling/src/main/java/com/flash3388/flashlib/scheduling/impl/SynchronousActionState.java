@@ -1,14 +1,12 @@
-package com.flash3388.flashlib.scheduling.simple;
+package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.scheduling.ActionState;
-
-class SynchronousActionState implements ActionState {
+public class SynchronousActionState implements ActionState {
 
     private boolean mIsCanceled;
     private boolean mIsRunning;
     private boolean mIsInitialized;
 
-    SynchronousActionState() {
+    public SynchronousActionState() {
         mIsRunning = false;
         mIsCanceled = false;
         mIsInitialized = false;
@@ -22,6 +20,11 @@ class SynchronousActionState implements ActionState {
     @Override
     public boolean isInitialized() {
         return mIsInitialized;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mIsRunning;
     }
 
     @Override

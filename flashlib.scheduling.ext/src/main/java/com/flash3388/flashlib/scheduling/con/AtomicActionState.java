@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.con;
 
-import com.flash3388.flashlib.scheduling.ActionState;
+import com.flash3388.flashlib.scheduling.impl.ActionState;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

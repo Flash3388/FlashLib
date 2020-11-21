@@ -1,16 +1,13 @@
-package com.flash3388.flashlib.scheduling.simple;
+package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.scheduling.impl.ActionState;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
-import com.flash3388.flashlib.scheduling.impl.SynchronousActionState;
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.ActionContext;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-public class SynchronousContext implements ActionContext {
+public class SynchronousActionContext {
 
     private final Action mAction;
     private final Clock mClock;
@@ -22,7 +19,7 @@ public class SynchronousContext implements ActionContext {
     private Time mStartTime;
     private Time mTimeout;
 
-    public SynchronousContext(Action action, Clock clock, Logger logger, ActionState actionState) {
+    public SynchronousActionContext(Action action, Clock clock, Logger logger, ActionState actionState) {
         mAction = action;
         mClock = clock;
         mLogger = logger;
@@ -33,62 +30,46 @@ public class SynchronousContext implements ActionContext {
         mTimeout = Time.INVALID;
     }
 
-    public SynchronousContext(Action action, Clock clock, Logger logger) {
-        this(action, clock, logger, new SynchronousActionState());
+    public ActionConfiguration getConfiguration() {
+        return mConfiguration;
     }
 
-    @Override
-    public Action getUnderlyingAction() {
-        return mAction;
+    public boolean isStarted() {
+        return mActionState.isRunning();
     }
 
-    @Override
+    public boolean isRunning() {
+        return mActionState.isInitialized() && mActionState.isRunning();
+    }
+
     public Time getRunTime() {
         return mClock.currentTime().sub(mStartTime);
     }
 
-    @Override
-    public boolean startRun() {
+    public void startRun() {
         if (mActionState.markStarted()) {
             mStartTime = mClock.currentTime();
             mTimeout = mConfiguration.getTimeout();
-
-            return true;
         }
-
-        return false;
     }
 
-    @Override
-    public boolean run(SchedulerMode mode) {
-        // acquire
-        if (mode.isDisabled() && !mConfiguration.shouldRunWhenDisabled()) {
-            onRunFinished();
-            return false;
-        }
-
+    public boolean run() {
         try {
             if (doRun()) {
                 return true;
             }
         } catch (Throwable t) {
             mLogger.error(String.format("Error while running an action %s", mConfiguration.getName()), t);
-            cancelAction();
+            mActionState.markCanceled();
         }
 
         onRunFinished();
         return false;
-        // release
     }
 
-    @Override
-    public void cancelAction() {
+    public void cancelAndFinish() {
         mActionState.markCanceled();
-    }
-
-    @Override
-    public String toString() {
-        return mAction.toString();
+        onRunFinished();
     }
 
     private boolean doRun() {
@@ -128,7 +109,6 @@ public class SynchronousContext implements ActionContext {
         }
 
         mStartTime = Time.INVALID;
-
         mActionState.markFinished();
     }
 }
