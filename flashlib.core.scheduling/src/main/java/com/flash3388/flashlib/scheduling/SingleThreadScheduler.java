@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+@Deprecated
 public class SingleThreadScheduler implements Scheduler {
 
     private final RequirementsControl mRequirementsControl;

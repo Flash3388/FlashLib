@@ -1,9 +1,6 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.impl.SchedulerStatus;
-import com.flash3388.flashlib.scheduling.impl.SchedulingTask;
-import com.flash3388.flashlib.scheduling.impl.UserRequests;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.SeparateThreadExecutor;
@@ -40,7 +37,7 @@ import java.util.function.Predicate;
  *     action.start();
  * </pre>
  * <p>
- *     The above code snippet is possible although may cause weired states, as technically the previous action is still
+ *     The above code snippet is possible although may cause weird states, as technically the previous action is still
  *     running and has not necessarily been canceled yet, so first the old action needs to be canceled. Only then
  *     will the new action be posted to the scheduling thread.
  * </p>
@@ -51,8 +48,8 @@ public class SeparateThreadScheduler implements Scheduler {
 
     private final Clock mClock;
     private final Logger mLogger;
-    private final UserRequests mUserRequests;
-    private final SchedulerStatus mSchedulerStatus;
+    private final StsUserRequests mUserRequests;
+    private final StsSchedulerStatus mSchedulerStatus;
 
     private final Set<Action> mRunningActions;
     private final Map<Requirement, Action> mRunningOnRequirements;
@@ -62,8 +59,8 @@ public class SeparateThreadScheduler implements Scheduler {
     private final Collection<Action> mCancelReplaceActions;
 
     SeparateThreadScheduler(Executor executor, Clock clock, Logger logger,
-                            UserRequests userRequests, SchedulerStatus schedulerStatus,
-                            Set<Action> runningActions, Map<Requirement, Action> runningOnRequirements, 
+                            StsUserRequests userRequests, StsSchedulerStatus schedulerStatus,
+                            Set<Action> runningActions, Map<Requirement, Action> runningOnRequirements,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
@@ -76,11 +73,11 @@ public class SeparateThreadScheduler implements Scheduler {
         mMarkedForCancel = new HashSet<>();
         mCancelReplaceActions = new HashSet<>();
 
-        executor.execute(new SchedulingTask(mUserRequests, mSchedulerStatus, mClock, mLogger));
+        executor.execute(new StsSchedulingTask(mUserRequests, mSchedulerStatus, mClock, mLogger));
     }
 
     public SeparateThreadScheduler(Executor executor, Clock clock, Logger logger) {
-        this(executor, clock, logger, new UserRequests(), new SchedulerStatus(),
+        this(executor, clock, logger, new StsUserRequests(), new StsSchedulerStatus(),
                 new HashSet<>(5), new HashMap<>(5), 
                 new HashMap<>(2));
     }

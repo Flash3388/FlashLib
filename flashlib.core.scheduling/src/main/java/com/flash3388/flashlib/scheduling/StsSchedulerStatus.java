@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling.impl;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Time;
@@ -8,21 +8,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SchedulerStatus {
+class StsSchedulerStatus {
 
     private final Collection<Action> mActionsFinished;
     private final Map<Action, Time> mStartTimes;
 
     private final Object mActionsStateLock;
 
-    SchedulerStatus(Collection<Action> actionsFinished, Map<Action, Time> startTimes) {
+    StsSchedulerStatus(Collection<Action> actionsFinished, Map<Action, Time> startTimes) {
         mActionsFinished = actionsFinished;
         mStartTimes = startTimes;
 
         mActionsStateLock = new Object();
     }
 
-    public SchedulerStatus() {
+    public StsSchedulerStatus() {
         this(new ArrayList<>(), new HashMap<>());
     }
 

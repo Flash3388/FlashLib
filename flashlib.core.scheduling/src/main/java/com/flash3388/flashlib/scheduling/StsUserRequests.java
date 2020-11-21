@@ -1,21 +1,21 @@
-package com.flash3388.flashlib.scheduling.impl;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class UserRequests {
+class StsUserRequests {
 
     private final Collection<Action> mActionsToStart;
     private final Collection<Action> mActionsToCancel;
 
-    UserRequests(Collection<Action> actionsToStart, Collection<Action> actionsToCancel) {
+    StsUserRequests(Collection<Action> actionsToStart, Collection<Action> actionsToCancel) {
         mActionsToStart = actionsToStart;
         mActionsToCancel = actionsToCancel;
     }
 
-    public UserRequests() {
+    public StsUserRequests() {
         this(new ArrayList<>(2), new ArrayList<>(2));
     }
 

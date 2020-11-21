@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling.impl;
+package com.flash3388.flashlib.scheduling.actions;
 
 public class SynchronousActionState implements ActionState {
 

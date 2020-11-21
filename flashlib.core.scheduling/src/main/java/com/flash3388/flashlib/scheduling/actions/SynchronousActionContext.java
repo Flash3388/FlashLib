@@ -1,7 +1,5 @@
-package com.flash3388.flashlib.scheduling.impl;
+package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 

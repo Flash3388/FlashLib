@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
-import com.flash3388.flashlib.scheduling.impl.SynchronousActionContext;
 import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayList;

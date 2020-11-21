@@ -8,7 +8,7 @@ public class ActionContext {
     private final Action mAction;
     private final Clock mClock;
 
-    private final ActionState mActionState;
+    private final OldActionState mActionState;
 
     private Time mStartTime;
     private Time mTimeout;
@@ -19,7 +19,7 @@ public class ActionContext {
         mAction = action;
         mClock = clock;
 
-        mActionState = new ActionState();
+        mActionState = new OldActionState();
         mStartTime = Time.INVALID;
         mTimeout = Time.INVALID;
         mIsInitialized = false;

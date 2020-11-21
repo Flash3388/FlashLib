@@ -1,6 +1,7 @@
-package com.flash3388.flashlib.scheduling.impl;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.SynchronousActionContext;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
@@ -11,10 +12,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class SchedulingTask implements Runnable {
+class StsSchedulingTask implements Runnable {
 
-    private final UserRequests mUserRequests;
-    private final SchedulerStatus mSchedulerStatus;
+    private final StsUserRequests mUserRequests;
+    private final StsSchedulerStatus mSchedulerStatus;
     private final Clock mClock;
     private final Logger mLogger;
 
@@ -23,7 +24,7 @@ public class SchedulingTask implements Runnable {
     private final Collection<Action> mFinishedCached;
     private final Map<Action, Time> mActionStartTimesCached;
 
-    public SchedulingTask(UserRequests userRequests, SchedulerStatus schedulerStatus, Clock clock, Logger logger) {
+    public StsSchedulingTask(StsUserRequests userRequests, StsSchedulerStatus schedulerStatus, Clock clock, Logger logger) {
         mUserRequests = userRequests;
         mSchedulerStatus = schedulerStatus;
         mClock = clock;
