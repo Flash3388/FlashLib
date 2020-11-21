@@ -48,14 +48,18 @@ build.finalizedBy sourcesJar, javadocJar
 publishing {
     publications {
         mavenFlashlib(MavenPublication) {
+            def projectName = project.name.replace('.', '-')
+
             from components.java
 
             artifact sourcesJar
             artifact javadocJar
 
+            artifactId = projectName
+
             pom {
-                name = project.name
-                description = "Robotics development framework (${project.name})"
+                name = projectName
+                description = "Robotics development framework (${projectName})"
                 url = POM_URL
 
                 licenses {

@@ -3,7 +3,8 @@
 ![Travis (.org) branch](https://img.shields.io/travis/Flash3388/FlashLib/master.svg)
 ![GitHub](https://img.shields.io/github/license/FLASH3388/FlashLib.svg)
 
-FlashLib is a robotics software development library for Java, originaly designed to improve and help FRC teams, but can work on other non-FRC platforms. Although currently available only for Java, we aim to make FlashLib available for C++ as well.
+FlashLib is a robotics software development library for Java, originally designed to improve and help FRC teams, 
+but now built to support non-FRC robots and even other usages. 
 
 - [Building](#building)
 - [Code Of Conduct](#code-of-conduct)
@@ -22,7 +23,7 @@ For further information, checkout the Wiki [main page](https://github.com/Flash3
 ## Code Of Conduct
 
 FlashLib is here to help the community in the development of robotics solutions, and thus supports an open and welcoming 
-envirnoment for users and developers. We expect everyone to act with respect and according to our code of conduct.
+environment for users and developers. We expect everyone to act with respect and according to our code of conduct.
 
 Please see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for information about our code of conduct.
 

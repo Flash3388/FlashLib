@@ -7,11 +7,9 @@ public class RobotMap {
 
     private RobotMap() {}
 
-    public static final IoChannel DRIVE_MOTOR_RIGHT_FRONT = new IoChannel.Stub();
-    public static final IoChannel DRIVE_MOTOR_RIGHT_BACK = new IoChannel.Stub();
-    public static final IoChannel DRIVE_MOTOR_LEFT_FRONT = new IoChannel.Stub();
-    public static final IoChannel DRIVE_MOTOR_LEFT_BACK = new IoChannel.Stub();
+    public static final IoChannel DRIVE_MOTOR_RIGHT = new IoChannel.Stub();
+    public static final IoChannel DRIVE_MOTOR_LEFT = new IoChannel.Stub();
 
-    public static final HidChannel STICK_RIGHT = new HidChannel.Stub();
-    public static final HidChannel STICK_LEFT = new HidChannel.Stub();
+    public static final HidChannel HID_RIGHT = new HidChannel.Stub();
+    public static final HidChannel HID_LEFT = new HidChannel.Stub();
 }
