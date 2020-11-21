@@ -1,9 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.scheduling.impl.SynchronousActionContext;
-import com.flash3388.flashlib.scheduling.impl.SynchronousActionState;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
@@ -48,7 +46,7 @@ public class SynchronousScheduler implements Scheduler {
             throw new IllegalStateException("action is running");
         }
 
-        SynchronousActionContext context = new SynchronousActionContext(action, mClock, mLogger, new SynchronousActionState());
+        SynchronousActionContext context = new SynchronousActionContext(action, mClock);
         updateRequirementsWithAction(action, context.getConfiguration().getRequirements());
         context.startRun();
         mActionsContexts.put(action, context);
@@ -180,16 +178,28 @@ public class SynchronousScheduler implements Scheduler {
                 mLogger.debug("Mode {} is disabled and action {} is not approved. Canceling", mode, entry.getKey());
                 cancelAction(context);
                 entryIterator.remove();
-            } else if (!context.run()) {
-                actionFinished(context);
-                entryIterator.remove();
+            } else {
+                try {
+                    if (!context.run()) {
+                        actionFinished(context);
+                        entryIterator.remove();
+                    }
+                } catch (Throwable t) {
+                    mLogger.error(String.format("Error while running an action %s", entry.getKey()), t);
+                    cancelAction(context);
+                    entryIterator.remove();
+                }
             }
         }
     }
 
     private void cancelAction(SynchronousActionContext context) {
         if (context.isRunning()) {
-            context.cancelAndFinish();
+            try {
+                context.cancelAndFinish();
+            } catch (Throwable t) {
+                mLogger.error(String.format("Error while ending an action %s", context), t);
+            }
         }
 
         actionFinished(context);

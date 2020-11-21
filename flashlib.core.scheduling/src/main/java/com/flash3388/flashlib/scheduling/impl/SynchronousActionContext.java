@@ -1,17 +1,14 @@
 package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import org.slf4j.Logger;
 
 public class SynchronousActionContext {
 
     private final Action mAction;
     private final Clock mClock;
-    private final Logger mLogger;
     private final ActionState mActionState;
 
     private final ActionConfiguration mConfiguration;
@@ -19,15 +16,18 @@ public class SynchronousActionContext {
     private Time mStartTime;
     private Time mTimeout;
 
-    public SynchronousActionContext(Action action, Clock clock, Logger logger, ActionState actionState) {
+    public SynchronousActionContext(Action action, Clock clock, ActionState actionState) {
         mAction = action;
         mClock = clock;
-        mLogger = logger;
         mActionState = actionState;
 
         mConfiguration = new ActionConfiguration(action.getConfiguration());
         mStartTime = Time.INVALID;
         mTimeout = Time.INVALID;
+    }
+
+    public SynchronousActionContext(Action action, Clock clock) {
+        this(action, clock, new SynchronousActionState());
     }
 
     public ActionConfiguration getConfiguration() {
@@ -54,13 +54,8 @@ public class SynchronousActionContext {
     }
 
     public boolean run() {
-        try {
-            if (doRun()) {
-                return true;
-            }
-        } catch (Throwable t) {
-            mLogger.error(String.format("Error while running an action %s", mConfiguration.getName()), t);
-            mActionState.markCanceled();
+        if (doRun()) {
+            return true;
         }
 
         onRunFinished();
@@ -72,6 +67,11 @@ public class SynchronousActionContext {
         onRunFinished();
     }
 
+    @Override
+    public String toString() {
+        return mAction.toString();
+    }
+
     private boolean doRun() {
         if(wasTimeoutReached()) {
             mActionState.markCanceled();
@@ -81,9 +81,10 @@ public class SynchronousActionContext {
             return false;
         }
 
-        if(mActionState.markInitialized()) {
+        if(!mActionState.isInitialized()) {
             mStartTime = mClock.currentTime();
             mAction.initialize();
+            mActionState.markInitialized();
         }
 
         mAction.execute();
@@ -100,15 +101,13 @@ public class SynchronousActionContext {
     }
 
     private void onRunFinished() {
-        if(mActionState.isInitialized()){
-            try {
+        try {
+            if(mActionState.isInitialized()){
                 mAction.end(mActionState.isCanceled());
-            } catch (Throwable t) {
-                mLogger.error(String.format("Error while ending an action %s", mConfiguration.getName()), t);
             }
+        } finally {
+            mStartTime = Time.INVALID;
+            mActionState.markFinished();
         }
-
-        mStartTime = Time.INVALID;
-        mActionState.markFinished();
     }
 }
