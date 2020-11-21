@@ -20,6 +20,33 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
+/**
+ * A scheduler implementation that runs actions in a thread separate from the main robot thread. Actions are not
+ * touched in the robot main thread at all. This causes to some delays in updates to certain robot status. For example,
+ * when calling {@link #start(Action)} the action may not actually start for a few milliseconds (until the scheduling thread
+ * runs). The same is true about {@link #cancel(Action)} which won't cancel the action until the scheduling thread gets to it. This leads
+ * to possible delays in several status methods, like {@link #isRunning(Action)}:
+ * <pre>
+ *     action.cancel()
+ *     assert !action.isRunning();
+ * </pre>
+ * <p>
+ *     This will cause an {@link AssertionError} as the action hasn't actually finished yet. In addition,
+ *     subsequent calls to {@link #cancel(Action)} may also work even though they shouldn't. Such a case won't cause 
+ *     an error in the scheduler, but users should beware. 
+ * </p>
+ * <pre>
+ *     action.cancel();
+ *     action.start();
+ * </pre>
+ * <p>
+ *     The above code snippet is possible although may cause weired states, as technically the previous action is still
+ *     running and has not necessarily been canceled yet, so first the old action needs to be canceled. Only then
+ *     will the new action be posted to the scheduling thread.
+ * </p>
+ *
+ * @since FlashLib 3.0.0
+ */
 public class SeparateThreadScheduler implements Scheduler {
 
     private final Clock mClock;
@@ -30,10 +57,14 @@ public class SeparateThreadScheduler implements Scheduler {
     private final Set<Action> mRunningActions;
     private final Map<Requirement, Action> mRunningOnRequirements;
     private final Map<Subsystem, Action> mDefaultActions;
+    
+    private final Collection<Action> mMarkedForCancel;
+    private final Collection<Action> mCancelReplaceActions;
 
     SeparateThreadScheduler(Executor executor, Clock clock, Logger logger,
-                           UserRequests userRequests, SchedulerStatus schedulerStatus,
-                           Set<Action> runningActions, Map<Requirement, Action> runningOnRequirements, Map<Subsystem, Action> defaultActions) {
+                            UserRequests userRequests, SchedulerStatus schedulerStatus,
+                            Set<Action> runningActions, Map<Requirement, Action> runningOnRequirements, 
+                            Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
         mUserRequests = userRequests;
@@ -42,12 +73,16 @@ public class SeparateThreadScheduler implements Scheduler {
         mRunningOnRequirements = runningOnRequirements;
         mDefaultActions = defaultActions;
 
+        mMarkedForCancel = new HashSet<>();
+        mCancelReplaceActions = new HashSet<>();
+
         executor.execute(new SchedulingTask(mUserRequests, mSchedulerStatus, mClock, mLogger));
     }
 
     public SeparateThreadScheduler(Executor executor, Clock clock, Logger logger) {
         this(executor, clock, logger, new UserRequests(), new SchedulerStatus(),
-                new HashSet<>(5), new HashMap<>(5), new HashMap<>(2));
+                new HashSet<>(5), new HashMap<>(5), 
+                new HashMap<>(2));
     }
 
     public SeparateThreadScheduler(Time runInterval, Clock clock, Logger logger) {
@@ -58,27 +93,39 @@ public class SeparateThreadScheduler implements Scheduler {
     public void start(Action action) {
         Objects.requireNonNull(action, "action is null");
 
-        if (mRunningActions.contains(action)) {
-            throw new IllegalStateException("action is running");
+        if (mMarkedForCancel.contains(action)) {
+            mCancelReplaceActions.add(action);
+        } else {
+            if (mRunningActions.contains(action)) {
+                throw new IllegalStateException("action is running");
+            }
+
+            mRunningActions.add(action);
+
+            Collection<Requirement> requirements = action.getConfiguration().getRequirements();
+            updateRequirementsWithAction(action, requirements);
+
+            mUserRequests.actionToStart(action);
         }
-
-        mRunningActions.add(action);
-
-        Collection<Requirement> requirements = action.getConfiguration().getRequirements();
-        updateRequirementsWithAction(action, requirements);
-
-        mUserRequests.actionToStart(action);
     }
 
     @Override
     public void cancel(Action action) {
         Objects.requireNonNull(action, "action is null");
 
+        if (mMarkedForCancel.contains(action)) {
+            if (mCancelReplaceActions.contains(action)) {
+                mCancelReplaceActions.remove(action);
+            } else {
+                return;
+            }
+        }
+
         if (!mRunningActions.contains(action)) {
             throw new IllegalStateException("action not running");
         }
 
-        mUserRequests.actionToCancel(action);
+        cancelAction(action);
     }
 
     @Override
@@ -106,14 +153,15 @@ public class SeparateThreadScheduler implements Scheduler {
 
         for (Action action : mRunningActions) {
             if (predicate.test(action)) {
-                mUserRequests.actionToCancel(action);
+                cancel(action);
             }
         }
     }
 
     @Override
     public void cancelAllActions() {
-        mUserRequests.actionsToCancel(mRunningActions);
+        mCancelReplaceActions.clear();
+        cancelActions(mRunningActions);
     }
 
     @Override
@@ -127,7 +175,7 @@ public class SeparateThreadScheduler implements Scheduler {
 
         Action old = mDefaultActions.put(subsystem, action);
         if (old != null && mRunningActions.contains(old)) {
-            mUserRequests.actionToCancel(old);
+            cancel(old);
         }
     }
 
@@ -148,8 +196,17 @@ public class SeparateThreadScheduler implements Scheduler {
         }
 
         mRunningActions.removeAll(actionsFinished);
+        mMarkedForCancel.removeAll(actionsFinished);
+        
         for (Action action : actionsFinished) {
             updateRequirementsActionFinished(action.getConfiguration().getRequirements());
+        }
+
+        for (Iterator<Action> iterator = mCancelReplaceActions.iterator(); iterator.hasNext();) {
+            Action action = iterator.next();
+            if (!mRunningActions.contains(action)) {
+                start(action);
+            }
         }
 
         startDefaultActions(mode);
@@ -178,7 +235,7 @@ public class SeparateThreadScheduler implements Scheduler {
             if (mode.isDisabled() && !action.getConfiguration().shouldRunWhenDisabled()) {
                 mLogger.debug("Mode {} is disabled and action {} is not approved. Canceling", mode, action);
                 iterator.remove();
-                mUserRequests.actionToCancel(action);
+                cancelAction(action);
             }
         }
     }
@@ -188,7 +245,7 @@ public class SeparateThreadScheduler implements Scheduler {
             Action old = mRunningOnRequirements.put(requirement, action);
             if (old != null && mRunningActions.contains(old)) {
                 mLogger.warn("Conflict on requirement {} by old {} and new {}. New receives priority", requirement, old, action);
-                mUserRequests.actionToCancel(action);
+                cancelAction(action);
             }
         }
     }
@@ -197,5 +254,13 @@ public class SeparateThreadScheduler implements Scheduler {
         for (Requirement requirement : requirements) {
             mRunningOnRequirements.remove(requirement);
         }
+    }
+    
+    private void cancelAction(Action action) {
+        mUserRequests.actionToCancel(action);
+    }
+
+    private void cancelActions(Collection<Action> actions) {
+        mUserRequests.actionsToCancel(actions);
     }
 }

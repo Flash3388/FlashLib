@@ -14,6 +14,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * A scheduler implementation that runs only in the main robot thread. Actions are executed mainly under
+ * {@link #run(SchedulerMode)}, but some updates are done when modifications are made to the scheduler; this includes:
+ * {@link #start(Action)}, {@link #cancel(Action)}, {@link #cancelActionsIf(Predicate)}, {@link #cancelAllActions()},
+ * {@link #setDefaultAction(Subsystem, Action)}. This should not matter as it is executed in the same thread.
+ *
+ * @since FlashLib 3.0.0
+ */
 public class SynchronousScheduler implements Scheduler {
 
     private final Clock mClock;
