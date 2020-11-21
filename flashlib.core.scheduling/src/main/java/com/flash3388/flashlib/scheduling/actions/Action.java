@@ -175,7 +175,7 @@ public interface Action {
      *
      * @param actions actions to group with this one.
      *
-     * @return this
+     * @return {@link ActionGroup} running in sequence this and the given actions.
      * @see SequentialActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
@@ -194,7 +194,7 @@ public interface Action {
      *
      * @param actions actions to group with this one.
      *
-     * @return this
+     * @return {@link ActionGroup} running in parallel this and the given actions.
      * @see ParallelActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
@@ -218,7 +218,7 @@ public interface Action {
      *
      * @param actions actions to group with this one.
      *
-     * @return this
+     * @return {@link ActionGroup} running in parallel this and the given actions.
      * @see ParallelRaceActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
