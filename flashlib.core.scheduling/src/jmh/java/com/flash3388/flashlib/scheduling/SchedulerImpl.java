@@ -5,7 +5,7 @@ import com.flash3388.flashlib.time.SystemNanoClock;
 import java.util.function.Supplier;
 
 public enum SchedulerImpl {
-    SINGLE_THREAD(()->new SingleThreadScheduler(new SystemNanoClock()))
+    SINGLE_THREAD(()->new SynchronousScheduler(new SystemNanoClock()))
     ;
 
     private final Supplier<Scheduler> mGenerator;

@@ -10,19 +10,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class SingleThreadScheduler implements Scheduler {
+public class SynchronousScheduler implements Scheduler {
 
     private final RequirementsControl mRequirementsControl;
     private final ActionControl mActionControl;
     private final SchedulerIteration mSchedulerIteration;
 
-    public SingleThreadScheduler(Clock clock, Logger logger) {
+    public SynchronousScheduler(Clock clock, Logger logger) {
         mRequirementsControl = new RequirementsControl(logger);
         mActionControl = new ActionControl(clock, mRequirementsControl);
         mSchedulerIteration = new SchedulerIteration(mActionControl, mRequirementsControl, logger);
     }
 
-    public SingleThreadScheduler(Clock clock) {
+    public SynchronousScheduler(Clock clock) {
         this(clock, Logging.stub());
     }
 
