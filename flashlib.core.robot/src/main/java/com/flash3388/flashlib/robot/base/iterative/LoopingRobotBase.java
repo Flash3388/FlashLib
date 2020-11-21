@@ -93,8 +93,8 @@ public class LoopingRobotBase implements RobotBase {
     private void initMode(RobotMode mode) {
         mRobotControl.getLogger().trace("Initializing mode {}", mode);
 
+        mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
         if (mode.isDisabled()) {
-            mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
             mRobot.disabledInit();
         } else {
             mRobot.modeInit(mode);
