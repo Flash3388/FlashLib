@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.impl.SynchronousActionContext;
 import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayList;
@@ -9,20 +10,16 @@ import java.util.Collection;
 public class ParallelRaceActionGroup extends ActionGroupBase {
 
     private final Clock mClock;
+    private final Collection<SynchronousActionContext> mCurrentActions;
 
-    private final Collection<ActionContext> mCurrentActions;
-    private final ActionContextRunner mContextRunner;
+    private SynchronousActionContext mFinishedCommand;
 
-    private ActionContext mFinishedCommand;
-
-    ParallelRaceActionGroup(Clock clock, Collection<Action> actions, Collection<ActionContext> currentActions) {
+    ParallelRaceActionGroup(Clock clock, Collection<Action> actions, Collection<SynchronousActionContext> currentActions) {
         super(actions, false);
 
         mClock = clock;
         mCurrentActions = currentActions;
 
-        mContextRunner = new ActionContextRunner();
-        mRunWhenDisabled = false;
         mFinishedCommand = null;
     }
 
@@ -60,8 +57,8 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     @Override
     public final void initialize() {
         for (Action action : mActions) {
-            ActionContext actionContext = new ActionContext(action, mClock);
-            actionContext.prepareForRun();
+            SynchronousActionContext actionContext = new SynchronousActionContext(action, mClock);
+            actionContext.startRun();
 
             mCurrentActions.add(actionContext);
         }
@@ -75,8 +72,8 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
             return;
         }
 
-        for (ActionContext context : mCurrentActions) {
-            if (!mContextRunner.test(context)) {
+        for (SynchronousActionContext context : mCurrentActions) {
+            if (!context.run()) {
                 mFinishedCommand = context;
                 break;
             }
@@ -90,14 +87,10 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
 
     @Override
     public void end(boolean wasInterrupted) {
-        for (ActionContext context : mCurrentActions) {
+        for (SynchronousActionContext context : mCurrentActions) {
             if (wasInterrupted || !context.equals(mFinishedCommand)) {
-                context.runCanceled();
+                context.cancelAndFinish();
             }
-        }
-
-        if (!wasInterrupted && mFinishedCommand != null) {
-            mFinishedCommand.runFinished();
         }
     }
 }

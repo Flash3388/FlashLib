@@ -1,33 +1,36 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependenciesMock;
-import com.flash3388.flashlib.time.ClockMock;
+import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.impl.SynchronousActionContext;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.ClockMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class ParallelActionGroupTest {
 
+    private Scheduler mScheduler;
     private Clock mClock;
+    private List<Action> mActions;
+    private Collection<SynchronousActionContext> mRunningActions;
 
     @BeforeEach
     public void setup() {
+        mScheduler = mock(Scheduler.class);
         mClock = ClockMock.mockInvalidTimeClock();
-
-        GlobalDependenciesMock.mockDependencies();
-        GlobalDependenciesMock.mockClock(mClock);
+        mActions = new ArrayList<>();
+        mRunningActions = new ArrayList<>();
     }
-
 
     @Test
     public void execute_actionsCurrentlyRunning_executesThem() throws Exception {
@@ -36,8 +39,9 @@ public class ParallelActionGroupTest {
                 ActionsMock.actionMocker().build()
         );
 
-        ParallelActionGroup actionGroup = new ParallelActionGroup()
-                .add(actions);
+        mActions.addAll(actions);
+
+        ParallelActionGroup actionGroup = new ParallelActionGroup(mScheduler, mClock, mActions, mRunningActions);
 
         actionGroup.initialize();
         actionGroup.execute();
@@ -47,34 +51,37 @@ public class ParallelActionGroupTest {
 
     @Test
     public void execute_actionCurrentlyRunningIsFinished_endsIt() throws Exception {
-        List<Action> actions = Collections.singletonList(
-                ActionsMock.actionMocker().mockIsFinished(true).build()
-        );
+        Action action = ActionsMock.actionMocker()
+                .mockIsFinished(true)
+                .build();
+        mActions.add(action);
 
-        ParallelActionGroup actionGroup = new ParallelActionGroup()
-                .add(actions);
+        ParallelActionGroup actionGroup = new ParallelActionGroup(mScheduler, mClock, mActions, mRunningActions);
 
         actionGroup.initialize();
         actionGroup.execute();
 
-        verify(actions.get(0), times(1)).end(eq(false));
+        verify(action, times(1)).end(eq(false));
     }
 
     @Test
     public void interrupted_actionIsRunning_cancelsIt() throws Exception {
-        List<Action> actions = Collections.singletonList(
-                ActionsMock.actionMocker().build()
-        );
-        Collection<ActionContext> runningActions = new ArrayList<>(Collections.singleton(
-            ActionsMock.contextMocker().runFinished(false).build()
-        ));
+        Action action = ActionsMock.actionMocker()
+                .build();
+        SynchronousActionContext context = ActionsMock.synchronousActionContextMocker(action)
+                .mockRunning(true)
+                .mockNextRunFinished(false)
+                .build();
 
-        ParallelActionGroup actionGroup = new ParallelActionGroup(
-                mClock, actions, runningActions);
+
+        mActions.add(action);
+        mRunningActions.add(context);
+
+        ParallelActionGroup actionGroup = new ParallelActionGroup(mScheduler, mClock, mActions, mRunningActions);
 
         actionGroup.execute();
         actionGroup.end(true);
 
-        verify(runningActions.iterator().next(), times(1)).runCanceled();
+        verify(context, times(1)).cancelAndFinish();
     }
 }

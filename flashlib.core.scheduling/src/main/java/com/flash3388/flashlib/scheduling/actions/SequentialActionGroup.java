@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.impl.SynchronousActionContext;
 import com.flash3388.flashlib.time.Clock;
 
 import java.util.ArrayDeque;
@@ -15,12 +16,12 @@ public class SequentialActionGroup extends ActionGroupBase {
 
     private final Clock mClock;
 
-    private final Queue<ActionContext> mActionQueue;
+    private final Queue<SynchronousActionContext> mActionQueue;
 
-    private ActionContext mCurrentAction;
+    private SynchronousActionContext mCurrentAction;
 
     SequentialActionGroup(Scheduler scheduler, Clock clock,
-                          Collection<Action> actions, Queue<ActionContext> actionQueue) {
+                          Collection<Action> actions, Queue<SynchronousActionContext> actionQueue) {
         super(scheduler, actions, true);
 
         mClock = clock;
@@ -30,13 +31,9 @@ public class SequentialActionGroup extends ActionGroupBase {
         mRunWhenDisabled = false;
     }
 
-    public SequentialActionGroup(Clock clock) {
-        this(GlobalDependencies.getScheduler(), clock,
-                new ArrayList<>(3), new ArrayDeque<>(3));
-    }
-
     public SequentialActionGroup() {
-        this(GlobalDependencies.getClock());
+        this(GlobalDependencies.getScheduler(), GlobalDependencies.getClock(),
+                new ArrayList<>(3), new ArrayDeque<>(3));
     }
 
     @Override
@@ -64,7 +61,7 @@ public class SequentialActionGroup extends ActionGroupBase {
 
     @Override
     public final void initialize() {
-        mActions.forEach((action) -> mActionQueue.add(new ActionContext(action, mClock)));
+        mActions.forEach((action) -> mActionQueue.add(new SynchronousActionContext(action, mClock)));
         startNextAction();
     }
 
@@ -85,7 +82,7 @@ public class SequentialActionGroup extends ActionGroupBase {
     @Override
     public void end(boolean wasInterrupted) {
         if (wasInterrupted && mCurrentAction != null) {
-            mCurrentAction.runCanceled();
+            mCurrentAction.cancelAndFinish();
         }
     }
 
@@ -95,7 +92,7 @@ public class SequentialActionGroup extends ActionGroupBase {
         }
 
         mCurrentAction = mActionQueue.poll();
-        mCurrentAction.prepareForRun();
+        mCurrentAction.startRun();
     }
 
     private void handleCurrentAction() {
@@ -104,7 +101,6 @@ public class SequentialActionGroup extends ActionGroupBase {
         }
 
         if (!mCurrentAction.run()) {
-            mCurrentAction.runFinished();
             mCurrentAction = null;
         }
     }
