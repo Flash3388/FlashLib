@@ -4,15 +4,18 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 class StsUserRequests {
 
     private final Collection<Action> mActionsToStart;
     private final Collection<Action> mActionsToCancel;
+    private volatile SchedulerMode mCurrentMode;
 
     StsUserRequests(Collection<Action> actionsToStart, Collection<Action> actionsToCancel) {
         mActionsToStart = actionsToStart;
         mActionsToCancel = actionsToCancel;
+        mCurrentMode = null;
     }
 
     public StsUserRequests() {
@@ -35,6 +38,10 @@ class StsUserRequests {
         }
     }
 
+    public boolean isCurrentModeDisable() {
+        return mCurrentMode == null || mCurrentMode.isDisabled();
+    }
+
     public void actionToStart(Action action) {
         synchronized (mActionsToStart) {
             mActionsToStart.add(action);
@@ -51,5 +58,9 @@ class StsUserRequests {
         synchronized (mActionsToCancel) {
             mActionsToCancel.addAll(runningActions);
         }
+    }
+
+    public void updateCurrentMode(SchedulerMode mode) {
+        mCurrentMode = mode;
     }
 }

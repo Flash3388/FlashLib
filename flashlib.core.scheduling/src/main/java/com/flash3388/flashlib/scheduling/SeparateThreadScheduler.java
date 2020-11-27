@@ -193,6 +193,8 @@ public class SeparateThreadScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         Objects.requireNonNull(mode, "mode is null");
 
+        mUserRequests.updateCurrentMode(mode);
+
         Collection<Action> actionsFinished = mSchedulerStatus.getAndClearActionsFinished();
         if (!actionsFinished.isEmpty()) {
             mLogger.debug("Scheduler finished actions {}", actionsFinished);

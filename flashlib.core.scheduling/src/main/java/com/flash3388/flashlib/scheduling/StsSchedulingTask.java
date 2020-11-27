@@ -50,8 +50,14 @@ class StsSchedulingTask implements Runnable {
         }
 
         mActionStartTimesCached.clear();
+        boolean disabled = mUserRequests.isCurrentModeDisable();
 
         for (Action action : actionsToStart) {
+            if (disabled && !action.getConfiguration().shouldRunWhenDisabled()) {
+                mLogger.debug("Mode disabled=true, not starting action {}", action);
+                continue;
+            }
+
             SynchronousActionContext context = new SynchronousActionContext(action, mClock);
             context.startRun();
             mActionsContexts.put(action, context);

@@ -35,6 +35,19 @@ import static org.mockito.Mockito.verify;
 
 class SeparateThreadSchedulerTest {
 
+
+    private static final SchedulerMode DISABLED_MODE = new SchedulerMode() {
+        @Override
+        public boolean isDisabled() {
+            return true;
+        }
+    };
+    private static final SchedulerMode NON_DISABLED_MODE = new SchedulerMode() {
+        @Override
+        public boolean isDisabled() {
+            return false;
+        }
+    };
     private static final Time TASK_ASSERTION_WAIT = Time.milliseconds(1000);
 
     private Time mRunInterval;
@@ -81,6 +94,7 @@ class SeparateThreadSchedulerTest {
                 .build();
 
         Scheduler scheduler = createScheduler();
+        scheduler.run(NON_DISABLED_MODE);
         scheduler.start(action);
 
         assertInTask(TASK_ASSERTION_WAIT, (task)-> {
@@ -96,6 +110,7 @@ class SeparateThreadSchedulerTest {
                 .build();
 
         Scheduler scheduler = createScheduler();
+        scheduler.run(NON_DISABLED_MODE);
         scheduler.start(action);
 
         assertInTask(TASK_ASSERTION_WAIT, (task)-> {
