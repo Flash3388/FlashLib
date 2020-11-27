@@ -4,6 +4,7 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.SeparateThreadExecutor;
+import com.flash3388.flashlib.util.concurrent.ServiceIntervalExecutor;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
 
 /**
@@ -80,6 +82,10 @@ public class SeparateThreadScheduler implements Scheduler {
         this(executor, clock, logger, new StsUserRequests(), new StsSchedulerStatus(),
                 new HashSet<>(5), new HashMap<>(5), 
                 new HashMap<>(2));
+    }
+
+    public SeparateThreadScheduler(Time runInterval, ExecutorService executorService, Clock clock, Logger logger) {
+        this(new ServiceIntervalExecutor(executorService, runInterval), clock, logger);
     }
 
     public SeparateThreadScheduler(Time runInterval, Clock clock, Logger logger) {

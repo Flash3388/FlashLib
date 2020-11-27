@@ -113,4 +113,18 @@ class StsSchedulingTask implements Runnable {
             }
         }
     }
+
+    // for use in tests
+
+    Map<Action, SynchronousActionContext> getActionsContexts() {
+        return mActionsContexts;
+    }
+
+    Collection<Action> getFinishedCached() {
+        return mFinishedCached;
+    }
+
+    Map<Action, Time> getActionStartTimesCached() {
+        return mActionStartTimesCached;
+    }
 }
