@@ -110,7 +110,7 @@ public class Main {
                                         // we filter out scorables with a low score
                                         .andThen(new StreamMappingProcessor<Rect, TargetScorable>(
                                                         (rect) -> new TargetScorable(rect, TARGET_HEIGHT_TO_WIDTH_RATIO),
-                                                        (scorable)-> scorable.score() > MIN_SCORE)
+                                                        (scorable) -> scorable.score() > MIN_SCORE)
                                                 // now we find the best scorable (highest score) assuming there are any
                                                 .andThen(new BestProcessor<>(Scorable::compareTo))))
                         )
