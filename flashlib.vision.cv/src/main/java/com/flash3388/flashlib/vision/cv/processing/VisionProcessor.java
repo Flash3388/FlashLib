@@ -6,4 +6,8 @@ public interface VisionProcessor {
     Future<?> startVisionPipeline(double minContourSize);
     VisionProcessingConfig getProcessingConfig();
     PhysicalVisionConfig getPhysicalConfig();
+
+    default void shutdownVisionPipeline() {
+        getProcessingConfig().getExecutorService().shutdownNow();
+    }
 }
