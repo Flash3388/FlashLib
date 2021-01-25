@@ -1,18 +1,20 @@
 package com.flash3388.flashlib.vision.cv.processing;
 
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.jmath.vectors.Vector2;
 import org.opencv.core.Rect;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RatioVisionThing extends VisionSomething<RatioVisionThing.RatioScorable>{
     private final double targetHeightToWidthRatio;
     private final double minScore;
 
-    public RatioVisionThing(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<Analysis> analysisConsumer, double targetHeightToWidthRatio, double minScore) {
-        super(processingConfig, physicalConfig, analysisConsumer);
+    public RatioVisionThing(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<StandardVisionResult> resultConsumer, Supplier<Time> syncedTime, double targetHeightToWidthRatio, double minScore) {
+        super(processingConfig, physicalConfig, resultConsumer, syncedTime);
         this.targetHeightToWidthRatio = targetHeightToWidthRatio;
         this.minScore = minScore;
     }

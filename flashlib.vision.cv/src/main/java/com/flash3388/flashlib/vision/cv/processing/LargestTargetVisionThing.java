@@ -1,15 +1,17 @@
 package com.flash3388.flashlib.vision.cv.processing;
 
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.jmath.vectors.Vector2;
 import org.opencv.core.Rect;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class LargestTargetVisionThing extends VisionSomething<LargestTargetVisionThing.RectSizeScorable> {
-    public LargestTargetVisionThing(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<Analysis> analysisConsumer) {
-        super(processingConfig, physicalConfig, analysisConsumer);
+    public LargestTargetVisionThing(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<StandardVisionResult> resultConsumer, Supplier<Time> syncedTime) {
+        super(processingConfig, physicalConfig, resultConsumer, syncedTime);
     }
 
     @Override

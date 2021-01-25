@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.vision.cv.processing;
 
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
@@ -13,18 +14,21 @@ import org.opencv.core.Rect;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class VisionSomething<S extends Scorable> implements  VisionProcessor{
     private final VisionProcessingConfig processingConfig;
     private final PhysicalVisionConfig physicalConfig;
-    private final Consumer<Analysis> analysisConsumer;
+    private final Consumer<StandardVisionResult> resultConsumer;
+    private final Supplier<Time> syncedTime;
 
     private final CvProcessing cvProcessing;
 
-    public VisionSomething(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<Analysis> analysisConsumer) {
+    public VisionSomething(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<StandardVisionResult> resultConsumer, Supplier<Time> syncedTime) {
         this.processingConfig = processingConfig;
         this.physicalConfig = physicalConfig;
-        this.analysisConsumer = analysisConsumer;
+        this.resultConsumer = resultConsumer;
+        this.syncedTime = syncedTime;
 
         cvProcessing = new CvProcessing();
     }
@@ -37,7 +41,7 @@ public abstract class VisionSomething<S extends Scorable> implements  VisionProc
                                 .andThen(new RectProcessor(cvProcessing, rect -> rect.area() > minContourSize)
                                         .andThen(mappingProcessor(minContourSize).andThen(new BestProcessor<>(Scorable::compareTo)))))
                         .analyse(this::analyze)
-                        .analysisTo(analysisConsumer)
+                        .analysisTo(analysis -> resultConsumer.accept(StandardVisionResult.fromAnalysis(analysis)))
                         .build())
                 , processingConfig.getHandler());
     }
@@ -67,6 +71,7 @@ public abstract class VisionSomething<S extends Scorable> implements  VisionProc
         return Optional.of(new Analysis.Builder()
                 .put("distance", distance)
                 .put("angle", angle)
+                .put("timestamp", syncedTime.get())
                 .build());
     }
 }
