@@ -7,20 +7,20 @@ import org.opencv.core.Rect;
 
 import java.util.function.Consumer;
 
-public class LargestTargetVisionThing extends VisionSomething<LargestTargetVisionThing.TargetScorable> {
+public class LargestTargetVisionThing extends VisionSomething<LargestTargetVisionThing.RectSizeScorable> {
     public LargestTargetVisionThing(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<Analysis> analysisConsumer) {
         super(processingConfig, physicalConfig, analysisConsumer);
     }
 
     @Override
-    protected StreamMappingProcessor<Rect, TargetScorable> mappingProcessor(double minContourSize) {
-        return new StreamMappingProcessor<>(TargetScorable::new, targetScorable -> targetScorable.score() < minContourSize);
+    protected StreamMappingProcessor<Rect, RectSizeScorable> mappingProcessor(double minContourSize) {
+        return new StreamMappingProcessor<>(RectSizeScorable::new, rectSizeScorable -> rectSizeScorable.score() < minContourSize);
     }
 
-    protected static class TargetScorable implements Scorable {
+    protected static class RectSizeScorable implements Scorable {
         private final Rect rect;
 
-        TargetScorable(Rect rect) {
+        RectSizeScorable(Rect rect) {
             this.rect = rect;
         }
 
