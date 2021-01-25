@@ -1,9 +1,11 @@
-package com.flash3388.flashlib.vision.cv.processing;
+package com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty;
 
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
+import com.flash3388.flashlib.vision.cv.processing.RectProcessor;
+import com.flash3388.flashlib.vision.cv.processing.Scorable;
 import com.flash3388.flashlib.vision.processing.BestProcessor;
 import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;

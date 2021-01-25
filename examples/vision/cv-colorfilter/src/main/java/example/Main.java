@@ -8,7 +8,7 @@ import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
-import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
+import com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty.HsvRangeProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
 import com.flash3388.flashlib.vision.processing.color.ColorRange;
 import com.flash3388.flashlib.vision.processing.color.HsvColorSettings;

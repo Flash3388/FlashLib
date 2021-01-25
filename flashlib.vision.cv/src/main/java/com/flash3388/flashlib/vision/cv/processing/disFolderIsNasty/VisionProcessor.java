@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.cv.processing;
+package com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty;
 
 import java.util.concurrent.Future;
 

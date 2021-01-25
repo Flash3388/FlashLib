@@ -8,7 +8,7 @@ import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
-import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
+import com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty.HsvRangeProcessor;
 import com.flash3388.flashlib.vision.cv.processing.RectProcessor;
 import com.flash3388.flashlib.vision.cv.processing.Scorable;
 import com.flash3388.flashlib.vision.processing.BestProcessor;

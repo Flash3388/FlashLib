@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.cv.processing;
+package com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty;
 
 import com.castle.util.throwables.ThrowableHandler;
 import com.castle.util.throwables.Throwables;

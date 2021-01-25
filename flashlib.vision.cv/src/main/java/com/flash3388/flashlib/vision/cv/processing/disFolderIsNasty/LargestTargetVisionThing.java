@@ -1,8 +1,8 @@
-package com.flash3388.flashlib.vision.cv.processing;
+package com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty;
 
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.vision.cv.processing.Scorable;
 import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.jmath.vectors.Vector2;
 import org.opencv.core.Rect;
 

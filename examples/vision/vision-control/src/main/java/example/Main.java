@@ -1,19 +1,15 @@
 package example;
 
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Camera;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.control.SingleThreadVisionControl;
 import com.flash3388.flashlib.vision.control.VisionControl;
-import com.flash3388.flashlib.vision.control.VisionData;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.CvProcessing;
-import com.flash3388.flashlib.vision.cv.processing.HsvRangeProcessor;
-import com.flash3388.flashlib.vision.processing.Processor;
+import com.flash3388.flashlib.vision.cv.processing.disFolderIsNasty.HsvRangeProcessor;
 import com.flash3388.flashlib.vision.processing.VisionProcessor;
 import com.flash3388.flashlib.vision.processing.color.ColorRange;
 import com.flash3388.flashlib.vision.processing.color.HsvColorSettings;
@@ -30,7 +26,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class Main {
