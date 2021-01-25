@@ -8,20 +8,23 @@ import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
 import com.flash3388.flashlib.vision.processing.analysis.Analysis;
 import com.flash3388.flashlib.vision.processing.analysis.AnalysisAlgorithms;
-import jdk.internal.org.objectweb.asm.tree.analysis.Analyzer;
 import org.opencv.core.Rect;
 
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public abstract class VisionSomething<S extends Scorable> implements  VisionProcessor{
     private final VisionProcessingConfig processingConfig;
     private final PhysicalVisionConfig physicalConfig;
+    private final Consumer<Analysis> analysisConsumer;
+
     private final CvProcessing cvProcessing;
 
-    public VisionSomething(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig) {
+    public VisionSomething(VisionProcessingConfig processingConfig, PhysicalVisionConfig physicalConfig, Consumer<Analysis> analysisConsumer) {
         this.processingConfig = processingConfig;
         this.physicalConfig = physicalConfig;
+        this.analysisConsumer = analysisConsumer;
 
         cvProcessing = new CvProcessing();
     }
@@ -32,9 +35,9 @@ public abstract class VisionSomething<S extends Scorable> implements  VisionProc
                 processingConfig.getOutputPipeline().divergeTo(new VisionPipeline.Builder<CvImage, Optional<S>>()
                         .process(new HsvRangeProcessor(processingConfig.getColorSettings(), cvProcessing)
                                 .andThen(new RectProcessor(cvProcessing, rect -> rect.area() > minContourSize)
-                                        .andThen(mappingProcessor().andThen(new BestProcessor<>(Scorable::compareTo)))))
+                                        .andThen(mappingProcessor(minContourSize).andThen(new BestProcessor<>(Scorable::compareTo)))))
                         .analyse(this::analyze)
-                        .analysisTo(this::consume)
+                        .analysisTo(analysisConsumer)
                         .build())
                 , processingConfig.getHandler());
     }
@@ -49,8 +52,7 @@ public abstract class VisionSomething<S extends Scorable> implements  VisionProc
         return physicalConfig;
     }
 
-    protected abstract StreamMappingProcessor<Rect, S> mappingProcessor();
-    protected abstract void consume(Analysis analysis);
+    protected abstract StreamMappingProcessor<Rect, S> mappingProcessor(double minContourSize);
 
     private Optional<Analysis> analyze(Image image, Optional<S> best) {
         if (!best.isPresent())
