@@ -2,7 +2,6 @@ package com.flash3388.flashlib.robot.systems;
 
 import com.flash3388.flashlib.control.Direction;
 import com.flash3388.flashlib.io.devices.SpeedController;
-import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 
 public class ConstantSpeedMotorSystem extends MotorSystem {
 
@@ -14,7 +13,7 @@ public class ConstantSpeedMotorSystem extends MotorSystem {
     }
 
     public ConstantSpeedMotorSystem(double speed, SpeedController... controllers) {
-        super(new SpeedControllerGroup(controllers));
+        super(controllers);
         mSpeed = speed;
     }
 
