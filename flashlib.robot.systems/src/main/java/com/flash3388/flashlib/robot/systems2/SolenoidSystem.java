@@ -1,11 +1,10 @@
-package com.flash3388.flashlib.robot.nsys;
+package com.flash3388.flashlib.robot.systems2;
 
 import com.flash3388.flashlib.io.devices.Solenoid;
 import com.flash3388.flashlib.io.devices.SolenoidGroup;
-import com.flash3388.flashlib.robot.nact.CloseValve;
-import com.flash3388.flashlib.robot.nact.OpenValve;
-import com.flash3388.flashlib.robot.nact.ToggleValve;
-import com.flash3388.flashlib.robot.nint.Piston;
+import com.flash3388.flashlib.robot.systems2.actions.CloseValve;
+import com.flash3388.flashlib.robot.systems2.actions.OpenValve;
+import com.flash3388.flashlib.robot.systems2.actions.ToggleValve;
 import com.flash3388.flashlib.robot.systems.Valve;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;

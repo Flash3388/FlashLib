@@ -1,9 +1,8 @@
-package com.flash3388.flashlib.robot.nsys;
+package com.flash3388.flashlib.robot.systems2;
 
 import com.flash3388.flashlib.io.devices.SpeedController;
-import com.flash3388.flashlib.robot.nact.DriveArcade;
-import com.flash3388.flashlib.robot.nact.DriveTank;
-import com.flash3388.flashlib.robot.nint.TankDrive;
+import com.flash3388.flashlib.robot.systems2.actions.DriveArcade;
+import com.flash3388.flashlib.robot.systems2.actions.DriveTank;
 import com.flash3388.flashlib.robot.systems.drive.ArcadeDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.TankDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;

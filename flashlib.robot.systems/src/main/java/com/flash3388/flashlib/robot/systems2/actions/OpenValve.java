@@ -1,23 +1,19 @@
-package com.flash3388.flashlib.robot.nact;
+package com.flash3388.flashlib.robot.systems2.actions;
 
 import com.flash3388.flashlib.robot.systems.Valve;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
-public class ToggleValve extends ActionBase {
+public class OpenValve extends ActionBase {
 
     private final Valve mValve;
 
-    public ToggleValve(Valve valve) {
+    public OpenValve(Valve valve) {
         mValve = valve;
     }
 
     @Override
     public void execute() {
-        if (mValve.isOpen()) {
-            mValve.close();
-        } else {
-            mValve.open();
-        }
+        mValve.open();
     }
 
     @Override

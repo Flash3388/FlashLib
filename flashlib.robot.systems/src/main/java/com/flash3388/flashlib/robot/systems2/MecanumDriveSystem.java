@@ -1,8 +1,7 @@
-package com.flash3388.flashlib.robot.nsys;
+package com.flash3388.flashlib.robot.systems2;
 
 import com.flash3388.flashlib.io.devices.SpeedController;
-import com.flash3388.flashlib.robot.nact.DriveMecanum;
-import com.flash3388.flashlib.robot.nint.MecanumDrive;
+import com.flash3388.flashlib.robot.systems2.actions.DriveMecanum;
 import com.flash3388.flashlib.robot.systems.drive.MecanumDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
 import com.flash3388.flashlib.scheduling.Subsystem;
