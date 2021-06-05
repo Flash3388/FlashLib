@@ -48,7 +48,7 @@ build.finalizedBy sourcesJar, javadocJar
 publishing {
     publications {
         mavenFlashlib(MavenPublication) {
-            def projectName = project.name.replace('.', '-')
+            def projectName = project.name
 
             from components.java
 
