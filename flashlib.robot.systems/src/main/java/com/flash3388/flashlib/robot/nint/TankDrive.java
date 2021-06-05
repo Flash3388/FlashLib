@@ -8,6 +8,11 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+/**
+ * Interface for tank drive systems.
+ *
+ * @since FlashLib 3.0.0
+ */
 public interface TankDrive extends Movable, Rotatable {
 
     /**
