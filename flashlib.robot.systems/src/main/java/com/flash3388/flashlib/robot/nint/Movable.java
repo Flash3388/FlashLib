@@ -22,7 +22,7 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power and direction.
      * @return action to perform motion.
      */
-    Action moveAt(DoubleSupplier speed);
+    Action move(DoubleSupplier speed);
 
     /**
      * Moves along the axis at a given speed.
@@ -31,8 +31,8 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power and direction.
      * @return action to perform motion.
      */
-    default Action moveAt(double speed) {
-        return moveAt(Suppliers.of(speed));
+    default Action move(double speed) {
+        return move(Suppliers.of(speed));
     }
 
     /**
@@ -43,8 +43,8 @@ public interface Movable extends Stoppable, Requirement {
      * @param direction direction of motion.
      * @return action to perform motion.
      */
-    default Action moveAt(double speed, Direction direction) {
-        return moveAt(Math.abs(speed) * direction.sign());
+    default Action move(double speed, Direction direction) {
+        return move(Math.abs(speed) * direction.sign());
     }
 
     /**
@@ -54,8 +54,8 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power.
      * @return action to perform motion.
      */
-    default Action forwardAt(DoubleSupplier speed) {
-        return moveAt(()-> Math.abs(speed.getAsDouble()));
+    default Action forward(DoubleSupplier speed) {
+        return move(()-> Math.abs(speed.getAsDouble()));
     }
 
     /**
@@ -65,8 +65,8 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power.
      * @return action to perform motion.
      */
-    default Action forwardAt(double speed) {
-        return moveAt(speed, Direction.FORWARD);
+    default Action forward(double speed) {
+        return move(speed, Direction.FORWARD);
     }
 
     /**
@@ -76,8 +76,8 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power.
      * @return action to perform motion.
      */
-    default Action backwardAt(DoubleSupplier speed) {
-        return moveAt(()-> -Math.abs(speed.getAsDouble()));
+    default Action backward(DoubleSupplier speed) {
+        return move(()-> -Math.abs(speed.getAsDouble()));
     }
 
     /**
@@ -87,8 +87,8 @@ public interface Movable extends Stoppable, Requirement {
      *              percentage of power.
      * @return action to perform motion.
      */
-    default Action backwardAt(double speed) {
-        return moveAt(speed, Direction.BACKWARD);
+    default Action backward(double speed) {
+        return move(speed, Direction.BACKWARD);
     }
 
     /**

@@ -26,7 +26,7 @@ public class MotorSystem extends Subsystem implements Rotatable {
     }
 
     @Override
-    public Action rotateAt(DoubleSupplier speed) {
+    public Action rotate(DoubleSupplier speed) {
         return new Rotate(mInterface, speed)
                 .requires(this);
     }

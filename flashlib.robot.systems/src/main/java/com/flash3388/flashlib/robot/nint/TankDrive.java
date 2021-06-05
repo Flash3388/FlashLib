@@ -14,7 +14,7 @@ public interface TankDrive extends Movable, Rotatable {
      * {@inheritDoc}
      */
     @Override
-    default Action moveAt(DoubleSupplier speed) {
+    default Action move(DoubleSupplier speed) {
          return tankDrive(speed, speed);
     }
 
@@ -22,7 +22,7 @@ public interface TankDrive extends Movable, Rotatable {
      * {@inheritDoc}
      */
     @Override
-    default Action rotateAt(DoubleSupplier speed) {
+    default Action rotate(DoubleSupplier speed) {
         return tankDrive(speed, ()-> -speed.getAsDouble());
     }
 
