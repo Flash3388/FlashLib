@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.systems2;
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.jmath.vectors.Vector2;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
  *
  * @since FlashLib 3.0.0
  */
-public interface OmniDrive extends Movable, Rotatable {
+public interface OmniDrive extends Movable2d, Rotatable {
 
     /**
      * {@inheritDoc}
@@ -20,6 +21,17 @@ public interface OmniDrive extends Movable, Rotatable {
     @Override
     default Action move(DoubleSupplier speed) {
         return omniDrive(speed, Suppliers.of(0.0));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default Action move2d(Supplier<Vector2> speed) {
+        return omniDrive(()-> {
+            Vector2 speedValue = speed.get();
+            return new OmniDriveSpeed(speedValue.y(), speedValue.y());
+        });
     }
 
     /**

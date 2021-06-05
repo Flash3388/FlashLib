@@ -1,14 +1,13 @@
 package com.flash3388.flashlib.robot.systems2;
 
 import com.beans.util.function.Suppliers;
-import com.flash3388.flashlib.control.Stoppable;
 import com.flash3388.flashlib.robot.systems.drive.MecanumDriveSpeed;
 import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public interface MecanumDrive extends Stoppable {
+public interface MecanumDrive extends HolonomicDrive {
 
     /**
      * Moves the drive system.

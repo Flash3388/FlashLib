@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.robot.systems2;
 
 import com.flash3388.flashlib.io.devices.SpeedController;
+import com.flash3388.flashlib.robot.systems.drive.HolonomicDriveSpeed;
+import com.flash3388.flashlib.robot.systems2.actions.DriveHolonomic;
 import com.flash3388.flashlib.robot.systems2.actions.DriveMecanum;
 import com.flash3388.flashlib.robot.systems.drive.MecanumDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
@@ -28,6 +30,12 @@ public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
                               SpeedController frontLeftController, SpeedController backLeftController) {
         this(frontRightController, backRightController, frontLeftController, backLeftController,
                 new DriveAlgorithms());
+    }
+
+    @Override
+    public Action holonomicDrive(Supplier<HolonomicDriveSpeed> speed) {
+        return new DriveHolonomic(mInterface, speed)
+                .requires(this);
     }
 
     @Override
