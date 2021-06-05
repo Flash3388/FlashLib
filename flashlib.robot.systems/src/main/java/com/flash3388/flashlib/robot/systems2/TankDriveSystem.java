@@ -45,7 +45,8 @@ public class TankDriveSystem extends Subsystem implements TankDrive {
         cancelCurrentAction();
     }
 
-    private static class Interface implements com.flash3388.flashlib.robot.systems.drive.TankDrive {
+    public static class Interface implements
+            com.flash3388.flashlib.robot.systems.drive.TankDrive {
 
         private final SpeedController mRightController;
         private final SpeedController mLeftController;

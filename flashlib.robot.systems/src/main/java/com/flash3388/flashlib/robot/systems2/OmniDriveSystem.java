@@ -39,7 +39,8 @@ public class OmniDriveSystem extends Subsystem implements OmniDrive {
         cancelCurrentAction();
     }
 
-    public static class Interface implements com.flash3388.flashlib.robot.systems.drive.OmniDrive {
+    public static class Interface implements
+            com.flash3388.flashlib.robot.systems.drive.OmniDrive {
 
         private final SpeedController mFrontController;
         private final SpeedController mRightController;

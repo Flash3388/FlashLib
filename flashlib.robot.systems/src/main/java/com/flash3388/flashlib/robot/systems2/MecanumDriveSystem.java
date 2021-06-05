@@ -49,7 +49,8 @@ public class MecanumDriveSystem extends Subsystem implements MecanumDrive {
         cancelCurrentAction();
     }
 
-    public static class Interface implements com.flash3388.flashlib.robot.systems.drive.MecanumDrive {
+    public static class Interface implements
+            com.flash3388.flashlib.robot.systems.drive.MecanumDrive {
 
         private final SpeedController mFrontRightController;
         private final SpeedController mBackRightController;
