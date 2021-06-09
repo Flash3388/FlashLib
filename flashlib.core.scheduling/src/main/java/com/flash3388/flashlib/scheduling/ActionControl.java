@@ -108,7 +108,14 @@ class ActionControl {
             return;
         }
 
-        mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+        Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+        conflictingActions.forEach((conflictingAction)-> {
+            ActionContext context = mRunningActions.remove(conflictingAction);
+            if (context != null) {
+                context.markCanceled();
+                onInternalRemove(conflictingAction, context, false);
+            }
+        });
 
         ActionContext context = new ActionContext(action, mClock);
         context.prepareForRun();
@@ -125,8 +132,14 @@ class ActionControl {
     }
 
     private void onInternalRemove(Action action, ActionContext context) {
+        onInternalRemove(action, context, true);
+    }
+
+    private void onInternalRemove(Action action, ActionContext context, boolean updateRequirements) {
         context.runFinished();
-        mRequirementsControl.updateRequirementsNoCurrentAction(action);
+        if (updateRequirements) {
+            mRequirementsControl.updateRequirementsNoCurrentAction(action);
+        }
         mLogger.debug("Finished action {}", action);
     }
 }

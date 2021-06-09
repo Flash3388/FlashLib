@@ -21,7 +21,8 @@ public class SchedulerTrigger implements Trigger, Requirement {
     private TriggerState mCurrentState;
     private Action mUpdateAction;
 
-    public SchedulerTrigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners, TriggerState currentState) {
+    public SchedulerTrigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners,
+                            TriggerState currentState) {
         mScheduler = new WeakReference<>(scheduler);
         mTriggerStateListeners = triggerStateListeners;
         mCurrentState = currentState;

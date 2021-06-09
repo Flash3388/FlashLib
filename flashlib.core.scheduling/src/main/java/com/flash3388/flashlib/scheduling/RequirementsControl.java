@@ -4,8 +4,10 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 class RequirementsControl {
 
@@ -30,11 +32,13 @@ class RequirementsControl {
         }
     }
 
-    public void updateRequirementsWithNewRunningAction(Action action) {
+    public Set<Action> updateRequirementsWithNewRunningAction(Action action) {
+        Set<Action> conflictingActions = new HashSet<>();
+
         for (Requirement requirement : action.getConfiguration().getRequirements()) {
             if (mActionsOnRequirement.containsKey(requirement)) {
                 Action currentAction = mActionsOnRequirement.get(requirement);
-                currentAction.cancel();
+                conflictingActions.add(currentAction);
 
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}",
                         currentAction.toString(), action.toString(), requirement.toString());
@@ -42,6 +46,8 @@ class RequirementsControl {
 
             mActionsOnRequirement.put(requirement, action);
         }
+
+        return conflictingActions;
     }
 
     public Optional<Action> getActionOnRequirement(Requirement requirement) {
