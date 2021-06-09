@@ -88,4 +88,12 @@ public class Subsystem implements Requirement {
         Optional<Action> currentAction = scheduler.getActionRunningOnRequirement(this);
         currentAction.ifPresent(Action::cancel);
     }
+
+    @Override
+    public String toString() {
+        return String.format("Subsystem %s",
+                getClass().getSimpleName().isEmpty() ?
+                        getClass().getName() :
+                        getClass().getSimpleName());
+    }
 }
