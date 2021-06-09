@@ -33,9 +33,13 @@ public class ActionContext {
         mIsInitialized = false;
     }
 
+    public void markCanceled() {
+        mActionState.markCanceled();
+    }
+
     public boolean run() {
         if(wasTimeoutReached()) {
-            mActionState.markCanceled();
+            markCanceled();
         }
 
         if(mActionState.isCanceled()) {
