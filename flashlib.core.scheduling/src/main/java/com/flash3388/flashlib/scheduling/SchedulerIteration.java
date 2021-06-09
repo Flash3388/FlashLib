@@ -44,6 +44,7 @@ class SchedulerIteration {
                         !context.runWhenDisabled()) {
                     context.markCanceled();
                     mActionsToRemove.add(action);
+                    mLogger.debug("Action {} running in disabled. Canceling", action);
                     continue;
                 }
 
