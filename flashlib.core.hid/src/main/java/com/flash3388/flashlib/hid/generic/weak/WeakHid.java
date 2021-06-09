@@ -40,6 +40,8 @@ public class WeakHid implements Hid {
             throw new IllegalArgumentException("Unknown axis " + index);
         }
 
+        refreshAxes();
+
         if (index == mAxes.size()) {
             mAxes.add(new GenericAxis(mInterface, mChannel, index));
         } else if (index > mAxes.size()) {
@@ -53,11 +55,13 @@ public class WeakHid implements Hid {
 
     @Override
     public int getAxisCount() {
+        refreshAxes();
         return mAxes.size();
     }
 
     @Override
     public Iterable<Axis> axes() {
+        refreshAxes();
         return mAxes;
     }
 
@@ -66,6 +70,8 @@ public class WeakHid implements Hid {
         if (index < 0) {
             throw new IllegalArgumentException("Unknown button " + index);
         }
+
+        refreshButtons();
 
         if (index == mButtons.size()) {
             mButtons.add(new GenericButton(mInterface, mChannel, index));
@@ -80,11 +86,13 @@ public class WeakHid implements Hid {
 
     @Override
     public int getButtonCount(){
+        refreshButtons();
         return mButtons.size();
     }
 
     @Override
     public Iterable<Button> buttons() {
+        refreshButtons();
         return mButtons;
     }
 
@@ -93,6 +101,8 @@ public class WeakHid implements Hid {
         if (index < 0) {
             throw new IllegalArgumentException("Unknown pov " + index);
         }
+
+        refreshPovs();
 
         if (index == mPovs.size()) {
             mPovs.add(new GenericPov(mInterface, mChannel, index));
@@ -107,12 +117,40 @@ public class WeakHid implements Hid {
 
     @Override
     public int getPovCount() {
+        refreshPovs();
         return mPovs.size();
     }
 
     @Override
     public Iterable<Pov> povs() {
+        refreshPovs();
         return mPovs;
     }
 
+    private void refreshAxes() {
+        int axisCount = mInterface.getAxesCount(mChannel);
+        if (axisCount > mAxes.size()) {
+            for (int i = mAxes.size(); i < axisCount; i++) {
+                mAxes.add(new GenericAxis(mInterface, mChannel, i));
+            }
+        }
+    }
+
+    private void refreshButtons() {
+        int buttonCount = mInterface.getButtonsCount(mChannel);
+        if (buttonCount > mButtons.size()) {
+            for (int i = mButtons.size(); i < buttonCount; i++) {
+                mButtons.add(new GenericButton(mInterface, mChannel, i));
+            }
+        }
+    }
+
+    private void refreshPovs() {
+        int povCount = mInterface.getPovsCount(mChannel);
+        if (povCount > mPovs.size()) {
+            for (int i = mPovs.size(); i < povCount; i++) {
+                mPovs.add(new GenericPov(mInterface, mChannel, i));
+            }
+        }
+    }
 }
