@@ -37,6 +37,11 @@ public class CvImage implements Image {
     }
 
     @Override
+    public boolean isEmpty() {
+        return mMat.empty();
+    }
+
+    @Override
     public byte[] getRaw() {
         MatOfByte buffer = new MatOfByte();
         MatOfInt compressParams = new MatOfInt();
