@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +40,8 @@ public class ActionControlTest {
         mRunningActions = new HashMap<>();
         mNextRunActions = new ArrayList<>();
 
-        mActionControl = new ActionControl(mock(Clock.class), mRequirementsControl, mRunningActions, mNextRunActions);
+        mActionControl = new ActionControl(mock(Clock.class), mRequirementsControl, mock(Logger.class),
+                mRunningActions, mNextRunActions);
     }
 
     @Test

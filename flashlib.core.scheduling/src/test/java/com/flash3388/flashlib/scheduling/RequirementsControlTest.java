@@ -19,9 +19,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -112,7 +114,7 @@ public class RequirementsControlTest {
     }
 
     @Test
-    public void updateRequirementsWithNewRunningAction_requirementHasAction_cancelsAction() throws Exception {
+    public void updateRequirementsWithNewRunningAction_requirementHasAction_returnsActionAsConflicting() throws Exception {
         Subsystem subsystem = mock(Subsystem.class);
         Action action = mock(Action.class);
         mActionsOnSubsystems.put(subsystem, action);
@@ -121,9 +123,9 @@ public class RequirementsControlTest {
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
 
-        mRequirementsControl.updateRequirementsWithNewRunningAction(newAction);
+        Set<Action> conflicting = mRequirementsControl.updateRequirementsWithNewRunningAction(newAction);
 
-        verify(action, times(1)).cancel();
+        assertThat(conflicting, contains(action));
     }
 
     @Test

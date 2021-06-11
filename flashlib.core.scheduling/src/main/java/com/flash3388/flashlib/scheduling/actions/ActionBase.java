@@ -16,7 +16,7 @@ public abstract class ActionBase implements Action {
         mConfiguration = configuration;
 
         if (mConfiguration.getName() == null) {
-            mConfiguration.setName(getClass().getSimpleName());
+            mConfiguration.setName("");
         }
     }
 
@@ -80,7 +80,11 @@ public abstract class ActionBase implements Action {
 
     @Override
     public String toString() {
-        return String.format("%s{%s}", mConfiguration.getName(), getClass().getSimpleName());
+        return String.format("%s{name=%s}",
+                getClass().getSimpleName().isEmpty() ?
+                        getClass().getName() :
+                        getClass().getSimpleName(),
+                mConfiguration.getName());
     }
 
     public final Time getRunTime() {

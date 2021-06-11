@@ -18,7 +18,7 @@ public class SynchronousScheduler implements Scheduler {
 
     public SynchronousScheduler(Clock clock, Logger logger) {
         mRequirementsControl = new RequirementsControl(logger);
-        mActionControl = new ActionControl(clock, mRequirementsControl);
+        mActionControl = new ActionControl(clock, mRequirementsControl, logger);
         mSchedulerIteration = new SchedulerIteration(mActionControl, mRequirementsControl, logger);
     }
 

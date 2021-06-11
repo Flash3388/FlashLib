@@ -38,6 +38,11 @@ public class JpegImage implements Image {
     }
 
     @Override
+    public boolean isEmpty() {
+        return mImage.getData().getDataBuffer().getSize() == 0;
+    }
+
+    @Override
     public byte[] getRaw() throws IOException {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             ImageIO.write(mImage, JPEG_FORMAT_NAME, byteArrayOutputStream);

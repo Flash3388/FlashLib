@@ -42,7 +42,9 @@ class SchedulerIteration {
             try {
                 if (mode.isDisabled() &&
                         !context.runWhenDisabled()) {
+                    context.markCanceled();
                     mActionsToRemove.add(action);
+                    mLogger.debug("Action {} running in disabled. Canceling", action);
                     continue;
                 }
 
@@ -51,7 +53,8 @@ class SchedulerIteration {
                 }
             } catch (Throwable t) {
                 mLogger.error("Error while running an action", t);
-                action.cancel();
+                context.markCanceled();
+                mActionsToRemove.add(action);
             }
         }
     }

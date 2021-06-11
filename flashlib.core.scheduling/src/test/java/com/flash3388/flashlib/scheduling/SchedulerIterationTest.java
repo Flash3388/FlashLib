@@ -102,7 +102,7 @@ public class SchedulerIterationTest {
 
         mSchedulerIteration.run(SchedulerModeMock.mockNotDisabledMode());
 
-        verify(action, times(1)).cancel();
+        verify(actionContext, times(1)).markCanceled();
     }
 
     @Test

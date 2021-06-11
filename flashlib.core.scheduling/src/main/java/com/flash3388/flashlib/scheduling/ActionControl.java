@@ -4,6 +4,7 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionContext;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,19 +17,22 @@ class ActionControl {
 
     private final Clock mClock;
     private final RequirementsControl mRequirementsControl;
+    private final Logger mLogger;
 
     private final Map<Action, ActionContext> mRunningActions;
     private final Collection<Action> mNextRunActions;
 
-    ActionControl(Clock clock, RequirementsControl requirementsControl, Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions) {
+    ActionControl(Clock clock, RequirementsControl requirementsControl, Logger logger,
+                  Map<Action, ActionContext> runningActions, Collection<Action> nextRunActions) {
         mClock = clock;
+        mLogger = logger;
         mRequirementsControl = requirementsControl;
         mRunningActions = runningActions;
         mNextRunActions = nextRunActions;
     }
 
-    public ActionControl(Clock clock, RequirementsControl requirementsControl) {
-        this(clock, requirementsControl, new HashMap<>(5), new ArrayList<>(2));
+    public ActionControl(Clock clock, RequirementsControl requirementsControl, Logger logger) {
+        this(clock, requirementsControl, logger, new HashMap<>(5), new ArrayList<>(2));
     }
 
     public Set<Map.Entry<Action, ActionContext>> getRunningActionContexts() {
@@ -100,14 +104,24 @@ class ActionControl {
 
     private void internalAdd(Action action) {
         if (mRunningActions.containsKey(action)) {
+            mLogger.debug("Attempted to start action {} when already running", action);
             return;
         }
 
-        mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+        Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+        conflictingActions.forEach((conflictingAction)-> {
+            ActionContext context = mRunningActions.remove(conflictingAction);
+            if (context != null) {
+                context.markCanceled();
+                onInternalRemove(conflictingAction, context, false);
+            }
+        });
 
         ActionContext context = new ActionContext(action, mClock);
         context.prepareForRun();
         mRunningActions.put(action, context);
+
+        mLogger.debug("Started action {}", action);
     }
 
     private void internalRemove(Action action) {
@@ -118,7 +132,14 @@ class ActionControl {
     }
 
     private void onInternalRemove(Action action, ActionContext context) {
+        onInternalRemove(action, context, true);
+    }
+
+    private void onInternalRemove(Action action, ActionContext context, boolean updateRequirements) {
         context.runFinished();
-        mRequirementsControl.updateRequirementsNoCurrentAction(action);
+        if (updateRequirements) {
+            mRequirementsControl.updateRequirementsNoCurrentAction(action);
+        }
+        mLogger.debug("Finished action {}", action);
     }
 }
