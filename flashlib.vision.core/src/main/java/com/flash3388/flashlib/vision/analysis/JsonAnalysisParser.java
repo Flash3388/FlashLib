@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.processing.analysis;
+package com.flash3388.flashlib.vision.analysis;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

@@ -1,12 +1,12 @@
-package com.flash3388.flashlib.vision.cv.processing.analysis;
+package com.flash3388.flashlib.vision.cv.analysis;
 
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.template.ScaledTemplateMatchingResult;
 import com.flash3388.flashlib.vision.cv.template.SingleTemplateMatcher;
-import com.flash3388.flashlib.vision.processing.analysis.Analyser;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
+import com.flash3388.flashlib.vision.analysis.Analyser;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;

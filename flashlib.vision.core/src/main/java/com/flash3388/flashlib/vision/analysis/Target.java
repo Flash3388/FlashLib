@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.processing.analysis;
+package com.flash3388.flashlib.vision.analysis;
 
 public interface Target {
 
