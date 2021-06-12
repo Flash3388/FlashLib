@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,8 +50,10 @@ public class SchedulerTriggerTest {
     }
 
     @Test
-    public void cancelWhenActive_triggerActivates_cancelsAction() throws Exception {
-        Action mockAction = mock(Action.class);
+    public void cancelWhenActive_triggerActivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
 
         SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
         trigger.cancelWhenActive(mockAction);
@@ -61,8 +64,10 @@ public class SchedulerTriggerTest {
     }
 
     @Test
-    public void cancelWhenInactive_triggerDeactivates_cancelsAction() throws Exception {
-        Action mockAction = mock(Action.class);
+    public void cancelWhenInactive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
 
         SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.ACTIVE);
         trigger.cancelWhenInactive(mockAction);
@@ -85,8 +90,10 @@ public class SchedulerTriggerTest {
     }
 
     @Test
-    public void whileActive_triggerDeactivates_cancelsAction() throws Exception {
-        Action mockAction = mock(Action.class);
+    public void whileActive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
 
         SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.ACTIVE);
         trigger.whileActive(mockAction);
