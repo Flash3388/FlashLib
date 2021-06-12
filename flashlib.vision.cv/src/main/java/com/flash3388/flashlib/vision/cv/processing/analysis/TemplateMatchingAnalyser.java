@@ -49,11 +49,13 @@ public class TemplateMatchingAnalyser<T> implements Analyser<T, CvImage> {
 
         @Override
         public Analysis apply(ScaledTemplateMatchingResult scaledTemplateMatchingResult) {
-            return new Analysis.Builder()
-                    .put("center.x", scaledTemplateMatchingResult.getCenterPoint().x)
-                    .put("center.y", scaledTemplateMatchingResult.getCenterPoint().y)
-                    .put("score", scaledTemplateMatchingResult.getScore())
-                    .put("scaleFactor", scaledTemplateMatchingResult.getScaleFactor())
+            return Analysis.builder()
+                    .buildTarget()
+                        .put("center.x", scaledTemplateMatchingResult.getCenterPoint().x)
+                        .put("center.y", scaledTemplateMatchingResult.getCenterPoint().y)
+                        .put("score", scaledTemplateMatchingResult.getScore())
+                        .put("scaleFactor", scaledTemplateMatchingResult.getScaleFactor())
+                        .build()
                     .build();
         }
     }
