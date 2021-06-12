@@ -10,8 +10,20 @@ import java.util.List;
 
 public class JsonAnalysisParser {
 
-    public JsonAnalysis parse(JsonObject root) {
-        List<JsonTarget> targets;
+    public JsonObject parseProperties(JsonObject root) {
+        if (root.has("properties")) {
+            JsonElement element = root.get("properties");
+            if (!element.isJsonObject()) {
+                throw new IllegalArgumentException("Unexpected format: 'properties' should be object");
+            }
+
+            return element.getAsJsonObject();
+        } else {
+            return new JsonObject();
+        }
+    }
+
+    public List<JsonTarget> parseTargets(JsonObject root) {
         if (root.has("targets")) {
             JsonElement element = root.get("targets");
             if (!element.isJsonArray()) {
@@ -19,24 +31,10 @@ public class JsonAnalysisParser {
             }
 
             JsonArray array = element.getAsJsonArray();
-            targets = parseTargets(array);
-        } else {
-            targets = Collections.emptyList();
+            return parseTargets(array);
         }
 
-        JsonObject properties;
-        if (root.has("properties")) {
-            JsonElement element = root.get("properties");
-            if (!element.isJsonObject()) {
-                throw new IllegalArgumentException("Unexpected format: 'properties' should be object");
-            }
-
-            properties = element.getAsJsonObject();
-        } else {
-            properties = new JsonObject();
-        }
-
-        return new JsonAnalysis(targets, properties);
+        return Collections.emptyList();
     }
 
     private List<JsonTarget> parseTargets(JsonArray array) {

@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.vision.analysis;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
 
 public interface Analysis {
@@ -12,4 +14,6 @@ public interface Analysis {
 
     boolean hasProperty(String name);
     <T> T getProperty(String name, Class<T> type);
+
+    void serializeTo(DataOutput dataOutput) throws IOException;
 }

@@ -4,7 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -106,8 +111,25 @@ public class JsonAnalysis implements Analysis {
         this(new Gson(), targets, properties);
     }
 
-    public static JsonAnalysis parse(JsonObject data) {
-        return new JsonAnalysisParser().parse(data);
+    public JsonAnalysis(DataInput dataInput) throws IOException {
+        try {
+            String rawJson = dataInput.readUTF();
+
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(rawJson);
+            if (!element.isJsonObject()) {
+                throw new IOException("Expected root to be json object");
+            }
+
+            JsonObject root = element.getAsJsonObject();
+
+            JsonAnalysisParser analysisParser = new JsonAnalysisParser();
+            mGson = new Gson();
+            mTargets = Collections.unmodifiableList(analysisParser.parseTargets(root));
+            mProperties = analysisParser.parseProperties(root);
+        } catch (JsonParseException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -128,6 +150,12 @@ public class JsonAnalysis implements Analysis {
         }
 
         return mGson.fromJson(element, type);
+    }
+
+    @Override
+    public void serializeTo(DataOutput dataOutput) throws IOException {
+        JsonObject root = toJson();
+        dataOutput.writeUTF(mGson.toJson(root));
     }
 
     public JsonObject toJson() {
