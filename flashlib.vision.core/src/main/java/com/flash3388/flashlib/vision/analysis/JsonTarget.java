@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class JsonTarget implements Target {
 
@@ -33,6 +34,19 @@ public class JsonTarget implements Target {
         }
 
         return mGson.fromJson(element, type);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JsonTarget that = (JsonTarget) o;
+        return Objects.equals(mProperties, that.mProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mProperties);
     }
 
     public JsonObject toJson() {

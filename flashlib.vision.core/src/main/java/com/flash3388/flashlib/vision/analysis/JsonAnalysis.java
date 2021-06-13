@@ -14,17 +14,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class JsonAnalysis implements Analysis {
 
     public static class Builder {
 
+        private final Gson mGson;
         private final List<JsonTarget> mTargets;
         private final JsonObject mProperties;
 
-        public Builder() {
+        public Builder(Gson gson) {
+            mGson = gson;
             mTargets = new ArrayList<>();
             mProperties = new JsonObject();
+        }
+
+        public Builder() {
+            this(new Gson());
         }
 
         public Builder addTarget(JsonTarget target) {
@@ -33,7 +40,7 @@ public class JsonAnalysis implements Analysis {
         }
 
         public TargetBuilder buildTarget() {
-            return new TargetBuilder(this);
+            return new TargetBuilder(this, mGson);
         }
 
         public Builder put(String name, String value) {
@@ -57,17 +64,19 @@ public class JsonAnalysis implements Analysis {
         }
 
         public JsonAnalysis build() {
-            return new JsonAnalysis(mTargets, mProperties);
+            return new JsonAnalysis(mGson, mTargets, mProperties);
         }
     }
 
     public static class TargetBuilder {
 
         private final Builder mBuilder;
+        private final Gson mGson;
         private final JsonObject mProperties;
 
-        private TargetBuilder(Builder builder) {
+        private TargetBuilder(Builder builder, Gson gson) {
             mBuilder = builder;
+            mGson = gson;
             mProperties = new JsonObject();
         }
 
@@ -92,7 +101,7 @@ public class JsonAnalysis implements Analysis {
         }
 
         public Builder build() {
-            JsonTarget target = new JsonTarget(mProperties);
+            JsonTarget target = new JsonTarget(mGson, mProperties);
             return mBuilder.addTarget(target);
         }
     }
@@ -156,6 +165,20 @@ public class JsonAnalysis implements Analysis {
     public void serializeTo(DataOutput dataOutput) throws IOException {
         JsonObject root = toJson();
         dataOutput.writeUTF(mGson.toJson(root));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JsonAnalysis analysis = (JsonAnalysis) o;
+        return Objects.equals(mTargets, analysis.mTargets) &&
+                Objects.equals(mProperties, analysis.mProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mTargets, mProperties);
     }
 
     public JsonObject toJson() {
