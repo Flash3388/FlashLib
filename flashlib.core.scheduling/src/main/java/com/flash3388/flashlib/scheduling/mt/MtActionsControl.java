@@ -6,8 +6,10 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -62,17 +64,19 @@ public class MtActionsControl {
     }
 
     public void cancelActionsIf(Predicate<? super Action> predicate) {
+        List<Action> toRemove = new ArrayList<>();
         for (Action action : mRunningActions.keySet()) {
             if (predicate.test(action)) {
-                cancelAction(action);
+                toRemove.add(action);
             }
         }
+
+        toRemove.forEach(this::cancelAction);
     }
 
     public void cancelAllActions() {
-        for (Action action : mRunningActions.keySet()) {
-            cancelAction(action);
-        }
+        List<Action> toRemove = new ArrayList<>(mRunningActions.keySet());
+        toRemove.forEach(this::cancelAction);
     }
 
     public boolean isActionRunning(Action action) {
