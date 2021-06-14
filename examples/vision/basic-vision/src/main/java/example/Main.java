@@ -7,7 +7,7 @@ import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -94,7 +94,7 @@ public class Main {
                         .analyse((original, postProcess)-> {
                             // analyze the image for the information we want
                             // and return an analysis if possible
-                            return Optional.of(new Analysis.Builder()
+                            return Optional.of(Analysis.builder()
                                     .put("somedatakey", "some data")
                                     .build());
                         })
