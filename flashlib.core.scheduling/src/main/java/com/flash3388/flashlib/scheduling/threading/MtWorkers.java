@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling.mt;
+package com.flash3388.flashlib.scheduling.threading;
 
 import java.util.function.Supplier;
 

@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling.mt;
+package com.flash3388.flashlib.scheduling.threading;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionContext;
