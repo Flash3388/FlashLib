@@ -1,8 +1,9 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
+import com.flash3388.flashlib.scheduling.Subsystem;
 import com.jmath.vectors.Vector2;
 
-public class SwerveDriveSystem implements HolonomicDrive {
+public class SwerveDriveSystem extends Subsystem implements HolonomicDrive {
 
     private final DrivetrainProperties mDrivetrain;
     private final SwerveWheel mFrontRightWheel;
@@ -25,6 +26,14 @@ public class SwerveDriveSystem implements HolonomicDrive {
         this(new DrivetrainProperties(drivetrainWidth, drivetrainLength), 
             frontRightWheel, frontLeftWheel, rearRightWheel, rearLeftWheel);
     }
+
+    public void fieldCentricDrive(double x, double y, double rotation, double gyroDegrees) { //put in another system? with gyro supp?
+        gyroDegrees = Math.toRadians(gyroDegrees); //hmmmm
+        rotation = -y * Math.sin(gyroDegrees) + rotation * Math.cos(gyroDegrees);
+        y = y * Math.cos(gyroDegrees) + rotation * Math.sin(gyroDegrees);
+
+        drive(x, y, rotation);
+    }//also this needs to be tested...
 
     //for user friendlyness
     public void drive(double x, double y, double rotation) {
