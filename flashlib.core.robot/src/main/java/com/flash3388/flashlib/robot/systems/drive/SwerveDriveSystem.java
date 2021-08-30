@@ -27,10 +27,9 @@ public class SwerveDriveSystem extends Subsystem implements HolonomicDrive {
             frontRightWheel, frontLeftWheel, rearRightWheel, rearLeftWheel);
     }
 
-    public void fieldCentricDrive(double x, double y, double rotation, double gyroDegrees) { //put in another system? with gyro supp?
-        gyroDegrees = Math.toRadians(gyroDegrees); //hmmmm
-        rotation = -y * Math.sin(gyroDegrees) + rotation * Math.cos(gyroDegrees);
-        y = y * Math.cos(gyroDegrees) + rotation * Math.sin(gyroDegrees);
+    public void fieldCentricDrive(double x, double y, double rotation, double gyroRadians) { //put in another system? with gyro supp?
+        rotation = -y * Math.sin(gyroRadians) + rotation * Math.cos(gyroRadians);
+        y = y * Math.cos(gyroRadians) + rotation * Math.sin(gyroRadians);
 
         drive(x, y, rotation);
     }//also this needs to be tested...
