@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.systems.drive;
 import java.util.function.DoubleSupplier;
 
 import com.flash3388.flashlib.io.devices.SpeedController;
+import com.flash3388.flashlib.math.Mathf;
 import com.flash3388.flashlib.robot.control.PidController;
 import com.jmath.vectors.Vector2;
 
@@ -28,11 +29,6 @@ public class PidSwerveWheel implements SwerveWheel {
         this(new PidController(kp, kd, kd, kf), forwardController, rotationController, angleDegreeSupplier);
     }
 
-    //this is bad, but I assume there is something built in, so I will wait for the PR on this one
-    public static double convertAngle(double angle) {
-        return angle < 0 ? 360 + angle : angle;
-    }
-
     public void resetPid() {
         mPidController.reset();
     }
@@ -41,7 +37,7 @@ public class PidSwerveWheel implements SwerveWheel {
     public void move(Vector2 motionVector) {
         double forwardSpeed = motionVector.magnitude();
         double targetAngle = motionVector.angle();
-        double currentAngle = convertAngle(mAngleDegreeSupplier.getAsDouble());
+        double currentAngle = Mathf.translateAngle(mAngleDegreeSupplier.getAsDouble());
 
         double nextAngle = calcNextAngle(targetAngle, currentAngle);
         double pidOut = mPidController.applyAsDouble(currentAngle, nextAngle);
@@ -62,8 +58,8 @@ public class PidSwerveWheel implements SwerveWheel {
     }
 
     private double calcNextAngle(double targetAngle, double currentAngle) {
-        targetAngle = convertAngle(targetAngle);
-        currentAngle = convertAngle(currentAngle);
+        targetAngle = Mathf.translateAngle(targetAngle);
+        currentAngle = Mathf.translateAngle(currentAngle);
         double distance = (targetAngle - currentAngle + 180 ) % 360 - 180;
 
         return currentAngle + distance;

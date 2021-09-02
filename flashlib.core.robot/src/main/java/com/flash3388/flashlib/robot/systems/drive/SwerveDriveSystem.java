@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.systems.drive;
 
+import com.flash3388.flashlib.math.Mathf;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.jmath.vectors.Vector2;
 
@@ -27,14 +28,13 @@ public class SwerveDriveSystem extends Subsystem implements HolonomicDrive {
             frontRightWheel, frontLeftWheel, rearRightWheel, rearLeftWheel);
     }
 
-    public void fieldCentricDrive(double x, double y, double rotation, double gyroRadians) { //put in another system? with gyro supp?
+    public void fieldCentricDrive(double x, double y, double rotation, double gyroRadians) {
         rotation = -y * Math.sin(gyroRadians) + rotation * Math.cos(gyroRadians);
         y = y * Math.cos(gyroRadians) + rotation * Math.sin(gyroRadians);
 
         drive(x, y, rotation);
-    }//also this needs to be tested...
+    }
 
-    //for user friendlyness
     public void drive(double x, double y, double rotation) {
         holonomicCartesian(y, x, rotation);
     }
@@ -56,7 +56,7 @@ public class SwerveDriveSystem extends Subsystem implements HolonomicDrive {
     }
     
     @Override
-    public void holonomicCartesian(double y, double x, double rotation) {//maths
+    public void holonomicCartesian(double y, double x, double rotation) {
         double a = x - rotation * (mDrivetrain.getLength() / mDrivetrain.getDiagonal());
         double b = x + rotation * (mDrivetrain.getLength() / mDrivetrain.getDiagonal());
         double c = y - rotation * (mDrivetrain.getWidth() / mDrivetrain.getDiagonal());
@@ -67,10 +67,10 @@ public class SwerveDriveSystem extends Subsystem implements HolonomicDrive {
         double rearRightSpeed = Math.sqrt((a * a) + (d * d));
         double rearLeftSpeed = Math.sqrt((a * a) + (c * c));
 
-        double frontRightAngle = PidSwerveWheel.convertAngle(Math.toDegrees(Math.atan2(b, d)));
-        double frontLeftAngle = PidSwerveWheel.convertAngle(Math.toDegrees(Math.atan2(b, c)));
-        double rearRightAngle = PidSwerveWheel.convertAngle(Math.toDegrees(Math.atan2(a, d))); 
-        double rearLeftAngle = PidSwerveWheel.convertAngle(Math.toDegrees(Math.atan2(a, c)));
+        double frontRightAngle = Mathf.translateAngle(Math.toDegrees(Math.atan2(b, d)));
+        double frontLeftAngle = Mathf.translateAngle(Math.toDegrees(Math.atan2(b, c)));
+        double rearRightAngle = Mathf.translateAngle(Math.toDegrees(Math.atan2(a, d))); 
+        double rearLeftAngle = Mathf.translateAngle(Math.toDegrees(Math.atan2(a, c)));
         
         mFrontRightWheel.move(Vector2.polar(frontRightSpeed, frontRightAngle));
         mFrontLeftWheel.move(Vector2.polar(frontLeftSpeed, frontLeftAngle));
