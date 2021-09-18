@@ -55,7 +55,7 @@ public interface VisionControl {
      *
      * @return {@link Optional} with the value from the option.
      *      If the option does not have any associated value,
-     *      {@link Optional#isEmpty()} is <b>true</b>.
+     *      {@link Optional#isPresent()} is <b>false</b>.
      */
     <T> Optional<T> getOption(VisionOption<T> option);
 
@@ -77,7 +77,7 @@ public interface VisionControl {
      * Gets the latest result produced by the vision process.
      *
      * @return {@link Optional} containing the latest vision result.
-     *      If no result is stored, {@link Optional#isEmpty()} is <b>true</b>.
+     *      If no result is stored, {@link Optional#isPresent()} is <b>false</b>.
      */
     Optional<VisionResult> getLatestResult();
 
@@ -91,7 +91,7 @@ public interface VisionControl {
      * @param clear <b>true</b> to clear the result, <b>false</b> otherwise.
      *
      * @return {@link Optional} containing the latest vision result.
-     *      If no result is stored, {@link Optional#isEmpty()} is <b>true</b>.
+     *      If no result is stored, {@link Optional#isPresent()} is <b>false</b>.
      */
     Optional<VisionResult> getLatestResult(boolean clear);
 
@@ -103,7 +103,7 @@ public interface VisionControl {
      *                     the call yields an empty {@link Optional}.
      *
      * @return {@link Optional} containing the latest vision result.
-     *      If no result is stored, {@link Optional#isEmpty()} is <b>true</b>.
+     *      If no result is stored, {@link Optional#isPresent()} is <b>false</b>.
      */
     Optional<VisionResult> getLatestResult(Time maxTimestamp);
 
@@ -126,7 +126,7 @@ public interface VisionControl {
      * @param clear <b>true</b> to clear the result, <b>false</b> otherwise.
      *
      * @return {@link Optional} containing the latest vision result.
-     *      If no result is stored, {@link Optional#isEmpty()} is <b>true</b>.
+     *      If no result is stored, {@link Optional#isPresent()} is <b>false</b>.
      */
     Optional<VisionResult> getLatestResult(Time maxTimestamp, boolean clear);
 

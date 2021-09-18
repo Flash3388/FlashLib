@@ -22,9 +22,9 @@ import java.util.Objects;
  * @since FlashLib 1.2.0
  */
 public class AnalogGyro implements Gyro {
-	
-	private static final double DEFAULT_SENSITIVITY = 0.007;
-	private static final long CALIBRATION_TIME_MS = 500;
+
+    public static final double DEFAULT_SENSITIVITY = 0.007;
+    public static final long CALIBRATION_TIME_MS = 500;
 	
 	private AnalogInput mInputPort;
 	private AnalogAccumulator mAccumulator;

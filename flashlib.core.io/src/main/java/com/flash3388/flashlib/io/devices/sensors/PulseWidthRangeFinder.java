@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class PulseWidthRangeFinder implements RangeFinder {
 
-	private static final double DEFAULT_SENSITIVITY = 147.0 * 2.54;
+    public static final double DEFAULT_SENSITIVITY = 147.0 * 2.54;
 	
 	private Counter mCounter;
 	private double mSensitivity;
