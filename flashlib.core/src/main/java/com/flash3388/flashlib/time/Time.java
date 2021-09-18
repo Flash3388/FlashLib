@@ -240,9 +240,9 @@ public class Time implements Comparable<Time> {
      *     If <code>other.after(this)</code>, the resulting time would be invalid.
      * </p>
      *
-     * @param other time to add.
+     * @param other time to subtract.
      *
-     * @return sum of this and the given time.
+     * @return subtraction of this and the given time.
      * @see #isValid()
      */
     public Time sub(Time other) {

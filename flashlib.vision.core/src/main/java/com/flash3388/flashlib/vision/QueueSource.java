@@ -4,24 +4,25 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Queue;
 
-public class QueueSource<T extends Image> implements Source<T> {
+public class QueueSource<T> implements Source<T> {
 
-    private final Queue<T> mImageQueue;
+    private final Queue<T> mQueue;
 
-    public QueueSource(Queue<T> imageQueue) {
-        mImageQueue = imageQueue;
+    public QueueSource(Queue<T> queue) {
+        mQueue = queue;
     }
 
     @SafeVarargs
-    public QueueSource(T... images) {
-        this(new ArrayDeque<>(Arrays.asList(images)));
+    public QueueSource(T... objects) {
+        this(new ArrayDeque<>(Arrays.asList(objects)));
     }
 
     @Override
     public T get() throws VisionException {
-        if (mImageQueue.isEmpty()) {
-            throw new VisionException("no more images");
+        if (mQueue.isEmpty()) {
+            throw new VisionException("no more objects in queue");
         }
-        return mImageQueue.remove();
+
+        return mQueue.remove();
     }
 }
