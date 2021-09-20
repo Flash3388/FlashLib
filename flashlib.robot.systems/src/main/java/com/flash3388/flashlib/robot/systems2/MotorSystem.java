@@ -10,7 +10,7 @@ import java.util.function.DoubleSupplier;
 
 public class MotorSystem extends Subsystem implements Rotatable {
 
-    private final com.flash3388.flashlib.robot.motion.Rotatable mInterface;
+    protected final com.flash3388.flashlib.robot.motion.Rotatable mInterface;
 
     public MotorSystem(com.flash3388.flashlib.robot.motion.Rotatable rotatable) {
         mInterface = rotatable;
