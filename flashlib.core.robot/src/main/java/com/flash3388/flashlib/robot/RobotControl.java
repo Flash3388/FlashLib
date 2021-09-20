@@ -1,9 +1,10 @@
 package com.flash3388.flashlib.robot;
 
+import com.castle.concurrent.service.Service;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
+import com.flash3388.flashlib.robot.base.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
@@ -205,4 +206,21 @@ public interface RobotControl {
     default void registerCloseables(AutoCloseable... closeables) {
         registerCloseables(Arrays.asList(closeables));
     }
+
+    /**
+     * Registered a service to be managed by the robot.
+     * <p>
+     *     Once the robot finishes initializing, all registered services
+     *     start running.
+     * </p>
+     * <p>
+     *     If invoked after robot initializing, this service will be started automatically.
+     * </p>
+     * <p>
+     *     Once the robot finishes shutdown, the service will be stopped.
+     * </p>
+     *
+     * @param service service to manage.
+     */
+    void registerService(Service service);
 }

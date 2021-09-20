@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.base;
 
+import com.castle.concurrent.service.Service;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
@@ -87,5 +88,10 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
         mRobotControl.registerCloseables(closeables);
+    }
+
+    @Override
+    public void registerService(Service service) {
+        mRobotControl.registerService(service);
     }
 }

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.robot.base.RobotBase;
+import com.flash3388.flashlib.robot.services.ServiceContainer;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
@@ -39,14 +40,27 @@ public class RobotProgram {
 
     private void runRobot() throws RobotInitializationException, RobotCreationException {
         ResourceHolder resourceHolder = ResourceHolder.empty();
+        ServiceContainer serviceContainer = new ServiceContainer();
         try {
             mLogger.debug("Creating user robot class");
-            RobotImplementation robot = mRobotCreator.create(mLogger, resourceHolder);
+            RobotImplementation robot = mRobotCreator.create(new Managers(
+                    resourceHolder,
+                    serviceContainer),
+                    mLogger);
             RunningRobot.setControlInstance(robot.getRobotControl());
+
+            mLogger.debug("Starting services");
+            serviceContainer.start();
 
             mLogger.debug("Initializing user robot");
             runRobot(robot.getRobotControl(), robot.getRobotBase());
         } finally {
+            try {
+                serviceContainer.stop();
+            }  catch (Throwable t) {
+                mLogger.warn("Service container error", t);
+            }
+
             try {
                 resourceHolder.freeAll();
             }  catch (Throwable t) {
