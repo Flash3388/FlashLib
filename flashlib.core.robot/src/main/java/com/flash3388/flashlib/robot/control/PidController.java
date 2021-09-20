@@ -17,7 +17,7 @@ import java.util.function.DoubleSupplier;
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController implements DoubleBinaryOperator {
+public class PidController implements DoubleBinaryOperator, Controller {
 
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
@@ -73,6 +73,7 @@ public class PidController implements DoubleBinaryOperator {
      * Resets the controller. This erases the I term buildup, and removes
      * D gain on the next loop.
      */
+    @Override
     public void reset() {
         mIsFirstRun = true;
     }
@@ -184,5 +185,10 @@ public class PidController implements DoubleBinaryOperator {
         mLastOutput = output;
 
         return output;
+    }
+
+    @Override
+    public double calculate(double processVariable, double setPoint) {
+        return applyAsDouble(processVariable, setPoint);
     }
 }
