@@ -15,14 +15,14 @@ import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
 import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
-public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
+public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 
     private final MotorSystem mShooter;
     private final SolenoidSystem mShooterDirector;
 
     private final Joystick mStick;
 
-    public MyRobot(RobotControl robotControl) {
+    public UserRobot(RobotControl robotControl) {
         super(robotControl);
 
         // Let's define a shooter system, which uses a motor to shoot
