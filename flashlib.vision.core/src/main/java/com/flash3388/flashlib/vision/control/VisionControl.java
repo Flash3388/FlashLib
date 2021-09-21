@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.vision.control;
 
+import com.castle.concurrent.service.Service;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.VisionResult;
 import com.flash3388.flashlib.vision.control.event.VisionListener;
@@ -11,7 +12,7 @@ import java.util.Optional;
  *
  * @since FlashLib 3.0.0
  */
-public interface VisionControl {
+public interface VisionControl extends Service {
 
     /**
      * Gets whether the vision process is running or not.
@@ -20,6 +21,7 @@ public interface VisionControl {
      * @see #start()
      * @see #stop()
      */
+    @Override
     boolean isRunning();
 
     /**
@@ -28,6 +30,7 @@ public interface VisionControl {
      *
      * @see #isRunning()
      */
+    @Override
     void start();
 
     /**
@@ -36,6 +39,7 @@ public interface VisionControl {
      *
      * @see #isRunning()
      */
+    @Override
     void stop();
 
     /**
