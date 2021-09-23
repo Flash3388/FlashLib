@@ -42,8 +42,8 @@ public class MtActionsControl {
     public MtActionsControl(MtRequirementsControl requirementsControl, Clock clock, Logger logger) {
         this(requirementsControl, clock, logger,
                 new HashMap<>(5),
-                new LinkedBlockingQueue<>(5),
-                new LinkedBlockingQueue<>(5));
+                new LinkedBlockingQueue<>(),
+                new LinkedBlockingQueue<>());
     }
 
     public void startActions(Collection<Action> actions) {
