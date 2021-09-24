@@ -38,7 +38,7 @@ public class ActionsControl {
         Status status = new StatusImpl(mClock.currentTime());
         ActionContext context = new ActionContext(
                 action, configuration, status,
-                mClock, mLogger);
+                this, mClock, mLogger);
         mActionsToStart.add(context);
 
         mLogger.debug("Starting action {}", context);

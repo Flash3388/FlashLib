@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling2.actions;
 
+import com.flash3388.flashlib.scheduling2.ActionsControl;
 import com.flash3388.flashlib.scheduling2.Requirement;
 import com.flash3388.flashlib.scheduling2.SchedulerMode;
 import com.flash3388.flashlib.time.Clock;
@@ -24,13 +25,14 @@ public class ActionContext {
     public ActionContext(Action action,
                          Configuration configuration,
                          Status status,
+                         ActionsControl actionsControl,
                          Clock clock, Logger logger) {
         mAction = action;
         mConfiguration = configuration;
         mStatus = status;
         mClock = clock;
         mLogger = logger;
-        mControl = new ControlImpl(status);
+        mControl = new ControlImpl(actionsControl, status);
 
         mStep = null;
         mIsConfigured = false;

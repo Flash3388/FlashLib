@@ -46,6 +46,7 @@ public class SingleThreadScheduler implements Scheduler {
         Status status = new StatusImpl(mClock.currentTime());
         ActionContext context = new ActionContext(
                 action, new ConfigurationImpl(), status,
+                mActionsControl,
                 mClock, mLogger);
 
         mRequirementsControl.setDefaultActionOnRequirement(requirement, context);

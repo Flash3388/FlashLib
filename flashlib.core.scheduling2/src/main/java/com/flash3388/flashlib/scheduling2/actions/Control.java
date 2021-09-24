@@ -10,6 +10,7 @@ public interface Control {
 
     void finished();
 
+    ActionExecutionBuilder start(Action action);
 
     // inner
 
