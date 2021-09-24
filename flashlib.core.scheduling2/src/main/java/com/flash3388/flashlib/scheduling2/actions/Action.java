@@ -1,10 +1,10 @@
 package com.flash3388.flashlib.scheduling2.actions;
 
-public interface Action<R> {
+public interface Action {
 
     void configure(Configuration configuration);
 
-    void initialize(Control<R> control);
-    void execute(Control<R> control);
-    void end(Control<R> control);
+    void initialize(Control control);
+    void execute(Control control);
+    void end(Control control);
 }

@@ -6,18 +6,18 @@ import com.flash3388.flashlib.time.Time;
 import java.util.Arrays;
 import java.util.Collection;
 
-public interface ActionExecutionBuilder<R> {
+public interface ActionExecutionBuilder {
 
-    ActionExecutionBuilder<R> name(String name);
+    ActionExecutionBuilder name(String name);
 
-    ActionExecutionBuilder<R> requires(Collection<? extends Requirement> requirements);
-    default ActionExecutionBuilder<R> requires(Requirement... requirements) {
+    ActionExecutionBuilder requires(Collection<? extends Requirement> requirements);
+    default ActionExecutionBuilder requires(Requirement... requirements) {
         return requires(Arrays.asList(requirements));
     }
 
-    ActionExecutionBuilder<R> withTimeout(Time timeout);
+    ActionExecutionBuilder withTimeout(Time timeout);
 
-    ActionExecutionBuilder<R> shouldRunInDisabled(boolean run);
+    ActionExecutionBuilder shouldRunInDisabled(boolean run);
 
-    Status<R> start();
+    Status start();
 }

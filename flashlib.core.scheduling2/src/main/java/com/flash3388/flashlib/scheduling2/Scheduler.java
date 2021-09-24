@@ -6,8 +6,8 @@ import com.flash3388.flashlib.scheduling2.actions.Status;
 
 public interface Scheduler {
 
-    <R> Status<R> start(Action<R> action);
-    <R> ActionExecutionBuilder<R> submit(Action<R> action);
+     Status start(Action action);
+     ActionExecutionBuilder submit(Action action);
 
     /**
      * <p>
@@ -36,7 +36,7 @@ public interface Scheduler {
      *
      * @return status of execution for the action.
      */
-    <R> Status<R> setDefaultAction(Requirement requirement, Action<R> action);
+     Status setDefaultAction(Requirement requirement, Action action);
 
     /**
      * <p>

@@ -20,9 +20,9 @@ public class ActionsControl {
     private final Clock mClock;
     private final Logger mLogger;
 
-    private final Collection<ActionContext<?>> mActionsToStart;
-    private final Collection<ActionContext<?>> mRunningActions;
-    private final Collection<ActionContext<?>> mActionsToRemove;
+    private final Collection<ActionContext> mActionsToStart;
+    private final Collection<ActionContext> mRunningActions;
+    private final Collection<ActionContext> mActionsToRemove;
 
     public ActionsControl(RequirementsControl requirementsControl, Clock clock, Logger logger) {
         mRequirementsControl = requirementsControl;
@@ -34,9 +34,9 @@ public class ActionsControl {
         mActionsToRemove = new ArrayList<>(3);
     }
 
-    public <R> Status<R> addActionPending(Action<R> action, Configuration configuration) {
-        Status<R> status = new StatusImpl<>(mClock.currentTime());
-        ActionContext<R> context = new ActionContext<R>(
+    public Status addActionPending(Action action, Configuration configuration) {
+        Status status = new StatusImpl(mClock.currentTime());
+        ActionContext context = new ActionContext(
                 action, configuration, status,
                 mClock, mLogger);
         mActionsToStart.add(context);
@@ -47,7 +47,7 @@ public class ActionsControl {
     }
 
     public void runActions(SchedulerMode mode) {
-        for (ActionContext<?> context : mRunningActions) {
+        for (ActionContext context : mRunningActions) {
             if (!context.run(mode)) {
                 mActionsToRemove.add(context);
             }
@@ -55,9 +55,9 @@ public class ActionsControl {
     }
 
     public void startDefaultSubsystemActions() {
-        for (Map.Entry<Requirement, ActionContext<?>> entry : mRequirementsControl.getDefaultActionsToStart()
+        for (Map.Entry<Requirement, ActionContext> entry : mRequirementsControl.getDefaultActionsToStart()
                 .entrySet()) {
-            ActionContext<?> context = entry.getValue();
+            ActionContext context = entry.getValue();
 
             mActionsToStart.add(context);
             mLogger.debug("Starting default action for {}", context);
@@ -65,21 +65,21 @@ public class ActionsControl {
     }
 
     public void startNewActions() {
-        for (ActionContext<?> context : mActionsToStart) {
+        for (ActionContext context : mActionsToStart) {
             boolean didConfigure = false;
             if (!context.isConfigured()) {
                 context.configure();
                 didConfigure = true;
             }
 
-            Set<ActionContext<?>> conflicts = mRequirementsControl.getConflicting(context.getRequirements());
+            Set<ActionContext> conflicts = mRequirementsControl.getConflicting(context.getRequirements());
             if (conflicts.isEmpty()) {
                 mRequirementsControl.updateRequirementsTaken(context.getRequirements(), context);
                 mRunningActions.add(context);
 
                 mLogger.debug("Action configured {}", context);
             } else {
-                for (ActionContext<?> conflict : conflicts) {
+                for (ActionContext conflict : conflicts) {
                     if (didConfigure) {
                         mLogger.warn("Requirements conflict in Scheduler between new {} and old {}",
                                 context, conflict);
@@ -94,7 +94,7 @@ public class ActionsControl {
     }
 
     public void removeFinished() {
-        for (ActionContext<?> context : mActionsToRemove) {
+        for (ActionContext context : mActionsToRemove) {
             mLogger.debug("Finished action {}", context);
             mRunningActions.remove(context);
 
@@ -107,7 +107,7 @@ public class ActionsControl {
     }
 
     public void cancelAllActions() {
-        for (ActionContext<?> context : mRunningActions) {
+        for (ActionContext context : mRunningActions) {
             context.cancel();
         }
         mActionsToStart.clear();

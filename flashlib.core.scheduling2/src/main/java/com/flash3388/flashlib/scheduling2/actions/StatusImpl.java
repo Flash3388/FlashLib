@@ -4,7 +4,7 @@ import com.flash3388.flashlib.time.Time;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StatusImpl<R> implements Status<R> {
+public class StatusImpl implements Status {
 
     enum Type {
         PENDING(false),
@@ -30,7 +30,6 @@ public class StatusImpl<R> implements Status<R> {
     private final AtomicReference<Type> mStatus;
 
     private Time mStartTime;
-    private R mResult;
     private Throwable mError;
 
     public StatusImpl(Time queuedTime) {
@@ -38,7 +37,6 @@ public class StatusImpl<R> implements Status<R> {
 
         mStatus = new AtomicReference<>(Type.PENDING);
         mStartTime = Time.INVALID;
-        mResult = null;
         mError = null;
     }
 
@@ -54,8 +52,7 @@ public class StatusImpl<R> implements Status<R> {
     }
 
     @Override
-    public void markFinished(R result) {
-        mResult = result;
+    public void markFinished() {
         mStatus.compareAndSet(Type.RUNNING, Type.SUCCESSFUL);
     }
 
@@ -96,15 +93,6 @@ public class StatusImpl<R> implements Status<R> {
     }
 
     @Override
-    public R getResult() {
-        Type type = mStatus.get();
-        if (type != Type.SUCCESSFUL) {
-            throw new IllegalStateException("not successful. Status=" + type);
-        }
-        return mResult;
-    }
-
-    @Override
     public Throwable getError() {
         Type type = mStatus.get();
         if (type != Type.ERRORED) {
@@ -128,7 +116,7 @@ public class StatusImpl<R> implements Status<R> {
             case RUNNING:
                 return String.format("Status{RUNNING, START_TIME=%s}", mStartTime);
             case SUCCESSFUL:
-                return String.format("Status{SUCCESSFUL, RESULT=%s}", type);
+                return "Status{SUCCESSFUL}";
             case ERRORED:
                 return String.format("Status{ERRORED, ERROR=%s: %s}",
                         mError.getClass().getName(),

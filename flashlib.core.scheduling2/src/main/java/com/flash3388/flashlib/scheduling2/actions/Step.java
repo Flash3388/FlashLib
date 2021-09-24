@@ -1,14 +1,14 @@
 package com.flash3388.flashlib.scheduling2.actions;
 
-public interface Step<R> {
+public interface Step {
 
     boolean canRunInDisabled();
 
-    Step<R> execute(ActionContext<R> context);
-    Step<R> onError(ActionContext<R> context);
-    Step<R> onCancel(ActionContext<R> context);
+    Step execute(ActionContext context);
+    Step onError(ActionContext context);
+    Step onCancel(ActionContext context);
 
-    class InitializationStep<R> implements Step<R> {
+    class InitializationStep implements Step {
 
         @Override
         public boolean canRunInDisabled() {
@@ -16,29 +16,29 @@ public interface Step<R> {
         }
 
         @Override
-        public Step<R> execute(ActionContext<R> context) {
+        public Step execute(ActionContext context) {
             context.initializeAction();
 
             if (context.isActionFinished()) {
-                context.saveActionResult();
+                context.actionFinished();
                 return null;
             }
 
-            return new ExecutionStep<>();
+            return new ExecutionStep();
         }
 
         @Override
-        public Step<R> onError(ActionContext<R> context) {
+        public Step onError(ActionContext context) {
             return null;
         }
 
         @Override
-        public Step<R> onCancel(ActionContext<R> context) {
+        public Step onCancel(ActionContext context) {
             return null;
         }
     }
 
-    class ExecutionStep<R> implements Step<R> {
+    class ExecutionStep implements Step {
 
         @Override
         public boolean canRunInDisabled() {
@@ -46,36 +46,36 @@ public interface Step<R> {
         }
 
         @Override
-        public Step<R> execute(ActionContext<R> context) {
+        public Step execute(ActionContext context) {
             if (context.isActionTimeout()) {
                 context.interruptAction();
-                return new EndStep<>();
+                return new EndStep();
             }
 
             context.executeAction();
 
             if (context.isActionFinished()) {
-                context.saveActionResult();
-                return new EndStep<>();
+                context.actionFinished();
+                return new EndStep();
             }
 
             return this;
         }
 
         @Override
-        public Step<R> onError(ActionContext<R> context) {
+        public Step onError(ActionContext context) {
             context.interruptAction();
-            return new EndStep<>();
+            return new EndStep();
         }
 
         @Override
-        public Step<R> onCancel(ActionContext<R> context) {
+        public Step onCancel(ActionContext context) {
             context.interruptAction();
-            return new EndStep<>();
+            return new EndStep();
         }
     }
 
-    class EndStep<R> implements Step<R> {
+    class EndStep implements Step {
 
         @Override
         public boolean canRunInDisabled() {
@@ -83,18 +83,18 @@ public interface Step<R> {
         }
 
         @Override
-        public Step<R> execute(ActionContext<R> context) {
+        public Step execute(ActionContext context) {
             context.endAction();
             return null;
         }
 
         @Override
-        public Step<R> onError(ActionContext<R> context) {
+        public Step onError(ActionContext context) {
             return null;
         }
 
         @Override
-        public Step<R> onCancel(ActionContext<R> context) {
+        public Step onCancel(ActionContext context) {
             return null;
         }
     }

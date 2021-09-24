@@ -6,14 +6,14 @@ import com.flash3388.flashlib.time.Time;
 
 import java.util.Collection;
 
-public class ActionExecutionBuilderImpl<R> implements ActionExecutionBuilder<R> {
+public class ActionExecutionBuilderImpl implements ActionExecutionBuilder {
 
     private final ActionsControl mActionsControl;
-    private final Action<R> mAction;
+    private final Action mAction;
 
     private final Configuration mConfiguration;
 
-    public ActionExecutionBuilderImpl(ActionsControl actionsControl, Action<R> action) {
+    public ActionExecutionBuilderImpl(ActionsControl actionsControl, Action action) {
         mActionsControl = actionsControl;
         mAction = action;
 
@@ -21,31 +21,31 @@ public class ActionExecutionBuilderImpl<R> implements ActionExecutionBuilder<R> 
     }
 
     @Override
-    public ActionExecutionBuilder<R> name(String name) {
+    public ActionExecutionBuilder name(String name) {
         mConfiguration.setName(name);
         return this;
     }
 
     @Override
-    public ActionExecutionBuilder<R> requires(Collection<? extends Requirement> requirements) {
+    public ActionExecutionBuilder requires(Collection<? extends Requirement> requirements) {
         mConfiguration.requires(requirements);
         return this;
     }
 
     @Override
-    public ActionExecutionBuilder<R> withTimeout(Time timeout) {
+    public ActionExecutionBuilder withTimeout(Time timeout) {
         mConfiguration.setTimeout(timeout);
         return this;
     }
 
     @Override
-    public ActionExecutionBuilder<R> shouldRunInDisabled(boolean run) {
+    public ActionExecutionBuilder shouldRunInDisabled(boolean run) {
         mConfiguration.setRunWhenDisabled(run);
         return this;
     }
 
     @Override
-    public Status<R> start() {
+    public Status start() {
         return mActionsControl.addActionPending(mAction, mConfiguration);
     }
 }

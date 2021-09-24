@@ -2,7 +2,7 @@ package com.flash3388.flashlib.scheduling2.actions;
 
 import com.flash3388.flashlib.time.Time;
 
-public interface Status<R> {
+public interface Status {
 
     boolean isPending();
     boolean isDone();
@@ -12,7 +12,6 @@ public interface Status<R> {
 
     Time getStartTime();
 
-    R getResult();
     Throwable getError();
 
     void cancel();
@@ -22,6 +21,6 @@ public interface Status<R> {
     Time getQueuedTime();
 
     void markStarted(Time time);
-    void markFinished(R result);
+    void markFinished();
     void markErrored(Throwable error);
 }

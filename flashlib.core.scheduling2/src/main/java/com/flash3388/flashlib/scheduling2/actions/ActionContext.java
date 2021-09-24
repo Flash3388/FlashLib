@@ -8,29 +8,29 @@ import org.slf4j.Logger;
 
 import java.util.Collection;
 
-public class ActionContext<R> {
+public class ActionContext {
 
-    private final Action<R> mAction;
+    private final Action mAction;
     private final Configuration mConfiguration;
-    private final Status<R> mStatus;
+    private final Status mStatus;
     private final Clock mClock;
     private final Logger mLogger;
-    private final Control<R> mControl;
+    private final Control mControl;
 
     private boolean mIsConfigured;
 
-    private Step<R> mStep;
+    private Step mStep;
 
-    public ActionContext(Action<R> action,
+    public ActionContext(Action action,
                          Configuration configuration,
-                         Status<R> status,
+                         Status status,
                          Clock clock, Logger logger) {
         mAction = action;
         mConfiguration = configuration;
         mStatus = status;
         mClock = clock;
         mLogger = logger;
-        mControl = new ControlImpl<>(status);
+        mControl = new ControlImpl(status);
 
         mStep = null;
         mIsConfigured = false;
@@ -45,7 +45,7 @@ public class ActionContext<R> {
         mAction.configure(configuration);
         configuration.copyTo(mConfiguration);
 
-        mStep = new Step.InitializationStep<>();
+        mStep = new Step.InitializationStep();
 
         mIsConfigured = true;
     }
@@ -110,8 +110,8 @@ public class ActionContext<R> {
         return mControl.isFinished();
     }
 
-    void saveActionResult() {
-        mStatus.markFinished(mControl.getResult());
+    void actionFinished() {
+        mStatus.markFinished();
     }
 
     boolean isActionTimeout() {

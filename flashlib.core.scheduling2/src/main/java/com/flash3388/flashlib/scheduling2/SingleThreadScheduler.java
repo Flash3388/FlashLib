@@ -27,13 +27,13 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
-    public <R> Status<R> start(Action<R> action) {
+    public  Status start(Action action) {
         return mActionsControl.addActionPending(action, new ConfigurationImpl());
     }
 
     @Override
-    public <R> ActionExecutionBuilder<R> submit(Action<R> action) {
-        return new ActionExecutionBuilderImpl<>(mActionsControl, action);
+    public  ActionExecutionBuilder submit(Action action) {
+        return new ActionExecutionBuilderImpl(mActionsControl, action);
     }
 
     @Override
@@ -42,9 +42,9 @@ public class SingleThreadScheduler implements Scheduler {
     }
 
     @Override
-    public <R> Status<R> setDefaultAction(Requirement requirement, Action<R> action) {
-        Status<R> status = new StatusImpl<>(mClock.currentTime());
-        ActionContext<R> context = new ActionContext<R>(
+    public  Status setDefaultAction(Requirement requirement, Action action) {
+        Status status = new StatusImpl(mClock.currentTime());
+        ActionContext context = new ActionContext(
                 action, new ConfigurationImpl(), status,
                 mClock, mLogger);
 

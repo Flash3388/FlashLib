@@ -12,8 +12,8 @@ import java.util.Set;
 
 public class RequirementsControl {
 
-    private final Map<Requirement, ActionContext<?>> mActionsOnRequirement;
-    private final Map<Requirement, ActionContext<?>> mDefaultActions;
+    private final Map<Requirement, ActionContext> mActionsOnRequirement;
+    private final Map<Requirement, ActionContext> mDefaultActions;
 
     public RequirementsControl() {
         mActionsOnRequirement = new HashMap<>(5);
@@ -27,18 +27,18 @@ public class RequirementsControl {
     }
 
     public void updateRequirementsTaken(Collection<? extends Requirement> requirements,
-                                                         ActionContext<?> newContext) {
+                                                         ActionContext newContext) {
         for (Requirement requirement : requirements) {
             mActionsOnRequirement.put(requirement, newContext);
         }
     }
 
-    public Set<ActionContext<?>> getConflicting(Collection<? extends Requirement> requirements) {
-        Set<ActionContext<?>> conflicting = new HashSet<>();
+    public Set<ActionContext> getConflicting(Collection<? extends Requirement> requirements) {
+        Set<ActionContext> conflicting = new HashSet<>();
 
         for (Requirement requirement : requirements) {
             if (mActionsOnRequirement.containsKey(requirement)) {
-                ActionContext<?> current = mActionsOnRequirement.get(requirement);
+                ActionContext current = mActionsOnRequirement.get(requirement);
                 conflicting.add(current);
             }
         }
@@ -46,17 +46,17 @@ public class RequirementsControl {
         return conflicting;
     }
 
-    public void setDefaultActionOnRequirement(Requirement requirement, ActionContext<?> context) {
-        ActionContext<?> old = mDefaultActions.put(requirement, context);
+    public void setDefaultActionOnRequirement(Requirement requirement, ActionContext context) {
+        ActionContext old = mDefaultActions.put(requirement, context);
         if (old != null) {
             old.cancel();
         }
     }
 
-    public Map<Requirement, ActionContext<?>> getDefaultActionsToStart() {
-        Map<Requirement, ActionContext<?>> actionsToStart = new HashMap<>();
+    public Map<Requirement, ActionContext> getDefaultActionsToStart() {
+        Map<Requirement, ActionContext> actionsToStart = new HashMap<>();
 
-        for (Map.Entry<Requirement, ActionContext<?>> entry : mDefaultActions.entrySet()) {
+        for (Map.Entry<Requirement, ActionContext> entry : mDefaultActions.entrySet()) {
             if (mActionsOnRequirement.containsKey(entry.getKey())) {
                 continue;
             }

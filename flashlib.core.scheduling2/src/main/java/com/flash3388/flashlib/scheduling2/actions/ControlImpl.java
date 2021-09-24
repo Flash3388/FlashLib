@@ -4,7 +4,7 @@ import com.flash3388.flashlib.time.Time;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ControlImpl<R> implements Control<R> {
+public class ControlImpl implements Control {
 
     private enum StatusType {
         RUNNING,
@@ -12,16 +12,14 @@ public class ControlImpl<R> implements Control<R> {
         FINISHED
     }
 
-    private final Status<R> mStatus;
+    private final Status mStatus;
 
     private final AtomicReference<StatusType> mStatusType;
-    private R mResult;
 
-    public ControlImpl(Status<R> status) {
+    public ControlImpl(Status status) {
         mStatus = status;
 
         mStatusType = new AtomicReference<>(StatusType.RUNNING);
-        mResult = null;
     }
 
     @Override
@@ -36,12 +34,6 @@ public class ControlImpl<R> implements Control<R> {
 
     @Override
     public void finished() {
-        finished(null);
-    }
-
-    @Override
-    public void finished(R result) {
-        mResult = result;
         mStatusType.compareAndSet(StatusType.RUNNING, StatusType.FINISHED);
     }
 
@@ -53,10 +45,5 @@ public class ControlImpl<R> implements Control<R> {
     @Override
     public void markInterrupted() {
         mStatusType.compareAndSet(StatusType.RUNNING, StatusType.INTERRUPTED);
-    }
-
-    @Override
-    public R getResult() {
-        return mResult;
     }
 }
