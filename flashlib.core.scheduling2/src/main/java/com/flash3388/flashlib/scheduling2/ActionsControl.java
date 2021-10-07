@@ -35,7 +35,7 @@ public class ActionsControl {
     }
 
     public Status addActionPending(Action action, Configuration configuration) {
-        Status status = new StatusImpl(mClock.currentTime());
+        Status status = new StatusImpl();
         ActionContext context = new ActionContext(
                 action, configuration, status,
                 this, mClock, mLogger);

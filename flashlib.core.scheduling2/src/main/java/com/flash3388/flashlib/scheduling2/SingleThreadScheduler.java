@@ -43,7 +43,7 @@ public class SingleThreadScheduler implements Scheduler {
 
     @Override
     public  Status setDefaultAction(Requirement requirement, Action action) {
-        Status status = new StatusImpl(mClock.currentTime());
+        Status status = new StatusImpl();
         ActionContext context = new ActionContext(
                 action, new ConfigurationImpl(), status,
                 mActionsControl,

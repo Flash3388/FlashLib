@@ -18,8 +18,6 @@ public interface Status {
 
     // inner
 
-    Time getQueuedTime();
-
     void markStarted(Time time);
     void markFinished();
     void markErrored(Throwable error);

@@ -25,24 +25,15 @@ public class StatusImpl implements Status {
         }
     }
 
-    private final Time mQueuedTime;
-
     private final AtomicReference<Type> mStatus;
 
     private Time mStartTime;
     private Throwable mError;
 
-    public StatusImpl(Time queuedTime) {
-        mQueuedTime = queuedTime;
-
+    public StatusImpl() {
         mStatus = new AtomicReference<>(Type.PENDING);
         mStartTime = Time.INVALID;
         mError = null;
-    }
-
-    @Override
-    public Time getQueuedTime() {
-        return mQueuedTime;
     }
 
     @Override
@@ -112,7 +103,7 @@ public class StatusImpl implements Status {
         Type type = mStatus.get();
         switch (type) {
             case PENDING:
-                return String.format("Status{PENDING, QUEUED_TIME=%s}", mQueuedTime);
+                return "Status{PENDING}";
             case RUNNING:
                 return String.format("Status{RUNNING, START_TIME=%s}", mStartTime);
             case SUCCESSFUL:
