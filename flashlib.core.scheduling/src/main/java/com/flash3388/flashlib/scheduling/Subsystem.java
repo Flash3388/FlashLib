@@ -4,6 +4,7 @@ import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -29,6 +30,8 @@ public class Subsystem implements Requirement {
     private final WeakReference<Scheduler> mScheduler;
 
     protected Subsystem(Scheduler scheduler) {
+        Objects.requireNonNull(scheduler, "scheduler null");
+
         mScheduler = new WeakReference<>(scheduler);
     }
 
