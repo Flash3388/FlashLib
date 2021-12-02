@@ -9,6 +9,24 @@ import java.util.Objects;
 
 public class JsonTarget implements Target {
 
+    public static class Builder extends JsonBuilderBase<Builder> {
+
+        private final Gson mGson;
+
+        private Builder(Gson gson) {
+            super(Builder.class);
+            mGson = gson;
+        }
+
+        Builder() {
+            this(new Gson());
+        }
+
+        public JsonTarget build() {
+            return new JsonTarget(mGson, mProperties);
+        }
+    }
+
     private final Gson mGson;
     private final JsonObject mProperties;
 

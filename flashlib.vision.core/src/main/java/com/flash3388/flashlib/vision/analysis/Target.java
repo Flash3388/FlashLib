@@ -9,6 +9,10 @@ import java.util.NoSuchElementException;
  */
 public interface Target {
 
+    static JsonTarget.Builder builder() {
+        return new JsonTarget.Builder();
+    }
+
     /**
      * Gets whether the target has a value for a named property.
      *

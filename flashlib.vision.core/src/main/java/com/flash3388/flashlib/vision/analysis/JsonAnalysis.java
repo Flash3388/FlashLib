@@ -18,16 +18,15 @@ import java.util.Objects;
 
 public class JsonAnalysis implements Analysis {
 
-    public static class Builder {
+    public static class Builder extends JsonBuilderBase<Builder> {
 
         private final Gson mGson;
         private final List<JsonTarget> mTargets;
-        private final JsonObject mProperties;
 
         public Builder(Gson gson) {
+            super(Builder.class);
             mGson = gson;
             mTargets = new ArrayList<>();
-            mProperties = new JsonObject();
         }
 
         public Builder() {
@@ -43,61 +42,20 @@ public class JsonAnalysis implements Analysis {
             return new TargetBuilder(this, mGson);
         }
 
-        public Builder put(String name, String value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public Builder put(String name, int value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public Builder put(String name, double value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public Builder put(String name, boolean value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
         public JsonAnalysis build() {
             return new JsonAnalysis(mGson, mTargets, mProperties);
         }
     }
 
-    public static class TargetBuilder {
+    public static class TargetBuilder extends JsonBuilderBase<TargetBuilder> {
 
         private final Builder mBuilder;
         private final Gson mGson;
-        private final JsonObject mProperties;
 
         private TargetBuilder(Builder builder, Gson gson) {
+            super(TargetBuilder.class);
             mBuilder = builder;
             mGson = gson;
-            mProperties = new JsonObject();
-        }
-
-        public TargetBuilder put(String name, String value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public TargetBuilder put(String name, int value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public TargetBuilder put(String name, double value) {
-            mProperties.addProperty(name, value);
-            return this;
-        }
-
-        public TargetBuilder put(String name, boolean value) {
-            mProperties.addProperty(name, value);
-            return this;
         }
 
         public Builder build() {
