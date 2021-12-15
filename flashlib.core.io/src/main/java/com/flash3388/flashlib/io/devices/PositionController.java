@@ -2,13 +2,16 @@ package com.flash3388.flashlib.io.devices;
 
 import com.flash3388.flashlib.control.Stoppable;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Represents controller component for position-based actuator,
  * such as a <em>Servo</em>, <em>Stepper</em> and such.
  *
  * @since FlashLib 2.0.0
  */
-public interface PositionController extends Stoppable {
+public interface PositionController extends Closeable, Stoppable {
 
     /**
      * Sets the position of the component controlled by this object.
@@ -30,4 +33,8 @@ public interface PositionController extends Stoppable {
      */
     @Override
     void stop();
+
+    @Override
+    default void close() throws IOException {
+    }
 }

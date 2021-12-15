@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.io.devices;
 
+import com.castle.util.closeables.Closer;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,5 +37,17 @@ public class DoubleSolenoidGroup implements DoubleSolenoid {
     @Override
     public Value get() {
         return mSolenoids.iterator().next().get();
+    }
+
+    @Override
+    public void close() throws IOException {
+        Closer closer = Closer.empty();
+        closer.addAll(mSolenoids);
+
+        try {
+            closer.close();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 }
