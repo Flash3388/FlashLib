@@ -25,6 +25,10 @@ public class ActionContext {
         mIsInitialized = false;
     }
 
+    public boolean isCanceled() {
+        return mActionState.isCanceled();
+    }
+
     public void prepareForRun() {
         mActionState.markStarted();
 
@@ -91,5 +95,14 @@ public class ActionContext {
         }
 
         return getRunTime().after(mTimeout);
+    }
+
+    public Action getAction() {
+        return mAction;
+    }
+
+    @Override
+    public String toString() {
+        return mAction.toString();
     }
 }
