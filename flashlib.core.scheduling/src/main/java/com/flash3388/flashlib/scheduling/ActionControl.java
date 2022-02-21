@@ -108,14 +108,20 @@ class ActionControl {
             return;
         }
 
-        Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
-        conflictingActions.forEach((conflictingAction)-> {
-            ActionContext context = mRunningActions.remove(conflictingAction);
-            if (context != null) {
-                context.markCanceled();
-                onInternalRemove(conflictingAction, context, false);
-            }
-        });
+        try {
+            Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+            conflictingActions.forEach((conflictingAction)-> {
+                ActionContext context = mRunningActions.remove(conflictingAction);
+                if (context != null) {
+                    context.markCanceled();
+                    onInternalRemove(conflictingAction, context, false);
+                }
+            });
+        } catch (ActionHasPreferredException e) {
+            // so not starting action
+            mLogger.warn("Not starting action {}", action);
+            return;
+        }
 
         ActionContext context = new ActionContext(action, mClock);
         context.prepareForRun();
