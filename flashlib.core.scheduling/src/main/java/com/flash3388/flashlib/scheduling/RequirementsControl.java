@@ -42,7 +42,7 @@ class RequirementsControl {
                 Action currentAction = mActionsOnRequirement.get(requirement);
                 conflictingActions.add(currentAction);
 
-                if (currentAction.getConfiguration().flags().contains(ActionFlag.PREFERRED_FOR_REQUIREMENTS)) {
+                if (currentAction.getConfiguration().hasFlags(ActionFlag.PREFERRED_FOR_REQUIREMENTS)) {
                     canAdd = false;
 
                     mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}. " +

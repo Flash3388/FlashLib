@@ -60,11 +60,21 @@ public class ActionConfiguration {
             return this;
         }
 
+        public Editor addFlags(ActionFlag... flags) {
+            mConfiguration.addFlags(flags);
+            return this;
+        }
+
+        public Editor removeFlags(ActionFlag... flags) {
+            mConfiguration.removeFlags(flags);
+            return this;
+        }
+
         public Editor setRunWhenDisabled(boolean runWhenDisabled) {
             if (runWhenDisabled) {
-                mConfiguration.addFlag(ActionFlag.RUN_ON_DISABLED);
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
             } else {
-                mConfiguration.removeFlag(ActionFlag.RUN_ON_DISABLED);
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
             }
             return this;
         }
@@ -78,7 +88,6 @@ public class ActionConfiguration {
     private final Set<Requirement> mRequirements;
     private Time mTimeout;
     private String mName;
-    private boolean mRunWhenDisabled;
     private final EnumSet<ActionFlag> mFlags;
 
     public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, Set<ActionFlag> flags) {
@@ -117,8 +126,18 @@ public class ActionConfiguration {
         return Collections.unmodifiableSet(mFlags);
     }
 
+    public boolean hasFlags(ActionFlag... flags) {
+        for (ActionFlag flag : flags) {
+            if (!mFlags.contains(flag)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean shouldRunWhenDisabled() {
-        return mFlags.contains(ActionFlag.RUN_ON_DISABLED);
+        return hasFlags(ActionFlag.RUN_ON_DISABLED);
     }
 
     void requires(Collection<? extends Requirement> requirements) {
@@ -136,11 +155,11 @@ public class ActionConfiguration {
         mName = name;
     }
 
-    void addFlag(ActionFlag flag) {
-        mFlags.add(flag);
+    void addFlags(ActionFlag... flags) {
+        mFlags.addAll(Arrays.asList(flags));
     }
 
-    void removeFlag(ActionFlag flag) {
-        mFlags.remove(flag);
+    void removeFlags(ActionFlag... flags) {
+        mFlags.removeAll(Arrays.asList(flags));
     }
 }

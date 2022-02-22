@@ -46,9 +46,9 @@ public final class ActionsMock {
 
         public ActionMocker mockRunWhenDisabled(boolean runWhenDisabled) {
             if (runWhenDisabled) {
-                mConfiguration.addFlag(ActionFlag.RUN_ON_DISABLED);
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
             } else {
-                mConfiguration.removeFlag(ActionFlag.RUN_ON_DISABLED);
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
             }
             return this;
         }
