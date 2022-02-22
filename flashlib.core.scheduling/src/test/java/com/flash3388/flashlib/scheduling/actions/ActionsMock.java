@@ -21,11 +21,12 @@ public final class ActionsMock {
 
         private ActionConfiguration mConfiguration;
         private boolean mIsFinished;
-        private boolean mRunWhenDisabled;
+        private boolean mIsRunning;
 
         private ActionMocker() {
             mConfiguration = new ActionConfiguration();
             mIsFinished = false;
+            mIsRunning = false;
         }
 
         public ActionMocker mockWithConfiguration(ActionConfiguration configuration) {
@@ -44,7 +45,16 @@ public final class ActionsMock {
         }
 
         public ActionMocker mockRunWhenDisabled(boolean runWhenDisabled) {
-            mConfiguration.setRunWhenDisabled(runWhenDisabled);
+            if (runWhenDisabled) {
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
+            } else {
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
+            }
+            return this;
+        }
+
+        public ActionMocker mockIsRunning(boolean isRunning) {
+            mIsRunning = isRunning;
             return this;
         }
 
@@ -52,7 +62,9 @@ public final class ActionsMock {
             Action action = mock(Action.class);
             when(action.isFinished()).thenReturn(mIsFinished);
             when(action.getConfiguration()).thenReturn(mConfiguration);
-            when(action.configure()).thenAnswer(invocation -> new ActionConfiguration.Editor(action, action.getConfiguration()));
+            when(action.isRunning()).thenReturn(mIsRunning);
+            when(action.configure()).thenAnswer(invocation ->
+                    new ActionConfiguration.Editor(action, action.getConfiguration()));
 
             doAnswer((Answer<Void>) invocation -> {
                 ActionConfiguration configuration = invocation.getArgument(0);

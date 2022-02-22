@@ -133,13 +133,21 @@ public class SingleThreadVisionControl<S> implements VisionControl {
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
+        if (isRunning()) {
+            return;
+        }
+
         Future<?> future = mRunner.apply(mTask);
         mFuture.set(future);
     }
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
+        if (!isRunning()) {
+            return;
+        }
+
         Future<?> future = mFuture.get();
         if (future != null) {
             future.cancel(true);

@@ -5,6 +5,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public abstract class ActionBase implements Action {
 
@@ -12,6 +13,9 @@ public abstract class ActionBase implements Action {
     private ActionConfiguration mConfiguration;
 
     protected ActionBase(Scheduler scheduler, ActionConfiguration configuration) {
+        Objects.requireNonNull(scheduler, "scheduler null");
+        Objects.requireNonNull(configuration, "configuration null");
+
         mScheduler = new WeakReference<>(scheduler);
         mConfiguration = configuration;
 

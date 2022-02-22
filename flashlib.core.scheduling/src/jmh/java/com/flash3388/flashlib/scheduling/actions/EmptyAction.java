@@ -8,7 +8,8 @@ import java.util.Collections;
 public class EmptyAction extends ActionBase {
 
     public EmptyAction(Scheduler scheduler, Time timeout) {
-        super(scheduler, new ActionConfiguration(Collections.emptyList(), timeout, "", true));
+        super(scheduler, new ActionConfiguration(Collections.emptyList(), timeout, "",
+                ActionFlag.RUN_ON_DISABLED));
     }
 
     public EmptyAction(Scheduler scheduler) {

@@ -19,8 +19,8 @@ import java.io.IOException;
  */
 public class AnalogAccelerometer implements Accelerometer {
 
-	private static final double DEFAULT_SENSITIVITY = 1.0;
-	private static final double DEFAULT_ZERO_VOLTAGE = 2.5;
+	public static final double DEFAULT_SENSITIVITY = 1.0;
+    public static final double DEFAULT_ZERO_VOLTAGE = 2.5;
 	
 	private AnalogInput mInput;
 	private double mZeroGvoltage;

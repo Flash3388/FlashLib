@@ -86,6 +86,19 @@ public interface HidInterface {
     XboxController newXboxController(HidChannel channel);
 
     /**
+     * Creates a new {@link DualshockController} representing a dualshock-like controller defined by
+     * the given {@link HidChannel}.
+     *
+     * @param channel the channel describing the connection.
+     *
+     * @return {@link DualshockController} object matching the control described by the given {@link HidChannel}.
+     *
+     * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
+     *  representable by {@link DualshockController}.
+     */
+    DualshockController newDualshockController(HidChannel channel);
+
+    /**
      * A stub implementation of {@link HidInterface}. All the methods throw {@link UnsupportedOperationException}.
      *
      * @since FlashLib 3.0.0
@@ -119,6 +132,11 @@ public interface HidInterface {
 
         @Override
         public XboxController newXboxController(HidChannel channel) {
+            throw new UnsupportedOperationException("stub");
+        }
+
+        @Override
+        public DualshockController newDualshockController(HidChannel channel) {
             throw new UnsupportedOperationException("stub");
         }
     }

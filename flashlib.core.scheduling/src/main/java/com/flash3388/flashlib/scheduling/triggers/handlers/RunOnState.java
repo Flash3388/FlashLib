@@ -16,9 +16,9 @@ public class RunOnState implements TriggerStateListener {
 
     @Override
     public void onStateChange(TriggerState newState, TriggerState lastState) {
-        if (mTriggerState == newState) {
+        if (mTriggerState == newState && !mAction.isRunning()) {
             mAction.start();
-        } else {
+        } else if (mTriggerState != newState && mAction.isRunning()) {
             mAction.cancel();
         }
     }
