@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -34,16 +35,34 @@ class RequirementsControl {
 
     public Set<Action> updateRequirementsWithNewRunningAction(Action action) {
         Set<Action> conflictingActions = new HashSet<>();
+        boolean canAdd = true;
 
         for (Requirement requirement : action.getConfiguration().getRequirements()) {
             if (mActionsOnRequirement.containsKey(requirement)) {
                 Action currentAction = mActionsOnRequirement.get(requirement);
                 conflictingActions.add(currentAction);
 
+                if (currentAction.getConfiguration().hasFlags(ActionFlag.PREFERRED_FOR_REQUIREMENTS)) {
+                    canAdd = false;
+
+                    mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}. " +
+                                    "However old action is preferred",
+                            currentAction.toString(), action.toString(), requirement.toString());
+
+                    break;
+                }
+
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}",
                         currentAction.toString(), action.toString(), requirement.toString());
             }
+        }
 
+        if (!canAdd) {
+            mLogger.warn("One of the requirements has preferred action. Cannot start {}", action);
+            throw new ActionHasPreferredException();
+        }
+
+        for (Requirement requirement : action.getConfiguration().getRequirements()) {
             mActionsOnRequirement.put(requirement, action);
         }
 
