@@ -2,6 +2,7 @@ package com.flash3388.flashlib.hid.generic;
 
 import com.flash3388.flashlib.hid.Axis;
 import com.flash3388.flashlib.hid.Button;
+import com.flash3388.flashlib.hid.DualshockController;
 import com.flash3388.flashlib.hid.Hid;
 import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.HidInterface;
@@ -69,6 +70,15 @@ public class GenericHidInterface implements HidInterface {
 
         ensureExistsChannelOfType(channelInt, ChannelType.XBOX);
         return new GenericXboxController(mInterface, channelInt);
+    }
+
+    @Override
+    public DualshockController newDualshockController(HidChannel channel) {
+        GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
+        int channelInt = genericHidChannel.intValue();
+
+        ensureExistsChannelOfType(channelInt, ChannelType.XBOX);
+        return new GenericDualshockController(mInterface, channelInt);
     }
 
     private void ensureExistsChannelOfType(int channel, ChannelType wantedType) {
