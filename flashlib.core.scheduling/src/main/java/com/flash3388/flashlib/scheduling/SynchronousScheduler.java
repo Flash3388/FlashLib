@@ -1,6 +1,9 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
+import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -8,6 +11,7 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 public class SynchronousScheduler implements Scheduler {
@@ -79,5 +83,16 @@ public class SynchronousScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         Objects.requireNonNull(mode, "mode is null");
         mSchedulerIteration.run(mode);
+    }
+
+    @Override
+    public Trigger newTrigger(BooleanSupplier condition) {
+        SchedulerTrigger trigger = new SchedulerTrigger();
+
+        Action action = new TriggerActivationAction(this, condition, trigger)
+                .requires(trigger);
+        start(action);
+
+        return trigger;
     }
 }
