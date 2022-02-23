@@ -1,6 +1,5 @@
-package com.flash3388.flashlib.scheduling2.actions;
+package com.flash3388.flashlib.scheduling2;
 
-import com.flash3388.flashlib.scheduling2.Requirement;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Arrays;
@@ -21,8 +20,9 @@ public interface Configuration {
     Time getTimeout();
     void setTimeout(Time timeout);
 
-    boolean shouldRunWhenDisabled();
-    void setRunWhenDisabled(boolean run);
+    Set<ActionFlag> getFlags();
+    void addFlags(Set<ActionFlag> flags);
+    void removeFlags(Set<ActionFlag> flags);
 
     void copyTo(Configuration other);
 }

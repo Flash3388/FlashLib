@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling2.actions;
+package com.flash3388.flashlib.scheduling2;
 
 public interface Action {
 

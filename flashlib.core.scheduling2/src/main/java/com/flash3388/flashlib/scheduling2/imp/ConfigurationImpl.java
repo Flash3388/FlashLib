@@ -1,11 +1,15 @@
-package com.flash3388.flashlib.scheduling2.actions;
+package com.flash3388.flashlib.scheduling2.imp;
 
+import com.flash3388.flashlib.scheduling2.ActionFlag;
+import com.flash3388.flashlib.scheduling2.Configuration;
 import com.flash3388.flashlib.scheduling2.Requirement;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class ConfigurationImpl implements Configuration {
@@ -13,13 +17,13 @@ public class ConfigurationImpl implements Configuration {
     private String mName;
     private final Set<Requirement> mRequirements;
     private Time mTimeout;
-    private boolean mRunWhenDisabled;
+    private final Set<ActionFlag> mFlags;
 
     public ConfigurationImpl() {
         mName = "";
         mRequirements = new HashSet<>();
         mTimeout = Time.INVALID;
-        mRunWhenDisabled = false;
+        mFlags = EnumSet.noneOf(ActionFlag.class);
     }
 
     @Override
@@ -29,7 +33,7 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public void setName(String name) {
-        mName = name;
+        mName = Objects.requireNonNull(name);
     }
 
     @Override
@@ -49,17 +53,22 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public void setTimeout(Time timeout) {
-        mTimeout = timeout;
+        mTimeout = Objects.requireNonNull(timeout);
     }
 
     @Override
-    public boolean shouldRunWhenDisabled() {
-        return mRunWhenDisabled;
+    public Set<ActionFlag> getFlags() {
+        return Collections.unmodifiableSet(mFlags);
     }
 
     @Override
-    public void setRunWhenDisabled(boolean run) {
-        mRunWhenDisabled = run;
+    public void addFlags(Set<ActionFlag> flags) {
+        mFlags.addAll(flags);
+    }
+
+    @Override
+    public void removeFlags(Set<ActionFlag> flags) {
+        mFlags.removeAll(flags);
     }
 
     @Override
@@ -67,6 +76,6 @@ public class ConfigurationImpl implements Configuration {
         other.setName(mName);
         other.requires(mRequirements);
         other.setTimeout(mTimeout);
-        other.setRunWhenDisabled(mRunWhenDisabled);
+        other.addFlags(mFlags);
     }
 }
