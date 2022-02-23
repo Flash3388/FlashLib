@@ -6,6 +6,7 @@ import com.flash3388.flashlib.time.Time;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -59,8 +60,22 @@ public class ActionConfiguration {
             return this;
         }
 
+        public Editor addFlags(ActionFlag... flags) {
+            mConfiguration.addFlags(flags);
+            return this;
+        }
+
+        public Editor removeFlags(ActionFlag... flags) {
+            mConfiguration.removeFlags(flags);
+            return this;
+        }
+
         public Editor setRunWhenDisabled(boolean runWhenDisabled) {
-            mConfiguration.setRunWhenDisabled(runWhenDisabled);
+            if (runWhenDisabled) {
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
+            } else {
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
+            }
             return this;
         }
 
@@ -73,21 +88,26 @@ public class ActionConfiguration {
     private final Set<Requirement> mRequirements;
     private Time mTimeout;
     private String mName;
-    private boolean mRunWhenDisabled;
+    private final EnumSet<ActionFlag> mFlags;
 
-    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, boolean runWhenDisabled) {
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, Set<ActionFlag> flags) {
         mRequirements = new HashSet<>(requirements);
         mTimeout = timeout;
         mName = name;
-        mRunWhenDisabled = runWhenDisabled;
+        mFlags = EnumSet.noneOf(ActionFlag.class);
+        mFlags.addAll(flags);
+    }
+
+    public ActionConfiguration(Collection<Requirement> requirements, Time timeout, String name, ActionFlag... flags) {
+        this(requirements, timeout, name, new HashSet<>(Arrays.asList(flags)));
     }
 
     public ActionConfiguration() {
-        this(Collections.emptyList(), Time.INVALID, "", false);
+        this(Collections.emptyList(), Time.INVALID, "", EnumSet.noneOf(ActionFlag.class));
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        this(other.getRequirements(), other.getTimeout(), other.getName(), other.shouldRunWhenDisabled());
+        this(other.getRequirements(), other.getTimeout(), other.getName(), other.flags());
     }
 
     public Set<Requirement> getRequirements() {
@@ -102,8 +122,22 @@ public class ActionConfiguration {
         return mName;
     }
 
+    public Set<ActionFlag> flags() {
+        return Collections.unmodifiableSet(mFlags);
+    }
+
+    public boolean hasFlags(ActionFlag... flags) {
+        for (ActionFlag flag : flags) {
+            if (!mFlags.contains(flag)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean shouldRunWhenDisabled() {
-        return mRunWhenDisabled;
+        return hasFlags(ActionFlag.RUN_ON_DISABLED);
     }
 
     void requires(Collection<? extends Requirement> requirements) {
@@ -121,7 +155,11 @@ public class ActionConfiguration {
         mName = name;
     }
 
-    void setRunWhenDisabled(boolean runWhenDisabled) {
-        mRunWhenDisabled = runWhenDisabled;
+    void addFlags(ActionFlag... flags) {
+        mFlags.addAll(Arrays.asList(flags));
+    }
+
+    void removeFlags(ActionFlag... flags) {
+        mFlags.removeAll(Arrays.asList(flags));
     }
 }

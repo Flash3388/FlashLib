@@ -22,7 +22,6 @@ public final class ActionsMock {
         private ActionConfiguration mConfiguration;
         private boolean mIsFinished;
         private boolean mIsRunning;
-        private boolean mRunWhenDisabled;
 
         private ActionMocker() {
             mConfiguration = new ActionConfiguration();
@@ -46,7 +45,11 @@ public final class ActionsMock {
         }
 
         public ActionMocker mockRunWhenDisabled(boolean runWhenDisabled) {
-            mConfiguration.setRunWhenDisabled(runWhenDisabled);
+            if (runWhenDisabled) {
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
+            } else {
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
+            }
             return this;
         }
 

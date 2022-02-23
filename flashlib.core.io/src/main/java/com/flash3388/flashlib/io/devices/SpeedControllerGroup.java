@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.io.devices;
 
+import com.castle.util.closeables.Closer;
 import com.flash3388.flashlib.control.Direction;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -95,4 +97,16 @@ public class SpeedControllerGroup implements SpeedController {
 	public void setInverted(boolean inverted) {
 		mIsInverted = inverted;
 	}
+
+    @Override
+    public void close() throws IOException {
+        Closer closer = Closer.empty();
+        closer.addAll(mControllers);
+
+        try {
+            closer.close();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 }

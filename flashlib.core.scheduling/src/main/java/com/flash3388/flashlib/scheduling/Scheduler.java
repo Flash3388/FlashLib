@@ -1,9 +1,11 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -140,4 +142,13 @@ public interface Scheduler {
      * @param mode current mode for the scheduler.
      */
     void run(SchedulerMode mode);
+
+    /**
+     * Creates a new trigger for registering action activation to a condition.
+     *
+     * @param condition when <b>true</b> marks the trigger as <em>active</em>,
+     *                  when <b>false</b> marks the trigger as <em>inactive</em>.
+     * @return the trigger
+     */
+    Trigger newTrigger(BooleanSupplier condition);
 }

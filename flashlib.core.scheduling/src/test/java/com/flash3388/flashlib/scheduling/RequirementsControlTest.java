@@ -116,7 +116,7 @@ public class RequirementsControlTest {
     @Test
     public void updateRequirementsWithNewRunningAction_requirementHasAction_returnsActionAsConflicting() throws Exception {
         Subsystem subsystem = mock(Subsystem.class);
-        Action action = mock(Action.class);
+        Action action = ActionsMock.actionMocker().build();
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()
@@ -131,7 +131,7 @@ public class RequirementsControlTest {
     @Test
     public void updateRequirementsWithNewRunningAction_requirementHasAction_replacesAction() throws Exception {
         Subsystem subsystem = mock(Subsystem.class);
-        Action action = mock(Action.class);
+        Action action = ActionsMock.actionMocker().build();
         mActionsOnSubsystems.put(subsystem, action);
 
         Action newAction = ActionsMock.actionMocker()

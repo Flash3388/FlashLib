@@ -2,6 +2,9 @@ package com.flash3388.flashlib.io.devices;
 
 import com.flash3388.flashlib.time.Time;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Represents a single solenoid valve.
  * <p>
@@ -11,7 +14,7 @@ import com.flash3388.flashlib.time.Time;
  *
  * @since FlashLib 3.0.0
  */
-public interface Solenoid {
+public interface Solenoid extends Closeable {
 
     /**
      * Sets whether or not the valve is open.
@@ -28,4 +31,8 @@ public interface Solenoid {
     boolean get();
 
     void pulse(Time duration);
+
+    @Override
+    default void close() throws IOException {
+    }
 }
