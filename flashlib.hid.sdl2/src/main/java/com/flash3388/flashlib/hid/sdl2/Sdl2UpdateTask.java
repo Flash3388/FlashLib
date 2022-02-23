@@ -61,7 +61,7 @@ public class Sdl2UpdateTask implements Runnable {
             case JOY_DEVICE_REMOVED:
                 JDeviceConnectionEvent connectionEvent = (JDeviceConnectionEvent) event;
                 if (connectionEvent.isConnected()) {
-                    long ptr = SDLJoystick.open(connectionEvent.getDeviceIndex());
+                    long ptr = SDLJoystick.open(connectionEvent.getWhich());
                     int id = SDLJoystick.getInstanceId(ptr);
 
                     Sdl2HidMeta hidMeta = new Sdl2HidMeta(
@@ -72,7 +72,7 @@ public class Sdl2UpdateTask implements Runnable {
                     );
                     mHidData.setMeta(id, hidMeta);
                 } else {
-                    // TODO: remove meta?
+                    mHidData.setMeta(connectionEvent.getWhich(), null);
                 }
                 break;
         }
