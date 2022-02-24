@@ -25,3 +25,5 @@ include 'examples:vision:basic-vision'
 include 'examples:vision:cv-2020-vision'
 include 'examples:vision:cv-colorfilter'
 include 'examples:vision:vision-control'
+
+include 'examples:test:scheduling2'
