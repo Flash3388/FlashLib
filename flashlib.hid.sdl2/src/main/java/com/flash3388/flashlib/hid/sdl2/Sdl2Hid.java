@@ -2,18 +2,16 @@ package com.flash3388.flashlib.hid.sdl2;
 
 import com.castle.nio.temp.TempPath;
 import com.castle.nio.temp.TempPathGenerator;
-import com.castle.nio.zip.OpenZip;
-import com.castle.nio.zip.Zip;
-import com.castle.util.java.JavaSources;
 import com.castle.util.os.OperatingSystem;
 import com.castle.util.os.System;
 import sdl2.SDL;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.regex.Pattern;
+import java.nio.file.StandardCopyOption;
 
 public class Sdl2Hid {
 
@@ -73,22 +71,20 @@ public class Sdl2Hid {
     }
 
     private static void extractSdl(Path destination) throws IOException {
-        Zip zip = JavaSources.containingJar(SDL.class);
-        try (OpenZip openZip = zip.open()) {
-            Pattern libPattern;
-            switch (System.operatingSystem()) {
-                case Windows:
-                    libPattern = Pattern.compile(".*" + SDLJNI_LIBNAME + ".dll$");
-                    break;
-                case Linux:
-                    libPattern = Pattern.compile(".*" + SDLJNI_LIBNAME + ".so$");
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
+        String libPath;
+        switch (System.operatingSystem()) {
+            case Windows:
+                libPath = "/" + SDLJNI_LIBNAME + ".dll";
+                break;
+            case Linux:
+                libPath = "/" + SDLJNI_LIBNAME + ".so";
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
 
-            Path path = openZip.find(libPattern);
-            openZip.extractInto(path, destination);
+        try (InputStream inputStream = SDL.class.getResourceAsStream(libPath)) {
+            Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 }

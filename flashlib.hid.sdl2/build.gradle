@@ -4,6 +4,6 @@ dependencies {
     api project(':flashlib.core.hid')
     api castle()
 
-    // expose it so we could have access to JNI elements
-    api 'com.github.tomtzook:jsdl2:1.0.0'
+    // users will have to specify natives manually
+    implementation 'com.github.tomtzook:jsdl2:0.1.0'
 }
