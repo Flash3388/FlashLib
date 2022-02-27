@@ -4,7 +4,6 @@ import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.hid.Button;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 public abstract class GenericButtonBase implements Button, Trigger {

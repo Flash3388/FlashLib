@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
+import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -87,7 +87,7 @@ public class SynchronousScheduler implements Scheduler {
 
     @Override
     public Trigger newTrigger(BooleanSupplier condition) {
-        SchedulerTrigger trigger = new SchedulerTrigger();
+        TriggerImpl trigger = new TriggerImpl();
 
         Action action = new TriggerActivationAction(this, condition, trigger)
                 .requires(trigger);

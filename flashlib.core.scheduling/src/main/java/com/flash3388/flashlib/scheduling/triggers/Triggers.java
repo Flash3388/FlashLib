@@ -24,4 +24,14 @@ public final class Triggers {
     public static Trigger onCondition(BooleanSupplier condition) {
         return GlobalDependencies.getScheduler().newTrigger(condition);
     }
+
+    /**
+     * Creates a new {@link ManualTrigger}, used to activate manually rather
+     * then automatically.
+     *
+     * @return a trigger.
+     */
+    public static ManualTrigger manual() {
+        return new TriggerImpl();
+    }
 }
