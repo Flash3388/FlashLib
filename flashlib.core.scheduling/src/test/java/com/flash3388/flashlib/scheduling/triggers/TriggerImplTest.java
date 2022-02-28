@@ -9,13 +9,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SchedulerTriggerTest {
+public class TriggerImplTest {
 
     @Test
     public void setState_stateChanges_updatesListenersWithChange() throws Exception {
         TriggerStateListener listener = mock(TriggerStateListener.class);
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.addStateListener(listener);
 
         trigger.setState(TriggerState.ACTIVE);
@@ -29,7 +29,7 @@ public class SchedulerTriggerTest {
     public void whenActive_triggerActivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.whenActive(mockAction);
 
         trigger.activate();
@@ -41,7 +41,7 @@ public class SchedulerTriggerTest {
     public void whenInactive_triggerDeactivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.ACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
         trigger.whenInactive(mockAction);
 
         trigger.deactivate();
@@ -55,7 +55,7 @@ public class SchedulerTriggerTest {
                 .mockIsRunning(true)
                 .build();
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.cancelWhenActive(mockAction);
 
         trigger.activate();
@@ -69,7 +69,7 @@ public class SchedulerTriggerTest {
                 .mockIsRunning(true)
                 .build();
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.ACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
         trigger.cancelWhenInactive(mockAction);
 
         trigger.deactivate();
@@ -81,7 +81,7 @@ public class SchedulerTriggerTest {
     public void whileActive_triggerActivates_startAction() throws Exception {
         Action mockAction = mock(Action.class);
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.INACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.whileActive(mockAction);
 
         trigger.activate();
@@ -95,7 +95,7 @@ public class SchedulerTriggerTest {
                 .mockIsRunning(true)
                 .build();
 
-        SchedulerTrigger trigger = new SchedulerTrigger(TriggerState.ACTIVE);
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
         trigger.whileActive(mockAction);
 
         trigger.deactivate();
