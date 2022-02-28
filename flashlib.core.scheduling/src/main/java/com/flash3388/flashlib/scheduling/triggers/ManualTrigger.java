@@ -1,5 +1,10 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
+/**
+ * A specialized trigger intended for manual activation.
+ *
+ * @since FlashLib 3.1.0
+ */
 public interface ManualTrigger extends Trigger {
 
     /**
