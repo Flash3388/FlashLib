@@ -4,6 +4,8 @@ import com.castle.nio.temp.TempPath;
 import com.castle.nio.temp.TempPathGenerator;
 import com.castle.util.os.OperatingSystem;
 import com.castle.util.os.System;
+import com.flash3388.flashlib.hid.HidChannel;
+import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import sdl2.SDL;
 
 import java.io.IOException;
@@ -30,6 +32,10 @@ public class Sdl2Hid {
 
     public static Sdl2HidData getHidData() {
         return sHidData;
+    }
+
+    public static HidChannel newChannel(int channel) {
+        return new GenericHidChannel(channel);
     }
 
     private static void loadNatives() {

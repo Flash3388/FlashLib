@@ -87,7 +87,7 @@ public class Sdl2HidInterface implements RawHidInterface {
     @Override
     public int getPovValue(int channel, int pov) {
         if (!hasChannel(channel)) {
-            return 0;
+            return -1;
         }
 
         int rawHat = mHidData.getHat(channel, pov);
