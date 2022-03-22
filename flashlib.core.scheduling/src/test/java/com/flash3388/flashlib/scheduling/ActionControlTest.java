@@ -81,8 +81,7 @@ public class ActionControlTest {
 
         mActionControl.cancelAction(action);
 
-        verify(context, times(1)).cancelAction();
-        verify(action, times(1)).end(eq(true));
+        verify(context, times(1)).runFinished();
 
         Assertions.assertFalse(mActionControl.isActionRunning(action));
     }
