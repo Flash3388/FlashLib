@@ -9,11 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class SchedulerTriggerActivationActionTest {
+public class TriggerActivationActionTest {
 
     @Test
     public void execute_conditionNotMetLastAndIsMetNow_triggerActivates() throws Exception {
-        SchedulerTrigger trigger = mock(SchedulerTrigger.class);
+        TriggerImpl trigger = mock(TriggerImpl.class);
         BooleanProperty condition = new SimpleBooleanProperty(false);
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
@@ -28,7 +28,7 @@ public class SchedulerTriggerActivationActionTest {
 
     @Test
     public void execute_conditionMetLastAndNotMetNow_triggerDeactivates() throws Exception {
-        SchedulerTrigger trigger = mock(SchedulerTrigger.class);
+        TriggerImpl trigger = mock(TriggerImpl.class);
         BooleanProperty condition = new SimpleBooleanProperty(true);
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),

@@ -10,39 +10,38 @@ import com.flash3388.flashlib.scheduling.triggers.handlers.ToggleOnState;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class SchedulerTrigger implements Trigger, Requirement {
+public class TriggerImpl implements ManualTrigger, Requirement {
 
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
 
-    public SchedulerTrigger(Collection<TriggerStateListener> triggerStateListeners,
+    public TriggerImpl(Collection<TriggerStateListener> triggerStateListeners,
                             TriggerState currentState) {
         mTriggerStateListeners = triggerStateListeners;
         mCurrentState = currentState;
     }
 
-    public SchedulerTrigger(TriggerState currentState) {
+    public TriggerImpl(TriggerState currentState) {
         this(new ArrayList<>(), currentState);
     }
 
-    public SchedulerTrigger() {
+    public TriggerImpl() {
         this(TriggerState.INACTIVE);
     }
 
+    @Override
     public void activate() {
         setState(TriggerState.ACTIVE);
     }
 
+    @Override
     public void deactivate() {
         setState(TriggerState.INACTIVE);
     }
 
+    @Override
     public boolean isActive() {
         return mCurrentState == TriggerState.ACTIVE;
-    }
-
-    public void addStateListener(TriggerStateListener handler) {
-        mTriggerStateListeners.add(handler);
     }
 
     @Override
@@ -83,6 +82,10 @@ public class SchedulerTrigger implements Trigger, Requirement {
     @Override
     public void whileInactive(Action action) {
         addStateListener(new RunOnState(TriggerState.INACTIVE, action));
+    }
+
+    void addStateListener(TriggerStateListener handler) {
+        mTriggerStateListeners.add(handler);
     }
 
     void setState(TriggerState newState) {
