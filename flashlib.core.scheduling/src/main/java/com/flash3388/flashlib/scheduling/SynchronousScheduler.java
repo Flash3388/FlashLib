@@ -14,6 +14,21 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+/**
+ * A single-thread implementation of the {@link Scheduler}. Executes all actions in the thread which performs
+ * calls to the scheduler. Should not be used from multiple threads as this will lead to undefined behaviour.
+ * <p>
+ *     Calls to {@link #run(SchedulerMode)} will actually run the actions.
+ * </p>
+ * <p>
+ *     Calls to {@link #start(Action)} will not start the actions immediately, but rather on the next invocation
+ *     of {@link #run(SchedulerMode)}
+ * </p>
+ * <p>
+ *     Calls to {@link #cancel(Action)}, {@link #cancelActionsIf(Predicate)} and {@link #cancelAllActions()} will
+ *     stop the action on invocation.
+ * </p>
+ */
 public class SynchronousScheduler implements Scheduler {
 
     private final RequirementsControl mRequirementsControl;

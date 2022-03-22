@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,7 +74,7 @@ public class ActionControlTest {
     }
 
     @Test
-    public void cancelAction_actionRunning_cancels() throws Exception {
+    public void cancelAction_actionRunning_cancelsAndNotRunning() throws Exception {
         Action action = mock(Action.class);
         ActionContext context = mock(ActionContext.class);
         mRunningActions.put(action, context);
@@ -81,6 +82,9 @@ public class ActionControlTest {
         mActionControl.cancelAction(action);
 
         verify(context, times(1)).cancelAction();
+        verify(action, times(1)).end(eq(true));
+
+        Assertions.assertFalse(mActionControl.isActionRunning(action));
     }
 
     @Test

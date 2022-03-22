@@ -51,9 +51,10 @@ class ActionControl {
     }
 
     public void cancelAction(Action action) {
-        ActionContext context = mRunningActions.get(action);
+        ActionContext context = mRunningActions.remove(action);
         if (context != null) {
-            context.cancelAction();
+            context.markCanceled();
+            onInternalRemove(action, context);
         } else if (!mNextRunActions.remove(action)) {
             throw new IllegalStateException("action is not running");
         }
