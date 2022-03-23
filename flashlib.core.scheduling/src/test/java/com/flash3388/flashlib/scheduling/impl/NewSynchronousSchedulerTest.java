@@ -1,10 +1,13 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.ClockMock;
+import com.flash3388.flashlib.time.Time;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +20,11 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class NewSynchronousSchedulerTest {
 
@@ -35,10 +42,11 @@ class NewSynchronousSchedulerTest {
         mRequirementsUsage = new HashMap<>();
         mDefaultActions = new HashMap<>();
 
-        mScheduler = new NewSynchronousScheduler(mock(Clock.class), mock(Logger.class),
+        mScheduler = new NewSynchronousScheduler(
+                ClockMock.mockInvalidTimeClock(),
+                mock(Logger.class),
                 mPendingActions, mRunningActions, mRequirementsUsage, mDefaultActions);
     }
-
 
     @Test
     public void start_actionNotRunningNoConflicts_putsActionInRunningAndUpdatesRequirements() throws Exception {
@@ -54,20 +62,200 @@ class NewSynchronousSchedulerTest {
     }
 
     @Test
-    public void start_actionNotRunningHasConflicts_putsActionInPending() throws Exception {
+    public void start_actionNotRunningHasNonPreferredConflicts_cancelsAndEndsConflictingStartsNew() throws Exception {
         Requirement requirement = mock(Requirement.class);
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mRequirementsUsage.put(requirement, action);
-        mRunningActions.put(action, mock(RunningActionContext.class));
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.getAction()).thenReturn(action);
+        mRunningActions.put(action, context);
 
         Action newAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(newAction);
 
-        assertThat(mPendingActions, IsMapContaining.hasKey(newAction));
-        assertThat(mRunningActions, not(IsMapContaining.hasKey(newAction)));
+        verify(context, times(1)).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRunningActions, IsMapContaining.hasKey(newAction));
+        assertThat(mRequirementsUsage, IsMapContaining.hasEntry(requirement, newAction));
+    }
+
+    @Test
+    public void start_actionNotRunningHasConflicts_marksConflictingForCancellation() throws Exception {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        mRequirementsUsage.put(requirement, action);
+        mRunningActions.put(action, context);
+
+        Action newAction = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        mScheduler.start(newAction);
+
+        verify(context, times(1)).markForCancellation();
+    }
+
+    @Test
+    public void start_actionIsRunning_throwsIllegalArgumentException() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        mRunningActions.put(action, mock(RunningActionContext.class));
+
+        assertThrows(IllegalArgumentException.class, ()-> {
+            mScheduler.start(action);
+        });
+    }
+
+    @Test
+    public void start_actionIsPending_throwsIllegalArgumentException() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        mPendingActions.put(action, mock(RunningActionContext.class));
+
+        assertThrows(IllegalArgumentException.class, ()-> {
+            mScheduler.start(action);
+        });
+    }
+
+    @Test
+    public void cancel_actionIsRunning_cancelsAndEndsAction() throws Exception {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        mRunningActions.put(action, context);
+
+        mScheduler.cancel(action);
+
+        verify(context, times(1)).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
+    }
+
+    @Test
+    public void cancel_actionIsPending_removesAction() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        mPendingActions.put(action, context);
+
+        mScheduler.cancel(action);
+
+        assertThat(mPendingActions, not(IsMapContaining.hasKey(action)));
+    }
+
+    @Test
+    public void cancel_actionNotRunning_throwsIllegalArgumentException() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+
+        assertThrows(IllegalArgumentException.class, ()-> {
+            mScheduler.cancel(action);
+        });
+    }
+
+    @Test
+    public void isRunning_actionNotRunning_returnsFalse() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+
+        assertFalse(mScheduler.isRunning(action));
+    }
+
+    @Test
+    public void isRunning_actionIsRunning_returnsTrue() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        mRunningActions.put(action, mock(RunningActionContext.class));
+
+        assertTrue(mScheduler.isRunning(action));
+    }
+
+    @Test
+    public void isRunning_actionIsPending_returnsTrue() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        mPendingActions.put(action, mock(RunningActionContext.class));
+
+        assertTrue(mScheduler.isRunning(action));
+    }
+
+    @Test
+    public void cancelActionsIf_predicateMatchesOnRunningAction_cancelsAndEndsAction() throws Exception {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.getAction()).thenReturn(action);
+        mRunningActions.put(action, context);
+
+        mScheduler.cancelActionsIf((a)-> a.equals(action));
+
+        verify(context, times(1)).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
+    }
+
+    @Test
+    public void cancelActionsIf_predicateMatchesOnPendingAction_removesAction() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.getAction()).thenReturn(action);
+        mPendingActions.put(action, context);
+
+        mScheduler.cancelActionsIf((a)-> a.equals(action));
+
+        assertThat(mPendingActions, not(IsMapContaining.hasKey(action)));
+    }
+
+    @Test
+    public void cancelAllActions_hasRunningAction_cancelsAndEndsAction() throws Exception {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.getAction()).thenReturn(action);
+        mRunningActions.put(action, context);
+
+        mScheduler.cancelAllActions();
+
+        verify(context, times(1)).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
+    }
+
+    @Test
+    public void cancelAllActions_hasPendingAction_removesAction() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.getAction()).thenReturn(action);
+        mPendingActions.put(action, context);
+
+        mScheduler.cancelAllActions();
+
+        assertThat(mPendingActions, not(IsMapContaining.hasKey(action)));
+    }
+
+    @Test
+    public void run_hasRunningActionNotFinishing_iteratesOnContextAndKeepsAction() {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        mRunningActions.put(action, context);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
     }
 }

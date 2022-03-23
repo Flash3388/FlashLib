@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
@@ -14,9 +15,11 @@ import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
@@ -71,12 +74,7 @@ public class NewSynchronousScheduler implements Scheduler {
 
         context = mRunningActions.remove(action);
         if (context != null) {
-            context.markForCancellation();
-            context.iterate(mClock.currentTime());
-            removeFromRequirements(context);
-
-            mLogger.debug("Action {} finished", context);
-
+            cancelAndEnd(context);
             return;
         }
 
@@ -110,10 +108,7 @@ public class NewSynchronousScheduler implements Scheduler {
             RunningActionContext context = iterator.next();
 
             if (predicate.test(context.getAction())) {
-                context.markForCancellation();
-                context.iterate(mClock.currentTime());
-                removeFromRequirements(context);
-
+                cancelAndEnd(context);
                 iterator.remove();
             }
         }
@@ -125,11 +120,7 @@ public class NewSynchronousScheduler implements Scheduler {
 
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
             RunningActionContext context = iterator.next();
-
-            context.markForCancellation();
-            context.iterate(mClock.currentTime());
-            removeFromRequirements(context);
-
+            cancelAndEnd(context);
             iterator.remove();
         }
     }
@@ -189,8 +180,9 @@ public class NewSynchronousScheduler implements Scheduler {
         return trigger;
     }
 
-    private boolean cancelConflictingOnRequirements(RunningActionContext context) {
-        boolean hasConflicting = false;
+    private Set<RunningActionContext> getConflictingOnRequirements(RunningActionContext context) {
+        Set<RunningActionContext> conflicts = new HashSet<>();
+        boolean hasPreferred = false;
         for (Requirement requirement : context.getRequirements()) {
             Action current = mRequirementsUsage.get(requirement);
             if (current != null) {
@@ -201,18 +193,19 @@ public class NewSynchronousScheduler implements Scheduler {
 
                     mLogger.warn("Action {} has conflict with (PREFERRED) {} on {}. Not canceling old, must wait for it to finish.",
                             context, current, requirement);
-                } else {
-                    currentContext.markForCancellation();
 
-                    mLogger.warn("Action {} has conflict with {} on {}. Canceling old.",
-                            context, current, requirement);
+                    hasPreferred = true;
                 }
 
-                hasConflicting = true;
+                conflicts.add(currentContext);
             }
         }
 
-        return hasConflicting;
+        if (hasPreferred) {
+            throw new ActionHasPreferredException();
+        }
+
+        return conflicts;
     }
 
     private void setOnRequirements(RunningActionContext context) {
@@ -228,7 +221,16 @@ public class NewSynchronousScheduler implements Scheduler {
     }
 
     private boolean tryStartingAction(RunningActionContext context) {
-        if (!cancelConflictingOnRequirements(context)) {
+        try {
+            Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
+            conflicts.forEach((conflict)-> {
+                cancelAndEnd(conflict);
+                mRunningActions.remove(conflict.getAction());
+
+                mLogger.warn("Action {} has conflict with {}. Canceling old.",
+                        context, conflict);
+            });
+
             // no conflicts, let's start
 
             context.markStarted(mClock.currentTime());
@@ -238,9 +240,9 @@ public class NewSynchronousScheduler implements Scheduler {
             mLogger.debug("Action {} started running", context);
 
             return true;
+        } catch (ActionHasPreferredException e) {
+            return false;
         }
-
-        return false;
     }
 
     private boolean canStartDefaultAction(Action action) {
@@ -257,5 +259,13 @@ public class NewSynchronousScheduler implements Scheduler {
         }
 
         return true;
+    }
+
+    private void cancelAndEnd(RunningActionContext context) {
+        context.markForCancellation();
+        context.iterate(mClock.currentTime());
+        removeFromRequirements(context);
+
+        mLogger.debug("Action {} finished", context);
     }
 }
