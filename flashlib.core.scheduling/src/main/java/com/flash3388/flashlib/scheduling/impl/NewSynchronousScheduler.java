@@ -30,14 +30,21 @@ public class NewSynchronousScheduler implements Scheduler {
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
-    public NewSynchronousScheduler(Clock clock, Logger logger) {
+    public NewSynchronousScheduler(Clock clock, Logger logger,
+                                   Map<Action, RunningActionContext> pendingActions,
+                                   Map<Action, RunningActionContext> runningActions,
+                                   Map<Requirement, Action> requirementsUsage,
+                                   Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
+        mPendingActions = pendingActions;
+        mRunningActions = runningActions;
+        mRequirementsUsage = requirementsUsage;
+        mDefaultActions = defaultActions;
+    }
 
-        mPendingActions = new HashMap<>();
-        mRunningActions = new HashMap<>();
-        mRequirementsUsage = new HashMap<>();
-        mDefaultActions = new HashMap<>();
+    public NewSynchronousScheduler(Clock clock, Logger logger) {
+        this(clock, logger, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
     @Override
