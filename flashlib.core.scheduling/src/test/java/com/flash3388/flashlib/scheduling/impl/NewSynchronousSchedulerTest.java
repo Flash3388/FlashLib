@@ -5,7 +5,6 @@ import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
-import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.time.Time;
 import org.hamcrest.collection.IsMapContaining;
@@ -19,9 +18,12 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -250,6 +252,7 @@ class NewSynchronousSchedulerTest {
     public void run_hasRunningActionNotFinishing_iteratesOnContextAndKeepsAction() {
         Action action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate(any(Time.class))).thenReturn(false);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
@@ -257,5 +260,99 @@ class NewSynchronousSchedulerTest {
         verify(context, times(1)).iterate(any(Time.class));
 
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
+    }
+
+    @Test
+    public void run_hasRunningActionFinishing_iteratesOnContextAndRemovesAction() {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate(any(Time.class))).thenReturn(true);
+        mRunningActions.put(action, context);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
+    }
+
+    @Test
+    public void run_hasRunningActionDisabledModeWhenShouldNot_cancelsIteratesOnActionAndRemoves() {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .mockRunWhenDisabled(false)
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate(any(Time.class))).thenReturn(true);
+        mRunningActions.put(action, context);
+
+        mScheduler.run(SchedulerModeMock.mockDisabledMode());
+
+        verify(context, times(1)).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+        assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
+    }
+
+    @Test
+    public void run_hasRunningActionDisabledModeWhenShould_iteratesOnActionAndKeeps() {
+        Requirement requirement = mock(Requirement.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(requirement))
+                .mockRunWhenDisabled(true)
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate(any(Time.class))).thenReturn(false);
+        when(context.shouldRunInDisabled()).thenReturn(true);
+        mRunningActions.put(action, context);
+
+        mScheduler.run(SchedulerModeMock.mockDisabledMode());
+
+        verify(context, never()).markForCancellation();
+        verify(context, times(1)).iterate(any(Time.class));
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+    }
+
+    @Test
+    public void run_hasDefaultActionAndCanRun_startsAction() {
+        Subsystem subsystem = mock(Subsystem.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(subsystem))
+                .build();
+        mDefaultActions.put(subsystem, action);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+        assertThat(mRequirementsUsage, IsMapContaining.hasEntry(subsystem, action));
+    }
+
+    @Test
+    public void run_hasDefaultActionAndCannotRun_doesNotStartAction() {
+        Subsystem subsystem = mock(Subsystem.class);
+        Action action = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(subsystem))
+                .build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        mRunningActions.put(action, context);
+        mRequirementsUsage.put(subsystem, action);
+
+        Action defaultAction = ActionsMock.actionMocker()
+                .mockWithRequirements(Collections.singleton(subsystem))
+                .build();
+        mDefaultActions.put(subsystem, defaultAction);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(defaultAction)));
+        assertThat(mRequirementsUsage, IsMapContaining.hasEntry(subsystem, action));
     }
 }

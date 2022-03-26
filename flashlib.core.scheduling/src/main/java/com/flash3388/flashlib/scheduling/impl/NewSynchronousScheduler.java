@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -33,11 +34,11 @@ public class NewSynchronousScheduler implements Scheduler {
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
-    public NewSynchronousScheduler(Clock clock, Logger logger,
-                                   Map<Action, RunningActionContext> pendingActions,
-                                   Map<Action, RunningActionContext> runningActions,
-                                   Map<Requirement, Action> requirementsUsage,
-                                   Map<Subsystem, Action> defaultActions) {
+    NewSynchronousScheduler(Clock clock, Logger logger,
+                           Map<Action, RunningActionContext> pendingActions,
+                           Map<Action, RunningActionContext> runningActions,
+                           Map<Requirement, Action> requirementsUsage,
+                           Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
         mPendingActions = pendingActions;
@@ -47,7 +48,9 @@ public class NewSynchronousScheduler implements Scheduler {
     }
 
     public NewSynchronousScheduler(Clock clock, Logger logger) {
-        this(clock, logger, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+        this(clock, logger,
+                new LinkedHashMap<>(5), new LinkedHashMap<>(10),
+                new HashMap<>(10), new HashMap<>(5));
     }
 
     @Override
@@ -89,7 +92,7 @@ public class NewSynchronousScheduler implements Scheduler {
     @Override
     public Time getActionRunTime(Action action) {
         if (mPendingActions.containsKey(action)) {
-            return Time.INVALID;
+            return Time.seconds(0);
         }
 
         RunningActionContext context = mRunningActions.get(action);
@@ -137,14 +140,6 @@ public class NewSynchronousScheduler implements Scheduler {
 
     @Override
     public void run(SchedulerMode mode) {
-        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
-
-            if (tryStartingAction(context)) {
-                iterator.remove();
-            }
-        }
-
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
             RunningActionContext context = iterator.next();
 
@@ -162,9 +157,20 @@ public class NewSynchronousScheduler implements Scheduler {
             }
         }
 
-        for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
-            if (canStartDefaultAction(entry.getValue())) {
-                start(entry.getValue());
+        //noinspection Java8CollectionRemoveIf
+        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            RunningActionContext context = iterator.next();
+
+            if (tryStartingAction(context)) {
+                iterator.remove();
+            }
+        }
+
+        if (!mode.isDisabled()) {
+            for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
+                if (canStartDefaultAction(entry.getValue())) {
+                    start(entry.getValue());
+                }
             }
         }
     }
@@ -182,7 +188,6 @@ public class NewSynchronousScheduler implements Scheduler {
 
     private Set<RunningActionContext> getConflictingOnRequirements(RunningActionContext context) {
         Set<RunningActionContext> conflicts = new HashSet<>();
-        boolean hasPreferred = false;
         for (Requirement requirement : context.getRequirements()) {
             Action current = mRequirementsUsage.get(requirement);
             if (current != null) {
@@ -194,15 +199,11 @@ public class NewSynchronousScheduler implements Scheduler {
                     mLogger.warn("Action {} has conflict with (PREFERRED) {} on {}. Not canceling old, must wait for it to finish.",
                             context, current, requirement);
 
-                    hasPreferred = true;
+                    throw new ActionHasPreferredException();
                 }
 
                 conflicts.add(currentContext);
             }
-        }
-
-        if (hasPreferred) {
-            throw new ActionHasPreferredException();
         }
 
         return conflicts;

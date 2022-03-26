@@ -137,4 +137,9 @@ public class RunningActionContext {
 
         return now.largerThanOrEquals(mEndTime);
     }
+
+    @Override
+    public String toString() {
+        return mAction.toString();
+    }
 }
