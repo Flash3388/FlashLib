@@ -24,6 +24,7 @@ public final class RunningRobot {
 
         GlobalDependencies.setSchedulerInstance(instance.getScheduler());
         GlobalDependencies.setClockInstance(instance.getClock());
+        GlobalDependencies.setLoggerInstance(instance.getLogger());
 
         if (previousInstance != null) {
             previousInstance.getLogger().warn("RunningRobot instance replaced");
