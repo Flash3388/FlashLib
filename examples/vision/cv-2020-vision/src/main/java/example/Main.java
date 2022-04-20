@@ -14,8 +14,8 @@ import com.flash3388.flashlib.vision.cv.processing.Scorable;
 import com.flash3388.flashlib.vision.processing.BestProcessor;
 import com.flash3388.flashlib.vision.processing.StreamMappingProcessor;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
-import com.flash3388.flashlib.vision.processing.analysis.AnalysisAlgorithms;
+import com.flash3388.flashlib.vision.analysis.Analysis;
+import com.flash3388.flashlib.vision.analysis.AnalysisAlgorithms;
 import com.flash3388.flashlib.vision.processing.color.ColorRange;
 import com.flash3388.flashlib.vision.processing.color.HsvColorSettings;
 import com.jmath.vectors.Vector2;
@@ -131,7 +131,7 @@ public class Main {
                             double angle = AnalysisAlgorithms.calculateHorizontalOffsetDegrees2(scorable.getCenter().x(),
                                     image.getWidth(), CAM_FOV_RADIANS);
 
-                            return Optional.of(new Analysis.Builder()
+                            return Optional.of(Analysis.builder()
                                     .put("distance", distance)
                                     .put("angle", angle)
                                     .build());

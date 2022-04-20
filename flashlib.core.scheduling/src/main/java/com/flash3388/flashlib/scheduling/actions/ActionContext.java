@@ -92,4 +92,9 @@ public class ActionContext {
 
         return getRunTime().after(mTimeout);
     }
+
+    @Override
+    public String toString() {
+        return mAction.toString();
+    }
 }

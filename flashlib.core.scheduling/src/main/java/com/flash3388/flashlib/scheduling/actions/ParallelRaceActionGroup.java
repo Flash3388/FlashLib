@@ -2,36 +2,49 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.time.Clock;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 public class ParallelRaceActionGroup extends ActionGroupBase {
 
     private final Clock mClock;
+    private final Logger mLogger;
 
     private final Collection<ActionContext> mCurrentActions;
-    private final ActionContextRunner mContextRunner;
+    private final Predicate<ActionContext> mContextRunner;
 
     private ActionContext mFinishedCommand;
 
-    ParallelRaceActionGroup(Clock clock, Collection<Action> actions, Collection<ActionContext> currentActions) {
+    ParallelRaceActionGroup(Clock clock, Logger logger, Collection<Action> actions, Collection<ActionContext> currentActions) {
         super(actions, false);
 
         mClock = clock;
+        mLogger = logger;
         mCurrentActions = currentActions;
 
-        mContextRunner = new ActionContextRunner();
+        mContextRunner = (actionContext)-> {
+            if (!actionContext.run()) {
+                actionContext.runFinished();
+                mLogger.debug("ActionGroup {} finished action {}", ParallelRaceActionGroup.this, actionContext);
+
+                return true;
+            }
+
+            return false;
+        };
         mRunWhenDisabled = false;
         mFinishedCommand = null;
     }
 
-    public ParallelRaceActionGroup(Clock clock) {
-        this(clock, new ArrayList<>(3), new ArrayList<>(2));
+    public ParallelRaceActionGroup(Clock clock, Logger logger) {
+        this(clock, logger, new ArrayList<>(3), new ArrayList<>(2));
     }
 
     public ParallelRaceActionGroup() {
-        this(GlobalDependencies.getClock());
+        this(GlobalDependencies.getClock(), GlobalDependencies.getLogger());
     }
 
     @Override
@@ -62,6 +75,7 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
         for (Action action : mActions) {
             ActionContext actionContext = new ActionContext(action, mClock);
             actionContext.prepareForRun();
+            mLogger.debug("ActionGroup {} started action {}", this, actionContext);
 
             mCurrentActions.add(actionContext);
         }
@@ -92,12 +106,14 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     public void end(boolean wasInterrupted) {
         for (ActionContext context : mCurrentActions) {
             if (wasInterrupted || !context.equals(mFinishedCommand)) {
+                mLogger.debug("ActionGroup {} interrupted, canceling action {}", this, context);
                 context.runCanceled();
             }
         }
 
         if (!wasInterrupted && mFinishedCommand != null) {
             mFinishedCommand.runFinished();
+            mLogger.debug("ActionGroup {} finished action {}", this, mFinishedCommand);
         }
     }
 }

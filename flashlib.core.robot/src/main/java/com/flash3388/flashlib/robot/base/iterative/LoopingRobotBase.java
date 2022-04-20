@@ -78,6 +78,7 @@ public class LoopingRobotBase implements RobotBase {
         mCurrentMode = mRobotControl.getMode();
 
         if (!mCurrentMode.equals(mLastMode)) {
+            exitMode(mCurrentMode);
             mLastMode = mCurrentMode;
             mWasCurrentModeInitialized = false;
         }
@@ -114,5 +115,15 @@ public class LoopingRobotBase implements RobotBase {
         mRobotControl.getLogger().trace("Robot periodic");
 
         mRobot.robotPeriodic();
+    }
+
+    private void exitMode(RobotMode mode) {
+        mRobotControl.getLogger().trace("Exiting mode {}", mode);
+
+        if (mode.isDisabled()) {
+            mRobot.disabledExit();
+        } else {
+            mRobot.modeExit(mode);
+        }
     }
 }
