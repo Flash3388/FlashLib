@@ -3,7 +3,7 @@ ext {
         return !version.contains("SNAPSHOT")
     }
     shouldSign = {
-        return project.hasProperty('SIGN_PUBLISH')
+        return project.hasProperty('SIGN_PUBLISH') && !version.contains("SNAPSHOT")
     }
     getNexusUsername = {
         return rootProject.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('NEXUS_USERNAME')
