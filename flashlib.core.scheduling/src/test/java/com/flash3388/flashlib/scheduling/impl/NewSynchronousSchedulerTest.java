@@ -270,6 +270,7 @@ class NewSynchronousSchedulerTest {
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(true);
+        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
@@ -289,6 +290,7 @@ class NewSynchronousSchedulerTest {
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(true);
+        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
@@ -310,6 +312,7 @@ class NewSynchronousSchedulerTest {
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(false);
         when(context.shouldRunInDisabled()).thenReturn(true);
+        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());

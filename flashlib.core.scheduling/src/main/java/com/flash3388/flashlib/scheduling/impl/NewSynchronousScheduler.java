@@ -13,6 +13,8 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +36,9 @@ public class NewSynchronousScheduler implements Scheduler {
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
+    private final Collection<RunningActionContext> mTempCopy;
+    private final Collection<Action> mTempToRemove;
+
     NewSynchronousScheduler(Clock clock, Logger logger,
                            Map<Action, RunningActionContext> pendingActions,
                            Map<Action, RunningActionContext> runningActions,
@@ -45,6 +50,9 @@ public class NewSynchronousScheduler implements Scheduler {
         mRunningActions = runningActions;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
+
+        mTempCopy = new ArrayList<>();
+        mTempToRemove = new ArrayList<>();
     }
 
     public NewSynchronousScheduler(Clock clock, Logger logger) {
@@ -140,9 +148,11 @@ public class NewSynchronousScheduler implements Scheduler {
 
     @Override
     public void run(SchedulerMode mode) {
-        for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
+        mTempCopy.clear();
+        mTempToRemove.clear();
+        mTempCopy.addAll(mRunningActions.values());
 
+        for (RunningActionContext context : mTempCopy) {
             if (mode.isDisabled() && !context.shouldRunInDisabled()) {
                 context.markForCancellation();
                 mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", context);
@@ -151,20 +161,25 @@ public class NewSynchronousScheduler implements Scheduler {
             if (context.iterate(mClock.currentTime())) {
                 // finished execution
                 removeFromRequirements(context);
-                iterator.remove();
+                mTempToRemove.add(context.getAction());
 
                 mLogger.debug("Action {} finished", context);
             }
         }
 
-        //noinspection Java8CollectionRemoveIf
-        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
+        mTempToRemove.forEach(mRunningActions::remove);
 
+        mTempCopy.clear();
+        mTempToRemove.clear();
+        mTempCopy.addAll(mPendingActions.values());
+
+        for (RunningActionContext context : mTempCopy) {
             if (tryStartingAction(context)) {
-                iterator.remove();
+                mTempToRemove.add(context.getAction());
             }
         }
+
+        mTempToRemove.forEach(mPendingActions::remove);
 
         if (!mode.isDisabled()) {
             for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
