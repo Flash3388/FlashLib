@@ -4,12 +4,15 @@ import com.flash3388.flashlib.control.Direction;
 import com.flash3388.flashlib.control.Invertable;
 import com.flash3388.flashlib.control.Stoppable;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Interface for speed controllers.
  *
  * @since FlashLib 1.0.0
  */
-public interface SpeedController extends Stoppable, Invertable {
+public interface SpeedController extends Closeable, Stoppable, Invertable {
 
 	/**
 	 * Sets the speed of the motor controller by this object. The speed is a percentage known as 
@@ -79,5 +82,9 @@ public interface SpeedController extends Stoppable, Invertable {
 	default SpeedController inverted(boolean inverted) {
 	    setInverted(inverted);
 	    return this;
+    }
+
+    @Override
+    default void close() throws IOException {
     }
 }

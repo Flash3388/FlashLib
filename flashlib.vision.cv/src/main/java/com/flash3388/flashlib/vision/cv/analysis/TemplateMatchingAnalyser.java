@@ -1,12 +1,12 @@
-package com.flash3388.flashlib.vision.cv.processing.analysis;
+package com.flash3388.flashlib.vision.cv.analysis;
 
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.cv.template.ScaledTemplateMatchingResult;
 import com.flash3388.flashlib.vision.cv.template.SingleTemplateMatcher;
-import com.flash3388.flashlib.vision.processing.analysis.Analyser;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
+import com.flash3388.flashlib.vision.analysis.Analyser;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -49,11 +49,13 @@ public class TemplateMatchingAnalyser<T> implements Analyser<T, CvImage> {
 
         @Override
         public Analysis apply(ScaledTemplateMatchingResult scaledTemplateMatchingResult) {
-            return new Analysis.Builder()
-                    .put("center.x", scaledTemplateMatchingResult.getCenterPoint().x)
-                    .put("center.y", scaledTemplateMatchingResult.getCenterPoint().y)
-                    .put("score", scaledTemplateMatchingResult.getScore())
-                    .put("scaleFactor", scaledTemplateMatchingResult.getScaleFactor())
+            return Analysis.builder()
+                    .buildTarget()
+                        .put("center.x", scaledTemplateMatchingResult.getCenterPoint().x)
+                        .put("center.y", scaledTemplateMatchingResult.getCenterPoint().y)
+                        .put("score", scaledTemplateMatchingResult.getScore())
+                        .put("scaleFactor", scaledTemplateMatchingResult.getScaleFactor())
+                        .build()
                     .build();
         }
     }

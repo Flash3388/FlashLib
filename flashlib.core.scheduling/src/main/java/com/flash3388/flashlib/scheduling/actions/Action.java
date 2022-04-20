@@ -163,6 +163,11 @@ public interface Action {
         return this;
     }
 
+    default Action flags(ActionFlag... flags) {
+        getConfiguration().addFlags(flags);
+        return this;
+    }
+
     // convenience methods for grouping
     // they reference subclasses, but that's how you decorate, so...
 

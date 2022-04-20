@@ -1,75 +1,47 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.Requirement;
-import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.scheduling.triggers.handlers.RunOnState;
 import com.flash3388.flashlib.scheduling.triggers.handlers.StartOnState;
 import com.flash3388.flashlib.scheduling.triggers.handlers.ToggleOnState;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.BooleanSupplier;
 
-public class SchedulerTrigger implements Trigger, Requirement {
+public class TriggerImpl implements ManualTrigger, Requirement {
 
-    private final WeakReference<Scheduler> mScheduler;
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
-    private Action mUpdateAction;
 
-    public SchedulerTrigger(Scheduler scheduler, Collection<TriggerStateListener> triggerStateListeners,
+    public TriggerImpl(Collection<TriggerStateListener> triggerStateListeners,
                             TriggerState currentState) {
-        mScheduler = new WeakReference<>(scheduler);
         mTriggerStateListeners = triggerStateListeners;
         mCurrentState = currentState;
-        mUpdateAction = null;
     }
 
-    public SchedulerTrigger(TriggerState currentState) {
-        this(GlobalDependencies.getScheduler(), new ArrayList<>(), currentState);
+    public TriggerImpl(TriggerState currentState) {
+        this(new ArrayList<>(), currentState);
     }
 
-    public SchedulerTrigger() {
+    public TriggerImpl() {
         this(TriggerState.INACTIVE);
     }
 
+    @Override
     public void activate() {
         setState(TriggerState.ACTIVE);
     }
 
+    @Override
     public void deactivate() {
         setState(TriggerState.INACTIVE);
     }
 
+    @Override
     public boolean isActive() {
         return mCurrentState == TriggerState.ACTIVE;
-    }
-
-    public void scheduleAutoUpdate(BooleanSupplier activeCondition) {
-        stopScheduling();
-
-        Scheduler scheduler = mScheduler.get();
-        if (scheduler == null) {
-            throw new IllegalStateException("scheduler was garbage collected");
-        }
-
-        mUpdateAction = new TriggerActivationAction(scheduler, activeCondition, this);
-        mUpdateAction.start();
-    }
-
-    public void stopScheduling() {
-        if (mUpdateAction != null) {
-            mUpdateAction.cancel();
-            mUpdateAction = null;
-        }
-    }
-
-    public void addStateListener(TriggerStateListener handler) {
-        mTriggerStateListeners.add(handler);
     }
 
     @Override
@@ -110,6 +82,10 @@ public class SchedulerTrigger implements Trigger, Requirement {
     @Override
     public void whileInactive(Action action) {
         addStateListener(new RunOnState(TriggerState.INACTIVE, action));
+    }
+
+    void addStateListener(TriggerStateListener handler) {
+        mTriggerStateListeners.add(handler);
     }
 
     void setState(TriggerState newState) {

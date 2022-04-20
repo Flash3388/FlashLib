@@ -51,9 +51,10 @@ class ActionControl {
     }
 
     public void cancelAction(Action action) {
-        ActionContext context = mRunningActions.get(action);
+        ActionContext context = mRunningActions.remove(action);
         if (context != null) {
-            context.cancelAction();
+            context.markCanceled();
+            onInternalRemove(action, context);
         } else if (!mNextRunActions.remove(action)) {
             throw new IllegalStateException("action is not running");
         }
@@ -108,14 +109,20 @@ class ActionControl {
             return;
         }
 
-        Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
-        conflictingActions.forEach((conflictingAction)-> {
-            ActionContext context = mRunningActions.remove(conflictingAction);
-            if (context != null) {
-                context.markCanceled();
-                onInternalRemove(conflictingAction, context, false);
-            }
-        });
+        try {
+            Set<Action> conflictingActions = mRequirementsControl.updateRequirementsWithNewRunningAction(action);
+            conflictingActions.forEach((conflictingAction)-> {
+                ActionContext context = mRunningActions.remove(conflictingAction);
+                if (context != null) {
+                    context.markCanceled();
+                    onInternalRemove(conflictingAction, context, false);
+                }
+            });
+        } catch (ActionHasPreferredException e) {
+            // so not starting action
+            mLogger.warn("Not starting action {}", action);
+            return;
+        }
 
         ActionContext context = new ActionContext(action, mClock);
         context.prepareForRun();

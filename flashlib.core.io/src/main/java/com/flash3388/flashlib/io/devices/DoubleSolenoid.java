@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.io.devices;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Represents a double solenoid valve.
  * <p>
@@ -15,7 +18,7 @@ package com.flash3388.flashlib.io.devices;
  *
  * @since FlashLib 3.0.0
  */
-public interface DoubleSolenoid {
+public interface DoubleSolenoid extends Closeable {
 
     /**
      * Operation values for {@link DoubleSolenoid}.
@@ -50,4 +53,8 @@ public interface DoubleSolenoid {
      * @return {@link Value} indicating which solenoid has current applied to it.
      */
     Value get();
+
+    @Override
+    default void close() throws IOException {
+    }
 }

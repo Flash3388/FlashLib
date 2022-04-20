@@ -1,9 +1,11 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 /**
@@ -37,6 +39,9 @@ public interface Scheduler {
      *     Cancels an {@link Action} being ran by the scheduler. Generally,
      *     this should be called from {@link Action#cancel()} implementations
      *     and not directly.
+     * </p>
+     * <p>
+     *     It is not guaranteed that the action will stop immediately. This depends on the implementation.
      * </p>
      *
      * @param action action to cancel.
@@ -78,6 +83,10 @@ public interface Scheduler {
      *     given predicate as described by {@link Predicate#test(Object)} of
      *     that predicate.
      * </p>
+     * <p>
+     *     It is not guaranteed that the actions will stop running immediately.
+     *     This highly depends on the implementation.
+     * </p>
      *
      * @param predicate {@link Predicate} determining whether or not to cancel
      *                                   an action.
@@ -87,6 +96,10 @@ public interface Scheduler {
     /**
      * <p>
      *     Cancels all actions running on this scheduler.
+     * </p>
+     * <p>
+     *     It is not guaranteed that the actions will stop running immediately.
+     *     This highly depends on the implementation.
      * </p>
      */
     void cancelAllActions();
@@ -140,4 +153,13 @@ public interface Scheduler {
      * @param mode current mode for the scheduler.
      */
     void run(SchedulerMode mode);
+
+    /**
+     * Creates a new trigger for registering action activation to a condition.
+     *
+     * @param condition when <b>true</b> marks the trigger as <em>active</em>,
+     *                  when <b>false</b> marks the trigger as <em>inactive</em>.
+     * @return the trigger
+     */
+    Trigger newTrigger(BooleanSupplier condition);
 }

@@ -2,6 +2,7 @@ package com.flash3388.flashlib.hid.generic.weak;
 
 import com.flash3388.flashlib.hid.Axis;
 import com.flash3388.flashlib.hid.Button;
+import com.flash3388.flashlib.hid.DualshockController;
 import com.flash3388.flashlib.hid.Hid;
 import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.HidInterface;
@@ -68,5 +69,13 @@ public class WeakHidInterface implements HidInterface {
         int channelInt = genericHidChannel.intValue();
 
         return new WeakXboxController(mInterface, channelInt);
+    }
+
+    @Override
+    public DualshockController newDualshockController(HidChannel channel) {
+        GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
+        int channelInt = genericHidChannel.intValue();
+
+        return new WeakDualshockController(mInterface, channelInt);
     }
 }

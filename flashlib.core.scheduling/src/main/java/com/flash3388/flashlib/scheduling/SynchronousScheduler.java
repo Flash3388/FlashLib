@@ -1,6 +1,9 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
+import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
+import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -8,8 +11,24 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
+/**
+ * A single-thread implementation of the {@link Scheduler}. Executes all actions in the thread which performs
+ * calls to the scheduler. Should not be used from multiple threads as this will lead to undefined behaviour.
+ * <p>
+ *     Calls to {@link #run(SchedulerMode)} will actually run the actions.
+ * </p>
+ * <p>
+ *     Calls to {@link #start(Action)} will not start the actions immediately, but rather on the next invocation
+ *     of {@link #run(SchedulerMode)}
+ * </p>
+ * <p>
+ *     Calls to {@link #cancel(Action)}, {@link #cancelActionsIf(Predicate)} and {@link #cancelAllActions()} will
+ *     stop the action on invocation.
+ * </p>
+ */
 public class SynchronousScheduler implements Scheduler {
 
     private final RequirementsControl mRequirementsControl;
@@ -79,5 +98,16 @@ public class SynchronousScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         Objects.requireNonNull(mode, "mode is null");
         mSchedulerIteration.run(mode);
+    }
+
+    @Override
+    public Trigger newTrigger(BooleanSupplier condition) {
+        TriggerImpl trigger = new TriggerImpl();
+
+        Action action = new TriggerActivationAction(this, condition, trigger)
+                .requires(trigger);
+        start(action);
+
+        return trigger;
     }
 }

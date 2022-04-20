@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.vision;
 
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.vision.processing.analysis.Analysis;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 
 public class VisionResult {
 
