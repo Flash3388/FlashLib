@@ -68,6 +68,11 @@ public interface IterativeRobot {
     void disabledPeriodic();
 
     /**
+     * Called when exiting a mode with {@link RobotMode#isDisabled()} being <b>true</b>.
+     */
+    default void disabledExit() {}
+
+    /**
      * Called when entering a mode with {@link RobotMode#isDisabled()} being <b>false</b>.
      *
      * @param mode the current {@link RobotMode}.
@@ -80,6 +85,13 @@ public interface IterativeRobot {
      * @param mode the current {@link RobotMode}.
      */
     void modePeriodic(RobotMode mode);
+
+    /**
+     * Called when exiting a mode with {@link RobotMode#isDisabled()} being <b>false</b>.
+     *
+     * @param mode the current {@link RobotMode}.
+     */
+    default void modeExit(RobotMode mode) {}
 
     /**
      * Called periodically after the mode-specific operations.

@@ -17,11 +17,7 @@ public abstract class ActionBase implements Action {
         Objects.requireNonNull(configuration, "configuration null");
 
         mScheduler = new WeakReference<>(scheduler);
-        mConfiguration = configuration;
-
-        if (mConfiguration.getName() == null) {
-            mConfiguration.setName("");
-        }
+        setConfiguration(configuration);
     }
 
     protected ActionBase(Scheduler scheduler) {
@@ -71,6 +67,10 @@ public abstract class ActionBase implements Action {
         }
 
         mConfiguration = configuration;
+
+        if (mConfiguration.getName() == null || mConfiguration.getName().isEmpty()) {
+            mConfiguration.setName(String.valueOf(hashCode()));
+        }
     }
 
     @Override

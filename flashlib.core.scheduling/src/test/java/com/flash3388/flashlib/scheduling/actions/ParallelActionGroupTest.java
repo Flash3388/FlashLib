@@ -5,6 +5,7 @@ import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -70,7 +72,7 @@ public class ParallelActionGroupTest {
         ));
 
         ParallelActionGroup actionGroup = new ParallelActionGroup(
-                mClock, actions, runningActions);
+                mClock, mock(Logger.class), actions, runningActions);
 
         actionGroup.execute();
         actionGroup.end(true);

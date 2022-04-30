@@ -6,6 +6,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class SequentialActionGroupTest {
                 context
         ));
         SequentialActionGroup actionGroup = new SequentialActionGroup(
-                mock(Scheduler.class), mClock, actions, contexts);
+                mock(Scheduler.class), mClock, mock(Logger.class), actions, contexts);
 
         actionGroup.execute();
 
@@ -95,7 +96,7 @@ public class SequentialActionGroupTest {
         ));
 
         SequentialActionGroup actionGroup = new SequentialActionGroup(
-                mock(Scheduler.class), mClock, actions, contexts);
+                mock(Scheduler.class), mClock, mock(Logger.class), actions, contexts);
 
         actionGroup.execute();
         actionGroup.end(true);

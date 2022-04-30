@@ -40,6 +40,9 @@ public interface Scheduler {
      *     this should be called from {@link Action#cancel()} implementations
      *     and not directly.
      * </p>
+     * <p>
+     *     It is not guaranteed that the action will stop immediately. This depends on the implementation.
+     * </p>
      *
      * @param action action to cancel.
      *
@@ -80,6 +83,10 @@ public interface Scheduler {
      *     given predicate as described by {@link Predicate#test(Object)} of
      *     that predicate.
      * </p>
+     * <p>
+     *     It is not guaranteed that the actions will stop running immediately.
+     *     This highly depends on the implementation.
+     * </p>
      *
      * @param predicate {@link Predicate} determining whether or not to cancel
      *                                   an action.
@@ -89,6 +96,10 @@ public interface Scheduler {
     /**
      * <p>
      *     Cancels all actions running on this scheduler.
+     * </p>
+     * <p>
+     *     It is not guaranteed that the actions will stop running immediately.
+     *     This highly depends on the implementation.
      * </p>
      */
     void cancelAllActions();

@@ -51,9 +51,10 @@ class ActionControl {
     }
 
     public void cancelAction(Action action) {
-        ActionContext context = mRunningActions.get(action);
+        ActionContext context = mRunningActions.remove(action);
         if (context != null) {
-            context.cancelAction();
+            context.markCanceled();
+            onInternalRemove(action, context);
         } else if (!mNextRunActions.remove(action)) {
             throw new IllegalStateException("action is not running");
         }
@@ -87,7 +88,7 @@ class ActionControl {
         Collection<Action> toRemove = new ArrayList<>();
         for (Map.Entry<Action, ActionContext> entry : mRunningActions.entrySet()) {
             if (predicate.test(entry.getKey())) {
-                onInternalRemove(entry.getKey(), entry.getValue());
+                onInternalCancel(entry.getKey(), entry.getValue());
                 toRemove.add(entry.getKey());
             }
         }
@@ -98,7 +99,7 @@ class ActionControl {
     public void cancelAllActions() {
         mNextRunActions.clear();
 
-        mRunningActions.forEach(this::onInternalRemove);
+        mRunningActions.forEach(this::onInternalCancel);
         mRunningActions.clear();
     }
 
@@ -135,6 +136,11 @@ class ActionControl {
         if (context != null) {
             onInternalRemove(action, context);
         }
+    }
+
+    private void onInternalCancel(Action action, ActionContext context) {
+        context.markCanceled();
+        onInternalRemove(action, context, true);
     }
 
     private void onInternalRemove(Action action, ActionContext context) {

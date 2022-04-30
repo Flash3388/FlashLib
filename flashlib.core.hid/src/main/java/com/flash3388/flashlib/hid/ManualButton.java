@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.hid;
 
 import com.beans.BooleanProperty;
-import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
+import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 
 /**
  * A {@link Button} implementation which is modified directly from user code and has to be
@@ -9,7 +9,7 @@ import com.flash3388.flashlib.scheduling.triggers.SchedulerTrigger;
  *
  * @since FlashLib 3.0.0
  */
-public class ManualButton extends SchedulerTrigger implements Button, BooleanProperty {
+public class ManualButton extends TriggerImpl implements Button, BooleanProperty {
 
     private boolean mIsInverted;
 
