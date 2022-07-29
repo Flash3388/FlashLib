@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.statemachine.nfa;
 
 import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.Actions;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.statemachine.State;
@@ -30,7 +32,12 @@ public class TransitionImpl implements Transition {
         }
 
         Trigger trigger = scheduler.newTrigger(condition);
-        trigger.whenActive(Actions.instant(this::initiate).configure().setRunWhenDisabled(true).save());
+
+        Action action = Actions.instant(this::initiate)
+                .configure()
+                    .addFlags(ActionFlag.RUN_ON_DISABLED)
+                    .save();
+        trigger.whenActive(action);
 
         return this;
     }

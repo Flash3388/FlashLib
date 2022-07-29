@@ -5,7 +5,12 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.statemachine.*;
 
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 
 public class NfaStateMachine implements StateMachine {
 
@@ -24,10 +29,20 @@ public class NfaStateMachine implements StateMachine {
     }
 
     @Override
+    public boolean isActive(State state) {
+        return mActiveStates.contains(state);
+    }
+
+    @Override
+    public boolean areActive(Collection<? extends State> states) {
+        return mActiveStates.containsAll(states);
+    }
+
+    @Override
     public StateEditor configureState(State state) {
         StateConfiguration configuration = new StateConfiguration(state);
         mKnownStates.put(state, configuration);
-        return new StateEditorImpl(new WeakReference<>(this), configuration);
+        return new StateEditorImpl(new WeakReference<>(this), mScheduler, configuration);
     }
 
     @Override

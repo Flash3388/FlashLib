@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.statemachine.nfa.attachments;
 
+import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.statemachine.Transition;
 
@@ -7,8 +8,8 @@ import java.util.Set;
 
 public class RunWhileActiveAttachment extends ActionAttachment {
 
-    public RunWhileActiveAttachment(Action action, Set<Transition> transitionsOnFinish) {
-        super(action, transitionsOnFinish);
+    public RunWhileActiveAttachment(Scheduler scheduler, Action action, Set<Transition> transitionsOnFinish) {
+        super(scheduler, action, transitionsOnFinish);
     }
 
     @Override

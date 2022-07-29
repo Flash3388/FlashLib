@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.statemachine.nfa.attachments;
 
+import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.statemachine.Transition;
@@ -11,7 +12,8 @@ public abstract class ActionAttachment extends ActionBase {
     protected final Action mAction;
     private final Set<Transition> mTransitionsOnFinish;
 
-    protected ActionAttachment(Action action, Set<Transition> transitionsOnFinish) {
+    protected ActionAttachment(Scheduler scheduler, Action action, Set<Transition> transitionsOnFinish) {
+        super(scheduler);
         mAction = action;
         mTransitionsOnFinish = transitionsOnFinish;
 
