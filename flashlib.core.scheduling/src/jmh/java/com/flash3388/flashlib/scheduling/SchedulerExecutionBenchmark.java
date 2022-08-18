@@ -29,7 +29,7 @@ public class SchedulerExecutionBenchmark {
     private int mActionsCount;
     @Param({"SMALL", "MEDIUM", "SHORT_SLEEP", "SMALL_SINGLE_SEQ_GROUP", "SMALL_MULTI_SEQ_GROUP"})
     private TestActions.ActionType mActionType;
-    @Param({"SINGLE_THREAD"})
+    @Param({"SINGLE_THREAD", "NEW_SINGLE_THREAD"})
     private SchedulerImpl mSchedulerImpl;
 
     private Scheduler mScheduler;
