@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.SynchronousScheduler;
 import com.flash3388.flashlib.scheduling.impl.NewSynchronousScheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
