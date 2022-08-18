@@ -28,7 +28,10 @@ import java.util.function.Predicate;
  *     Calls to {@link #cancel(Action)}, {@link #cancelActionsIf(Predicate)} and {@link #cancelAllActions()} will
  *     stop the action on invocation.
  * </p>
+ *
+ * @deprecated use {@link com.flash3388.flashlib.scheduling.impl.NewSynchronousScheduler}
  */
+@Deprecated
 public class SynchronousScheduler implements Scheduler {
 
     private final RequirementsControl mRequirementsControl;

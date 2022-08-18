@@ -16,7 +16,7 @@ public class SchedulerStopBenchmark {
 
     private static final SchedulerMode SCHEDULER_MODE = new SchedulerModeImpl(false);
 
-    @Param({"SINGLE_THREAD"})
+    @Param({"SINGLE_THREAD", "NEW_SINGLE_THREAD"})
     private SchedulerImpl mSchedulerImpl;
     @Param({"NO_REQUIREMENTS", "ONE_REQUIREMENTS", "THREE_REQUIREMENTS"})
     private RequirementState mRequirementState;
