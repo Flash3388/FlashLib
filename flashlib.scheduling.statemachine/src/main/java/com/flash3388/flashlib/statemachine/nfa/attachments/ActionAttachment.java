@@ -3,16 +3,15 @@ package com.flash3388.flashlib.statemachine.nfa.attachments;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.flash3388.flashlib.statemachine.Transition;
 
-import java.util.Set;
+import java.util.Collection;
 
 public abstract class ActionAttachment extends ActionBase {
 
     protected final Action mAction;
-    private final Set<Transition> mTransitionsOnFinish;
+    private final Collection<AttachmentTransition> mTransitionsOnFinish;
 
-    protected ActionAttachment(Scheduler scheduler, Action action, Set<Transition> transitionsOnFinish) {
+    protected ActionAttachment(Scheduler scheduler, Action action, Collection<AttachmentTransition> transitionsOnFinish) {
         super(scheduler);
         mAction = action;
         mTransitionsOnFinish = transitionsOnFinish;
@@ -39,7 +38,7 @@ public abstract class ActionAttachment extends ActionBase {
     public void end(boolean wasInterrupted) {
         mAction.end(wasInterrupted);
 
-        mTransitionsOnFinish.forEach(Transition::initiate);
+        mTransitionsOnFinish.forEach(AttachmentTransition::perform);
     }
 
     public abstract void onStateEnter();

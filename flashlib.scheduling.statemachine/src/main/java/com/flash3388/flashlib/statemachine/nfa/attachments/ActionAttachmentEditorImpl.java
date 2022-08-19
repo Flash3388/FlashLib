@@ -6,9 +6,11 @@ import com.flash3388.flashlib.statemachine.*;
 import com.flash3388.flashlib.statemachine.nfa.StateConfiguration;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 public class ActionAttachmentEditorImpl implements ActionAttachmentEditor {
 
@@ -18,7 +20,7 @@ public class ActionAttachmentEditorImpl implements ActionAttachmentEditor {
     private final StateConfiguration mConfiguration;
     private final Action mAction;
 
-    private final Set<Transition> mTransitionsOnFinish;
+    private final Collection<AttachmentTransition> mTransitionsOnFinish;
 
     public ActionAttachmentEditorImpl(WeakReference<StateMachine> stateMachine, WeakReference<Scheduler> scheduler,
                                       StateEditor previousMenu, StateConfiguration configuration, Action action) {
@@ -28,7 +30,19 @@ public class ActionAttachmentEditorImpl implements ActionAttachmentEditor {
         mConfiguration = configuration;
         mAction = action;
 
-        mTransitionsOnFinish = new HashSet<>();
+        mTransitionsOnFinish = new ArrayList<>();
+    }
+
+    @Override
+    public ActionAttachmentEditor transitionOnFinish(BooleanSupplier condition, Collection<? extends State> states) {
+        StateMachine stateMachine = mStateMachine.get();
+        if (stateMachine == null) {
+            throw new IllegalStateException("statemachine garbage collected");
+        }
+
+        Transition transition = stateMachine.newTransition(states);
+        mTransitionsOnFinish.add(new AttachmentTransition(condition, transition));
+        return this;
     }
 
     @Override
@@ -38,7 +52,8 @@ public class ActionAttachmentEditorImpl implements ActionAttachmentEditor {
             throw new IllegalStateException("statemachine garbage collected");
         }
 
-        mTransitionsOnFinish.add(stateMachine.newTransition(states));
+        Transition transition = stateMachine.newTransition(states);
+        mTransitionsOnFinish.add(new AttachmentTransition(transition));
         return this;
     }
 
