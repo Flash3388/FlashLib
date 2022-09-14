@@ -49,24 +49,26 @@ public interface VisionControl extends Service {
      * @param value value to set
      * @param <T> data type of the option.
      */
-    <T> void setOption(VisionOption<T> option, T value);
+    <T> void setOption(VisionOption option, T value);
 
     /**
      * Gets the value associated with the option.
      *
      * @param option option to get value from.
+     * @param type type of the value to retrieve. Must be convertible from the original option type.
      * @param <T> data type of the option.
      *
      * @return {@link Optional} with the value from the option.
      *      If the option does not have any associated value,
      *      {@link Optional#isPresent()} is <b>false</b>.
      */
-    <T> Optional<T> getOption(VisionOption<T> option);
+    <T> Optional<T> getOption(VisionOption option, Class<T> type);
 
     /**
      * Gets the value associated with the option.
      *
      * @param option option to get value from.
+     * @param type type of the value to retrieve. Must be convertible from the original option type.
      * @param defaultValue value to return if no value is associated
      *                     with the option.
      * @param <T> data type of the option.
@@ -75,7 +77,7 @@ public interface VisionControl extends Service {
      *      is associated with the option, <em>defaultValue</em>
      *      is returned.
      */
-    <T> T getOptionOrDefault(VisionOption<T> option, T defaultValue);
+    <T> T getOptionOrDefault(VisionOption option, Class<T> type, T defaultValue);
 
     /**
      * Gets the latest result produced by the vision process.

@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.vision.analysis;
 
-import com.castle.reflect.Types;
-
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -26,7 +24,7 @@ public class FakeTarget implements Target {
             throw new NoSuchElementException(name);
         }
 
-        return Types.smartCast(value, type);
+        return type.cast(value);
     }
 
     public Map<String, Object> getProperties() {

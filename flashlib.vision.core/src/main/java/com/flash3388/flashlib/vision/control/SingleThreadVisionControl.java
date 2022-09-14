@@ -9,10 +9,10 @@ import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.VisionResult;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.flash3388.flashlib.vision.control.event.NewResultEvent;
 import com.flash3388.flashlib.vision.control.event.VisionListener;
 import com.flash3388.flashlib.vision.processing.Processor;
-import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.notifier.Controllers;
 import com.notifier.EventController;
 
@@ -155,18 +155,18 @@ public class SingleThreadVisionControl<S> implements VisionControl {
     }
 
     @Override
-    public <T> void setOption(VisionOption<T> option, T value) {
+    public <T> void setOption(VisionOption option, T value) {
         mVisionOptions.put(option, value);
     }
 
     @Override
-    public <T> Optional<T> getOption(VisionOption<T> option) {
-        return mVisionOptions.get(option);
+    public <T> Optional<T> getOption(VisionOption option, Class<T> type) {
+        return mVisionOptions.get(option, type);
     }
 
     @Override
-    public <T> T getOptionOrDefault(VisionOption<T> option, T defaultValue) {
-        return mVisionOptions.getOrDefault(option, defaultValue);
+    public <T> T getOptionOrDefault(VisionOption option, Class<T> type, T defaultValue) {
+        return mVisionOptions.getOrDefault(option, type, defaultValue);
     }
 
     @Override

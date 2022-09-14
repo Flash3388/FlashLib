@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.vision.analysis;
 
-import com.castle.reflect.Types;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -51,7 +49,7 @@ public class FakeAnalysis implements Analysis {
             throw new NoSuchElementException(name);
         }
 
-        return Types.smartCast(value, type);
+        return type.cast(value);
     }
 
     @Override

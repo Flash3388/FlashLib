@@ -16,11 +16,11 @@ public class VisionData<T> {
         return mData;
     }
 
-    public <OT> Optional<OT> getOption(VisionOption<OT> option) {
-        return mVisionOptions.get(option);
+    public <OT> Optional<OT> getOption(VisionOption option, Class<OT> type) {
+        return mVisionOptions.get(option, type);
     }
 
-    public <OT> OT getOptionOrDefault(VisionOption<OT> option, OT defaultValue) {
-        return mVisionOptions.getOrDefault(option, defaultValue);
+    public <OT> OT getOptionOrDefault(VisionOption option, Class<OT> type, OT defaultValue) {
+        return mVisionOptions.getOrDefault(option, type, defaultValue);
     }
 }

@@ -1,20 +1,22 @@
 package com.flash3388.flashlib.vision.control;
 
-public interface VisionOption<T> {
+import com.castle.reflect.DataType;
+
+public interface VisionOption {
 
     String name();
-    Class<T> valueType();
+    DataType valueType();
 
-    static <T> VisionOption<T> create(String name, Class<T> valueType) {
-        return new Impl<>(name, valueType);
+    static VisionOption create(String name, DataType valueType) {
+        return new Impl(name, valueType);
     }
 
-    class Impl<T> implements VisionOption<T> {
+    class Impl implements VisionOption {
 
         private final String mName;
-        private final Class<T> mValueType;
+        private final DataType mValueType;
 
-        public Impl(String name, Class<T> valueType) {
+        public Impl(String name, DataType valueType) {
             mName = name;
             mValueType = valueType;
         }
@@ -25,7 +27,7 @@ public interface VisionOption<T> {
         }
 
         @Override
-        public Class<T> valueType() {
+        public DataType valueType() {
             return mValueType;
         }
     }
