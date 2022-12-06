@@ -9,6 +9,8 @@ include 'flashlib.core.robot'
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
 
+include 'flashlib.hid.sdl2'
+
 include 'examples:robot:tankdrive'
 include 'examples:robot:tankdrive-modes'
 include 'examples:robot:tankdrive-system'
@@ -18,6 +20,7 @@ include 'examples:robot:pnuematics-system'
 include 'examples:robot:basic-robot'
 include 'examples:robot:robot-manual-mode-control'
 include 'examples:robot:basic-trigger'
+include 'examples:robot:sdl2-hid'
 
 include 'examples:vision:basic-vision'
 include 'examples:vision:cv-2020-vision'

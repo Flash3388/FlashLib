@@ -1,0 +1,9 @@
+apply from: rootProject.file('jcomponent.gradle')
+
+dependencies {
+    api project(':flashlib.core.hid')
+    api castle()
+
+    // users will have to specify natives manually
+    implementation 'com.github.tomtzook:jsdl2:0.1.0'
+}
