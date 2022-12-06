@@ -23,7 +23,7 @@ public class SequentialActionGroup extends ActionGroupBase {
 
     SequentialActionGroup(Scheduler scheduler, Clock clock, Logger logger,
                           Collection<Action> actions, Queue<ActionContext> actionQueue) {
-        super(scheduler, actions, true);
+        super(scheduler, logger, actions, true);
 
         mClock = clock;
         mLogger = logger;
@@ -66,6 +66,12 @@ public class SequentialActionGroup extends ActionGroupBase {
     }
 
     @Override
+    public SequentialActionGroup whenInterrupted(Runnable runnable) {
+        super.whenInterrupted(runnable);
+        return this;
+    }
+
+    @Override
     public final void initialize() {
         mActions.forEach((action) -> mActionQueue.add(new ActionContext(action, mClock)));
         startNextAction();
@@ -91,6 +97,8 @@ public class SequentialActionGroup extends ActionGroupBase {
             mLogger.debug("ActionGroup {} interrupted, canceling current action {}", this, mCurrentAction);
             mCurrentAction.runCanceled();
         }
+
+        super.end(wasInterrupted);
     }
 
     private void startNextAction() {

@@ -79,4 +79,17 @@ public class ParallelActionGroupTest {
 
         verify(runningActions.iterator().next(), times(1)).runCanceled();
     }
+
+    @Test
+    public void interrupted_hasWhenInterruptedCallback_callsIt() throws Exception {
+        Runnable whenInterrupted = mock(Runnable.class);
+
+        ParallelActionGroup actionGroup = new ParallelActionGroup(
+                mClock, mock(Logger.class), Collections.emptyList(), Collections.emptyList());
+        actionGroup.whenInterrupted(whenInterrupted);
+
+        actionGroup.end(true);
+
+        verify(whenInterrupted, times(1)).run();
+    }
 }

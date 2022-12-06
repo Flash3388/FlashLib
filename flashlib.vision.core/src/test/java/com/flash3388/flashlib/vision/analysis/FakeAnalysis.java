@@ -51,7 +51,7 @@ public class FakeAnalysis implements Analysis {
             throw new NoSuchElementException(name);
         }
 
-        return Types.smartCast(value, type);
+        return type.cast(value);
     }
 
     @Override

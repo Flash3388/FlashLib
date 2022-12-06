@@ -19,7 +19,7 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     private ActionContext mFinishedCommand;
 
     ParallelRaceActionGroup(Clock clock, Logger logger, Collection<Action> actions, Collection<ActionContext> currentActions) {
-        super(actions, false);
+        super(logger, actions, false);
 
         mClock = clock;
         mLogger = logger;
@@ -71,6 +71,12 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
     }
 
     @Override
+    public ActionGroupBase whenInterrupted(Runnable runnable) {
+        super.whenInterrupted(runnable);
+        return this;
+    }
+
+    @Override
     public final void initialize() {
         for (Action action : mActions) {
             ActionContext actionContext = new ActionContext(action, mClock);
@@ -115,5 +121,7 @@ public class ParallelRaceActionGroup extends ActionGroupBase {
             mFinishedCommand.runFinished();
             mLogger.debug("ActionGroup {} finished action {}", this, mFinishedCommand);
         }
+
+        super.end(wasInterrupted);
     }
 }
