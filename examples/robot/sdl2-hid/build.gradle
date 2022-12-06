@@ -1,0 +1,12 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':flashlib.core.robot')
+    implementation project(':flashlib.hid.sdl2')
+
+    implementation group: 'com.github.tomtzook', name: 'jsdl2-jni', version: '0.1.0', classifier: 'linux-amd64'
+}
+
+mainClassName = 'robot.Main'
