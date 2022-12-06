@@ -103,4 +103,18 @@ public class SequentialActionGroupTest {
 
         verify(context, times(1)).runCanceled();
     }
+
+    @Test
+    public void interrupted_hasWhenInterruptedCallback_callsIt() throws Exception {
+        Runnable whenInterrupted = mock(Runnable.class);
+
+        SequentialActionGroup actionGroup = new SequentialActionGroup(
+                mock(Scheduler.class),
+                mClock, mock(Logger.class), Collections.emptyList(), new ArrayDeque<>());
+        actionGroup.whenInterrupted(whenInterrupted);
+
+        actionGroup.end(true);
+
+        verify(whenInterrupted, times(1)).run();
+    }
 }

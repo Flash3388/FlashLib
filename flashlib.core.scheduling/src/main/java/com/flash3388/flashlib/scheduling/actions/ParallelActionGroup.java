@@ -21,7 +21,7 @@ public class ParallelActionGroup extends ActionGroupBase {
 
     ParallelActionGroup(Clock clock, Logger logger,
                         Collection<Action> actions, Collection<ActionContext> currentActions) {
-        super(actions, false);
+        super(logger, actions, false);
 
         mClock = clock;
         mLogger = logger;
@@ -72,6 +72,12 @@ public class ParallelActionGroup extends ActionGroupBase {
     }
 
     @Override
+    public ParallelActionGroup whenInterrupted(Runnable runnable) {
+        super.whenInterrupted(runnable);
+        return this;
+    }
+
+    @Override
     public final void initialize() {
         for (Action action : mActions) {
             ActionContext actionContext = new ActionContext(action, mClock);
@@ -104,5 +110,7 @@ public class ParallelActionGroup extends ActionGroupBase {
                 context.runCanceled();
             }
         }
+
+        super.end(wasInterrupted);
     }
 }
