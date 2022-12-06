@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-public class NewSynchronousScheduler implements Scheduler {
+public class SingleThreadedScheduler implements Scheduler {
 
     private final Clock mClock;
     private final Logger mLogger;
@@ -39,7 +39,7 @@ public class NewSynchronousScheduler implements Scheduler {
 
     private boolean mCanModifyRunningActions;
 
-    NewSynchronousScheduler(Clock clock, Logger logger,
+    SingleThreadedScheduler(Clock clock, Logger logger,
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
                             Collection<Action> actionsToRemote, Map<Requirement, Action> requirementsUsage,
@@ -54,7 +54,7 @@ public class NewSynchronousScheduler implements Scheduler {
         mCanModifyRunningActions = true;
     }
 
-    public NewSynchronousScheduler(Clock clock, Logger logger) {
+    public SingleThreadedScheduler(Clock clock, Logger logger) {
         this(clock, logger,
                 new LinkedHashMap<>(5), new LinkedHashMap<>(10),
                 new ArrayList<>(2),

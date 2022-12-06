@@ -30,14 +30,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class NewSynchronousSchedulerTest {
+class SingleThreadedSchedulerTest {
 
     private Map<Action, RunningActionContext> mPendingActions;
     private Map<Action, RunningActionContext> mRunningActions;
     private Map<Requirement, Action> mRequirementsUsage;
     private Map<Subsystem, Action> mDefaultActions;
 
-    private NewSynchronousScheduler mScheduler;
+    private SingleThreadedScheduler mScheduler;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -46,7 +46,7 @@ class NewSynchronousSchedulerTest {
         mRequirementsUsage = new HashMap<>();
         mDefaultActions = new HashMap<>();
 
-        mScheduler = new NewSynchronousScheduler(
+        mScheduler = new SingleThreadedScheduler(
                 ClockMock.mockInvalidTimeClock(),
                 mock(Logger.class),
                 mPendingActions, mRunningActions,

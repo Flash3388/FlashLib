@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
@@ -29,7 +30,7 @@ import java.util.function.Predicate;
  *     stop the action on invocation.
  * </p>
  *
- * @deprecated use {@link com.flash3388.flashlib.scheduling.impl.NewSynchronousScheduler}
+ * @deprecated use {@link SingleThreadedScheduler}
  */
 @Deprecated
 public class SynchronousScheduler implements Scheduler {
