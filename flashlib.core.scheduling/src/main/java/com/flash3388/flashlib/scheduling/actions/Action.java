@@ -181,12 +181,10 @@ public interface Action {
      * @param actions actions to group with this one.
      *
      * @return {@link ActionGroup} running in sequence this and the given actions.
-     * @see SequentialActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup andThen(Action... actions) {
-        return new SequentialActionGroup()
-                .add(this)
+        return Actions.sequential(this)
                 .add(actions);
     }
 
@@ -200,12 +198,10 @@ public interface Action {
      * @param actions actions to group with this one.
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
-     * @see ParallelActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup alongWith(Action... actions) {
-        return new ParallelActionGroup()
-                .add(this)
+        return Actions.parallel(this)
                 .add(actions);
     }
 
@@ -224,12 +220,10 @@ public interface Action {
      * @param actions actions to group with this one.
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
-     * @see ParallelRaceActionGroup
      */
     @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup raceWith(Action... actions) {
-        return new ParallelRaceActionGroup()
-                .add(this)
+        return Actions.race(this)
                 .add(actions);
     }
 }

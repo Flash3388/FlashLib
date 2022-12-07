@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
@@ -162,4 +163,8 @@ public interface Scheduler {
      * @return the trigger
      */
     Trigger newTrigger(BooleanSupplier condition);
+
+    ExecutionContext createExecutionContext(ActionGroup group, Action action);
+
+    ActionGroup newActionGroup(ActionGroupType type);
 }
