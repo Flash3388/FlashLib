@@ -1,11 +1,14 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
+import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
@@ -193,6 +196,32 @@ public class SingleThreadedScheduler implements Scheduler {
         start(action);
 
         return trigger;
+    }
+
+    @Override
+    public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
+        RunningActionContext context = new RunningActionContext(action, mLogger);
+        return new ExecutionContextImpl(mClock, mLogger, group, context);
+    }
+
+    @Override
+    public ActionGroup newActionGroup(ActionGroupType type) {
+        GroupPolicy policy;
+        switch (type) {
+            case SEQUENTIAL:
+                policy = GroupPolicy.sequential();
+                break;
+            case PARALLEL:
+                policy = GroupPolicy.parallel();
+                break;
+            case PARALLEL_RACE:
+                policy = GroupPolicy.parallelRace();
+                break;
+            default:
+                throw new IllegalArgumentException("unsupported group type");
+        }
+
+        return new ActionGroupImpl(this, mLogger, policy);
     }
 
     private void executeRunningActions(SchedulerMode mode) {
