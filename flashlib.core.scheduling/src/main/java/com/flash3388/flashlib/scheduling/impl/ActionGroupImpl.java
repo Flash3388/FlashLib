@@ -177,7 +177,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
             mWhenInterrupted.run();
         }
 
-        if (wasInterrupted) {
+        if (wasInterrupted || mForceFinish) {
             for (ExecutionContext context : mRunningActions) {
                 context.interrupt();
             }

@@ -11,12 +11,13 @@ import org.slf4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
 class ActionGroupImplTest {
@@ -101,6 +102,118 @@ class ActionGroupImplTest {
         actionGroup.end(true);
 
         verify(callback, times(1)).run();
+    }
+
+    @Test
+    public void initialize_forSequential_startsOneAction() throws Exception {
+        List<Action> actions = Arrays.asList(
+                ActionsMock.actionMocker().build(),
+                ActionsMock.actionMocker().build()
+        );
+        mActions.addAll(actions);
+
+        ActionGroupImpl actionGroup = createSequential();
+
+        actionGroup.initialize();
+
+        assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(1));
+        assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
+    }
+
+    @Test
+    public void initialize_forParallel_startsAllActions() throws Exception {
+        List<Action> actions = Arrays.asList(
+                ActionsMock.actionMocker().build(),
+                ActionsMock.actionMocker().build()
+        );
+        mActions.addAll(actions);
+
+        ActionGroupImpl actionGroup = createParallel();
+
+        actionGroup.initialize();
+
+        assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(0));
+        assertThat(mRunningActions, IsCollectionWithSize.hasSize(2));
+    }
+
+    @Test
+    public void initialize_forParallelRace_startsAllActions() throws Exception {
+        List<Action> actions = Arrays.asList(
+                ActionsMock.actionMocker().build(),
+                ActionsMock.actionMocker().build()
+        );
+        mActions.addAll(actions);
+
+        ActionGroupImpl actionGroup = createParallelRace();
+
+        actionGroup.initialize();
+
+        assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(0));
+        assertThat(mRunningActions, IsCollectionWithSize.hasSize(2));
+    }
+
+    @Test
+    public void execute_forParallelActionsFinished_isFinishedTrue() throws Exception {
+        ExecutionContext context1 = mock(ExecutionContext.class);
+        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        mRunningActions.add(context1);
+        ExecutionContext context2 = mock(ExecutionContext.class);
+        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        mRunningActions.add(context2);
+
+        ActionGroupImpl actionGroup = createParallelRace();
+
+        actionGroup.execute();
+        assertThat(actionGroup.isFinished(), equalTo(true));
+    }
+
+    @Test
+    public void execute_forParallelRaceActionFinished_isFinishedTrue() throws Exception {
+        ExecutionContext context1 = mock(ExecutionContext.class);
+        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        mRunningActions.add(context1);
+        ExecutionContext context2 = mock(ExecutionContext.class);
+        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        mRunningActions.add(context2);
+
+        ActionGroupImpl actionGroup = createParallelRace();
+
+        actionGroup.execute();
+        assertThat(actionGroup.isFinished(), equalTo(true));
+    }
+
+    @Test
+    public void end_forParallelInterrupt_interruptsRemainingInEnd() throws Exception {
+        ExecutionContext context1 = mock(ExecutionContext.class);
+        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        mRunningActions.add(context1);
+        ExecutionContext context2 = mock(ExecutionContext.class);
+        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        mRunningActions.add(context2);
+
+        ActionGroupImpl actionGroup = createParallel();
+
+        actionGroup.execute();
+        actionGroup.end(true);
+
+        verify(context1, times(1)).interrupt();
+    }
+
+    @Test
+    public void end_forParallelRace_interruptsRemainingInEnd() throws Exception {
+        ExecutionContext context1 = mock(ExecutionContext.class);
+        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        mRunningActions.add(context1);
+        ExecutionContext context2 = mock(ExecutionContext.class);
+        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        mRunningActions.add(context2);
+
+        ActionGroupImpl actionGroup = createParallelRace();
+
+        actionGroup.execute();
+        actionGroup.end(true);
+
+        verify(context1, times(1)).interrupt();
     }
 
     private ActionGroupImpl createSequential() {
