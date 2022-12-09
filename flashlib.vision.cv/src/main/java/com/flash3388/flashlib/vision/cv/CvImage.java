@@ -18,7 +18,7 @@ public class CvImage implements Image {
     }
 
     public static CvImage fromBytes(byte[] bytes) {
-        Mat mat = Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+        Mat mat = Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.IMREAD_UNCHANGED);
         return new CvImage(mat);
     }
 
