@@ -9,7 +9,7 @@ ext {
         return "com.github.tomtzook:javabeans:1.4.0"
     }
     castle = {
-        return "com.github.tomtzook:castle:1.0.0"
+        return "com.github.tomtzook:castle:2.0.1"
     }
     slf4jApi = {
         return "org.slf4j:slf4j-api:1.7.25"

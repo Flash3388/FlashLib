@@ -4,6 +4,7 @@ import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.time.Time;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,14 +30,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class NewSynchronousSchedulerTest {
+class SingleThreadedSchedulerTest {
 
     private Map<Action, RunningActionContext> mPendingActions;
     private Map<Action, RunningActionContext> mRunningActions;
     private Map<Requirement, Action> mRequirementsUsage;
     private Map<Subsystem, Action> mDefaultActions;
 
-    private NewSynchronousScheduler mScheduler;
+    private SingleThreadedScheduler mScheduler;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -44,10 +46,11 @@ class NewSynchronousSchedulerTest {
         mRequirementsUsage = new HashMap<>();
         mDefaultActions = new HashMap<>();
 
-        mScheduler = new NewSynchronousScheduler(
+        mScheduler = new SingleThreadedScheduler(
                 ClockMock.mockInvalidTimeClock(),
                 mock(Logger.class),
-                mPendingActions, mRunningActions, mRequirementsUsage, mDefaultActions);
+                mPendingActions, mRunningActions,
+                new ArrayList<>(), mRequirementsUsage, mDefaultActions);
     }
 
     @Test
@@ -270,7 +273,6 @@ class NewSynchronousSchedulerTest {
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(true);
-        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
@@ -290,7 +292,6 @@ class NewSynchronousSchedulerTest {
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(true);
-        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
@@ -312,7 +313,6 @@ class NewSynchronousSchedulerTest {
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate(any(Time.class))).thenReturn(false);
         when(context.shouldRunInDisabled()).thenReturn(true);
-        when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
@@ -357,5 +357,29 @@ class NewSynchronousSchedulerTest {
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
         assertThat(mRunningActions, not(IsMapContaining.hasKey(defaultAction)));
         assertThat(mRequirementsUsage, IsMapContaining.hasEntry(subsystem, action));
+    }
+
+    @Test
+    public void run_actionCallsStart_newActionStarts() throws Exception {
+        Action actionToStart = ActionsMock.actionMocker()
+                .mockIsFinished(false)
+                .build();
+        Action startingAction = new ActionBase(mScheduler) {
+            @Override
+            public void execute() {
+                mScheduler.start(actionToStart);
+            }
+
+            @Override
+            public boolean isFinished() {
+                return true;
+            }
+        };
+
+        mScheduler.start(startingAction);
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(actionToStart));
     }
 }

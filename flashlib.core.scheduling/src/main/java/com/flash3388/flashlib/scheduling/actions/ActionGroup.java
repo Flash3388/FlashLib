@@ -36,4 +36,11 @@ public interface ActionGroup extends Action {
      * @return this
      */
     ActionGroup add(Collection<Action> actions);
+
+    /**
+     * Sets a callback to run when the action group is interrupted.
+     *
+     * @return this
+     */
+    ActionGroup whenInterrupted(Runnable runnable);
 }

@@ -1,11 +1,14 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
+import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
@@ -26,38 +29,38 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-public class NewSynchronousScheduler implements Scheduler {
+public class SingleThreadedScheduler implements Scheduler {
 
     private final Clock mClock;
     private final Logger mLogger;
 
     private final Map<Action, RunningActionContext> mPendingActions;
     private final Map<Action, RunningActionContext> mRunningActions;
+    private final Collection<Action> mActionsToRemote;
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
-    private final Collection<RunningActionContext> mTempCopy;
-    private final Collection<Action> mTempToRemove;
+    private boolean mCanModifyRunningActions;
 
-    NewSynchronousScheduler(Clock clock, Logger logger,
-                           Map<Action, RunningActionContext> pendingActions,
-                           Map<Action, RunningActionContext> runningActions,
-                           Map<Requirement, Action> requirementsUsage,
-                           Map<Subsystem, Action> defaultActions) {
+    SingleThreadedScheduler(Clock clock, Logger logger,
+                            Map<Action, RunningActionContext> pendingActions,
+                            Map<Action, RunningActionContext> runningActions,
+                            Collection<Action> actionsToRemote, Map<Requirement, Action> requirementsUsage,
+                            Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
+        mActionsToRemote = actionsToRemote;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
-
-        mTempCopy = new ArrayList<>();
-        mTempToRemove = new ArrayList<>();
+        mCanModifyRunningActions = true;
     }
 
-    public NewSynchronousScheduler(Clock clock, Logger logger) {
+    public SingleThreadedScheduler(Clock clock, Logger logger) {
         this(clock, logger,
                 new LinkedHashMap<>(5), new LinkedHashMap<>(10),
+                new ArrayList<>(2),
                 new HashMap<>(10), new HashMap<>(5));
     }
 
@@ -83,9 +86,15 @@ public class NewSynchronousScheduler implements Scheduler {
             return;
         }
 
-        context = mRunningActions.remove(action);
-        if (context != null) {
-            cancelAndEnd(context);
+        if (mCanModifyRunningActions) {
+            context = mRunningActions.remove(action);
+            if (context != null) {
+                cancelAndEnd(context);
+                return;
+            }
+        } else if (mRunningActions.containsKey(action)) {
+            mActionsToRemote.add(action);
+            mLogger.debug("Action placed for later removal");
             return;
         }
 
@@ -148,38 +157,26 @@ public class NewSynchronousScheduler implements Scheduler {
 
     @Override
     public void run(SchedulerMode mode) {
-        mTempCopy.clear();
-        mTempToRemove.clear();
-        mTempCopy.addAll(mRunningActions.values());
+        executeRunningActions(mode);
 
-        for (RunningActionContext context : mTempCopy) {
-            if (mode.isDisabled() && !context.shouldRunInDisabled()) {
-                context.markForCancellation();
-                mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", context);
+        for (Iterator<Action> iterator = mActionsToRemote.iterator(); iterator.hasNext();) {
+            Action action = iterator.next();
+            RunningActionContext context = mRunningActions.remove(action);
+            if (context != null) {
+                cancelAndEnd(context);
             }
 
-            if (context.iterate(mClock.currentTime())) {
-                // finished execution
-                removeFromRequirements(context);
-                mTempToRemove.add(context.getAction());
-
-                mLogger.debug("Action {} finished", context);
-            }
+            iterator.remove();
         }
 
-        mTempToRemove.forEach(mRunningActions::remove);
+        //noinspection Java8CollectionRemoveIf
+        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            RunningActionContext context = iterator.next();
 
-        mTempCopy.clear();
-        mTempToRemove.clear();
-        mTempCopy.addAll(mPendingActions.values());
-
-        for (RunningActionContext context : mTempCopy) {
             if (tryStartingAction(context)) {
-                mTempToRemove.add(context.getAction());
+                iterator.remove();
             }
         }
-
-        mTempToRemove.forEach(mPendingActions::remove);
 
         if (!mode.isDisabled()) {
             for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
@@ -199,6 +196,60 @@ public class NewSynchronousScheduler implements Scheduler {
         start(action);
 
         return trigger;
+    }
+
+    @Override
+    public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
+        RunningActionContext context = new RunningActionContext(action, mLogger);
+        return new ExecutionContextImpl(mClock, mLogger, group, context);
+    }
+
+    @Override
+    public ActionGroup newActionGroup(ActionGroupType type) {
+        GroupPolicy policy;
+        switch (type) {
+            case SEQUENTIAL:
+                policy = GroupPolicy.sequential();
+                break;
+            case PARALLEL:
+                policy = GroupPolicy.parallel();
+                break;
+            case PARALLEL_RACE:
+                policy = GroupPolicy.parallelRace();
+                break;
+            default:
+                throw new IllegalArgumentException("unsupported group type");
+        }
+
+        return new ActionGroupImpl(this, mLogger, policy);
+    }
+
+    private void executeRunningActions(SchedulerMode mode) {
+        // while in this method, calls to start and cancel methods cannot occur due
+        // to modifications of the collections.
+        // since this implementation is meant for single-thread, then such calls
+        // can only occur from within other actions.
+        mCanModifyRunningActions = false;
+        try {
+            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                RunningActionContext context = iterator.next();
+
+                if (mode.isDisabled() && !context.shouldRunInDisabled()) {
+                    context.markForCancellation();
+                    mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", context);
+                }
+
+                if (context.iterate(mClock.currentTime())) {
+                    // finished execution
+                    removeFromRequirements(context);
+                    iterator.remove();
+
+                    mLogger.debug("Action {} finished", context);
+                }
+            }
+        } finally {
+            mCanModifyRunningActions = true;
+        }
     }
 
     private Set<RunningActionContext> getConflictingOnRequirements(RunningActionContext context) {
@@ -237,6 +288,11 @@ public class NewSynchronousScheduler implements Scheduler {
     }
 
     private boolean tryStartingAction(RunningActionContext context) {
+        if (!mCanModifyRunningActions) {
+            mLogger.debug("Cannot modify running actions");
+            return false;
+        }
+
         try {
             Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
             conflicts.forEach((conflict)-> {

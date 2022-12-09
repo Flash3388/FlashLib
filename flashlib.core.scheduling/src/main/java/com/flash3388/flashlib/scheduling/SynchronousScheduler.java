@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
@@ -29,7 +31,7 @@ import java.util.function.Predicate;
  *     stop the action on invocation.
  * </p>
  *
- * @deprecated use {@link com.flash3388.flashlib.scheduling.impl.NewSynchronousScheduler}
+ * @deprecated use {@link SingleThreadedScheduler}
  */
 @Deprecated
 public class SynchronousScheduler implements Scheduler {
@@ -112,5 +114,15 @@ public class SynchronousScheduler implements Scheduler {
         start(action);
 
         return trigger;
+    }
+
+    @Override
+    public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
+        throw new UnsupportedOperationException("not supported. use SingleThreadedScheduler");
+    }
+
+    @Override
+    public ActionGroup newActionGroup(ActionGroupType type) {
+        throw new UnsupportedOperationException("not supported. use SingleThreadedScheduler");
     }
 }

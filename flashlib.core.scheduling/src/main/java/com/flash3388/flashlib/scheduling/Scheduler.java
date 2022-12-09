@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
@@ -162,4 +163,23 @@ public interface Scheduler {
      * @return the trigger
      */
     Trigger newTrigger(BooleanSupplier condition);
+
+    /**
+     * Creates a context for running actions. Can be used to manually execute actions. Should be
+     * used carefully as no requirements checks are made on the action.
+     * Generally used by groups to run actions.
+     *
+     * @param group group which contains the action.
+     * @param action action to use.
+     * @return execution context.
+     */
+    ExecutionContext createExecutionContext(ActionGroup group, Action action);
+
+    /**
+     * Creates a new group for executes actions.
+     *
+     * @param type type of group to create. Influences the execution order and flow.
+     * @return action group.
+     */
+    ActionGroup newActionGroup(ActionGroupType type);
 }
