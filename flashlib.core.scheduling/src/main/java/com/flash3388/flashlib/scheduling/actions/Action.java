@@ -169,7 +169,6 @@ public interface Action {
     }
 
     // convenience methods for grouping
-    // they reference subclasses, but that's how you decorate, so...
 
     /**
      * <p>
@@ -182,7 +181,6 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in sequence this and the given actions.
      */
-    @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup andThen(Action... actions) {
         return Actions.sequential(this)
                 .add(actions);
@@ -199,7 +197,6 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
      */
-    @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup alongWith(Action... actions) {
         return Actions.parallel(this)
                 .add(actions);
@@ -221,7 +218,6 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
      */
-    @SuppressWarnings("ClassReferencesSubclass")
     default ActionGroup raceWith(Action... actions) {
         return Actions.race(this)
                 .add(actions);
