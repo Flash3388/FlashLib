@@ -41,6 +41,20 @@ public final class Actions {
     }
 
     /**
+     * Creates an empty action which runs until a condition is met,
+     * Only finishing when that condition is met.
+     *
+     * @param condition condition
+     * @return action
+     */
+    public static Action waitUntil(BooleanSupplier condition) {
+        Objects.requireNonNull(condition, "condition is null");
+        return new GenericAction.Builder()
+                .isFinished(condition)
+                .build();
+    }
+
+    /**
      * Creates a builder for creating a {@link GenericAction}.
      *
      * @return builder.
