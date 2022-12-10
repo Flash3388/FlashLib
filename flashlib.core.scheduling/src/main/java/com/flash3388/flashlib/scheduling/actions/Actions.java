@@ -35,6 +35,7 @@ public final class Actions {
      * @return action
      */
     public static Action wait(Time waitTime) {
+        Objects.requireNonNull(waitTime, "waitTime is null");
         return empty().configure()
                 .setTimeout(waitTime)
                 .save();
@@ -130,6 +131,7 @@ public final class Actions {
      */
     public static Action periodic(Runnable runnable, Time period) {
         Objects.requireNonNull(runnable, "runnable is null");
+        Objects.requireNonNull(period, "period is null");
         return new PeriodicAction(runnable, period);
     }
 
@@ -181,6 +183,9 @@ public final class Actions {
      * @return trigger
      */
     public static Trigger onCondition(BooleanSupplier condition, Action action) {
+        Objects.requireNonNull(condition, "condition is null");
+        Objects.requireNonNull(action, "action is null");
+
         Trigger trigger = Triggers.onCondition(condition);
         trigger.whenActive(action);
 
