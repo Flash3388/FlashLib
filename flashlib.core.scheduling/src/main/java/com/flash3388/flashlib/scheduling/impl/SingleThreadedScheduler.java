@@ -36,7 +36,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
     private final Map<Action, RunningActionContext> mPendingActions;
     private final Map<Action, RunningActionContext> mRunningActions;
-    private final Collection<Action> mActionsToRemote;
+    private final Collection<Action> mActionsToRemove;
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
@@ -45,13 +45,14 @@ public class SingleThreadedScheduler implements Scheduler {
     SingleThreadedScheduler(Clock clock, Logger logger,
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
-                            Collection<Action> actionsToRemote, Map<Requirement, Action> requirementsUsage,
+                            Collection<Action> actionsToRemove,
+                            Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
         mLogger = logger;
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
-        mActionsToRemote = actionsToRemote;
+        mActionsToRemove = actionsToRemove;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
         mCanModifyRunningActions = true;
@@ -59,9 +60,11 @@ public class SingleThreadedScheduler implements Scheduler {
 
     public SingleThreadedScheduler(Clock clock, Logger logger) {
         this(clock, logger,
-                new LinkedHashMap<>(5), new LinkedHashMap<>(10),
+                new LinkedHashMap<>(5),
+                new LinkedHashMap<>(10),
                 new ArrayList<>(2),
-                new HashMap<>(10), new HashMap<>(5));
+                new HashMap<>(10),
+                new HashMap<>(5));
     }
 
     @Override
@@ -93,7 +96,7 @@ public class SingleThreadedScheduler implements Scheduler {
                 return;
             }
         } else if (mRunningActions.containsKey(action)) {
-            mActionsToRemote.add(action);
+            mActionsToRemove.add(action);
             mLogger.debug("Action placed for later removal");
             return;
         }
@@ -159,7 +162,7 @@ public class SingleThreadedScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         executeRunningActions(mode);
 
-        for (Iterator<Action> iterator = mActionsToRemote.iterator(); iterator.hasNext();) {
+        for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
             Action action = iterator.next();
             RunningActionContext context = mRunningActions.remove(action);
             if (context != null) {
@@ -200,8 +203,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
-        RunningActionContext context = new RunningActionContext(action, mLogger);
-        return new ExecutionContextImpl(mClock, mLogger, group, context);
+        RunningActionContext context = new RunningActionContext(action, group, mLogger);
+        return new ExecutionContextImpl(mClock, mLogger, context);
     }
 
     @Override

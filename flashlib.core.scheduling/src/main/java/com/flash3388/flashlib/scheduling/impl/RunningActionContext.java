@@ -4,6 +4,7 @@ import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
+import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
@@ -12,6 +13,7 @@ import java.util.Set;
 public class RunningActionContext {
 
     private final Action mAction;
+    private final ActionGroup mParent;
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
@@ -21,8 +23,9 @@ public class RunningActionContext {
     private Time mStartTime;
     private Time mEndTime;
 
-    public RunningActionContext(Action action, Logger logger) {
+    public RunningActionContext(Action action, ActionGroup parent, Logger logger) {
         mAction = action;
+        mParent = parent;
         mLogger = logger;
 
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
@@ -30,6 +33,10 @@ public class RunningActionContext {
         mIsCanceled = false;
         mStartTime = Time.INVALID;
         mEndTime = Time.INVALID;
+    }
+
+    public RunningActionContext(Action action, Logger logger) {
+        this(action, null, logger);
     }
 
     public Action getAction() {
@@ -140,6 +147,16 @@ public class RunningActionContext {
 
     @Override
     public String toString() {
-        return mAction.toString();
+        if (mParent == null) {
+            return mAction.toString();
+        } else {
+            //noinspection StringBufferReplaceableByString
+            StringBuilder builder = new StringBuilder();
+            builder.append(mAction.toString());
+            builder.append("( IN GROUP ");
+            builder.append(mParent.toString());
+            builder.append(")");
+            return builder.toString();
+        }
     }
 }

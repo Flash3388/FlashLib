@@ -214,7 +214,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         for (Iterator<ExecutionContext> iterator = mRunningActions.iterator(); iterator.hasNext();) {
             ExecutionContext context = iterator.next();
 
-            if (context.execute() == ExecutionContext.ExecutionResult.FINISHED) {
+            if (context.execute(null) == ExecutionContext.ExecutionResult.FINISHED) {
                 iterator.remove();
                 actionFinished = true;
             }
