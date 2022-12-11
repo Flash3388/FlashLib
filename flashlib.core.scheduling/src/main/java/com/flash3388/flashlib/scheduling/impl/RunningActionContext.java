@@ -153,8 +153,8 @@ public class RunningActionContext {
             //noinspection StringBufferReplaceableByString
             StringBuilder builder = new StringBuilder();
             builder.append(mAction.toString());
-            builder.append("( IN GROUP ");
-            builder.append(mParent.toString());
+            builder.append(" (IN GROUP ");
+            builder.append(mParent);
             builder.append(")");
             return builder.toString();
         }
