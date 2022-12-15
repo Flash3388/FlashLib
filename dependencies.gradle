@@ -11,6 +11,9 @@ ext {
     castle = {
         return "com.github.tomtzook:castle:2.0.1"
     }
+    notifier = {
+        return "com.github.tomtzook:notifier:1.2.0"
+    }
     slf4jApi = {
         return "org.slf4j:slf4j-api:1.7.25"
     }

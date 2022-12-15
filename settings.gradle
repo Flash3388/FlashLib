@@ -6,6 +6,9 @@ include 'flashlib.core.io'
 include 'flashlib.core.hid'
 include 'flashlib.core.robot'
 
+include 'flashlib.hmi.core'
+include 'flashlib.hmi.impl'
+
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
 
@@ -21,6 +24,8 @@ include 'examples:robot:basic-robot'
 include 'examples:robot:robot-manual-mode-control'
 include 'examples:robot:basic-trigger'
 include 'examples:robot:sdl2-hid'
+
+include 'examples:robot:test-hmi'
 
 include 'examples:vision:basic-vision'
 include 'examples:vision:cv-2020-vision'

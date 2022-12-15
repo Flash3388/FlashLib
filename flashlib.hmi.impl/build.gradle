@@ -1,0 +1,10 @@
+apply from: rootProject.file('jcomponent.gradle')
+
+dependencies {
+    api project(':flashlib.core')
+    api project(':flashlib.hmi.core')
+
+    api jmath()
+    api castle()
+    api notifier()
+}
