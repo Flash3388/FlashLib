@@ -51,7 +51,7 @@ public class GenericRobotControl implements RobotControl {
     }
 
     @Override
-    public NetworkInterface getNetwork() {
+    public NetworkInterface getNetworkInterface() {
         return mNetworkInterface;
     }
 

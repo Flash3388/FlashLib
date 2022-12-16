@@ -8,6 +8,7 @@ import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.util.logging.Logging;
+import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
 public final class RobotFactory {
@@ -26,7 +27,13 @@ public final class RobotFactory {
         return new SystemNanoClock();
     }
 
+    public static NetworkInterface newNetworkInterface(NetworkConfiguration configuration, ResourceHolder holder, Logger logger) {
+        NetworkInterfaceImpl networkInterface = new NetworkInterfaceImpl(configuration, logger);
+        holder.add(networkInterface);
+        return networkInterface;
+    }
+
     public static NetworkInterface disabledNetworkInterface() {
-        return new NetworkInterfaceImpl(NetworkConfiguration.disabled());
+        return new NetworkInterfaceImpl(NetworkConfiguration.disabled(), Logging.stub());
     }
 }

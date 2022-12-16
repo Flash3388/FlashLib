@@ -10,6 +10,6 @@ public interface MessagingChannel extends Closeable {
 
     void waitForConnection() throws IOException, TimeoutException, InterruptedException;
 
-    void write(Message message) throws IOException, TimeoutException;
+    void write(Message message) throws IOException, TimeoutException, InterruptedException;
     Message read() throws IOException, TimeoutException, InterruptedException;
 }

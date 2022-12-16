@@ -217,5 +217,5 @@ public interface RobotControl {
      *
      * @return {@link NetworkInterface}
      */
-    NetworkInterface getNetwork();
+    NetworkInterface getNetworkInterface();
 }

@@ -29,7 +29,7 @@ public class ClientMessagingChannel implements MessagingChannel {
     }
 
     @Override
-    public void write(Message message) throws IOException, TimeoutException {
+    public void write(Message message) throws IOException, TimeoutException, InterruptedException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
             mSerializer.write(dataOutputStream, message);

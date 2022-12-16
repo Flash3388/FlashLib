@@ -30,7 +30,7 @@ public class ServerMessagingChannel implements MessagingServerChannel {
 
     @Override
     public void waitForConnection() throws IOException, TimeoutException, InterruptedException {
-
+        mChannel.waitUntilHasClients();
     }
 
     @Override

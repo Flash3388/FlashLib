@@ -20,7 +20,6 @@ public class BufferedReader extends InputStream {
         mSize = 0;
     }
 
-
     @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
@@ -46,7 +45,8 @@ public class BufferedReader extends InputStream {
     @Override
     public int read() throws IOException {
         updateBuffer();
-        return mBuffer.get(mIndex++);
+        byte b = mBuffer.get(mIndex++);
+        return b & 0xff;
     }
 
     private void updateBuffer() throws IOException {

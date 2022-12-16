@@ -91,7 +91,7 @@ public class DelegatingRobotControl implements RobotControl {
     }
 
     @Override
-    public NetworkInterface getNetwork() {
-        return mRobotControl.getNetwork();
+    public NetworkInterface getNetworkInterface() {
+        return mRobotControl.getNetworkInterface();
     }
 }

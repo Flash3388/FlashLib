@@ -9,6 +9,7 @@ import com.flash3388.flashlib.net.messaging.MessageReceiver;
 import com.flash3388.flashlib.net.messaging.io.MessagingChannel;
 import com.flash3388.flashlib.net.messaging.io.MessagingServerChannel;
 import com.notifier.EventController;
+import org.slf4j.Logger;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,16 +19,18 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
     private final MessagingChannel mChannel;
     private final MessagingServerChannel mServerChannel;
     private final EventController mEventController;
+    private final Logger mLogger;
     private final BlockingQueue<Message> mMessageQueue;
 
     private Thread mWriteThread;
     private Thread mReadThread;
     private Thread mAcceptThread;
 
-    private MessagingService(MessagingChannel channel, MessagingServerChannel serverChannel, EventController eventController) {
+    private MessagingService(MessagingChannel channel, MessagingServerChannel serverChannel, EventController eventController, Logger logger) {
         mChannel = channel;
         mServerChannel = serverChannel;
         mEventController = eventController;
+        mLogger = logger;
         mMessageQueue = new LinkedBlockingQueue<>();
 
         mWriteThread = null;
@@ -35,12 +38,12 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
         mAcceptThread = null;
     }
 
-    public static MessagingService server(MessagingServerChannel channel, EventController controller) {
-        return new MessagingService(channel, channel, controller);
+    public static MessagingService server(MessagingServerChannel channel, EventController controller, Logger logger) {
+        return new MessagingService(channel, channel, controller, logger);
     }
 
-    public static MessagingService client(MessagingChannel channel, EventController controller) {
-        return new MessagingService(channel, null, controller);
+    public static MessagingService client(MessagingChannel channel, EventController controller, Logger logger) {
+        return new MessagingService(channel, null, controller, logger);
     }
 
     @Override
@@ -56,18 +59,18 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
     @Override
     protected void startRunning() throws ServiceException {
         mWriteThread = new Thread(
-                new WriteTask(mChannel, mMessageQueue),
+                new WriteTask(mChannel, mMessageQueue, mLogger),
                 "MessagingService-WriteTask");
         mWriteThread.setDaemon(true);
 
         mReadThread = new Thread(
-                new ReadTask(mChannel, mEventController),
+                new ReadTask(mChannel, mEventController, mLogger),
                 "MessagingService-ReadTask");
         mReadThread.setDaemon(true);
 
         if (mServerChannel != null) {
             mAcceptThread = new Thread(
-                    new AcceptThread(mServerChannel),
+                    new AcceptThread(mServerChannel, mLogger),
                     "MessagingService-AcceptTask");
             mAcceptThread.setDaemon(true);
             mAcceptThread.start();

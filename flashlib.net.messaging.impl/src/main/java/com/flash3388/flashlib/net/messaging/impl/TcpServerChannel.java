@@ -18,6 +18,9 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TcpServerChannel implements Closeable {
 
@@ -27,6 +30,9 @@ public class TcpServerChannel implements Closeable {
     private final SocketAddress mBindAddress;
     private final Map<Channel, TcpSocketChannel> mClients;
 
+    private final Lock mAcceptLock;
+    private final Condition mHasClients;
+
     private Selector mAcceptSelector;
     private Selector mReadSelector;
     private ServerSocketChannel mServer;
@@ -34,6 +40,13 @@ public class TcpServerChannel implements Closeable {
     public TcpServerChannel(SocketAddress bindAddress) {
         mBindAddress = bindAddress;
         mClients = new ConcurrentHashMap<>();
+
+        mAcceptLock = new ReentrantLock();
+        mHasClients = mAcceptLock.newCondition();
+
+        mAcceptSelector = null;
+        mReadSelector = null;
+        mServer = null;
     }
 
     public void acceptNewClient() throws IOException, TimeoutException {
@@ -50,13 +63,38 @@ public class TcpServerChannel implements Closeable {
             try {
                 if (key.isAcceptable()) {
                     SocketChannel channel = mServer.accept();
-                    channel.register(mReadSelector, SelectionKey.OP_READ);
 
-                    mClients.put(channel, new TcpSocketChannel(channel));
+                    try {
+                        channel.configureBlocking(false);
+                        channel.register(mReadSelector, SelectionKey.OP_READ);
+
+                        mClients.put(channel, new TcpSocketChannel(channel));
+
+                        mAcceptLock.lock();
+                        try {
+                            mHasClients.signalAll();
+                        } finally {
+                            mAcceptLock.unlock();
+                        }
+                    } catch (IOException e) {
+                        Closeables.silentClose(channel);
+                        mClients.remove(channel);
+
+                        throw e;
+                    }
                 }
             } finally {
                 it.remove();
             }
+        }
+    }
+
+    public void waitUntilHasClients() throws InterruptedException {
+        mAcceptLock.lock();
+        try {
+            mHasClients.await();
+        } finally {
+            mAcceptLock.unlock();
         }
     }
 
@@ -65,6 +103,7 @@ public class TcpServerChannel implements Closeable {
         for (Iterator<? extends TcpSocketChannel> it = mClients.values().iterator(); it.hasNext();) {
             TcpSocketChannel channel = it.next();
             try {
+                buffer.rewind();
                 channel.write(buffer);
             } catch (IOException e) {
                 it.remove();
