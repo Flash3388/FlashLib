@@ -180,4 +180,32 @@ public class ServerMessagingChannel implements MessagingChannel, ServerChannel {
             throw new TimeoutException();
         }
     }
+
+    @Override
+    public void close() throws IOException {
+        mServerLock.lock();
+        try {
+            mClients.forEach((k, v)-> v.closeChannel());
+            mClients.clear();
+
+            try {
+                Closer closer = Closer.empty();
+                if (mServer != null) {
+                    closer.add(mServer);
+                }
+                if (mServerSelector != null) {
+                    closer.add(mServerSelector);
+                }
+                if (mClientSelector.get() != null) {
+                    closer.add(mClientSelector.get());
+                }
+
+                closer.close();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        } finally {
+            mServerLock.unlock();
+        }
+    }
 }

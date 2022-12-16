@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.robot;
 
+import com.flash3388.flashlib.robot.net.NetworkConfiguration;
+import com.flash3388.flashlib.robot.net.NetworkInterface;
+import com.flash3388.flashlib.robot.net.impl.NetworkInterfaceImpl;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.time.Clock;
@@ -21,5 +24,9 @@ public final class RobotFactory {
 
     public static Clock newDefaultClock() {
         return new SystemNanoClock();
+    }
+
+    public static NetworkInterface disabledNetworkInterface() {
+        return new NetworkInterfaceImpl(NetworkConfiguration.disabled());
     }
 }

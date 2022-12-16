@@ -4,6 +4,7 @@ import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
@@ -26,6 +27,7 @@ public class GenericRobotControl implements RobotControl {
     private final HidInterface mHidInterface;
     private final Scheduler mScheduler;
     private final Clock mClock;
+    private final NetworkInterface mNetworkInterface;
 
     public GenericRobotControl(Logger logger, ResourceHolder resourceHolder, DependencyProvider dependencyProvider) {
         mLogger = logger;
@@ -35,6 +37,7 @@ public class GenericRobotControl implements RobotControl {
         mHidInterface = dependencyProvider.getHidInterface();
         mScheduler = dependencyProvider.getScheduler();
         mClock = dependencyProvider.getClock();
+        mNetworkInterface = dependencyProvider.getNetworkInterface();
     }
 
     @Override
@@ -45,6 +48,11 @@ public class GenericRobotControl implements RobotControl {
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
         mResourceHolder.add(closeables);
+    }
+
+    @Override
+    public NetworkInterface getNetwork() {
+        return mNetworkInterface;
     }
 
     @Override

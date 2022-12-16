@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.base.generic;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
@@ -20,6 +21,7 @@ public interface DependencyProvider {
     IoInterface getIoInterface();
     HidInterface getHidInterface();
     Scheduler getScheduler();
+    NetworkInterface getNetworkInterface();
 
     static LazyInitializingBuilder cascadingInitializationBuilder(Logger logger, ResourceHolder resourceHolder) {
         return new LazyInitializingBuilder(Arrays.asList(logger, resourceHolder));
@@ -96,6 +98,12 @@ public interface DependencyProvider {
         public Scheduler getScheduler() {
             initializeIfNeeded();
             return mDependencyHolder.get(Scheduler.class);
+        }
+
+        @Override
+        public NetworkInterface getNetworkInterface() {
+            initializeIfNeeded();
+            return mDependencyHolder.get(NetworkInterface.class);
         }
 
         private void initializeIfNeeded() {

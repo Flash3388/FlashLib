@@ -30,6 +30,7 @@ public class Main {
                             .add(IoInterface.Stub::new)
                             .add(HidInterface.Stub::new)
                             .add(RobotFactory::newDefaultClock)
+                            .add(RobotFactory::disabledNetworkInterface)
                             .add((dependencies)-> {
                                 Clock clock = dependencies.get(Clock.class);
                                 return RobotFactory.newDefaultScheduler(clock, l);

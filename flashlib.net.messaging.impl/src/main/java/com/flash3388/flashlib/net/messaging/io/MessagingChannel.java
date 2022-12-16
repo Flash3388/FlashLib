@@ -3,9 +3,10 @@ package com.flash3388.flashlib.net.messaging.io;
 import com.castle.time.exceptions.TimeoutException;
 import com.flash3388.flashlib.net.messaging.Message;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public interface MessagingChannel {
+public interface MessagingChannel extends Closeable {
 
     boolean establishConnection() throws IOException, TimeoutException;
 

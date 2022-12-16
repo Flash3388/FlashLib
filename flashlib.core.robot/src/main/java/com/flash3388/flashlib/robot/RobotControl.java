@@ -5,6 +5,8 @@ import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.net.NetworkInterface;
+import com.flash3388.flashlib.robot.net.NetworkingMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -205,4 +207,15 @@ public interface RobotControl {
     default void registerCloseables(AutoCloseable... closeables) {
         registerCloseables(Arrays.asList(closeables));
     }
+
+    /**
+     * Gets the {@link NetworkInterface} object associated with the robot. Can be used
+     * to communicate with other programs via several protocols, depending on
+     * the configuration and the implementation of this interface.
+     * Check {@link NetworkingMode} before accessing specific protocol to ensure
+     * the protocol is indeed available.
+     *
+     * @return {@link NetworkInterface}
+     */
+    NetworkInterface getNetwork();
 }

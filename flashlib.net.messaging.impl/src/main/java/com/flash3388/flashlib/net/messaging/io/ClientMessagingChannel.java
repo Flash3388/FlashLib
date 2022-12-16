@@ -45,4 +45,9 @@ public class ClientMessagingChannel implements MessagingChannel {
             throw new TimeoutException();
         }
     }
+
+    @Override
+    public void close() throws IOException {
+        mChannel.closeChannel();
+    }
 }
