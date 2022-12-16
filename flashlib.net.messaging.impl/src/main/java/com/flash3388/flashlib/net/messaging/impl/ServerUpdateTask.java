@@ -4,14 +4,12 @@ import com.castle.time.exceptions.TimeoutException;
 import com.flash3388.flashlib.net.messaging.io.MessagingServerChannel;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-
-public class AcceptThread implements Runnable {
+public class ServerUpdateTask implements Runnable {
 
     private final MessagingServerChannel mChannel;
     private final Logger mLogger;
 
-    public AcceptThread(MessagingServerChannel channel, Logger logger) {
+    public ServerUpdateTask(MessagingServerChannel channel, Logger logger) {
         mChannel = channel;
         mLogger = logger;
     }
@@ -20,13 +18,13 @@ public class AcceptThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                mChannel.handleNewConnections();
+                mChannel.handleUpdates();
             } catch (InterruptedException e) {
                 break;
             } catch (TimeoutException e) {
                 // no need to do anything
             } catch (Throwable t) {
-                mLogger.error("Error in ReadTask", t);
+                mLogger.error("Error in AcceptTask", t);
             }
         }
     }

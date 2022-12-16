@@ -24,7 +24,7 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
 
     private Thread mWriteThread;
     private Thread mReadThread;
-    private Thread mAcceptThread;
+    private Thread mServerUpdateThread;
 
     private MessagingService(MessagingChannel channel, MessagingServerChannel serverChannel, EventController eventController, Logger logger) {
         mChannel = channel;
@@ -35,7 +35,7 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
 
         mWriteThread = null;
         mReadThread = null;
-        mAcceptThread = null;
+        mServerUpdateThread = null;
     }
 
     public static MessagingService server(MessagingServerChannel channel, EventController controller, Logger logger) {
@@ -69,11 +69,11 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
         mReadThread.setDaemon(true);
 
         if (mServerChannel != null) {
-            mAcceptThread = new Thread(
-                    new AcceptThread(mServerChannel, mLogger),
-                    "MessagingService-AcceptTask");
-            mAcceptThread.setDaemon(true);
-            mAcceptThread.start();
+            mServerUpdateThread = new Thread(
+                    new ServerUpdateTask(mServerChannel, mLogger),
+                    "MessagingService-ServerUpdate");
+            mServerUpdateThread.setDaemon(true);
+            mServerUpdateThread.start();
         }
 
         mWriteThread.start();
@@ -88,9 +88,9 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
         mReadThread.interrupt();
         mReadThread = null;
 
-        if (mAcceptThread != null) {
-            mAcceptThread.interrupt();
-            mAcceptThread = null;
+        if (mServerUpdateThread != null) {
+            mServerUpdateThread.interrupt();
+            mServerUpdateThread = null;
         }
     }
 }

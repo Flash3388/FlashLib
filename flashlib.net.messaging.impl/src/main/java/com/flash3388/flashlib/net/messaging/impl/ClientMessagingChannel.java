@@ -1,10 +1,12 @@
 package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
+import com.flash3388.flashlib.net.impl.TcpClientChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.io.MessageSerializer;
 import com.flash3388.flashlib.net.messaging.io.MessagingChannel;
+import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -18,8 +20,8 @@ public class ClientMessagingChannel implements MessagingChannel {
     private final TcpClientChannel mChannel;
     private final MessageSerializer mSerializer;
 
-    public ClientMessagingChannel(SocketAddress serverAddress, KnownMessageTypes messageTypes) {
-        mChannel = new TcpClientChannel(serverAddress);
+    public ClientMessagingChannel(SocketAddress serverAddress, KnownMessageTypes messageTypes, Logger logger) {
+        mChannel = new TcpClientChannel(serverAddress, logger);
         mSerializer = new MessageSerializer(messageTypes);
     }
 

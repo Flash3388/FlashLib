@@ -1,7 +1,8 @@
-package com.flash3388.flashlib.net.messaging.impl;
+package com.flash3388.flashlib.net.impl;
 
 import com.castle.util.closeables.Closeables;
 import com.castle.util.function.ThrowingFunction;
+import org.slf4j.Logger;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -18,17 +19,22 @@ public class TcpClientChannel implements Closeable {
     private static final int CONNECTION_WAIT_TIME = 100;
 
     private final SocketAddress mRemoteAddress;
+    private final Logger mLogger;
 
+    private final ByteBuffer mReadBuffer;
     private final Lock mLock;
     private final Condition mConnected;
     private final AtomicBoolean mConnector;
 
     private SocketChannel mBaseChannel;
     private TcpSocketChannel mChannel;
+    private BufferedReader mReader;
 
-    public TcpClientChannel(SocketAddress remoteAddress) {
+    public TcpClientChannel(SocketAddress remoteAddress, Logger logger) {
         mRemoteAddress = remoteAddress;
+        mLogger = logger;
 
+        mReadBuffer = ByteBuffer.allocateDirect(1024);
         mLock = new ReentrantLock();
         mConnected = mLock.newCondition();
         mConnector = new AtomicBoolean(false);
@@ -37,12 +43,12 @@ public class TcpClientChannel implements Closeable {
         mChannel = null;
     }
 
-    public synchronized void waitForConnection() throws IOException, InterruptedException {
+    public void waitForConnection() throws IOException, InterruptedException {
         //noinspection resource
         connectChannel();
     }
 
-    public synchronized void write(ByteBuffer buffer) throws IOException, InterruptedException {
+    public void write(ByteBuffer buffer) throws IOException, InterruptedException {
         try {
             //noinspection resource
             TcpSocketChannel channel = connectChannel();
@@ -53,11 +59,11 @@ public class TcpClientChannel implements Closeable {
         }
     }
 
-    public synchronized <T> T read(ThrowingFunction<BufferedReader, T, IOException> func) throws IOException, InterruptedException {
+    public <T> T read(ThrowingFunction<BufferedReader, T, IOException> func) throws IOException, InterruptedException {
         try {
             //noinspection resource
-            TcpSocketChannel channel = connectChannel();
-            return func.apply(channel.reader());
+            connectChannel();
+            return func.apply(mReader);
         } catch (IOException | InterruptedException e) {
             close();
             throw e;
@@ -91,6 +97,8 @@ public class TcpClientChannel implements Closeable {
         try {
             if (mBaseChannel == null) {
                 try {
+                    mLogger.debug("Client opening new socket in non-blocking mode");
+
                     mBaseChannel = SocketChannel.open();
                     mBaseChannel.configureBlocking(false);
                 } catch (IOException e) {
@@ -110,6 +118,7 @@ public class TcpClientChannel implements Closeable {
             SocketChannel channel = openChannel();
 
             try {
+                mLogger.debug("Client attempting to connect to {}", mRemoteAddress);
                 if (!channel.connect(mRemoteAddress)) {
                     while (!channel.finishConnect()) {
                         //noinspection BusyWait
@@ -117,6 +126,8 @@ public class TcpClientChannel implements Closeable {
                     }
                 }
             } catch (IOException e) {
+                mLogger.debug("Client encountered error while connecting");
+
                 Closeables.silentClose(mBaseChannel);
                 mBaseChannel = null;
 
@@ -131,8 +142,11 @@ public class TcpClientChannel implements Closeable {
                 throw e;
             }
 
+            mLogger.debug("Client established connection");
             try {
                 mChannel = new TcpSocketChannel(mBaseChannel);
+                mReader = new BufferedReader(mChannel, mReadBuffer);
+                mReader.clear();
             } catch (IOException e) {
                 close();
                 throw e;
@@ -148,6 +162,8 @@ public class TcpClientChannel implements Closeable {
     public void close() {
         mLock.lock();
         try {
+            mLogger.debug("Client closing socket");
+
             if (mChannel != null) {
                 Closeables.silentClose(mChannel);
                 mChannel = null;

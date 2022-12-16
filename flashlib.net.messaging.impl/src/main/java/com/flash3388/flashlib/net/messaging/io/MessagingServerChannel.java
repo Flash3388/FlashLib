@@ -6,5 +6,5 @@ import java.io.IOException;
 
 public interface MessagingServerChannel extends MessagingChannel {
 
-    void handleNewConnections() throws IOException, TimeoutException, InterruptedException;
+    void handleUpdates() throws IOException, TimeoutException, InterruptedException;
 }

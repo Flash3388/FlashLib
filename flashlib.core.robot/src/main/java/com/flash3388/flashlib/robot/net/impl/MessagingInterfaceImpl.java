@@ -25,12 +25,12 @@ public class MessagingInterfaceImpl implements MessagingInterface, AutoCloseable
         mMessageTypes = new KnownMessageTypes();
 
         if (configuration.isServer) {
-            ServerMessagingChannel channel = new ServerMessagingChannel(configuration.address, mMessageTypes);
+            ServerMessagingChannel channel = new ServerMessagingChannel(configuration.address, mMessageTypes, logger);
             mResourceHolder.add(channel);
             mMessagingService = MessagingService.server(channel, Controllers.newSyncExecutionController(), logger);
             mResourceHolder.add(mMessagingService);
         } else {
-            ClientMessagingChannel channel = new ClientMessagingChannel(configuration.address, mMessageTypes);
+            ClientMessagingChannel channel = new ClientMessagingChannel(configuration.address, mMessageTypes, logger);
             mResourceHolder.add(channel);
             mMessagingService = MessagingService.client(channel, Controllers.newSyncExecutionController(), logger);
             mResourceHolder.add(mMessagingService);

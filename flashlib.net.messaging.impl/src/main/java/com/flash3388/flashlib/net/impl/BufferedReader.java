@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.messaging.impl;
+package com.flash3388.flashlib.net.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,16 +6,26 @@ import java.nio.ByteBuffer;
 
 public class BufferedReader extends InputStream {
 
-    private final TcpSocketChannel mChannel;
+    private final ReadableChannel mChannel;
     private final ByteBuffer mBuffer;
 
     private int mIndex;
     private int mSize;
 
-    public BufferedReader(TcpSocketChannel channel) {
+    public BufferedReader(ReadableChannel channel, ByteBuffer buffer) {
         mChannel = channel;
-        mBuffer = ByteBuffer.allocateDirect(1024);
+        mBuffer = buffer;
 
+        mIndex = 0;
+        mSize = 0;
+    }
+
+    public BufferedReader(ReadableChannel channel) {
+        this(channel, ByteBuffer.allocateDirect(1024));
+    }
+
+    public void clear() {
+        mBuffer.clear();
         mIndex = 0;
         mSize = 0;
     }
