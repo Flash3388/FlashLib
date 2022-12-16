@@ -1,24 +1,25 @@
-package com.flash3388.flashlib.net.messaging.io;
+package com.flash3388.flashlib.net.messaging.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
-public class ChannelInput extends InputStream {
+public class BufferedReader extends InputStream {
 
-    private final WeakReference<TcpChannel> mChannel;
+    private final TcpSocketChannel mChannel;
     private final ByteBuffer mBuffer;
+
     private int mIndex;
     private int mSize;
 
-    public ChannelInput(TcpChannel channel, ByteBuffer buffer) {
-        mChannel = new WeakReference<>(channel);
-        mBuffer = buffer;
+    public BufferedReader(TcpSocketChannel channel) {
+        mChannel = channel;
+        mBuffer = ByteBuffer.allocateDirect(1024);
+
         mIndex = 0;
         mSize = 0;
     }
+
 
     @Override
     public int read(byte[] b) throws IOException {
@@ -52,18 +53,12 @@ public class ChannelInput extends InputStream {
         if (mIndex < mSize) {
             return;
         }
-
-        TcpChannel channel = mChannel.get();
-        if (channel == null) {
-            throw new IllegalStateException("channel was garbage collected");
-        }
-
-        mSize = channel.read(mBuffer);
+        mSize = mChannel.read(mBuffer);
         mIndex = 0;
     }
 
     @Override
     public void close() throws IOException {
-        throw new UnsupportedEncodingException();
+        // DO NOTHING
     }
 }

@@ -1,50 +1,38 @@
 package com.flash3388.flashlib.robot.net.impl;
 
-import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closer;
-import com.flash3388.flashlib.net.messaging.MessageHandler;
 import com.flash3388.flashlib.net.messaging.MessageQueue;
+import com.flash3388.flashlib.net.messaging.MessageReceiver;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
-import com.flash3388.flashlib.net.messaging.impl.MessageService;
-import com.flash3388.flashlib.net.messaging.io.ClientMessagingChannel;
-import com.flash3388.flashlib.net.messaging.io.MessagingChannel;
-import com.flash3388.flashlib.net.messaging.io.ServerConnectionService;
-import com.flash3388.flashlib.net.messaging.io.ServerMessagingChannel;
+import com.flash3388.flashlib.net.messaging.impl.ClientMessagingChannel;
+import com.flash3388.flashlib.net.messaging.impl.MessagingService;
+import com.flash3388.flashlib.net.messaging.impl.ServerMessagingChannel;
 import com.flash3388.flashlib.robot.net.MessagingInterface;
 import com.flash3388.flashlib.robot.net.NetworkConfiguration;
+import com.notifier.Controllers;
 
 public class MessagingInterfaceImpl implements MessagingInterface, AutoCloseable {
 
     private final Closer mResourceHolder;
     private final KnownMessageTypes mMessageTypes;
-    private final MessageService mMessageService;
+    private final MessagingService mMessagingService;
 
     public MessagingInterfaceImpl(NetworkConfiguration.MessagingConfiguration configuration) {
         mResourceHolder = new Closer();
         mMessageTypes = new KnownMessageTypes();
 
-        MessagingChannel channel;
         if (configuration.isServer) {
-            ServerMessagingChannel channelImpl = new ServerMessagingChannel(configuration.address, mMessageTypes);
-            mResourceHolder.add(channelImpl);
-
-            ServerConnectionService service = new ServerConnectionService(channelImpl);
-            try {
-                service.start();
-            } catch (ServiceException e) {
-                throw new Error(e);
-            }
-            mResourceHolder.add(service);
-
-            channel = channelImpl;
-        } else {
-            channel = new ClientMessagingChannel(configuration.address, mMessageTypes);
+            ServerMessagingChannel channel = new ServerMessagingChannel(configuration.address, mMessageTypes);
             mResourceHolder.add(channel);
+            mMessagingService = MessagingService.server(channel, Controllers.newSyncExecutionController());
+            mResourceHolder.add(mMessagingService);
+        } else {
+            ClientMessagingChannel channel = new ClientMessagingChannel(configuration.address, mMessageTypes);
+            mResourceHolder.add(channel);
+            mMessagingService = MessagingService.client(channel, Controllers.newSyncExecutionController());
+            mResourceHolder.add(mMessagingService);
         }
-
-        mMessageService = new MessageService(channel);
-        mResourceHolder.add(mMessageService);
     }
 
     @Override
@@ -54,12 +42,12 @@ public class MessagingInterfaceImpl implements MessagingInterface, AutoCloseable
 
     @Override
     public MessageQueue getQueue() {
-        return mMessageService;
+        return mMessagingService;
     }
 
     @Override
-    public MessageHandler getHandler() {
-        return mMessageService;
+    public MessageReceiver getReceiver() {
+        return mMessagingService;
     }
 
     @Override

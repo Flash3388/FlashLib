@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public interface MessagingChannel extends Closeable {
 
-    boolean establishConnection() throws IOException, TimeoutException;
+    void waitForConnection() throws IOException, TimeoutException, InterruptedException;
 
     void write(Message message) throws IOException, TimeoutException;
     Message read() throws IOException, TimeoutException, InterruptedException;

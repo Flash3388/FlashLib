@@ -1,15 +1,17 @@
-package com.flash3388.flashlib.net.messaging.io;
+package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.io.MessageSerializer;
+import com.flash3388.flashlib.net.messaging.io.MessagingChannel;
 
-import java.io.DataInput;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 
 public class ClientMessagingChannel implements MessagingChannel {
 
@@ -22,32 +24,33 @@ public class ClientMessagingChannel implements MessagingChannel {
     }
 
     @Override
-    public boolean establishConnection() throws IOException, TimeoutException {
-        return mChannel.refreshConnection();
+    public void waitForConnection() throws IOException, TimeoutException, InterruptedException {
+        mChannel.waitForConnection();
     }
 
     @Override
     public void write(Message message) throws IOException, TimeoutException {
-        try (ChannelOutput output = mChannel.output();
-             DataOutputStream dataOutputStream = new DataOutputStream(output)) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
             mSerializer.write(dataOutputStream, message);
-        } catch (SocketTimeoutException e) {
-            throw new TimeoutException();
+            dataOutputStream.flush();
+
+            ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
+            mChannel.write(buffer);
         }
     }
 
     @Override
     public Message read() throws IOException, TimeoutException, InterruptedException {
-        DataInput dataInput = mChannel.input();
-        try {
-            return mSerializer.read(dataInput);
-        } catch (SocketTimeoutException e) {
-            throw new TimeoutException();
-        }
+        return mChannel.read((reader)-> {
+            try (DataInputStream dataInputStream = new DataInputStream(reader)) {
+                return mSerializer.read(dataInputStream);
+            }
+        });
     }
 
     @Override
     public void close() throws IOException {
-        mChannel.closeChannel();
+        mChannel.close();
     }
 }

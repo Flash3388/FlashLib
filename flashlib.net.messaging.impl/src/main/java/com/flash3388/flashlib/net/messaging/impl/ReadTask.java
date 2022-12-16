@@ -24,14 +24,7 @@ public class ReadTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                if (mChannel.establishConnection()) {
-                    mEventController.fire(
-                            null,
-                            Event.class,
-                            MessageListener.class,
-                            MessageListener::onConnectionEstablished
-                    );
-                }
+                mChannel.waitForConnection();
 
                 Message message = mChannel.read();
                 mEventController.fire(
