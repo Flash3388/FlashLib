@@ -5,13 +5,14 @@ import com.flash3388.flashlib.net.messaging.MessageType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KnownMessageTypes {
 
     private final Map<Integer, MessageType> mTypeMap;
 
     public KnownMessageTypes() {
-        mTypeMap = new HashMap<>();
+        mTypeMap = new ConcurrentHashMap<>();
     }
 
     public void put(MessageType type) {
