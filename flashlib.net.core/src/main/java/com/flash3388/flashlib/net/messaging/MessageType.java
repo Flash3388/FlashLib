@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.messaging;
 
+import java.util.function.Supplier;
+
 /**
  * Represents a type of message.
  * Used to transmit the message and parse it.
@@ -24,4 +26,40 @@ public interface MessageType {
      * @return empty message
      */
     Message create();
+
+    /**
+     * Creates a new {@link MessageType}.
+     *
+     * @param key unique identifier of the type
+     * @param messageCreator creator for the message type identified by this.
+     *
+     * @return new type
+     */
+    static MessageType createType(int key, Supplier<? extends Message> messageCreator) {
+        return new Impl(key, messageCreator);
+    }
+
+    /**
+     * A basic implementation for {@link MessageType}
+     */
+    class Impl implements MessageType {
+
+        private final int mKey;
+        private final Supplier<? extends Message> mMessageCreator;
+
+        public Impl(int key, Supplier<? extends Message> messageCreator) {
+            mKey = key;
+            mMessageCreator = messageCreator;
+        }
+
+        @Override
+        public int getKey() {
+            return mKey;
+        }
+
+        @Override
+        public Message create() {
+            return mMessageCreator.get();
+        }
+    }
 }
