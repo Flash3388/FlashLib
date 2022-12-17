@@ -26,7 +26,7 @@ public class WriteTask implements Runnable {
         mClock = clock;
         mLogger = logger;
 
-        mLastSend = new AtomicReference<>(null);
+        mLastSend = new AtomicReference<>(Time.INVALID);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class WriteTask implements Runnable {
                 // if the queue has so little that it will cause a continuous loop, we should sleep
                 Time now = mClock.currentTime();
                 Time lastSend = mLastSend.getAndSet(now);
-                if (now.sub(lastSend).lessThanOrEquals(MINIMUM_LOOP_TIME)) {
+                if (lastSend.isValid() && now.sub(lastSend).lessThanOrEquals(MINIMUM_LOOP_TIME)) {
                     //noinspection BusyWait
                     Thread.sleep(MINIMUM_LOOP_TIME.valueAsMillis());
                 }

@@ -30,9 +30,8 @@ public class RoboLinkService extends TerminalServiceBase
     private Thread mUpdatesThread;
     private Thread mWriteThread;
 
-    public RoboLinkService(RoboLinkChannel channel, EventController eventController,
-                           Clock clock, Logger logger) {
-        mChannel = channel;
+    public RoboLinkService(String id, EventController eventController, Clock clock, Logger logger) {
+        mChannel = new RoboLinkChannel(id, clock, logger);
         mEventController = eventController;
         mClock = clock;
         mLogger = logger;

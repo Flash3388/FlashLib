@@ -2,6 +2,8 @@ package com.flash3388.flashlib.net.udp;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
+import com.castle.util.throwables.ThrowableChain;
+import com.castle.util.throwables.Throwables;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -17,13 +19,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class MultiTargetUdpChannel implements Closeable {
 
-    private final int mBindPort;
+    private final int[] mBindPorts;
     private final Logger mLogger;
     private final AtomicReference<UnconnectedUdpChannel> mChannel;
     private final Lock mChannelLock;
 
-    public MultiTargetUdpChannel(int bindPort, Logger logger) {
-        mBindPort = bindPort;
+    public MultiTargetUdpChannel(int[] bindPorts, Logger logger) {
+        mBindPorts = bindPorts;
         mLogger = logger;
         mChannel = new AtomicReference<>();
         mChannelLock = new ReentrantLock();
@@ -78,9 +80,10 @@ public class MultiTargetUdpChannel implements Closeable {
 
                 baseChannel = DatagramChannel.open();
                 baseChannel.configureBlocking(false);
-                baseChannel.bind(new InetSocketAddress(mBindPort));
                 baseChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
                 baseChannel.setOption(StandardSocketOptions.SO_BROADCAST, true);
+
+                bind(baseChannel);
 
                 channel = new UnconnectedUdpChannel(baseChannel);
                 mChannel.set(channel);
@@ -95,5 +98,27 @@ public class MultiTargetUdpChannel implements Closeable {
         }
 
         return channel;
+    }
+
+    private void bind(DatagramChannel channel) throws IOException {
+        boolean isBound = false;
+        ThrowableChain chain = Throwables.newChain();
+        for (int port : mBindPorts) {
+            try {
+                SocketAddress address = new InetSocketAddress(port);
+                channel.bind(address);
+                isBound = true;
+
+                mLogger.debug("UDP socket bound at {}", address);
+                break;
+            } catch (IOException e) {
+                chain.chain(e);
+            }
+        }
+
+        if (!isBound) {
+            chain.throwIfType(IOException.class);
+            throw new IOException("not bound");
+        }
     }
 }

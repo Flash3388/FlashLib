@@ -6,6 +6,7 @@ import com.flash3388.flashlib.robot.net.NetworkConfiguration;
 import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.robot.net.NetworkingMode;
 import com.flash3388.flashlib.robot.net.RoboLinkInterface;
+import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
 public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
@@ -15,7 +16,7 @@ public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
     private final RoboLinkInterface mRoboLinkInterface;
     private final Closer mCloser;
 
-    public NetworkInterfaceImpl(NetworkConfiguration configuration, Logger logger) {
+    public NetworkInterfaceImpl(NetworkConfiguration configuration, Clock clock, Logger logger) {
         mMode = configuration;
         mCloser = Closer.empty();
 
@@ -28,7 +29,9 @@ public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
         }
 
         if (mMode.isNetworkingEnabled() && mMode.isRoboLinkSupported()) {
-            throw new UnsupportedOperationException();
+            RoboLinkInterfaceImpl impl = new RoboLinkInterfaceImpl(configuration.getRoboLinkConfiguration(), clock, logger);
+            mCloser.add(impl);
+            mRoboLinkInterface = impl;
         } else {
             mRoboLinkInterface = null;
         }

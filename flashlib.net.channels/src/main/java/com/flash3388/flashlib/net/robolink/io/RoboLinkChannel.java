@@ -25,36 +25,30 @@ public class RoboLinkChannel implements Closeable {
         void onPacketReceived(InboundPacket packet, boolean isFirstPacketFromSender);
     }
 
-    private static final int PORT = 5005;
+    private static final int[] PORTS = {5005, 5006, 5007, 5008, 5009};
 
     private final String mOurId;
     private final MultiTargetUdpChannel mChannel;
     private final Clock mClock;
     private final Logger mLogger;
-    private final boolean mBroadcastByPort;
 
     private final RemotesStorageImpl<RemoteImpl> mRemotes;
     private final ByteBuffer mReadBuffer;
     private final PacketSerializer mSerializer;
 
-    RoboLinkChannel(String id, MultiTargetUdpChannel channel, Clock clock, Logger logger, boolean broadcastByPort) {
+    RoboLinkChannel(String id, MultiTargetUdpChannel channel, Clock clock, Logger logger) {
         mOurId = id;
         mChannel = channel;
         mClock = clock;
         mLogger = logger;
-        mBroadcastByPort = broadcastByPort;
 
         mRemotes = new RemotesStorageImpl<>();
         mReadBuffer = ByteBuffer.allocateDirect(1024);
         mSerializer = new PacketSerializer();
     }
 
-    public RoboLinkChannel(String id, int port, Clock clock, Logger logger) {
-        this(id, new MultiTargetUdpChannel(port, logger), clock, logger, false);
-    }
-
     public RoboLinkChannel(String id, Clock clock, Logger logger) {
-        this(id, new MultiTargetUdpChannel(PORT, logger), clock, logger, true);
+        this(id, new MultiTargetUdpChannel(PORTS, logger), clock, logger);
     }
 
     public RemotesStorage getRemotesStorage() {
@@ -71,6 +65,11 @@ public class RoboLinkChannel implements Closeable {
                 int size = mReadBuffer.position();
                 mReadBuffer.flip();
                 PacketSerializer.Data data = mSerializer.read(mReadBuffer, size);
+
+                if (data.header.getSenderId().equals(mOurId)) {
+                    // this is us
+                    continue;
+                }
 
                 // TODO: HANDLE REMOTES WITH THE SAME ID
 
@@ -94,6 +93,8 @@ public class RoboLinkChannel implements Closeable {
                 Time now = mClock.currentTime();
                 remote.updateLastSeen(now);
 
+                mLogger.debug("Received packet from {} at address {}", remote.getId(), remoteAddress);
+
                 handler.onPacketReceived(
                         new InboundPacketImpl(remote, now, data.header.getContentType(), data.content),
                         isFirstPacked);
@@ -110,6 +111,8 @@ public class RoboLinkChannel implements Closeable {
         }
 
         SocketAddress address = addressOptional.get();
+        mLogger.debug("Writing packet to remote {} at address {}", remoteId, address);
+
         PacketHeader header = new PacketHeader(mOurId, contentType, content.length);
         ByteBuffer buffer = mSerializer.write(header, content);
         mChannel.writeTo(buffer, address);
@@ -119,21 +122,18 @@ public class RoboLinkChannel implements Closeable {
         PacketHeader header = new PacketHeader(mOurId, contentType, content.length);
         ByteBuffer buffer = mSerializer.write(header, content);
 
-        if (mBroadcastByPort) {
-            mChannel.writeTo(buffer, new InetSocketAddress("255.255.255.255", PORT));
-        } else {
-            ThrowableChain chain = Throwables.newChain();
-            Collection<SocketAddress> addresses = mRemotes.getAllRemoteAddress();
-            for (SocketAddress address : addresses) {
-                try {
-                    mChannel.writeTo(buffer, address);
-                } catch (IOException e) {
-                    chain.chain(e);
-                }
-            }
 
-            chain.throwIfType(IOException.class);
+        mLogger.debug("Writing BROADCAST packet");
+        ThrowableChain chain = Throwables.newChain();
+        for (int port : PORTS) {
+            try {
+                mChannel.writeTo(buffer, new InetSocketAddress("255.255.255.255", port));
+            } catch (IOException e) {
+                chain.chain(e);
+            }
         }
+
+        chain.throwIfType(IOException.class);
     }
 
     @Override

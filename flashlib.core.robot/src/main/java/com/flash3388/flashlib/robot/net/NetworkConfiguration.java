@@ -53,8 +53,13 @@ public class NetworkConfiguration implements NetworkingMode {
     }
 
     public static NetworkConfiguration withMessaging(MessagingConfiguration configuration) {
-        Objects.requireNonNull(configuration, "MessagingConfiguration should not be null");
+        Objects.requireNonNull(configuration, "configuration should not be null");
         return new NetworkConfiguration(true, configuration, null);
+    }
+
+    public static NetworkConfiguration withRoboLink(RoboLinkConfiguration configuration) {
+        Objects.requireNonNull(configuration, "configuration should not be null");
+        return new NetworkConfiguration(true, null, configuration);
     }
 
     @Override

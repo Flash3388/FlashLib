@@ -27,13 +27,14 @@ public final class RobotFactory {
         return new SystemNanoClock();
     }
 
-    public static NetworkInterface newNetworkInterface(NetworkConfiguration configuration, ResourceHolder holder, Logger logger) {
-        NetworkInterfaceImpl networkInterface = new NetworkInterfaceImpl(configuration, logger);
+    public static NetworkInterface newNetworkInterface(NetworkConfiguration configuration,
+                                                       ResourceHolder holder, Clock clock, Logger logger) {
+        NetworkInterfaceImpl networkInterface = new NetworkInterfaceImpl(configuration, clock, logger);
         holder.add(networkInterface);
         return networkInterface;
     }
 
     public static NetworkInterface disabledNetworkInterface() {
-        return new NetworkInterfaceImpl(NetworkConfiguration.disabled(), Logging.stub());
+        return new NetworkInterfaceImpl(NetworkConfiguration.disabled(), null, Logging.stub());
     }
 }
