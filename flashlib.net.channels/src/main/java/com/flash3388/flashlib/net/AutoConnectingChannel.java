@@ -26,7 +26,6 @@ public class AutoConnectingChannel implements ConnectedNetChannel {
     private final Lock mConnectionLock;
     private final Condition mConnected;
     private final AtomicBoolean mConnectorThread;
-    private final AtomicReference<Runnable> mOnConnectionCallback;
     private final AtomicReference<ConnectedNetChannel> mUnderlyingChannel;
 
     public AutoConnectingChannel(NetConnector connector, SocketAddress remoteAddress, Logger logger) {
@@ -37,12 +36,7 @@ public class AutoConnectingChannel implements ConnectedNetChannel {
         mConnectionLock = new ReentrantLock();
         mConnected = mConnectionLock.newCondition();
         mConnectorThread = new AtomicBoolean(false);
-        mOnConnectionCallback = new AtomicReference<>(null);
         mUnderlyingChannel = new AtomicReference<>(null);
-    }
-
-    public void setOnConnection(Runnable callback) {
-        mOnConnectionCallback.set(callback);
     }
 
     public void waitForConnection() throws InterruptedException, IOException {
@@ -113,16 +107,6 @@ public class AutoConnectingChannel implements ConnectedNetChannel {
             try {
                 mLogger.debug("Attempting to connect to {}", mRemoteAddress);
                 underlyingChannel = mConnector.connect(mRemoteAddress, CONNECTION_WAIT_TIME);
-
-                Runnable runnable = mOnConnectionCallback.get();
-                if (runnable != null) {
-                    try {
-                        runnable.run();
-                    } catch (Throwable t) {
-                        // catch user errors
-                    }
-                }
-
                 mUnderlyingChannel.set(underlyingChannel);
 
                 mConnected.signalAll();

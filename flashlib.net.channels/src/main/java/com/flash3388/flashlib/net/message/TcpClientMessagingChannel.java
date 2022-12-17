@@ -35,6 +35,7 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException {
+        // TODO: RECOGNIZE NEW REMOTE
         mChannel.waitForConnection();
 
         BufferedChannelReader reader = new BufferedChannelReader(mChannel, mReadBuffer);
@@ -43,6 +44,8 @@ public class TcpClientMessagingChannel implements MessagingChannel {
         // this will block until we receive data
         try (DataInputStream dataInputStream = new DataInputStream(reader)) {
             NewDataHandler.Result result = mDataHandler.handle(dataInputStream);
+
+            mLogger.debug("New message routed from server");
             handler.onNewMessage(result.info, result.message);
         }
     }
@@ -55,6 +58,8 @@ public class TcpClientMessagingChannel implements MessagingChannel {
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
             mSerializer.write(dataOutputStream, message);
             dataOutputStream.flush();
+
+            mLogger.debug("Sending message to server");
 
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
             mChannel.write(buffer);

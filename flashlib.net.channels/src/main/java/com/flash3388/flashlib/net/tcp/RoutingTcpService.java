@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-public class RoutingTcpServer extends TerminalServiceBase {
+public class RoutingTcpService extends TerminalServiceBase {
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
@@ -18,7 +18,7 @@ public class RoutingTcpServer extends TerminalServiceBase {
     private TcpServerChannel mChannel;
     private Thread mThread;
 
-    public RoutingTcpServer(SocketAddress bindAddress, Logger logger) {
+    public RoutingTcpService(SocketAddress bindAddress, Logger logger) {
         mBindAddress = bindAddress;
         mLogger = logger;
 

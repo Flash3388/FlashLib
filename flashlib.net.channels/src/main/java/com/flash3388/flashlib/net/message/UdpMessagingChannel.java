@@ -36,6 +36,7 @@ public class UdpMessagingChannel implements MessagingChannel {
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException, TimeoutException {
+        // TODO: RECOGNIZE NEW REMOTE
         mReadBuffer.rewind();
         // this will block until we receive something
         SocketAddress remoteAddress = mChannel.read(mReadBuffer);
@@ -44,6 +45,8 @@ public class UdpMessagingChannel implements MessagingChannel {
         // parse packet
         int size = mReadBuffer.position();
         mReadBuffer.flip();
+
+        mLogger.debug("Received new data packet from {}", remoteAddress);
 
         try (InputStream inputStream = new ByteArrayInputStream(mReadBuffer.array(), 0, size);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
@@ -61,6 +64,8 @@ public class UdpMessagingChannel implements MessagingChannel {
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
             mSerializer.write(dataOutputStream, message);
             dataOutputStream.flush();
+
+            mLogger.debug("Sending BROADCAST of message");
 
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
             mChannel.broadcastToPossiblePorts(buffer);
