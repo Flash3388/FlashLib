@@ -2,6 +2,8 @@ package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.concurrent.service.TerminalServiceBase;
 import com.castle.exceptions.ServiceException;
+import com.flash3388.flashlib.net.messaging.ConnectionEvent;
+import com.flash3388.flashlib.net.messaging.ConnectionListener;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageListener;
 import com.flash3388.flashlib.net.messaging.MessageQueue;
@@ -57,6 +59,11 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
     }
 
     @Override
+    public void addListener(ConnectionListener listener) {
+        mEventController.registerListener(listener);
+    }
+
+    @Override
     protected void startRunning() throws ServiceException {
         mWriteThread = new Thread(
                 new WriteTask(mChannel, mMessageQueue, mLogger),
@@ -67,6 +74,15 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
                 new ReadTask(mChannel, mEventController, mLogger),
                 "MessagingService-ReadTask");
         mReadThread.setDaemon(true);
+
+        mChannel.setOnConnection(()-> {
+            mEventController.fire(
+                    new ConnectionEvent(),
+                    ConnectionEvent.class,
+                    ConnectionListener.class,
+                    ConnectionListener::onConnection
+            );
+        });
 
         if (mServerChannel != null) {
             mServerUpdateThread = new Thread(
@@ -82,6 +98,8 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
 
     @Override
     protected void stopRunning() {
+        mChannel.setOnConnection(null);
+
         mWriteThread.interrupt();
         mWriteThread = null;
 

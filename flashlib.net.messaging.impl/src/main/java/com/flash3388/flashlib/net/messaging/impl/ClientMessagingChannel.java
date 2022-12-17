@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
+import com.castle.util.function.ThrowingRunnable;
 import com.flash3388.flashlib.net.impl.TcpClientChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
@@ -20,9 +21,16 @@ public class ClientMessagingChannel implements MessagingChannel {
     private final TcpClientChannel mChannel;
     private final MessageSerializer mSerializer;
 
-    public ClientMessagingChannel(SocketAddress serverAddress, KnownMessageTypes messageTypes, Logger logger) {
+    public ClientMessagingChannel(SocketAddress serverAddress,
+                                  KnownMessageTypes messageTypes,
+                                  Logger logger) {
         mChannel = new TcpClientChannel(serverAddress, logger);
         mSerializer = new MessageSerializer(messageTypes);
+    }
+
+    @Override
+    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+        mChannel.setOnConnection(callback);
     }
 
     @Override

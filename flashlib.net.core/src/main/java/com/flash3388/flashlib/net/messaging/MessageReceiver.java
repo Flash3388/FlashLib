@@ -13,4 +13,11 @@ public interface MessageReceiver {
      * @param listener listener
      */
     void addListener(MessageListener listener);
+
+    /**
+     * Registers a listener to handle connection events.
+     *
+     * @param listener listener
+     */
+    void addListener(ConnectionListener listener);
 }

@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.impl;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
+import com.castle.util.function.ThrowingRunnable;
 import com.castle.util.throwables.ThrowableChain;
 import com.castle.util.throwables.Throwables;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -45,6 +47,7 @@ public class TcpServerChannel implements Closeable {
     private final Lock mClientsChangeLock;
     private final Condition mHasClients;
     private final AtomicInteger mClientIdentifier;
+    private final AtomicReference<ThrowingRunnable<IOException>> mOnConnectionCallback;
 
     private Selector mSelector;
     private Selector mReadSelector;
@@ -59,9 +62,14 @@ public class TcpServerChannel implements Closeable {
         mClientsChangeLock = new ReentrantLock();
         mHasClients = mClientsChangeLock.newCondition();
         mClientIdentifier = new AtomicInteger(0);
+        mOnConnectionCallback = new AtomicReference<>(null);
 
         mSelector = null;
         mServer = null;
+    }
+
+    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+        mOnConnectionCallback.set(callback);
     }
 
     public void handleUpdates(UpdateHandler handler) throws IOException, TimeoutException {
@@ -89,6 +97,11 @@ public class TcpServerChannel implements Closeable {
                         channel.register(mSelector, SelectionKey.OP_READ);
 
                         handler.onNewChannel(identifier);
+
+                        ThrowingRunnable<IOException> callback = mOnConnectionCallback.get();
+                        if (callback != null) {
+                            callback.run();
+                        }
 
                         mClients.put(channel, new TcpSocketChannel(channel, identifier));
                         mClientIdentifiers.put(identifier, channel);

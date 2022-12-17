@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.impl;
 
 import com.castle.util.closeables.Closeables;
 import com.castle.util.function.ThrowingFunction;
+import com.castle.util.function.ThrowingRunnable;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -10,6 +11,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,6 +27,7 @@ public class TcpClientChannel implements Closeable {
     private final Lock mLock;
     private final Condition mConnected;
     private final AtomicBoolean mConnector;
+    private final AtomicReference<ThrowingRunnable<IOException>> mOnConnectionCallback;
 
     private SocketChannel mBaseChannel;
     private TcpSocketChannel mChannel;
@@ -38,9 +41,14 @@ public class TcpClientChannel implements Closeable {
         mLock = new ReentrantLock();
         mConnected = mLock.newCondition();
         mConnector = new AtomicBoolean(false);
+        mOnConnectionCallback = new AtomicReference<>(null);
 
         mBaseChannel = null;
         mChannel = null;
+    }
+
+    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+        mOnConnectionCallback.set(callback);
     }
 
     public void waitForConnection() throws IOException, InterruptedException {
@@ -147,6 +155,11 @@ public class TcpClientChannel implements Closeable {
                 mChannel = new TcpSocketChannel(mBaseChannel);
                 mReader = new BufferedReader(mChannel, mReadBuffer);
                 mReader.clear();
+
+                ThrowingRunnable<IOException> callback = mOnConnectionCallback.get();
+                if (callback != null) {
+                    callback.run();
+                }
             } catch (IOException e) {
                 close();
                 throw e;

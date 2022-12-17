@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
+import com.castle.util.function.ThrowingRunnable;
 import com.flash3388.flashlib.net.impl.BufferedReader;
 import com.flash3388.flashlib.net.impl.ReadableChannel;
 import com.flash3388.flashlib.net.impl.TcpServerChannel;
@@ -38,6 +39,11 @@ public class ServerMessagingChannel implements MessagingServerChannel {
     @Override
     public void handleUpdates() throws IOException, TimeoutException, InterruptedException {
         mChannel.handleUpdates(mUpdateHandler);
+    }
+
+    @Override
+    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+        mChannel.setOnConnection(callback);
     }
 
     @Override
