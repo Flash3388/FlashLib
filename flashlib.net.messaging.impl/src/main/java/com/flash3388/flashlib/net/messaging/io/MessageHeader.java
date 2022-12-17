@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class MessageHeader {
 
-    private static final int VERSION = 1;
+    static final int VERSION = 1;
 
     private final int mMessageType;
 
