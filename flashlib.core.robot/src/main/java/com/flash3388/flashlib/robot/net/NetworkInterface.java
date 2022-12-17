@@ -17,17 +17,4 @@ public interface NetworkInterface {
      * @return {@link NetworkingMode}
      */
     NetworkingMode getMode();
-
-    /**
-     * Retrieves the {@link MessagingInterface} packaged with this communication module.
-     *
-     * @return {@link MessagingInterface}
-     *
-     * @throws UnsupportedOperationException if the configured
-     *      {@link NetworkingMode#isMessagingSupported()} is <b>false</b>.
-     * @see #getMode()
-     */
-    MessagingInterface getMessaging();
-
-    RoboLinkInterface getRoboLink();
 }

@@ -42,6 +42,19 @@ public class MultiTargetUdpChannel implements Closeable {
         }
     }
 
+    public void broadcastToPossiblePorts(ByteBuffer buffer) throws IOException {
+        ThrowableChain chain = Throwables.newChain();
+        for (int port : mBindPorts) {
+            try {
+                writeTo(buffer, new InetSocketAddress("255.255.255.255", port));
+            } catch (IOException e) {
+                chain.chain(e);
+            }
+        }
+
+        chain.throwIfType(IOException.class);
+    }
+
     public SocketAddress read(ByteBuffer buffer) throws IOException, TimeoutException {
         try {
             //noinspection resource
