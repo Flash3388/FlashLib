@@ -1,6 +1,6 @@
-package com.flash3388.flashlib.net.robolink.io;
+package com.flash3388.flashlib.net.packets.io;
 
-import com.flash3388.flashlib.net.robolink.InboundPacket;
+import com.flash3388.flashlib.net.packets.InboundPacket;
 import com.flash3388.flashlib.net.robolink.Remote;
 import com.flash3388.flashlib.time.Time;
 

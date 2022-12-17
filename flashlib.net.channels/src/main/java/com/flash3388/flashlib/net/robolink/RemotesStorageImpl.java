@@ -1,7 +1,4 @@
-package com.flash3388.flashlib.net.robolink.io;
-
-import com.flash3388.flashlib.net.robolink.Remote;
-import com.flash3388.flashlib.net.robolink.RemotesStorage;
+package com.flash3388.flashlib.net.robolink;
 
 import java.net.SocketAddress;
 import java.util.Collection;

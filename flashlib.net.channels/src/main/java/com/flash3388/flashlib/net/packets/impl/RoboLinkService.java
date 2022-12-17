@@ -1,15 +1,15 @@
-package com.flash3388.flashlib.net.robolink.impl;
+package com.flash3388.flashlib.net.packets.impl;
 
 import com.castle.concurrent.service.TerminalServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.robolink.DataListener;
-import com.flash3388.flashlib.net.robolink.InboundPacketsReceiver;
-import com.flash3388.flashlib.net.robolink.Packet;
-import com.flash3388.flashlib.net.robolink.PacketsSender;
+import com.flash3388.flashlib.net.packets.DataListener;
+import com.flash3388.flashlib.net.packets.InboundPacketsReceiver;
+import com.flash3388.flashlib.net.packets.Packet;
+import com.flash3388.flashlib.net.packets.PacketsSender;
+import com.flash3388.flashlib.net.packets.io.RoboLinkChannel;
 import com.flash3388.flashlib.net.robolink.Remote;
 import com.flash3388.flashlib.net.robolink.RemotesStorage;
-import com.flash3388.flashlib.net.robolink.io.RoboLinkChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.notifier.EventController;
 import org.slf4j.Logger;
@@ -20,6 +20,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class RoboLinkService extends TerminalServiceBase
         implements InboundPacketsReceiver, PacketsSender, RemotesStorage {
+    // TODO: RoboLink should be based on this packets thing, but is actually sending periodically specific data
+    // and receiving specific data
 
     private final RoboLinkChannel mChannel;
     private final EventController mEventController;

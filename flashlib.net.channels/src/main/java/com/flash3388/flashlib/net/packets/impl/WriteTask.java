@@ -1,7 +1,7 @@
-package com.flash3388.flashlib.net.robolink.impl;
+package com.flash3388.flashlib.net.packets.impl;
 
-import com.flash3388.flashlib.net.robolink.io.RoboLinkChannel;
-import com.flash3388.flashlib.net.robolink.io.UnknownRemoteException;
+import com.flash3388.flashlib.net.robolink.UnknownRemoteException;
+import com.flash3388.flashlib.net.packets.io.RoboLinkChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;

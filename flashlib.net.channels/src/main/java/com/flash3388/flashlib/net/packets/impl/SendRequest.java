@@ -1,6 +1,6 @@
-package com.flash3388.flashlib.net.robolink.impl;
+package com.flash3388.flashlib.net.packets.impl;
 
-import com.flash3388.flashlib.net.robolink.Packet;
+import com.flash3388.flashlib.net.packets.Packet;
 
 public class SendRequest {
 

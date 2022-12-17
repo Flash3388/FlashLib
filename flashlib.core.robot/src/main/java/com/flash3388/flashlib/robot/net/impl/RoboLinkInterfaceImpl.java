@@ -1,11 +1,10 @@
 package com.flash3388.flashlib.robot.net.impl;
 
 import com.castle.exceptions.ServiceException;
-import com.flash3388.flashlib.net.robolink.InboundPacketsReceiver;
-import com.flash3388.flashlib.net.robolink.PacketsSender;
+import com.flash3388.flashlib.net.packets.InboundPacketsReceiver;
+import com.flash3388.flashlib.net.packets.PacketsSender;
 import com.flash3388.flashlib.net.robolink.RemotesStorage;
-import com.flash3388.flashlib.net.robolink.impl.RoboLinkService;
-import com.flash3388.flashlib.net.robolink.io.RoboLinkChannel;
+import com.flash3388.flashlib.net.packets.impl.RoboLinkService;
 import com.flash3388.flashlib.robot.net.NetworkConfiguration;
 import com.flash3388.flashlib.robot.net.RoboLinkInterface;
 import com.flash3388.flashlib.time.Clock;

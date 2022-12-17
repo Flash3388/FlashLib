@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.robolink;
+package com.flash3388.flashlib.net.packets;
 
 public interface PacketsSender {
 

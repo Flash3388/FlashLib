@@ -1,7 +1,10 @@
-package com.flash3388.flashlib.net.robolink.io;
+package com.flash3388.flashlib.net.packets.io;
+
+import com.castle.util.closeables.Closeables;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,13 +12,18 @@ import java.nio.ByteBuffer;
 
 public class PacketSerializer {
 
-    public static class Data {
+    public static class Data implements Closeable {
         public final PacketHeader header;
-        public final byte[] content;
+        public final DataInputStream contentStream;
 
-        private Data(PacketHeader header, byte[] content) {
+        private Data(PacketHeader header, DataInputStream contentStream) {
             this.header = header;
-            this.content = content;
+            this.contentStream = contentStream;
+        }
+
+        @Override
+        public void close() {
+            Closeables.silentClose(contentStream);
         }
     }
 
@@ -28,15 +36,10 @@ public class PacketSerializer {
     public Data read(ByteBuffer buffer, int size) throws IOException {
         buffer.get(mBytesBuffer, 0, size);
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mBytesBuffer);
-             DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-            PacketHeader header = new PacketHeader(dataInputStream);
-            byte[] content = new byte[header.getContentSize()];
-            //noinspection ResultOfMethodCallIgnored
-            dataInputStream.read(content);
-
-            return new Data(header, content);
-        }
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(mBytesBuffer);
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        PacketHeader header = new PacketHeader(dataInputStream);
+        return new Data(header, dataInputStream);
     }
 
     public ByteBuffer write(PacketHeader header, byte[] content) throws IOException {

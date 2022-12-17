@@ -1,11 +1,11 @@
-package com.flash3388.flashlib.net.robolink.impl;
+package com.flash3388.flashlib.net.packets.impl;
 
-import com.flash3388.flashlib.net.robolink.DataListener;
-import com.flash3388.flashlib.net.robolink.InboundPacket;
-import com.flash3388.flashlib.net.robolink.NewPacketEvent;
-import com.flash3388.flashlib.net.robolink.io.RoboLinkChannel;
+import com.flash3388.flashlib.net.packets.io.PacketInfo;
+import com.flash3388.flashlib.net.packets.io.RoboLinkChannel;
 import com.notifier.EventController;
 import org.slf4j.Logger;
+
+import java.io.DataInput;
 
 public class UpdatesTask implements Runnable {
 
@@ -42,13 +42,15 @@ public class UpdatesTask implements Runnable {
         }
 
         @Override
-        public void onPacketReceived(InboundPacket packet, boolean isFirstPacketFromSender) {
+        public void onPacketReceived(PacketInfo packetInfo, DataInput contentInfo, boolean isFirstPacketFromSender) {
+            /*
             mEventController.fire(
                     new NewPacketEvent(packet),
                     NewPacketEvent.class,
                     DataListener.class,
                     DataListener::onNewPacketReceived
             );
+             */
         }
     }
 }

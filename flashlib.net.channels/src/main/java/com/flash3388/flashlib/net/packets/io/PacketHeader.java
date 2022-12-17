@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.robolink.io;
+package com.flash3388.flashlib.net.packets.io;
 
 import java.io.DataInput;
 import java.io.DataOutput;

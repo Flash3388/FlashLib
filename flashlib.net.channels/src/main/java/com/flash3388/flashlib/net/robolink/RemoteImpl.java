@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.robolink.io;
+package com.flash3388.flashlib.net.robolink;
 
 import com.flash3388.flashlib.net.robolink.Remote;
 import com.flash3388.flashlib.time.Time;
@@ -25,7 +25,7 @@ public class RemoteImpl implements Remote {
         return mLastSeen.get();
     }
 
-    void updateLastSeen(Time time) {
+    public void updateLastSeen(Time time) {
         mLastSeen.set(time);
     }
 }
