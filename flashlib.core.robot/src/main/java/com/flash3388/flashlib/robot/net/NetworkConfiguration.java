@@ -30,21 +30,31 @@ public class NetworkConfiguration implements NetworkingMode {
         }
     }
 
+    public static class RoboLinkConfiguration {
+        public final boolean isEnabled;
+
+        public RoboLinkConfiguration(boolean isEnabled) {
+            this.isEnabled = isEnabled;
+        }
+    }
+
     private final boolean mEnabled;
     private final MessagingConfiguration mMessagingConfiguration;
+    private final RoboLinkConfiguration mRoboLinkConfiguration;
 
-    private NetworkConfiguration(boolean enabled, MessagingConfiguration messagingConfiguration) {
+    private NetworkConfiguration(boolean enabled, MessagingConfiguration messagingConfiguration, RoboLinkConfiguration roboLinkConfiguration) {
         mEnabled = enabled;
         mMessagingConfiguration = messagingConfiguration;
+        mRoboLinkConfiguration = roboLinkConfiguration;
     }
 
     public static NetworkConfiguration disabled() {
-        return new NetworkConfiguration(false, null);
+        return new NetworkConfiguration(false, null, null);
     }
 
     public static NetworkConfiguration withMessaging(MessagingConfiguration configuration) {
         Objects.requireNonNull(configuration, "MessagingConfiguration should not be null");
-        return new NetworkConfiguration(true, configuration);
+        return new NetworkConfiguration(true, configuration, null);
     }
 
     @Override
@@ -54,10 +64,19 @@ public class NetworkConfiguration implements NetworkingMode {
 
     @Override
     public boolean isMessagingSupported() {
-        return mMessagingConfiguration.isEnabled;
+        return mMessagingConfiguration != null && mMessagingConfiguration.isEnabled;
+    }
+
+    @Override
+    public boolean isRoboLinkSupported() {
+        return mRoboLinkConfiguration != null && mRoboLinkConfiguration.isEnabled;
     }
 
     public MessagingConfiguration getMessagingConfiguration() {
         return mMessagingConfiguration;
+    }
+
+    public RoboLinkConfiguration getRoboLinkConfiguration() {
+        return mRoboLinkConfiguration;
     }
 }

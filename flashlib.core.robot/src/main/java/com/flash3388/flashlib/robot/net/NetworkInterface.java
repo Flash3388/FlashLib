@@ -28,4 +28,6 @@ public interface NetworkInterface {
      * @see #getMode()
      */
     MessagingInterface getMessaging();
+
+    RoboLinkInterface getRoboLink();
 }

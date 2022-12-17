@@ -5,12 +5,14 @@ import com.flash3388.flashlib.robot.net.MessagingInterface;
 import com.flash3388.flashlib.robot.net.NetworkConfiguration;
 import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.robot.net.NetworkingMode;
+import com.flash3388.flashlib.robot.net.RoboLinkInterface;
 import org.slf4j.Logger;
 
 public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
 
     private final NetworkingMode mMode;
     private final MessagingInterface mMessagingInterface;
+    private final RoboLinkInterface mRoboLinkInterface;
     private final Closer mCloser;
 
     public NetworkInterfaceImpl(NetworkConfiguration configuration, Logger logger) {
@@ -23,6 +25,12 @@ public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
             mMessagingInterface = impl;
         } else {
             mMessagingInterface = null;
+        }
+
+        if (mMode.isNetworkingEnabled() && mMode.isRoboLinkSupported()) {
+            throw new UnsupportedOperationException();
+        } else {
+            mRoboLinkInterface = null;
         }
     }
 
@@ -38,6 +46,15 @@ public class NetworkInterfaceImpl implements NetworkInterface, AutoCloseable {
         }
 
         return mMessagingInterface;
+    }
+
+    @Override
+    public RoboLinkInterface getRoboLink() {
+        if (!mMode.isRoboLinkSupported()) {
+            throw new UnsupportedOperationException();
+        }
+
+        return mRoboLinkInterface;
     }
 
     @Override

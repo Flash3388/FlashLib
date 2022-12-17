@@ -14,6 +14,7 @@ import java.nio.channels.Selector;
 public class ConnectedUdpChannel implements ConnectedNetChannel {
 
     private static final int READ_TIMEOUT = 100;
+    private static final boolean BREAK_ON_READ_TIMEOUT = false;
 
     private final DatagramChannel mChannel;
     private final Selector mReadSelector;
@@ -41,7 +42,11 @@ public class ConnectedUdpChannel implements ConnectedNetChannel {
         while (remote == null) {
             int available = mReadSelector.select(READ_TIMEOUT);
             if (available < 1) {
-                throw new TimeoutException();
+                if (BREAK_ON_READ_TIMEOUT) {
+                    throw new TimeoutException();
+                } else {
+                    continue;
+                }
             }
 
             remote = mChannel.receive(buffer);

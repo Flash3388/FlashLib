@@ -37,7 +37,7 @@ public class WriteTask implements Runnable {
             } catch (TimeoutException e) {
                 // no need to do anything
             } catch (Throwable t) {
-                mLogger.error("Error in ReadTask", t);
+                mLogger.error("Error in WriteTask", t);
             }
         }
     }

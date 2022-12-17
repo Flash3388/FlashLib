@@ -4,4 +4,5 @@ public interface NetworkingMode {
 
     boolean isNetworkingEnabled();
     boolean isMessagingSupported();
+    boolean isRoboLinkSupported();
 }
