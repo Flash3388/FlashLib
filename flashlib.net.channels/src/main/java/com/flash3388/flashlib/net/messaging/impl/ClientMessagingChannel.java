@@ -1,12 +1,13 @@
 package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
-import com.castle.util.function.ThrowingRunnable;
-import com.flash3388.flashlib.net.impl.TcpClientChannel;
+import com.flash3388.flashlib.net.AutoConnectingChannel;
+import com.flash3388.flashlib.net.BufferedChannelReader;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.io.MessageSerializer;
 import com.flash3388.flashlib.net.messaging.io.MessagingChannel;
+import com.flash3388.flashlib.net.tcp.TcpClientConnector;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -18,18 +19,20 @@ import java.nio.ByteBuffer;
 
 public class ClientMessagingChannel implements MessagingChannel {
 
-    private final TcpClientChannel mChannel;
+    private final AutoConnectingChannel mChannel;
     private final MessageSerializer mSerializer;
+    private final ByteBuffer mReadBuffer;
 
     public ClientMessagingChannel(SocketAddress serverAddress,
                                   KnownMessageTypes messageTypes,
                                   Logger logger) {
-        mChannel = new TcpClientChannel(serverAddress, logger);
+        mChannel = new AutoConnectingChannel(new TcpClientConnector(logger), serverAddress, logger);
         mSerializer = new MessageSerializer(messageTypes);
+        mReadBuffer = ByteBuffer.allocateDirect(1024);
     }
 
     @Override
-    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+    public void setOnConnection(Runnable callback) {
         mChannel.setOnConnection(callback);
     }
 
@@ -52,11 +55,12 @@ public class ClientMessagingChannel implements MessagingChannel {
 
     @Override
     public Message read() throws IOException, TimeoutException, InterruptedException {
-        return mChannel.read((reader)-> {
-            try (DataInputStream dataInputStream = new DataInputStream(reader)) {
-                return mSerializer.read(dataInputStream);
-            }
-        });
+        BufferedChannelReader reader = new BufferedChannelReader(mChannel, mReadBuffer);
+        reader.clear();
+
+        try (DataInputStream dataInputStream = new DataInputStream(reader)) {
+            return mSerializer.read(dataInputStream);
+        }
     }
 
     @Override

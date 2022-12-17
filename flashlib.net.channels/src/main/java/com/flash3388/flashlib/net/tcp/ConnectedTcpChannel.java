@@ -1,8 +1,9 @@
-package com.flash3388.flashlib.net.impl;
+package com.flash3388.flashlib.net.tcp;
 
+import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -10,7 +11,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-public class TcpSocketChannel implements Closeable, ReadableChannel {
+public class ConnectedTcpChannel implements IdentifiedConnectedNetChannel {
 
     private static final int READ_TIMEOUT = 100;
 
@@ -18,20 +19,21 @@ public class TcpSocketChannel implements Closeable, ReadableChannel {
     private final int mIdentifier;
     private final Selector mReadSelector;
 
-    public TcpSocketChannel(SocketChannel channel, int identifier) throws IOException {
+    public ConnectedTcpChannel(SocketChannel channel, int identifier) throws IOException {
+        if (!channel.isConnected()) {
+            throw new IllegalArgumentException("expected connected channel");
+        }
+
         mChannel = channel;
+        mChannel.configureBlocking(false);
         mIdentifier = identifier;
         mReadSelector = Selector.open();
 
         mChannel.register(mReadSelector, SelectionKey.OP_READ);
     }
 
-    public TcpSocketChannel(SocketChannel channel) throws IOException {
+    public ConnectedTcpChannel(SocketChannel channel) throws IOException {
         this(channel, -1);
-    }
-
-    public void write(ByteBuffer buffer) throws IOException {
-        mChannel.write(buffer);
     }
 
     @Override
@@ -39,8 +41,12 @@ public class TcpSocketChannel implements Closeable, ReadableChannel {
         return mIdentifier;
     }
 
+    public void write(ByteBuffer buffer) throws IOException {
+        mChannel.write(buffer);
+    }
+
     @Override
-    public int read(ByteBuffer buffer) throws IOException {
+    public int read(ByteBuffer buffer) throws IOException, TimeoutException {
         int read = mChannel.read(buffer);
         if (read < 0) {
             close();
@@ -48,7 +54,11 @@ public class TcpSocketChannel implements Closeable, ReadableChannel {
         }
 
         while (read < 1) {
-            mReadSelector.select(READ_TIMEOUT);
+            int available = mReadSelector.select(READ_TIMEOUT);
+            if (available < 1) {
+                throw new TimeoutException();
+            }
+
             read = mChannel.read(buffer);
         }
 

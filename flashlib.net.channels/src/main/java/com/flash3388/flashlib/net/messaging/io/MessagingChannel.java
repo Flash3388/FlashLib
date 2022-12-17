@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.net.messaging.io;
 
 import com.castle.time.exceptions.TimeoutException;
-import com.castle.util.function.ThrowingRunnable;
 import com.flash3388.flashlib.net.messaging.Message;
 
 import java.io.Closeable;
@@ -9,7 +8,7 @@ import java.io.IOException;
 
 public interface MessagingChannel extends Closeable {
 
-    void setOnConnection(ThrowingRunnable<IOException> callback);
+    void setOnConnection(Runnable callback);
 
     void waitForConnection() throws IOException, TimeoutException, InterruptedException;
 

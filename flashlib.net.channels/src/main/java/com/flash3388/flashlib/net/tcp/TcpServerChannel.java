@@ -1,10 +1,10 @@
-package com.flash3388.flashlib.net.impl;
+package com.flash3388.flashlib.net.tcp;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.castle.util.function.ThrowingRunnable;
 import com.castle.util.throwables.ThrowableChain;
 import com.castle.util.throwables.Throwables;
+import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -16,13 +16,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -33,7 +31,7 @@ public class TcpServerChannel implements Closeable {
 
     public interface UpdateHandler {
 
-        void onNewClientData(ReadableChannel channel) throws IOException;
+        void onNewClientData(IdentifiedConnectedNetChannel channel) throws IOException;
         void onNewChannel(int identifier) throws IOException;
     }
 
@@ -41,13 +39,13 @@ public class TcpServerChannel implements Closeable {
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
-    private final Map<Channel, TcpSocketChannel> mClients;
+    private final Map<Channel, ConnectedTcpChannel> mClients;
     private final Map<Integer, Channel> mClientIdentifiers;
 
     private final Lock mClientsChangeLock;
     private final Condition mHasClients;
     private final AtomicInteger mClientIdentifier;
-    private final AtomicReference<ThrowingRunnable<IOException>> mOnConnectionCallback;
+    private final AtomicReference<Runnable> mOnConnectionCallback;
 
     private Selector mSelector;
     private Selector mReadSelector;
@@ -68,7 +66,7 @@ public class TcpServerChannel implements Closeable {
         mServer = null;
     }
 
-    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+    public void setOnConnection(Runnable callback) {
         mOnConnectionCallback.set(callback);
     }
 
@@ -98,12 +96,12 @@ public class TcpServerChannel implements Closeable {
 
                         handler.onNewChannel(identifier);
 
-                        ThrowingRunnable<IOException> callback = mOnConnectionCallback.get();
+                        Runnable callback = mOnConnectionCallback.get();
                         if (callback != null) {
                             callback.run();
                         }
 
-                        mClients.put(channel, new TcpSocketChannel(channel, identifier));
+                        mClients.put(channel, new ConnectedTcpChannel(channel, identifier));
                         mClientIdentifiers.put(identifier, channel);
 
                         mHasClients.signalAll();
@@ -119,7 +117,7 @@ public class TcpServerChannel implements Closeable {
                 } else if (key.isReadable()) {
                     // client ready to read
 
-                    TcpSocketChannel channel;
+                    ConnectedTcpChannel channel;
                     mClientsChangeLock.lock();
                     try {
                         channel = mClients.get(key.channel());
@@ -157,7 +155,7 @@ public class TcpServerChannel implements Closeable {
     }
 
     public void writeToAllBut(ByteBuffer buffer, int identifier) throws IOException {
-        List<TcpSocketChannel> clients;
+        List<ConnectedTcpChannel> clients;
         mClientsChangeLock.lock();
         try {
             clients = new LinkedList<>(mClients.values());
@@ -167,8 +165,8 @@ public class TcpServerChannel implements Closeable {
 
         ThrowableChain chain = Throwables.newChain();
         // remove channels with no errors
-        for (Iterator<? extends TcpSocketChannel> it = clients.iterator(); it.hasNext();) {
-            TcpSocketChannel channel = it.next();
+        for (Iterator<? extends ConnectedTcpChannel> it = clients.iterator(); it.hasNext();) {
+            ConnectedTcpChannel channel = it.next();
             if (channel.getIdentifier() == identifier) {
                 it.remove();
                 continue;
@@ -196,7 +194,7 @@ public class TcpServerChannel implements Closeable {
         writeToAllBut(buffer, -1);
     }
 
-    private void writeToChannel(TcpSocketChannel channel, ByteBuffer buffer) throws IOException {
+    private void writeToChannel(ConnectedTcpChannel channel, ByteBuffer buffer) throws IOException {
         mLogger.debug("Server writing to channel {}", channel.getIdentifier());
         try {
             buffer.rewind();
@@ -212,7 +210,7 @@ public class TcpServerChannel implements Closeable {
         mClientsChangeLock.lock();
         try {
             //noinspection SuspiciousMethodCalls
-            TcpSocketChannel channel = mClients.remove(key);
+            ConnectedTcpChannel channel = mClients.remove(key);
             if (channel != null) {
                 mLogger.debug("Server removing client, id {}", channel.getIdentifier());
                 //noinspection resource
@@ -232,7 +230,7 @@ public class TcpServerChannel implements Closeable {
                 return;
             }
 
-            TcpSocketChannel channel = mClients.remove(baseChannel);
+            ConnectedTcpChannel channel = mClients.remove(baseChannel);
             if (channel != null) {
                 mLogger.debug("Server removing client, id {}", channel.getIdentifier());
                 channel.close();

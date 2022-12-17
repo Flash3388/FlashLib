@@ -1,18 +1,20 @@
-package com.flash3388.flashlib.net.impl;
+package com.flash3388.flashlib.net;
+
+import com.castle.time.exceptions.TimeoutException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-public class BufferedReader extends InputStream {
+public class BufferedChannelReader extends InputStream {
 
-    private final ReadableChannel mChannel;
+    private final ConnectedNetChannel mChannel;
     private final ByteBuffer mBuffer;
 
     private int mIndex;
     private int mSize;
 
-    public BufferedReader(ReadableChannel channel, ByteBuffer buffer) {
+    public BufferedChannelReader(ConnectedNetChannel channel, ByteBuffer buffer) {
         mChannel = channel;
         mBuffer = buffer;
 
@@ -20,7 +22,7 @@ public class BufferedReader extends InputStream {
         mSize = 0;
     }
 
-    public BufferedReader(ReadableChannel channel) {
+    public BufferedChannelReader(ConnectedNetChannel channel) {
         this(channel, ByteBuffer.allocateDirect(1024));
     }
 
@@ -63,8 +65,15 @@ public class BufferedReader extends InputStream {
         if (mIndex < mSize) {
             return;
         }
-        mSize = mChannel.read(mBuffer);
-        mIndex = 0;
+        try {
+            mSize = mChannel.read(mBuffer);
+            mIndex = 0;
+        } catch (TimeoutException e) {
+            throw new IOException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
+        }
     }
 
     @Override

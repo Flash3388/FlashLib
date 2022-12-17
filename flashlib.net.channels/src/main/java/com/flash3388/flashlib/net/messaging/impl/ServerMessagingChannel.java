@@ -1,14 +1,13 @@
 package com.flash3388.flashlib.net.messaging.impl;
 
 import com.castle.time.exceptions.TimeoutException;
-import com.castle.util.function.ThrowingRunnable;
-import com.flash3388.flashlib.net.impl.BufferedReader;
-import com.flash3388.flashlib.net.impl.ReadableChannel;
-import com.flash3388.flashlib.net.impl.TcpServerChannel;
+import com.flash3388.flashlib.net.BufferedChannelReader;
+import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.data.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.io.MessageSerializer;
 import com.flash3388.flashlib.net.messaging.io.MessagingServerChannel;
+import com.flash3388.flashlib.net.tcp.TcpServerChannel;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -42,7 +41,7 @@ public class ServerMessagingChannel implements MessagingServerChannel {
     }
 
     @Override
-    public void setOnConnection(ThrowingRunnable<IOException> callback) {
+    public void setOnConnection(Runnable callback) {
         mChannel.setOnConnection(callback);
     }
 
@@ -89,8 +88,8 @@ public class ServerMessagingChannel implements MessagingServerChannel {
         }
 
         @Override
-        public void onNewClientData(ReadableChannel channel) throws IOException {
-            BufferedReader reader = new BufferedReader(channel, mReadBuffer);
+        public void onNewClientData(IdentifiedConnectedNetChannel channel) throws IOException {
+            BufferedChannelReader reader = new BufferedChannelReader(channel, mReadBuffer);
             reader.clear();
 
             try (DataInputStream dataInputStream = new DataInputStream(reader)) {

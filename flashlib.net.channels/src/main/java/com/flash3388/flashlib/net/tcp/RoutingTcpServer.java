@@ -1,15 +1,16 @@
-package com.flash3388.flashlib.net.impl;
+package com.flash3388.flashlib.net.tcp;
 
 import com.castle.concurrent.service.TerminalServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.castle.time.exceptions.TimeoutException;
+import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-public class RoutingServer extends TerminalServiceBase {
+public class RoutingTcpServer extends TerminalServiceBase {
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
@@ -17,7 +18,7 @@ public class RoutingServer extends TerminalServiceBase {
     private TcpServerChannel mChannel;
     private Thread mThread;
 
-    public RoutingServer(SocketAddress bindAddress, Logger logger) {
+    public RoutingTcpServer(SocketAddress bindAddress, Logger logger) {
         mBindAddress = bindAddress;
         mLogger = logger;
 
@@ -82,12 +83,20 @@ public class RoutingServer extends TerminalServiceBase {
         }
 
         @Override
-        public void onNewClientData(ReadableChannel channel) throws IOException {
+        public void onNewClientData(IdentifiedConnectedNetChannel channel) throws IOException {
             mReadBuffer.clear();
-            int read = channel.read(mReadBuffer);
-            if (read > 0) {
-                mReadBuffer.flip();
-                mChannel.writeToAllBut(mReadBuffer, channel.getIdentifier());
+
+            try {
+                int read = channel.read(mReadBuffer);
+                if (read > 0) {
+                    mReadBuffer.flip();
+                    mChannel.writeToAllBut(mReadBuffer, channel.getIdentifier());
+                }
+            } catch (TimeoutException e) {
+                throw new IOException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException(e);
             }
         }
 
