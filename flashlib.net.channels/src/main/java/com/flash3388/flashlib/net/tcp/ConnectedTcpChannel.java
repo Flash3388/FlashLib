@@ -14,6 +14,7 @@ import java.nio.channels.SocketChannel;
 public class ConnectedTcpChannel implements IdentifiedConnectedNetChannel {
 
     private static final int READ_TIMEOUT = 100;
+    private static final boolean BREAK_ON_READ_TIMEOUT = false;
 
     private final SocketChannel mChannel;
     private final int mIdentifier;
@@ -56,7 +57,11 @@ public class ConnectedTcpChannel implements IdentifiedConnectedNetChannel {
         while (read < 1) {
             int available = mReadSelector.select(READ_TIMEOUT);
             if (available < 1) {
-                throw new TimeoutException();
+                if (BREAK_ON_READ_TIMEOUT) {
+                    throw new TimeoutException();
+                } else {
+                    continue;
+                }
             }
 
             read = mChannel.read(buffer);
