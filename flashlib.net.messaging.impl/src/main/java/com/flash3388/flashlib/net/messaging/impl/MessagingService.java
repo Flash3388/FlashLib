@@ -54,12 +54,12 @@ public class MessagingService extends TerminalServiceBase implements MessageQueu
     }
 
     @Override
-    public void addListener(MessageListener listener) {
+    public void addMessageListener(MessageListener listener) {
         mEventController.registerListener(listener);
     }
 
     @Override
-    public void addListener(ConnectionListener listener) {
+    public void addConnectionListener(ConnectionListener listener) {
         mEventController.registerListener(listener);
     }
 
