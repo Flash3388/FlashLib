@@ -1,4 +1,6 @@
-package com.flash3388.flashlib.net.message;
+package com.flash3388.flashlib.net.message.v1;
+
+import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -8,10 +10,10 @@ public class MessageHeader {
 
     static final int VERSION = 1;
 
-    private final String mSenderId;
+    private final InstanceId mSenderId;
     private final int mMessageType;
 
-    public MessageHeader(String senderId, int messageType) {
+    public MessageHeader(InstanceId senderId, int messageType) {
         mSenderId = senderId;
         mMessageType = messageType;
     }
@@ -22,11 +24,11 @@ public class MessageHeader {
             throw new IOException("message header version mismatch: " + version);
         }
 
-        mSenderId = dataInput.readUTF();
+        mSenderId = InstanceId.createFrom(dataInput);
         mMessageType = dataInput.readInt();
     }
 
-    public String getSenderId() {
+    public InstanceId getSenderId() {
         return mSenderId;
     }
 
@@ -36,7 +38,7 @@ public class MessageHeader {
 
     public void writeTo(DataOutput dataOutput) throws IOException {
         dataOutput.writeInt(VERSION);
-        dataOutput.writeUTF(mSenderId);
+        mSenderId.writeTo(dataOutput);
         dataOutput.writeInt(mMessageType);
     }
 }

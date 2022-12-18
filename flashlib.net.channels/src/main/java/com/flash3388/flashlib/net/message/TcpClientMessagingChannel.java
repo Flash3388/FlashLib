@@ -3,6 +3,8 @@ package com.flash3388.flashlib.net.message;
 import com.flash3388.flashlib.net.AutoConnectingChannel;
 import com.flash3388.flashlib.net.BufferedChannelReader;
 import com.flash3388.flashlib.net.tcp.TcpClientConnector;
+import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -14,19 +16,22 @@ import java.nio.ByteBuffer;
 
 public class TcpClientMessagingChannel implements MessagingChannel {
 
-    private final NewDataHandler mDataHandler;
-    private final MessageSerializer mSerializer;
+    private final MessageWriter mMessageWriter;
+    private final MessageReader mMessageReader;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private final AutoConnectingChannel mChannel;
     private final ByteBuffer mReadBuffer;
 
     public TcpClientMessagingChannel(SocketAddress serverAddress,
-                                     NewDataHandler dataHandler,
-                                     MessageSerializer serializer,
+                                     MessageWriter messageWriter,
+                                     MessageReader messageReader,
+                                     Clock clock,
                                      Logger logger) {
-        mDataHandler = dataHandler;
-        mSerializer = serializer;
+        mMessageWriter = messageWriter;
+        mMessageReader = messageReader;
+        mClock = clock;
         mLogger = logger;
 
         mChannel = new AutoConnectingChannel(new TcpClientConnector(logger), serverAddress, logger);
@@ -35,7 +40,6 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException {
-        // TODO: RECOGNIZE NEW REMOTE
         mChannel.waitForConnection();
 
         BufferedChannelReader reader = new BufferedChannelReader(mChannel, mReadBuffer);
@@ -43,10 +47,16 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
         // this will block until we receive data
         try (DataInputStream dataInputStream = new DataInputStream(reader)) {
-            NewDataHandler.Result result = mDataHandler.handle(dataInputStream);
+            MessageReader.Result result = mMessageReader.read(dataInputStream);
+
+            Time now = mClock.currentTime();
+            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now);
 
             mLogger.debug("New message routed from server");
-            handler.onNewMessage(result.info, result.message);
+            handler.onNewMessage(messageInfo, result.message);
+        } catch (IOException e) {
+            mLogger.debug("Error processing incoming message", e);
+            throw e;
         }
     }
 
@@ -56,13 +66,21 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-            mSerializer.write(dataOutputStream, message);
+            mMessageWriter.write(dataOutputStream, message);
             dataOutputStream.flush();
 
             mLogger.debug("Sending message to server");
 
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
             mChannel.write(buffer);
+        } catch (IOException e) {
+            mLogger.debug("Error processing outgoing message", e);
+            throw e;
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        mChannel.close();
     }
 }

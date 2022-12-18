@@ -1,21 +1,21 @@
 package com.flash3388.flashlib.net.message;
 
-import com.flash3388.flashlib.net.Remote;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.unique.InstanceId;
 
 public class MessageInfoImpl implements MessageInfo {
 
-    private final Remote mRemote;
+    private final InstanceId mSender;
     private final Time mTimestamp;
 
-    public MessageInfoImpl(Remote remote, Time timestamp) {
-        mRemote = remote;
+    public MessageInfoImpl(InstanceId sender, Time timestamp) {
+        mSender = sender;
         mTimestamp = timestamp;
     }
 
     @Override
-    public Remote getSender() {
-        return mRemote;
+    public InstanceId getSender() {
+        return mSender;
     }
 
     @Override

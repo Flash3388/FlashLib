@@ -42,11 +42,11 @@ public class BufferedChannelReader extends InputStream {
         int read = 0;
         while (read < len) {
             updateBuffer();
-            int available = mSize - mIndex - 1;
+            int available = mSize - mIndex;
             int wanted = len - off - read;
             int toCopy = Math.min(available, wanted);
 
-            System.arraycopy(mBuffer.array(), mIndex, b, read + off, toCopy);
+            mBuffer.position(mIndex).get(b, read + off, toCopy).rewind();
             mIndex += toCopy;
             read += toCopy;
         }

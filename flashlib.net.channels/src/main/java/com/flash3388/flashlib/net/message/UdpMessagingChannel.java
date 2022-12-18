@@ -2,6 +2,9 @@ package com.flash3388.flashlib.net.message;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.flash3388.flashlib.net.udp.MultiTargetUdpChannel;
+import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
@@ -15,19 +18,25 @@ import java.nio.ByteBuffer;
 
 public class UdpMessagingChannel implements MessagingChannel {
 
-    private final NewDataHandler mDataHandler;
-    private final MessageSerializer mSerializer;
+    private final InstanceId mOurId;
+    private final MessageWriter mMessageWriter;
+    private final MessageReader mMessageReader;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private final MultiTargetUdpChannel mChannel;
     private final ByteBuffer mReadBuffer;
 
     public UdpMessagingChannel(int[] bindPorts,
-                               NewDataHandler dataHandler,
-                               MessageSerializer serializer,
+                               InstanceId ourId,
+                               MessageWriter messageWriter,
+                               MessageReader messageReader,
+                               Clock clock,
                                Logger logger) {
-        mDataHandler = dataHandler;
-        mSerializer = serializer;
+        mOurId = ourId;
+        mMessageWriter = messageWriter;
+        mMessageReader = messageReader;
+        mClock = clock;
         mLogger = logger;
 
         mChannel = new MultiTargetUdpChannel(bindPorts, logger);
@@ -50,11 +59,17 @@ public class UdpMessagingChannel implements MessagingChannel {
 
         try (InputStream inputStream = new ByteArrayInputStream(mReadBuffer.array(), 0, size);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-            NewDataHandler.Result result = mDataHandler.handle(dataInputStream);
-            handler.onNewMessage(result.info, result.message);
-        } catch (MessageSentByUsException e) {
-            // since we broadcast, this could happen so just ignore
-            throw new TimeoutException();
+            MessageReader.Result result = mMessageReader.read(dataInputStream);
+
+            if (result.senderId.equals(mOurId)) {
+                // since we broadcast, this could happen so just ignore
+                throw new TimeoutException();
+            }
+
+            Time now = mClock.currentTime();
+            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now);
+
+            handler.onNewMessage(messageInfo, result.message);
         }
     }
 
@@ -62,7 +77,7 @@ public class UdpMessagingChannel implements MessagingChannel {
     public void write(Message message) throws IOException, InterruptedException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-            mSerializer.write(dataOutputStream, message);
+            mMessageWriter.write(dataOutputStream, message);
             dataOutputStream.flush();
 
             mLogger.debug("Sending BROADCAST of message");
@@ -70,5 +85,10 @@ public class UdpMessagingChannel implements MessagingChannel {
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
             mChannel.broadcastToPossiblePorts(buffer);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        mChannel.close();
     }
 }
