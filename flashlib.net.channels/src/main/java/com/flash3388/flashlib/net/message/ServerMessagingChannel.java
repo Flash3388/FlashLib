@@ -4,11 +4,12 @@ import com.castle.time.exceptions.TimeoutException;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Optional;
 
-public interface MessagingChannel extends WritableMessagingChannel, Closeable {
+public interface ServerMessagingChannel extends WritableMessagingChannel, Closeable {
 
-    interface UpdateHandler {
-        void onNewMessage(MessageInfo messageInfo, Message message);
+    interface UpdateHandler extends MessagingChannel.UpdateHandler {
+        Optional<Message> onNewClientSend();
     }
 
     void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException, TimeoutException;
