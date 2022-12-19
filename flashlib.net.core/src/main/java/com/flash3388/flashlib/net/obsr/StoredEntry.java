@@ -8,6 +8,8 @@ package com.flash3388.flashlib.net.obsr;
  */
 public interface StoredEntry {
 
+    void registerValueListener(EntryValueListener listener);
+
     /**
      * Gets the value stored in this entry.
      *

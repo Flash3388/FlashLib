@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.net.obsr;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class StorageBasedEntry implements StoredEntry {
 
@@ -10,6 +11,11 @@ public class StorageBasedEntry implements StoredEntry {
     public StorageBasedEntry(StoragePath path, Storage storage) {
         mPath = path;
         mStorage = new WeakReference<>(storage);
+    }
+
+    @Override
+    public void registerValueListener(EntryValueListener listener) {
+        Storage storage = getStorage();
     }
 
     @Override
@@ -87,6 +93,19 @@ public class StorageBasedEntry implements StoredEntry {
     public void setString(String value) {
         Storage storage = getStorage();
         storage.setEntryValue(mPath, new Value(ValueType.STRING, value));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StorageBasedEntry that = (StorageBasedEntry) o;
+        return Objects.equals(mPath, that.mPath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPath);
     }
 
     private Storage getStorage() {

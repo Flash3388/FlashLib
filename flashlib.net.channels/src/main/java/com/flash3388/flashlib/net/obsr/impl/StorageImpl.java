@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
+import com.flash3388.flashlib.net.obsr.EntryValueListener;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
@@ -8,8 +9,10 @@ import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.StoredObjectImpl;
 import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueChangedEvent;
 import com.flash3388.flashlib.net.obsr.ValueType;
 import com.flash3388.flashlib.time.Clock;
+import com.notifier.Controllers;
 import org.slf4j.Logger;
 
 import java.util.EnumSet;
@@ -29,6 +32,7 @@ public class StorageImpl implements Storage {
     private final Clock mClock;
     private final Logger mLogger;
 
+    private final ListenerStorage mListenerStorage;
     // TODO: STORAGE OBJECTS AS WELL?
     private final Map<String, StoredEntryNode> mEntries;
     private final Lock mLock; // TODO: ReadWriteLock? StampedLock?
@@ -38,6 +42,7 @@ public class StorageImpl implements Storage {
         mClock = clock;
         mLogger = logger;
 
+        mListenerStorage = new ListenerStorage(Controllers.newSyncExecutionController());
         mEntries = new HashMap<>();
         mLock = new ReentrantLock();
     }
@@ -135,11 +140,15 @@ public class StorageImpl implements Storage {
                 throw new IllegalStateException("wrong type");
             }
 
+            Value oldValue = node.getValue();
             node.setValue(value, mClock.currentTime());
 
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryUpdate(path, value);
             }
+
+            mListenerStorage.fireEntryValueChanged(
+                    new ValueChangedEvent(new StorageBasedEntry(path, this), oldValue, value));
         } finally {
             mLock.unlock();
         }
@@ -155,6 +164,16 @@ public class StorageImpl implements Storage {
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryClear(path);
             }
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    @Override
+    public void registerEntryListener(StoragePath path, EntryValueListener listener) {
+        mLock.lock();
+        try {
+            mListenerStorage.addEntryValueListener(new StorageBasedEntry(path, this), listener);
         } finally {
             mLock.unlock();
         }
