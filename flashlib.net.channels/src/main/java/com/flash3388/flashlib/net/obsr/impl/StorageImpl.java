@@ -1,25 +1,29 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.obsr.BasicEntry;
-import com.flash3388.flashlib.net.obsr.StoredEntry;
-import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
-import com.flash3388.flashlib.net.obsr.EntryValueType;
 import com.flash3388.flashlib.net.obsr.Storage;
+import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
+import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.StoredObjectImpl;
+import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueType;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class StorageImpl implements Storage {
+
+    // TODO: IMPROVE PATH RESTRICTIONS AND HANDLING
+    // TODO: LISTENERS / SELECTORS?
+    // TODO: FIND A WAY TO STORE ENTRIES AND ACCESS THEM FASTER
+    // TODO: IMPROVE THE GETALL SETALL METHODS
 
     private final StorageListener mListener;
     private final Clock mClock;
@@ -39,13 +43,13 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public Map<String, BasicEntry> getAll() {
+    public Map<String, Value> getAll() {
         mLock.lock();
         try {
-            Map<String, BasicEntry> result = new HashMap<>();
+            Map<String, Value> result = new HashMap<>();
             for (Map.Entry<String, StoredEntryNode> entry : mEntries.entrySet()) {
                 StoredEntryNode node = entry.getValue();
-                result.put(entry.getKey(), new BasicEntry(node.getType(), node.getValue()));
+                result.put(entry.getKey(), node.getValue());
             }
 
             return result;
@@ -55,14 +59,13 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public void setAll(Map<String, BasicEntry> values) {
+    public void setAll(Map<String, Value> values) {
         mLock.lock();
         try {
             EnumSet<StorageOpFlag> flags = EnumSet.of(StorageOpFlag.NO_REMOTE_NOTIFICATION, StorageOpFlag.FORCE_CHANGE);
-            for (Map.Entry<String, BasicEntry> entry : values.entrySet()) {
+            for (Map.Entry<String, Value> entry : values.entrySet()) {
                 setEntryValue(StoragePath.create(entry.getKey()),
-                        entry.getValue().getType(),
-                        entry.getValue().getValue(),
+                        entry.getValue(),
                         flags);
             }
         } finally {
@@ -109,52 +112,33 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public EntryValueType getEntryType(StoragePath path) {
+    public Value getEntryValue(StoragePath path) {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            return node.getType();
+            return node.getValue();
         } finally {
             mLock.unlock();
         }
     }
 
     @Override
-    public Optional<Object> getEntryValueForType(StoragePath path, EntryValueType type) {
+    public void setEntryValue(StoragePath path, Value value, EnumSet<StorageOpFlag> flags) {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            if (node.getType() == EntryValueType.EMPTY) {
-                return Optional.empty();
-            }
-
-            if (type != node.getType()) {
-                // TODO: THROW ERROR? RETURN EMPTY?
-                throw new IllegalStateException("wrong type");
-            }
-
-            return Optional.of(node.getValue());
-        } finally {
-            mLock.unlock();
-        }
-    }
-
-    @Override
-    public void setEntryValue(StoragePath path, EntryValueType type, Object value, EnumSet<StorageOpFlag> flags) {
-        mLock.lock();
-        try {
-            StoredEntryNode node = getOrCreateEntryNode(path);
-            if (node.getType() != EntryValueType.EMPTY &&
-                    type != node.getType() &&
+            Value currentValue = node.getValue();
+            if (currentValue.getType() != ValueType.EMPTY &&
+                    value.getType() != currentValue.getType() &&
                     !flags.contains(StorageOpFlag.FORCE_CHANGE)) {
                 // TODO: THROW ERROR? RETURN EMPTY?
                 throw new IllegalStateException("wrong type");
             }
 
-            node.setValue(type, value, mClock.currentTime(), flags.contains(StorageOpFlag.FORCE_CHANGE));
+            node.setValue(value, mClock.currentTime());
 
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
-                mListener.onEntryUpdate(path, type, value);
+                mListener.onEntryUpdate(path, value);
             }
         } finally {
             mLock.unlock();
@@ -166,7 +150,7 @@ public class StorageImpl implements Storage {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            node.setValue(EntryValueType.EMPTY, null, mClock.currentTime(), flags.contains(StorageOpFlag.FORCE_CHANGE));
+            node.setValue(new Value(), mClock.currentTime());
 
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryClear(path);

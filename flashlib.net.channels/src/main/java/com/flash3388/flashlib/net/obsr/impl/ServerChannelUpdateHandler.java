@@ -4,8 +4,8 @@ import com.flash3388.flashlib.net.message.Message;
 import com.flash3388.flashlib.net.message.MessageInfo;
 import com.flash3388.flashlib.net.message.ServerMessagingChannel;
 import com.flash3388.flashlib.net.message.WritableMessagingChannel;
-import com.flash3388.flashlib.net.obsr.BasicEntry;
 import com.flash3388.flashlib.net.obsr.Storage;
+import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import org.slf4j.Logger;
 
@@ -24,7 +24,7 @@ public class ServerChannelUpdateHandler extends ChannelUpdateHandler implements 
 
     @Override
     public Optional<Message> onNewClientSend() {
-        Map<String, BasicEntry> entries = mStorage.getAll();
+        Map<String, Value> entries = mStorage.getAll();
         return Optional.of(new StorageContentsMessage(entries));
     }
 

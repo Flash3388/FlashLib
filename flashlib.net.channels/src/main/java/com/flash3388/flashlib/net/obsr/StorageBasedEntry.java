@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.net.obsr;
 
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 
 public class StorageBasedEntry implements StoredEntry {
 
@@ -14,39 +13,44 @@ public class StorageBasedEntry implements StoredEntry {
     }
 
     @Override
-    public EntryValueType getType() {
+    public Value getValue() {
         Storage storage = getStorage();
-        return storage.getEntryType(mPath);
+        return storage.getEntryValue(mPath);
+    }
+
+    @Override
+    public ValueType getType() {
+        return getValue().getType();
     }
 
     @Override
     public boolean isEmpty() {
-        return getType() == EntryValueType.EMPTY;
+        return getType() == ValueType.EMPTY;
     }
 
     @Override
     public byte[] getRaw(byte[] defaultValue) {
-        return getValueForType(EntryValueType.RAW, byte[].class, defaultValue);
+        return getValue().getRaw(defaultValue);
     }
 
     @Override
     public boolean getBoolean(boolean defaultValue) {
-        return getValueForType(EntryValueType.BOOLEAN, Boolean.class, defaultValue);
+        return getValue().getBoolean(defaultValue);
     }
 
     @Override
     public int getInt(int defaultValue) {
-        return getValueForType(EntryValueType.INT, Integer.class, defaultValue);
+        return getValue().getInt(defaultValue);
     }
 
     @Override
     public double getDouble(double defaultValue) {
-        return getValueForType(EntryValueType.DOUBLE, Double.class, defaultValue);
+        return getValue().getDouble(defaultValue);
     }
 
     @Override
     public String getString(String defaultValue) {
-        return getValueForType(EntryValueType.STRING, String.class, defaultValue);
+        return getValue().getString(defaultValue);
     }
 
     @Override
@@ -58,37 +62,31 @@ public class StorageBasedEntry implements StoredEntry {
     @Override
     public void setRaw(byte[] value) {
         Storage storage = getStorage();
-        storage.setEntryValue(mPath, EntryValueType.RAW, value);
+        storage.setEntryValue(mPath, new Value(ValueType.RAW, value));
     }
 
     @Override
     public void setBoolean(boolean value) {
         Storage storage = getStorage();
-        storage.setEntryValue(mPath, EntryValueType.BOOLEAN, value);
+        storage.setEntryValue(mPath, new Value(ValueType.BOOLEAN, value));
     }
 
     @Override
     public void setInt(int value) {
         Storage storage = getStorage();
-        storage.setEntryValue(mPath, EntryValueType.INT, value);
+        storage.setEntryValue(mPath, new Value(ValueType.INT, value));
     }
 
     @Override
     public void setDouble(double value) {
         Storage storage = getStorage();
-        storage.setEntryValue(mPath, EntryValueType.DOUBLE, value);
+        storage.setEntryValue(mPath, new Value(ValueType.DOUBLE, value));
     }
 
     @Override
     public void setString(String value) {
         Storage storage = getStorage();
-        storage.setEntryValue(mPath, EntryValueType.STRING, value);
-    }
-
-    private <T> T getValueForType(EntryValueType type, Class<T> clsType, T defaultValue) {
-        Storage storage = getStorage();
-        Optional<Object> optional = storage.getEntryValueForType(mPath, type);
-        return optional.map(clsType::cast).orElse(defaultValue);
+        storage.setEntryValue(mPath, new Value(ValueType.STRING, value));
     }
 
     private Storage getStorage() {

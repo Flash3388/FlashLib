@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.net.obsr.messages;
 
-import com.flash3388.flashlib.net.obsr.EntryValueType;
+import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -10,11 +11,22 @@ public class EntryHelper {
 
     private EntryHelper() {}
 
-    public static void writeTypeTo(DataOutput output, EntryValueType type) throws IOException {
+    public static void writeValueTo(DataOutput output, Value value) throws IOException {
+        writeTypeTo(output, value.getType());
+        writeRawValueTo(output, value.getType(), value);
+    }
+
+    public static Value readValueFrom(DataInput input) throws IOException {
+        ValueType type = readTypeFrom(input);
+        Object rawValue = readRawValueFrom(input, type);
+        return new Value(type, rawValue);
+    }
+
+    private static void writeTypeTo(DataOutput output, ValueType type) throws IOException {
         output.writeInt(type.ordinal());
     }
 
-    public static void writeValueTo(DataOutput output, EntryValueType type, Object value) throws IOException {
+    private static void writeRawValueTo(DataOutput output, ValueType type, Object value) throws IOException {
         switch (type) {
             case EMPTY:
                 break;
@@ -39,12 +51,12 @@ public class EntryHelper {
         }
     }
 
-    public static EntryValueType readTypeFrom(DataInput input) throws IOException {
+    private static ValueType readTypeFrom(DataInput input) throws IOException {
         int typeInt = input.readInt();
-        return EntryValueType.values()[typeInt];
+        return ValueType.values()[typeInt];
     }
 
-    public static Object readValueFrom(DataInput input, EntryValueType type) throws IOException {
+    private static Object readRawValueFrom(DataInput input, ValueType type) throws IOException {
         Object value;
         switch (type) {
             case EMPTY:

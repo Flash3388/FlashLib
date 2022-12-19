@@ -49,7 +49,7 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
     private void handleEntryChange(EntryChangeMessage message) {
         StoragePath path = StoragePath.create(message.getEntryPath());
-        mStorage.setEntryValue(path, message.getEntryType(), message.getValue(),
+        mStorage.setEntryValue(path, message.getValue(),
                 EnumSet.of(StorageOpFlag.NO_REMOTE_NOTIFICATION, StorageOpFlag.FORCE_CHANGE));
     }
 

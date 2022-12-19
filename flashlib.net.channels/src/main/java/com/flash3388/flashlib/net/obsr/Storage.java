@@ -6,24 +6,23 @@ import java.util.Optional;
 
 public interface Storage {
 
-    Map<String, BasicEntry> getAll();
-    void setAll(Map<String, BasicEntry> values);
+    Map<String, Value> getAll();
+    void setAll(Map<String, Value> values);
 
     StoredObject getObject(StoragePath path);
 
     void createEntry(StoragePath path, EnumSet<StorageOpFlag> flags);
     StoredEntry getEntry(StoragePath path);
-    EntryValueType getEntryType(StoragePath path);
-    Optional<Object> getEntryValueForType(StoragePath path, EntryValueType type);
-    void setEntryValue(StoragePath path, EntryValueType type, Object value, EnumSet<StorageOpFlag> flags);
+    Value getEntryValue(StoragePath path);
+    void setEntryValue(StoragePath path, Value value, EnumSet<StorageOpFlag> flags);
     void clearEntryValue(StoragePath path, EnumSet<StorageOpFlag> flags);
 
     default void createEntry(StoragePath path) {
         createEntry(path, EnumSet.noneOf(StorageOpFlag.class));
     }
 
-    default void setEntryValue(StoragePath path, EntryValueType type, Object value) {
-        setEntryValue(path, type, value, EnumSet.noneOf(StorageOpFlag.class));
+    default void setEntryValue(StoragePath path, Value value) {
+        setEntryValue(path, value, EnumSet.noneOf(StorageOpFlag.class));
     }
 
     default void clearEntryValue(StoragePath path) {

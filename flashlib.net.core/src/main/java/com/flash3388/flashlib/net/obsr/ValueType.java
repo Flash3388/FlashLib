@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.obsr;
 
-public enum EntryValueType {
+public enum ValueType {
     EMPTY,
     RAW,
     BOOLEAN,

@@ -7,8 +7,8 @@ import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.message.KnownMessageTypes;
 import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageWriter;
-import com.flash3388.flashlib.net.message.MessagingChannel;
-import com.flash3388.flashlib.net.message.TcpClientMessagingChannel;
+import com.flash3388.flashlib.net.message.ServerMessagingChannel;
+import com.flash3388.flashlib.net.message.TcpServerMessagingChannel;
 import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
 import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
@@ -25,17 +25,18 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-public class ObsrClientService extends SingleUseService implements ObjectStorage {
+public class ObsrPrimaryNodeService extends SingleUseService implements ObjectStorage {
 
     private final Logger mLogger;
-    private final MessagingChannel mChannel;
+    private final ServerMessagingChannel mChannel;
     private final Storage mStorage;
 
     private Thread mReadThread;
 
-    public ObsrClientService(InstanceId ourId, SocketAddress serverAddress, Clock clock, Logger logger) {
+    public ObsrPrimaryNodeService(InstanceId ourId, SocketAddress bindAddress, Clock clock, Logger logger) {
         mLogger = logger;
 
         KnownMessageTypes messageTypes = new KnownMessageTypes();
@@ -46,12 +47,16 @@ public class ObsrClientService extends SingleUseService implements ObjectStorage
 
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
         MessageReader messageReader = new MessageReaderImpl(messageTypes);
-        mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, logger);
+        mChannel = new TcpServerMessagingChannel(bindAddress, messageWriter, messageReader, clock, logger);
 
         StorageListener listener = new StorageListenerImpl(mChannel, logger);
         mStorage = new StorageImpl(listener, clock, logger);
 
         mReadThread = null;
+    }
+
+    public ObsrPrimaryNodeService(InstanceId ourId, Clock clock, Logger logger) {
+        this(ourId, new InetSocketAddress("0.0.0.0", Constants.PRIMARY_NODE_PORT), clock, logger);
     }
 
     @Override
@@ -68,7 +73,7 @@ public class ObsrClientService extends SingleUseService implements ObjectStorage
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
                 new ReadTask(mChannel, mStorage, mLogger),
-                "ObsrClientService-ReadTask");
+                "ObsrServerService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();
     }
@@ -83,14 +88,14 @@ public class ObsrClientService extends SingleUseService implements ObjectStorage
 
     private static class ReadTask implements Runnable {
 
-        private final MessagingChannel mChannel;
+        private final ServerMessagingChannel mChannel;
         private final Logger mLogger;
-        private final MessagingChannel.UpdateHandler mHandler;
+        private final ServerMessagingChannel.UpdateHandler mHandler;
 
-        private ReadTask(MessagingChannel channel, Storage storage, Logger logger) {
+        private ReadTask(ServerMessagingChannel channel, Storage storage, Logger logger) {
             mChannel = channel;
             mLogger = logger;
-            mHandler = new ChannelUpdateHandler(storage, logger);
+            mHandler = new ServerChannelUpdateHandler(storage, logger, channel);
         }
 
         @Override
