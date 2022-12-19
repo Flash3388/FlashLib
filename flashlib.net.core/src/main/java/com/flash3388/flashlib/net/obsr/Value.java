@@ -99,6 +99,28 @@ public class Value {
         return getValue(ValueType.STRING, String.class, defaultValue);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Value value = (Value) o;
+        return mType == value.mType && Objects.equals(mValue, value.mValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mType, mValue);
+    }
+
+    @Override
+    public String toString() {
+        if (mType == ValueType.EMPTY) {
+            return "{EMPTY}";
+        }
+
+        return String.format("{type=%s value=%s}", mType, mValue);
+    }
+
     private <T> T getValue(ValueType wantedType, Class<T> typeCls, T defaultValue) {
         if (mType == ValueType.EMPTY) {
             return defaultValue;

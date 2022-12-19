@@ -16,6 +16,7 @@ public class StorageBasedEntry implements StoredEntry {
     @Override
     public void registerValueListener(EntryValueListener listener) {
         Storage storage = getStorage();
+        storage.registerEntryListener(mPath, listener);
     }
 
     @Override
@@ -106,6 +107,11 @@ public class StorageBasedEntry implements StoredEntry {
     @Override
     public int hashCode() {
         return Objects.hash(mPath);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("{ENTRY %s}", mPath);
     }
 
     private Storage getStorage() {

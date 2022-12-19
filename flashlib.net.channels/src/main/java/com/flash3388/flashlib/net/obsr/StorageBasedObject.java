@@ -2,12 +2,12 @@ package com.flash3388.flashlib.net.obsr;
 
 import java.lang.ref.WeakReference;
 
-public class StoredObjectImpl implements StoredObject {
+public class StorageBasedObject implements StoredObject {
 
     private final StoragePath mPath;
     private final WeakReference<Storage> mStorage;
 
-    public StoredObjectImpl(StoragePath path, Storage storage) {
+    public StorageBasedObject(StoragePath path, Storage storage) {
         mPath = path;
         mStorage = new WeakReference<>(storage);
     }
@@ -26,6 +26,11 @@ public class StoredObjectImpl implements StoredObject {
 
         Storage storage = getStorage();
         return storage.getEntry(childPath);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("{OBJECT %s}", mPath);
     }
 
     private Storage getStorage() {

@@ -26,26 +26,32 @@ public class EntryHelper {
         output.writeInt(type.ordinal());
     }
 
-    private static void writeRawValueTo(DataOutput output, ValueType type, Object value) throws IOException {
+    private static void writeRawValueTo(DataOutput output, ValueType type, Value value) throws IOException {
         switch (type) {
             case EMPTY:
                 break;
-            case RAW:
-                output.writeInt(((byte[]) value).length);
-                output.write((byte[]) value);
+            case RAW: {
+                byte[] rawValue = value.getRaw(null);
+                output.writeInt(rawValue.length);
+                output.write(rawValue);
                 break;
-            case BOOLEAN:
-                output.writeBoolean((Boolean) value);
+            }
+            case BOOLEAN: {
+                output.writeBoolean(value.getBoolean(false));
                 break;
-            case INT:
-                output.writeInt((Integer) value);
+            }
+            case INT: {
+                output.writeInt(value.getInt(0));
                 break;
-            case DOUBLE:
-                output.writeDouble((Double) value);
+            }
+            case DOUBLE: {
+                output.writeDouble(value.getDouble(0));
                 break;
-            case STRING:
-                output.writeUTF((String) value);
+            }
+            case STRING: {
+                output.writeUTF(value.getString(null));
                 break;
+            }
             default:
                 throw new IllegalArgumentException("unsupported type: " + type.name());
         }

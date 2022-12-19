@@ -7,7 +7,7 @@ import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
-import com.flash3388.flashlib.net.obsr.StoredObjectImpl;
+import com.flash3388.flashlib.net.obsr.StorageBasedObject;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueChangedEvent;
 import com.flash3388.flashlib.net.obsr.ValueType;
@@ -88,7 +88,7 @@ public class StorageImpl implements Storage {
                 throw new IllegalStateException("path represents an object");
             }
 
-            return new StoredObjectImpl(path, this);
+            return new StorageBasedObject(path, this);
         } finally {
             mLock.unlock();
         }
@@ -147,8 +147,10 @@ public class StorageImpl implements Storage {
                 mListener.onEntryUpdate(path, value);
             }
 
-            mListenerStorage.fireEntryValueChanged(
-                    new ValueChangedEvent(new StorageBasedEntry(path, this), oldValue, value));
+            mListenerStorage.fireEntryValueChanged(new ValueChangedEvent(
+                            new StorageBasedEntry(path, this),
+                            oldValue,
+                            value));
         } finally {
             mLock.unlock();
         }
