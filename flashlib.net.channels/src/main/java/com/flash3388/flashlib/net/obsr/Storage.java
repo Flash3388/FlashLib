@@ -13,16 +13,16 @@ public interface Storage {
 
     void createEntry(StoragePath path, EnumSet<StorageOpFlag> flags);
     StoredEntry getEntry(StoragePath path);
-    EntryType getEntryType(StoragePath path);
-    Optional<Object> getEntryValueForType(StoragePath path, EntryType type);
-    void setEntryValue(StoragePath path, EntryType type, Object value, EnumSet<StorageOpFlag> flags);
+    EntryValueType getEntryType(StoragePath path);
+    Optional<Object> getEntryValueForType(StoragePath path, EntryValueType type);
+    void setEntryValue(StoragePath path, EntryValueType type, Object value, EnumSet<StorageOpFlag> flags);
     void clearEntryValue(StoragePath path, EnumSet<StorageOpFlag> flags);
 
     default void createEntry(StoragePath path) {
         createEntry(path, EnumSet.noneOf(StorageOpFlag.class));
     }
 
-    default void setEntryValue(StoragePath path, EntryType type, Object value) {
+    default void setEntryValue(StoragePath path, EntryValueType type, Object value) {
         setEntryValue(path, type, value, EnumSet.noneOf(StorageOpFlag.class));
     }
 

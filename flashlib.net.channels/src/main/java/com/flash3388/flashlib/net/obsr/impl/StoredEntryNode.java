@@ -1,21 +1,21 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.obsr.EntryType;
+import com.flash3388.flashlib.net.obsr.EntryValueType;
 import com.flash3388.flashlib.time.Time;
 
 public class StoredEntryNode {
 
-    private EntryType mType;
+    private EntryValueType mType;
     private Object mValue;
     private Time mLastChangeTimestamp;
 
     public StoredEntryNode() {
-        mType = EntryType.EMPTY;
+        mType = EntryValueType.EMPTY;
         mValue = null;
         mLastChangeTimestamp = Time.INVALID;
     }
 
-    public EntryType getType() {
+    public EntryValueType getType() {
         return mType;
     }
 
@@ -23,7 +23,7 @@ public class StoredEntryNode {
         return mValue;
     }
 
-    public void setValue(EntryType type, Object value, Time currentTime, boolean force) {
+    public void setValue(EntryValueType type, Object value, Time currentTime, boolean force) {
         if (!force) {
             ensureTypeValid(type, value);
         }
@@ -33,7 +33,7 @@ public class StoredEntryNode {
         mLastChangeTimestamp = currentTime;
     }
 
-    private void ensureTypeValid(EntryType type, Object value) {
+    private void ensureTypeValid(EntryValueType type, Object value) {
         switch (type) {
             case EMPTY:
                 if (value != null) {
@@ -62,7 +62,7 @@ public class StoredEntryNode {
 
     }
 
-    private static <T> void ensureType(EntryType type, Class<?> expected, Object value) {
+    private static <T> void ensureType(EntryValueType type, Class<?> expected, Object value) {
         if (!expected.isInstance(value)) {
             throw new TypeMismatchException(type, expected, value.getClass());
         }

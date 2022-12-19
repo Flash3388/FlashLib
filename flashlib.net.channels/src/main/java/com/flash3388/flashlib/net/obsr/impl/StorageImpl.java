@@ -3,7 +3,7 @@ package com.flash3388.flashlib.net.obsr.impl;
 import com.flash3388.flashlib.net.obsr.BasicEntry;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
-import com.flash3388.flashlib.net.obsr.EntryType;
+import com.flash3388.flashlib.net.obsr.EntryValueType;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -109,7 +109,7 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public EntryType getEntryType(StoragePath path) {
+    public EntryValueType getEntryType(StoragePath path) {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
@@ -120,11 +120,11 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public Optional<Object> getEntryValueForType(StoragePath path, EntryType type) {
+    public Optional<Object> getEntryValueForType(StoragePath path, EntryValueType type) {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            if (node.getType() == EntryType.EMPTY) {
+            if (node.getType() == EntryValueType.EMPTY) {
                 return Optional.empty();
             }
 
@@ -140,11 +140,11 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public void setEntryValue(StoragePath path, EntryType type, Object value, EnumSet<StorageOpFlag> flags) {
+    public void setEntryValue(StoragePath path, EntryValueType type, Object value, EnumSet<StorageOpFlag> flags) {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            if (node.getType() != EntryType.EMPTY &&
+            if (node.getType() != EntryValueType.EMPTY &&
                     type != node.getType() &&
                     !flags.contains(StorageOpFlag.FORCE_CHANGE)) {
                 // TODO: THROW ERROR? RETURN EMPTY?
@@ -166,7 +166,7 @@ public class StorageImpl implements Storage {
         mLock.lock();
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
-            node.setValue(EntryType.EMPTY, null, mClock.currentTime(), flags.contains(StorageOpFlag.FORCE_CHANGE));
+            node.setValue(EntryValueType.EMPTY, null, mClock.currentTime(), flags.contains(StorageOpFlag.FORCE_CHANGE));
 
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryClear(path);

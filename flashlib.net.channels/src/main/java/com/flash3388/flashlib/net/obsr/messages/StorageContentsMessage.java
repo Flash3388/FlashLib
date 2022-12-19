@@ -3,7 +3,7 @@ package com.flash3388.flashlib.net.obsr.messages;
 import com.flash3388.flashlib.net.message.Message;
 import com.flash3388.flashlib.net.message.MessageType;
 import com.flash3388.flashlib.net.obsr.BasicEntry;
-import com.flash3388.flashlib.net.obsr.EntryType;
+import com.flash3388.flashlib.net.obsr.EntryValueType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -50,7 +50,7 @@ public class StorageContentsMessage implements Message {
         Map<String, BasicEntry> entries = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
             String path = input.readUTF();
-            EntryType type = EntryHelper.readTypeFrom(input);
+            EntryValueType type = EntryHelper.readTypeFrom(input);
             Object value = EntryHelper.readValueFrom(input, type);
 
             entries.put(path, new BasicEntry(type, value));

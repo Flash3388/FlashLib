@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.obsr.messages;
 
-import com.flash3388.flashlib.net.obsr.EntryType;
+import com.flash3388.flashlib.net.obsr.EntryValueType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -10,11 +10,11 @@ public class EntryHelper {
 
     private EntryHelper() {}
 
-    public static void writeTypeTo(DataOutput output, EntryType type) throws IOException {
+    public static void writeTypeTo(DataOutput output, EntryValueType type) throws IOException {
         output.writeInt(type.ordinal());
     }
 
-    public static void writeValueTo(DataOutput output, EntryType type, Object value) throws IOException {
+    public static void writeValueTo(DataOutput output, EntryValueType type, Object value) throws IOException {
         switch (type) {
             case EMPTY:
                 break;
@@ -39,12 +39,12 @@ public class EntryHelper {
         }
     }
 
-    public static EntryType readTypeFrom(DataInput input) throws IOException {
+    public static EntryValueType readTypeFrom(DataInput input) throws IOException {
         int typeInt = input.readInt();
-        return EntryType.values()[typeInt];
+        return EntryValueType.values()[typeInt];
     }
 
-    public static Object readValueFrom(DataInput input, EntryType type) throws IOException {
+    public static Object readValueFrom(DataInput input, EntryValueType type) throws IOException {
         Object value;
         switch (type) {
             case EMPTY:

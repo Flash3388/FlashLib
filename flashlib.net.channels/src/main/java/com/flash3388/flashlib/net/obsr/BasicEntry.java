@@ -2,15 +2,15 @@ package com.flash3388.flashlib.net.obsr;
 
 public class BasicEntry {
 
-    private final EntryType mType;
+    private final EntryValueType mType;
     private final Object mValue;
 
-    public BasicEntry(EntryType type, Object value) {
+    public BasicEntry(EntryValueType type, Object value) {
         mType = type;
         mValue = value;
     }
 
-    public EntryType getType() {
+    public EntryValueType getType() {
         return mType;
     }
 

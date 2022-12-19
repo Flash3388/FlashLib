@@ -1,8 +1,7 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.message.MessagingChannel;
 import com.flash3388.flashlib.net.message.WritableMessagingChannel;
-import com.flash3388.flashlib.net.obsr.EntryType;
+import com.flash3388.flashlib.net.obsr.EntryValueType;
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
@@ -35,7 +34,7 @@ public class StorageListenerImpl implements StorageListener {
     }
 
     @Override
-    public void onEntryUpdate(StoragePath path, EntryType type, Object value) {
+    public void onEntryUpdate(StoragePath path, EntryValueType type, Object value) {
         try {
             mChannel.write(new EntryChangeMessage(path.toString(), type, value));
         } catch (IOException e) {
