@@ -8,7 +8,12 @@ package com.flash3388.flashlib.net.obsr;
  */
 public interface StoredEntry {
 
-    void registerValueListener(EntryValueListener listener);
+    /**
+     * Retrieves the property which holds the value of this entry.
+     *
+     * @return value property
+     */
+    ValueProperty valueProperty();
 
     /**
      * Gets the value stored in this entry.

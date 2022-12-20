@@ -16,7 +16,7 @@ public interface Storage {
     void setEntryValue(StoragePath path, Value value, EnumSet<StorageOpFlag> flags);
     void clearEntryValue(StoragePath path, EnumSet<StorageOpFlag> flags);
 
-    void registerEntryListener(StoragePath path, EntryValueListener listener);
+    ValueProperty getEntryValueProperty(StoragePath path);
 
     default void createEntry(StoragePath path) {
         createEntry(path, EnumSet.noneOf(StorageOpFlag.class));

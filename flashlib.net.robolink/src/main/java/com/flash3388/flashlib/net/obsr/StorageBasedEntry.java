@@ -14,9 +14,9 @@ public class StorageBasedEntry implements StoredEntry {
     }
 
     @Override
-    public void registerValueListener(EntryValueListener listener) {
+    public ValueProperty valueProperty() {
         Storage storage = getStorage();
-        storage.registerEntryListener(mPath, listener);
+        return storage.getEntryValueProperty(mPath);
     }
 
     @Override

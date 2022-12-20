@@ -78,6 +78,18 @@ public class Value {
     /**
      * Gets the typed value stored.
      *
+     * This method will return the value if {@link #getType()} is {@link ValueType#LONG}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    public long getLong(long defaultValue) {
+        return getValue(ValueType.LONG, Long.class, defaultValue);
+    }
+
+    /**
+     * Gets the typed value stored.
+     *
      * This method will return the value if {@link #getType()} is {@link ValueType#DOUBLE}.
      *
      * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
@@ -148,6 +160,9 @@ public class Value {
                 break;
             case INT:
                 ensureType(type, Integer.class, value);
+                break;
+            case LONG:
+                ensureType(type, Long.class, value);
                 break;
             case DOUBLE:
                 ensureType(type, Double.class, value);

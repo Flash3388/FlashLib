@@ -1,6 +1,9 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
+import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
+import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.flash3388.flashlib.time.Time;
 
 public class StoredEntryNode {
@@ -8,9 +11,22 @@ public class StoredEntryNode {
     private Value mValue;
     private Time mLastChangeTimestamp;
 
-    public StoredEntryNode() {
+    private final StorageBasedEntry mEntry;
+    private final EntryValueObservableProperty mValueProperty;
+
+    public StoredEntryNode(StorageBasedEntry entry, EntryValueObservableProperty valueProperty) {
+        mEntry = entry;
+        mValueProperty = valueProperty;
         mValue = new Value();
         mLastChangeTimestamp = Time.INVALID;
+    }
+
+    public StorageBasedEntry getEntry() {
+        return mEntry;
+    }
+
+    public ValueProperty getValueProperty() {
+        return mValueProperty;
     }
 
     public Value getValue() {
@@ -22,7 +38,11 @@ public class StoredEntryNode {
     }
 
     public void setValue(Value value, Time currentTime) {
+        Value oldValue = mValue;
+
         mValue = value;
         mLastChangeTimestamp = currentTime;
+
+        mValueProperty.invokeChangeListener(oldValue, mValue);
     }
 }

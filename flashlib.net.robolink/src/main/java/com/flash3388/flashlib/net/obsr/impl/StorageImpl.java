@@ -1,18 +1,19 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.obsr.EntryValueListener;
+import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
+import com.flash3388.flashlib.net.obsr.StorageBasedObject;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
-import com.flash3388.flashlib.net.obsr.StorageBasedObject;
 import com.flash3388.flashlib.net.obsr.Value;
-import com.flash3388.flashlib.net.obsr.ValueChangedEvent;
+import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.flash3388.flashlib.net.obsr.ValueType;
 import com.flash3388.flashlib.time.Clock;
 import com.notifier.Controllers;
+import com.notifier.EventController;
 import org.slf4j.Logger;
 
 import java.util.EnumSet;
@@ -32,7 +33,8 @@ public class StorageImpl implements Storage {
     private final Clock mClock;
     private final Logger mLogger;
 
-    private final ListenerStorage mListenerStorage;
+    private final EventController mEventController;
+
     // TODO: STORAGE OBJECTS AS WELL?
     private final Map<String, StoredEntryNode> mEntries;
     private final Lock mLock; // TODO: ReadWriteLock? StampedLock?
@@ -42,7 +44,7 @@ public class StorageImpl implements Storage {
         mClock = clock;
         mLogger = logger;
 
-        mListenerStorage = new ListenerStorage(Controllers.newSyncExecutionController());
+        mEventController = Controllers.newSyncExecutionController();
         mEntries = new HashMap<>();
         mLock = new ReentrantLock();
     }
@@ -109,8 +111,8 @@ public class StorageImpl implements Storage {
     public StoredEntry getEntry(StoragePath path) {
         mLock.lock();
         try {
-            getOrCreateEntryNode(path);
-            return new StorageBasedEntry(path, this);
+            StoredEntryNode node = getOrCreateEntryNode(path);
+            return node.getEntry();
         } finally {
             mLock.unlock();
         }
@@ -140,17 +142,11 @@ public class StorageImpl implements Storage {
                 throw new IllegalStateException("wrong type");
             }
 
-            Value oldValue = node.getValue();
             node.setValue(value, mClock.currentTime());
 
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryUpdate(path, value);
             }
-
-            mListenerStorage.fireEntryValueChanged(new ValueChangedEvent(
-                            new StorageBasedEntry(path, this),
-                            oldValue,
-                            value));
         } finally {
             mLock.unlock();
         }
@@ -172,10 +168,11 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public void registerEntryListener(StoragePath path, EntryValueListener listener) {
+    public ValueProperty getEntryValueProperty(StoragePath path) {
         mLock.lock();
         try {
-            mListenerStorage.addEntryValueListener(new StorageBasedEntry(path, this), listener);
+            StoredEntryNode node = getOrCreateEntryNode(path);
+            return node.getValueProperty();
         } finally {
             mLock.unlock();
         }
@@ -188,10 +185,17 @@ public class StorageImpl implements Storage {
     private StoredEntryNode getOrCreateEntryNode(StoragePath path, boolean allowRemoteNotification) {
         String strPath = path.toString();
 
-        StoredEntryNode entry = mEntries.get(strPath);
-        if (entry == null) {
-            entry = new StoredEntryNode();
-            mEntries.put(strPath, entry);
+        StoredEntryNode node = mEntries.get(strPath);
+        if (node == null) {
+
+            StorageBasedEntry entry = new StorageBasedEntry(path, this);
+            EntryValueObservableProperty valueProperty = new EntryValueObservableProperty(
+                    this,
+                    path,
+                    mEventController,
+                    entry);
+            node = new StoredEntryNode(entry, valueProperty);
+            mEntries.put(strPath, node);
 
             if (mListener != null && allowRemoteNotification) {
                 mListener.onNewEntry(path);
@@ -199,6 +203,6 @@ public class StorageImpl implements Storage {
         }
 
 
-        return entry;
+        return node;
     }
 }

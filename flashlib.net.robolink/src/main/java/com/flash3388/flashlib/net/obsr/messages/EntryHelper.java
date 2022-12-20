@@ -44,6 +44,10 @@ public class EntryHelper {
                 output.writeInt(value.getInt(0));
                 break;
             }
+            case LONG: {
+                output.writeLong(value.getLong(0));
+                break;
+            }
             case DOUBLE: {
                 output.writeDouble(value.getDouble(0));
                 break;
@@ -78,6 +82,9 @@ public class EntryHelper {
                 break;
             case INT:
                 value = input.readInt();
+                break;
+            case LONG:
+                value = input.readLong();
                 break;
             case DOUBLE:
                 value = input.readDouble();

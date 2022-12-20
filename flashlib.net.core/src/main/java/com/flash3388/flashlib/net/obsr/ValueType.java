@@ -5,6 +5,7 @@ public enum ValueType {
     RAW,
     BOOLEAN,
     INT,
+    LONG,
     DOUBLE,
     STRING
 }
