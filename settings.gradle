@@ -4,7 +4,6 @@ include 'flashlib.core'
 include 'flashlib.core.scheduling'
 include 'flashlib.core.io'
 include 'flashlib.core.hid'
-include 'flashlib.core.robot'
 
 include 'flashlib.net.core'
 include 'flashlib.net.channels'
@@ -12,6 +11,9 @@ include 'flashlib.net.robolink'
 
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
+
+include 'flashlib.core.robot'
+include 'flashlib.core.app'
 
 include 'flashlib.hid.sdl2'
 

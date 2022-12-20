@@ -7,6 +7,7 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -73,6 +74,11 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public Scheduler getScheduler() {
         return mRobotControl.getScheduler();
+    }
+
+    @Override
+    public InstanceId getInstanceId() {
+        return mRobotControl.getInstanceId();
     }
 
     @Override

@@ -1,11 +1,11 @@
 package robot;
 
+import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
 import com.flash3388.flashlib.io.devices.SpeedControllerGroup;
 import com.flash3388.flashlib.io.devices.actuators.PwmTalonSrx;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -21,7 +21,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
     private final Joystick mStickRight;
     private final Joystick mStickLeft;
 
-    public UserRobot(RobotControl robotControl) throws RobotInitializationException {
+    public UserRobot(RobotControl robotControl) throws StartupException {
         super(robotControl);
 
         // Creating the tank drive system.

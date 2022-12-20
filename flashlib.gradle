@@ -5,10 +5,11 @@ def flashlibModules = [
         project('flashlib.net.robolink'),
         project('flashlib.core.hid'),
         project('flashlib.core.io'),
-        project('flashlib.core.robot'),
         project('flashlib.core.scheduling'),
         project('flashlib.vision.core'),
         project('flashlib.vision.cv'),
+        project('flashlib.core.app'),
+        project('flashlib.core.robot'),
 ]
 
 flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }

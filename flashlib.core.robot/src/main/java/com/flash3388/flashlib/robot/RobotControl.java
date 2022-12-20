@@ -1,9 +1,10 @@
 package com.flash3388.flashlib.robot;
 
+import com.flash3388.flashlib.app.FlashLibControl;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
+import com.flash3388.flashlib.robot.base.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.net.NetworkInterface;
 import com.flash3388.flashlib.robot.net.NetworkingMode;
@@ -30,7 +31,7 @@ import java.util.function.Supplier;
  *
  * @see GenericRobotControl
  */
-public interface RobotControl {
+public interface RobotControl extends FlashLibControl {
 
     /**
      * Gets the initialized {@link Supplier} object for {@link RobotMode} of the robot.
@@ -171,6 +172,7 @@ public interface RobotControl {
      *
      * @return {@link Clock} of the robot.
      */
+    @Override
     Clock getClock();
 
     /**
@@ -184,6 +186,7 @@ public interface RobotControl {
      *
      * @return {@link Logger} of the robot.
      */
+    @Override
     Logger getLogger();
 
     /**
@@ -194,6 +197,7 @@ public interface RobotControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @Override
     void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
     /**
@@ -204,6 +208,7 @@ public interface RobotControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @Override
     default void registerCloseables(AutoCloseable... closeables) {
         registerCloseables(Arrays.asList(closeables));
     }
