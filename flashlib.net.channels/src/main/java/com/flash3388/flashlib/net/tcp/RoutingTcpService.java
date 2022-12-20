@@ -1,16 +1,17 @@
 package com.flash3388.flashlib.net.tcp;
 
-import com.castle.concurrent.service.TerminalServiceBase;
+import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
 import com.castle.time.exceptions.TimeoutException;
-import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
+import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.net.ConnectedNetChannel;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-public class RoutingTcpService extends TerminalServiceBase {
+public class RoutingTcpService extends SingleUseService {
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
@@ -42,7 +43,7 @@ public class RoutingTcpService extends TerminalServiceBase {
         mThread.interrupt();
         mThread = null;
 
-        mChannel.close();
+        Closeables.silentClose(mChannel);
         mChannel = null;
     }
 
@@ -83,14 +84,19 @@ public class RoutingTcpService extends TerminalServiceBase {
         }
 
         @Override
-        public void onNewClientData(IdentifiedConnectedNetChannel channel) throws IOException {
+        public void onNewChannel(ConnectedNetChannel channel) throws IOException {
+
+        }
+
+        @Override
+        public void onNewData(ConnectedNetChannel channel) throws IOException {
             mReadBuffer.clear();
 
             try {
                 int read = channel.read(mReadBuffer);
                 if (read > 0) {
                     mReadBuffer.flip();
-                    mChannel.writeToAllBut(mReadBuffer, channel.getIdentifier());
+                    mChannel.writeToAllBut(mReadBuffer, channel);
                 }
             } catch (TimeoutException e) {
                 throw new IOException(e);
@@ -98,11 +104,6 @@ public class RoutingTcpService extends TerminalServiceBase {
                 Thread.currentThread().interrupt();
                 throw new IOException(e);
             }
-        }
-
-        @Override
-        public void onNewChannel(int identifier) throws IOException {
-
         }
     }
 }

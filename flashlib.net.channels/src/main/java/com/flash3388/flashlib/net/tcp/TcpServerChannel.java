@@ -4,74 +4,47 @@ import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
 import com.castle.util.throwables.ThrowableChain;
 import com.castle.util.throwables.Throwables;
-import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
+import com.flash3388.flashlib.net.ConnectedNetChannel;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class TcpServerChannel implements Closeable {
 
     public interface UpdateHandler {
-
-        void onNewClientData(IdentifiedConnectedNetChannel channel) throws IOException;
-        void onNewChannel(int identifier) throws IOException;
+        void onNewChannel(ConnectedNetChannel channel) throws IOException;
+        void onNewData(ConnectedNetChannel channel) throws IOException;
     }
 
     private static final int SELECTOR_TIMEOUT = 500;
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
-    private final Map<Channel, ConnectedTcpChannel> mClients;
-    private final Map<Integer, Channel> mClientIdentifiers;
+    private final ClientsStorage mClientsStorage;
 
-    private final Lock mClientsChangeLock;
-    private final Condition mHasClients;
-    private final AtomicInteger mClientIdentifier;
-    private final AtomicReference<Runnable> mOnConnectionCallback;
-
+    private ServerSocketChannel mBaseChannel;
     private Selector mSelector;
-    private Selector mReadSelector;
-    private ServerSocketChannel mServer;
 
     public TcpServerChannel(SocketAddress bindAddress, Logger logger) {
         mBindAddress = bindAddress;
         mLogger = logger;
-        mClients = new HashMap<>(5);
-        mClientIdentifiers = new HashMap<>(5);
+        mClientsStorage = new ClientsStorage();
 
-        mClientsChangeLock = new ReentrantLock();
-        mHasClients = mClientsChangeLock.newCondition();
-        mClientIdentifier = new AtomicInteger(0);
-        mOnConnectionCallback = new AtomicReference<>(null);
-
+        mBaseChannel = null;
         mSelector = null;
-        mServer = null;
-    }
-
-    public void setOnConnection(Runnable callback) {
-        mOnConnectionCallback.set(callback);
     }
 
     public void handleUpdates(UpdateHandler handler) throws IOException, TimeoutException {
-        openServer();
+        openChannel();
 
         int available = mSelector.select(SELECTOR_TIMEOUT);
         if (available < 1) {
@@ -84,57 +57,46 @@ public class TcpServerChannel implements Closeable {
             try {
                 if (key.isAcceptable()) {
                     // new client
-                    SocketChannel channel = mServer.accept();
-                    int identifier = mClientIdentifier.incrementAndGet();
+                    SocketChannel channel = mBaseChannel.accept();
+                    mLogger.debug("Server received new client from {} at {}",
+                            channel.getRemoteAddress(),
+                            channel.getLocalAddress());
 
-                    mClientsChangeLock.lock();
+                    SocketAddress address = channel.getLocalAddress();
+                    ConnectedTcpChannel connectedTcpChannel = null;
                     try {
-                        mLogger.debug("Server received new client, id {}", identifier);
+                        connectedTcpChannel = new ConnectedTcpChannel(channel);
+                        handler.onNewChannel(connectedTcpChannel);
 
-                        channel.configureBlocking(false);
-                        channel.register(mSelector, SelectionKey.OP_READ);
-
-                        handler.onNewChannel(identifier);
-
-                        Runnable callback = mOnConnectionCallback.get();
-                        if (callback != null) {
-                            callback.run();
-                        }
-
-                        mClients.put(channel, new ConnectedTcpChannel(channel, identifier));
-                        mClientIdentifiers.put(identifier, channel);
-
-                        mHasClients.signalAll();
+                        mClientsStorage.putChannel(address, connectedTcpChannel);
                     } catch (IOException e) {
-                        mLogger.debug("Server encountered error while processing new client {}", identifier);
-                        Closeables.silentClose(channel);
-                        removeClient(channel);
+                        // close client
+                        mLogger.debug("Error processing new client at {}", address);
+
+                        if (connectedTcpChannel != null) {
+                            Closeables.silentClose(connectedTcpChannel);
+                        } else {
+                            Closeables.silentClose(channel);
+                        }
 
                         throw e;
-                    } finally {
-                        mClientsChangeLock.unlock();
                     }
                 } else if (key.isReadable()) {
-                    // client ready to read
+                    // new data for client
+                    // TODO: STOP READING IF NOT ENOUGH DATA TO READ INSTEAD OF BLOCKING
 
-                    ConnectedTcpChannel channel;
-                    mClientsChangeLock.lock();
+                    //noinspection resource
+                    SocketAddress address = ((SocketChannel) key.channel()).getLocalAddress();
                     try {
-                        channel = mClients.get(key.channel());
-                    } finally {
-                        mClientsChangeLock.unlock();
-                    }
+                        ConnectedNetChannel channel = mClientsStorage.getChannelByAddress(address);
+                        handler.onNewData(channel);
+                    } catch (IOException e) {
+                        // remove client
+                        mLogger.debug("Error processing new data from client at {}", address);
+                        ConnectedNetChannel channel = mClientsStorage.remoteByAddress(address);
+                        Closeables.silentClose(channel);
 
-                    if (channel != null) {
-                        try {
-                            mLogger.debug("Server received data from client, id {}", channel.getIdentifier());
-                            handler.onNewClientData(channel);
-                        } catch (IOException e) {
-                            mLogger.debug("Server encountered error processing data from client, id {}",
-                                    channel.getIdentifier());
-                            removeClient(key.channel());
-                            throw e;
-                        }
+                        throw e;
                     }
                 }
             } finally {
@@ -143,147 +105,74 @@ public class TcpServerChannel implements Closeable {
         }
     }
 
-    public void waitUntilHasClients() throws InterruptedException {
-        mClientsChangeLock.lock();
-        try {
-            while (mClients.size() < 1) {
-                mHasClients.await();
-            }
-        } finally {
-            mClientsChangeLock.unlock();
-        }
+    public void writeToAll(ByteBuffer buffer) throws IOException, InterruptedException {
+        writeToAllBut(buffer, null);
     }
 
-    public void writeToAllBut(ByteBuffer buffer, int identifier) throws IOException {
-        List<ConnectedTcpChannel> clients;
-        mClientsChangeLock.lock();
-        try {
-            clients = new LinkedList<>(mClients.values());
-        } finally {
-            mClientsChangeLock.unlock();
-        }
+    public void writeToAllBut(ByteBuffer buffer, ConnectedNetChannel notWriteChannel) throws IOException, InterruptedException {
+        openChannel();
 
+        Map<SocketAddress, ConnectedNetChannel> clients = mClientsStorage.getAll();
         ThrowableChain chain = Throwables.newChain();
-        // remove channels with no errors
-        for (Iterator<? extends ConnectedTcpChannel> it = clients.iterator(); it.hasNext();) {
-            ConnectedTcpChannel channel = it.next();
-            if (channel.getIdentifier() == identifier) {
+        for (Iterator<Map.Entry<SocketAddress, ConnectedNetChannel>> it = clients.entrySet().iterator();
+             it.hasNext();) {
+            Map.Entry<SocketAddress, ConnectedNetChannel> entry = it.next();
+            if (entry.getValue().equals(notWriteChannel)) {
                 it.remove();
                 continue;
             }
 
             try {
-                writeToChannel(channel, buffer);
+                buffer.rewind();
+                entry.getValue().write(buffer);
+
+                // remove entries that are okay
                 it.remove();
             } catch (IOException e) {
+                mLogger.debug("Error sending data to client at {}", entry.getKey());
                 chain.chain(e);
             }
         }
 
-        mClientsChangeLock.lock();
-        try {
-            clients.forEach((v)-> removeClientById(v.getIdentifier()));
-        } finally {
-            mClientsChangeLock.unlock();
-        }
+        mClientsStorage.removeAll(clients.keySet());
+        clients.forEach((k, channel)-> {
+            Closeables.silentClose(channel);
+        });
 
         chain.throwIfType(IOException.class);
     }
 
-    public void writeToAll(ByteBuffer buffer) throws IOException {
-        writeToAllBut(buffer, -1);
-    }
+    @Override
+    public void close() throws IOException {
+        if (mBaseChannel != null) {
+            Closeables.silentClose(mBaseChannel);
+            mBaseChannel = null;
+        }
 
-    private void writeToChannel(ConnectedTcpChannel channel, ByteBuffer buffer) throws IOException {
-        mLogger.debug("Server writing to channel {}", channel.getIdentifier());
-        try {
-            buffer.rewind();
-            channel.write(buffer);
-        } catch (IOException e) {
-            mLogger.debug("Server failed writing to channel {}, closing it", channel.getIdentifier());
-            channel.close();
-            throw e;
+        if (mSelector != null) {
+            Closeables.silentClose(mSelector);
+            mSelector = null;
         }
     }
 
-    private void removeClient(Object key) {
-        mClientsChangeLock.lock();
-        try {
-            //noinspection SuspiciousMethodCalls
-            ConnectedTcpChannel channel = mClients.remove(key);
-            if (channel != null) {
-                mLogger.debug("Server removing client, id {}", channel.getIdentifier());
-                //noinspection resource
-                mClientIdentifiers.remove(channel.getIdentifier());
-                channel.close();
-            }
-        } finally {
-            mClientsChangeLock.unlock();
-        }
-    }
-
-    private void removeClientById(int key) {
-        mClientsChangeLock.lock();
-        try {
-            Channel baseChannel = mClientIdentifiers.remove(key);
-            if (baseChannel == null) {
-                return;
-            }
-
-            ConnectedTcpChannel channel = mClients.remove(baseChannel);
-            if (channel != null) {
-                mLogger.debug("Server removing client, id {}", channel.getIdentifier());
-                channel.close();
-            }
-        } finally {
-            mClientsChangeLock.unlock();
-        }
-    }
-
-    private synchronized void openServer() throws IOException {
-        if (mServer == null) {
+    private synchronized void openChannel() throws IOException {
+        if (mBaseChannel == null) {
             try {
-                mLogger.debug("Server opening socket in non-blocking mode");
+                mLogger.debug("Opening new TCP SERVER socket in non-blocking mode");
 
                 mSelector = Selector.open();
 
-                mServer = ServerSocketChannel.open();
-                mServer.configureBlocking(false);
+                mBaseChannel = ServerSocketChannel.open();
+                mBaseChannel.configureBlocking(false);
 
-                mLogger.debug("Server binding socket to {}", mBindAddress);
-                mServer.bind(mBindAddress);
+                mLogger.debug("Binding TCP SERVER to {}", mBindAddress);
+                mBaseChannel.bind(mBindAddress);
 
-                mServer.register(mSelector, SelectionKey.OP_ACCEPT);
+                mBaseChannel.register(mSelector, SelectionKey.OP_ACCEPT);
             } catch (IOException e) {
                 close();
                 throw e;
             }
-        }
-    }
-
-    @Override
-    public synchronized void close() {
-        mLogger.debug("Server closing socket and connections");
-
-        mClients.forEach((k, v)-> {
-            v.close();
-        });
-        mClients.clear();
-
-        if (mReadSelector != null) {
-            Closeables.silentClose(mReadSelector);
-            mReadSelector = null;
-        }
-
-        if (mServer != null) {
-            Closeables.silentClose(mServer);
-            mServer = null;
-        }
-
-        if (mSelector != null) {
-            mSelector.wakeup();
-            Closeables.silentClose(mSelector);
-            mSelector = null;
         }
     }
 }

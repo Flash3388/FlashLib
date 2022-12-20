@@ -2,7 +2,7 @@ package com.flash3388.flashlib.net.tcp;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.IdentifiedConnectedNetChannel;
+import com.flash3388.flashlib.net.ConnectedNetChannel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,35 +11,24 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-public class ConnectedTcpChannel implements IdentifiedConnectedNetChannel {
+public class ConnectedTcpChannel implements ConnectedNetChannel {
 
     private static final int READ_TIMEOUT = 100;
     private static final boolean BREAK_ON_READ_TIMEOUT = false;
 
     private final SocketChannel mChannel;
-    private final int mIdentifier;
     private final Selector mReadSelector;
 
-    public ConnectedTcpChannel(SocketChannel channel, int identifier) throws IOException {
+    public ConnectedTcpChannel(SocketChannel channel) throws IOException {
         if (!channel.isConnected()) {
             throw new IllegalArgumentException("expected connected channel");
         }
 
         mChannel = channel;
         mChannel.configureBlocking(false);
-        mIdentifier = identifier;
         mReadSelector = Selector.open();
 
         mChannel.register(mReadSelector, SelectionKey.OP_READ);
-    }
-
-    public ConnectedTcpChannel(SocketChannel channel) throws IOException {
-        this(channel, -1);
-    }
-
-    @Override
-    public int getIdentifier() {
-        return mIdentifier;
     }
 
     public void write(ByteBuffer buffer) throws IOException {

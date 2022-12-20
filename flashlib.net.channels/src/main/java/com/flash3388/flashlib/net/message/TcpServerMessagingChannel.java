@@ -4,7 +4,7 @@ import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.BufferedChannelReader;
 import com.flash3388.flashlib.net.ConnectedNetChannel;
-import com.flash3388.flashlib.net.tcp.impl2.TcpServerChannel;
+import com.flash3388.flashlib.net.tcp.TcpServerChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;

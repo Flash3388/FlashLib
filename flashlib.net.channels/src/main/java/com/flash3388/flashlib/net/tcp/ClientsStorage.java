@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.tcp.impl2;
+package com.flash3388.flashlib.net.tcp;
 
 import com.flash3388.flashlib.net.ConnectedNetChannel;
 import com.flash3388.flashlib.net.tcp.ConnectedTcpChannel;

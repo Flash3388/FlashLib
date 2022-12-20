@@ -8,6 +8,7 @@ include 'flashlib.core.robot'
 
 include 'flashlib.net.core'
 include 'flashlib.net.channels'
+include 'flashlib.net.robolink'
 
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
