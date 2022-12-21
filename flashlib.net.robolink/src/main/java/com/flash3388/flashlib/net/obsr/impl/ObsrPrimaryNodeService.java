@@ -60,13 +60,8 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
     }
 
     @Override
-    public StoredObject getChild(String name) {
-        return mStorage.getObject(StoragePath.create(name));
-    }
-
-    @Override
-    public StoredEntry getEntry(String name) {
-        return mStorage.getEntry(StoragePath.create(name));
+    public StoredObject getRoot() {
+        return mStorage.getObject(StoragePath.root());
     }
 
     @Override

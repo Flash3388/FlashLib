@@ -9,5 +9,12 @@ package com.flash3388.flashlib.net.obsr;
  *
  * @since FlashLib 3.2.0
  */
-public interface ObjectStorage extends StoredObject {
+public interface ObjectStorage {
+
+    /**
+     * Get the root object in the storage.
+     *
+     * @return root object
+     */
+    StoredObject getRoot();
 }

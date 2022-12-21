@@ -16,11 +16,19 @@ public class StoragePath {
         return new StoragePath(path);
     }
 
+    public static StoragePath root() {
+        return new StoragePath(DELIMITER + "");
+    }
+
     public boolean isRoot() {
         return mPath.length() == 1 && mPath.charAt(0) == DELIMITER;
     }
 
     public StoragePath parent() {
+        if (isRoot()) {
+            throw new IllegalStateException("this path is root and has no parents");
+        }
+
         return new StoragePath(dirname(mPath));
     }
 
