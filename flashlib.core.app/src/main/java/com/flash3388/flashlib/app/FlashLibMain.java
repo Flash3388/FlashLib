@@ -21,7 +21,7 @@ public class FlashLibMain {
     }
 
     public static void appMain(SimpleApp.Creator creator, Logger logger) {
-        appMain(()-> new SimpleAppImpl(creator), logger);
+        appMain(()-> new SimpleAppRunner(creator), logger);
     }
 
     private static class BasicCreator implements AppCreator {
@@ -40,31 +40,4 @@ public class FlashLibMain {
         }
     }
 
-    private static class SimpleAppImpl implements FlashLibApp {
-
-        private final SimpleApp.Creator mCreator;
-        private SimpleApp mApp;
-
-        private SimpleAppImpl(SimpleApp.Creator creator) {
-            mCreator = creator;
-            mApp = null;
-        }
-
-        @Override
-        public void initialize(FlashLibControl control) throws StartupException {
-            mApp = mCreator.create(control);
-        }
-
-        @Override
-        public void main(FlashLibControl control) throws Exception {
-            mApp.main();
-        }
-
-        @Override
-        public void shutdown(FlashLibControl control) throws Exception {
-            if (mApp != null) {
-                mApp.close();
-            }
-        }
-    }
 }

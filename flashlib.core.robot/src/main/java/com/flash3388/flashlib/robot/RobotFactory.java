@@ -1,14 +1,12 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.robot.net.NetworkConfiguration;
-import com.flash3388.flashlib.robot.net.NetworkInterface;
-import com.flash3388.flashlib.robot.net.impl.NetworkInterfaceImpl;
+import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.util.logging.Logging;
-import com.flash3388.flashlib.util.resources.ResourceHolder;
 import org.slf4j.Logger;
 
 public final class RobotFactory {
@@ -27,14 +25,7 @@ public final class RobotFactory {
         return new SystemNanoClock();
     }
 
-    public static NetworkInterface newNetworkInterface(NetworkConfiguration configuration,
-                                                       ResourceHolder holder, Clock clock, Logger logger) {
-        NetworkInterfaceImpl networkInterface = new NetworkInterfaceImpl(configuration, clock, logger);
-        holder.add(networkInterface);
-        return networkInterface;
-    }
-
     public static NetworkInterface disabledNetworkInterface() {
-        return new NetworkInterfaceImpl(NetworkConfiguration.disabled(), null, Logging.stub());
+        return new NetworkInterfaceImpl();
     }
 }

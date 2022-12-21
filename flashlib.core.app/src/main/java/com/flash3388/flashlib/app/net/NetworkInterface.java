@@ -1,7 +1,9 @@
-package com.flash3388.flashlib.robot.net;
+package com.flash3388.flashlib.app.net;
+
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
 
 /**
- * A packaged module allowing access to networking functionalities to be used by the robot.
+ * A packaged module allowing access to network functionalities to be used by the application.
  * Depending on the implementation and the configured {@link NetworkingMode}, different protocols
  * for communication may be available. Check {@link #getMode()} before accessing different protocol interfaces
  * to ensure the protocol is indeed supported and initialized.
@@ -17,4 +19,6 @@ public interface NetworkInterface {
      * @return {@link NetworkingMode}
      */
     NetworkingMode getMode();
+
+    ObjectStorage getObjectStorage();
 }

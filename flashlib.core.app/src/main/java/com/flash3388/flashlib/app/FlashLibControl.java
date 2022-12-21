@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.app;
 
+import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.app.net.NetworkingMode;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -87,5 +89,16 @@ public interface FlashLibControl {
      * @return {@link ServiceRegistry}
      */
     ServiceRegistry getServiceRegistry();
+
+    /**
+     * Gets the {@link NetworkInterface} object associated with the application. Can be used
+     * to communicate with other programs via several protocols, depending on
+     * the configuration and the implementation of this interface.
+     * Check {@link NetworkingMode} before accessing specific protocol to ensure
+     * the protocol is indeed available.
+     *
+     * @return {@link NetworkInterface}
+     */
+    NetworkInterface getNetworkInterface();
 
 }

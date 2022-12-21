@@ -63,10 +63,10 @@ public class FlashLibProgram {
     private void appInitialize(FlashLibApp app, FlashLibControl control) throws Exception {
         mLogger.debug("Initializing user app");
         try {
-            app.initialize(control);
-
             ServiceRegistry serviceRegistry = control.getServiceRegistry();
             serviceRegistry.startAll();
+
+            app.initialize(control);
         } catch (Throwable t) {
             mLogger.error("Error in app initialization", t);
             throw t;

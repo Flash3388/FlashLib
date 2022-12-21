@@ -5,7 +5,7 @@ import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.net.NetworkInterface;
+import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
