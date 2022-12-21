@@ -41,25 +41,24 @@ public class BasicServiceRegistry implements ServiceRegistry {
 
     @Override
     public void stopAll() {
-        if (mHasStarted.compareAndSet(true, false)) {
-            for (Service service : mServices) {
-                try {
-                    if (service.isRunning()) {
-                        mLogger.debug("Stopping service {}", service);
-                        service.stop();
-                    }
-
-                    if (service instanceof TerminalService) {
-                        TerminalService terminalService = ((TerminalService) service);
-                        if (!terminalService.isClosed()) {
-                            mLogger.debug("Service {} is TerminalService, closing service", service);
-                            terminalService.close();
-                        }
-                    }
-                } catch (Throwable t) {
-                    mLogger.warn("Failed to stop service {}", service);
-                    mLogger.error("Failed to stop service: exception", t);
+        mHasStarted.set(false);
+        for (Service service : mServices) {
+            try {
+                if (service.isRunning()) {
+                    mLogger.debug("Stopping service {}", service);
+                    service.stop();
                 }
+
+                if (service instanceof TerminalService) {
+                    TerminalService terminalService = ((TerminalService) service);
+                    if (!terminalService.isClosed()) {
+                        mLogger.debug("Service {} is TerminalService, closing service", service);
+                        terminalService.close();
+                    }
+                }
+            } catch (Throwable t) {
+                mLogger.warn("Failed to stop service {}", service);
+                mLogger.error("Failed to stop service: exception", t);
             }
         }
     }

@@ -90,5 +90,12 @@ public class FlashLibProgram {
         } catch (Throwable t) {
             mLogger.error("Error in app shutdown", t);
         }
+
+        try {
+            ServiceRegistry serviceRegistry = control.getServiceRegistry();
+            serviceRegistry.stopAll();
+        } catch (Throwable t) {
+            mLogger.error("Error in app shutdown", t);
+        }
     }
 }
