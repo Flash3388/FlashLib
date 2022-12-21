@@ -2,6 +2,7 @@ package robot;
 
 import com.beans.Property;
 import com.beans.properties.atomic.AtomicProperty;
+import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.hid.sdl2.Sdl2HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
@@ -38,7 +39,8 @@ public class Main {
                     new IoInterface.Stub(),
                     new WeakHidInterface(new Sdl2HidInterface()),
                     RobotFactory.newDefaultScheduler(clock, aLogger),
-                    clock);
+                    clock,
+                    new BasicServiceRegistry(aLogger));
 
             // When defining the creation of UserRobot, we make sure to pass the manual mode supplier to
             // the constructor, so it could be used.

@@ -62,7 +62,9 @@ public class FlashLibMain {
 
         @Override
         public void shutdown(FlashLibControl control) throws Exception {
-            mApp.close();
+            if (mApp != null) {
+                mApp.close();
+            }
         }
     }
 }

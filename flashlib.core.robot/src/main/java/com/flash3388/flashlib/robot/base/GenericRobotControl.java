@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.base;
 
+import com.flash3388.flashlib.app.BasicServiceRegistry;
+import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
@@ -28,6 +30,7 @@ public class GenericRobotControl implements RobotControl {
     private final HidInterface mHidInterface;
     private final Scheduler mScheduler;
     private final Clock mClock;
+    private final ServiceRegistry mServiceRegistry;
 
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Logger logger,
                                Supplier<? extends RobotMode> modeSupplier,
@@ -35,7 +38,8 @@ public class GenericRobotControl implements RobotControl {
                                IoInterface ioInterface,
                                HidInterface hidInterface,
                                Scheduler scheduler,
-                               Clock clock) {
+                               Clock clock,
+                               ServiceRegistry serviceRegistry) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
         mLogger = logger;
@@ -45,6 +49,7 @@ public class GenericRobotControl implements RobotControl {
         mHidInterface = hidInterface;
         mScheduler = scheduler;
         mClock = clock;
+        mServiceRegistry = serviceRegistry;
     }
 
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Logger logger) {
@@ -58,6 +63,7 @@ public class GenericRobotControl implements RobotControl {
 
         mNetworkInterface = RobotFactory.disabledNetworkInterface();
         mScheduler = RobotFactory.newDefaultScheduler(mClock, logger);
+        mServiceRegistry = new BasicServiceRegistry(logger);
     }
 
     @Override
@@ -103,5 +109,10 @@ public class GenericRobotControl implements RobotControl {
     @Override
     public NetworkInterface getNetworkInterface() {
         return mNetworkInterface;
+    }
+
+    @Override
+    public ServiceRegistry getServiceRegistry() {
+        return mServiceRegistry;
     }
 }

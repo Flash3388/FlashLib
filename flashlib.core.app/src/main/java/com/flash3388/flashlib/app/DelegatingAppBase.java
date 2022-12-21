@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 
 import java.util.Collection;
 
-public abstract class SimpleAppBase implements FlashLibControl, SimpleApp {
+public class DelegatingAppBase implements FlashLibControl {
 
     private final FlashLibControl mControl;
 
-    public SimpleAppBase(FlashLibControl control) {
+    public DelegatingAppBase(FlashLibControl control) {
         mControl = control;
     }
 
@@ -32,5 +32,10 @@ public abstract class SimpleAppBase implements FlashLibControl, SimpleApp {
     @Override
     public final void registerCloseables(Collection<? extends AutoCloseable> closeables) {
         mControl.registerCloseables(closeables);
+    }
+
+    @Override
+    public ServiceRegistry getServiceRegistry() {
+        return mControl.getServiceRegistry();
     }
 }

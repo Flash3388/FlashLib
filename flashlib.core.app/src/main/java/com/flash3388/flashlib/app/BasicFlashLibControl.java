@@ -15,6 +15,7 @@ public class BasicFlashLibControl implements FlashLibControl {
     private final Logger mLogger;
 
     private final Clock mClock;
+    private final ServiceRegistry mServiceRegistry;
 
     public BasicFlashLibControl(InstanceId instanceId, ResourceHolder resourceHolder, Logger logger) {
         mInstanceId = instanceId;
@@ -22,6 +23,7 @@ public class BasicFlashLibControl implements FlashLibControl {
         mLogger = logger;
 
         mClock = new SystemNanoClock();
+        mServiceRegistry = new BasicServiceRegistry(logger);
     }
 
     @Override
@@ -42,5 +44,10 @@ public class BasicFlashLibControl implements FlashLibControl {
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
         mResourceHolder.add(closeables);
+    }
+
+    @Override
+    public ServiceRegistry getServiceRegistry() {
+        return mServiceRegistry;
     }
 }

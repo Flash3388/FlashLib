@@ -37,7 +37,7 @@ public class FlashLibProgram {
             AppImplementation app = mCreator.create(mInstanceId, resourceHolder, mLogger);
             FlashLibInstance.setControl(app.getControl());
 
-            mLogger.debug("Initializing user app");
+            mLogger.debug("Running application");
             runApplication(app);
         } finally {
             try {
@@ -52,8 +52,8 @@ public class FlashLibProgram {
         FlashLibApp app = appImplementation.getApp();
         FlashLibControl control = appImplementation.getControl();
 
-        appInitialize(app, control);
         try {
+            appInitialize(app, control);
             appMain(app, control);
         } finally {
             appShutdown(app, control);
@@ -64,6 +64,9 @@ public class FlashLibProgram {
         mLogger.debug("Initializing user app");
         try {
             app.initialize(control);
+
+            ServiceRegistry serviceRegistry = control.getServiceRegistry();
+            serviceRegistry.startAll();
         } catch (Throwable t) {
             mLogger.error("Error in app initialization", t);
             throw t;

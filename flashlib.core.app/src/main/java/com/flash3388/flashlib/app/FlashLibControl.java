@@ -77,4 +77,15 @@ public interface FlashLibControl {
         registerCloseables(Arrays.asList(closeables));
     }
 
+    /**
+     * Gets the registry which holds and controls {@link com.castle.concurrent.service.Service services}.
+     * <p>
+     *     Services registered here will be automatically started on application initialization and automatically
+     *     stopped on application shutdown.
+     * </p>
+     *
+     * @return {@link ServiceRegistry}
+     */
+    ServiceRegistry getServiceRegistry();
+
 }

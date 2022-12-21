@@ -1,5 +1,6 @@
 package robot;
 
+import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
@@ -36,7 +37,8 @@ public class Main {
                     new IoInterface.Stub(),
                     new HidInterface.Stub(),
                     RobotFactory.newDefaultScheduler(clock, aLogger),
-                    clock);
+                    clock,
+                    new BasicServiceRegistry(aLogger));
 
             // When defining the creation of UserRobot, we make sure to pass the manual mode supplier to
             // the constructor, so it could be used.
