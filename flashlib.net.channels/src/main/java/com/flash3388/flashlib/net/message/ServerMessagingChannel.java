@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ServerMessagingChannel extends WritableMessagingChannel, Closeable {
 
     interface UpdateHandler extends MessagingChannel.UpdateHandler {
-        Optional<Message> onNewClientSend();
+        Optional<MessageToSend> onNewClientSend();
     }
 
     void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException, TimeoutException;

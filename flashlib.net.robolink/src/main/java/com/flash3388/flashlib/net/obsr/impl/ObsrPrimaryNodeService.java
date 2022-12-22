@@ -50,7 +50,7 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
         mChannel = new TcpServerMessagingChannel(bindAddress, messageWriter, messageReader, clock, logger);
 
         StorageListener listener = new StorageListenerImpl(mChannel, logger);
-        mStorage = new StorageImpl(listener, clock, logger);
+        mStorage = new StorageImpl(listener, clock);
 
         mReadThread = null;
     }

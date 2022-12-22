@@ -25,7 +25,7 @@ public class StorageListenerImpl implements StorageListener {
     @Override
     public void onNewEntry(StoragePath path) {
         try {
-            mChannel.write(new NewEntryMessage(path.toString()));
+            mChannel.write(NewEntryMessage.TYPE, new NewEntryMessage(path.toString()));
         } catch (IOException e) {
             mLogger.debug("error writing message from storage", e);
         } catch (InterruptedException e) {
@@ -36,7 +36,7 @@ public class StorageListenerImpl implements StorageListener {
     @Override
     public void onEntryUpdate(StoragePath path, Value value) {
         try {
-            mChannel.write(new EntryChangeMessage(path.toString(), value));
+            mChannel.write(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value));
         } catch (IOException e) {
             mLogger.debug("error writing message from storage", e);
         } catch (InterruptedException e) {
@@ -47,7 +47,7 @@ public class StorageListenerImpl implements StorageListener {
     @Override
     public void onEntryClear(StoragePath path) {
         try {
-            mChannel.write(new EntryClearMessage(path.toString()));
+            mChannel.write(EntryClearMessage.TYPE, new EntryClearMessage(path.toString()));
         } catch (IOException e) {
             mLogger.debug("error writing message from storage", e);
         } catch (InterruptedException e) {

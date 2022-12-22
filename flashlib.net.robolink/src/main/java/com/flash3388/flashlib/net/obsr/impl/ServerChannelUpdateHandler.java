@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.obsr.impl;
 
 import com.flash3388.flashlib.net.message.Message;
 import com.flash3388.flashlib.net.message.MessageInfo;
+import com.flash3388.flashlib.net.message.MessageToSend;
 import com.flash3388.flashlib.net.message.ServerMessagingChannel;
 import com.flash3388.flashlib.net.message.WritableMessagingChannel;
 import com.flash3388.flashlib.net.obsr.Storage;
@@ -23,9 +24,12 @@ public class ServerChannelUpdateHandler extends ChannelUpdateHandler implements 
     }
 
     @Override
-    public Optional<Message> onNewClientSend() {
+    public Optional<MessageToSend> onNewClientSend() {
         Map<String, Value> entries = mStorage.getAll();
-        return Optional.of(new StorageContentsMessage(entries));
+        return Optional.of(new MessageToSend(
+                StorageContentsMessage.TYPE,
+                new StorageContentsMessage(entries)
+        ));
     }
 
     @Override
@@ -33,7 +37,7 @@ public class ServerChannelUpdateHandler extends ChannelUpdateHandler implements 
         super.onNewMessage(messageInfo, message);
 
         try {
-            mChannel.write(message);
+            mChannel.write(messageInfo.getType(), message);
         } catch (IOException e) {
             mLogger.debug("Error transferring message to other clients", e);
         } catch (InterruptedException e) {

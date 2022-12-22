@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.message;
 
 import com.castle.time.exceptions.TimeoutException;
-import com.flash3388.flashlib.net.udp.MultiTargetUdpChannel;
+import com.flash3388.flashlib.net.udp.BroadcastUdpChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -24,10 +24,10 @@ public class UdpMessagingChannel implements MessagingChannel {
     private final Clock mClock;
     private final Logger mLogger;
 
-    private final MultiTargetUdpChannel mChannel;
+    private final BroadcastUdpChannel mChannel;
     private final ByteBuffer mReadBuffer;
 
-    public UdpMessagingChannel(int[] bindPorts,
+    public UdpMessagingChannel(int bindPort,
                                InstanceId ourId,
                                MessageWriter messageWriter,
                                MessageReader messageReader,
@@ -39,7 +39,7 @@ public class UdpMessagingChannel implements MessagingChannel {
         mClock = clock;
         mLogger = logger;
 
-        mChannel = new MultiTargetUdpChannel(bindPorts, logger);
+        mChannel = new BroadcastUdpChannel(bindPort, logger);
         mReadBuffer = ByteBuffer.allocate(1024);
     }
 
@@ -67,23 +67,23 @@ public class UdpMessagingChannel implements MessagingChannel {
             }
 
             Time now = mClock.currentTime();
-            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now);
+            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
             handler.onNewMessage(messageInfo, result.message);
         }
     }
 
     @Override
-    public void write(Message message) throws IOException, InterruptedException {
+    public void write(MessageType type, Message message) throws IOException, InterruptedException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-            mMessageWriter.write(dataOutputStream, message);
+            mMessageWriter.write(dataOutputStream, type, message);
             dataOutputStream.flush();
 
             mLogger.debug("Sending BROADCAST of message");
 
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
-            mChannel.broadcastToPossiblePorts(buffer);
+            mChannel.broadcast(buffer);
         }
     }
 

@@ -20,11 +20,6 @@ public class EntryClearMessage implements Message {
     private EntryClearMessage() {
     }
 
-    @Override
-    public MessageType getType() {
-        return TYPE;
-    }
-
     public String getEntryPath() {
         return mEntryPath;
     }

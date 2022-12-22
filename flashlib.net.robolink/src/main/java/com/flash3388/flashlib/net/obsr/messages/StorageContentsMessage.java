@@ -3,7 +3,6 @@ package com.flash3388.flashlib.net.obsr.messages;
 import com.flash3388.flashlib.net.message.Message;
 import com.flash3388.flashlib.net.message.MessageType;
 import com.flash3388.flashlib.net.obsr.Value;
-import com.flash3388.flashlib.net.obsr.ValueType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -22,11 +21,6 @@ public class StorageContentsMessage implements Message {
     }
 
     private StorageContentsMessage() {
-    }
-
-    @Override
-    public MessageType getType() {
-        return TYPE;
     }
 
     public Map<String, Value> getEntries() {

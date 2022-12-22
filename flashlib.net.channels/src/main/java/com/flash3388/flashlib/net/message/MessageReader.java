@@ -9,10 +9,12 @@ public interface MessageReader {
 
     class Result {
         public final InstanceId senderId;
+        public final MessageType type;
         public final Message message;
 
-        public Result(InstanceId senderId, Message message) {
+        public Result(InstanceId senderId, MessageType type, Message message) {
             this.senderId = senderId;
+            this.type = type;
             this.message = message;
         }
     }

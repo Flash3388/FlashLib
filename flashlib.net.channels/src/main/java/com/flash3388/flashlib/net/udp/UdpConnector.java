@@ -9,25 +9,36 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.SocketOption;
 import java.nio.channels.DatagramChannel;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UdpConnector implements NetConnector {
 
+    private final SocketAddress mBindAddress;
+    private final Map<SocketOption<?>, Object> mSocketOptions;
     private final Logger mLogger;
 
     private DatagramChannel mBaseChannel;
     private ConnectedUdpChannel mChannel;
     private boolean mLastAttemptError;
 
-    public UdpConnector(Logger logger) {
+    public UdpConnector(SocketAddress bindAddress, Map<SocketOption<?>, Object> socketOptions, Logger logger) {
+        mBindAddress = bindAddress;
+        mSocketOptions = socketOptions;
         mLogger = logger;
         mBaseChannel = null;
         mChannel = null;
         mLastAttemptError = false;
     }
 
+    public UdpConnector(SocketAddress bindAddress, Logger logger) {
+        this(bindAddress, new HashMap<>(), logger);
+    }
+
     @Override
-    public ConnectedNetChannel connect(SocketAddress remote, Time timeout) throws IOException, TimeoutException, InterruptedException {
+    public ConnectedNetChannel connect(SocketAddress remote, Time timeout) throws IOException, InterruptedException {
         if (mLastAttemptError) {
             mLastAttemptError = false;
 
@@ -76,6 +87,12 @@ public class UdpConnector implements NetConnector {
 
                 mBaseChannel = DatagramChannel.open();
                 mBaseChannel.configureBlocking(false);
+                mBaseChannel.bind(mBindAddress);
+
+                for (Map.Entry<SocketOption<?>, Object> entry : mSocketOptions.entrySet()) {
+                    //noinspection unchecked,rawtypes
+                    mBaseChannel.setOption((SocketOption) entry.getKey(), entry.getValue());
+                }
             } catch (IOException e) {
                 close();
                 throw e;

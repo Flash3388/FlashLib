@@ -33,7 +33,7 @@ public class ConnectedUdpChannel implements ConnectedNetChannel {
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        mChannel.send(buffer, mChannel.getRemoteAddress());
+        mChannel.write(buffer);
     }
 
     @Override

@@ -5,5 +5,5 @@ import java.io.IOException;
 
 public interface MessageWriter {
 
-    void write(DataOutput dataOutput, Message message) throws IOException;
+    void write(DataOutput dataOutput, MessageType type, Message message) throws IOException;
 }

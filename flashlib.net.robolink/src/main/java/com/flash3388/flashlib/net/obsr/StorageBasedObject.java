@@ -14,7 +14,11 @@ public class StorageBasedObject implements StoredObject {
 
     @Override
     public StoredObject getChild(String name) {
-        StoragePath childPath = mPath.child(name);
+        if (name.indexOf(StoragePath.DELIMITER) > 0) {
+            throw new IllegalArgumentException("bad name, cannot contain " + StoragePath.DELIMITER);
+        }
+
+        StoragePath childPath = mPath.child(name + StoragePath.DELIMITER);
 
         Storage storage = getStorage();
         return storage.getObject(childPath);
@@ -22,6 +26,10 @@ public class StorageBasedObject implements StoredObject {
 
     @Override
     public StoredEntry getEntry(String name) {
+        if (name.indexOf(StoragePath.DELIMITER) > 0) {
+            throw new IllegalArgumentException("bad name, cannot contain " + StoragePath.DELIMITER);
+        }
+
         StoragePath childPath = mPath.child(name);
 
         Storage storage = getStorage();

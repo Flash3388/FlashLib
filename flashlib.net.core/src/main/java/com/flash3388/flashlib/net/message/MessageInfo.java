@@ -23,4 +23,11 @@ public interface MessageInfo {
      * @return timestamp
      */
     Time getTimestamp();
+
+    /**
+     * Gets the type of the message.
+     *
+     * @return type
+     */
+    MessageType getType();
 }

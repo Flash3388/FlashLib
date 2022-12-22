@@ -12,13 +12,6 @@ import java.io.IOException;
 public interface Message {
 
     /**
-     * The type of the message.
-     *
-     * @return type.
-     */
-    MessageType getType();
-
-    /**
      * Writes the content of the message into an output, allowing it to be sent.
      *
      * @param output output

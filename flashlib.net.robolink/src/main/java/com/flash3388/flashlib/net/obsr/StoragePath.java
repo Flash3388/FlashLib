@@ -37,7 +37,12 @@ public class StoragePath {
             subPath = subPath.substring(1);
         }
 
-        return new StoragePath(mPath + DELIMITER + subPath);
+        String endPath = mPath;
+        if (mPath.lastIndexOf(DELIMITER) != mPath.length() - 1) {
+            endPath += DELIMITER;
+        }
+
+        return new StoragePath(endPath + subPath);
     }
 
     public String getName() {
@@ -65,9 +70,6 @@ public class StoragePath {
     private static String normalizePath(String path) {
         if (path.indexOf(DELIMITER) != 0) {
             path = DELIMITER + path;
-        }
-        if (path.lastIndexOf(DELIMITER) == path.length() - 1) {
-            path = path.substring(0, path.length() - 2);
         }
 
         return path;

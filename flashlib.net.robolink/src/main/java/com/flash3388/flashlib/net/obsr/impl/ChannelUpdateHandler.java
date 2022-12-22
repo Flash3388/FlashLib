@@ -27,7 +27,7 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
     @Override
     public void onNewMessage(MessageInfo messageInfo, Message message) {
-        MessageType type = message.getType();
+        MessageType type = messageInfo.getType();
 
         if (type.equals(EntryChangeMessage.TYPE)) {
             handleEntryChange((EntryChangeMessage) message);

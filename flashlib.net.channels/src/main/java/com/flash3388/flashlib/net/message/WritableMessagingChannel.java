@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface WritableMessagingChannel {
 
-    void write(Message message) throws IOException, InterruptedException;
+    void write(MessageType type, Message message) throws IOException, InterruptedException;
 }

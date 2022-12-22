@@ -50,7 +50,7 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
         mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, logger);
 
         StorageListener listener = new StorageListenerImpl(mChannel, logger);
-        mStorage = new StorageImpl(listener, clock, logger);
+        mStorage = new StorageImpl(listener, clock);
 
         mReadThread = null;
     }

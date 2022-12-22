@@ -20,11 +20,6 @@ public class NewEntryMessage implements Message {
     private NewEntryMessage() {
     }
 
-    @Override
-    public MessageType getType() {
-        return TYPE;
-    }
-
     public String getEntryPath() {
         return mEntryPath;
     }

@@ -46,16 +46,16 @@ public class TcpServerMessagingChannel implements ServerMessagingChannel {
         mChannel.handleUpdates(new TcpServerChannel.UpdateHandler() {
             @Override
             public void onNewChannel(ConnectedNetChannel channel) throws IOException {
-                Optional<Message> optional = handler.onNewClientSend();
+                Optional<MessageToSend> optional = handler.onNewClientSend();
                 if (!optional.isPresent()) {
                     return;
                 }
 
-                Message message = optional.get();
+                MessageToSend message = optional.get();
 
                 try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                      DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-                    mMessageWriter.write(dataOutputStream, message);
+                    mMessageWriter.write(dataOutputStream, message.getType(), message.getMessage());
                     dataOutputStream.flush();
 
                     mLogger.debug("Sending message to a single client");
@@ -78,7 +78,7 @@ public class TcpServerMessagingChannel implements ServerMessagingChannel {
                     MessageReader.Result result = mMessageReader.read(dataInputStream);
 
                     Time now = mClock.currentTime();
-                    MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now);
+                    MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
                     mLogger.debug("New message from clients {}" ,result.senderId);
                     handler.onNewMessage(messageInfo, result.message);
@@ -91,10 +91,10 @@ public class TcpServerMessagingChannel implements ServerMessagingChannel {
     }
 
     @Override
-    public void write(Message message) throws IOException, InterruptedException {
+    public void write(MessageType type, Message message) throws IOException, InterruptedException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-            mMessageWriter.write(dataOutputStream, message);
+            mMessageWriter.write(dataOutputStream, type, message);
             dataOutputStream.flush();
 
             mLogger.debug("Sending message to all clients");

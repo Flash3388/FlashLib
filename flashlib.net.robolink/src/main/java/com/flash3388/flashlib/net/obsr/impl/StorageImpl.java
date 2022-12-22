@@ -14,7 +14,6 @@ import com.flash3388.flashlib.net.obsr.ValueType;
 import com.flash3388.flashlib.time.Clock;
 import com.notifier.Controllers;
 import com.notifier.EventController;
-import org.slf4j.Logger;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -24,25 +23,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class StorageImpl implements Storage {
 
-    // TODO: IMPROVE PATH RESTRICTIONS AND HANDLING
-    // TODO: LISTENERS / SELECTORS?
-    // TODO: FIND A WAY TO STORE ENTRIES AND ACCESS THEM FASTER
-    // TODO: IMPROVE THE GETALL SETALL METHODS
-
     private final StorageListener mListener;
     private final Clock mClock;
-    private final Logger mLogger;
 
     private final EventController mEventController;
-
-    // TODO: STORAGE OBJECTS AS WELL?
     private final Map<String, StoredEntryNode> mEntries;
-    private final Lock mLock; // TODO: ReadWriteLock? StampedLock?
+    private final Lock mLock;
 
-    public StorageImpl(StorageListener listener, Clock clock, Logger logger) {
+    public StorageImpl(StorageListener listener, Clock clock) {
         mListener = listener;
         mClock = clock;
-        mLogger = logger;
 
         mEventController = Controllers.newSyncExecutionController();
         mEntries = new HashMap<>();
@@ -86,8 +76,7 @@ public class StorageImpl implements Storage {
         try {
             StoredEntryNode entry = mEntries.get(path.toString());
             if (entry != null) {
-                // TODO: THROW ERROR? RETURN EMPTY? OR MAYBE SEPARATE PATHS FOR OBJECTS AND ENTRIES
-                throw new IllegalStateException("path represents an object");
+                throw new IllegalArgumentException("path represents an object");
             }
 
             return new StorageBasedObject(path, this);
@@ -138,8 +127,7 @@ public class StorageImpl implements Storage {
             if (currentValue.getType() != ValueType.EMPTY &&
                     value.getType() != currentValue.getType() &&
                     !flags.contains(StorageOpFlag.FORCE_CHANGE)) {
-                // TODO: THROW ERROR? RETURN EMPTY?
-                throw new IllegalStateException("wrong type");
+                throw new IllegalStateException("cannot change type of non-empty entry");
             }
 
             node.setValue(value, mClock.currentTime());

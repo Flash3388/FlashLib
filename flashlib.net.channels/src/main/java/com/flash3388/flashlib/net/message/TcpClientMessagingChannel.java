@@ -50,7 +50,7 @@ public class TcpClientMessagingChannel implements MessagingChannel {
             MessageReader.Result result = mMessageReader.read(dataInputStream);
 
             Time now = mClock.currentTime();
-            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now);
+            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
             mLogger.debug("New message routed from server");
             handler.onNewMessage(messageInfo, result.message);
@@ -61,12 +61,12 @@ public class TcpClientMessagingChannel implements MessagingChannel {
     }
 
     @Override
-    public void write(Message message) throws IOException, InterruptedException {
+    public void write(MessageType type, Message message) throws IOException, InterruptedException {
         mChannel.waitForConnection();
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-            mMessageWriter.write(dataOutputStream, message);
+            mMessageWriter.write(dataOutputStream, type, message);
             dataOutputStream.flush();
 
             mLogger.debug("Sending message to server");

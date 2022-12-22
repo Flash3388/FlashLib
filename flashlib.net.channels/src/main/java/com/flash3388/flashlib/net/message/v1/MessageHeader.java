@@ -12,10 +12,12 @@ public class MessageHeader {
 
     private final InstanceId mSenderId;
     private final int mMessageType;
+    private final int mContentSize;
 
-    public MessageHeader(InstanceId senderId, int messageType) {
+    public MessageHeader(InstanceId senderId, int messageType, int contentSize) {
         mSenderId = senderId;
         mMessageType = messageType;
+        mContentSize = contentSize;
     }
 
     public MessageHeader(DataInput dataInput) throws IOException {
@@ -26,6 +28,7 @@ public class MessageHeader {
 
         mSenderId = InstanceId.createFrom(dataInput);
         mMessageType = dataInput.readInt();
+        mContentSize = dataInput.readInt();
     }
 
     public InstanceId getSenderId() {
@@ -36,9 +39,14 @@ public class MessageHeader {
         return mMessageType;
     }
 
+    public int getContentSize() {
+        return mContentSize;
+    }
+
     public void writeTo(DataOutput dataOutput) throws IOException {
         dataOutput.writeInt(VERSION);
         mSenderId.writeTo(dataOutput);
         dataOutput.writeInt(mMessageType);
+        dataOutput.writeInt(mContentSize);
     }
 }
