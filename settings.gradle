@@ -6,7 +6,6 @@ include 'flashlib.core.io'
 include 'flashlib.core.hid'
 
 include 'flashlib.net.core'
-include 'flashlib.net.channels'
 include 'flashlib.net.robolink'
 
 include 'flashlib.vision.core'

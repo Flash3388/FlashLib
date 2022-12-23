@@ -1,7 +1,6 @@
 def flashlibModules = [
         project('flashlib.core'),
         project('flashlib.net.core'),
-        project('flashlib.net.channels'),
         project('flashlib.net.robolink'),
         project('flashlib.core.hid'),
         project('flashlib.core.io'),

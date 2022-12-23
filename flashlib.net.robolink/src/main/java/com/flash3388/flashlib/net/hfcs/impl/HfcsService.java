@@ -13,7 +13,8 @@ import com.flash3388.flashlib.net.hfcs.messages.InPackage;
 import com.flash3388.flashlib.net.message.KnownMessageTypes;
 import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageWriter;
-import com.flash3388.flashlib.net.message.UdpMessagingChannel;
+import com.flash3388.flashlib.net.message.MessagingChannel;
+import com.flash3388.flashlib.net.message.BroadcastUdpMessagingChannel;
 import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
 import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
 import com.flash3388.flashlib.time.Clock;
@@ -36,7 +37,7 @@ public class HfcsService extends SingleUseService implements Registry {
 
     private final KnownInDataTypes mInDataTypes;
     private final EventController mEventController;
-    private final UdpMessagingChannel mChannel;
+    private final MessagingChannel mChannel;
     private final BlockingQueue<OutDataNode> mOutDataQueue;
 
     private Thread mUpdateThread;
@@ -55,7 +56,7 @@ public class HfcsService extends SingleUseService implements Registry {
         MessageReader messageReader = new MessageReaderImpl(messageTypes);
 
         mEventController = Controllers.newSyncExecutionController();
-        mChannel = new UdpMessagingChannel(
+        mChannel = new BroadcastUdpMessagingChannel(
                 BIND_PORT,
                 ourId,
                 messageWriter,

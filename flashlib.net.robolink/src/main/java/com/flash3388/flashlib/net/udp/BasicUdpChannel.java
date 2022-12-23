@@ -16,14 +16,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class BroadcastUdpChannel implements Closeable {
+public class BasicUdpChannel implements Closeable {
 
     private final int mBindPort;
     private final Logger mLogger;
     private final AtomicReference<DatagramChannel> mChannel;
     private final Lock mChannelLock;
 
-    public BroadcastUdpChannel(int bindPort, Logger logger) {
+    public BasicUdpChannel(int bindPort, Logger logger) {
         mBindPort = bindPort;
         mLogger = logger;
         mChannel = new AtomicReference<>();

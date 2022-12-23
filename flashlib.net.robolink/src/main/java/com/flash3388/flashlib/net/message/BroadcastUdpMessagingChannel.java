@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.message;
 
 import com.castle.time.exceptions.TimeoutException;
-import com.flash3388.flashlib.net.udp.BroadcastUdpChannel;
+import com.flash3388.flashlib.net.udp.BasicUdpChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-public class UdpMessagingChannel implements MessagingChannel {
+public class BroadcastUdpMessagingChannel implements MessagingChannel {
 
     private final InstanceId mOurId;
     private final MessageWriter mMessageWriter;
@@ -24,32 +24,30 @@ public class UdpMessagingChannel implements MessagingChannel {
     private final Clock mClock;
     private final Logger mLogger;
 
-    private final BroadcastUdpChannel mChannel;
+    private final BasicUdpChannel mChannel;
     private final ByteBuffer mReadBuffer;
 
-    public UdpMessagingChannel(int bindPort,
-                               InstanceId ourId,
-                               MessageWriter messageWriter,
-                               MessageReader messageReader,
-                               Clock clock,
-                               Logger logger) {
+    public BroadcastUdpMessagingChannel(int bindPort,
+                                        InstanceId ourId,
+                                        MessageWriter messageWriter,
+                                        MessageReader messageReader,
+                                        Clock clock,
+                                        Logger logger) {
         mOurId = ourId;
         mMessageWriter = messageWriter;
         mMessageReader = messageReader;
         mClock = clock;
         mLogger = logger;
 
-        mChannel = new BroadcastUdpChannel(bindPort, logger);
+        mChannel = new BasicUdpChannel(bindPort, logger);
         mReadBuffer = ByteBuffer.allocate(1024);
     }
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException, TimeoutException {
-        // TODO: RECOGNIZE NEW REMOTE
         mReadBuffer.rewind();
         // this will block until we receive something
         SocketAddress remoteAddress = mChannel.read(mReadBuffer);
-        // TODO: do something with remote address?
 
         // parse packet
         int size = mReadBuffer.position();
