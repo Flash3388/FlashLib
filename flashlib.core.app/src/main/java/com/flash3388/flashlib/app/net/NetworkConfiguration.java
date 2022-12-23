@@ -27,21 +27,47 @@ public class NetworkConfiguration implements NetworkingMode {
         }
     }
 
+    public static class HfcsConfiguration {
+        final boolean isEnabled;
+        final boolean broadcastModeEnabled;
+
+        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled) {
+            this.isEnabled = isEnabled;
+            this.broadcastModeEnabled = broadcastModeEnabled;
+        }
+
+        public static HfcsConfiguration disabled() {
+            return new HfcsConfiguration(false, false);
+        }
+
+        public static HfcsConfiguration broadcastMode() {
+            return new HfcsConfiguration(true, true);
+        }
+    }
+
     private final boolean mEnabled;
     private final ObjectStorageConfiguration mObjectStorageConfiguration;
+    private final HfcsConfiguration mHfcsConfiguration;
 
     private NetworkConfiguration(boolean enabled,
-                                 ObjectStorageConfiguration objectStorageConfiguration) {
+                                 ObjectStorageConfiguration objectStorageConfiguration,
+                                 HfcsConfiguration hfcsConfiguration) {
         mEnabled = enabled;
         mObjectStorageConfiguration = objectStorageConfiguration;
+        mHfcsConfiguration = hfcsConfiguration;
+    }
+
+    private NetworkConfiguration() {
+        this(false, null, null);
     }
 
     public static NetworkConfiguration disabled() {
-        return new NetworkConfiguration(false, null);
+        return new NetworkConfiguration();
     }
 
-    public static NetworkConfiguration enabled(ObjectStorageConfiguration objectStorageConfiguration) {
-        return new NetworkConfiguration(true, objectStorageConfiguration);
+    public static NetworkConfiguration enabled(ObjectStorageConfiguration objectStorageConfiguration,
+                                               HfcsConfiguration hfcsConfiguration) {
+        return new NetworkConfiguration(true, objectStorageConfiguration, hfcsConfiguration);
     }
 
     @Override
@@ -54,7 +80,16 @@ public class NetworkConfiguration implements NetworkingMode {
         return mObjectStorageConfiguration != null && mObjectStorageConfiguration.isEnabled;
     }
 
+    @Override
+    public boolean isHfcsEnabled() {
+        return mHfcsConfiguration != null && mHfcsConfiguration.isEnabled;
+    }
+
     public ObjectStorageConfiguration getObjectStorageConfiguration() {
         return mObjectStorageConfiguration;
+    }
+
+    public HfcsConfiguration getHfcsConfiguration() {
+        return mHfcsConfiguration;
     }
 }

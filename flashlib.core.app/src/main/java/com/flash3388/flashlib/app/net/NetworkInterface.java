@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.app.net;
 
+import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 
 /**
@@ -21,4 +22,6 @@ public interface NetworkInterface {
     NetworkingMode getMode();
 
     ObjectStorage getObjectStorage();
+
+    HfcsRegistry getHfcsRegistry();
 }

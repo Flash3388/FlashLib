@@ -1,9 +1,8 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.app.net.NetworkConfiguration;
-import com.flash3388.flashlib.app.net.NetworkInterface;
-import com.flash3388.flashlib.app.net.NetworkingMode;
+import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsBroadcastService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
 import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
@@ -16,6 +15,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
 
     private final NetworkingMode mMode;
     private final ObjectStorage mObjectStorage;
+    private final HfcsRegistry mHfcsRegistry;
 
     public NetworkInterfaceImpl(NetworkConfiguration configuration,
                                 InstanceId instanceId,
@@ -41,6 +41,18 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         } else {
             mObjectStorage = null;
         }
+
+        if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
+            if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
+                HfcsBroadcastService hfcsService = new HfcsBroadcastService(instanceId, clock, logger);
+                serviceRegistry.register(hfcsService);
+                mHfcsRegistry = hfcsService;
+            } else {
+                throw new UnsupportedOperationException("HFCS mode not supported");
+            }
+        } else {
+            mHfcsRegistry = null;
+        }
     }
 
     public NetworkInterfaceImpl() {
@@ -59,5 +71,14 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         }
 
         return mObjectStorage;
+    }
+
+    @Override
+    public HfcsRegistry getHfcsRegistry() {
+        if (mHfcsRegistry == null) {
+            throw new IllegalStateException("HFCS disabled");
+        }
+
+        return mHfcsRegistry;
     }
 }

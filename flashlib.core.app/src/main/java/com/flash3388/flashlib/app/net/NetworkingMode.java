@@ -5,4 +5,6 @@ public interface NetworkingMode {
     boolean isNetworkingEnabled();
 
     boolean isObjectStorageEnabled();
+
+    boolean isHfcsEnabled();
 }

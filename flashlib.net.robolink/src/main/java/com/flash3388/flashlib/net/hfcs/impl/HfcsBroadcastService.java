@@ -6,7 +6,7 @@ import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
 import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
-import com.flash3388.flashlib.net.hfcs.Registry;
+import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.Type;
 import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
 import com.flash3388.flashlib.net.hfcs.messages.InPackage;
@@ -28,7 +28,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.function.Supplier;
 
-public class HfcsService extends SingleUseService implements Registry {
+public class HfcsBroadcastService extends SingleUseService implements HfcsRegistry {
 
     private static final int BIND_PORT = 5005;
 
@@ -43,7 +43,7 @@ public class HfcsService extends SingleUseService implements Registry {
     private Thread mUpdateThread;
     private Thread mWriteThread;
 
-    public HfcsService(InstanceId ourId, Clock clock, Logger logger) {
+    public HfcsBroadcastService(InstanceId ourId, Clock clock, Logger logger) {
         mClock = clock;
         mLogger = logger;
 
