@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.hid;
+package com.flash3388.flashlib.robot.hfcs.hid;
 
 import java.io.DataInput;
 import java.io.DataOutput;

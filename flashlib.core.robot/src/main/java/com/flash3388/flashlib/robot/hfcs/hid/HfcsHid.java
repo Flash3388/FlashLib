@@ -1,6 +1,8 @@
-package com.flash3388.flashlib.robot.hid;
+package com.flash3388.flashlib.robot.hfcs.hid;
 
+import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.time.Time;
@@ -24,8 +26,12 @@ public class HfcsHid {
         DataStore dataStore = new DataStore();
         HidOutData outData = new HidOutData(data, dataStore);
 
-        registry.registerOutgoing(new HidDataOutType(), sendPeriod, ()-> outData);
+        registry.registerOutgoing(new HidDataType(), sendPeriod, ()-> outData);
 
         return data;
+    }
+
+    public static HidChannel newChannel(int channel) {
+        return new GenericHidChannel(channel);
     }
 }

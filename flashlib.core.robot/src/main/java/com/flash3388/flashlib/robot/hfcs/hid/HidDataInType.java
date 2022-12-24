@@ -1,11 +1,11 @@
-package com.flash3388.flashlib.robot.hid;
+package com.flash3388.flashlib.robot.hfcs.hid;
 
 import com.flash3388.flashlib.net.hfcs.InType;
 
 import java.io.DataInput;
 import java.io.IOException;
 
-public class HidDataInType implements InType<RawHidData> {
+public class HidDataInType extends HidDataType implements InType<RawHidData> {
 
     private final DataStore mDataStore;
     private final HidDataSerializer mParser;
@@ -25,10 +25,5 @@ public class HidDataInType implements InType<RawHidData> {
         RawHidData rawHidData = mDataStore.retrieve();
         mParser.loadInto(input, rawHidData);
         return rawHidData;
-    }
-
-    @Override
-    public int getKey() {
-        return 2001;
     }
 }

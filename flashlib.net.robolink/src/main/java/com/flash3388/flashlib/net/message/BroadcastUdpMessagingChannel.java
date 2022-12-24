@@ -57,6 +57,8 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
 
         try (InputStream inputStream = new ByteArrayInputStream(mReadBuffer.array(), 0, size);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
+            // TODO: for some reason an EOFException is thrown while reading
+            // TODO: the contents, which is weird since we transmit a contentSize in headers
             MessageReader.Result result = mMessageReader.read(dataInputStream);
 
             if (result.senderId.equals(mOurId)) {

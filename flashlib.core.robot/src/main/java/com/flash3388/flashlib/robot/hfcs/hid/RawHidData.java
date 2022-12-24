@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.hid;
+package com.flash3388.flashlib.robot.hfcs.hid;
 
 public class RawHidData {
 
