@@ -352,13 +352,13 @@ public class HidData {
     }
 
     private void checkValidButton(int index) {
-        if (index < 0 || index >= RawHidData.MAX_AXES) {
+        if (index < 0 || index >= RawHidData.MAX_BUTTONS) {
             throw new IllegalArgumentException("button index must be non-negative and below " + RawHidData.MAX_BUTTONS);
         }
     }
 
     private void checkValidPov(int index) {
-        if (index < 0 || index >= RawHidData.MAX_AXES) {
+        if (index < 0 || index >= RawHidData.MAX_POVS) {
             throw new IllegalArgumentException("pov index must be non-negative and below " + RawHidData.MAX_POVS);
         }
     }
