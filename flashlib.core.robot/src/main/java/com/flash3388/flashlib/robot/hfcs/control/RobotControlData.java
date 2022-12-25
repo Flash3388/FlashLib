@@ -6,11 +6,11 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class ControlData implements OutData {
+public class RobotControlData implements OutData {
 
     private final RobotMode mMode;
 
-    public ControlData(RobotMode mode) {
+    public RobotControlData(RobotMode mode) {
         mMode = mode;
     }
 

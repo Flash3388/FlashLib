@@ -7,12 +7,12 @@ import com.flash3388.flashlib.time.Time;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class StateData implements OutData {
+public class RobotStateData implements OutData {
 
     private final RobotMode mCurrentMode;
     private final Time mClockTime;
 
-    public StateData(RobotMode currentMode, Time clockTime) {
+    public RobotStateData(RobotMode currentMode, Time clockTime) {
         mCurrentMode = currentMode;
         mClockTime = clockTime;
     }

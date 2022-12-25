@@ -7,15 +7,15 @@ import com.flash3388.flashlib.time.Time;
 import java.io.DataInput;
 import java.io.IOException;
 
-public class StateDataInType extends StateDataType implements InType<StateData> {
+public class StateDataInType extends StateDataType implements InType<RobotStateData> {
 
     @Override
-    public Class<StateData> getClassType() {
-        return StateData.class;
+    public Class<RobotStateData> getClassType() {
+        return RobotStateData.class;
     }
 
     @Override
-    public StateData readFrom(DataInput input) throws IOException {
+    public RobotStateData readFrom(DataInput input) throws IOException {
         int modeKey = input.readInt();
         String modeName = input.readUTF();
         boolean modeDisabled = input.readBoolean();
@@ -24,6 +24,6 @@ public class StateDataInType extends StateDataType implements InType<StateData> 
         long timeMillis = input.readLong();
         Time clockTime = Time.milliseconds(timeMillis);
 
-        return new StateData(mode, clockTime);
+        return new RobotStateData(mode, clockTime);
     }
 }

@@ -6,7 +6,7 @@ import com.flash3388.flashlib.time.Time;
 
 import java.util.function.Supplier;
 
-public class StateDataSupplier implements Supplier<StateData> {
+public class StateDataSupplier implements Supplier<RobotStateData> {
 
     private final RobotControl mControl;
 
@@ -15,10 +15,10 @@ public class StateDataSupplier implements Supplier<StateData> {
     }
 
     @Override
-    public StateData get() {
+    public RobotStateData get() {
         RobotMode currentMode = mControl.getMode();
         Time clockTime = mControl.getClock().currentTime();
 
-        return new StateData(currentMode, clockTime);
+        return new RobotStateData(currentMode, clockTime);
     }
 }

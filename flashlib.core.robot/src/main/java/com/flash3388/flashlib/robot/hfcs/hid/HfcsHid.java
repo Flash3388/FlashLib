@@ -6,6 +6,7 @@ import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.resources.CircularResourceHolder;
 
 public class HfcsHid {
 
@@ -13,7 +14,7 @@ public class HfcsHid {
 
     public static HidInterface createReceiver(HfcsRegistry registry) {
         HidData data = new HidData();
-        DataStore dataStore = new DataStore();
+        CircularResourceHolder<RawHidData> dataStore = new CircularResourceHolder<>(3, RawHidData::new);
 
         registry.registerIncoming(new HidDataInType(dataStore))
                 .addListener(new NewDataListener(data, dataStore));
@@ -23,7 +24,7 @@ public class HfcsHid {
 
     public static HidData createProvider(HfcsRegistry registry, Time sendPeriod) {
         HidData data = new HidData();
-        DataStore dataStore = new DataStore();
+        CircularResourceHolder<RawHidData> dataStore = new CircularResourceHolder<>(3, RawHidData::new);
         HidOutData outData = new HidOutData(data, dataStore);
 
         registry.registerOutgoing(new HidDataType(), sendPeriod, ()-> outData);

@@ -7,9 +7,9 @@ import java.io.IOException;
 
 public class StateOutData implements OutData {
 
-    private final StateData mData;
+    private final RobotStateData mData;
 
-    public StateOutData(StateData data) {
+    public StateOutData(RobotStateData data) {
         mData = data;
     }
 
