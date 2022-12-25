@@ -11,7 +11,6 @@ import com.flash3388.flashlib.net.message.MessagingChannel;
 import com.flash3388.flashlib.net.message.TcpClientMessagingChannel;
 import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
 import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
-import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -46,7 +45,7 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
         messageTypes.put(StorageContentsMessage.TYPE);
 
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
-        MessageReader messageReader = new MessageReaderImpl(messageTypes);
+        MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
         mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, logger);
 
         StorageListener listener = new StorageListenerImpl(mChannel, logger);

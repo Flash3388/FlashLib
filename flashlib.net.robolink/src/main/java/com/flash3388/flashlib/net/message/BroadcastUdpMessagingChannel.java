@@ -45,7 +45,7 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException, TimeoutException {
-        mReadBuffer.rewind();
+        mReadBuffer.clear();
         // this will block until we receive something
         SocketAddress remoteAddress = mChannel.read(mReadBuffer);
 
@@ -53,7 +53,7 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
         int size = mReadBuffer.position();
         mReadBuffer.flip();
 
-        mLogger.debug("Received new data packet from {}", remoteAddress);
+        mLogger.debug("Received new data packet (size={}) from {}", size, remoteAddress);
 
         try (InputStream inputStream = new ByteArrayInputStream(mReadBuffer.array(), 0, size);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
@@ -70,6 +70,8 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
             MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
             handler.onNewMessage(messageInfo, result.message);
+        } catch (SentByThisInstanceException e) {
+            // ignore, possible because broadcast
         }
     }
 

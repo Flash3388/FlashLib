@@ -53,7 +53,7 @@ public class HfcsBroadcastService extends SingleUseService implements HfcsRegist
         messageTypes.put(new DataMessageType(new InPackage(mInDataTypes)));
 
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
-        MessageReader messageReader = new MessageReaderImpl(messageTypes);
+        MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
 
         mEventController = Controllers.newSyncExecutionController();
         mChannel = new BroadcastUdpMessagingChannel(

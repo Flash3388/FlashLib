@@ -23,6 +23,10 @@ public class CircularResourceHolder<T> {
     }
 
     public void add(T instance) {
+        if (instance == null) {
+            return;
+        }
+
         mLock.lock();
         try {
             mQueue.add(instance);

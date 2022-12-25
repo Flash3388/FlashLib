@@ -4,6 +4,8 @@ import com.flash3388.flashlib.net.message.KnownMessageTypes;
 import com.flash3388.flashlib.net.message.Message;
 import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageType;
+import com.flash3388.flashlib.net.message.SentByThisInstanceException;
+import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
@@ -12,9 +14,11 @@ import java.io.IOException;
 
 public class MessageReaderImpl implements MessageReader {
 
+    private final InstanceId mOurId;
     private final KnownMessageTypes mMessageTypes;
 
-    public MessageReaderImpl(KnownMessageTypes messageTypes) {
+    public MessageReaderImpl(InstanceId ourId, KnownMessageTypes messageTypes) {
+        mOurId = ourId;
         mMessageTypes = messageTypes;
     }
 
@@ -23,6 +27,10 @@ public class MessageReaderImpl implements MessageReader {
         MessageHeader header = new MessageHeader(dataInput);
         byte[] content = new byte[header.getContentSize()];
         dataInput.readFully(content);
+
+        if (header.getSenderId().equals(mOurId)) {
+            throw new SentByThisInstanceException();
+        }
 
         MessageType type = mMessageTypes.get(header.getMessageType());
 
