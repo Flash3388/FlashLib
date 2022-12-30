@@ -3,6 +3,7 @@ package com.flash3388.flashlib.net.hfcs.impl;
 import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
 import com.castle.time.exceptions.TimeoutException;
+import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.hfcs.DataListener;
 import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
@@ -125,7 +126,13 @@ public class HfcsTightService extends SingleUseService implements HfcsRegistry {
 
     @Override
     protected void stopRunning() {
+        mUpdateThread.interrupt();
+        mUpdateThread = null;
 
+        mWriteThread.interrupt();
+        mWriteThread = null;
+
+        Closeables.silentClose(mChannel);
     }
 
     private static class UpdateTask implements Runnable {
