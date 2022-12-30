@@ -15,8 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class BroadcastUdpMessagingChannel implements MessagingChannel {
+public class AutoReplyingUdpMessagingChannel implements MessagingChannel {
 
     private static final Time READ_TIMEOUT = Time.milliseconds(500);
 
@@ -28,13 +29,14 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
 
     private final BasicUdpChannel mChannel;
     private final ByteBuffer mReadBuffer;
+    private final AtomicReference<SocketAddress> mLastReceivedAddress;
 
-    public BroadcastUdpMessagingChannel(int bindPort,
-                                        InstanceId ourId,
-                                        MessageWriter messageWriter,
-                                        MessageReader messageReader,
-                                        Clock clock,
-                                        Logger logger) {
+    public AutoReplyingUdpMessagingChannel(int bindPort,
+                                           InstanceId ourId,
+                                           MessageWriter messageWriter,
+                                           MessageReader messageReader,
+                                           Clock clock,
+                                           Logger logger) {
         mOurId = ourId;
         mMessageWriter = messageWriter;
         mMessageReader = messageReader;
@@ -43,6 +45,7 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
 
         mChannel = new BasicUdpChannel(bindPort, READ_TIMEOUT, logger);
         mReadBuffer = ByteBuffer.allocate(1024);
+        mLastReceivedAddress = new AtomicReference<>(null);
     }
 
     @Override
@@ -61,31 +64,32 @@ public class BroadcastUdpMessagingChannel implements MessagingChannel {
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             MessageReader.Result result = mMessageReader.read(dataInputStream);
 
-            if (result.senderId.equals(mOurId)) {
-                // since we broadcast, this could happen so just ignore
-                throw new TimeoutException();
-            }
-
             Time now = mClock.currentTime();
             MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
             handler.onNewMessage(messageInfo, result.message);
-        } catch (SentByThisInstanceException e) {
-            // ignore, possible because broadcast
+
+            mLastReceivedAddress.set(remoteAddress);
         }
     }
 
     @Override
     public void write(MessageType type, Message message) throws IOException, InterruptedException {
+        SocketAddress remoteAddress = mLastReceivedAddress.get();
+        if (remoteAddress == null) {
+            mLogger.warn("No remoteAddress configured yet, can't send");
+            return;
+        }
+
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
             mMessageWriter.write(dataOutputStream, type, message);
             dataOutputStream.flush();
 
-            mLogger.debug("Sending BROADCAST of message");
+            mLogger.debug("Sending message to {}", remoteAddress);
 
             ByteBuffer buffer = ByteBuffer.wrap(outputStream.toByteArray());
-            mChannel.broadcast(buffer);
+            mChannel.writeTo(buffer, remoteAddress);
         }
     }
 

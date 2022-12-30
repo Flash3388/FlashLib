@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.udp;
 
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
@@ -19,12 +21,14 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BasicUdpChannel implements Closeable {
 
     private final int mBindPort;
+    private final int mReadTimeout;
     private final Logger mLogger;
     private final AtomicReference<DatagramChannel> mChannel;
     private final Lock mChannelLock;
 
-    public BasicUdpChannel(int bindPort, Logger logger) {
+    public BasicUdpChannel(int bindPort, Time readTimeout, Logger logger) {
         mBindPort = bindPort;
+        mReadTimeout = (int) readTimeout.valueAsMillis();
         mLogger = logger;
         mChannel = new AtomicReference<>();
         mChannelLock = new ReentrantLock();
@@ -58,6 +62,8 @@ public class BasicUdpChannel implements Closeable {
                 mLogger.debug("Received packet from {}", address);
             }
             return address;
+        } catch (SocketTimeoutException e) {
+            throw new TimeoutException(e);
         } catch (IOException e) {
             close();
             throw e;
@@ -91,6 +97,7 @@ public class BasicUdpChannel implements Closeable {
                 channel.configureBlocking(true);
                 channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
                 channel.setOption(StandardSocketOptions.SO_BROADCAST, true);
+                channel.socket().setSoTimeout(mReadTimeout);
 
                 SocketAddress address = new InetSocketAddress(mBindPort);
                 channel.bind(address);

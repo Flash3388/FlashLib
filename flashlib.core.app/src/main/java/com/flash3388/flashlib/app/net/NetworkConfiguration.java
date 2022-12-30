@@ -30,18 +30,24 @@ public class NetworkConfiguration implements NetworkingMode {
     public static class HfcsConfiguration {
         final boolean isEnabled;
         final boolean broadcastModeEnabled;
+        final boolean replyToSenderModeEnabled;
 
-        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled) {
+        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled, boolean replyToSenderModeEnabled) {
             this.isEnabled = isEnabled;
             this.broadcastModeEnabled = broadcastModeEnabled;
+            this.replyToSenderModeEnabled = replyToSenderModeEnabled;
         }
 
         public static HfcsConfiguration disabled() {
-            return new HfcsConfiguration(false, false);
+            return new HfcsConfiguration(false, false, false);
         }
 
         public static HfcsConfiguration broadcastMode() {
-            return new HfcsConfiguration(true, true);
+            return new HfcsConfiguration(true, true, false);
+        }
+
+        public static HfcsConfiguration replyToSenderMode() {
+            return new HfcsConfiguration(true, false, true);
         }
     }
 

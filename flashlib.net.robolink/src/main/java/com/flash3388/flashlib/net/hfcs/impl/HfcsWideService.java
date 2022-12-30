@@ -10,6 +10,7 @@ import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.Type;
 import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
 import com.flash3388.flashlib.net.hfcs.messages.InPackage;
+import com.flash3388.flashlib.net.message.AutoReplyingUdpMessagingChannel;
 import com.flash3388.flashlib.net.message.KnownMessageTypes;
 import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageWriter;
@@ -28,7 +29,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.function.Supplier;
 
-public class HfcsBroadcastService extends SingleUseService implements HfcsRegistry {
+public class HfcsWideService extends SingleUseService implements HfcsRegistry {
+
+    public enum ChannelType {
+        BROADCAST,
+        AUTO_REPLY
+    }
 
     private static final int BIND_PORT = 5005;
 
@@ -43,7 +49,7 @@ public class HfcsBroadcastService extends SingleUseService implements HfcsRegist
     private Thread mUpdateThread;
     private Thread mWriteThread;
 
-    public HfcsBroadcastService(InstanceId ourId, Clock clock, Logger logger) {
+    public HfcsWideService(ChannelType type, InstanceId ourId, Clock clock, Logger logger) {
         mClock = clock;
         mLogger = logger;
 
@@ -56,14 +62,30 @@ public class HfcsBroadcastService extends SingleUseService implements HfcsRegist
         MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
 
         mEventController = Controllers.newSyncExecutionController();
-        mChannel = new BroadcastUdpMessagingChannel(
-                BIND_PORT,
-                ourId,
-                messageWriter,
-                messageReader,
-                clock,
-                logger
-        );
+        switch (type) {
+            case BROADCAST:
+                mChannel = new BroadcastUdpMessagingChannel(
+                        BIND_PORT,
+                        ourId,
+                        messageWriter,
+                        messageReader,
+                        clock,
+                        logger
+                );
+                break;
+            case AUTO_REPLY:
+                mChannel = new AutoReplyingUdpMessagingChannel(
+                        BIND_PORT,
+                        ourId,
+                        messageWriter,
+                        messageReader,
+                        clock,
+                        logger
+                );
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported ChannelType");
+        }
 
         mOutDataQueue = new DelayQueue<>();
 
