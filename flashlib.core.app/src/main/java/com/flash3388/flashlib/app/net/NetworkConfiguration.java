@@ -1,9 +1,13 @@
 package com.flash3388.flashlib.app.net;
 
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 public class NetworkConfiguration implements NetworkingMode {
 
     public static class ObjectStorageConfiguration {
-
         final boolean isEnabled;
         final boolean isPrimaryNode;
         final String primaryNodeAddress;
@@ -31,23 +35,51 @@ public class NetworkConfiguration implements NetworkingMode {
         final boolean isEnabled;
         final boolean broadcastModeEnabled;
         final boolean replyToSenderModeEnabled;
+        final boolean specificTargetModeEnabled;
+        final Collection<SocketAddress> specificTargetAddress;
 
-        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled, boolean replyToSenderModeEnabled) {
+        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled, boolean replyToSenderModeEnabled, boolean specificTargetModeEnabled, Collection<SocketAddress> specificTargetAddress) {
             this.isEnabled = isEnabled;
             this.broadcastModeEnabled = broadcastModeEnabled;
             this.replyToSenderModeEnabled = replyToSenderModeEnabled;
+            this.specificTargetModeEnabled = specificTargetModeEnabled;
+            this.specificTargetAddress = specificTargetAddress;
         }
 
         public static HfcsConfiguration disabled() {
-            return new HfcsConfiguration(false, false, false);
+            return new HfcsConfiguration(
+                    false,
+                    false,
+                    false,
+                    false, null);
         }
 
         public static HfcsConfiguration broadcastMode() {
-            return new HfcsConfiguration(true, true, false);
+            return new HfcsConfiguration(
+                    true,
+                    true,
+                    false,
+                    false, null);
         }
 
         public static HfcsConfiguration replyToSenderMode() {
-            return new HfcsConfiguration(true, false, true);
+            return new HfcsConfiguration(
+                    true,
+                    false,
+                    true,
+                    false, null);
+        }
+
+        public static HfcsConfiguration specificTargetMode(Collection<? extends SocketAddress> targetAddress) {
+            return new HfcsConfiguration(
+                    true,
+                    false,
+                    false,
+                    true, new ArrayList<>(targetAddress));
+        }
+
+        public static HfcsConfiguration specificTargetMode(SocketAddress... targetAddress) {
+            return specificTargetMode(Arrays.asList(targetAddress));
         }
     }
 

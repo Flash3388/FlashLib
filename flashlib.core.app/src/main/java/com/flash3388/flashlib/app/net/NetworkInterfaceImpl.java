@@ -2,7 +2,9 @@ package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsWideService;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsBroadcastService;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsReplyingService;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsTightService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
 import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
@@ -44,14 +46,16 @@ public class NetworkInterfaceImpl implements NetworkInterface {
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
             if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
-                HfcsWideService hfcsService = new HfcsWideService(
-                        HfcsWideService.ChannelType.BROADCAST,
-                        instanceId, clock, logger);
+                HfcsBroadcastService hfcsService = new HfcsBroadcastService(instanceId, clock, logger);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsWideService hfcsService = new HfcsWideService(
-                        HfcsWideService.ChannelType.AUTO_REPLY,
+                HfcsReplyingService hfcsService = new HfcsReplyingService(instanceId, clock, logger);
+                serviceRegistry.register(hfcsService);
+                mHfcsRegistry = hfcsService;
+            } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
+                HfcsTightService hfcsService = new HfcsTightService(
+                        configuration.getHfcsConfiguration().specificTargetAddress,
                         instanceId, clock, logger);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
