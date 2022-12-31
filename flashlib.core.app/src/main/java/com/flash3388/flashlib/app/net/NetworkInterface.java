@@ -21,7 +21,27 @@ public interface NetworkInterface {
      */
     NetworkingMode getMode();
 
+    /**
+     * Gets the {@link ObjectStorage} associated with this network interface.
+     * This networking protocol provides a distributed object storage for sharing
+     * information between instances/processes.
+     *
+     * Make sure to check before end that this networking featuring is indeed enabled
+     * by querying {@link #getMode()} and {@link NetworkingMode#isObjectStorageEnabled()}.
+     *
+     * @return object storage
+     */
     ObjectStorage getObjectStorage();
 
+    /**
+     * Gets the {@link HfcsRegistry} associated with this networking interface.
+     * This networking protocol provides a continuous transmission of control and state
+     * data packets between instances.
+     *
+     * Make sure to check before end that this networking featuring is indeed enabled
+     * by querying {@link #getMode()} and {@link NetworkingMode#isHfcsEnabled()}.
+     *
+     * @return HFCS registry.
+     */
     HfcsRegistry getHfcsRegistry();
 }
