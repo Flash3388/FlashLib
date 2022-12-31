@@ -86,7 +86,7 @@ public class ConfigurableTargetUdpMessagingChannel implements MessagingChannel {
     public void write(MessageType type, Message message) throws IOException, InterruptedException {
         SocketAddress remoteAddress = mSendAddress.get();
         if (remoteAddress == null) {
-            mLogger.warn("No remoteAddress configured yet, can't send");
+            mLogger.debug("No remoteAddress configured yet, can't send");
             return;
         }
 

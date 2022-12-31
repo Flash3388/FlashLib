@@ -9,12 +9,14 @@ import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageWriter;
 import com.flash3388.flashlib.net.message.ServerMessagingChannel;
 import com.flash3388.flashlib.net.message.TcpServerMessagingChannel;
+import com.flash3388.flashlib.net.message.WritableMessagingChannel;
 import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
 import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
@@ -67,7 +69,7 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
                 new ReadTask(mChannel, mStorage, mLogger),
-                "ObsrServerService-ReadTask");
+                "ObsrPrimaryNodeService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();
     }
@@ -104,6 +106,50 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
                 } catch (TimeoutException e) {
                     // oh, well
                 }
+            }
+        }
+    }
+
+    private static class StorageListenerImpl implements StorageListener {
+
+        private final WritableMessagingChannel mChannel;
+        private final Logger mLogger;
+
+        public StorageListenerImpl(WritableMessagingChannel channel, Logger logger) {
+            mChannel = channel;
+            mLogger = logger;
+        }
+
+        @Override
+        public void onNewEntry(StoragePath path) {
+            try {
+                mChannel.write(NewEntryMessage.TYPE, new NewEntryMessage(path.toString()));
+            } catch (IOException e) {
+                mLogger.debug("error writing message from storage", e);
+            } catch (InterruptedException e) {
+                // we don't care about this
+            }
+        }
+
+        @Override
+        public void onEntryUpdate(StoragePath path, Value value) {
+            try {
+                mChannel.write(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value));
+            } catch (IOException e) {
+                mLogger.debug("error writing message from storage", e);
+            } catch (InterruptedException e) {
+                // we don't care about this
+            }
+        }
+
+        @Override
+        public void onEntryClear(StoragePath path) {
+            try {
+                mChannel.write(EntryClearMessage.TYPE, new EntryClearMessage(path.toString()));
+            } catch (IOException e) {
+                mLogger.debug("error writing message from storage", e);
+            } catch (InterruptedException e) {
+                // we don't care about this
             }
         }
     }

@@ -77,7 +77,7 @@ public class AutoReplyingUdpMessagingChannel implements MessagingChannel {
     public void write(MessageType type, Message message) throws IOException, InterruptedException {
         SocketAddress remoteAddress = mLastReceivedAddress.get();
         if (remoteAddress == null) {
-            mLogger.warn("No remoteAddress configured yet, can't send");
+            mLogger.debug("No remoteAddress configured yet, can't send");
             return;
         }
 

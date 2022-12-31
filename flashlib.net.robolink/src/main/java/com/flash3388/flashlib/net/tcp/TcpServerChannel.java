@@ -68,6 +68,8 @@ public class TcpServerChannel implements Closeable {
                         connectedTcpChannel = new ConnectedTcpChannel(channel);
                         handler.onNewChannel(connectedTcpChannel);
 
+                        channel.register(mSelector, SelectionKey.OP_READ);
+
                         mClientsStorage.putChannel(address, connectedTcpChannel);
                     } catch (IOException e) {
                         // close client

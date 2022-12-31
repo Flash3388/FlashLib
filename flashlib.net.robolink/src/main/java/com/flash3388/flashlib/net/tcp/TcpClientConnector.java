@@ -16,7 +16,7 @@ public class TcpClientConnector implements NetConnector {
     private final Logger mLogger;
 
     private SocketChannel mBaseChannel;
-    private ConnectedTcpChannel mChannel;
+    private ConnectedNetChannel mChannel;
     private boolean mLastAttemptError;
 
     public TcpClientConnector(Logger logger) {
@@ -56,7 +56,7 @@ public class TcpClientConnector implements NetConnector {
         }
 
         try {
-            mChannel = new ConnectedTcpChannel(mBaseChannel);
+            mChannel = new BlockingConnectedTcpChannel(mBaseChannel);
             return mChannel;
         } catch (IOException e) {
             mLastAttemptError = true;

@@ -11,6 +11,8 @@ public class InstanceId {
     private static final int MACHINE_ID_SIZE = Long.BYTES;
     private static final int PROCESS_ID_SIZE = Long.BYTES;
 
+    public static final int BYTES = MACHINE_ID_SIZE + PROCESS_ID_SIZE;
+
     private final byte[] mInstanceId;
 
     InstanceId(byte[] machineId, byte[] processId) {

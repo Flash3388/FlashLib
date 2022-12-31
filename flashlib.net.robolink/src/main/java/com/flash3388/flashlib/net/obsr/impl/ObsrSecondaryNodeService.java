@@ -15,6 +15,7 @@ import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
@@ -26,14 +27,18 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ObsrSecondaryNodeService extends SingleUseService implements ObjectStorage {
 
     private final Logger mLogger;
     private final MessagingChannel mChannel;
     private final Storage mStorage;
+    private final BlockingQueue<PendingWriteMessage> mWriteQueue;
 
     private Thread mReadThread;
+    private Thread mWriteThread;
 
     public ObsrSecondaryNodeService(InstanceId ourId, SocketAddress serverAddress, Clock clock, Logger logger) {
         mLogger = logger;
@@ -48,10 +53,13 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
         MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
         mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, logger);
 
-        StorageListener listener = new StorageListenerImpl(mChannel, logger);
+        mWriteQueue = new LinkedBlockingQueue<>();
+
+        StorageListener listener = new StorageListenerImpl(mWriteQueue);
         mStorage = new StorageImpl(listener, clock);
 
         mReadThread = null;
+        mWriteThread = null;
     }
 
     public ObsrSecondaryNodeService(InstanceId ourId, String serverAddress, Clock clock, Logger logger) {
@@ -67,15 +75,24 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
                 new ReadTask(mChannel, mStorage, mLogger),
-                "ObsrClientService-ReadTask");
+                "ObsrSecondaryNodeService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();
+
+        mWriteThread = new Thread(
+                new WriteTask(mWriteQueue, mChannel, mLogger),
+                "ObsrSecondaryNodeService-WriteTask");
+        mWriteThread.setDaemon(true);
+        mWriteThread.start();
     }
 
     @Override
     protected void stopRunning() {
         mReadThread.interrupt();
         mReadThread = null;
+
+        mWriteThread.interrupt();
+        mWriteThread = null;
 
         Closeables.silentClose(mChannel);
     }
@@ -105,6 +122,30 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
                     // oh, well
                 }
             }
+        }
+    }
+
+    private static class StorageListenerImpl implements StorageListener {
+
+        private final BlockingQueue<PendingWriteMessage> mQueue;
+
+        public StorageListenerImpl(BlockingQueue<PendingWriteMessage> queue) {
+            mQueue = queue;
+        }
+
+        @Override
+        public void onNewEntry(StoragePath path) {
+            mQueue.add(new PendingWriteMessage(NewEntryMessage.TYPE, new NewEntryMessage(path.toString())));
+        }
+
+        @Override
+        public void onEntryUpdate(StoragePath path, Value value) {
+            mQueue.add(new PendingWriteMessage(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value)));
+        }
+
+        @Override
+        public void onEntryClear(StoragePath path) {
+            mQueue.add(new PendingWriteMessage(EntryClearMessage.TYPE, new EntryClearMessage(path.toString())));
         }
     }
 }
