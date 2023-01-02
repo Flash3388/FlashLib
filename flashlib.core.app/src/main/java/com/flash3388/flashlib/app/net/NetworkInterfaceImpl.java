@@ -2,8 +2,8 @@ package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsAutoReplyService;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsBroadcastService;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsReplyingService;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsTightService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
@@ -50,7 +50,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsReplyingService hfcsService = new HfcsReplyingService(instanceId, clock, logger);
+                HfcsAutoReplyService hfcsService = new HfcsAutoReplyService(instanceId, clock, logger);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
