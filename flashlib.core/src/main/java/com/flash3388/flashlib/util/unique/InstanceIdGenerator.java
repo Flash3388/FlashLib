@@ -1,9 +1,14 @@
 package com.flash3388.flashlib.util.unique;
 
+import com.castle.util.os.KnownOperatingSystem;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 
 public class InstanceIdGenerator {
@@ -11,16 +16,28 @@ public class InstanceIdGenerator {
     private InstanceIdGenerator() {}
 
     public static InstanceId generate() {
-        // although not fool-proof, we'll use MAC address from the machine.
-        // MAC addresses can actually change, but for now this will do.
+        byte[] machineId = getMachineId();
+        byte[] pid = getPid();
+
+        return new InstanceId(machineId, pid);
+    }
+
+    private static byte[] getMachineId() {
+        if (KnownOperatingSystem.LINUX.isCurrent()) {
+            Path machineIdFile = Paths.get("/etc/machine-id");
+            if (Files.exists(machineIdFile)) {
+                try {
+                    return Files.readAllBytes(machineIdFile);
+                } catch (IOException e) {
+                    // failed to get id from file
+                }
+            }
+        }
+
         try {
-            byte[] macAddress = getMacAddress();
-            byte[] machineId = new byte[8];
-            System.arraycopy(macAddress, 0, machineId, 0, macAddress.length);
-
-            byte[] pid = getPid();
-
-            return new InstanceId(machineId, pid);
+            // although not fool-proof, we'll use MAC address from the machine.
+            // MAC addresses can actually change, but for now this will do.
+            return getMacAddress();
         } catch (IOException e) {
             throw new IdGenerationException("failed retrieving MAC address", e);
         }

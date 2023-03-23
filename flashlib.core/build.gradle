@@ -4,5 +4,6 @@ dependencies {
     api slf4jApi()
     api javabeans()
     api jmath()
+    api castle()
     api gson()
 }

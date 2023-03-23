@@ -7,49 +7,51 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class InstanceId {
-
-    private static final int MACHINE_ID_SIZE = Long.BYTES;
     private static final int PROCESS_ID_SIZE = Long.BYTES;
 
-    public static final int BYTES = MACHINE_ID_SIZE + PROCESS_ID_SIZE;
-
-    private final byte[] mInstanceId;
+    private final byte[] mMachineId;
+    private final byte[] mProcessId;
 
     InstanceId(byte[] machineId, byte[] processId) {
-        assert MACHINE_ID_SIZE == machineId.length;
+        assert machineId.length > 1;
         assert PROCESS_ID_SIZE == processId.length;
 
-        mInstanceId = new byte[machineId.length + processId.length];
-        System.arraycopy(machineId, 0, mInstanceId, 0, machineId.length);
-        System.arraycopy(processId, 0, mInstanceId, machineId.length, processId.length);
-    }
-
-    private InstanceId(byte[] instanceId) {
-        assert instanceId.length == MACHINE_ID_SIZE + PROCESS_ID_SIZE;
-        mInstanceId = instanceId;
+        mMachineId = machineId;
+        mProcessId = processId;
     }
 
     public static InstanceId createFrom(DataInput dataInput) throws IOException {
-        byte[] data = new byte[MACHINE_ID_SIZE + PROCESS_ID_SIZE];
-        dataInput.readFully(data);
+        int size = dataInput.readInt();
+        byte[] machineId = new byte[size];
+        dataInput.readFully(machineId);
+        size = dataInput.readInt();
+        byte[] processId = new byte[size];
+        dataInput.readFully(machineId);
 
-        return new InstanceId(data);
+        return new InstanceId(machineId, processId);
     }
 
     public byte[] get() {
-        return mInstanceId;
+        byte[] instanceId = new byte[mMachineId.length + mProcessId.length];
+        System.arraycopy(mMachineId, 0, instanceId, 0, mMachineId.length);
+        System.arraycopy(mProcessId, 0, instanceId, mMachineId.length, mProcessId.length);
+
+        return instanceId;
     }
 
     private byte[] getMachineId() {
-        return Arrays.copyOfRange(mInstanceId, 0, MACHINE_ID_SIZE);
+        return Arrays.copyOf(mMachineId, mMachineId.length);
     }
 
     private byte[] getProcessId() {
-        return Arrays.copyOfRange(mInstanceId, MACHINE_ID_SIZE, mInstanceId.length);
+        return Arrays.copyOf(mProcessId, mProcessId.length);
     }
 
     public void writeTo(DataOutput dataOutput) throws IOException {
-        dataOutput.write(mInstanceId);
+        dataOutput.writeInt(mMachineId.length);
+        dataOutput.write(mMachineId);
+        dataOutput.writeInt(mProcessId.length);
+        dataOutput.write(mProcessId);
     }
 
     @Override
@@ -57,21 +59,23 @@ public class InstanceId {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InstanceId that = (InstanceId) o;
-        return Arrays.equals(mInstanceId, that.mInstanceId);
+        return Arrays.equals(mMachineId, that.mMachineId) &&
+                Arrays.equals(mProcessId, that.mProcessId);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(mInstanceId);
+        int result = Arrays.hashCode(mMachineId);
+        result = 31 * result + Arrays.hashCode(mProcessId);
+        return result;
     }
 
     @Override
     public String toString() {
-        long machineId = ByteBuffer.wrap(getMachineId()).getLong();
-        long processId = ByteBuffer.wrap(getProcessId()).getLong();
+        long processId = ByteBuffer.wrap(mProcessId).getLong();
 
         return String.format("{%s-%s}",
-                Long.toHexString(machineId),
+                Arrays.toString(mMachineId),
                 Long.toHexString(processId));
     }
 }
