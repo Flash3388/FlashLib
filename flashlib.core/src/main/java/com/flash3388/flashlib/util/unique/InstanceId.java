@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.Arrays;
 
 public class InstanceId {
@@ -74,8 +75,25 @@ public class InstanceId {
     public String toString() {
         long processId = ByteBuffer.wrap(mProcessId).getLong();
 
-        return String.format("{%s-%s}",
-                Arrays.toString(mMachineId),
+        return String.format("{%s-0x%s}",
+                machineIdToLongString(),
                 Long.toHexString(processId));
+    }
+
+    private String machineIdToLongString() {
+        LongBuffer machineIdBuffer = ByteBuffer.wrap(mMachineId).asLongBuffer();
+        StringBuilder builder = new StringBuilder();
+
+        do {
+            if (builder.length() > 0) {
+                builder.append(',');
+            }
+
+            long value = machineIdBuffer.get();
+            builder.append("0x");
+            builder.append(Long.toHexString(value));
+        } while (machineIdBuffer.hasRemaining());
+
+        return builder.toString();
     }
 }
