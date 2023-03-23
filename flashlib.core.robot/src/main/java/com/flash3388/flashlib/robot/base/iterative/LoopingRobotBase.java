@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
+import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
@@ -56,7 +56,7 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     @Override
-    public final void robotInit(RobotControl robotControl) throws RobotInitializationException {
+    public final void robotInit(RobotControl robotControl) throws StartupException {
         mRobotControl = robotControl;
         mRobot = mRobotInitializer.init(robotControl);
     }

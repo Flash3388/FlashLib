@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
+import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
 /**
@@ -54,7 +54,7 @@ public interface IterativeRobot {
      */
     @FunctionalInterface
     interface Initializer {
-        IterativeRobot init(RobotControl robotControl) throws RobotInitializationException;
+        IterativeRobot init(RobotControl robotControl) throws StartupException;
     }
 
     /**

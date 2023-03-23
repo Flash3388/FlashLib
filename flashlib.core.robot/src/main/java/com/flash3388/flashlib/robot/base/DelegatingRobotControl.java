@@ -1,11 +1,14 @@
 package com.flash3388.flashlib.robot.base;
 
+import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.util.Collection;
@@ -75,6 +78,11 @@ public class DelegatingRobotControl implements RobotControl {
     }
 
     @Override
+    public InstanceId getInstanceId() {
+        return mRobotControl.getInstanceId();
+    }
+
+    @Override
     public Clock getClock() {
         return mRobotControl.getClock();
     }
@@ -87,5 +95,15 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
         mRobotControl.registerCloseables(closeables);
+    }
+
+    @Override
+    public ServiceRegistry getServiceRegistry() {
+        return mRobotControl.getServiceRegistry();
+    }
+
+    @Override
+    public NetworkInterface getNetworkInterface() {
+        return mRobotControl.getNetworkInterface();
     }
 }

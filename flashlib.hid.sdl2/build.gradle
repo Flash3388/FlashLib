@@ -2,6 +2,7 @@ apply from: rootProject.file('jcomponent.gradle')
 
 dependencies {
     api project(':flashlib.core.hid')
+    api project(':flashlib.core.robot')
     api castle()
 
     // users will have to specify natives manually
