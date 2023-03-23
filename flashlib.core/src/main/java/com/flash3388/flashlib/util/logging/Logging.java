@@ -26,10 +26,8 @@ public final class Logging {
         builder.append(first);
 
         for (int i = 0; i < more.length; i++) {
+            builder.append('.');
             builder.append(more[i]);
-            if (i < more.length - 1) {
-                builder.append('.');
-            }
         }
 
         return builder.toString();
