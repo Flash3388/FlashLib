@@ -22,6 +22,7 @@ import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -31,15 +32,14 @@ import java.net.SocketAddress;
 
 public class ObsrPrimaryNodeService extends SingleUseService implements ObjectStorage {
 
-    private final Logger mLogger;
+    private static final Logger LOGGER = Logging.getLogger("Comm", "OBSRNode");
+
     private final ServerMessagingChannel mChannel;
     private final Storage mStorage;
 
     private Thread mReadThread;
 
-    public ObsrPrimaryNodeService(InstanceId ourId, SocketAddress bindAddress, Clock clock, Logger logger) {
-        mLogger = logger;
-
+    public ObsrPrimaryNodeService(InstanceId ourId, SocketAddress bindAddress, Clock clock) {
         KnownMessageTypes messageTypes = new KnownMessageTypes();
         messageTypes.put(NewEntryMessage.TYPE);
         messageTypes.put(EntryClearMessage.TYPE);
@@ -48,16 +48,16 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
 
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
         MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
-        mChannel = new TcpServerMessagingChannel(bindAddress, messageWriter, messageReader, clock, logger);
+        mChannel = new TcpServerMessagingChannel(bindAddress, messageWriter, messageReader, clock, LOGGER);
 
-        StorageListener listener = new StorageListenerImpl(mChannel, logger);
+        StorageListener listener = new StorageListenerImpl(mChannel, LOGGER);
         mStorage = new StorageImpl(listener, clock);
 
         mReadThread = null;
     }
 
-    public ObsrPrimaryNodeService(InstanceId ourId, Clock clock, Logger logger) {
-        this(ourId, new InetSocketAddress("0.0.0.0", Constants.PRIMARY_NODE_PORT), clock, logger);
+    public ObsrPrimaryNodeService(InstanceId ourId, Clock clock) {
+        this(ourId, new InetSocketAddress("0.0.0.0", Constants.PRIMARY_NODE_PORT), clock);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ObsrPrimaryNodeService extends SingleUseService implements ObjectSt
     @Override
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
-                new ReadTask(mChannel, mStorage, mLogger),
+                new ReadTask(mChannel, mStorage, LOGGER),
                 "ObsrPrimaryNodeService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();

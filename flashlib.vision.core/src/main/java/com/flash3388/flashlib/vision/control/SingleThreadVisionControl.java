@@ -9,10 +9,10 @@ import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.VisionResult;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.flash3388.flashlib.vision.control.event.NewResultEvent;
 import com.flash3388.flashlib.vision.control.event.VisionListener;
 import com.flash3388.flashlib.vision.processing.Processor;
-import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.notifier.Controllers;
 import com.notifier.EventController;
 

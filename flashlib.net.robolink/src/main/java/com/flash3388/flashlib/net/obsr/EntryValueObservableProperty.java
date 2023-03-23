@@ -14,7 +14,6 @@ import com.notifier.Event;
 import com.notifier.EventController;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;

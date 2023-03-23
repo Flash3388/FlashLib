@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.castle.time.exceptions.TimeoutException;
 import com.flash3388.flashlib.net.message.WritableMessagingChannel;
 import org.slf4j.Logger;
 

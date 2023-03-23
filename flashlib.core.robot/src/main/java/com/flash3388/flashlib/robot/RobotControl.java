@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.app.FlashLibControl;
-import com.flash3388.flashlib.hid.HidInterface;
-import com.flash3388.flashlib.io.IoInterface;
-import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.base.GenericRobotControl;
-import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkingMode;
+import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.robot.base.GenericRobotControl;
+import com.flash3388.flashlib.robot.base.RobotBase;
+import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;

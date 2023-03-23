@@ -5,9 +5,7 @@ import com.beans.properties.SimpleBooleanProperty;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class TriggerActivationActionTest {
 

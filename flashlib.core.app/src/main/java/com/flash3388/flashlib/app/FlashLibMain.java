@@ -2,7 +2,6 @@ package com.flash3388.flashlib.app;
 
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
-import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
@@ -10,18 +9,18 @@ public class FlashLibMain {
 
     private FlashLibMain() {}
 
-    public static void appMain(AppCreator creator, Logger logger) {
-        FlashLibProgram program = new FlashLibProgram(creator, logger);
+    public static void appMain(AppCreator creator) {
+        FlashLibProgram program = new FlashLibProgram(creator);
         program.start();
     }
 
-    public static void appMain(Supplier<FlashLibApp> appSupplier, Logger logger) {
+    public static void appMain(Supplier<FlashLibApp> appSupplier) {
         AppCreator creator = new BasicCreator(appSupplier);
-        appMain(creator, logger);
+        appMain(creator);
     }
 
-    public static void appMain(SimpleApp.Creator creator, Logger logger) {
-        appMain(()-> new SimpleAppRunner(creator), logger);
+    public static void appMain(SimpleApp.Creator creator) {
+        appMain(()-> new SimpleAppRunner(creator));
     }
 
     private static class BasicCreator implements AppCreator {
@@ -33,8 +32,8 @@ public class FlashLibMain {
         }
 
         @Override
-        public AppImplementation create(InstanceId instanceId, ResourceHolder holder, Logger logger) throws StartupException {
-            FlashLibControl control = new BasicFlashLibControl(instanceId, holder, logger);
+        public AppImplementation create(InstanceId instanceId, ResourceHolder holder) throws StartupException {
+            FlashLibControl control = new BasicFlashLibControl(instanceId, holder);
             FlashLibApp app = mAppSupplier.get();
             return new AppImplementation(control, app);
         }

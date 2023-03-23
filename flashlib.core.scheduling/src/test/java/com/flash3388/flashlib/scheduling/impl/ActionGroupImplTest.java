@@ -2,7 +2,6 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import org.hamcrest.collection.IsCollectionWithSize;

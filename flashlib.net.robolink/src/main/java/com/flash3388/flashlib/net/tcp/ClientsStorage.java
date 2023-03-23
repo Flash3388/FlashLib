@@ -1,14 +1,11 @@
 package com.flash3388.flashlib.net.tcp;
 
 import com.flash3388.flashlib.net.ConnectedNetChannel;
-import com.flash3388.flashlib.net.tcp.ConnectedTcpChannel;
 
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

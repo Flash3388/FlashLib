@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.udp;
 
-import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.ConnectedNetChannel;
 import com.flash3388.flashlib.net.NetConnector;

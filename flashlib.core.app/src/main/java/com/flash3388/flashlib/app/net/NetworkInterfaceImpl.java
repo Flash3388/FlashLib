@@ -9,9 +9,7 @@ import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
 import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
-import org.slf4j.Logger;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
 
@@ -22,8 +20,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     public NetworkInterfaceImpl(NetworkConfiguration configuration,
                                 InstanceId instanceId,
                                 ServiceRegistry serviceRegistry,
-                                Clock clock,
-                                Logger logger) {
+                                Clock clock) {
         mMode = configuration;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
@@ -31,12 +28,12 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                     configuration.getObjectStorageConfiguration();
             if (objectStorageConfiguration.isPrimaryNode) {
                 ObsrPrimaryNodeService obsrPrimaryNodeService = new ObsrPrimaryNodeService(
-                        instanceId, clock, logger);
+                        instanceId, clock);
                 serviceRegistry.register(obsrPrimaryNodeService);
                 mObjectStorage = obsrPrimaryNodeService;
             } else {
                 ObsrSecondaryNodeService obsrSecondaryNodeService = new ObsrSecondaryNodeService(
-                        instanceId, objectStorageConfiguration.primaryNodeAddress, clock, logger);
+                        instanceId, objectStorageConfiguration.primaryNodeAddress, clock);
                 serviceRegistry.register(obsrSecondaryNodeService);
                 mObjectStorage = obsrSecondaryNodeService;
             }
@@ -46,17 +43,17 @@ public class NetworkInterfaceImpl implements NetworkInterface {
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
             if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
-                HfcsBroadcastService hfcsService = new HfcsBroadcastService(instanceId, clock, logger);
+                HfcsBroadcastService hfcsService = new HfcsBroadcastService(instanceId, clock);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsAutoReplyService hfcsService = new HfcsAutoReplyService(instanceId, clock, logger);
+                HfcsAutoReplyService hfcsService = new HfcsAutoReplyService(instanceId, clock);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
                 HfcsTightService hfcsService = new HfcsTightService(
                         configuration.getHfcsConfiguration().specificTargetAddress,
-                        instanceId, clock, logger);
+                        instanceId, clock);
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else {
@@ -68,7 +65,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     }
 
     public NetworkInterfaceImpl() {
-        this(NetworkConfiguration.disabled(), null, null, null, Logging.stub());
+        this(NetworkConfiguration.disabled(), null, null, null);
     }
 
     @Override

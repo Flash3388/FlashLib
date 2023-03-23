@@ -2,12 +2,11 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.app.AppCreator;
 import com.flash3388.flashlib.app.FlashLibMain;
-import org.slf4j.Logger;
 
 /**
  * <p>
  *     Launcher for robot classes. Robot should be started through here.
- *     Call {@link #start(RobotCreator, Logger)}.
+ *     Call {@link #start(RobotCreator)}.
  * </p>
  *
  * @since FlashLib 1.3.0
@@ -25,10 +24,9 @@ public final class RobotMain {
      * </p>
      *
      * @param robotCreator creator for the robot class.
-     * @param logger logger to be used by the robot.
      */
-    public static void start(RobotCreator robotCreator, Logger logger) {
+    public static void start(RobotCreator robotCreator) {
         AppCreator appCreator = new RobotAppCreator(robotCreator);
-        FlashLibMain.appMain(appCreator, logger);
+        FlashLibMain.appMain(appCreator);
     }
 }

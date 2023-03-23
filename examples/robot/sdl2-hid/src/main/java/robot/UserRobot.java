@@ -55,7 +55,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
             double value = mController.getAxis(axis).getAsDouble();
 
             status.append("\tAxis ");
-            status.append(axis.toString());
+            status.append(axis);
             status.append(": ");
             status.append(value);
             status.append('\n');
@@ -66,7 +66,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
             boolean value = mController.getButton(button).getAsBoolean();
 
             status.append("\tButton ");
-            status.append(button.toString());
+            status.append(button);
             status.append(": ");
             status.append(value);
             status.append('\n');

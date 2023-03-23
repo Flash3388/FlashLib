@@ -47,13 +47,13 @@ class RequirementsControl {
 
                     mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}. " +
                                     "However old action is preferred",
-                            currentAction.toString(), action.toString(), requirement.toString());
+                            currentAction, action, requirement.toString());
 
                     break;
                 }
 
                 mLogger.warn("Requirements conflict in Scheduler between {} and new action {} over requirement {}",
-                        currentAction.toString(), action.toString(), requirement.toString());
+                        currentAction, action, requirement.toString());
             }
         }
 

@@ -21,6 +21,7 @@ import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -32,7 +33,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class ObsrSecondaryNodeService extends SingleUseService implements ObjectStorage {
 
-    private final Logger mLogger;
+    private static final Logger LOGGER = Logging.getLogger("Comm", "OBSRNode");
+
     private final MessagingChannel mChannel;
     private final Storage mStorage;
     private final BlockingQueue<PendingWriteMessage> mWriteQueue;
@@ -40,9 +42,7 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
     private Thread mReadThread;
     private Thread mWriteThread;
 
-    public ObsrSecondaryNodeService(InstanceId ourId, SocketAddress serverAddress, Clock clock, Logger logger) {
-        mLogger = logger;
-
+    public ObsrSecondaryNodeService(InstanceId ourId, SocketAddress serverAddress, Clock clock) {
         KnownMessageTypes messageTypes = new KnownMessageTypes();
         messageTypes.put(NewEntryMessage.TYPE);
         messageTypes.put(EntryClearMessage.TYPE);
@@ -51,7 +51,7 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
 
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
         MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
-        mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, logger);
+        mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, LOGGER);
 
         mWriteQueue = new LinkedBlockingQueue<>();
 
@@ -62,8 +62,8 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
         mWriteThread = null;
     }
 
-    public ObsrSecondaryNodeService(InstanceId ourId, String serverAddress, Clock clock, Logger logger) {
-        this(ourId, new InetSocketAddress(serverAddress, Constants.PRIMARY_NODE_PORT), clock, logger);
+    public ObsrSecondaryNodeService(InstanceId ourId, String serverAddress, Clock clock) {
+        this(ourId, new InetSocketAddress(serverAddress, Constants.PRIMARY_NODE_PORT), clock);
     }
 
     @Override
@@ -74,13 +74,13 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
     @Override
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
-                new ReadTask(mChannel, mStorage, mLogger),
+                new ReadTask(mChannel, mStorage, LOGGER),
                 "ObsrSecondaryNodeService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();
 
         mWriteThread = new Thread(
-                new WriteTask(mWriteQueue, mChannel, mLogger),
+                new WriteTask(mWriteQueue, mChannel, LOGGER),
                 "ObsrSecondaryNodeService-WriteTask");
         mWriteThread.setDaemon(true);
         mWriteThread.start();

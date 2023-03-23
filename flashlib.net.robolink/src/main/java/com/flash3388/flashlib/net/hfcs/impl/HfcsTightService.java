@@ -5,7 +5,6 @@ import com.flash3388.flashlib.net.message.ConfigurableTargetUdpMessagingChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
-import org.slf4j.Logger;
 
 import java.net.SocketAddress;
 import java.util.ArrayDeque;
@@ -22,9 +21,8 @@ public class HfcsTightService extends HfcsServiceBase {
 
     public HfcsTightService(Collection<SocketAddress> possibleAddress,
                             InstanceId ourId,
-                            Clock clock,
-                            Logger logger) {
-        super(ourId, clock, logger);
+                            Clock clock) {
+        super(ourId, clock);
 
         mChannel = new ConfigurableTargetUdpMessagingChannel(
                 Constants.DEFAULT_PORT,
@@ -32,13 +30,13 @@ public class HfcsTightService extends HfcsServiceBase {
                 mMessageWriter,
                 mMessageReader,
                 clock,
-                logger
+                LOGGER
         );
 
         mConnectionPackage = new TightConnectionPackage(
                 mEventController,
                 clock,
-                logger,
+                LOGGER,
                 new ArrayDeque<>(possibleAddress),
                 mChannel,
                 RECEIVE_TIMER_EXPIRATION
@@ -49,9 +47,9 @@ public class HfcsTightService extends HfcsServiceBase {
     protected Map<String, Runnable> createTasks() {
         Map<String, Runnable> tasks = new HashMap<>();
         tasks.put("HfcsAutoReply-UpdateTask",
-                new TightUpdateTask(mConnectionPackage, mChannel, mLogger));
+                new TightUpdateTask(mConnectionPackage, mChannel, LOGGER));
         tasks.put("HfcsAutoReply-WriteTask",
-                new BasicWriteTask(mOutDataQueue, mChannel, mLogger));
+                new BasicWriteTask(mOutDataQueue, mChannel, LOGGER));
         return tasks;
     }
 

@@ -11,7 +11,6 @@ import com.flash3388.flashlib.time.Time;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,15 +19,9 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class SingleThreadedSchedulerTest {
 
@@ -48,7 +41,6 @@ class SingleThreadedSchedulerTest {
 
         mScheduler = new SingleThreadedScheduler(
                 ClockMock.mockInvalidTimeClock(),
-                mock(Logger.class),
                 mPendingActions, mRunningActions,
                 new ArrayList<>(), mRequirementsUsage, mDefaultActions);
     }

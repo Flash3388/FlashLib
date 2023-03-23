@@ -2,15 +2,16 @@ package com.flash3388.flashlib.robot.base;
 
 import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.app.ServiceRegistry;
+import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
-import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -20,9 +21,10 @@ import java.util.function.Supplier;
 
 public class GenericRobotControl implements RobotControl {
 
+    private static final Logger LOGGER = Logging.getMainLogger();
+
     private final InstanceId mInstanceId;
     private final ResourceHolder mResourceHolder;
-    private final Logger mLogger;
 
     private final Supplier<? extends RobotMode> mModeSupplier;
     private final NetworkInterface mNetworkInterface;
@@ -32,7 +34,8 @@ public class GenericRobotControl implements RobotControl {
     private final Clock mClock;
     private final ServiceRegistry mServiceRegistry;
 
-    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Logger logger,
+    public GenericRobotControl(InstanceId instanceId,
+                               ResourceHolder resourceHolder,
                                Supplier<? extends RobotMode> modeSupplier,
                                NetworkInterface networkInterface,
                                IoInterface ioInterface,
@@ -42,7 +45,6 @@ public class GenericRobotControl implements RobotControl {
                                ServiceRegistry serviceRegistry) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
-        mLogger = logger;
         mModeSupplier = modeSupplier;
         mNetworkInterface = networkInterface;
         mIoInterface = ioInterface;
@@ -52,18 +54,18 @@ public class GenericRobotControl implements RobotControl {
         mServiceRegistry = serviceRegistry;
     }
 
-    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Logger logger) {
+    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
-        mLogger = logger;
+
         mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
         mIoInterface = new IoInterface.Stub();
         mHidInterface = new HidInterface.Stub();
         mClock = RobotFactory.newDefaultClock();
 
         mNetworkInterface = RobotFactory.disabledNetworkInterface();
-        mScheduler = RobotFactory.newDefaultScheduler(mClock, logger);
-        mServiceRegistry = new BasicServiceRegistry(logger);
+        mScheduler = RobotFactory.newDefaultScheduler(mClock);
+        mServiceRegistry = new BasicServiceRegistry();
     }
 
     @Override
@@ -98,7 +100,7 @@ public class GenericRobotControl implements RobotControl {
 
     @Override
     public Logger getLogger() {
-        return mLogger;
+        return LOGGER;
     }
 
     @Override

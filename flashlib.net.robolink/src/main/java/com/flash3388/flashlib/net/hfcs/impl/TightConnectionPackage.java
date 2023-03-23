@@ -73,11 +73,7 @@ public class TightConnectionPackage implements MessagingChannel.UpdateHandler {
         }
 
         Time now = mClock.currentTime();
-        if (now.sub(mLastReceivedTimestamp).largerThanOrEquals(mReceiveTimerExpiration)) {
-            return true;
-        }
-
-        return false;
+        return now.sub(mLastReceivedTimestamp).largerThanOrEquals(mReceiveTimerExpiration);
     }
 
     private synchronized boolean updateDataReceived(SocketAddress address) {

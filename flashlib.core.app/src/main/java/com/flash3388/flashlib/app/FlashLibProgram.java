@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.app;
 
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import com.flash3388.flashlib.util.unique.InstanceIdGenerator;
@@ -7,43 +8,43 @@ import org.slf4j.Logger;
 
 public class FlashLibProgram {
 
+    private static final Logger LOGGER = Logging.getMainLogger();
+    
     private final AppCreator mCreator;
-    private final Logger mLogger;
     private final InstanceId mInstanceId;
 
-    public FlashLibProgram(AppCreator creator, Logger logger) {
+    public FlashLibProgram(AppCreator creator) {
         mCreator = creator;
-        mLogger = logger;
         mInstanceId = InstanceIdGenerator.generate();
     }
 
     public void start() {
         try {
-            mLogger.info("Running application id={}", mInstanceId);
+            LOGGER.info("Running application id={}", mInstanceId);
             runApplication();
         } catch (StartupException e) {
-            mLogger.error("Error while creating application", e);
+            LOGGER.error("Error while creating application", e);
         } catch (Throwable t) {
-            mLogger.error("Unknown error from application", t);
+            LOGGER.error("Unknown error from application", t);
         }
 
-        mLogger.info("Application finished");
+        LOGGER.info("Application finished");
     }
 
     private void runApplication() throws Exception {
         ResourceHolder resourceHolder = ResourceHolder.empty();
         try {
-            mLogger.debug("Creating user app class");
-            AppImplementation app = mCreator.create(mInstanceId, resourceHolder, mLogger);
+            LOGGER.debug("Creating user app class");
+            AppImplementation app = mCreator.create(mInstanceId, resourceHolder);
             FlashLibInstance.setControl(app.getControl());
 
-            mLogger.debug("Running application");
+            LOGGER.debug("Running application");
             runApplication(app);
         } finally {
             try {
                 resourceHolder.freeAll();
             }  catch (Throwable t) {
-                mLogger.warn("Resource close error", t);
+                LOGGER.warn("Resource close error", t);
             }
         }
     }
@@ -61,41 +62,41 @@ public class FlashLibProgram {
     }
 
     private void appInitialize(FlashLibApp app, FlashLibControl control) throws Exception {
-        mLogger.debug("Initializing user app");
+        LOGGER.debug("Initializing user app");
         try {
             ServiceRegistry serviceRegistry = control.getServiceRegistry();
             serviceRegistry.startAll();
 
             app.initialize(control);
         } catch (Throwable t) {
-            mLogger.error("Error in app initialization", t);
+            LOGGER.error("Error in app initialization", t);
             throw t;
         }
     }
 
     private void appMain(FlashLibApp app, FlashLibControl control) throws Exception {
-        mLogger.debug("Starting user app");
+        LOGGER.debug("Starting user app");
         try {
             app.main(control);
         } catch (Throwable t) {
-            mLogger.error("Error in app main", t);
+            LOGGER.error("Error in app main", t);
             throw t;
         }
     }
 
     private void appShutdown(FlashLibApp app, FlashLibControl control) {
-        mLogger.debug("Shutting down user app");
+        LOGGER.debug("Shutting down user app");
         try {
             app.shutdown(control);
         } catch (Throwable t) {
-            mLogger.error("Error in app shutdown", t);
+            LOGGER.error("Error in app shutdown", t);
         }
 
         try {
             ServiceRegistry serviceRegistry = control.getServiceRegistry();
             serviceRegistry.stopAll();
         } catch (Throwable t) {
-            mLogger.error("Error in app shutdown", t);
+            LOGGER.error("Error in app shutdown", t);
         }
     }
 }

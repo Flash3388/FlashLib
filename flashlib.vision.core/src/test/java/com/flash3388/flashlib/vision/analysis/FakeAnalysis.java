@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.vision.analysis;
 
-import com.castle.reflect.Types;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;

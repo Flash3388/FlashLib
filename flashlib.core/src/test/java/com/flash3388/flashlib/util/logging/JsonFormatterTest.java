@@ -4,7 +4,6 @@ import com.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.logging.Handler;

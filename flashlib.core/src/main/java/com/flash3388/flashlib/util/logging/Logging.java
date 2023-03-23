@@ -1,31 +1,37 @@
 package com.flash3388.flashlib.util.logging;
 
-import com.flash3388.flashlib.util.logging.jul.JsonFormatter;
 import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.nio.file.Path;
+import org.slf4j.LoggerFactory;
 
 public final class Logging {
 
     private Logging() {}
 
-    public static Logger consoleLogger(String name) {
-        return new LoggerBuilder(name)
-                .enableConsoleLogging(true)
-                .build();
-    }
-
-    public static Logger fileLogger(Path parent, String name) throws IOException {
-        return new LoggerBuilder(name)
-                .enableFileLogging(true)
-                .setFileLogFormatter(new JsonFormatter())
-                .setDateBasedFilesParent(parent)
-                .setTimeBasedFilePattern()
-                .build();
-    }
-
     public static Logger stub() {
         return new StubLogger();
+    }
+
+    public static Logger getLogger(String first, String... more) {
+        return LoggerFactory.getLogger(constructName(first, more));
+    }
+
+    public static Logger getMainLogger() {
+        return getLogger("Main");
+    }
+
+    private static String constructName(String first, String... more) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FlashLib");
+        builder.append('.');
+        builder.append(first);
+
+        for (int i = 0; i < more.length; i++) {
+            builder.append(more[i]);
+            if (i < more.length - 1) {
+                builder.append('.');
+            }
+        }
+
+        return builder.toString();
     }
 }

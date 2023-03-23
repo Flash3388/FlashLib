@@ -1,12 +1,8 @@
 package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.FullySuppliedPidController;
-import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.jmath.ExtendedMath;
-
-import java.util.function.DoubleSupplier;
 
 public class PidAction extends ActionBase {
 

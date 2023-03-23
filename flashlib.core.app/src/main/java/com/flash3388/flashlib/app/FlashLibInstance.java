@@ -22,7 +22,6 @@ public class FlashLibInstance {
     static void setControl(FlashLibControl control) {
         FlashLibControl old = sControl.getAndSet(control);
         GlobalDependencies.setClockInstance(control.getClock());
-        GlobalDependencies.setLoggerInstance(control.getLogger());
 
         if (old != null) {
             control.getLogger().warn("FlashLibControl global modified after initial setup");

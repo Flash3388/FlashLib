@@ -10,7 +10,6 @@ import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
 import com.flash3388.flashlib.net.hfcs.Type;
 import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
 import com.flash3388.flashlib.net.hfcs.messages.InPackage;
-import com.flash3388.flashlib.net.message.BroadcastUdpMessagingChannel;
 import com.flash3388.flashlib.net.message.KnownMessageTypes;
 import com.flash3388.flashlib.net.message.MessageReader;
 import com.flash3388.flashlib.net.message.MessageWriter;
@@ -18,6 +17,7 @@ import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
 import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.Controllers;
 import com.notifier.EventController;
@@ -32,9 +32,10 @@ import java.util.function.Supplier;
 
 public abstract class HfcsServiceBase extends SingleUseService implements HfcsRegistry {
 
+    protected static final Logger LOGGER = Logging.getLogger("Comm", "HFCSService");
+
     protected final InstanceId mOurId;
     protected final Clock mClock;
-    protected final Logger mLogger;
 
     protected final KnownInDataTypes mInDataTypes;
     protected final EventController mEventController;
@@ -44,10 +45,9 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
 
     private final List<Thread> mThreads;
 
-    public HfcsServiceBase(InstanceId ourId, Clock clock, Logger logger) {
+    public HfcsServiceBase(InstanceId ourId, Clock clock) {
         mOurId = ourId;
         mClock = clock;
-        mLogger = logger;
 
         mInDataTypes = new KnownInDataTypes();
 

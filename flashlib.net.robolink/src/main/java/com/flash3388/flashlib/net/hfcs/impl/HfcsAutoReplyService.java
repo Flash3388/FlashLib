@@ -5,7 +5,6 @@ import com.flash3388.flashlib.net.message.AutoReplyingUdpMessagingChannel;
 import com.flash3388.flashlib.net.message.MessagingChannel;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
-import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +13,8 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
 
     private final MessagingChannel mChannel;
 
-    public HfcsAutoReplyService(InstanceId ourId, Clock clock, Logger logger) {
-        super(ourId, clock, logger);
+    public HfcsAutoReplyService(InstanceId ourId, Clock clock) {
+        super(ourId, clock);
 
         mChannel = new AutoReplyingUdpMessagingChannel(
                 Constants.DEFAULT_PORT,
@@ -23,7 +22,7 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
                 mMessageWriter,
                 mMessageReader,
                 clock,
-                logger
+                LOGGER
         );
     }
 
@@ -31,9 +30,10 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
     protected Map<String, Runnable> createTasks() {
         Map<String, Runnable> tasks = new HashMap<>();
         tasks.put("HfcsAutoReply-UpdateTask",
-                new BasicUpdateTask(mChannel, mLogger, new BasicChannelUpdateHandler(mEventController, mLogger)));
+                new BasicUpdateTask(mChannel, LOGGER,
+                        new BasicChannelUpdateHandler(mEventController, LOGGER)));
         tasks.put("HfcsAutoReply-WriteTask",
-                new BasicWriteTask(mOutDataQueue, mChannel, mLogger));
+                new BasicWriteTask(mOutDataQueue, mChannel, LOGGER));
         return tasks;
     }
 
