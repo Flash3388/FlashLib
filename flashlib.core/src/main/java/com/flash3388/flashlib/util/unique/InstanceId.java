@@ -75,7 +75,7 @@ public class InstanceId {
     public String toString() {
         long processId = ByteBuffer.wrap(mProcessId).getLong();
 
-        return String.format("{%s-0x%s}",
+        return String.format("{[%s]-0x%s}",
                 machineIdToLongString(),
                 Long.toHexString(processId));
     }
