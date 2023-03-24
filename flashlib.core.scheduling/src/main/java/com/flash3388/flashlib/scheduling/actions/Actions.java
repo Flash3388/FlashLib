@@ -142,6 +142,17 @@ public final class Actions {
      * Creates a new builder for constructing {@link ActionStartSelector}. This specialized selector allows
      * selection of actions on the fly using condition matching with a given value.
      *
+     * <pre>
+     *     ActionStartSelector&lt;Integer&gt; selector = Actions.&lt;Integer&gt;startSelector()
+     *          .useWhen((value)-&gt; new SomeAction(value), (value)-&gt; value &lt; 1 || value &gt; 10)
+     *          .useWhen((value)-&gt; new SomeOtherAction(value), (value)-&gt; value == 6)
+     *          .useElse((value)-&gt; new SomeLastAction(value))
+     *          .build();
+     *
+     *      ... later
+     *      Action action = selector.create(12);
+     * </pre>
+     *
      * @return {@link ActionStartSelector.Builder builder} for {@link ActionStartSelector}
      * @param <T> type of the parameter used for selection
      */
