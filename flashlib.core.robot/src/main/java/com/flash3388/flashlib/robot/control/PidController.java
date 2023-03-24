@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.control;
 
+import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
 
 import java.util.function.DoubleBinaryOperator;
@@ -19,6 +21,7 @@ import java.util.function.DoubleSupplier;
  */
 public class PidController implements DoubleBinaryOperator {
 
+    private final Clock mClock;
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
     private final DoubleSupplier mKd;
@@ -29,23 +32,29 @@ public class PidController implements DoubleBinaryOperator {
 
     private double mSetPointRange;
     private double mOutRampRate;
+    private double mTolerance;
+    private Time mToleranceTimeout;
 
     private double mTotalError;
     private double mLastError;
 
     private double mLastOutput;
+    private Time mToleranceAcceptableTime;
 
     private boolean mIsFirstRun;
 
     /**
      * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid mPidSource
      * for the feedback data.
-     * @param kp the proportional constant
-     * @param ki the integral constant
-     * @param kd the differential constant
-     * @param kf the feed forward constant
+     *
+     * @param clock
+     * @param kp    the proportional constant
+     * @param ki    the integral constant
+     * @param kd    the differential constant
+     * @param kf    the feed forward constant
      */
-    public PidController(DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
+    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
+        mClock = clock;
         mKp = kp;
         mKi = ki;
         mKd = kd;
@@ -56,17 +65,20 @@ public class PidController implements DoubleBinaryOperator {
 
         mSetPointRange = 0;
         mOutRampRate = 0;
+        mTolerance = 0;
+        mToleranceTimeout = Time.INVALID;
 
         mTotalError = 0;
         mLastError = 0;
+        mToleranceAcceptableTime = Time.INVALID;
 
         mLastOutput = 0;
 
         mIsFirstRun = true;
     }
 
-    public PidController(double kp, double ki, double kd, double kf) {
-        this(() -> kp, () -> ki, () ->  kd, () -> kf);
+    public PidController(Clock clock, double kp, double ki, double kd, double kf) {
+        this(clock, () -> kp, () -> ki, () ->  kd, () -> kf);
     }
 
     /**
@@ -75,6 +87,9 @@ public class PidController implements DoubleBinaryOperator {
      */
     public void reset() {
         mIsFirstRun = true;
+        mToleranceAcceptableTime = Time.INVALID;
+        mLastOutput = 0;
+        mLastError = 0;
     }
 
     /**
@@ -135,6 +150,36 @@ public class PidController implements DoubleBinaryOperator {
     }
 
     /**
+     * Gets the error tolerance.
+     *
+     * @return tolerance, in measurement points used for set point.
+     */
+    public double getTolerance() {
+        return mTolerance;
+    }
+
+    /**
+     * Gets the time defined for an error tolerance to be considered acceptable.
+     * That is, if the error is within the given tolerance for this amount of time,
+     * the error is acceptable and the target is in the setpoint.
+     * @return tolerance timeout
+     */
+    public Time getToleranceTimeout() {
+        return mToleranceTimeout;
+    }
+
+    /**
+     * Sets the error tolerance.
+     *
+     * @param tolerance tolerance, in measurement points used for set point.
+     * @param toleranceTimeout timeout for the error, if in tolerance, to consider the error acceptable.
+     */
+    public void setTolerance(double tolerance, Time toleranceTimeout) {
+        mTolerance = tolerance;
+        mToleranceTimeout = toleranceTimeout;
+    }
+
+    /**
      * Calculates the output to the system to compensate for the error.
      *
      * @param processVariable the process variable of the system.
@@ -183,6 +228,38 @@ public class PidController implements DoubleBinaryOperator {
 
         mLastOutput = output;
 
+        if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
+            if (mToleranceTimeout.isValid() && !mToleranceAcceptableTime.isValid()) {
+                Time now = mClock.currentTime();
+                mToleranceAcceptableTime = now.add(mToleranceTimeout);
+            }
+        } else {
+            mToleranceAcceptableTime = Time.INVALID;
+        }
+
         return output;
+    }
+
+    /**
+     * Determines whether the current error can be acceptably considered as within the setpoint range.
+     *
+     * @param processVariable the process variable of the system.
+     * @param setpoint the desired set point.
+     *
+     * @return <b>true</b> if the error can be acceptably considered as within the setpoint range, <b>false</b> otherwise.
+     */
+    public boolean atSetpoint(double processVariable, double setpoint) {
+        double error = setpoint - processVariable;
+        if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
+            if (!mToleranceTimeout.isValid()) {
+                // no timeout so immediately true.
+                return true;
+            } else if (mToleranceAcceptableTime.isValid()) {
+                Time now = mClock.currentTime();
+                return now.after(mToleranceAcceptableTime);
+            }
+        }
+
+        return false;
     }
 }
