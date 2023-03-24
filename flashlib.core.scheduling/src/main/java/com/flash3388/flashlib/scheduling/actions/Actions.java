@@ -139,6 +139,17 @@ public final class Actions {
     }
 
     /**
+     * Creates a new builder for constructing {@link ActionStartSelector}. This specialized selector allows
+     * selection of actions on the fly using condition matching with a given value.
+     *
+     * @return {@link ActionStartSelector.Builder builder} for {@link ActionStartSelector}
+     * @param <T> type of the parameter used for selection
+     */
+    public static <T> ActionStartSelector.Builder<T> startSelector() {
+        return new ActionStartSelector.Builder<>();
+    }
+
+    /**
      * Creates a group which executes the given actions one after the other, in order (i.e. when one
      * is finished, the other starts, thus called sequential).
      *
