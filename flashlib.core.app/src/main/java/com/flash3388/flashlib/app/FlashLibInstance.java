@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.app;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FlashLibInstance {
@@ -21,8 +19,6 @@ public class FlashLibInstance {
 
     static void setControl(FlashLibControl control) {
         FlashLibControl old = sControl.getAndSet(control);
-        GlobalDependencies.setClockInstance(control.getClock());
-
         if (old != null) {
             control.getLogger().warn("FlashLibControl global modified after initial setup");
         }

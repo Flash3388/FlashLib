@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
@@ -20,10 +19,6 @@ public class PeriodicAction extends ActionBase {
 
     public PeriodicAction(Clock clock, Runnable runnable, Time period) {
         this(clock, runnable, period, Time.INVALID);
-    }
-
-    public PeriodicAction(Runnable runnable, Time period) {
-        this(GlobalDependencies.getClock(), runnable, period);
     }
 
     @Override

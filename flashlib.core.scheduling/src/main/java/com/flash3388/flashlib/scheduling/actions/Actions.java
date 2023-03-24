@@ -4,6 +4,7 @@ import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Objects;
@@ -125,14 +126,16 @@ public final class Actions {
      * use {@link Action#withTimeout(Time)}, add requirements or interrupt the action
      * manually to end it.
      *
+     * @param clock clock
      * @param runnable runnable which runs in the execution phase.
      * @param period period of execution
      * @return action
      */
-    public static Action periodic(Runnable runnable, Time period) {
+    public static Action periodic(Clock clock, Runnable runnable, Time period) {
+        Objects.requireNonNull(clock, "clock is null");
         Objects.requireNonNull(runnable, "runnable is null");
         Objects.requireNonNull(period, "period is null");
-        return new PeriodicAction(runnable, period);
+        return new PeriodicAction(clock, runnable, period);
     }
 
     /**

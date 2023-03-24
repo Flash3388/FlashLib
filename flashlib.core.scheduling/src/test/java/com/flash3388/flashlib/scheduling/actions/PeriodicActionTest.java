@@ -18,7 +18,6 @@ class PeriodicActionTest {
         mClock = ClockMock.mockInvalidTimeClock();
 
         GlobalDependenciesMock.mockDependencies();
-        GlobalDependenciesMock.mockClock(mClock);
     }
 
     @Test

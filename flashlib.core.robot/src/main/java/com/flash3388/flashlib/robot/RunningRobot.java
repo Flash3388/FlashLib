@@ -23,7 +23,6 @@ public final class RunningRobot {
         RobotControl previousInstance = sControlInstance.getAndSet(instance);
 
         GlobalDependencies.setSchedulerInstance(instance.getScheduler());
-        GlobalDependencies.setClockInstance(instance.getClock());
 
         if (previousInstance != null) {
             previousInstance.getLogger().warn("RunningRobot instance replaced");
