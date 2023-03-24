@@ -32,10 +32,9 @@ public class BasicServiceRegistry implements ServiceRegistry {
 
     @Override
     public void startAll() {
-        if (mHasStarted.compareAndSet(false, true)) {
-            for (Service service : mServices) {
-                startService(service);
-            }
+        mHasStarted.set(true);
+        for (Service service : mServices) {
+            startService(service);
         }
     }
 
