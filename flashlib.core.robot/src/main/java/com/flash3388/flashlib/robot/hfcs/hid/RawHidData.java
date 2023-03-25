@@ -4,7 +4,7 @@ public class RawHidData {
 
     public static final int MAX_HID = 3;
     public static final int MAX_AXES = 7;
-    public static final int MAX_BUTTONS = 15;
+    public static final int MAX_BUTTONS = 20;
     public static final int MAX_POVS = 2;
     public static final int MAX_HID_VALUE = 127;
 

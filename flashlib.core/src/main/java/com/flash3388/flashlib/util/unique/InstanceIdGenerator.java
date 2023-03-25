@@ -34,7 +34,7 @@ public class InstanceIdGenerator {
             Path machineIdFile = Paths.get("/etc/machine-id");
             if (Files.exists(machineIdFile)) {
                 try {
-                    LOGGER.info("Using /etc/machine-id for machine-id");
+                    LOGGER.debug("Using /etc/machine-id for machine-id");
                     byte[] id = Files.readAllBytes(machineIdFile);
 
                     MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -50,7 +50,7 @@ public class InstanceIdGenerator {
         try {
             // although not fool-proof, we'll use MAC address from the machine.
             // MAC addresses can actually change, but for now this will do.
-            LOGGER.info("Using MAC address for machine-id");
+            LOGGER.debug("Using MAC address for machine-id");
             return getMacAddress();
         } catch (IOException e) {
             throw new IdGenerationException("failed retrieving MAC address", e);
@@ -79,7 +79,7 @@ public class InstanceIdGenerator {
             Path processStat = Paths.get("/proc/self/stat");
             if (Files.exists(processStat)) {
                 try {
-                    LOGGER.info("Using /proc/self for process-id");
+                    LOGGER.debug("Using /proc/self for process-id");
                     List<String> lines = Files.readAllLines(processStat);
                     String pidString = lines.get(0).split(" ")[0];
                     return Long.parseLong(pidString);
@@ -91,7 +91,7 @@ public class InstanceIdGenerator {
         }
 
         try {
-            LOGGER.info("Using ManagementFactory.getRuntimeMXBean() for process-id");
+            LOGGER.debug("Using ManagementFactory.getRuntimeMXBean() for process-id");
 
             String jvmName = ManagementFactory.getRuntimeMXBean().getName();
             if (!jvmName.contains("@")) {

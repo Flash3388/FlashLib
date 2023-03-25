@@ -92,7 +92,7 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Initializing mode {}", mode);
+        mRobotControl.getLogger().debug("Initializing mode {}", mode);
 
         if (mode.isDisabled()) {
             mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
@@ -103,7 +103,7 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     private void periodicMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Periodic mode {}", mode);
+        mRobotControl.getLogger().debug("Periodic mode {}", mode);
 
         mRobotControl.getServiceRegistry().startAll();
         mRobotControl.getScheduler().run(mode);
@@ -114,13 +114,13 @@ public class LoopingRobotBase implements RobotBase {
             mRobot.modePeriodic(mode);
         }
 
-        mRobotControl.getLogger().trace("Robot periodic");
+        mRobotControl.getLogger().debug("Robot periodic");
 
         mRobot.robotPeriodic();
     }
 
     private void exitMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Exiting mode {}", mode);
+        mRobotControl.getLogger().debug("Exiting mode {}", mode);
 
         if (mode.isDisabled()) {
             mRobot.disabledExit();
