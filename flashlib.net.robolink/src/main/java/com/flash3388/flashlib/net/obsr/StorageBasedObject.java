@@ -37,6 +37,18 @@ public class StorageBasedObject implements StoredObject {
     }
 
     @Override
+    public void addListener(ObjectListener listener) {
+        Storage storage = getStorage();
+        storage.addListener(mPath, listener);
+    }
+
+    @Override
+    public void removeListener(ObjectListener listener) {
+        Storage storage = getStorage();
+        storage.removeListener(mPath, listener);
+    }
+
+    @Override
     public String toString() {
         return String.format("{OBJECT %s}", mPath);
     }

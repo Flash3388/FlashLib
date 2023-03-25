@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
+import com.flash3388.flashlib.net.obsr.EntryModificationEvent;
 import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
+import com.flash3388.flashlib.net.obsr.ObjectListener;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.StorageBasedObject;
@@ -135,6 +137,12 @@ public class StorageImpl implements Storage {
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryUpdate(path, value);
             }
+
+            mEventController.fire(
+                    new EntryModificationEvent(node.getEntry(), node.getEntry().getPath().toString()),
+                    EntryModificationEvent.class,
+                    ObjectListener.class,
+                    ObjectListener::onEntryModification);
         } finally {
             mLock.unlock();
         }
@@ -161,6 +169,30 @@ public class StorageImpl implements Storage {
         try {
             StoredEntryNode node = getOrCreateEntryNode(path);
             return node.getValueProperty();
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    @Override
+    public void addListener(StoragePath path, ObjectListener listener) {
+        mLock.lock();
+        try {
+            mEventController.registerListener(listener, (event)-> {
+                return event instanceof EntryModificationEvent &&
+                        ((EntryModificationEvent)event).getEntry() instanceof StorageBasedEntry &&
+                        ((StorageBasedEntry)((EntryModificationEvent)event).getEntry()).getPath().startsWith(path);
+            });
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    @Override
+    public void removeListener(StoragePath path, ObjectListener listener) {
+        mLock.lock();
+        try {
+            mEventController.unregisterListener(listener);
         } finally {
             mLock.unlock();
         }

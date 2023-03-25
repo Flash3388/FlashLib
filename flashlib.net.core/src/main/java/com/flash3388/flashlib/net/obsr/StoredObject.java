@@ -25,4 +25,7 @@ public interface StoredObject {
      * @return entry
      */
     StoredEntry getEntry(String name);
+
+    void addListener(ObjectListener listener);
+    void removeListener(ObjectListener listener);
 }

@@ -13,6 +13,10 @@ public class StorageBasedEntry implements StoredEntry {
         mStorage = new WeakReference<>(storage);
     }
 
+    public StoragePath getPath() {
+        return mPath;
+    }
+
     @Override
     public ValueProperty valueProperty() {
         Storage storage = getStorage();

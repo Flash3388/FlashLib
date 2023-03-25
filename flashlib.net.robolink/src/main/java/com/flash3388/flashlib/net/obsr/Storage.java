@@ -29,4 +29,7 @@ public interface Storage {
     default void clearEntryValue(StoragePath path) {
         clearEntryValue(path, EnumSet.noneOf(StorageOpFlag.class));
     }
+
+    void addListener(StoragePath path, ObjectListener listener);
+    void removeListener(StoragePath path, ObjectListener listener);
 }

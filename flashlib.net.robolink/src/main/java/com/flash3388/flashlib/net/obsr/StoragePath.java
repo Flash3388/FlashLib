@@ -1,8 +1,10 @@
 package com.flash3388.flashlib.net.obsr;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class StoragePath {
+public class StoragePath implements Iterable<String> {
 
     public static final char DELIMITER = '/';
 
@@ -49,6 +51,10 @@ public class StoragePath {
         return basename(mPath);
     }
 
+    public boolean startsWith(StoragePath path) {
+        return mPath.startsWith(path.mPath);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -65,6 +71,29 @@ public class StoragePath {
     @Override
     public String toString() {
         return mPath;
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return new Iterator<String>() {
+            private final String[] mParts = mPath.split(String.valueOf(DELIMITER));
+            private int mIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return mIndex < mParts.length - 1;
+            }
+
+            @Override
+            public String next() {
+                mIndex++;
+                if (mIndex <= 0 || mIndex >= mParts.length) {
+                    throw new NoSuchElementException();
+                }
+
+                return mParts[mIndex];
+            }
+        };
     }
 
     private static String normalizePath(String path) {
