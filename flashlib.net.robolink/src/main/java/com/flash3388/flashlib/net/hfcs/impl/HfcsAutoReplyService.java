@@ -13,17 +13,21 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
 
     private final MessagingChannel mChannel;
 
-    public HfcsAutoReplyService(InstanceId ourId, Clock clock) {
+    public HfcsAutoReplyService(InstanceId ourId, Clock clock, int bindPort) {
         super(ourId, clock);
 
         mChannel = new AutoReplyingUdpMessagingChannel(
-                Constants.DEFAULT_PORT,
+                bindPort,
                 ourId,
                 mMessageWriter,
                 mMessageReader,
                 clock,
                 LOGGER
         );
+    }
+
+    public HfcsAutoReplyService(InstanceId ourId, Clock clock) {
+        this(ourId, clock, Constants.DEFAULT_PORT);
     }
 
     @Override

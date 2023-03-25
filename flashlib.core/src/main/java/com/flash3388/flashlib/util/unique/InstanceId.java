@@ -3,8 +3,6 @@ package com.flash3388.flashlib.util.unique;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 import java.util.Arrays;
 
 public class InstanceId {
@@ -27,7 +25,7 @@ public class InstanceId {
         dataInput.readFully(machineId);
         size = dataInput.readInt();
         byte[] processId = new byte[size];
-        dataInput.readFully(machineId);
+        dataInput.readFully(processId);
 
         return new InstanceId(machineId, processId);
     }
@@ -73,27 +71,21 @@ public class InstanceId {
 
     @Override
     public String toString() {
-        long processId = ByteBuffer.wrap(mProcessId).getLong();
-
-        return String.format("{[%s]-0x%s}",
-                machineIdToLongString(),
-                Long.toHexString(processId));
+        return String.format("{0x%s-0x%s}",
+                bytesToHex(mMachineId),
+                bytesToHex(mProcessId));
     }
 
-    private String machineIdToLongString() {
-        LongBuffer machineIdBuffer = ByteBuffer.wrap(mMachineId).asLongBuffer();
-        StringBuilder builder = new StringBuilder();
+    public static String bytesToHex(byte[] bytes) {
+        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
 
-        do {
-            if (builder.length() > 0) {
-                builder.append(',');
-            }
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
 
-            long value = machineIdBuffer.get();
-            builder.append("0x");
-            builder.append(Long.toHexString(value));
-        } while (machineIdBuffer.hasRemaining());
-
-        return builder.toString();
+        return new String(hexChars);
     }
 }

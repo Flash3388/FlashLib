@@ -21,11 +21,12 @@ public class HfcsTightService extends HfcsServiceBase {
 
     public HfcsTightService(Collection<SocketAddress> possibleAddress,
                             InstanceId ourId,
-                            Clock clock) {
+                            Clock clock,
+                            int bindPort) {
         super(ourId, clock);
 
         mChannel = new ConfigurableTargetUdpMessagingChannel(
-                Constants.DEFAULT_PORT,
+                bindPort,
                 ourId,
                 mMessageWriter,
                 mMessageReader,
@@ -41,6 +42,12 @@ public class HfcsTightService extends HfcsServiceBase {
                 mChannel,
                 RECEIVE_TIMER_EXPIRATION
         );
+    }
+
+    public HfcsTightService(Collection<SocketAddress> possibleAddress,
+                            InstanceId ourId,
+                            Clock clock) {
+        this(possibleAddress, ourId, clock, Constants.DEFAULT_PORT);
     }
 
     @Override

@@ -47,7 +47,14 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsAutoReplyService hfcsService = new HfcsAutoReplyService(instanceId, clock);
+                HfcsAutoReplyService hfcsService;
+                int bindPort = configuration.getHfcsConfiguration().bindPort;
+                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
+                    hfcsService = new HfcsAutoReplyService(instanceId, clock);
+                } else {
+                    hfcsService = new HfcsAutoReplyService(instanceId, clock, bindPort);
+                }
+
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {

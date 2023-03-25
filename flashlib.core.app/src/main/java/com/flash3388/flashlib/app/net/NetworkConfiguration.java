@@ -32,18 +32,22 @@ public class NetworkConfiguration implements NetworkingMode {
     }
 
     public static class HfcsConfiguration {
+        static final int INVALID_PORT = -1;
+
         final boolean isEnabled;
         final boolean broadcastModeEnabled;
         final boolean replyToSenderModeEnabled;
         final boolean specificTargetModeEnabled;
         final Collection<SocketAddress> specificTargetAddress;
+        final int bindPort;
 
-        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled, boolean replyToSenderModeEnabled, boolean specificTargetModeEnabled, Collection<SocketAddress> specificTargetAddress) {
+        private HfcsConfiguration(boolean isEnabled, boolean broadcastModeEnabled, boolean replyToSenderModeEnabled, boolean specificTargetModeEnabled, Collection<SocketAddress> specificTargetAddress, int bindPort) {
             this.isEnabled = isEnabled;
             this.broadcastModeEnabled = broadcastModeEnabled;
             this.replyToSenderModeEnabled = replyToSenderModeEnabled;
             this.specificTargetModeEnabled = specificTargetModeEnabled;
             this.specificTargetAddress = specificTargetAddress;
+            this.bindPort = bindPort;
         }
 
         public static HfcsConfiguration disabled() {
@@ -51,7 +55,8 @@ public class NetworkConfiguration implements NetworkingMode {
                     false,
                     false,
                     false,
-                    false, null);
+                    false, null,
+                    INVALID_PORT);
         }
 
         public static HfcsConfiguration broadcastMode() {
@@ -59,15 +64,21 @@ public class NetworkConfiguration implements NetworkingMode {
                     true,
                     true,
                     false,
-                    false, null);
+                    false, null,
+                    INVALID_PORT);
         }
 
-        public static HfcsConfiguration replyToSenderMode() {
+        public static HfcsConfiguration replyToSenderMode(int bindPort) {
             return new HfcsConfiguration(
                     true,
                     false,
                     true,
-                    false, null);
+                    false, null,
+                    bindPort);
+        }
+
+        public static HfcsConfiguration replyToSenderMode() {
+            return replyToSenderMode(INVALID_PORT);
         }
 
         public static HfcsConfiguration specificTargetMode(Collection<? extends SocketAddress> targetAddress) {
@@ -75,7 +86,8 @@ public class NetworkConfiguration implements NetworkingMode {
                     true,
                     false,
                     false,
-                    true, new ArrayList<>(targetAddress));
+                    true, new ArrayList<>(targetAddress),
+                    INVALID_PORT);
         }
 
         public static HfcsConfiguration specificTargetMode(SocketAddress... targetAddress) {

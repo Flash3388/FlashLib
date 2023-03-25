@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -33,8 +35,12 @@ public class InstanceIdGenerator {
             if (Files.exists(machineIdFile)) {
                 try {
                     LOGGER.info("Using /etc/machine-id for machine-id");
-                    return Files.readAllBytes(machineIdFile);
-                } catch (IOException e) {
+                    byte[] id = Files.readAllBytes(machineIdFile);
+
+                    MessageDigest digest = MessageDigest.getInstance("MD5");
+                    digest.update(id);
+                    return digest.digest();
+                } catch (IOException | NoSuchAlgorithmException e) {
                     // failed to get id from file
                     LOGGER.error("Failed retrieving machine id from /etc/machine-id", e);
                 }
