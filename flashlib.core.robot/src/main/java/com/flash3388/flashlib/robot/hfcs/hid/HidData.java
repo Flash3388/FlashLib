@@ -109,7 +109,7 @@ public class HidData {
                 return 0;
             }
 
-            return (mHidData.channelContents[index] >> 4) & 0xf;
+            return (mHidData.channelContents[index] >> 4) & 0xff;
         } finally {
             mLock.readLock().unlock();
         }
@@ -124,7 +124,7 @@ public class HidData {
                 return 0;
             }
 
-            return (mHidData.channelContents[index] >> 8) & 0xf;
+            return (mHidData.channelContents[index] >> 12) & 0xf;
         } finally {
             mLock.readLock().unlock();
         }
@@ -177,11 +177,11 @@ public class HidData {
         mLock.readLock().lock();
         try {
             if (mHidData == null) {
-                return 0;
+                return -1;
             }
 
             if (index >= getPovCount(hid)) {
-                return 0;
+                return -1;
             }
 
             return mHidData.povs[hid * RawHidData.MAX_POVS + index];
@@ -202,8 +202,8 @@ public class HidData {
             mHidData.channelTypes[index] = type.ordinal();
             mHidData.channelContents[index] =
                     (((short) axes) & 0xf) |
-                            ((((short) buttons) & 0xf) << 4) |
-                            ((((short) povs) & 0xf) << 8);
+                            ((((short) buttons) & 0xff) << 4) |
+                            ((((short) povs) & 0xf) << 12);
 
             Arrays.fill(mHidData.axes,
                     index * RawHidData.MAX_AXES,
