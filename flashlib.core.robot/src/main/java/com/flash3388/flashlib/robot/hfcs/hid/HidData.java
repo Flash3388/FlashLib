@@ -59,7 +59,7 @@ public class HidData {
                 return false;
             }
 
-            return mHidData.channelTypes[index] >= 0;
+            return mHidData.channelTypes[index] > 0;
         } finally {
             mLock.readLock().unlock();
         }
@@ -75,11 +75,11 @@ public class HidData {
             }
 
             int intType = mHidData.channelTypes[index];
-            if (intType < 0) {
+            if (intType <= 0) {
                 return null;
             }
 
-            return ChannelType.values()[intType];
+            return ChannelType.values()[intType - 1];
         } finally {
             mLock.readLock().unlock();
         }
@@ -199,7 +199,7 @@ public class HidData {
                 return;
             }
 
-            mHidData.channelTypes[index] = type.ordinal();
+            mHidData.channelTypes[index] = type.ordinal() + 1;
             mHidData.channelContents[index] =
                     (((short) axes) & 0xf) |
                             ((((short) buttons) & 0xff) << 4) |
@@ -228,7 +228,7 @@ public class HidData {
                 return;
             }
 
-            mHidData.channelTypes[index] = -1;
+            mHidData.channelTypes[index] = 0;
             mHidData.channelContents[index] = 0;
         } finally {
             mLock.writeLock().unlock();
