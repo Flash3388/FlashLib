@@ -55,6 +55,11 @@ public class StorageBasedEntry implements StoredEntry {
     }
 
     @Override
+    public long getLong(long defaultValue) {
+        return getValue().getLong(defaultValue);
+    }
+
+    @Override
     public double getDouble(double defaultValue) {
         return getValue().getDouble(defaultValue);
     }
@@ -86,6 +91,12 @@ public class StorageBasedEntry implements StoredEntry {
     public void setInt(int value) {
         Storage storage = getStorage();
         storage.setEntryValue(mPath, new Value(ValueType.INT, value));
+    }
+
+    @Override
+    public void setLong(long value) {
+        Storage storage = getStorage();
+        storage.setEntryValue(mPath, new Value(ValueType.LONG, value));
     }
 
     @Override

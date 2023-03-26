@@ -68,6 +68,16 @@ public interface StoredEntry {
     int getInt(int defaultValue);
 
     /**
+     * Gets the typed value stored.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#LONG}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    long getLong(long defaultValue);
+
+    /**
      * Gets the typed value stored in this entry.
      *
      * This method will return the value if {@link #getType()} is {@link ValueType#DOUBLE}.
@@ -124,6 +134,17 @@ public interface StoredEntry {
      * @param value value to set
      */
     void setInt(int value);
+
+    /**
+     * Sets the value of this entry.
+     * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
+     * after this call, it will no longer be empty, changing it to {@link ValueType#LONG}.
+     * If the entry is neither empty nor has a type of {@link ValueType#LONG} then this call will fail,
+     * as changing types without clearing the value first is not possible.
+     *
+     * @param value value to set
+     */
+    void setLong(long value);
 
     /**
      * Sets the value of this entry.
