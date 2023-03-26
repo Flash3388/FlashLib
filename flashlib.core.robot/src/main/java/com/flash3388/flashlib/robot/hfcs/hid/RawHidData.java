@@ -20,5 +20,9 @@ public class RawHidData {
         axes = new short[MAX_HID * MAX_AXES];
         buttons = new short[MAX_HID];
         povs = new short[MAX_HID * MAX_POVS];
+
+        for (int i = 0; i < MAX_HID; i++) {
+            channelTypes[i] = -1;
+        }
     }
 }

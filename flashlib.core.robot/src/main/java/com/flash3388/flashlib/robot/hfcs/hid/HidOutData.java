@@ -19,6 +19,7 @@ public class HidOutData implements OutData {
 
         // to load first into hidData
         swapData();
+        mHidData.clearChannels();
     }
 
     @Override

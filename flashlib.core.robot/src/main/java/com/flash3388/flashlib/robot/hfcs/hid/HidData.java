@@ -235,6 +235,12 @@ public class HidData {
         }
     }
 
+    public void clearChannels() {
+        for (int i = 0; i < mHidData.channelTypes.length; i++) {
+            clearChannel(0);
+        }
+    }
+
     public void moveChannel(int srcIndex, int dstIndex) {
         checkValidHid(srcIndex);
         checkValidHid(dstIndex);
