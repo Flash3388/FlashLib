@@ -3,6 +3,7 @@ package com.flash3388.flashlib.scheduling.impl;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Time;
 
@@ -12,6 +13,7 @@ public class ObsrActionContext {
 
     private final StoredEntry mStatus;
     private final StoredEntry mPhase;
+    private final StoredEntry mClass;
     private final StoredEntry mName;
     private final StoredEntry mTimeout;
     private final StoredEntry mRequirements;
@@ -23,6 +25,9 @@ public class ObsrActionContext {
         mPhase = object.getEntry("phase");
         mPhase.setString(ExecutionPhase.STARTUP.name());
 
+        mClass = object.getEntry("class");
+        mClass.setString("");
+
         mName = object.getEntry("name");
         mName.setString("");
 
@@ -31,6 +36,10 @@ public class ObsrActionContext {
 
         mRequirements = object.getEntry("requirements");
         mRequirements.setString("");
+    }
+
+    public void updateFromAction(Action action) {
+        mClass.setString(action.getClass().getName());
     }
 
     public void updateFromConfiguration(ActionConfiguration configuration) {

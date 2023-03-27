@@ -36,6 +36,7 @@ public class RunningActionContext {
         mStartTime = Time.INVALID;
         mEndTime = Time.INVALID;
 
+        mObsrContext.updateFromAction(action);
         mObsrContext.updateFromConfiguration(mConfiguration);
     }
 
