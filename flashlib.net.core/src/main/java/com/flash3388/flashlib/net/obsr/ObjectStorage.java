@@ -18,10 +18,24 @@ public interface ObjectStorage {
      */
     StoredObject getRoot();
 
+    /**
+     * Get the instance-specific root object.
+     * This object is a child of {@link #getRoot()} and is identified by the
+     * instance id of the current instance.
+     *
+     * @return root object
+     */
+    StoredObject getInstanceRoot();
+
     class Stub implements ObjectStorage {
 
         @Override
         public StoredObject getRoot() {
+            return new StoredObject.Stub();
+        }
+
+        @Override
+        public StoredObject getInstanceRoot() {
             return new StoredObject.Stub();
         }
     }

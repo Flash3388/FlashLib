@@ -18,7 +18,7 @@ public final class RobotFactory {
     }
 
     public static Scheduler newDefaultScheduler(Clock clock, ObjectStorage objectStorage) {
-        StoredObject object = objectStorage.getRoot().getChild("FlashLib").getChild("Scheduler");
+        StoredObject object = objectStorage.getInstanceRoot().getChild("FlashLib").getChild("Scheduler");
         return new SingleThreadedScheduler(clock, object);
     }
 

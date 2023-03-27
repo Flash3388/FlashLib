@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
@@ -14,12 +13,10 @@ import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
-import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
-import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -31,7 +28,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ObsrSecondaryNodeService extends SingleUseService implements ObjectStorage {
+public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements ObjectStorage {
 
     private static final Logger LOGGER = Logging.getLogger("Comm", "OBSRNode");
 
@@ -43,12 +40,9 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
     private Thread mWriteThread;
 
     public ObsrSecondaryNodeService(InstanceId ourId, SocketAddress serverAddress, Clock clock) {
-        KnownMessageTypes messageTypes = new KnownMessageTypes();
-        messageTypes.put(NewEntryMessage.TYPE);
-        messageTypes.put(EntryClearMessage.TYPE);
-        messageTypes.put(EntryChangeMessage.TYPE);
-        messageTypes.put(StorageContentsMessage.TYPE);
+        super(ourId);
 
+        KnownMessageTypes messageTypes = getMessageTypes();
         MessageWriter messageWriter = new MessageWriterImpl(ourId);
         MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
         mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, LOGGER);
@@ -67,8 +61,8 @@ public class ObsrSecondaryNodeService extends SingleUseService implements Object
     }
 
     @Override
-    public StoredObject getRoot() {
-        return mStorage.getObject(StoragePath.root());
+    protected Storage getStorage() {
+        return mStorage;
     }
 
     @Override
