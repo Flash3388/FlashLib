@@ -17,4 +17,12 @@ public interface ObjectStorage {
      * @return root object
      */
     StoredObject getRoot();
+
+    class Stub implements ObjectStorage {
+
+        @Override
+        public StoredObject getRoot() {
+            return new StoredObject.Stub();
+        }
+    }
 }

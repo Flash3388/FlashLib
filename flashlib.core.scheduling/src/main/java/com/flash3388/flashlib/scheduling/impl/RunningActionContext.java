@@ -14,6 +14,7 @@ public class RunningActionContext {
 
     private final Action mAction;
     private final ActionGroup mParent;
+    private final ObsrActionContext mObsrContext;
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
@@ -23,9 +24,10 @@ public class RunningActionContext {
     private Time mStartTime;
     private Time mEndTime;
 
-    public RunningActionContext(Action action, ActionGroup parent, Logger logger) {
+    public RunningActionContext(Action action, ActionGroup parent, ObsrActionContext obsrContext, Logger logger) {
         mAction = action;
         mParent = parent;
+        mObsrContext = obsrContext;
         mLogger = logger;
 
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
@@ -33,10 +35,12 @@ public class RunningActionContext {
         mIsCanceled = false;
         mStartTime = Time.INVALID;
         mEndTime = Time.INVALID;
+
+        mObsrContext.updateFromConfiguration(mConfiguration);
     }
 
-    public RunningActionContext(Action action, Logger logger) {
-        this(action, null, logger);
+    public RunningActionContext(Action action, Logger logger, ObsrActionContext obsrContext) {
+        this(action, null, obsrContext, logger);
     }
 
     public Action getAction() {
@@ -64,10 +68,14 @@ public class RunningActionContext {
         if (mConfiguration.getTimeout().isValid()) {
             mEndTime = now.add(mConfiguration.getTimeout());
         }
+
+        mObsrContext.updateStatus(ExecutionStatus.RUNNING);
+        mObsrContext.updatePhase(ExecutionPhase.INITIALIZATION);
     }
 
     public void markForCancellation() {
         mIsCanceled = true;
+        mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
     }
 
     public boolean iterate(Time now) {
@@ -107,6 +115,8 @@ public class RunningActionContext {
             mLogger.error("Error while running an action", t);
             markForCancellation();
         }
+
+        mObsrContext.updatePhase(ExecutionPhase.EXECUTION);
     }
 
     private void execute() {
@@ -129,8 +139,11 @@ public class RunningActionContext {
     }
 
     private void finish() {
+        mObsrContext.updatePhase(ExecutionPhase.END);
+
         try {
             mAction.end(mIsCanceled);
+            mObsrContext.updateStatus(ExecutionStatus.FINISHED);
         } catch (Throwable t) {
             mLogger.error("Error while running an action (in end!!!)", t);
             markForCancellation();

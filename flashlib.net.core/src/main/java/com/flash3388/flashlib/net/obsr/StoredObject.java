@@ -28,4 +28,27 @@ public interface StoredObject {
 
     void addListener(ObjectListener listener);
     void removeListener(ObjectListener listener);
+
+    class Stub implements StoredObject {
+
+        @Override
+        public StoredObject getChild(String name) {
+            return new Stub();
+        }
+
+        @Override
+        public StoredEntry getEntry(String name) {
+            return new StoredEntry.Stub();
+        }
+
+        @Override
+        public void addListener(ObjectListener listener) {
+
+        }
+
+        @Override
+        public void removeListener(ObjectListener listener) {
+
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
@@ -41,8 +42,12 @@ class SingleThreadedSchedulerTest {
 
         mScheduler = new SingleThreadedScheduler(
                 ClockMock.mockInvalidTimeClock(),
-                mPendingActions, mRunningActions,
-                new ArrayList<>(), mRequirementsUsage, mDefaultActions);
+                new StoredObject.Stub(),
+                mPendingActions,
+                mRunningActions,
+                new ArrayList<>(),
+                mRequirementsUsage,
+                mDefaultActions);
     }
 
     @Test

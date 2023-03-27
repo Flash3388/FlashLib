@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
@@ -36,6 +38,7 @@ public class SingleThreadedScheduler implements Scheduler {
     
     private final Clock mClock;
 
+    private final StoredObject mRootObject;
     private final Map<Action, RunningActionContext> mPendingActions;
     private final Map<Action, RunningActionContext> mRunningActions;
     private final Collection<Action> mActionsToRemove;
@@ -45,12 +48,14 @@ public class SingleThreadedScheduler implements Scheduler {
     private boolean mCanModifyRunningActions;
 
     SingleThreadedScheduler(Clock clock,
+                            StoredObject rootObject,
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
                             Collection<Action> actionsToRemove,
                             Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
+        mRootObject = rootObject;
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
         mActionsToRemove = actionsToRemove;
@@ -59,8 +64,10 @@ public class SingleThreadedScheduler implements Scheduler {
         mCanModifyRunningActions = true;
     }
 
-    public SingleThreadedScheduler(Clock clock) {
-        this(clock,
+    public SingleThreadedScheduler(Clock clock, StoredObject rootObject) {
+        this(
+                clock,
+                rootObject,
                 new LinkedHashMap<>(5),
                 new LinkedHashMap<>(10),
                 new ArrayList<>(2),
@@ -74,7 +81,8 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalArgumentException("Action already started");
         }
 
-        RunningActionContext context = new RunningActionContext(action, LOGGER);
+        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
+        RunningActionContext context = new RunningActionContext(action, LOGGER, new ObsrActionContext(object));
 
         if (!tryStartingAction(context)) {
             mPendingActions.put(action, context);
@@ -204,7 +212,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
-        RunningActionContext context = new RunningActionContext(action, group, LOGGER);
+        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
+        RunningActionContext context = new RunningActionContext(action, group, new ObsrActionContext(object), LOGGER);
         return new ExecutionContextImpl(mClock, LOGGER, context);
     }
 

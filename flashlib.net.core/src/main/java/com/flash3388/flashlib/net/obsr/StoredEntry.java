@@ -167,4 +167,92 @@ public interface StoredEntry {
      * @param value value to set
      */
     void setString(String value);
+
+    class Stub implements StoredEntry {
+
+        @Override
+        public ValueProperty valueProperty() {
+            return null;
+        }
+
+        @Override
+        public Value getValue() {
+            return new Value(ValueType.EMPTY, null);
+        }
+
+        @Override
+        public ValueType getType() {
+            return ValueType.EMPTY;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public byte[] getRaw(byte[] defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public boolean getBoolean(boolean defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public int getInt(int defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public long getLong(long defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public double getDouble(double defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public String getString(String defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public void clearValue() {
+
+        }
+
+        @Override
+        public void setRaw(byte[] value) {
+
+        }
+
+        @Override
+        public void setBoolean(boolean value) {
+
+        }
+
+        @Override
+        public void setInt(int value) {
+
+        }
+
+        @Override
+        public void setLong(long value) {
+
+        }
+
+        @Override
+        public void setDouble(double value) {
+
+        }
+
+        @Override
+        public void setString(String value) {
+
+        }
+    }
 }
