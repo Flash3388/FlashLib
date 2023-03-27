@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.obsr;
 
+import com.beans.observables.RegisteredListener;
+
 /**
  * Represents an object stored in memory and shared across connected instance.
  *
@@ -26,8 +28,7 @@ public interface StoredObject {
      */
     StoredEntry getEntry(String name);
 
-    void addListener(ObjectListener listener);
-    void removeListener(ObjectListener listener);
+    RegisteredListener addListener(EntryListener listener);
 
     class Stub implements StoredObject {
 
@@ -42,13 +43,8 @@ public interface StoredObject {
         }
 
         @Override
-        public void addListener(ObjectListener listener) {
-
-        }
-
-        @Override
-        public void removeListener(ObjectListener listener) {
-
+        public RegisteredListener addListener(EntryListener listener) {
+            return () -> {};
         }
     }
 }

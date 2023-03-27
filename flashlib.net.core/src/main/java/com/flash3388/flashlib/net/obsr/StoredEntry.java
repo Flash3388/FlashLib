@@ -104,6 +104,12 @@ public interface StoredEntry {
     void clearValue();
 
     /**
+     * Deletes this entry.
+     * After this call the entry is not usable.
+     */
+    void delete();
+
+    /**
      * Sets the value of this entry.
      * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
      * after this call, it will no longer be empty, changing it to {@link ValueType#RAW}.
@@ -222,6 +228,11 @@ public interface StoredEntry {
 
         @Override
         public void clearValue() {
+
+        }
+
+        @Override
+        public void delete() {
 
         }
 

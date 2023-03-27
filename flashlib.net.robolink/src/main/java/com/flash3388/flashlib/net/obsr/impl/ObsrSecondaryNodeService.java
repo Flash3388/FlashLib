@@ -16,7 +16,9 @@ import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
+import com.flash3388.flashlib.net.obsr.messages.EntryDeleteMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
+import com.flash3388.flashlib.net.obsr.messages.RequestContentMessage;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -49,7 +51,7 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
 
         mWriteQueue = new LinkedBlockingQueue<>();
 
-        StorageListener listener = new StorageListenerImpl(mWriteQueue);
+        StorageListener listener = new StorageListenerImpl(mWriteQueue, LOGGER);
         mStorage = new StorageImpl(listener, clock);
 
         mReadThread = null;
@@ -68,7 +70,7 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
     @Override
     protected void startRunning() throws ServiceException {
         mReadThread = new Thread(
-                new ReadTask(mChannel, mStorage, LOGGER),
+                new ReadTask(mChannel, mStorage, LOGGER, mWriteQueue),
                 "ObsrSecondaryNodeService-ReadTask");
         mReadThread.setDaemon(true);
         mReadThread.start();
@@ -96,11 +98,15 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
         private final MessagingChannel mChannel;
         private final Logger mLogger;
         private final MessagingChannel.UpdateHandler mHandler;
+        private final BlockingQueue<PendingWriteMessage> mQueue;
 
-        private ReadTask(MessagingChannel channel, Storage storage, Logger logger) {
+        private ReadTask(MessagingChannel channel, Storage storage, Logger logger,
+                         BlockingQueue<PendingWriteMessage> queue) {
             mChannel = channel;
             mLogger = logger;
-            mHandler = new ChannelUpdateHandler(storage, logger);
+            mQueue = queue;
+            mHandler = new ChannelUpdateHandler(storage, logger,
+                    (type, msg)-> queue.add(new PendingWriteMessage(type, msg)));
         }
 
         @Override
@@ -109,7 +115,10 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
                 try {
                     mChannel.handleUpdates(mHandler);
                 } catch (IOException e) {
-                    mLogger.debug("Error processing changes", e);
+                    mLogger.error("Error processing changes", e);
+
+                    mLogger.debug("Requesting full storage content");
+                    mQueue.add(new PendingWriteMessage(RequestContentMessage.TYPE, new RequestContentMessage()));
                 } catch (InterruptedException e) {
                     break;
                 } catch (TimeoutException e) {
@@ -122,24 +131,35 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
     private static class StorageListenerImpl implements StorageListener {
 
         private final BlockingQueue<PendingWriteMessage> mQueue;
+        private final Logger mLogger;
 
-        public StorageListenerImpl(BlockingQueue<PendingWriteMessage> queue) {
+        public StorageListenerImpl(BlockingQueue<PendingWriteMessage> queue, Logger logger) {
             mQueue = queue;
+            mLogger = logger;
         }
 
         @Override
         public void onNewEntry(StoragePath path) {
+            mLogger.debug("New entry in path {}", path);
             mQueue.add(new PendingWriteMessage(NewEntryMessage.TYPE, new NewEntryMessage(path.toString())));
         }
 
         @Override
         public void onEntryUpdate(StoragePath path, Value value) {
+            mLogger.debug("Update to entry in path {}, value={}", path, value);
             mQueue.add(new PendingWriteMessage(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value)));
         }
 
         @Override
         public void onEntryClear(StoragePath path) {
+            mLogger.debug("Entry in path {} cleared", path);
             mQueue.add(new PendingWriteMessage(EntryClearMessage.TYPE, new EntryClearMessage(path.toString())));
+        }
+
+        @Override
+        public void onEntryDeleted(StoragePath path) {
+            mLogger.debug("Entry in path {} deleted", path);
+            mQueue.add(new PendingWriteMessage(EntryDeleteMessage.TYPE, new EntryDeleteMessage(path.toString())));
         }
     }
 }

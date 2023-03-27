@@ -17,6 +17,7 @@ import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
+import com.flash3388.flashlib.net.obsr.messages.EntryDeleteMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -117,9 +118,10 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
         @Override
         public void onNewEntry(StoragePath path) {
             try {
+                mLogger.debug("New entry in path {}", path);
                 mChannel.write(NewEntryMessage.TYPE, new NewEntryMessage(path.toString()));
             } catch (IOException e) {
-                mLogger.debug("error writing message from storage", e);
+                mLogger.error("error writing message from storage", e);
             } catch (InterruptedException e) {
                 // we don't care about this
             }
@@ -128,9 +130,10 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
         @Override
         public void onEntryUpdate(StoragePath path, Value value) {
             try {
+                mLogger.debug("Update to entry in path {}, value={}", path, value);
                 mChannel.write(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value));
             } catch (IOException e) {
-                mLogger.debug("error writing message from storage", e);
+                mLogger.error("error writing message from storage", e);
             } catch (InterruptedException e) {
                 // we don't care about this
             }
@@ -139,9 +142,22 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
         @Override
         public void onEntryClear(StoragePath path) {
             try {
+                mLogger.debug("Entry in path {} cleared", path);
                 mChannel.write(EntryClearMessage.TYPE, new EntryClearMessage(path.toString()));
             } catch (IOException e) {
-                mLogger.debug("error writing message from storage", e);
+                mLogger.error("error writing message from storage", e);
+            } catch (InterruptedException e) {
+                // we don't care about this
+            }
+        }
+
+        @Override
+        public void onEntryDeleted(StoragePath path) {
+            try {
+                mLogger.debug("Entry in path {} deleted", path);
+                mChannel.write(EntryDeleteMessage.TYPE, new EntryDeleteMessage(path.toString()));
+            } catch (IOException e) {
+                mLogger.error("error writing message from storage", e);
             } catch (InterruptedException e) {
                 // we don't care about this
             }

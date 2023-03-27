@@ -19,7 +19,15 @@ public class ServerChannelUpdateHandler extends ChannelUpdateHandler implements 
     private final WritableMessagingChannel mChannel;
 
     public ServerChannelUpdateHandler(Storage storage, Logger logger, WritableMessagingChannel channel) {
-        super(storage, logger);
+        super(storage, logger, (type, msg)-> {
+            try {
+                channel.write(type, msg);
+            } catch (IOException e) {
+                logger.debug("Error writing message", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
         mChannel = channel;
     }
 
@@ -39,7 +47,7 @@ public class ServerChannelUpdateHandler extends ChannelUpdateHandler implements 
         try {
             mChannel.write(messageInfo.getType(), message);
         } catch (IOException e) {
-            mLogger.debug("Error transferring message to other clients", e);
+            mLogger.error("Error transferring message to other clients", e);
         } catch (InterruptedException e) {
             // interrupt our thread
             Thread.currentThread().interrupt();

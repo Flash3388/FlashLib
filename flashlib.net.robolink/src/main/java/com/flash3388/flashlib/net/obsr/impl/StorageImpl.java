@@ -1,8 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
+import com.beans.observables.RegisteredListener;
+import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.flash3388.flashlib.net.obsr.EntryModificationEvent;
 import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
-import com.flash3388.flashlib.net.obsr.ObjectListener;
+import com.flash3388.flashlib.net.obsr.EntryListener;
+import com.flash3388.flashlib.net.obsr.ModificationType;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.StorageBasedObject;
@@ -19,6 +22,7 @@ import com.notifier.EventController;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -62,6 +66,9 @@ public class StorageImpl implements Storage {
         mLock.lock();
         try {
             EnumSet<StorageOpFlag> flags = EnumSet.of(StorageOpFlag.NO_REMOTE_NOTIFICATION, StorageOpFlag.FORCE_CHANGE);
+
+            deleteAllEntries(flags);
+
             for (Map.Entry<String, Value> entry : values.entrySet()) {
                 setEntryValue(StoragePath.create(entry.getKey()),
                         entry.getValue(),
@@ -139,10 +146,14 @@ public class StorageImpl implements Storage {
             }
 
             mEventController.fire(
-                    new EntryModificationEvent(node.getEntry(), node.getEntry().getPath().toString()),
+                    new EntryModificationEvent(
+                            node.getEntry(),
+                            node.getEntry().getPath().toString(),
+                            value,
+                            ModificationType.UPDATE),
                     EntryModificationEvent.class,
-                    ObjectListener.class,
-                    ObjectListener::onEntryModification);
+                    EntryListener.class,
+                    EntryListener::onEntryModification);
         } finally {
             mLock.unlock();
         }
@@ -158,6 +169,40 @@ public class StorageImpl implements Storage {
             if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
                 mListener.onEntryClear(path);
             }
+
+            mEventController.fire(
+                    new EntryModificationEvent(
+                            node.getEntry(),
+                            node.getEntry().getPath().toString(),
+                            new Value(),
+                            ModificationType.CLEAR),
+                    EntryModificationEvent.class,
+                    EntryListener.class,
+                    EntryListener::onEntryModification);
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    @Override
+    public void deleteEntry(StoragePath path, EnumSet<StorageOpFlag> flags) {
+        mLock.lock();
+        try {
+            remoteEntryNode(path);
+
+            if (mListener != null && !flags.contains(StorageOpFlag.NO_REMOTE_NOTIFICATION)) {
+                mListener.onEntryDeleted(path);
+            }
+
+            mEventController.fire(
+                    new EntryModificationEvent(
+                            null,
+                            path.toString(),
+                            new Value(),
+                            ModificationType.DELETE),
+                    EntryModificationEvent.class,
+                    EntryListener.class,
+                    EntryListener::onEntryModification);
         } finally {
             mLock.unlock();
         }
@@ -175,7 +220,7 @@ public class StorageImpl implements Storage {
     }
 
     @Override
-    public void addListener(StoragePath path, ObjectListener listener) {
+    public RegisteredListener addListener(StoragePath path, EntryListener listener) {
         mLock.lock();
         try {
             mEventController.registerListener(listener, (event)-> {
@@ -183,18 +228,16 @@ public class StorageImpl implements Storage {
                         ((EntryModificationEvent)event).getEntry() instanceof StorageBasedEntry &&
                         ((StorageBasedEntry)((EntryModificationEvent)event).getEntry()).getPath().startsWith(path);
             });
+
+            return new RegisteredListenerImpl(mEventController, listener);
         } finally {
             mLock.unlock();
         }
     }
 
-    @Override
-    public void removeListener(StoragePath path, ObjectListener listener) {
-        mLock.lock();
-        try {
-            mEventController.unregisterListener(listener);
-        } finally {
-            mLock.unlock();
+    private void deleteAllEntries(EnumSet<StorageOpFlag> flags) {
+        for (String path : new HashSet<>(mEntries.keySet())) {
+            deleteEntry(StoragePath.create(path), flags);
         }
     }
 
@@ -207,7 +250,6 @@ public class StorageImpl implements Storage {
 
         StoredEntryNode node = mEntries.get(strPath);
         if (node == null) {
-
             StorageBasedEntry entry = new StorageBasedEntry(path, this);
             EntryValueObservableProperty valueProperty = new EntryValueObservableProperty(
                     this,
@@ -224,5 +266,10 @@ public class StorageImpl implements Storage {
 
 
         return node;
+    }
+
+    private void remoteEntryNode(StoragePath path) {
+        String strPath = path.toString();
+        mEntries.remove(strPath);
     }
 }

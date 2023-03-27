@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.obsr;
 
+import com.beans.observables.RegisteredListener;
+
 import java.lang.ref.WeakReference;
 
 public class StorageBasedObject implements StoredObject {
@@ -37,15 +39,9 @@ public class StorageBasedObject implements StoredObject {
     }
 
     @Override
-    public void addListener(ObjectListener listener) {
+    public RegisteredListener addListener(EntryListener listener) {
         Storage storage = getStorage();
-        storage.addListener(mPath, listener);
-    }
-
-    @Override
-    public void removeListener(ObjectListener listener) {
-        Storage storage = getStorage();
-        storage.removeListener(mPath, listener);
+        return storage.addListener(mPath, listener);
     }
 
     @Override

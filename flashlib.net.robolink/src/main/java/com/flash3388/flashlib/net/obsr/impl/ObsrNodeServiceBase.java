@@ -8,7 +8,9 @@ import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 import com.flash3388.flashlib.net.obsr.messages.EntryClearMessage;
+import com.flash3388.flashlib.net.obsr.messages.EntryDeleteMessage;
 import com.flash3388.flashlib.net.obsr.messages.NewEntryMessage;
+import com.flash3388.flashlib.net.obsr.messages.RequestContentMessage;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -42,6 +44,8 @@ public abstract class ObsrNodeServiceBase extends SingleUseService implements Ob
         messageTypes.put(EntryClearMessage.TYPE);
         messageTypes.put(EntryChangeMessage.TYPE);
         messageTypes.put(StorageContentsMessage.TYPE);
+        messageTypes.put(EntryDeleteMessage.TYPE);
+        messageTypes.put(RequestContentMessage.TYPE);
 
         return messageTypes;
     }

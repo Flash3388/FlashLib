@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.obsr;
 
+import com.beans.observables.RegisteredListener;
+
 import java.util.EnumSet;
 import java.util.Map;
 
@@ -15,6 +17,7 @@ public interface Storage {
     Value getEntryValue(StoragePath path);
     void setEntryValue(StoragePath path, Value value, EnumSet<StorageOpFlag> flags);
     void clearEntryValue(StoragePath path, EnumSet<StorageOpFlag> flags);
+    void deleteEntry(StoragePath path, EnumSet<StorageOpFlag> flags);
 
     ValueProperty getEntryValueProperty(StoragePath path);
 
@@ -30,6 +33,9 @@ public interface Storage {
         clearEntryValue(path, EnumSet.noneOf(StorageOpFlag.class));
     }
 
-    void addListener(StoragePath path, ObjectListener listener);
-    void removeListener(StoragePath path, ObjectListener listener);
+    default void deleteEntry(StoragePath path) {
+        deleteEntry(path, EnumSet.noneOf(StorageOpFlag.class));
+    }
+
+    RegisteredListener addListener(StoragePath path, EntryListener listener);
 }
