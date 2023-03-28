@@ -145,6 +145,7 @@ public class RunningActionContext {
         try {
             mAction.end(mIsCanceled);
             mObsrContext.updateStatus(ExecutionStatus.FINISHED);
+            mObsrContext.finished();
         } catch (Throwable t) {
             mLogger.error("Error while running an action (in end!!!)", t);
             markForCancellation();

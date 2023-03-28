@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -39,8 +40,12 @@ public class AutoConnectingChannel implements ConnectedNetChannel {
         mUnderlyingChannel = new AtomicReference<>(null);
     }
 
-    public void waitForConnection() throws InterruptedException, IOException {
-        getChannel();
+    public boolean waitForConnection() throws InterruptedException, IOException {
+        ConnectedNetChannel channel = mUnderlyingChannel.get();
+        ConnectedNetChannel newChannel = getChannel();
+
+        // channels not equal = new connection
+        return !Objects.equals(channel, newChannel);
     }
 
     @Override

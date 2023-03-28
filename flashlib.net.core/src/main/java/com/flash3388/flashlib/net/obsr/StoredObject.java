@@ -28,6 +28,19 @@ public interface StoredObject {
      */
     StoredEntry getEntry(String name);
 
+    /**
+     * Deletes this object and all it's entries.
+     * After this call the object and its entries are not usable.
+     */
+    void delete();
+
+    /**
+     * Registers a listener which monitors changes to entries belonging to this object
+     * or its children.
+     *
+     * @param listener listener
+     * @return registered listener for removal.
+     */
     RegisteredListener addListener(EntryListener listener);
 
     class Stub implements StoredObject {
@@ -40,6 +53,11 @@ public interface StoredObject {
         @Override
         public StoredEntry getEntry(String name) {
             return new StoredEntry.Stub();
+        }
+
+        @Override
+        public void delete() {
+
         }
 
         @Override

@@ -17,6 +17,7 @@ public interface Storage {
     Value getEntryValue(StoragePath path);
     void setEntryValue(StoragePath path, Value value, EnumSet<StorageOpFlag> flags);
     void clearEntryValue(StoragePath path, EnumSet<StorageOpFlag> flags);
+    void deleteObject(StoragePath path, EnumSet<StorageOpFlag> flags);
     void deleteEntry(StoragePath path, EnumSet<StorageOpFlag> flags);
 
     ValueProperty getEntryValueProperty(StoragePath path);
@@ -31,6 +32,10 @@ public interface Storage {
 
     default void clearEntryValue(StoragePath path) {
         clearEntryValue(path, EnumSet.noneOf(StorageOpFlag.class));
+    }
+
+    default void deleteObject(StoragePath path) {
+        deleteObject(path, EnumSet.noneOf(StorageOpFlag.class));
     }
 
     default void deleteEntry(StoragePath path) {

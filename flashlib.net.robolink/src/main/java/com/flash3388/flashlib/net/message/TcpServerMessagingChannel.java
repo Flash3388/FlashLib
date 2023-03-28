@@ -71,7 +71,6 @@ public class TcpServerMessagingChannel implements ServerMessagingChannel {
             @Override
             public void onNewData(ConnectedNetChannel channel) throws IOException {
                 BufferedChannelReader reader = new BufferedChannelReader(channel, mReadBuffer);
-                reader.clear();
 
                 // this will block until we receive data
                 try (DataInputStream dataInputStream = new DataInputStream(reader)) {

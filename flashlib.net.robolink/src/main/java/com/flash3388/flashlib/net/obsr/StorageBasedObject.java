@@ -39,6 +39,12 @@ public class StorageBasedObject implements StoredObject {
     }
 
     @Override
+    public void delete() {
+        Storage storage = getStorage();
+        storage.deleteObject(mPath);
+    }
+
+    @Override
     public RegisteredListener addListener(EntryListener listener) {
         Storage storage = getStorage();
         return storage.addListener(mPath, listener);

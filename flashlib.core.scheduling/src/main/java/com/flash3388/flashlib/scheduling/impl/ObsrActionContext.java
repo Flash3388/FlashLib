@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 public class ObsrActionContext {
 
+    private final StoredObject mRootObject;
     private final StoredEntry mStatus;
     private final StoredEntry mPhase;
     private final StoredEntry mClass;
@@ -19,6 +20,8 @@ public class ObsrActionContext {
     private final StoredEntry mRequirements;
 
     public ObsrActionContext(StoredObject object) {
+        mRootObject = object;
+
         mStatus = object.getEntry("status");
         mStatus.setString(ExecutionStatus.PENDING.name());
 
@@ -57,5 +60,9 @@ public class ObsrActionContext {
 
     public void updatePhase(ExecutionPhase phase) {
         mPhase.setString(phase.name());
+    }
+
+    public void finished() {
+        mRootObject.delete();
     }
 }

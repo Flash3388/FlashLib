@@ -40,20 +40,24 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
     @Override
     public void handleUpdates(UpdateHandler handler) throws IOException, InterruptedException {
-        mChannel.waitForConnection();
+        boolean newConnection = mChannel.waitForConnection();
 
         BufferedChannelReader reader = new BufferedChannelReader(mChannel, mReadBuffer);
-        reader.clear();
+        if (newConnection) {
+            reader.clear();
+        }
 
         // this will block until we receive data
         try (DataInputStream dataInputStream = new DataInputStream(reader)) {
-            MessageReader.Result result = mMessageReader.read(dataInputStream);
+            while (true) {
+                MessageReader.Result result = mMessageReader.read(dataInputStream);
 
-            Time now = mClock.currentTime();
-            MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
+                Time now = mClock.currentTime();
+                MessageInfo messageInfo = new MessageInfoImpl(result.senderId, now, result.type);
 
-            mLogger.debug("New message routed from server");
-            handler.onNewMessage(messageInfo, result.message);
+                mLogger.debug("New message routed from server");
+                handler.onNewMessage(messageInfo, result.message);
+            }
         } catch (IOException e) {
             mLogger.debug("Error processing incoming message", e);
             throw e;
@@ -62,7 +66,11 @@ public class TcpClientMessagingChannel implements MessagingChannel {
 
     @Override
     public void write(MessageType type, Message message) throws IOException, InterruptedException {
-        mChannel.waitForConnection();
+        boolean newConnection = mChannel.waitForConnection();
+        if (newConnection) {
+            BufferedChannelReader reader = new BufferedChannelReader(mChannel, mReadBuffer);
+            reader.clear();
+        }
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
              DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {

@@ -109,7 +109,7 @@ public class StorageImpl implements Storage {
     public StoredEntry getEntry(StoragePath path) {
         mLock.lock();
         try {
-            StoredEntryNode node = getOrCreateEntryNode(path);
+            StoredEntryNode node = getOrCreateEntryNode(path, false);
             return node.getEntry();
         } finally {
             mLock.unlock();
@@ -120,7 +120,7 @@ public class StorageImpl implements Storage {
     public Value getEntryValue(StoragePath path) {
         mLock.lock();
         try {
-            StoredEntryNode node = getOrCreateEntryNode(path);
+            StoredEntryNode node = getOrCreateEntryNode(path, false);
             return node.getValue();
         } finally {
             mLock.unlock();
@@ -185,6 +185,16 @@ public class StorageImpl implements Storage {
     }
 
     @Override
+    public void deleteObject(StoragePath path, EnumSet<StorageOpFlag> flags) {
+        mLock.lock();
+        try {
+            removeAllInHierarchy(path, flags);
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    @Override
     public void deleteEntry(StoragePath path, EnumSet<StorageOpFlag> flags) {
         mLock.lock();
         try {
@@ -212,7 +222,7 @@ public class StorageImpl implements Storage {
     public ValueProperty getEntryValueProperty(StoragePath path) {
         mLock.lock();
         try {
-            StoredEntryNode node = getOrCreateEntryNode(path);
+            StoredEntryNode node = getOrCreateEntryNode(path, false);
             return node.getValueProperty();
         } finally {
             mLock.unlock();
@@ -225,8 +235,7 @@ public class StorageImpl implements Storage {
         try {
             mEventController.registerListener(listener, (event)-> {
                 return event instanceof EntryModificationEvent &&
-                        ((EntryModificationEvent)event).getEntry() instanceof StorageBasedEntry &&
-                        ((StorageBasedEntry)((EntryModificationEvent)event).getEntry()).getPath().startsWith(path);
+                        ((EntryModificationEvent)event).getPath().startsWith(path.toString());
             });
 
             return new RegisteredListenerImpl(mEventController, listener);
@@ -266,6 +275,14 @@ public class StorageImpl implements Storage {
 
 
         return node;
+    }
+
+    private void removeAllInHierarchy(StoragePath rootPath, EnumSet<StorageOpFlag> flags) {
+        for (String path : new HashSet<>(mEntries.keySet())) {
+            if (StoragePath.create(path).startsWith(rootPath)) {
+                deleteEntry(StoragePath.create(path), flags);
+            }
+        }
     }
 
     private void remoteEntryNode(StoragePath path) {
