@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.app;
 
 import com.castle.concurrent.service.Service;
+import com.flash3388.flashlib.annotations.MainThreadOnly;
 
 /**
  *
@@ -20,6 +21,8 @@ public interface ServiceRegistry {
      */
     void register(Service service);
 
+    @MainThreadOnly
     void startAll();
+    @MainThreadOnly
     void stopAll();
 }

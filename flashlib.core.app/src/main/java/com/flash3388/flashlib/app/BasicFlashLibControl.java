@@ -5,6 +5,8 @@ import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
+import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.FlashLibMainThreadImpl;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -22,6 +24,7 @@ public class BasicFlashLibControl implements FlashLibControl {
     private final Clock mClock;
     private final ServiceRegistry mServiceRegistry;
     private final NetworkInterface mNetworkInterface;
+    private final FlashLibMainThread mMainThread;
 
     public BasicFlashLibControl(InstanceId instanceId,
                                 ResourceHolder resourceHolder,
@@ -29,8 +32,9 @@ public class BasicFlashLibControl implements FlashLibControl {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
 
+        mMainThread = new FlashLibMainThreadImpl();
         mClock = new SystemNanoClock();
-        mServiceRegistry = new BasicServiceRegistry();
+        mServiceRegistry = new BasicServiceRegistry(mMainThread);
         mNetworkInterface = new NetworkInterfaceImpl(
                 networkConfiguration, instanceId, mServiceRegistry, mClock);
     }
@@ -56,6 +60,7 @@ public class BasicFlashLibControl implements FlashLibControl {
 
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
+        mMainThread.verifyCurrentThread();
         mResourceHolder.add(closeables);
     }
 
@@ -67,5 +72,10 @@ public class BasicFlashLibControl implements FlashLibControl {
     @Override
     public NetworkInterface getNetworkInterface() {
         return mNetworkInterface;
+    }
+
+    @Override
+    public FlashLibMainThread getMainThread() {
+        return mMainThread;
     }
 }

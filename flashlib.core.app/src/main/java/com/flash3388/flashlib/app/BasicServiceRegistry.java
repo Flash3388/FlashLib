@@ -2,6 +2,7 @@ package com.flash3388.flashlib.app;
 
 import com.castle.concurrent.service.Service;
 import com.castle.concurrent.service.TerminalService;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -13,10 +14,12 @@ public class BasicServiceRegistry implements ServiceRegistry {
     
     private static final Logger LOGGER = Logging.getLogger("ServiceRegistry");
 
+    private final FlashLibMainThread mMainThread;
     private final Deque<Service> mServices;
     private final AtomicBoolean mHasStarted;
 
-    public BasicServiceRegistry() {
+    public BasicServiceRegistry(FlashLibMainThread mainThread) {
+        mMainThread = mainThread;
         mServices = new ConcurrentLinkedDeque<>();
         mHasStarted = new AtomicBoolean(false);
     }
@@ -32,6 +35,8 @@ public class BasicServiceRegistry implements ServiceRegistry {
 
     @Override
     public void startAll() {
+        mMainThread.verifyCurrentThread();
+
         mHasStarted.set(true);
         for (Service service : mServices) {
             startService(service);
@@ -40,6 +45,8 @@ public class BasicServiceRegistry implements ServiceRegistry {
 
     @Override
     public void stopAll() {
+        mMainThread.verifyCurrentThread();
+
         mHasStarted.set(false);
         for (Service service : mServices) {
             try {

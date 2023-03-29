@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.app.FlashLibControl;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkingMode;
@@ -8,6 +9,7 @@ import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.robot.base.GenericRobotControl;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -40,7 +42,7 @@ public interface RobotControl extends FlashLibControl {
      *
      * @return robot mode selector, or null if not initialized.
      */
-    Supplier<? extends RobotMode> getModeSupplier();
+    RobotModeSupplier getModeSupplier();
 
     /**
      * Gets the current operation mode set by the {@link #getModeSupplier()} object of the robot.
@@ -51,7 +53,9 @@ public interface RobotControl extends FlashLibControl {
      *
      * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
      */
+    @MainThreadOnly
     default RobotMode getMode() {
+        getMainThread().verifyCurrentThread();
         return getModeSupplier() == null ? RobotMode.DISABLED : getModeSupplier().get();
     }
 
@@ -72,7 +76,10 @@ public interface RobotControl extends FlashLibControl {
      *
      * @see RobotMode#cast(RobotMode, Class)
      */
+    @MainThreadOnly
     default <T extends RobotMode> T getMode(Class<T> type) {
+        getMainThread().verifyCurrentThread();
+
         Supplier<? extends RobotMode> supplier = getModeSupplier();
         if (supplier == null) {
             throw new IllegalStateException("No supplier set");
@@ -92,7 +99,9 @@ public interface RobotControl extends FlashLibControl {
      * @return true if the given mode is the current operation mode, false otherwise
      * @see #getMode()
      */
+    @MainThreadOnly
     default boolean isInMode(RobotMode mode) {
+        getMainThread().verifyCurrentThread();
         return getMode().equals(mode);
     }
 
@@ -102,7 +111,9 @@ public interface RobotControl extends FlashLibControl {
      *
      * @return true if in disabled mode, false otherwise
      */
+    @MainThreadOnly
     default boolean isDisabled() {
+        getMainThread().verifyCurrentThread();
         return getMode().isDisabled();
     }
 
@@ -197,6 +208,7 @@ public interface RobotControl extends FlashLibControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @MainThreadOnly
     @Override
     void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
@@ -208,8 +220,10 @@ public interface RobotControl extends FlashLibControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @MainThreadOnly
     @Override
     default void registerCloseables(AutoCloseable... closeables) {
+        getMainThread().verifyCurrentThread();
         registerCloseables(Arrays.asList(closeables));
     }
 

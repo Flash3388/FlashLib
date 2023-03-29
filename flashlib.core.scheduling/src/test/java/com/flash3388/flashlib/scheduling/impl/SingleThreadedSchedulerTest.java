@@ -9,6 +9,7 @@ import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ class SingleThreadedSchedulerTest {
 
         mScheduler = new SingleThreadedScheduler(
                 ClockMock.mockInvalidTimeClock(),
+                new FlashLibMainThread.Stub(),
                 new StoredObject.Stub(),
                 mPendingActions,
                 mRunningActions,

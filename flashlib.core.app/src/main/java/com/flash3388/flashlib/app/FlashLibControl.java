@@ -1,8 +1,10 @@
 package com.flash3388.flashlib.app;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkingMode;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -65,6 +67,7 @@ public interface FlashLibControl {
      *
      * @see FlashLibApp#shutdown(FlashLibControl)
      */
+    @MainThreadOnly
     void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
     /**
@@ -75,7 +78,9 @@ public interface FlashLibControl {
      *
      * @see FlashLibApp#shutdown(FlashLibControl)
      */
+    @MainThreadOnly
     default void registerCloseables(AutoCloseable... closeables) {
+        getMainThread().verifyCurrentThread();
         registerCloseables(Arrays.asList(closeables));
     }
 
@@ -100,5 +105,13 @@ public interface FlashLibControl {
      * @return {@link NetworkInterface}
      */
     NetworkInterface getNetworkInterface();
+
+    /**
+     * Gets the {@link FlashLibMainThread} object representing the main thread
+     * of the application.
+     *
+     * @return {@link FlashLibMainThread}
+     */
+    FlashLibMainThread getMainThread();
 
 }

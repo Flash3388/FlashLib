@@ -1,6 +1,12 @@
 package com.flash3388.flashlib.robot.base;
 
 import com.flash3388.flashlib.app.BasicServiceRegistry;
+import com.flash3388.flashlib.app.net.NetworkConfiguration;
+import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
+import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.FlashLibMainThreadImpl;
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.hid.HidInterface;
@@ -26,23 +32,25 @@ public class GenericRobotControl implements RobotControl {
     private final InstanceId mInstanceId;
     private final ResourceHolder mResourceHolder;
 
-    private final Supplier<? extends RobotMode> mModeSupplier;
+    private final RobotModeSupplier mModeSupplier;
     private final NetworkInterface mNetworkInterface;
     private final IoInterface mIoInterface;
     private final HidInterface mHidInterface;
     private final Scheduler mScheduler;
     private final Clock mClock;
     private final ServiceRegistry mServiceRegistry;
+    private final FlashLibMainThread mMainThread;
 
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
-                               Supplier<? extends RobotMode> modeSupplier,
+                               RobotModeSupplier modeSupplier,
                                NetworkInterface networkInterface,
                                IoInterface ioInterface,
                                HidInterface hidInterface,
                                Scheduler scheduler,
                                Clock clock,
-                               ServiceRegistry serviceRegistry) {
+                               ServiceRegistry serviceRegistry,
+                               FlashLibMainThread mainThread) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
         mModeSupplier = modeSupplier;
@@ -52,9 +60,12 @@ public class GenericRobotControl implements RobotControl {
         mScheduler = scheduler;
         mClock = clock;
         mServiceRegistry = serviceRegistry;
+        mMainThread = mainThread;
     }
 
-    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder) {
+    public GenericRobotControl(InstanceId instanceId,
+                               ResourceHolder resourceHolder,
+                               NetworkConfiguration networkConfiguration) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
 
@@ -63,9 +74,18 @@ public class GenericRobotControl implements RobotControl {
         mHidInterface = new HidInterface.Stub();
         mClock = RobotFactory.newDefaultClock();
 
-        mNetworkInterface = RobotFactory.disabledNetworkInterface();
-        mScheduler = RobotFactory.newDefaultScheduler(mClock);
-        mServiceRegistry = new BasicServiceRegistry();
+        mMainThread = new FlashLibMainThreadImpl();
+        mServiceRegistry = new BasicServiceRegistry(mMainThread);
+        mNetworkInterface = new NetworkInterfaceImpl(networkConfiguration, mInstanceId, mServiceRegistry, mClock);
+
+        ObjectStorage objectStorage = mNetworkInterface.getMode().isObjectStorageEnabled() ?
+                mNetworkInterface.getObjectStorage() :
+                new ObjectStorage.Stub();
+        mScheduler = RobotFactory.newDefaultScheduler(mClock, objectStorage, mMainThread);
+    }
+
+    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder) {
+        this(instanceId, resourceHolder, NetworkConfiguration.disabled());
     }
 
     @Override
@@ -74,7 +94,7 @@ public class GenericRobotControl implements RobotControl {
     }
 
     @Override
-    public Supplier<? extends RobotMode> getModeSupplier() {
+    public RobotModeSupplier getModeSupplier() {
         return mModeSupplier;
     }
 
@@ -105,12 +125,18 @@ public class GenericRobotControl implements RobotControl {
 
     @Override
     public void registerCloseables(Collection<? extends AutoCloseable> closeables) {
+        getMainThread().verifyCurrentThread();
         mResourceHolder.add(closeables);
     }
 
     @Override
     public NetworkInterface getNetworkInterface() {
         return mNetworkInterface;
+    }
+
+    @Override
+    public FlashLibMainThread getMainThread() {
+        return mMainThread;
     }
 
     @Override

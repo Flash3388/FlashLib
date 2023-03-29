@@ -2,6 +2,7 @@ package com.flash3388.flashlib.app;
 
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -43,5 +44,10 @@ public class DelegatingAppBase implements FlashLibControl {
     @Override
     public NetworkInterface getNetworkInterface() {
         return mControl.getNetworkInterface();
+    }
+
+    @Override
+    public FlashLibMainThread getMainThread() {
+        return mControl.getMainThread();
     }
 }

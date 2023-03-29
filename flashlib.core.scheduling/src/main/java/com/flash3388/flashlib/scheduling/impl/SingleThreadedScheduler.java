@@ -15,6 +15,7 @@ import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -37,6 +38,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private static final Logger LOGGER = Logging.getLogger("Scheduler");
     
     private final Clock mClock;
+    private final FlashLibMainThread mMainThread;
 
     private final StoredObject mRootObject;
     private final Map<Action, RunningActionContext> mPendingActions;
@@ -48,6 +50,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private boolean mCanModifyRunningActions;
 
     SingleThreadedScheduler(Clock clock,
+                            FlashLibMainThread mainThread,
                             StoredObject rootObject,
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
@@ -55,6 +58,7 @@ public class SingleThreadedScheduler implements Scheduler {
                             Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
+        mMainThread = mainThread;
         mRootObject = rootObject;
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
@@ -64,10 +68,10 @@ public class SingleThreadedScheduler implements Scheduler {
         mCanModifyRunningActions = true;
     }
 
-    public SingleThreadedScheduler(Clock clock, StoredObject rootObject) {
+    public SingleThreadedScheduler(Clock clock, StoredObject rootObject, FlashLibMainThread mainThread) {
         this(
                 clock,
-                rootObject,
+                mainThread, rootObject,
                 new LinkedHashMap<>(5),
                 new LinkedHashMap<>(10),
                 new ArrayList<>(2),
@@ -77,6 +81,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void start(Action action) {
+        mMainThread.verifyCurrentThread();
+
         if (mPendingActions.containsKey(action) || mRunningActions.containsKey(action)) {
             throw new IllegalArgumentException("Action already started");
         }
@@ -92,6 +98,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void cancel(Action action) {
+        mMainThread.verifyCurrentThread();
+
         RunningActionContext context = mPendingActions.remove(action);
         if (context != null) {
             LOGGER.debug("Action {} removed (from pending)", context);
@@ -115,11 +123,15 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public boolean isRunning(Action action) {
+        mMainThread.verifyCurrentThread();
+
         return mPendingActions.containsKey(action) || mRunningActions.containsKey(action);
     }
 
     @Override
     public Time getActionRunTime(Action action) {
+        mMainThread.verifyCurrentThread();
+
         if (mPendingActions.containsKey(action)) {
             return Time.seconds(0);
         }
@@ -134,6 +146,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void cancelActionsIf(Predicate<? super Action> predicate) {
+        mMainThread.verifyCurrentThread();
+
         mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
 
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
@@ -148,6 +162,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void cancelAllActions() {
+        mMainThread.verifyCurrentThread();
+
         mPendingActions.clear();
 
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
@@ -159,16 +175,22 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void setDefaultAction(Subsystem subsystem, Action action) {
+        mMainThread.verifyCurrentThread();
+
         mDefaultActions.put(subsystem, action);
     }
 
     @Override
     public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+        mMainThread.verifyCurrentThread();
+
         return Optional.ofNullable(mRequirementsUsage.get(requirement));
     }
 
     @Override
     public void run(SchedulerMode mode) {
+        mMainThread.verifyCurrentThread();
+
         executeRunningActions(mode);
 
         for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
@@ -201,6 +223,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public Trigger newTrigger(BooleanSupplier condition) {
+        mMainThread.verifyCurrentThread();
+
         TriggerImpl trigger = new TriggerImpl();
 
         Action action = new TriggerActivationAction(this, condition, trigger)
@@ -212,6 +236,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
+        mMainThread.verifyCurrentThread();
+
         StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
         RunningActionContext context = new RunningActionContext(action, group, new ObsrActionContext(object), LOGGER);
         return new ExecutionContextImpl(mClock, LOGGER, context);
@@ -219,6 +245,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public ActionGroup newActionGroup(ActionGroupType type) {
+        mMainThread.verifyCurrentThread();
+
         GroupPolicy policy;
         switch (type) {
             case SEQUENTIAL:
