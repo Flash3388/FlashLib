@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.channels.udp;
 
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -17,6 +18,11 @@ public class BroadcastUdpChannel extends UdpChannel {
             return ()-> {};
         });
 
-        setRemoteAddress(new InetSocketAddress("255.255.255.255", remotePort));
+        try {
+            InetAddress address = InetAddress.getByName("255.255.255.255");
+            setRemoteAddress(new InetSocketAddress(address, remotePort));
+        } catch (IOException e) {
+            throw new Error(e);
+        }
     }
 }

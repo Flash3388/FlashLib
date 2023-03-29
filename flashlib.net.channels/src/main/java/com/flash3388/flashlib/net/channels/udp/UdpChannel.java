@@ -66,6 +66,9 @@ public class UdpChannel implements NetChannel {
             //noinspection resource
             DatagramChannel channel = openChannel();
             SocketAddress remote = channel.receive(buffer);
+            if (remote == null) {
+                return new IncomingData(null, 0);
+            }
             if (remote.equals(channel.getLocalAddress())) {
                 return new IncomingData(remote, 0);
             }
