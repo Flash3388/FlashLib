@@ -3,14 +3,9 @@ package com.flash3388.flashlib.net.obsr.impl;
 import com.castle.exceptions.ServiceException;
 import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.message.KnownMessageTypes;
-import com.flash3388.flashlib.net.message.MessageReader;
-import com.flash3388.flashlib.net.message.MessageWriter;
-import com.flash3388.flashlib.net.message.ServerMessagingChannel;
-import com.flash3388.flashlib.net.message.TcpServerMessagingChannel;
-import com.flash3388.flashlib.net.message.WritableMessagingChannel;
-import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
-import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.TcpServerMessagingChannel;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -32,7 +27,7 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
 
     private static final Logger LOGGER = Logging.getLogger("Comm", "OBSRNode");
 
-    private final ServerMessagingChannel mChannel;
+    private final TcpServerMessagingChannel mChannel;
     private final Storage mStorage;
 
     private Thread mReadThread;
@@ -41,9 +36,7 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
         super(ourId);
 
         KnownMessageTypes messageTypes = getMessageTypes();
-        MessageWriter messageWriter = new MessageWriterImpl(ourId);
-        MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
-        mChannel = new TcpServerMessagingChannel(bindAddress, messageWriter, messageReader, clock, LOGGER);
+        mChannel = new TcpServerMessagingChannel(bindAddress, ourId, LOGGER, messageTypes);
 
         StorageListener listener = new StorageListenerImpl(mChannel, LOGGER);
         mStorage = new StorageImpl(listener, clock);
@@ -79,27 +72,29 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
 
     private static class ReadTask implements Runnable {
 
-        private final ServerMessagingChannel mChannel;
+        private final TcpServerMessagingChannel mChannel;
         private final Logger mLogger;
-        private final ServerMessagingChannel.UpdateHandler mHandler;
+        private final TcpServerMessagingChannel.UpdateHandler mHandler;
 
-        private ReadTask(ServerMessagingChannel channel, Storage storage, Logger logger) {
+        private ReadTask(TcpServerMessagingChannel channel, Storage storage, Logger logger) {
             mChannel = channel;
             mLogger = logger;
-            mHandler = new ServerChannelUpdateHandler(storage, logger, channel);
+            mHandler = new ChannelUpdateHandler(storage, logger, (type, message)-> {
+                try {
+                    channel.write(type, message);
+                } catch (IOException e) {
+                    logger.error("Error transferring message to client", e);
+                }
+            });
         }
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
                 try {
-                    mChannel.handleUpdates(mHandler);
+                    mChannel.processUpdates(mHandler);
                 } catch (IOException e) {
-                    mLogger.debug("Error processing changes", e);
-                } catch (InterruptedException e) {
-                    break;
-                } catch (TimeoutException e) {
-                    // oh, well
+                    mLogger.error("Error processing changes", e);
                 }
             }
         }
@@ -107,10 +102,10 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
 
     private static class StorageListenerImpl implements StorageListener {
 
-        private final WritableMessagingChannel mChannel;
+        private final MessagingChannel mChannel;
         private final Logger mLogger;
 
-        public StorageListenerImpl(WritableMessagingChannel channel, Logger logger) {
+        public StorageListenerImpl(MessagingChannel channel, Logger logger) {
             mChannel = channel;
             mLogger = logger;
         }
@@ -122,8 +117,6 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
                 mChannel.write(NewEntryMessage.TYPE, new NewEntryMessage(path.toString()));
             } catch (IOException e) {
                 mLogger.error("error writing message from storage", e);
-            } catch (InterruptedException e) {
-                // we don't care about this
             }
         }
 
@@ -134,8 +127,6 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
                 mChannel.write(EntryChangeMessage.TYPE, new EntryChangeMessage(path.toString(), value));
             } catch (IOException e) {
                 mLogger.error("error writing message from storage", e);
-            } catch (InterruptedException e) {
-                // we don't care about this
             }
         }
 
@@ -146,8 +137,6 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
                 mChannel.write(EntryClearMessage.TYPE, new EntryClearMessage(path.toString()));
             } catch (IOException e) {
                 mLogger.error("error writing message from storage", e);
-            } catch (InterruptedException e) {
-                // we don't care about this
             }
         }
 
@@ -158,8 +147,6 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
                 mChannel.write(EntryDeleteMessage.TYPE, new EntryDeleteMessage(path.toString()));
             } catch (IOException e) {
                 mLogger.error("error writing message from storage", e);
-            } catch (InterruptedException e) {
-                // we don't care about this
             }
         }
     }

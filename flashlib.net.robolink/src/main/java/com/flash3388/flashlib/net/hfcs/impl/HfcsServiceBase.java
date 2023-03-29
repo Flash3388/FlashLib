@@ -2,19 +2,14 @@ package com.flash3388.flashlib.net.hfcs.impl;
 
 import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
 import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
 import com.flash3388.flashlib.net.hfcs.Type;
-import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
-import com.flash3388.flashlib.net.hfcs.messages.InPackage;
-import com.flash3388.flashlib.net.message.KnownMessageTypes;
-import com.flash3388.flashlib.net.message.MessageReader;
-import com.flash3388.flashlib.net.message.MessageWriter;
-import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
-import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
+import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -40,8 +35,6 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
     protected final KnownInDataTypes mInDataTypes;
     protected final EventController mEventController;
     protected final BlockingQueue<OutDataNode> mOutDataQueue;
-    protected final MessageWriter mMessageWriter;
-    protected final MessageReader mMessageReader;
 
     private final List<Thread> mThreads;
 
@@ -50,12 +43,6 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
         mClock = clock;
 
         mInDataTypes = new KnownInDataTypes();
-
-        KnownMessageTypes messageTypes = new KnownMessageTypes();
-        messageTypes.put(new DataMessageType(new InPackage(mInDataTypes)));
-
-        mMessageWriter = new MessageWriterImpl(ourId);
-        mMessageReader = new MessageReaderImpl(ourId, messageTypes);
 
         mEventController = Controllers.newSyncExecutionController();
         mOutDataQueue = new DelayQueue<>();
@@ -102,6 +89,12 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
         mThreads.clear();
 
         freeResources();
+    }
+
+    protected KnownMessageTypes getMessageTypes() {
+        KnownMessageTypes messageTypes = new KnownMessageTypes();
+        messageTypes.put(new HfcsMessageType(mInDataTypes));
+        return messageTypes;
     }
 
     protected abstract Map<String, Runnable> createTasks();

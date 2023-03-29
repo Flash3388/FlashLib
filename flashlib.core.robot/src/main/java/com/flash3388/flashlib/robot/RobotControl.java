@@ -53,9 +53,7 @@ public interface RobotControl extends FlashLibControl {
      *
      * @return current mode set by the robot's mode selector, or disabled if not mode selector was set.
      */
-    @MainThreadOnly
     default RobotMode getMode() {
-        getMainThread().verifyCurrentThread();
         return getModeSupplier() == null ? RobotMode.DISABLED : getModeSupplier().get();
     }
 
@@ -76,10 +74,7 @@ public interface RobotControl extends FlashLibControl {
      *
      * @see RobotMode#cast(RobotMode, Class)
      */
-    @MainThreadOnly
     default <T extends RobotMode> T getMode(Class<T> type) {
-        getMainThread().verifyCurrentThread();
-
         Supplier<? extends RobotMode> supplier = getModeSupplier();
         if (supplier == null) {
             throw new IllegalStateException("No supplier set");
@@ -89,7 +84,7 @@ public interface RobotControl extends FlashLibControl {
     }
 
     /**
-     * Gets whether or not the current mode set by the robot's {@link #getModeSupplier()} object is equal
+     * Gets whether the current mode set by the robot's {@link #getModeSupplier()} object is equal
      * to a given mode value. If true, this indicates that the current mode is the given mode.
      * <p>
      * The default implementation calls {@link #getMode()} and gets whether the returned value
@@ -99,21 +94,17 @@ public interface RobotControl extends FlashLibControl {
      * @return true if the given mode is the current operation mode, false otherwise
      * @see #getMode()
      */
-    @MainThreadOnly
     default boolean isInMode(RobotMode mode) {
-        getMainThread().verifyCurrentThread();
         return getMode().equals(mode);
     }
 
     /**
-     * Gets whether or not the robot is currently in disabled mode. Disabled mode
+     * Gets whether the robot is currently in disabled mode. Disabled mode
      * is a safety mode where the robot does nothing.
      *
      * @return true if in disabled mode, false otherwise
      */
-    @MainThreadOnly
     default boolean isDisabled() {
-        getMainThread().verifyCurrentThread();
         return getMode().isDisabled();
     }
 

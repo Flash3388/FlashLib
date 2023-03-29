@@ -1,27 +1,24 @@
 package com.flash3388.flashlib.robot.modes;
 
 import com.beans.Property;
-import com.flash3388.flashlib.util.FlashLibMainThread;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ManualRobotModeSupplier implements RobotModeSupplier, Property<RobotMode> {
 
-	private final FlashLibMainThread mMainThread;
-	private RobotMode mCurrentMode;
+	private final AtomicReference<RobotMode> mCurrentMode;
 
-	public ManualRobotModeSupplier(FlashLibMainThread mainThread) {
-		mMainThread = mainThread;
-		mCurrentMode = RobotMode.DISABLED;
+	public ManualRobotModeSupplier() {
+		mCurrentMode = new AtomicReference<>(RobotMode.DISABLED);
 	}
 
 	@Override
 	public RobotMode get() {
-		mMainThread.verifyCurrentThread();
-		return mCurrentMode;
+		return mCurrentMode.get();
 	}
 
 	@Override
 	public void set(RobotMode mode) {
-		mMainThread.verifyCurrentThread();
-		mCurrentMode = mode;
+		mCurrentMode.set(mode);
 	}
 }

@@ -21,7 +21,7 @@ public class Main {
     public static void main(String[] args) {
         RobotMain.start((instanceId, resourceHolder)-> {
             FlashLibMainThread mainThread = new FlashLibMainThreadImpl();
-            ManualRobotModeSupplier robotModeProperty = new ManualRobotModeSupplier(mainThread);
+            ManualRobotModeSupplier robotModeProperty = new ManualRobotModeSupplier();
 
             Clock clock = RobotFactory.newDefaultClock();
 

@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
-import com.castle.time.exceptions.TimeoutException;
-import com.flash3388.flashlib.net.message.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -24,13 +23,9 @@ public class BasicUpdateTask implements Runnable {
     public void run() {
         while (!Thread.interrupted()) {
             try {
-                mChannel.handleUpdates(mHandler);
+                mChannel.processUpdates(mHandler);
             } catch (IOException e) {
                 mLogger.error("Error in UpdateTask", e);
-            } catch (InterruptedException e) {
-                break;
-            } catch (TimeoutException e) {
-                // oh, well
             }
         }
     }

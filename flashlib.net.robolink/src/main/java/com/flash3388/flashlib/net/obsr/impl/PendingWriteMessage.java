@@ -1,14 +1,15 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.message.Message;
-import com.flash3388.flashlib.net.message.MessageType;
+
+import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.channels.messsaging.OutMessage;
 
 public class PendingWriteMessage {
 
     private final MessageType mMessageType;
-    private final Message mMessage;
+    private final OutMessage mMessage;
 
-    public PendingWriteMessage(MessageType messageType, Message message) {
+    public PendingWriteMessage(MessageType messageType, OutMessage message) {
         mMessageType = messageType;
         mMessage = message;
     }
@@ -17,7 +18,7 @@ public class PendingWriteMessage {
         return mMessageType;
     }
 
-    public Message getMessage() {
+    public OutMessage getMessage() {
         return mMessage;
     }
 }

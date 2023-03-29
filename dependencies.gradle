@@ -14,6 +14,9 @@ ext {
     slf4jApi = {
         return "org.slf4j:slf4j-api:1.7.25"
     }
+    commonsio = {
+        return "commons-io:commons-io:2.11.0"
+    }
     junit = {
         return ['org.junit.jupiter:junit-jupiter-engine:5.4.2',
                 'org.junit.platform:junit-platform-runner:1.2.0',

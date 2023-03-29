@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
 import com.castle.concurrent.service.SingleUseService;
-import com.flash3388.flashlib.net.message.KnownMessageTypes;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;

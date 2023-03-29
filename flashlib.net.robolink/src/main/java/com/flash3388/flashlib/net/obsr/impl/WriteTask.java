@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.message.WritableMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -9,11 +9,11 @@ import java.util.concurrent.BlockingQueue;
 public class WriteTask implements Runnable {
 
     private final BlockingQueue<PendingWriteMessage> mQueue;
-    private final WritableMessagingChannel mChannel;
+    private final MessagingChannel mChannel;
     private final Logger mLogger;
 
     public WriteTask(BlockingQueue<PendingWriteMessage> queue,
-                     WritableMessagingChannel channel,
+                     MessagingChannel channel,
                      Logger logger) {
         mQueue = queue;
         mChannel = channel;

@@ -24,7 +24,7 @@ public class Main {
 
             // We'll use ManualRobotModeSupplier, it will allow us to set the value from the robot
             // only using set(RobotMode).
-            ManualRobotModeSupplier manualRobotModeSupplier = new ManualRobotModeSupplier(mainThread);
+            ManualRobotModeSupplier manualRobotModeSupplier = new ManualRobotModeSupplier();
             manualRobotModeSupplier.set(RobotMode.DISABLED);
 
             Clock clock = RobotFactory.newDefaultClock();

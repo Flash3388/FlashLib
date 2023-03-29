@@ -1,15 +1,17 @@
 package com.flash3388.flashlib.net.obsr.messages;
 
-import com.flash3388.flashlib.net.message.Message;
-import com.flash3388.flashlib.net.message.MessageType;
+
+import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.channels.messsaging.OutMessage;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NewEntryMessage implements Message {
+public class NewEntryMessage implements Message, OutMessage {
 
-    public static final MessageType TYPE = MessageType.createType(100003, NewEntryMessage::new);
+    public static final MessageType TYPE = MessageType.create(100003, NewEntryMessage::readFrom);
 
     private String mEntryPath;
 
@@ -29,8 +31,8 @@ public class NewEntryMessage implements Message {
         output.writeUTF(mEntryPath);
     }
 
-    @Override
-    public void readFrom(DataInput input) throws IOException {
-        mEntryPath = input.readUTF();
+    private static NewEntryMessage readFrom(DataInput input) throws IOException {
+        String entryPath = input.readUTF();
+        return new NewEntryMessage(entryPath);
     }
 }

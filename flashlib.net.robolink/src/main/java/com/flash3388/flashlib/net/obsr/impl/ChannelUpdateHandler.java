@@ -1,9 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.message.Message;
-import com.flash3388.flashlib.net.message.MessageInfo;
-import com.flash3388.flashlib.net.message.MessageType;
-import com.flash3388.flashlib.net.message.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
+import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
+import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.OutMessage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -18,24 +20,25 @@ import org.slf4j.Logger;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
     protected final Storage mStorage;
     protected final Logger mLogger;
-    private final BiConsumer<MessageType, Message> mMessageConsumer;
+    private final BiConsumer<MessageType, OutMessage> mMessageConsumer;
 
     protected ChannelUpdateHandler(Storage storage, Logger logger,
-                                   BiConsumer<MessageType, Message> messageConsumer) {
+                                   BiConsumer<MessageType, OutMessage> messageConsumer) {
         mStorage = storage;
         mLogger = logger;
         mMessageConsumer = messageConsumer;
     }
 
     @Override
-    public void onNewMessage(MessageInfo messageInfo, Message message) {
-        MessageType type = messageInfo.getType();
+    public void onNewMessage(MessageInfo info, Message message) {
+        MessageType type = info.getType();
 
         if (type.equals(EntryChangeMessage.TYPE)) {
             handleEntryChange((EntryChangeMessage) message);
@@ -52,6 +55,15 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
         } else {
             mLogger.debug("Received storage message with unknown type: " + type.getKey());
         }
+    }
+
+    @Override
+    public Optional<MessageAndType> getMessageForNewClient() {
+        Map<String, Value> all = mStorage.getAll();
+        return Optional.of(new MessageAndType(
+                StorageContentsMessage.TYPE,
+                new StorageContentsMessage(all)
+        ));
     }
 
     private void handleNewEntry(NewEntryMessage message) {

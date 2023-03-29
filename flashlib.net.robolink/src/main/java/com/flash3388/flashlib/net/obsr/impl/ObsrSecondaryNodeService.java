@@ -1,15 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
 import com.castle.exceptions.ServiceException;
-import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.message.KnownMessageTypes;
-import com.flash3388.flashlib.net.message.MessageReader;
-import com.flash3388.flashlib.net.message.MessageWriter;
-import com.flash3388.flashlib.net.message.MessagingChannel;
-import com.flash3388.flashlib.net.message.TcpClientMessagingChannel;
-import com.flash3388.flashlib.net.message.v1.MessageReaderImpl;
-import com.flash3388.flashlib.net.message.v1.MessageWriterImpl;
+import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -45,9 +41,13 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
         super(ourId);
 
         KnownMessageTypes messageTypes = getMessageTypes();
-        MessageWriter messageWriter = new MessageWriterImpl(ourId);
-        MessageReader messageReader = new MessageReaderImpl(ourId, messageTypes);
-        mChannel = new TcpClientMessagingChannel(serverAddress, messageWriter, messageReader, clock, LOGGER);
+        mChannel = new BasicMessagingChannel(
+                new TcpClientConnector(LOGGER),
+                serverAddress,
+                ourId,
+                LOGGER,
+                messageTypes
+        );
 
         mWriteQueue = new LinkedBlockingQueue<>();
 
@@ -113,16 +113,12 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
         public void run() {
             while (!Thread.interrupted()) {
                 try {
-                    mChannel.handleUpdates(mHandler);
+                    mChannel.processUpdates(mHandler);
                 } catch (IOException e) {
                     mLogger.error("Error processing changes", e);
 
                     mLogger.debug("Requesting full storage content");
                     mQueue.add(new PendingWriteMessage(RequestContentMessage.TYPE, new RequestContentMessage()));
-                } catch (InterruptedException e) {
-                    break;
-                } catch (TimeoutException e) {
-                    // oh, well
                 }
             }
         }

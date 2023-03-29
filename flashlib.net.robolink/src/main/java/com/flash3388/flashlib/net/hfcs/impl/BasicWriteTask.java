@@ -1,12 +1,10 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
+import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.Type;
-import com.flash3388.flashlib.net.hfcs.messages.DataMessage;
-import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
-import com.flash3388.flashlib.net.hfcs.messages.OutPackage;
-import com.flash3388.flashlib.net.message.MessageType;
-import com.flash3388.flashlib.net.message.WritableMessagingChannel;
+import com.flash3388.flashlib.net.hfcs.messages.HfcsOutMessage;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -14,16 +12,17 @@ import java.util.concurrent.BlockingQueue;
 
 public class BasicWriteTask implements Runnable {
 
-    private static final MessageType MESSAGE_TYPE = new DataMessageType();
-
     private final BlockingQueue<OutDataNode> mDataQueue;
-    private final WritableMessagingChannel mChannel;
+    private final MessagingChannel mChannel;
     private final Logger mLogger;
+    private final MessageType mMessageType;
 
-    public BasicWriteTask(BlockingQueue<OutDataNode> dataQueue, WritableMessagingChannel channel, Logger logger) {
+    public BasicWriteTask(BlockingQueue<OutDataNode> dataQueue, MessagingChannel channel, Logger logger,
+                          MessageType messageType) {
         mDataQueue = dataQueue;
         mChannel = channel;
         mLogger = logger;
+        mMessageType = messageType;
     }
 
     @Override
@@ -37,7 +36,7 @@ public class BasicWriteTask implements Runnable {
                 mDataQueue.add(node);
 
                 mLogger.debug("Sending data of type {}", type.getKey());
-                mChannel.write(MESSAGE_TYPE, new DataMessage(new OutPackage(type, data)));
+                mChannel.write(mMessageType, new HfcsOutMessage(type, data));
             } catch (InterruptedException e) {
                 break;
             } catch (IOException e) {

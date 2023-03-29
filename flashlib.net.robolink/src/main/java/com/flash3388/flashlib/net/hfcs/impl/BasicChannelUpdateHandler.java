@@ -1,15 +1,18 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
+import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
+import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.hfcs.DataListener;
 import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.InType;
-import com.flash3388.flashlib.net.hfcs.messages.DataMessage;
-import com.flash3388.flashlib.net.hfcs.messages.DataMessageType;
-import com.flash3388.flashlib.net.message.Message;
-import com.flash3388.flashlib.net.message.MessageInfo;
-import com.flash3388.flashlib.net.message.MessagingChannel;
+import com.flash3388.flashlib.net.hfcs.messages.HfcsInMessage;
+import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
 import com.notifier.EventController;
 import org.slf4j.Logger;
+
+import java.util.Optional;
 
 public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
@@ -23,12 +26,12 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
 
     @Override
     public void onNewMessage(MessageInfo messageInfo, Message message) {
-        assert messageInfo.getType().getKey() == DataMessageType.KEY;
-        assert message instanceof DataMessage;
+        assert messageInfo.getType().getKey() == HfcsMessageType.KEY;
+        assert message instanceof HfcsInMessage;
 
-        DataMessage dataMessage = ((DataMessage) message);
-        InType<?> inType = dataMessage.getInType();
-        Object inData = dataMessage.getInData();
+        HfcsInMessage dataMessage = ((HfcsInMessage) message);
+        InType<?> inType = dataMessage.getType();
+        Object inData = dataMessage.getData();
 
         assert inData.getClass().isInstance(inData);
 
@@ -42,5 +45,10 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
                 DataListener.class,
                 DataListener::onReceived
         );
+    }
+
+    @Override
+    public Optional<MessageAndType> getMessageForNewClient() {
+        return Optional.empty();
     }
 }

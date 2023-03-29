@@ -1,8 +1,10 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.message.AutoReplyingUdpMessagingChannel;
-import com.flash3388.flashlib.net.message.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.udp.AutoReplyingUdpChannel;
+import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
@@ -16,13 +18,12 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
     public HfcsAutoReplyService(InstanceId ourId, Clock clock, int bindPort) {
         super(ourId, clock);
 
-        mChannel = new AutoReplyingUdpMessagingChannel(
-                bindPort,
+
+        mChannel = new BasicMessagingChannel(
+                (onConn)-> new AutoReplyingUdpChannel(bindPort, LOGGER, onConn),
                 ourId,
-                mMessageWriter,
-                mMessageReader,
-                clock,
-                LOGGER
+                LOGGER,
+                getMessageTypes()
         );
     }
 
@@ -37,7 +38,7 @@ public class HfcsAutoReplyService extends HfcsServiceBase {
                 new BasicUpdateTask(mChannel, LOGGER,
                         new BasicChannelUpdateHandler(mEventController, LOGGER)));
         tasks.put("HfcsAutoReply-WriteTask",
-                new BasicWriteTask(mOutDataQueue, mChannel, LOGGER));
+                new BasicWriteTask(mOutDataQueue, mChannel, LOGGER, new HfcsMessageType(mInDataTypes)));
         return tasks;
     }
 
