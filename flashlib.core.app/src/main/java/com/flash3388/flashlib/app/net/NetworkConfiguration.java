@@ -37,6 +37,7 @@ public class NetworkConfiguration implements NetworkingMode {
         final boolean replyToSenderModeEnabled;
         final boolean specificTargetModeEnabled;
         final boolean multicastModeEnabled;
+        final boolean broadcastModeEnabled;
         final SocketAddress specificTargetAddress;
         final NetworkInterface multicastInterface;
         final InetAddress multicastGroup;
@@ -47,6 +48,7 @@ public class NetworkConfiguration implements NetworkingMode {
                                   boolean replyToSenderModeEnabled,
                                   boolean specificTargetModeEnabled,
                                   boolean multicastModeEnabled,
+                                  boolean broadcastModeEnabled,
                                   SocketAddress specificTargetAddress,
                                   NetworkInterface multicastInterface,
                                   InetAddress multicastGroup,
@@ -56,6 +58,7 @@ public class NetworkConfiguration implements NetworkingMode {
             this.replyToSenderModeEnabled = replyToSenderModeEnabled;
             this.specificTargetModeEnabled = specificTargetModeEnabled;
             this.multicastModeEnabled = multicastModeEnabled;
+            this.broadcastModeEnabled = broadcastModeEnabled;
             this.specificTargetAddress = specificTargetAddress;
             this.multicastInterface = multicastInterface;
             this.multicastGroup = multicastGroup;
@@ -65,6 +68,7 @@ public class NetworkConfiguration implements NetworkingMode {
 
         public static HfcsConfiguration disabled() {
             return new HfcsConfiguration(
+                    false,
                     false,
                     false,
                     false,
@@ -80,6 +84,7 @@ public class NetworkConfiguration implements NetworkingMode {
             return new HfcsConfiguration(
                     true,
                     true,
+                    false,
                     false,
                     false,
                     null,
@@ -98,6 +103,7 @@ public class NetworkConfiguration implements NetworkingMode {
                     true,
                     false,
                     true,
+                    false,
                     false,
                     remote,
                     null,
@@ -119,9 +125,24 @@ public class NetworkConfiguration implements NetworkingMode {
                     false,
                     false,
                     true,
+                    false,
                     null,
                     networkInterface,
                     group,
+                    remotePort,
+                    bindPort);
+        }
+
+        public static HfcsConfiguration broadcastMode(int bindPort, int remotePort) {
+            return new HfcsConfiguration(
+                    true,
+                    false,
+                    false,
+                    false,
+                    true,
+                    null,
+                    null,
+                    null,
                     remotePort,
                     bindPort);
         }
