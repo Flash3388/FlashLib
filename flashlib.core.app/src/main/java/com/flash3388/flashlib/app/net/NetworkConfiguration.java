@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.app.net;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
 public class NetworkConfiguration implements NetworkingMode {
@@ -34,17 +36,30 @@ public class NetworkConfiguration implements NetworkingMode {
         final boolean isEnabled;
         final boolean replyToSenderModeEnabled;
         final boolean specificTargetModeEnabled;
+        final boolean multicastModeEnabled;
         final SocketAddress specificTargetAddress;
+        final NetworkInterface multicastInterface;
+        final InetAddress multicastGroup;
+        final int remotePort;
         final int bindPort;
 
         private HfcsConfiguration(boolean isEnabled,
                                   boolean replyToSenderModeEnabled,
-                                  boolean specificTargetModeEnabled, SocketAddress specificTargetAddress,
+                                  boolean specificTargetModeEnabled,
+                                  boolean multicastModeEnabled,
+                                  SocketAddress specificTargetAddress,
+                                  NetworkInterface multicastInterface,
+                                  InetAddress multicastGroup,
+                                  int remotePort,
                                   int bindPort) {
             this.isEnabled = isEnabled;
             this.replyToSenderModeEnabled = replyToSenderModeEnabled;
             this.specificTargetModeEnabled = specificTargetModeEnabled;
+            this.multicastModeEnabled = multicastModeEnabled;
             this.specificTargetAddress = specificTargetAddress;
+            this.multicastInterface = multicastInterface;
+            this.multicastGroup = multicastGroup;
+            this.remotePort = remotePort;
             this.bindPort = bindPort;
         }
 
@@ -52,8 +67,12 @@ public class NetworkConfiguration implements NetworkingMode {
             return new HfcsConfiguration(
                     false,
                     false,
-                    false
-                    , null,
+                    false,
+                    false,
+                    null,
+                    null,
+                    null,
+                    INVALID_PORT,
                     INVALID_PORT);
         }
 
@@ -62,7 +81,11 @@ public class NetworkConfiguration implements NetworkingMode {
                     true,
                     true,
                     false,
+                    false,
                     null,
+                    null,
+                    null,
+                    INVALID_PORT,
                     bindPort);
         }
 
@@ -75,12 +98,32 @@ public class NetworkConfiguration implements NetworkingMode {
                     true,
                     false,
                     true,
+                    false,
                     remote,
+                    null,
+                    null,
+                    INVALID_PORT,
                     bindPort);
         }
 
         public static HfcsConfiguration specificTargetMode(SocketAddress remote) {
             return specificTargetMode(INVALID_PORT, remote);
+        }
+
+        public static HfcsConfiguration multicastMode(int bindPort,
+                                                      NetworkInterface networkInterface,
+                                                      InetAddress group,
+                                                      int remotePort) {
+            return new HfcsConfiguration(
+                    true,
+                    false,
+                    false,
+                    true,
+                    null,
+                    networkInterface,
+                    group,
+                    remotePort,
+                    bindPort);
         }
     }
 

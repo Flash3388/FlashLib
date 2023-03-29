@@ -3,6 +3,7 @@ package com.flash3388.flashlib.app.net;
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsAutoReplyService;
+import com.flash3388.flashlib.net.hfcs.impl.HfcsMulticastService;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsUnicastService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
@@ -10,6 +11,7 @@ import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
+import java.net.InetAddress;
 import java.net.SocketAddress;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
@@ -62,6 +64,20 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                     hfcsService = new HfcsUnicastService(instanceId, clock, remote);
                 } else {
                     hfcsService = new HfcsUnicastService(instanceId, clock, bindPort, remote);
+                }
+
+                serviceRegistry.register(hfcsService);
+                mHfcsRegistry = hfcsService;
+            } else if (configuration.getHfcsConfiguration().multicastModeEnabled) {
+                HfcsMulticastService hfcsService;
+                int bindPort = configuration.getHfcsConfiguration().bindPort;
+                java.net.NetworkInterface networkInterface = configuration.getHfcsConfiguration().multicastInterface;
+                InetAddress group = configuration.getHfcsConfiguration().multicastGroup;
+                int remotePort = configuration.getHfcsConfiguration().remotePort;
+                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
+                    hfcsService = new HfcsMulticastService(instanceId, clock, remotePort, networkInterface, group);
+                } else {
+                    hfcsService = new HfcsMulticastService(instanceId, clock, bindPort, remotePort, networkInterface, group);
                 }
 
                 serviceRegistry.register(hfcsService);
