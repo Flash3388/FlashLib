@@ -156,7 +156,8 @@ public final class Actions {
      * @return {@link ActionStartSelector.Builder builder} for {@link ActionStartSelector}
      * @param <T> type of the parameter used for selection
      */
-    public static <T> ActionStartSelector.Builder<T> startSelector() {
+    public static <T> ActionStartSelector.Builder<T> startSelector(Class<T> type) {
+        // type is knowingly unused.
         return new ActionStartSelector.Builder<>();
     }
 
