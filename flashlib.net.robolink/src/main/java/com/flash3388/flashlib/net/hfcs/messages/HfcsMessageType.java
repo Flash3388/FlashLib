@@ -7,6 +7,7 @@ import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 public class HfcsMessageType implements MessageType {
 
@@ -31,8 +32,12 @@ public class HfcsMessageType implements MessageType {
     }
 
     private InType<?> readType(DataInput input) throws IOException {
-        int typeInt = input.readInt();
-        return mInDataTypes.get(typeInt);
+        try {
+            int typeInt = input.readInt();
+            return mInDataTypes.get(typeInt);
+        } catch (NoSuchElementException e) {
+            throw new IOException(e);
+        }
     }
 
     private Object readFrom(DataInput input, InType<?> type) throws IOException {
