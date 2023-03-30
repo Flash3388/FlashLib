@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
@@ -33,6 +34,7 @@ public interface Scheduler {
      *
      * @throws IllegalStateException if the action is already running on this scheduler.
      */
+    @MainThreadOnly
     void start(Action action);
 
     /**
@@ -49,6 +51,7 @@ public interface Scheduler {
      *
      * @throws IllegalStateException if the action is not running on the scheduler.
      */
+    @MainThreadOnly
     void cancel(Action action);
 
     /**
@@ -60,6 +63,7 @@ public interface Scheduler {
      *
      * @return <b>true</b> if running, <b>false</b> otherwise.
      */
+    @MainThreadOnly
     boolean isRunning(Action action);
 
     /**
@@ -76,6 +80,7 @@ public interface Scheduler {
      *
      * @throws IllegalStateException if the action is not running.
      */
+    @MainThreadOnly
     Time getActionRunTime(Action action);
 
     /**
@@ -92,6 +97,7 @@ public interface Scheduler {
      * @param predicate {@link Predicate} determining whether or not to cancel
      *                                   an action.
      */
+    @MainThreadOnly
     void cancelActionsIf(Predicate<? super Action> predicate);
 
     /**
@@ -103,6 +109,7 @@ public interface Scheduler {
      *     This highly depends on the implementation.
      * </p>
      */
+    @MainThreadOnly
     void cancelAllActions();
 
     /**
@@ -126,6 +133,7 @@ public interface Scheduler {
      * @throws IllegalArgumentException if the given action does not require the given
      *      subsystem.
      */
+    @MainThreadOnly
     void setDefaultAction(Subsystem subsystem, Action action);
 
     /**
@@ -138,6 +146,7 @@ public interface Scheduler {
      * @return {@link Optional} containing the action, if there is one running, or {@link Optional#empty()}
      *  if there is no action running.
      */
+    @MainThreadOnly
     Optional<Action> getActionRunningOnRequirement(Requirement requirement);
 
     /**
@@ -153,6 +162,7 @@ public interface Scheduler {
      *
      * @param mode current mode for the scheduler.
      */
+    @MainThreadOnly
     void run(SchedulerMode mode);
 
     /**
@@ -162,6 +172,7 @@ public interface Scheduler {
      *                  when <b>false</b> marks the trigger as <em>inactive</em>.
      * @return the trigger
      */
+    @MainThreadOnly
     Trigger newTrigger(BooleanSupplier condition);
 
     /**
@@ -173,6 +184,7 @@ public interface Scheduler {
      * @param action action to use.
      * @return execution context.
      */
+    @MainThreadOnly
     ExecutionContext createExecutionContext(ActionGroup group, Action action);
 
     /**
@@ -181,5 +193,6 @@ public interface Scheduler {
      * @param type type of group to create. Influences the execution order and flow.
      * @return action group.
      */
+    @MainThreadOnly
     ActionGroup newActionGroup(ActionGroupType type);
 }

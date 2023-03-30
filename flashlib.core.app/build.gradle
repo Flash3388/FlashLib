@@ -1,0 +1,14 @@
+apply from: rootProject.file('jcomponent.gradle')
+
+dependencies {
+    api project(':flashlib.core')
+    api project(':flashlib.core.scheduling')
+    api project(':flashlib.core.io')
+    api project(':flashlib.core.hid')
+    api project(':flashlib.net.core')
+    api project(':flashlib.net.robolink')
+
+    api javabeans()
+    api jmath()
+    api castle()
+}

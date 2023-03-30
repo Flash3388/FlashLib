@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.vision.cam.jpeg;
 
-import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Camera;
+import com.flash3388.flashlib.vision.Image;
 
 public class StaticImageCamera implements Camera {
 

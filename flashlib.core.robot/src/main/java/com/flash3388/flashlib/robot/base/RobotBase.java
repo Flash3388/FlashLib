@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.base;
 
+import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.iterative.LoopingRobotBase;
 
 /**
@@ -19,9 +19,9 @@ public interface RobotBase {
      *
      * @param robotControl object for accessing and controlling robot resources and components.
      *
-     * @throws RobotInitializationException if an error occurs while initializing
+     * @throws StartupException if an error occurs while initializing
      */
-    void robotInit(RobotControl robotControl) throws RobotInitializationException;
+    void robotInit(RobotControl robotControl) throws StartupException;
 
     /**
      * Called when {@link RobotControl} finished initialization and the robot can be started.

@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
@@ -14,6 +15,8 @@ import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -26,63 +29,80 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 public class SingleThreadedScheduler implements Scheduler {
 
+    private static final Logger LOGGER = Logging.getLogger("Scheduler");
+    
     private final Clock mClock;
-    private final Logger mLogger;
+    private final FlashLibMainThread mMainThread;
 
+    private final StoredObject mRootObject;
     private final Map<Action, RunningActionContext> mPendingActions;
     private final Map<Action, RunningActionContext> mRunningActions;
-    private final Collection<Action> mActionsToRemote;
+    private final Collection<Action> mActionsToRemove;
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
     private boolean mCanModifyRunningActions;
 
-    SingleThreadedScheduler(Clock clock, Logger logger,
+    SingleThreadedScheduler(Clock clock,
+                            FlashLibMainThread mainThread,
+                            StoredObject rootObject,
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
-                            Collection<Action> actionsToRemote, Map<Requirement, Action> requirementsUsage,
+                            Collection<Action> actionsToRemove,
+                            Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
-        mLogger = logger;
+        mMainThread = mainThread;
+        mRootObject = rootObject;
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
-        mActionsToRemote = actionsToRemote;
+        mActionsToRemove = actionsToRemove;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
         mCanModifyRunningActions = true;
     }
 
-    public SingleThreadedScheduler(Clock clock, Logger logger) {
-        this(clock, logger,
-                new LinkedHashMap<>(5), new LinkedHashMap<>(10),
+    public SingleThreadedScheduler(Clock clock, StoredObject rootObject, FlashLibMainThread mainThread) {
+        this(
+                clock,
+                mainThread, rootObject,
+                new LinkedHashMap<>(5),
+                new LinkedHashMap<>(10),
                 new ArrayList<>(2),
-                new HashMap<>(10), new HashMap<>(5));
+                new HashMap<>(10),
+                new HashMap<>(5));
     }
 
     @Override
     public void start(Action action) {
+        mMainThread.verifyCurrentThread();
+
         if (mPendingActions.containsKey(action) || mRunningActions.containsKey(action)) {
             throw new IllegalArgumentException("Action already started");
         }
 
-        RunningActionContext context = new RunningActionContext(action, mLogger);
+        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
+        RunningActionContext context = new RunningActionContext(action, LOGGER, new ObsrActionContext(object));
 
         if (!tryStartingAction(context)) {
             mPendingActions.put(action, context);
-            mLogger.debug("Action {} pending", context);
+            LOGGER.debug("Action {} pending", context);
         }
     }
 
     @Override
     public void cancel(Action action) {
+        mMainThread.verifyCurrentThread();
+
         RunningActionContext context = mPendingActions.remove(action);
         if (context != null) {
-            mLogger.debug("Action {} removed (from pending)", context);
+            LOGGER.debug("Action {} removed (from pending)", context);
             return;
         }
 
@@ -93,8 +113,8 @@ public class SingleThreadedScheduler implements Scheduler {
                 return;
             }
         } else if (mRunningActions.containsKey(action)) {
-            mActionsToRemote.add(action);
-            mLogger.debug("Action placed for later removal");
+            mActionsToRemove.add(action);
+            LOGGER.debug("Action placed for later removal");
             return;
         }
 
@@ -103,11 +123,15 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public boolean isRunning(Action action) {
+        mMainThread.verifyCurrentThread();
+
         return mPendingActions.containsKey(action) || mRunningActions.containsKey(action);
     }
 
     @Override
     public Time getActionRunTime(Action action) {
+        mMainThread.verifyCurrentThread();
+
         if (mPendingActions.containsKey(action)) {
             return Time.seconds(0);
         }
@@ -122,6 +146,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void cancelActionsIf(Predicate<? super Action> predicate) {
+        mMainThread.verifyCurrentThread();
+
         mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
 
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
@@ -136,6 +162,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void cancelAllActions() {
+        mMainThread.verifyCurrentThread();
+
         mPendingActions.clear();
 
         for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
@@ -147,19 +175,25 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public void setDefaultAction(Subsystem subsystem, Action action) {
+        mMainThread.verifyCurrentThread();
+
         mDefaultActions.put(subsystem, action);
     }
 
     @Override
     public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+        mMainThread.verifyCurrentThread();
+
         return Optional.ofNullable(mRequirementsUsage.get(requirement));
     }
 
     @Override
     public void run(SchedulerMode mode) {
+        mMainThread.verifyCurrentThread();
+
         executeRunningActions(mode);
 
-        for (Iterator<Action> iterator = mActionsToRemote.iterator(); iterator.hasNext();) {
+        for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
             Action action = iterator.next();
             RunningActionContext context = mRunningActions.remove(action);
             if (context != null) {
@@ -189,6 +223,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public Trigger newTrigger(BooleanSupplier condition) {
+        mMainThread.verifyCurrentThread();
+
         TriggerImpl trigger = new TriggerImpl();
 
         Action action = new TriggerActivationAction(this, condition, trigger)
@@ -200,12 +236,17 @@ public class SingleThreadedScheduler implements Scheduler {
 
     @Override
     public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
-        RunningActionContext context = new RunningActionContext(action, mLogger);
-        return new ExecutionContextImpl(mClock, mLogger, group, context);
+        mMainThread.verifyCurrentThread();
+
+        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
+        RunningActionContext context = new RunningActionContext(action, group, new ObsrActionContext(object), LOGGER);
+        return new ExecutionContextImpl(mClock, LOGGER, context);
     }
 
     @Override
     public ActionGroup newActionGroup(ActionGroupType type) {
+        mMainThread.verifyCurrentThread();
+
         GroupPolicy policy;
         switch (type) {
             case SEQUENTIAL:
@@ -221,7 +262,7 @@ public class SingleThreadedScheduler implements Scheduler {
                 throw new IllegalArgumentException("unsupported group type");
         }
 
-        return new ActionGroupImpl(this, mLogger, policy);
+        return new ActionGroupImpl(this, LOGGER, policy);
     }
 
     private void executeRunningActions(SchedulerMode mode) {
@@ -236,7 +277,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
                 if (mode.isDisabled() && !context.shouldRunInDisabled()) {
                     context.markForCancellation();
-                    mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", context);
+                    LOGGER.warn("Action {} is not allowed to run in disabled. Cancelling", context);
                 }
 
                 if (context.iterate(mClock.currentTime())) {
@@ -244,7 +285,7 @@ public class SingleThreadedScheduler implements Scheduler {
                     removeFromRequirements(context);
                     iterator.remove();
 
-                    mLogger.debug("Action {} finished", context);
+                    LOGGER.debug("Action {} finished", context);
                 }
             }
         } finally {
@@ -262,7 +303,7 @@ public class SingleThreadedScheduler implements Scheduler {
                     // cannot cancel it as it is the preferred one.
                     // will have to wait for it to finish
 
-                    mLogger.warn("Action {} has conflict with (PREFERRED) {} on {}. Not canceling old, must wait for it to finish.",
+                    LOGGER.warn("Action {} has conflict with (PREFERRED) {} on {}. Not canceling old, must wait for it to finish.",
                             context, current, requirement);
 
                     throw new ActionHasPreferredException();
@@ -289,7 +330,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
     private boolean tryStartingAction(RunningActionContext context) {
         if (!mCanModifyRunningActions) {
-            mLogger.debug("Cannot modify running actions");
+            LOGGER.debug("Cannot modify running actions");
             return false;
         }
 
@@ -299,7 +340,7 @@ public class SingleThreadedScheduler implements Scheduler {
                 cancelAndEnd(conflict);
                 mRunningActions.remove(conflict.getAction());
 
-                mLogger.warn("Action {} has conflict with {}. Canceling old.",
+                LOGGER.warn("Action {} has conflict with {}. Canceling old.",
                         context, conflict);
             });
 
@@ -309,7 +350,7 @@ public class SingleThreadedScheduler implements Scheduler {
             setOnRequirements(context);
             mRunningActions.put(context.getAction(), context);
 
-            mLogger.debug("Action {} started running", context);
+            LOGGER.debug("Action {} started running", context);
 
             return true;
         } catch (ActionHasPreferredException e) {
@@ -338,6 +379,6 @@ public class SingleThreadedScheduler implements Scheduler {
         context.iterate(mClock.currentTime());
         removeFromRequirements(context);
 
-        mLogger.debug("Action {} finished", context);
+        LOGGER.debug("Action {} finished", context);
     }
 }

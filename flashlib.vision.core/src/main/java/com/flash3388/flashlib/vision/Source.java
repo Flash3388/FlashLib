@@ -52,7 +52,7 @@ public interface Source<T> {
     default void asyncPoll(Pipeline<? super T> pipeline,
                            ThrowableHandler throwableHandler) {
         Thread thread = new Thread(new SourcePoller<>(this, pipeline, throwableHandler),
-                toString() + "-poller");
+                this + "-poller");
         thread.setDaemon(true);
         thread.start();
     }
@@ -87,7 +87,7 @@ public interface Source<T> {
                                       Pipeline<? super T> pipeline,
                                       ThrowableHandler throwableHandler) {
         Thread thread = new Thread(new PeriodicPoller<>(this, rate, pipeline, throwableHandler),
-                toString() + "-poller");
+                this + "-poller");
         thread.setDaemon(true);
         thread.start();
     }

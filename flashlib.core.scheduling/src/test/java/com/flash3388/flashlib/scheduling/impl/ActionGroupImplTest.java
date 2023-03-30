@@ -53,35 +53,35 @@ class ActionGroupImplTest {
     @Test
     public void execute_actionCurrentlyRunning_executesIt() throws Exception {
         ExecutionContext context = mock(ExecutionContext.class);
-        when(context.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        when(context.execute(any())).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
         mRunningActions.add(context);
 
         ActionGroupImpl actionGroup = createSequential();
 
         actionGroup.execute();
 
-        verify(context, times(1)).execute();
+        verify(context, times(1)).execute(any());
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
     }
 
     @Test
     public void execute_actionCurrentlyRunningIsFinished_removesIt() throws Exception {
         ExecutionContext context = mock(ExecutionContext.class);
-        when(context.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context);
 
         ActionGroupImpl actionGroup = createSequential();
 
         actionGroup.execute();
 
-        verify(context, times(1)).execute();
+        verify(context, times(1)).execute(any());
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(0));
     }
 
     @Test
     public void interrupted_actionIsRunning_cancelsIt() throws Exception {
         ExecutionContext context = mock(ExecutionContext.class);
-        when(context.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        when(context.execute(any())).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
         mRunningActions.add(context);
 
         ActionGroupImpl actionGroup = createSequential();
@@ -155,10 +155,10 @@ class ActionGroupImplTest {
     @Test
     public void execute_forParallelActionsFinished_isFinishedTrue() throws Exception {
         ExecutionContext context1 = mock(ExecutionContext.class);
-        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context1.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context1);
         ExecutionContext context2 = mock(ExecutionContext.class);
-        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context2.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context2);
 
         ActionGroupImpl actionGroup = createParallelRace();
@@ -170,10 +170,10 @@ class ActionGroupImplTest {
     @Test
     public void execute_forParallelRaceActionFinished_isFinishedTrue() throws Exception {
         ExecutionContext context1 = mock(ExecutionContext.class);
-        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        when(context1.execute(any())).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
         mRunningActions.add(context1);
         ExecutionContext context2 = mock(ExecutionContext.class);
-        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context2.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context2);
 
         ActionGroupImpl actionGroup = createParallelRace();
@@ -185,10 +185,10 @@ class ActionGroupImplTest {
     @Test
     public void end_forParallelInterrupt_interruptsRemainingInEnd() throws Exception {
         ExecutionContext context1 = mock(ExecutionContext.class);
-        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        when(context1.execute(any())).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
         mRunningActions.add(context1);
         ExecutionContext context2 = mock(ExecutionContext.class);
-        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context2.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context2);
 
         ActionGroupImpl actionGroup = createParallel();
@@ -202,10 +202,10 @@ class ActionGroupImplTest {
     @Test
     public void end_forParallelRace_interruptsRemainingInEnd() throws Exception {
         ExecutionContext context1 = mock(ExecutionContext.class);
-        when(context1.execute()).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
+        when(context1.execute(any())).thenReturn(ExecutionContext.ExecutionResult.STILL_RUNNING);
         mRunningActions.add(context1);
         ExecutionContext context2 = mock(ExecutionContext.class);
-        when(context2.execute()).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
+        when(context2.execute(any())).thenReturn(ExecutionContext.ExecutionResult.FINISHED);
         mRunningActions.add(context2);
 
         ActionGroupImpl actionGroup = createParallelRace();

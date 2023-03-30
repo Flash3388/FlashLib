@@ -5,9 +5,9 @@ import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
+import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
-import com.flash3388.flashlib.vision.analysis.Analysis;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;

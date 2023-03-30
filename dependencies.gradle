@@ -6,13 +6,16 @@ ext {
         return "com.github.tomtzook:jmath:1.1.0"
     }
     javabeans = {
-        return "com.github.tomtzook:javabeans:1.4.0"
+        return "com.github.tomtzook:javabeans:1.6.0"
     }
     castle = {
         return "com.github.tomtzook:castle:2.0.1"
     }
     slf4jApi = {
         return "org.slf4j:slf4j-api:1.7.25"
+    }
+    commonsio = {
+        return "commons-io:commons-io:2.11.0"
     }
     junit = {
         return ['org.junit.jupiter:junit-jupiter-engine:5.4.2',

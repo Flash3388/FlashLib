@@ -2,21 +2,23 @@ package com.flash3388.flashlib.robot.modes;
 
 import com.beans.Property;
 
-public class ManualRobotModeSupplier implements Property<RobotMode> {
+import java.util.concurrent.atomic.AtomicReference;
 
-	private RobotMode mCurrentMode;
+public class ManualRobotModeSupplier implements RobotModeSupplier, Property<RobotMode> {
+
+	private final AtomicReference<RobotMode> mCurrentMode;
 
 	public ManualRobotModeSupplier() {
-		mCurrentMode = RobotMode.DISABLED;
+		mCurrentMode = new AtomicReference<>(RobotMode.DISABLED);
 	}
 
 	@Override
 	public RobotMode get() {
-		return mCurrentMode;
+		return mCurrentMode.get();
 	}
 
 	@Override
 	public void set(RobotMode mode) {
-		mCurrentMode = mode;
+		mCurrentMode.set(mode);
 	}
 }

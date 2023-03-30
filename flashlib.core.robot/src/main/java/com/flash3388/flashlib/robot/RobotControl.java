@@ -1,10 +1,15 @@
 package com.flash3388.flashlib.robot;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
+import com.flash3388.flashlib.app.FlashLibControl;
+import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.app.net.NetworkingMode;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.robot.base.GenericRobotControl;
 import com.flash3388.flashlib.robot.base.RobotBase;
-import com.flash3388.flashlib.robot.base.generic.GenericRobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -28,7 +33,7 @@ import java.util.function.Supplier;
  *
  * @see GenericRobotControl
  */
-public interface RobotControl {
+public interface RobotControl extends FlashLibControl {
 
     /**
      * Gets the initialized {@link Supplier} object for {@link RobotMode} of the robot.
@@ -37,7 +42,7 @@ public interface RobotControl {
      *
      * @return robot mode selector, or null if not initialized.
      */
-    Supplier<? extends RobotMode> getModeSupplier();
+    RobotModeSupplier getModeSupplier();
 
     /**
      * Gets the current operation mode set by the {@link #getModeSupplier()} object of the robot.
@@ -79,7 +84,7 @@ public interface RobotControl {
     }
 
     /**
-     * Gets whether or not the current mode set by the robot's {@link #getModeSupplier()} object is equal
+     * Gets whether the current mode set by the robot's {@link #getModeSupplier()} object is equal
      * to a given mode value. If true, this indicates that the current mode is the given mode.
      * <p>
      * The default implementation calls {@link #getMode()} and gets whether the returned value
@@ -94,7 +99,7 @@ public interface RobotControl {
     }
 
     /**
-     * Gets whether or not the robot is currently in disabled mode. Disabled mode
+     * Gets whether the robot is currently in disabled mode. Disabled mode
      * is a safety mode where the robot does nothing.
      *
      * @return true if in disabled mode, false otherwise
@@ -169,6 +174,7 @@ public interface RobotControl {
      *
      * @return {@link Clock} of the robot.
      */
+    @Override
     Clock getClock();
 
     /**
@@ -182,6 +188,7 @@ public interface RobotControl {
      *
      * @return {@link Logger} of the robot.
      */
+    @Override
     Logger getLogger();
 
     /**
@@ -192,6 +199,8 @@ public interface RobotControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @MainThreadOnly
+    @Override
     void registerCloseables(Collection<? extends AutoCloseable> closeables);
 
     /**
@@ -202,7 +211,21 @@ public interface RobotControl {
      *
      * @see RobotBase#robotShutdown()
      */
+    @MainThreadOnly
+    @Override
     default void registerCloseables(AutoCloseable... closeables) {
+        getMainThread().verifyCurrentThread();
         registerCloseables(Arrays.asList(closeables));
     }
+
+    /**
+     * Gets the {@link NetworkInterface} object associated with the robot. Can be used
+     * to communicate with other programs via several protocols, depending on
+     * the configuration and the implementation of this interface.
+     * Check {@link NetworkingMode} before accessing specific protocol to ensure
+     * the protocol is indeed available.
+     *
+     * @return {@link NetworkInterface}
+     */
+    NetworkInterface getNetworkInterface();
 }

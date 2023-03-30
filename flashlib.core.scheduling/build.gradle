@@ -3,6 +3,7 @@ apply from: rootProject.file('component-benchmark.gradle')
 
 dependencies {
     api project(':flashlib.core')
+    api project(':flashlib.net.core')
 
     api jmath()
 }

@@ -123,6 +123,11 @@ public interface RobotMode extends SchedulerMode {
             public boolean isDisabled() {
                 return isDisabled;
             }
+
+            @Override
+            public String toString() {
+                return getName();
+            }
         };
     }
 }

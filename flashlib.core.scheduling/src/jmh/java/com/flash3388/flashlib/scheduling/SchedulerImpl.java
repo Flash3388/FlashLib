@@ -1,14 +1,17 @@
 package com.flash3388.flashlib.scheduling;
 
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.impl.SingleThreadedScheduler;
 import com.flash3388.flashlib.time.SystemNanoClock;
-import com.flash3388.flashlib.util.logging.Logging;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 
 import java.util.function.Supplier;
 
 public enum SchedulerImpl {
-    SINGLE_THREAD(()->new SynchronousScheduler(new SystemNanoClock())),
-    NEW_SINGLE_THREAD(()->new SingleThreadedScheduler(new SystemNanoClock(), Logging.stub()))
+    NEW_SINGLE_THREAD(()->new SingleThreadedScheduler(
+            new SystemNanoClock(),
+            new StoredObject.Stub(),
+            new FlashLibMainThread.Stub()))
     ;
 
     private final Supplier<Scheduler> mGenerator;

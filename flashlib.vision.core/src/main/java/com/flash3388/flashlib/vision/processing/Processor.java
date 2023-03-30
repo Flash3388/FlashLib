@@ -4,9 +4,7 @@ import com.castle.util.throwables.ThrowableHandler;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.VisionException;
 
-import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public interface Processor<T, R> {
 

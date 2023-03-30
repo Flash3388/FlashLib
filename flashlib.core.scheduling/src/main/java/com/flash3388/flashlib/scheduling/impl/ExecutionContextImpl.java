@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.scheduling.ExecutionContext;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
@@ -9,23 +9,28 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     private final Clock mClock;
     private final Logger mLogger;
-    private final ActionGroup mGroup;
     private final RunningActionContext mContext;
 
-    public ExecutionContextImpl(Clock clock, Logger logger, ActionGroup group, RunningActionContext context) {
+    public ExecutionContextImpl(Clock clock, Logger logger, RunningActionContext context) {
         mClock = clock;
         mLogger = logger;
-        mGroup = group;
         mContext = context;
 
-        context.markStarted(mClock.currentTime());
-        mLogger.debug("ActionGroup {} started action {}", mGroup, mContext);
+        mContext.markStarted(mClock.currentTime());
+        mLogger.debug("Action {} started running", mContext);
     }
 
     @Override
-    public ExecutionResult execute() {
+    public ExecutionResult execute(SchedulerMode mode) {
+        if (mode != null && mode.isDisabled() && !mContext.shouldRunInDisabled()) {
+            mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", mContext);
+            interrupt();
+
+            return ExecutionResult.FINISHED;
+        }
+
         if (mContext.iterate(mClock.currentTime())) {
-            mLogger.debug("ActionGroup {} finished action {}", mGroup, mContext);
+            mLogger.debug("Action {} finished", mContext);
             return ExecutionResult.FINISHED;
         }
 
@@ -37,6 +42,6 @@ public class ExecutionContextImpl implements ExecutionContext {
         mContext.markForCancellation();
         mContext.iterate(mClock.currentTime());
 
-        mLogger.debug("ActionGroup {} interrupted, canceling current action {}", mGroup, mContext);
+        mLogger.debug("Action {} interrupted", mContext);
     }
 }

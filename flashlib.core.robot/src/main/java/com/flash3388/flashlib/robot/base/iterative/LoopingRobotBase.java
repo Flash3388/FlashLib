@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
+import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.robot.RobotControl;
-import com.flash3388.flashlib.robot.RobotInitializationException;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
@@ -56,7 +56,7 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     @Override
-    public final void robotInit(RobotControl robotControl) throws RobotInitializationException {
+    public final void robotInit(RobotControl robotControl) throws StartupException {
         mRobotControl = robotControl;
         mRobot = mRobotInitializer.init(robotControl);
     }
@@ -92,7 +92,7 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     private void initMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Initializing mode {}", mode);
+        mRobotControl.getLogger().debug("Initializing mode {}", mode);
 
         if (mode.isDisabled()) {
             mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
@@ -103,22 +103,24 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     private void periodicMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Periodic mode {}", mode);
+        mRobotControl.getLogger().debug("Periodic mode {}", mode);
 
+        mRobotControl.getServiceRegistry().startAll();
         mRobotControl.getScheduler().run(mode);
+
         if (mode.isDisabled()) {
             mRobot.disabledPeriodic();
         } else {
             mRobot.modePeriodic(mode);
         }
 
-        mRobotControl.getLogger().trace("Robot periodic");
+        mRobotControl.getLogger().debug("Robot periodic");
 
         mRobot.robotPeriodic();
     }
 
     private void exitMode(RobotMode mode) {
-        mRobotControl.getLogger().trace("Exiting mode {}", mode);
+        mRobotControl.getLogger().debug("Exiting mode {}", mode);
 
         if (mode.isDisabled()) {
             mRobot.disabledExit();
