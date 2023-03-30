@@ -6,20 +6,21 @@ import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.resources.CircularResourceHolder;
 
 public class HfcsHid {
 
     private HfcsHid() {}
 
-    public static HidInterface createReceiver(HfcsRegistry registry) {
+    public static HidInterface createReceiver(HfcsRegistry registry, FlashLibMainThread mainThread) {
         HidData data = new HidData();
         CircularResourceHolder<RawHidData> dataStore = new CircularResourceHolder<>(3, RawHidData::new);
 
         registry.registerIncoming(new HidDataInType(dataStore))
                 .addListener(new NewDataListener(data, dataStore));
 
-        return new WeakHidInterface(new HfcsHidInterface(data));
+        return new WeakHidInterface(new HfcsHidInterface(data), mainThread);
     }
 
     public static HidData createProvider(HfcsRegistry registry, Time sendPeriod) {

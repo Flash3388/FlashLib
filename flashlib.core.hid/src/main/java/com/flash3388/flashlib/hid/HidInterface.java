@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.hid;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
+
 /**
  * A connection layer to Human Interface Devices. Capable of
  * creating connection and allowing access to different HIDs.
@@ -23,6 +25,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Axis}.
      */
+    @MainThreadOnly
     Axis newAxis(HidChannel channel);
 
     /**
@@ -35,6 +38,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Button}.
      */
+    @MainThreadOnly
     Button newButton(HidChannel channel);
 
     /**
@@ -47,6 +51,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Pov}.
      */
+    @MainThreadOnly
     Pov newPov(HidChannel channel);
 
     /**
@@ -59,6 +64,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Hid}.
      */
+    @MainThreadOnly
     Hid newGenericHid(HidChannel channel);
 
     /**
@@ -71,6 +77,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Joystick}.
      */
+    @MainThreadOnly
     Joystick newJoystick(HidChannel channel);
 
     /**
@@ -83,6 +90,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link XboxController}.
      */
+    @MainThreadOnly
     XboxController newXboxController(HidChannel channel);
 
     /**
@@ -96,6 +104,7 @@ public interface HidInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link DualshockController}.
      */
+    @MainThreadOnly
     DualshockController newDualshockController(HidChannel channel);
 
     /**

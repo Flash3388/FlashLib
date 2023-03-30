@@ -105,6 +105,7 @@ public class LoopingRobotBase implements RobotBase {
     private void periodicMode(RobotMode mode) {
         mRobotControl.getLogger().debug("Periodic mode {}", mode);
 
+        mRobotControl.getMainThread().executePendingTasks();
         mRobotControl.getServiceRegistry().startAll();
         mRobotControl.getScheduler().run(mode);
 
