@@ -9,6 +9,7 @@ import com.notifier.EventController;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
@@ -41,7 +42,7 @@ public class ReadTask implements Runnable {
             }
 
             @Override
-            public Optional<MessageAndType> getMessageForNewClient() {
+            public Optional<List<MessageAndType>> getMessageForNewClient() {
                 return Optional.empty();
             }
         };

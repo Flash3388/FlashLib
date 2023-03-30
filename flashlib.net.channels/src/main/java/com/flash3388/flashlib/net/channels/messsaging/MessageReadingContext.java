@@ -54,6 +54,10 @@ public class MessageReadingContext {
         mBuffer.clear();
     }
 
+    public boolean hasEnoughSpace() {
+        return mBuffer.hasSpace(1024);
+    }
+
     public void updateBuffer(ByteBuffer buffer, int bytesInBuffer) {
         if (bytesInBuffer < 1) {
             return;

@@ -18,7 +18,9 @@ import com.flash3388.flashlib.net.obsr.messages.RequestContentMessage;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -58,12 +60,18 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
     }
 
     @Override
-    public Optional<MessageAndType> getMessageForNewClient() {
+    public Optional<List<MessageAndType>> getMessageForNewClient() {
+        mLogger.debug("New client. Sending contents of storage");
         Map<String, Value> all = mStorage.getAll();
-        return Optional.of(new MessageAndType(
-                StorageContentsMessage.TYPE,
-                new StorageContentsMessage(all)
-        ));
+        List<MessageAndType> messages = new ArrayList<>(all.size());
+        for (Map.Entry<String, Value> entry : all.entrySet()) {
+            messages.add(new MessageAndType(
+                    EntryChangeMessage.TYPE,
+                    new EntryChangeMessage(entry.getKey(), entry.getValue())
+            ));
+        }
+
+        return Optional.of(messages);
     }
 
     private void handleNewEntry(NewEntryMessage message) {

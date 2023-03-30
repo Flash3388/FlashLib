@@ -105,7 +105,9 @@ public class TcpServerChannel implements NetServerChannel {
         }
 
         try {
-            mLogger.debug("Writing message to client: {}", clientInfo.getAddress());
+            mLogger.debug("Writing message to client: {}, size={}",
+                    clientInfo.getAddress(),
+                    buffer.limit());
             buffer.rewind();
             node.getChannel().write(buffer);
         } catch (IOException e) {
@@ -130,7 +132,9 @@ public class TcpServerChannel implements NetServerChannel {
             }
 
             try {
-                mLogger.debug("Writing message to client: {}", node.getClientInfo().getAddress());
+                mLogger.debug("Writing message to client: {}, size={}",
+                        node.getClientInfo().getAddress(),
+                        buffer.limit());
                 buffer.rewind();
                 node.getChannel().write(buffer);
             } catch (IOException e) {

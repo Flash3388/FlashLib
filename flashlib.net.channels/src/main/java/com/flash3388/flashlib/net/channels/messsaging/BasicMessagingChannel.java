@@ -56,22 +56,31 @@ public class BasicMessagingChannel implements MessagingChannel {
     public void processUpdates(UpdateHandler handler) throws IOException {
         mReadBuffer.clear();
         IncomingData data = mChannel.read(mReadBuffer);
-        if (data.getBytesReceived() < 1) {
-            return;
+        if (data.getBytesReceived() >= 1) {
+            mLogger.debug("New data from remote: {}, size={}",
+                    data.getSender(),
+                    data.getBytesReceived());
+
+            mReadBuffer.rewind();
+            mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
         }
 
-        mReadBuffer.rewind();
-        mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
+        boolean hasMoreToParse;
+        do {
+            Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
+            if (resultOptional.isPresent()) {
+                MessageReadingContext.ParseResult parseResult = resultOptional.get();
 
-        Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
-        if (resultOptional.isPresent()) {
-            MessageReadingContext.ParseResult parseResult = resultOptional.get();
+                mLogger.debug("New message received: sender={}, type={}",
+                        parseResult.getInfo().getSender(),
+                        parseResult.getInfo().getType().getKey());
+                handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
 
-            mLogger.debug("New message received: sender={}, type={}",
-                    parseResult.getInfo().getSender(),
-                    parseResult.getInfo().getType().getKey());
-            handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
-        }
+                hasMoreToParse = true;
+            } else {
+                hasMoreToParse = false;
+            }
+        } while (hasMoreToParse || !mReadingContext.hasEnoughSpace());
     }
 
     @Override
