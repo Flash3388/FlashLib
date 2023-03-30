@@ -11,7 +11,8 @@ public class Main {
 
     public static void main(String[] args) {
         RobotMain.start((instanceId, resourceHolder)-> {
-            RobotControl robotControl = new GenericRobotControl(instanceId, resourceHolder);
+            RobotControl robotControl = new GenericRobotControl(instanceId, resourceHolder,
+                    GenericRobotControl.Configuration.controlStubs());
             RobotBase robotBase = new LoopingRobotBase(UserRobot::new);
             return new RobotImplementation(robotControl, robotBase);
         });

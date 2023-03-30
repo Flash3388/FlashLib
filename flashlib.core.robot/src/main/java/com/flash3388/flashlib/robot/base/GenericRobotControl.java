@@ -3,8 +3,15 @@ package com.flash3388.flashlib.robot.base;
 import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkConfiguration;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
+import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.hfcs.ping.HfcsPing;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.robot.hfcs.control.HfcsRobotControl;
+import com.flash3388.flashlib.robot.hfcs.control.RobotControlData;
+import com.flash3388.flashlib.robot.hfcs.hid.HfcsHid;
+import com.flash3388.flashlib.robot.hfcs.state.HfcsRobotState;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.FlashLibMainThreadImpl;
 import com.flash3388.flashlib.app.ServiceRegistry;
@@ -26,6 +33,26 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 public class GenericRobotControl implements RobotControl {
+
+    public static class Configuration {
+        final boolean fullHfcsControl;
+
+        private Configuration(boolean fullHfcsControl) {
+            this.fullHfcsControl = fullHfcsControl;
+        }
+
+        public static Configuration fullHfcsControl() {
+            return new Configuration(
+                    true
+            );
+        }
+
+        public static Configuration controlStubs() {
+            return new Configuration(
+                    false
+            );
+        }
+    }
 
     private static final Logger LOGGER = Logging.getMainLogger();
 
@@ -65,27 +92,46 @@ public class GenericRobotControl implements RobotControl {
 
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
-                               NetworkConfiguration networkConfiguration) {
+                               NetworkConfiguration networkConfiguration,
+                               Configuration configuration) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
 
-        mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
-        mIoInterface = new IoInterface.Stub();
-        mHidInterface = new HidInterface.Stub();
         mClock = RobotFactory.newDefaultClock();
-
         mMainThread = new FlashLibMainThreadImpl();
+
         mServiceRegistry = new BasicServiceRegistry(mMainThread);
         mNetworkInterface = new NetworkInterfaceImpl(networkConfiguration, mInstanceId, mServiceRegistry, mClock);
 
         ObjectStorage objectStorage = mNetworkInterface.getMode().isObjectStorageEnabled() ?
                 mNetworkInterface.getObjectStorage() :
                 new ObjectStorage.Stub();
+
+        if (configuration.fullHfcsControl) {
+            HfcsRegistry hfcsRegistry = mNetworkInterface.getHfcsRegistry();
+            HfcsPing.registerReceiver(hfcsRegistry, (a, b)->{});
+            Supplier<RobotControlData> controlDataSupplier =
+                    HfcsRobotControl.registerReceiver(hfcsRegistry, instanceId);
+
+            mModeSupplier = ()-> controlDataSupplier.get().getMode();
+            mHidInterface = HfcsHid.createReceiver(hfcsRegistry);
+
+            HfcsRobotState.registerProvider(this, Time.milliseconds(100));
+        } else {
+            mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
+            mHidInterface = new HidInterface.Stub();
+        }
+
+        mIoInterface = new IoInterface.Stub();
         mScheduler = RobotFactory.newDefaultScheduler(mClock, objectStorage, mMainThread);
     }
 
+    public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Configuration configuration) {
+        this(instanceId, resourceHolder, NetworkConfiguration.disabled(), configuration);
+    }
+
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder) {
-        this(instanceId, resourceHolder, NetworkConfiguration.disabled());
+        this(instanceId, resourceHolder, Configuration.controlStubs());
     }
 
     @Override
