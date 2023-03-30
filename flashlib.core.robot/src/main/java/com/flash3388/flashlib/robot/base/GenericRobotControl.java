@@ -116,7 +116,7 @@ public class GenericRobotControl implements RobotControl {
                     HfcsRobotControl.registerReceiver(hfcsRegistry, instanceId);
 
             mModeSupplier = ()-> controlDataSupplier.get().getMode();
-            mHidInterface = HfcsHid.createReceiver(hfcsRegistry);
+            mHidInterface = HfcsHid.createReceiver(hfcsRegistry, mMainThread);
 
             HfcsRobotState.registerProvider(this, Time.milliseconds(100));
         } else {

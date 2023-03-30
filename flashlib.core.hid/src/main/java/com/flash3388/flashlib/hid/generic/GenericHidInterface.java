@@ -9,17 +9,22 @@ import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.Pov;
 import com.flash3388.flashlib.hid.XboxController;
+import com.flash3388.flashlib.util.FlashLibMainThread;
 
 public class GenericHidInterface implements HidInterface {
 
     private final RawHidInterface mInterface;
+    private final FlashLibMainThread mMainThread;
 
-    public GenericHidInterface(RawHidInterface anInterface) {
+    public GenericHidInterface(RawHidInterface anInterface, FlashLibMainThread mainThread) {
         mInterface = anInterface;
+        mMainThread = mainThread;
     }
 
     @Override
     public Axis newAxis(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -29,6 +34,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public Button newButton(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -38,6 +45,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public Pov newPov(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -47,6 +56,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public Hid newGenericHid(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -56,6 +67,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public Joystick newJoystick(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -65,6 +78,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public XboxController newXboxController(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 
@@ -74,6 +89,8 @@ public class GenericHidInterface implements HidInterface {
 
     @Override
     public DualshockController newDualshockController(HidChannel channel) {
+        mMainThread.verifyCurrentThread();
+
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
 

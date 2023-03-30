@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.io;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
+
 /**
  * A connection layer to Input/Output ports. Capable of creating connection and allowing access to different IO
  * devices and ports.
@@ -24,6 +26,7 @@ public interface IoInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link AnalogInput}.
      */
+    @MainThreadOnly
     AnalogInput newAnalogInput(IoChannel channel);
 
     /**
@@ -37,6 +40,7 @@ public interface IoInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link AnalogOutput}.
      */
+    @MainThreadOnly
     AnalogOutput newAnalogOutput(IoChannel channel);
 
     /**
@@ -50,6 +54,7 @@ public interface IoInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link DigitalInput}.
      */
+    @MainThreadOnly
     DigitalInput newDigitalInput(IoChannel channel);
 
     /**
@@ -63,6 +68,7 @@ public interface IoInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link DigitalOutput}.
      */
+    @MainThreadOnly
     DigitalOutput newDigitalOutput(IoChannel channel);
 
     /**
@@ -76,6 +82,7 @@ public interface IoInterface {
      * @throws IllegalArgumentException if the given channel does not exist or does not correspond to a control
      *  representable by {@link Pwm}.
      */
+    @MainThreadOnly
     Pwm newPwm(IoChannel channel);
 
     /**
