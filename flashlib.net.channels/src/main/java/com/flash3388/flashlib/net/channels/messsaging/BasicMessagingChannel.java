@@ -4,6 +4,8 @@ import com.flash3388.flashlib.net.channels.AutoConnectingChannel;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelConnector;
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -67,7 +69,7 @@ public class BasicMessagingChannel implements MessagingChannel {
 
             mLogger.debug("New message received: sender={}, type={}",
                     parseResult.getInfo().getSender(),
-                    parseResult.getInfo().getType());
+                    parseResult.getInfo().getType().getKey());
             handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
         }
     }

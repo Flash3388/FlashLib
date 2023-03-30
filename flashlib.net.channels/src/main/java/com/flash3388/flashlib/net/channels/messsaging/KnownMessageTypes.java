@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.MessageType;
+
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;

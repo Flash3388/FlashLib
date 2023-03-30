@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.channels.messsaging;
+package com.flash3388.flashlib.net.messaging;
 
 import com.castle.util.function.ThrowingFunction;
 
@@ -27,19 +27,19 @@ public interface MessageType {
      * Parse the given stream into message data.
      * @return parsed message
      */
-    Message parse(DataInput dataInput) throws IOException;
+    InMessage parse(DataInput dataInput) throws IOException;
 
 
-    static MessageType create(int key, ThrowingFunction<DataInput, ? extends Message, IOException> parseFunction) {
+    static MessageType create(int key, ThrowingFunction<DataInput, ? extends InMessage, IOException> parseFunction) {
         return new Impl(key, parseFunction);
     }
 
     class Impl implements MessageType {
 
         private final int mKey;
-        private final ThrowingFunction<DataInput, ? extends Message, IOException> mParseFunction;
+        private final ThrowingFunction<DataInput, ? extends InMessage, IOException> mParseFunction;
 
-        public Impl(int key, ThrowingFunction<DataInput, ? extends Message, IOException> parseFunction) {
+        public Impl(int key, ThrowingFunction<DataInput, ? extends InMessage, IOException> parseFunction) {
             mKey = key;
             mParseFunction = parseFunction;
         }
@@ -50,7 +50,7 @@ public interface MessageType {
         }
 
         @Override
-        public Message parse(DataInput dataInput) throws IOException {
+        public InMessage parse(DataInput dataInput) throws IOException {
             return mParseFunction.apply(dataInput);
         }
     }

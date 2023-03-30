@@ -65,6 +65,9 @@ public class TcpClientConnector implements NetChannelConnector {
             throw e;
         }
 
+        mLogger.debug("TCP Client {} connected to {}",
+                mBaseChannel.getLocalAddress(),
+                mBaseChannel.getRemoteAddress());
         return new TcpChannel(mBaseChannel);
     }
 
@@ -91,7 +94,9 @@ public class TcpClientConnector implements NetChannelConnector {
                 mBaseChannel.configureBlocking(false);
 
                 if (mBindPort >= 0) {
-                    mBaseChannel.bind(new InetSocketAddress(mBindPort));
+                    SocketAddress bindAddress = new InetSocketAddress(mBindPort);
+                    mLogger.debug("Binding TCP Client to {}", bindAddress);
+                    mBaseChannel.bind(bindAddress);
                 }
             } catch (IOException e) {
                 close();

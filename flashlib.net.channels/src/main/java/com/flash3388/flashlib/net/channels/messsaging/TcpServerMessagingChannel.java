@@ -3,11 +3,11 @@ package com.flash3388.flashlib.net.channels.messsaging;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
 import com.flash3388.flashlib.net.channels.tcp.TcpServerChannel;
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -78,7 +78,7 @@ public class TcpServerMessagingChannel implements MessagingChannel {
 
                         mLogger.debug("New message received: sender={}, type={}",
                                 parseResult.getInfo().getSender(),
-                                parseResult.getInfo().getType());
+                                parseResult.getInfo().getType().getKey());
 
                         UpdateHandler handler = mHandler.get();
                         if (handler != null) {

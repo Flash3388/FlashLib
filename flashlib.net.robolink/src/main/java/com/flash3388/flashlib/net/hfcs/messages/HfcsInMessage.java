@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.net.hfcs.messages;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.hfcs.InType;
 
-public class HfcsInMessage implements Message {
+public class HfcsInMessage implements InMessage {
 
     private final InType<?> mType;
     private final Object mData;

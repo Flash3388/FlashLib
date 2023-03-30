@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
@@ -25,7 +25,7 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
     }
 
     @Override
-    public void onNewMessage(MessageInfo messageInfo, Message message) {
+    public void onNewMessage(MessageInfo messageInfo, InMessage message) {
         assert messageInfo.getType().getKey() == HfcsMessageType.KEY;
         assert message instanceof HfcsInMessage;
 

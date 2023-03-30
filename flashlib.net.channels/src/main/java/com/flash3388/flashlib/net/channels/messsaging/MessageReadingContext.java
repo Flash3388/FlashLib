@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.InMessage;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
 
 import java.io.ByteArrayInputStream;
@@ -14,9 +15,9 @@ public class MessageReadingContext {
 
         private final MessageHeader mHeader;
         private final MessageInfo mInfo;
-        private final Message mMessage;
+        private final InMessage mMessage;
 
-        public ParseResult(MessageHeader header, MessageInfo info, Message message) {
+        public ParseResult(MessageHeader header, MessageInfo info, InMessage message) {
             mHeader = header;
             mInfo = info;
             mMessage = message;
@@ -30,7 +31,7 @@ public class MessageReadingContext {
             return mInfo;
         }
 
-        public Message getMessage() {
+        public InMessage getMessage() {
             return mMessage;
         }
     }
@@ -104,7 +105,7 @@ public class MessageReadingContext {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             MessageInfo messageInfo = new MessageInfo(dataInputStream, mMessageTypes);
-            Message message = messageInfo.getType().parse(dataInputStream);
+            InMessage message = messageInfo.getType().parse(dataInputStream);
 
             return new ParseResult(header, messageInfo, message);
         }

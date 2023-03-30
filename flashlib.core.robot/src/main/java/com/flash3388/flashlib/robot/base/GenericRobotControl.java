@@ -101,7 +101,9 @@ public class GenericRobotControl implements RobotControl {
         mMainThread = new FlashLibMainThreadImpl();
 
         mServiceRegistry = new BasicServiceRegistry(mMainThread);
-        mNetworkInterface = new NetworkInterfaceImpl(networkConfiguration, mInstanceId, mServiceRegistry, mClock);
+        mNetworkInterface = new NetworkInterfaceImpl(networkConfiguration,
+                mInstanceId, mServiceRegistry, mClock,
+                mMainThread);
 
         ObjectStorage objectStorage = mNetworkInterface.getMode().isObjectStorageEnabled() ?
                 mNetworkInterface.getObjectStorage() :

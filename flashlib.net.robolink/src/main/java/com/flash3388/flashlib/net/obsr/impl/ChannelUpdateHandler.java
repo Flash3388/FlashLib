@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
-import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.channels.messsaging.OutMessage;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -37,7 +37,7 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
     }
 
     @Override
-    public void onNewMessage(MessageInfo info, Message message) {
+    public void onNewMessage(MessageInfo info, InMessage message) {
         MessageType type = info.getType();
 
         if (type.equals(EntryChangeMessage.TYPE)) {

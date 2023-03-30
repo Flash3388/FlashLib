@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.DataInput;
