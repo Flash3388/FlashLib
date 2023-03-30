@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
+import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
-import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.channels.messsaging.OutMessage;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -18,7 +18,9 @@ import com.flash3388.flashlib.net.obsr.messages.RequestContentMessage;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -37,7 +39,7 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
     }
 
     @Override
-    public void onNewMessage(MessageInfo info, Message message) {
+    public void onNewMessage(MessageInfo info, InMessage message) {
         MessageType type = info.getType();
 
         if (type.equals(EntryChangeMessage.TYPE)) {
@@ -58,12 +60,18 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
     }
 
     @Override
-    public Optional<MessageAndType> getMessageForNewClient() {
+    public Optional<List<MessageAndType>> getMessageForNewClient() {
+        mLogger.debug("New client. Sending contents of storage");
         Map<String, Value> all = mStorage.getAll();
-        return Optional.of(new MessageAndType(
-                StorageContentsMessage.TYPE,
-                new StorageContentsMessage(all)
-        ));
+        List<MessageAndType> messages = new ArrayList<>(all.size());
+        for (Map.Entry<String, Value> entry : all.entrySet()) {
+            messages.add(new MessageAndType(
+                    EntryChangeMessage.TYPE,
+                    new EntryChangeMessage(entry.getKey(), entry.getValue())
+            ));
+        }
+
+        return Optional.of(messages);
     }
 
     private void handleNewEntry(NewEntryMessage message) {

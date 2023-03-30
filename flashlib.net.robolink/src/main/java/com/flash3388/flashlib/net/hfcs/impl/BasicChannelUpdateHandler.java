@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
@@ -9,9 +8,11 @@ import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsInMessage;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
+import com.flash3388.flashlib.net.messaging.InMessage;
 import com.notifier.EventController;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Optional;
 
 public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler {
@@ -25,7 +26,7 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
     }
 
     @Override
-    public void onNewMessage(MessageInfo messageInfo, Message message) {
+    public void onNewMessage(MessageInfo messageInfo, InMessage message) {
         assert messageInfo.getType().getKey() == HfcsMessageType.KEY;
         assert message instanceof HfcsInMessage;
 
@@ -48,7 +49,7 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
     }
 
     @Override
-    public Optional<MessageAndType> getMessageForNewClient() {
+    public Optional<List<MessageAndType>> getMessageForNewClient() {
         return Optional.empty();
     }
 }

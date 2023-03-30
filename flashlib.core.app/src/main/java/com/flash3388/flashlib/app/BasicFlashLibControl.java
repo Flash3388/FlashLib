@@ -36,7 +36,7 @@ public class BasicFlashLibControl implements FlashLibControl {
         mClock = new SystemNanoClock();
         mServiceRegistry = new BasicServiceRegistry(mMainThread);
         mNetworkInterface = new NetworkInterfaceImpl(
-                networkConfiguration, instanceId, mServiceRegistry, mClock);
+                networkConfiguration, instanceId, mServiceRegistry, mClock, mMainThread);
     }
 
     public BasicFlashLibControl(InstanceId instanceId, ResourceHolder resourceHolder) {

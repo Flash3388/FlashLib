@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.OutMessage;
+
 public class MessageAndType {
 
     private final MessageType mType;

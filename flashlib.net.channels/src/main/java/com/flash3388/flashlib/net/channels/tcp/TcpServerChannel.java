@@ -72,7 +72,7 @@ public class TcpServerChannel implements NetServerChannel {
                             // new data from client
 
                             //noinspection resource
-                            SocketAddress address = ((SocketChannel) key.channel()).getLocalAddress();
+                            SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
                             ClientNode clientNode = mClients.get(address);
                             if (clientNode == null) {
                                 // no such client
@@ -105,7 +105,9 @@ public class TcpServerChannel implements NetServerChannel {
         }
 
         try {
-            mLogger.debug("Writing message to client: {}", clientInfo.getAddress());
+            mLogger.debug("Writing message to client: {}, size={}",
+                    clientInfo.getAddress(),
+                    buffer.limit());
             buffer.rewind();
             node.getChannel().write(buffer);
         } catch (IOException e) {
@@ -130,7 +132,9 @@ public class TcpServerChannel implements NetServerChannel {
             }
 
             try {
-                mLogger.debug("Writing message to client: {}", node.getClientInfo().getAddress());
+                mLogger.debug("Writing message to client: {}, size={}",
+                        node.getClientInfo().getAddress(),
+                        buffer.limit());
                 buffer.rewind();
                 node.getChannel().write(buffer);
             } catch (IOException e) {
@@ -184,10 +188,10 @@ public class TcpServerChannel implements NetServerChannel {
     private void handleNewClient() throws IOException {
         SocketChannel baseChannel = mUnderlyingChannel.accept();
 
-        SocketAddress address = baseChannel.getLocalAddress();
+        SocketAddress address = baseChannel.getRemoteAddress();
         mLogger.debug("Server received new client from {} at {}",
-                baseChannel.getRemoteAddress(),
-                address);
+                address,
+                baseChannel.getLocalAddress());
         try {
             baseChannel.configureBlocking(false);
             baseChannel.register(mSelector, SelectionKey.OP_READ);

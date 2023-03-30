@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
-import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.Type;

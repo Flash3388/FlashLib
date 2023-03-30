@@ -4,6 +4,8 @@ import com.flash3388.flashlib.net.channels.AutoConnectingChannel;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelConnector;
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -54,22 +56,31 @@ public class BasicMessagingChannel implements MessagingChannel {
     public void processUpdates(UpdateHandler handler) throws IOException {
         mReadBuffer.clear();
         IncomingData data = mChannel.read(mReadBuffer);
-        if (data.getBytesReceived() < 1) {
-            return;
+        if (data.getBytesReceived() >= 1) {
+            mLogger.debug("New data from remote: {}, size={}",
+                    data.getSender(),
+                    data.getBytesReceived());
+
+            mReadBuffer.rewind();
+            mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
         }
 
-        mReadBuffer.rewind();
-        mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
+        boolean hasMoreToParse;
+        do {
+            Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
+            if (resultOptional.isPresent()) {
+                MessageReadingContext.ParseResult parseResult = resultOptional.get();
 
-        Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
-        if (resultOptional.isPresent()) {
-            MessageReadingContext.ParseResult parseResult = resultOptional.get();
+                mLogger.debug("New message received: sender={}, type={}",
+                        parseResult.getInfo().getSender(),
+                        parseResult.getInfo().getType().getKey());
+                handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
 
-            mLogger.debug("New message received: sender={}, type={}",
-                    parseResult.getInfo().getSender(),
-                    parseResult.getInfo().getType());
-            handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
-        }
+                hasMoreToParse = true;
+            } else {
+                hasMoreToParse = false;
+            }
+        } while (hasMoreToParse || !mReadingContext.hasEnoughSpace());
     }
 
     @Override

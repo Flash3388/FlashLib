@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.channels.messsaging;
+package com.flash3388.flashlib.net.messaging;
 
 import java.io.DataOutput;
 import java.io.IOException;

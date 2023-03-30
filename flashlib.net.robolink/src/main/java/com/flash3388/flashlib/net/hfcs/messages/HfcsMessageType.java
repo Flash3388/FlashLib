@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.hfcs.messages;
 
-import com.flash3388.flashlib.net.channels.messsaging.Message;
-import com.flash3388.flashlib.net.channels.messsaging.MessageType;
+import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
 
@@ -25,7 +25,7 @@ public class HfcsMessageType implements MessageType {
     }
 
     @Override
-    public Message parse(DataInput dataInput) throws IOException {
+    public InMessage parse(DataInput dataInput) throws IOException {
         InType<?> type = readType(dataInput);
         Object data = readFrom(dataInput, type);
         return new HfcsInMessage(type, data);

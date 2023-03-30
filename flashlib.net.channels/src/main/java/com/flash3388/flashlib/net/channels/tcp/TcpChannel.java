@@ -21,6 +21,10 @@ public class TcpChannel implements NetChannel {
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         int received = mChannel.read(buffer);
+        if (received < 1) {
+            return new IncomingData(null, 0);
+        }
+
         return new IncomingData(mRemoteAddress, received);
     }
 

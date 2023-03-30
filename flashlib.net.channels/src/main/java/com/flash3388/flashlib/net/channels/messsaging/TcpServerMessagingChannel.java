@@ -3,15 +3,16 @@ package com.flash3388.flashlib.net.channels.messsaging;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
 import com.flash3388.flashlib.net.channels.tcp.TcpServerChannel;
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,11 +49,13 @@ public class TcpServerMessagingChannel implements MessagingChannel {
                 UpdateHandler handler = mHandler.get();
                 if (handler != null) {
                     try {
-                        Optional<MessageAndType> optional = handler.getMessageForNewClient();
+                        Optional<List<MessageAndType>> optional = handler.getMessageForNewClient();
                         if (optional.isPresent()) {
-                            MessageAndType message = optional.get();
-                            byte[] content = mSerializer.serialize(message.getType(), message.getMessage());
-                            mChannel.writeToOne(ByteBuffer.wrap(content), clientInfo);
+                            List<MessageAndType> messages = optional.get();
+                            for (MessageAndType message : messages) {
+                                byte[] content = mSerializer.serialize(message.getType(), message.getMessage());
+                                mChannel.writeToOne(ByteBuffer.wrap(content), clientInfo);
+                            }
                         }
                     } catch (IOException e) {
                         logger.error("Error writing initial message to client", e);
@@ -72,22 +75,29 @@ public class TcpServerMessagingChannel implements MessagingChannel {
                 mReadingContext.updateBuffer(buffer, amountReceived);
 
                 try {
-                    Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
-                    if (resultOptional.isPresent()) {
-                        MessageReadingContext.ParseResult parseResult = resultOptional.get();
+                    boolean hasMoreToParse;
+                    do {
+                        Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
+                        if (resultOptional.isPresent()) {
+                            MessageReadingContext.ParseResult parseResult = resultOptional.get();
 
-                        mLogger.debug("New message received: sender={}, type={}",
-                                parseResult.getInfo().getSender(),
-                                parseResult.getInfo().getType());
+                            mLogger.debug("New message received: sender={}, type={}",
+                                    parseResult.getInfo().getSender(),
+                                    parseResult.getInfo().getType().getKey());
 
-                        UpdateHandler handler = mHandler.get();
-                        if (handler != null) {
-                            handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
+                            hasMoreToParse = true;
+
+                            UpdateHandler handler = mHandler.get();
+                            if (handler != null) {
+                                handler.onNewMessage(parseResult.getInfo(), parseResult.getMessage());
+                            }
+
+                            buffer.rewind();
+                            mChannel.writeToAllBut(buffer, sender);
+                        } else {
+                            hasMoreToParse = false;
                         }
-
-                        buffer.rewind();
-                        mChannel.writeToAllBut(buffer, sender);
-                    }
+                    } while (hasMoreToParse || !mReadingContext.hasEnoughSpace());
                 } catch (IOException e) {
                     logger.error("Error parsing message", e);
                 }

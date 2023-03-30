@@ -1,6 +1,10 @@
 package robot;
 
 import com.flash3388.flashlib.app.BasicServiceRegistry;
+import com.flash3388.flashlib.app.ServiceRegistry;
+import com.flash3388.flashlib.app.net.NetworkConfiguration;
+import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
+import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.hid.sdl2.Sdl2HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
@@ -24,16 +28,18 @@ public class Main {
             ManualRobotModeSupplier robotModeProperty = new ManualRobotModeSupplier();
 
             Clock clock = RobotFactory.newDefaultClock();
+            ServiceRegistry serviceRegistry = new BasicServiceRegistry(mainThread);
 
             RobotControl robotControl = new GenericRobotControl(
                     instanceId, resourceHolder,
                     robotModeProperty,
-                    RobotFactory.disabledNetworkInterface(),
+                    new NetworkInterfaceImpl(NetworkConfiguration.disabled(),
+                            instanceId, serviceRegistry, clock, mainThread),
                     new IoInterface.Stub(),
-                    new WeakHidInterface(new Sdl2HidInterface()),
+                    new HidInterface.Stub(),
                     RobotFactory.newDefaultScheduler(clock),
                     clock,
-                    new BasicServiceRegistry(mainThread),
+                    serviceRegistry,
                     mainThread);
 
             // When defining the creation of UserRobot, we make sure to pass the manual mode supplier to

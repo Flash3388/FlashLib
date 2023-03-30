@@ -1,7 +1,13 @@
 package com.flash3388.flashlib.app.net;
 
+import com.flash3388.flashlib.annotations.MainThreadOnly;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 /**
  * A packaged module allowing access to network functionalities to be used by the application.
@@ -44,4 +50,39 @@ public interface NetworkInterface {
      * @return HFCS registry.
      */
     HfcsRegistry getHfcsRegistry();
+
+    /**
+     * Creates a new messaging service for sending and receiving message,
+     * communicating with one or more remote applications.
+     *
+     * @param messageTypes known message types
+     * @param configuration configuration describing the messenger
+     * @return new {@link Messenger}
+     */
+    @MainThreadOnly
+    Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration);
+
+    class MessengerConfiguration {
+        final boolean serverMode;
+        final SocketAddress serverAddress;
+
+        private MessengerConfiguration(boolean serverMode, SocketAddress serverAddress) {
+            this.serverMode = serverMode;
+            this.serverAddress = serverAddress;
+        }
+
+        public static MessengerConfiguration serverMode(int bindPort) {
+            return new MessengerConfiguration(
+                    true,
+                    new InetSocketAddress("0.0.0.0", bindPort)
+            );
+        }
+
+        public static MessengerConfiguration clientMode(SocketAddress serverAddress) {
+            return new MessengerConfiguration(
+                    false,
+                    serverAddress
+            );
+        }
+    }
 }
