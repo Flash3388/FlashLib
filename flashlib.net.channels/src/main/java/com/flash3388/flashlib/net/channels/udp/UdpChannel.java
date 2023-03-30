@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UdpChannel implements NetChannel {
 
     private final int mBindPort;
-    private final Logger mLogger;
+    protected final Logger mLogger;
     private final Runnable mOnOpen;
     private final ThrowingFunction<DatagramChannel, Closeable, IOException> mConfigureChannel;
 
@@ -57,6 +57,11 @@ public class UdpChannel implements NetChannel {
     }
 
     public void setRemoteAddress(SocketAddress remoteAddress) {
+        if (remoteAddress == null || remoteAddress.equals(mRemoteAddress.get())) {
+            return;
+        }
+
+        mLogger.debug("Configuring remote address to {}", remoteAddress);
         mRemoteAddress.set(remoteAddress);
     }
 
@@ -70,9 +75,11 @@ public class UdpChannel implements NetChannel {
                 return new IncomingData(null, 0);
             }
             if (remote.equals(channel.getLocalAddress())) {
-                return new IncomingData(remote, 0);
+                mLogger.debug("Received data from self");
+                return new IncomingData(null, 0);
             }
 
+            mLogger.debug("Received data from {}", remote);
             return new IncomingData(remote, buffer.position());
         } catch (IOException e) {
             close();
@@ -89,6 +96,8 @@ public class UdpChannel implements NetChannel {
         }
 
         try {
+            mLogger.debug("Sending data to {}", remote);
+
             //noinspection resource
             DatagramChannel channel = openChannel();
             channel.send(buffer, remote);
@@ -127,7 +136,9 @@ public class UdpChannel implements NetChannel {
                 channel = DatagramChannel.open();
                 channel.configureBlocking(false);
                 channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-                mCustomCloseable = mConfigureChannel.apply(channel);
+                if (mConfigureChannel != null) {
+                    mCustomCloseable = mConfigureChannel.apply(channel);
+                }
 
                 SocketAddress address = new InetSocketAddress(mBindPort);
                 channel.bind(address);

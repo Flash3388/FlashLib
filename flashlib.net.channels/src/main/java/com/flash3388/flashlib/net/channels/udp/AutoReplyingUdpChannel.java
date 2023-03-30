@@ -15,7 +15,9 @@ public class AutoReplyingUdpChannel extends UdpChannel {
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         IncomingData data = super.read(buffer);
-        setRemoteAddress(data.getSender());
+        if (data.getSender() != null) {
+            setRemoteAddress(data.getSender());
+        }
 
         return data;
     }
