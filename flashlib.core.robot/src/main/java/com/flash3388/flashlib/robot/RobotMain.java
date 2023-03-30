@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot;
 
 import com.flash3388.flashlib.app.AppCreator;
 import com.flash3388.flashlib.app.FlashLibMain;
+import com.flash3388.flashlib.util.unique.InstanceId;
 
 /**
  * <p>
@@ -14,6 +15,22 @@ import com.flash3388.flashlib.app.FlashLibMain;
 public final class RobotMain {
 
     private RobotMain() {}
+
+    /**
+     * <p>
+     *     Starts the robot class.
+     * </p>
+     * <p>
+     *     Any exception thrown from the robot class is caught and logged.
+     * </p>
+     *
+     * @param instanceId instance id for the application
+     * @param robotCreator creator for the robot class.
+     */
+    public static void start(RobotCreator robotCreator, InstanceId instanceId) {
+        AppCreator appCreator = new RobotAppCreator(robotCreator);
+        FlashLibMain.appMain(appCreator, instanceId);
+    }
 
     /**
      * <p>

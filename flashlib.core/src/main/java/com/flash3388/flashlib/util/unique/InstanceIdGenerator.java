@@ -22,11 +22,17 @@ public class InstanceIdGenerator {
 
     private InstanceIdGenerator() {}
 
-    public static InstanceId generate() {
+    public static InstanceId generate(byte[] processIdentifier) {
         byte[] machineId = getMachineId();
-        byte[] pid = getPidAsBytes();
+        return new InstanceId(machineId, processIdentifier);
+    }
 
-        return new InstanceId(machineId, pid);
+    public static InstanceId generate(long processIdentifier) {
+        return generate(getLongAsBytes(processIdentifier));
+    }
+
+    public static InstanceId generate() {
+        return generate(getPid());
     }
 
     private static byte[] getMachineId() {
@@ -67,13 +73,6 @@ public class InstanceIdGenerator {
         return networkInterface.getHardwareAddress();
     }
 
-    private static byte[] getPidAsBytes() {
-        long pid = getPid();
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(pid);
-        return buffer.array();
-    }
-
     private static long getPid() {
         if (KnownOperatingSystem.LINUX.isCurrent()) {
             Path processStat = Paths.get("/proc/self/stat");
@@ -105,5 +104,11 @@ public class InstanceIdGenerator {
             throw new IdGenerationException("ManagementFactory.getRuntimeMXBean().getName() " +
                     "returned an unexpected value", e);
         }
+    }
+
+    private static byte[] getLongAsBytes(long value) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(value);
+        return buffer.array();
     }
 }

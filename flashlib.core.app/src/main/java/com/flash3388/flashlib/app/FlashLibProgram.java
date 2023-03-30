@@ -13,9 +13,13 @@ public class FlashLibProgram {
     private final AppCreator mCreator;
     private final InstanceId mInstanceId;
 
-    public FlashLibProgram(AppCreator creator) {
+    public FlashLibProgram(AppCreator creator, InstanceId instanceId) {
         mCreator = creator;
-        mInstanceId = InstanceIdGenerator.generate();
+        mInstanceId = instanceId;
+    }
+
+    public FlashLibProgram(AppCreator creator) {
+        this(creator, InstanceIdGenerator.generate());
     }
 
     public void start() {

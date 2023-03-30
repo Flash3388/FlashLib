@@ -14,9 +14,23 @@ public class FlashLibMain {
         program.start();
     }
 
+    public static void appMain(AppCreator creator, InstanceId instanceId) {
+        FlashLibProgram program = new FlashLibProgram(creator, instanceId);
+        program.start();
+    }
+
+    public static void appMain(Supplier<FlashLibApp> appSupplier, InstanceId instanceId) {
+        AppCreator creator = new BasicCreator(appSupplier);
+        appMain(creator, instanceId);
+    }
+
     public static void appMain(Supplier<FlashLibApp> appSupplier) {
         AppCreator creator = new BasicCreator(appSupplier);
         appMain(creator);
+    }
+
+    public static void appMain(SimpleApp.Creator creator, InstanceId instanceId) {
+        appMain(()-> new SimpleAppRunner(creator), instanceId);
     }
 
     public static void appMain(SimpleApp.Creator creator) {
