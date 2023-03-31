@@ -2,7 +2,9 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogAccumulator;
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
 import com.flash3388.flashlib.io.devices.Gyro;
+import com.flash3388.flashlib.io.devices.NamedArg;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -47,7 +49,13 @@ public class AnalogGyro implements Gyro {
      * @param center uncalibrated sensor center voltage.
      * @param offset uncalibrated sensor offset voltage.
      */
-    public AnalogGyro(AnalogInput port, double sensitivity, double center, double offset) {
+	@DeviceConstructor
+    public AnalogGyro(
+			@NamedArg("input") AnalogInput port,
+			@NamedArg("sensitivity") double sensitivity,
+			@NamedArg("center") double center,
+			@NamedArg("offset") double offset
+	) {
         mInputPort = port;
         mSensitivity = sensitivity;
         mCenter = port.voltsToValue(center);
@@ -87,7 +95,10 @@ public class AnalogGyro implements Gyro {
 	 * 
 	 * @param port an analog input port.
 	 */
-	public AnalogGyro(AnalogInput port) {
+	@DeviceConstructor
+	public AnalogGyro(
+			@NamedArg("port") AnalogInput port
+	) {
 		mInputPort = port;
 		mSensitivity = DEFAULT_SENSITIVITY;
 		

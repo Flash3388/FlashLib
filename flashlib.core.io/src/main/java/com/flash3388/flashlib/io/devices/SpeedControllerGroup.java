@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @since FlashLib 1.0.0
  */
-public class SpeedControllerGroup implements SpeedController {
+public class SpeedControllerGroup implements SpeedController, DeviceGroup<SpeedController> {
 
 	private final List<SpeedController> mControllers;
 	private boolean mIsInverted;

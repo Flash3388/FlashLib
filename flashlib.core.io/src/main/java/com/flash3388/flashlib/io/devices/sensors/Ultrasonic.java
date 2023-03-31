@@ -4,6 +4,8 @@ import com.castle.util.closeables.Closer;
 import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.io.Counter;
 import com.flash3388.flashlib.io.DigitalOutput;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
@@ -39,7 +41,11 @@ public class Ultrasonic implements RangeFinder {
 	 * @param pingChannel digital output channel for ping
 	 * @param counter pulse counter for echo
 	 */
-	public Ultrasonic(DigitalOutput pingChannel, Counter counter) {
+	@DeviceConstructor
+	public Ultrasonic(
+			@NamedArg("pingChannel") DigitalOutput pingChannel,
+			@NamedArg("counter") Counter counter
+	) {
 		this.mCounter = counter;
 		this.mPingPort = pingChannel;
 	}

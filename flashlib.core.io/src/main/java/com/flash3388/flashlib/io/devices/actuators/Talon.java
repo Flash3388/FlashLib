@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 
 /**
  * Control class for the Talon and Talon SR speed controllers from Cross the Road Electronics. This
@@ -17,7 +19,10 @@ public class Talon extends PwmSpeedController {
 	 * 
 	 * @param port Pwm port object.
 	 */
-	public Talon(Pwm port) {
+	@DeviceConstructor
+	public Talon(
+			@NamedArg("port") Pwm port
+	) {
 		super(port,
                 new PwmBounds(2.037, 1.539, 1.513,
                         1.487, 0.989, false),

@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.Counter;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
@@ -34,7 +36,11 @@ public class PulseWidthRangeFinder implements RangeFinder {
      * @param counter pulse counter for the input port
      * @param sensitivity sensitivity in microseconds/centimeter
      */
-    public PulseWidthRangeFinder(Counter counter, double sensitivity) {
+	@DeviceConstructor
+    public PulseWidthRangeFinder(
+			@NamedArg("counter") Counter counter,
+			@NamedArg("sensitivity") double sensitivity
+	) {
         this.mCounter = counter;
         this.mSensitivity = sensitivity;
     }

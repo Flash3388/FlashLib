@@ -13,7 +13,7 @@ import java.util.Collection;
  *
  * @since FlashLib 3.0.0.
  */
-public class SolenoidGroup implements Solenoid {
+public class SolenoidGroup implements Solenoid, DeviceGroup<Solenoid> {
 
     private final Collection<Solenoid> mSolenoids;
 
