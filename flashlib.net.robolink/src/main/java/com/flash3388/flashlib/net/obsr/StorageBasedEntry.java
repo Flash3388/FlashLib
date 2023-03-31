@@ -82,6 +82,30 @@ public class StorageBasedEntry implements StoredEntry {
     }
 
     @Override
+    public boolean[] getBooleanArray(boolean[] defaultValue) {
+        checkDeleted();
+        return getValue().getBooleanArray(defaultValue);
+    }
+
+    @Override
+    public int[] getIntArray(int[] defaultValue) {
+        checkDeleted();
+        return getValue().getIntArray(defaultValue);
+    }
+
+    @Override
+    public double[] getDoubleArray(double[] defaultValue) {
+        checkDeleted();
+        return getValue().getDoubleArray(defaultValue);
+    }
+
+    @Override
+    public String[] getStringArray(String[] defaultValue) {
+        checkDeleted();
+        return getValue().getStringArray(defaultValue);
+    }
+
+    @Override
     public void clearValue() {
         checkDeleted();
         Storage storage = getStorage();
@@ -135,6 +159,34 @@ public class StorageBasedEntry implements StoredEntry {
         checkDeleted();
         Storage storage = getStorage();
         storage.setEntryValue(mPath, new Value(ValueType.STRING, value));
+    }
+
+    @Override
+    public void setBooleanArray(boolean[] value) {
+        checkDeleted();
+        Storage storage = getStorage();
+        storage.setEntryValue(mPath, new Value(ValueType.BOOLEAN_ARRAY, value));
+    }
+
+    @Override
+    public void setIntArray(int[] value) {
+        checkDeleted();
+        Storage storage = getStorage();
+        storage.setEntryValue(mPath, new Value(ValueType.INT_ARRAY, value));
+    }
+
+    @Override
+    public void setDoubleArray(double[] value) {
+        checkDeleted();
+        Storage storage = getStorage();
+        storage.setEntryValue(mPath, new Value(ValueType.DOUBLE_ARRAY, value));
+    }
+
+    @Override
+    public void setStringArray(String[] value) {
+        checkDeleted();
+        Storage storage = getStorage();
+        storage.setEntryValue(mPath, new Value(ValueType.STRING_ARRAY, value));
     }
 
     @Override

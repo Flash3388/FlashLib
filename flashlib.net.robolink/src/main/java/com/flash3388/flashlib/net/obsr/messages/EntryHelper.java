@@ -56,6 +56,38 @@ public class EntryHelper {
                 output.writeUTF(value.getString(null));
                 break;
             }
+            case BOOLEAN_ARRAY: {
+                boolean[] array = value.getBooleanArray(null);
+                output.writeInt(array.length);
+                for (boolean val : array) {
+                    output.writeBoolean(val);
+                }
+                break;
+            }
+            case INT_ARRAY: {
+                int[] array = value.getIntArray(null);
+                output.writeInt(array.length);
+                for (int val : array) {
+                    output.writeInt(val);
+                }
+                break;
+            }
+            case DOUBLE_ARRAY: {
+                double[] array = value.getDoubleArray(null);
+                output.writeInt(array.length);
+                for (double val : array) {
+                    output.writeDouble(val);
+                }
+                break;
+            }
+            case STRING_ARRAY: {
+                String[] array = value.getStringArray(null);
+                output.writeInt(array.length);
+                for (String val : array) {
+                    output.writeUTF(val);
+                }
+                break;
+            }
             default:
                 throw new IllegalArgumentException("unsupported type: " + type.name());
         }
@@ -92,6 +124,42 @@ public class EntryHelper {
             case STRING:
                 value = input.readUTF();
                 break;
+            case BOOLEAN_ARRAY: {
+                int size = input.readInt();
+                boolean[] array = new boolean[size];
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = input.readBoolean();
+                }
+                value = array;
+                break;
+            }
+            case INT_ARRAY: {
+                int size = input.readInt();
+                int[] array = new int[size];
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = input.readInt();
+                }
+                value = array;
+                break;
+            }
+            case DOUBLE_ARRAY: {
+                int size = input.readInt();
+                double[] array = new double[size];
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = input.readDouble();
+                }
+                value = array;
+                break;
+            }
+            case STRING_ARRAY: {
+                int size = input.readInt();
+                String[] array = new String[size];
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = input.readUTF();
+                }
+                value = array;
+                break;
+            }
             default:
                 throw new IllegalArgumentException("unsupported type: " + type.name());
         }

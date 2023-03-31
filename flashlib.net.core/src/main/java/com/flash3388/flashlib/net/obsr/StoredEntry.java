@@ -98,6 +98,46 @@ public interface StoredEntry {
     String getString(String defaultValue);
 
     /**
+     * Gets the typed value stored in this entry.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#BOOLEAN_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    boolean[] getBooleanArray(boolean[] defaultValue);
+
+    /**
+     * Gets the typed value stored in this entry.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#INT_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    int[] getIntArray(int[] defaultValue);
+
+    /**
+     * Gets the typed value stored in this entry.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#DOUBLE_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    double[] getDoubleArray(double[] defaultValue);
+
+    /**
+     * Gets the typed value stored in this entry.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#STRING_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    String[] getStringArray(String[] defaultValue);
+
+    /**
      * Clears the current entry of any stored value.
      * After this call {@link #getType()} will be {@link ValueType#EMPTY}.
      */
@@ -174,6 +214,50 @@ public interface StoredEntry {
      */
     void setString(String value);
 
+    /**
+     * Sets the value of this entry.
+     * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
+     * after this call, it will no longer be empty, changing it to {@link ValueType#BOOLEAN_ARRAY}.
+     * If the entry is neither empty nor has a type of {@link ValueType#BOOLEAN_ARRAY} then this call will fail,
+     * as changing types without clearing the value first is not possible.
+     *
+     * @param value value to set
+     */
+    void setBooleanArray(boolean[] value);
+
+    /**
+     * Sets the value of this entry.
+     * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
+     * after this call, it will no longer be empty, changing it to {@link ValueType#INT_ARRAY}.
+     * If the entry is neither empty nor has a type of {@link ValueType#INT_ARRAY} then this call will fail,
+     * as changing types without clearing the value first is not possible.
+     *
+     * @param value value to set
+     */
+    void setIntArray(int[] value);
+
+    /**
+     * Sets the value of this entry.
+     * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
+     * after this call, it will no longer be empty, changing it to {@link ValueType#DOUBLE_ARRAY}.
+     * If the entry is neither empty nor has a type of {@link ValueType#DOUBLE_ARRAY} then this call will fail,
+     * as changing types without clearing the value first is not possible.
+     *
+     * @param value value to set
+     */
+    void setDoubleArray(double[] value);
+
+    /**
+     * Sets the value of this entry.
+     * If the entry is empty, i.e. current type of the entry is {@link ValueType#EMPTY}, then
+     * after this call, it will no longer be empty, changing it to {@link ValueType#STRING_ARRAY}.
+     * If the entry is neither empty nor has a type of {@link ValueType#STRING_ARRAY} then this call will fail,
+     * as changing types without clearing the value first is not possible.
+     *
+     * @param value value to set
+     */
+    void setStringArray(String[] value);
+
     class Stub implements StoredEntry {
 
         @Override
@@ -227,6 +311,26 @@ public interface StoredEntry {
         }
 
         @Override
+        public boolean[] getBooleanArray(boolean[] defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public int[] getIntArray(int[] defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public double[] getDoubleArray(double[] defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public String[] getStringArray(String[] defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
         public void clearValue() {
 
         }
@@ -263,6 +367,26 @@ public interface StoredEntry {
 
         @Override
         public void setString(String value) {
+
+        }
+
+        @Override
+        public void setBooleanArray(boolean[] value) {
+
+        }
+
+        @Override
+        public void setIntArray(int[] value) {
+
+        }
+
+        @Override
+        public void setDoubleArray(double[] value) {
+
+        }
+
+        @Override
+        public void setStringArray(String[] value) {
 
         }
     }

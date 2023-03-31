@@ -20,6 +20,46 @@ public class Value {
         mValue = value;
     }
 
+    public static Value newRaw(byte[] value) {
+        return new Value(ValueType.RAW, value);
+    }
+
+    public static Value newInt(int value) {
+        return new Value(ValueType.INT, value);
+    }
+
+    public static Value newLong(long value) {
+        return new Value(ValueType.LONG, value);
+    }
+
+    public static Value newDouble(double value) {
+        return new Value(ValueType.DOUBLE, value);
+    }
+
+    public static Value newBoolean(boolean value) {
+        return new Value(ValueType.BOOLEAN, value);
+    }
+
+    public static Value newString(String value) {
+        return new Value(ValueType.STRING, value);
+    }
+
+    public static Value newBooleanArray(boolean[] value) {
+        return new Value(ValueType.STRING, value);
+    }
+
+    public static Value newIntArray(int[] value) {
+        return new Value(ValueType.INT_ARRAY, value);
+    }
+
+    public static Value newDoubleArray(double[] value) {
+        return new Value(ValueType.DOUBLE_ARRAY, value);
+    }
+
+    public static Value newStringArray(String[] value) {
+        return new Value(ValueType.STRING_ARRAY, value);
+    }
+
     /**
      * Gets the current type of the value.
      *
@@ -111,6 +151,54 @@ public class Value {
         return getValue(ValueType.STRING, String.class, defaultValue);
     }
 
+    /**
+     * Gets the typed value stored.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#BOOLEAN_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    public boolean[] getBooleanArray(boolean[] defaultValue) {
+        return getValue(ValueType.BOOLEAN_ARRAY, boolean[].class, defaultValue);
+    }
+
+    /**
+     * Gets the typed value stored.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#INT_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    public int[] getIntArray(int[] defaultValue) {
+        return getValue(ValueType.INT_ARRAY, int[].class, defaultValue);
+    }
+
+    /**
+     * Gets the typed value stored.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#DOUBLE_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    public double[] getDoubleArray(double[] defaultValue) {
+        return getValue(ValueType.DOUBLE_ARRAY, double[].class, defaultValue);
+    }
+
+    /**
+     * Gets the typed value stored.
+     *
+     * This method will return the value if {@link #getType()} is {@link ValueType#STRING_ARRAY}.
+     *
+     * @param defaultValue value to return if the value is empty, i.e. {@link #isEmpty()} is <b>true</b>.
+     * @return value stored, or <em>defaultValue</em> if empty.
+     */
+    public String[] getStringArray(String[] defaultValue) {
+        return getValue(ValueType.STRING_ARRAY, String[].class, defaultValue);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -169,6 +257,18 @@ public class Value {
                 break;
             case STRING:
                 ensureType(type, String.class, value);
+                break;
+            case BOOLEAN_ARRAY:
+                ensureType(type, boolean[].class, value);
+                break;
+            case INT_ARRAY:
+                ensureType(type, int[].class, value);
+                break;
+            case DOUBLE_ARRAY:
+                ensureType(type, double[].class, value);
+                break;
+            case STRING_ARRAY:
+                ensureType(type, String[].class, value);
                 break;
             default:
                 throw new IllegalArgumentException("unsupported type: " + type);
