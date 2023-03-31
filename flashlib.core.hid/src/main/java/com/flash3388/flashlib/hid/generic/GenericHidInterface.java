@@ -10,8 +10,12 @@ import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.Pov;
 import com.flash3388.flashlib.hid.XboxController;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.logging.Logging;
+import org.slf4j.Logger;
 
 public class GenericHidInterface implements HidInterface {
+
+    private static final Logger LOGGER = Logging.getMainLogger();
 
     private final RawHidInterface mInterface;
     private final FlashLibMainThread mMainThread;
@@ -27,6 +31,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID Axis for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.AXIS);
         return new GenericAxis(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
@@ -38,6 +43,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID Button for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.BUTTON);
         return new GenericButton(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
@@ -49,6 +55,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID POV for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.POV);
         return new GenericPov(mInterface, RawHidInterface.NO_HID_CHANNEL, channelInt);
@@ -60,6 +67,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.HID);
         return new GenericHid(mInterface, channelInt);
@@ -71,6 +79,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID Joystick for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.JOYSTICK);
         return new GenericJoystick(mInterface, channelInt);
@@ -82,6 +91,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID XBOX Controller for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.XBOX);
         return new GenericXboxController(mInterface, channelInt);
@@ -93,6 +103,7 @@ public class GenericHidInterface implements HidInterface {
 
         GenericHidChannel genericHidChannel = HidChannel.cast(channel, GenericHidChannel.class);
         int channelInt = genericHidChannel.intValue();
+        LOGGER.info("Create new HID DualShock4 for channel {}", channelInt);
 
         ensureExistsChannelOfType(channelInt, ChannelType.XBOX);
         return new GenericDualshockController(mInterface, channelInt);

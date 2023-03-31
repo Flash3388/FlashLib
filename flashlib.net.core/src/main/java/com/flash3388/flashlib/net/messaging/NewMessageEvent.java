@@ -19,4 +19,12 @@ public class NewMessageEvent implements Event {
     public InMessage getMessage() {
         return mMessage;
     }
+
+    public <T extends InMessage> T getMessage(Class<T> type) {
+        if (type.isInstance(mMessage)) {
+            return type.cast(mMessage);
+        }
+
+        throw new ClassCastException(String.format("Message is not of type %s", type.getName()));
+    }
 }
