@@ -12,7 +12,7 @@ import java.util.Collection;
  *
  * @since FlashLib 3.0.0.
  */
-public class DoubleSolenoidGroup implements DoubleSolenoid {
+public class DoubleSolenoidGroup implements DoubleSolenoid, DeviceGroup<DoubleSolenoid> {
 
     private final Collection<DoubleSolenoid> mSolenoids;
 

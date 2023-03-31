@@ -2,7 +2,9 @@ package com.flash3388.flashlib.io.devices;
 
 import com.flash3388.flashlib.annotations.MainThreadOnly;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A provider/creator of devices of certain types. Each registered implementation
@@ -26,10 +28,11 @@ public interface DeviceInterface {
     @MainThreadOnly
     <T> T newDevice(String id, Class<T> type, Map<String, Object> namedArgs);
 
+    /**
+     * Creates a new group of devices, which is encapsulated under a single interface.
+     *
+     * @return an object encapsulating usage of all the device
+     */
     @MainThreadOnly
-    GroupBuilder<SpeedController, SpeedControllerGroup> newSpeedControllerGroup();
-    @MainThreadOnly
-    GroupBuilder<Solenoid, SolenoidGroup> newSolenoidGroup();
-    @MainThreadOnly
-    GroupBuilder<DoubleSolenoid, DoubleSolenoidGroup> newDoubleSolenoidGroup();
+    <E, T extends DeviceGroup<E>> GroupBuilder<E, T> newGroup(Class<T> groupType, Function<List<E>, T> creator);
 }

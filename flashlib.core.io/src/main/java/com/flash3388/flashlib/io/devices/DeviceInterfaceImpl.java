@@ -10,9 +10,11 @@ import org.slf4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
+import java.util.function.Function;
 
 public class DeviceInterfaceImpl implements DeviceInterface {
 
@@ -33,21 +35,9 @@ public class DeviceInterfaceImpl implements DeviceInterface {
     }
 
     @Override
-    public GroupBuilder<SpeedController, SpeedControllerGroup> newSpeedControllerGroup() {
+    public <E, T extends DeviceGroup<E>> GroupBuilder<E, T> newGroup(Class<T> groupType, Function<List<E>, T> creator) {
         mMainThread.verifyCurrentThread();
-        return new GroupBuilder<>(SpeedControllerGroup::new);
-    }
-
-    @Override
-    public GroupBuilder<Solenoid, SolenoidGroup> newSolenoidGroup() {
-        mMainThread.verifyCurrentThread();
-        return new GroupBuilder<>(SolenoidGroup::new);
-    }
-
-    @Override
-    public GroupBuilder<DoubleSolenoid, DoubleSolenoidGroup> newDoubleSolenoidGroup() {
-        mMainThread.verifyCurrentThread();
-        return new GroupBuilder<>(DoubleSolenoidGroup::new);
+        return new GroupBuilder<>(creator);
     }
 
     private <T> Class<? extends T> findType(String id, Class<T> type) {

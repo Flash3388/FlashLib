@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class GroupBuilder<E, T> {
+public class GroupBuilder<E, T extends DeviceGroup<E>> {
 
     private final Function<List<E>, T> mCreator;
     private final List<E> mParts;
