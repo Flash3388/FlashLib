@@ -6,6 +6,7 @@ import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkingMode;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.io.devices.DeviceInterface;
 import com.flash3388.flashlib.robot.base.GenericRobotControl;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -228,4 +229,12 @@ public interface RobotControl extends FlashLibControl {
      * @return {@link NetworkInterface}
      */
     NetworkInterface getNetworkInterface();
+
+    /**
+     * Gets the {@link DeviceInterface} object associated with the robot.
+     * This interface allows acquired/create devices based on a given requirements.
+     *
+     * @return {@link DeviceInterface}
+     */
+    DeviceInterface getDeviceInterface();
 }

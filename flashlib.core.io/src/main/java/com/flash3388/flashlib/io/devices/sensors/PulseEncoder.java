@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.Counter;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
 import com.flash3388.flashlib.io.devices.Encoder;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
@@ -27,7 +29,13 @@ public class PulseEncoder implements Encoder {
 	private long mRestTimeout;
 	private boolean mShouldCheckRest;
 
-	public PulseEncoder(Counter counter, Clock clock, int pulsesPerRevolution, double distancePerPulse) {
+	@DeviceConstructor
+	public PulseEncoder(
+			@NamedArg("counter") Counter counter,
+			@NamedArg("clock") Clock clock,
+			@NamedArg("pulsesPerRevolution") int pulsesPerRevolution,
+			@NamedArg("distancePerPulse") double distancePerPulse
+	) {
 		mCounter = counter;
 		mClock = clock;
 		mDistancePerPulse = distancePerPulse;

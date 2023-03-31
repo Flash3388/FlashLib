@@ -3,6 +3,8 @@ package com.flash3388.flashlib.robot.base;
 import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkConfiguration;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
+import com.flash3388.flashlib.io.devices.DeviceInterface;
+import com.flash3388.flashlib.io.devices.DeviceInterfaceImpl;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.ping.HfcsPing;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
@@ -67,6 +69,7 @@ public class GenericRobotControl implements RobotControl {
     private final Clock mClock;
     private final ServiceRegistry mServiceRegistry;
     private final FlashLibMainThread mMainThread;
+    private final DeviceInterface mDeviceInterface;
 
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
@@ -77,7 +80,8 @@ public class GenericRobotControl implements RobotControl {
                                Scheduler scheduler,
                                Clock clock,
                                ServiceRegistry serviceRegistry,
-                               FlashLibMainThread mainThread) {
+                               FlashLibMainThread mainThread,
+                               DeviceInterface deviceInterface) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
         mModeSupplier = modeSupplier;
@@ -88,6 +92,7 @@ public class GenericRobotControl implements RobotControl {
         mClock = clock;
         mServiceRegistry = serviceRegistry;
         mMainThread = mainThread;
+        mDeviceInterface = deviceInterface;
     }
 
     public GenericRobotControl(InstanceId instanceId,
@@ -126,6 +131,7 @@ public class GenericRobotControl implements RobotControl {
 
         mIoInterface = new IoInterface.Stub();
         mScheduler = RobotFactory.newDefaultScheduler(mClock, objectStorage, mMainThread);
+        mDeviceInterface = new DeviceInterfaceImpl(mMainThread);
     }
 
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Configuration configuration) {
@@ -180,6 +186,11 @@ public class GenericRobotControl implements RobotControl {
     @Override
     public NetworkInterface getNetworkInterface() {
         return mNetworkInterface;
+    }
+
+    @Override
+    public DeviceInterface getDeviceInterface() {
+        return mDeviceInterface;
     }
 
     @Override

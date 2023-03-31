@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.PositionController;
 import com.jmath.ExtendedMath;
 
@@ -19,7 +21,12 @@ public class PwmPositionController extends PwmController implements PositionCont
      * @param pulseBounds the Pwm port bounds
      * @param pwmFrequency frequency of the Pwm in Hz
      */
-    public PwmPositionController(Pwm port, PwmBounds pulseBounds, double pwmFrequency) {
+    @DeviceConstructor
+    public PwmPositionController(
+            @NamedArg("port") Pwm port,
+            @NamedArg("pulseBounds") PwmBounds pulseBounds,
+            @NamedArg("pwmFrequency") double pwmFrequency
+    ) {
         super(port, pulseBounds, pwmFrequency);
     }
 

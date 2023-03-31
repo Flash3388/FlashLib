@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.io.devices.actuators;
 
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.SpeedController;
 
 /**
@@ -20,7 +22,12 @@ public class PwmSpeedController extends PwmController implements SpeedController
 	 * @param pulseBounds pwm bounds
      * @param pwmFrequency frequency of the Pwm in Hz
 	 */
-	public PwmSpeedController(Pwm port, PwmBounds pulseBounds, double pwmFrequency) {
+	@DeviceConstructor
+	public PwmSpeedController(
+			@NamedArg("port") Pwm port,
+			@NamedArg("pulseBounds") PwmBounds pulseBounds,
+			@NamedArg("pwmFrequency") double pwmFrequency
+	) {
 		super(port, pulseBounds, pwmFrequency);
 
 		mInverted = false;

@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.RangeFinder;
 
 import java.io.IOException;
@@ -32,7 +34,11 @@ public class AnalogRangeFinder implements RangeFinder {
 	 * @param input analog input port
 	 * @param sensitivity sensitivity in volts/centimeter
 	 */
-	public AnalogRangeFinder(AnalogInput input, double sensitivity) {
+	@DeviceConstructor
+	public AnalogRangeFinder(
+			@NamedArg("input") AnalogInput input,
+			@NamedArg("sensitivity") double sensitivity
+	) {
 		this.mInput = input;
 		this.mSensitivity = sensitivity;
 	}

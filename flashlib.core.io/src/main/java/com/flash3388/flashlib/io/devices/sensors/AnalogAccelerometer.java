@@ -2,6 +2,8 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.flash3388.flashlib.io.AnalogInput;
 import com.flash3388.flashlib.io.devices.Accelerometer;
+import com.flash3388.flashlib.io.devices.DeviceConstructor;
+import com.flash3388.flashlib.io.devices.NamedArg;
 
 import java.io.IOException;
 
@@ -37,7 +39,12 @@ public class AnalogAccelerometer implements Accelerometer {
      * @param zeroGVoltage voltage when acceleration is 0
      * @param voltsPerG conversion factor from volts to G acceleration.
      */
-    public AnalogAccelerometer(AnalogInput input, double zeroGVoltage, double voltsPerG) {
+	@DeviceConstructor
+    public AnalogAccelerometer(
+			@NamedArg("input") AnalogInput input,
+			@NamedArg("zeroGVoltage") double zeroGVoltage,
+			@NamedArg("voltsPerG") double voltsPerG
+	) {
         this.mInput = input;
         this.mZeroGvoltage = zeroGVoltage;
         this.mVoltsPerG = voltsPerG;
@@ -52,7 +59,10 @@ public class AnalogAccelerometer implements Accelerometer {
 	 * 
 	 * @param input analog input port to which the sensor is connected
 	 */
-	public AnalogAccelerometer(AnalogInput input) {
+	@DeviceConstructor
+	public AnalogAccelerometer(
+			@NamedArg("input") AnalogInput input
+	) {
 		this(input, DEFAULT_ZERO_VOLTAGE, DEFAULT_SENSITIVITY);
 	}
 	

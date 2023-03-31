@@ -5,9 +5,8 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkConfiguration;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
 import com.flash3388.flashlib.hid.HidInterface;
-import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
-import com.flash3388.flashlib.hid.sdl2.Sdl2HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.io.devices.DeviceInterfaceImpl;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.RobotImplementation;
@@ -40,7 +39,8 @@ public class Main {
                     RobotFactory.newDefaultScheduler(clock),
                     clock,
                     serviceRegistry,
-                    mainThread);
+                    mainThread,
+                    new DeviceInterfaceImpl(mainThread));
 
             // When defining the creation of UserRobot, we make sure to pass the manual mode supplier to
             // the constructor, so it could be used.

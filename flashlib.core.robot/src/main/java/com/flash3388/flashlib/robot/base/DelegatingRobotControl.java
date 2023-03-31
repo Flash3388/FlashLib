@@ -4,6 +4,7 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
+import com.flash3388.flashlib.io.devices.DeviceInterface;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.scheduling.Scheduler;
@@ -105,6 +106,11 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public NetworkInterface getNetworkInterface() {
         return mRobotControl.getNetworkInterface();
+    }
+
+    @Override
+    public DeviceInterface getDeviceInterface() {
+        return mRobotControl.getDeviceInterface();
     }
 
     @Override
