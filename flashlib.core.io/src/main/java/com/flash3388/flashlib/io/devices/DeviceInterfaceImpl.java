@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.io.devices;
 
+import com.castle.reflect.Types;
 import com.castle.reflect.exceptions.TypeException;
 import com.castle.util.throwables.ThrowableChain;
 import com.castle.util.throwables.Throwables;
@@ -64,7 +65,7 @@ public class DeviceInterfaceImpl implements DeviceInterface {
         throw new AssertionError("should not have reached here");
     }
 
-    private static <T> T newInstance(Class<? extends T> type, Map<String, Object> namedArgs) {
+    private <T> T newInstance(Class<? extends T> type, Map<String, Object> namedArgs) {
         ThrowableChain chain = Throwables.newChain();
 
         for (Constructor<?> constructor : type.getConstructors()) {
@@ -83,7 +84,7 @@ public class DeviceInterfaceImpl implements DeviceInterface {
         throw new AssertionError("should not have reached here");
     }
 
-    private static <T> T newInstance(Class<? extends T> type, Map<String, Object> namedArgs,
+    private <T> T newInstance(Class<? extends T> type, Map<String, Object> namedArgs,
                                      Constructor<?> constructor)
             throws InvocationTargetException, InstantiationException, IllegalAccessException {
         if (constructor.getAnnotation(DeviceConstructor.class) == null) {
@@ -107,14 +108,27 @@ public class DeviceInterfaceImpl implements DeviceInterface {
             if (value == null) {
                 throw new TypeException("no argument given for constructor arg " + name);
             }
-            if (!parameter.getType().isInstance(value)) {
-                throw new TypeException("given value does not match actual arg type " + name);
-            }
 
-            args[argIndex++] = value;
+            args[argIndex++] = loadValue(name, value, parameter.getType());
         }
 
         //noinspection unchecked
         return (T) constructor.newInstance(args);
+    }
+
+    private Object loadValue(String name, Object value, Class<?> wantedType) {
+        if (wantedType.isPrimitive()) {
+            if (!Types.toWrapperClass(wantedType).isInstance(value)) {
+                throw new TypeException("given value does not match actual arg type " + name);
+            }
+
+            return value;
+        } else {
+            if (!wantedType.isInstance(value)) {
+                throw new TypeException("given value does not match actual arg type " + name);
+            }
+
+            return wantedType.cast(value);
+        }
     }
 }

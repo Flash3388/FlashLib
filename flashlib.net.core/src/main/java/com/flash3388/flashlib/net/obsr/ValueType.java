@@ -7,5 +7,9 @@ public enum ValueType {
     INT,
     LONG,
     DOUBLE,
-    STRING
+    STRING,
+    BOOLEAN_ARRAY,
+    INT_ARRAY,
+    DOUBLE_ARRAY,
+    STRING_ARRAY
 }
