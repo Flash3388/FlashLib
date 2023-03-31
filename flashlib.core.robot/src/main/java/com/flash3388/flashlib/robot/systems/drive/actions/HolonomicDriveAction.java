@@ -3,13 +3,16 @@ package com.flash3388.flashlib.robot.systems.drive.actions;
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDrive;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDriveSpeed;
-import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.jmath.vectors.Vector2;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class HolonomicDriveAction extends ActionBase {
+public class HolonomicDriveAction implements ActionInterface {
 	
 	private final HolonomicDrive mDriveInterface;
 	private final Supplier<? extends HolonomicDriveSpeed> mSpeedSupplier;
@@ -17,8 +20,6 @@ public class HolonomicDriveAction extends ActionBase {
     public HolonomicDriveAction(HolonomicDrive driveInterface, Supplier<? extends HolonomicDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
-
-        requires(driveInterface);
     }
 
     public HolonomicDriveAction(HolonomicDrive driveInterface, HolonomicDriveSpeed driveSpeed) {
@@ -40,14 +41,19 @@ public class HolonomicDriveAction extends ActionBase {
 	public static HolonomicDriveAction polar(HolonomicDrive driveInterface, DoubleSupplier magnitude, DoubleSupplier direction, DoubleSupplier rotate) {
 		return new HolonomicDriveAction(driveInterface, ()->new HolonomicDriveSpeed(Vector2.polar(magnitude.getAsDouble(), direction.getAsDouble()), rotate.getAsDouble()));
 	}
-	
-	@Override
-	public void execute() {
-		mDriveInterface.holonomicDrive(mSpeedSupplier.get());
-	}
 
-	@Override
-    public void end(boolean wasInterrupted) {
-		mDriveInterface.stop();
-	}
+    @Override
+    public void configure(ActionConfigurationEditor editor) {
+        editor.addRequirements(mDriveInterface);
+    }
+
+    @Override
+    public void execute(ActionControl control) {
+        mDriveInterface.holonomicDrive(mSpeedSupplier.get());
+    }
+
+    @Override
+    public void end(FinishReason reason) {
+        mDriveInterface.stop();
+    }
 }

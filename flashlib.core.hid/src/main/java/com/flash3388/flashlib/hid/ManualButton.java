@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.hid;
 
 import com.beans.BooleanProperty;
-import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerImpl;
 
 /**
  * A {@link Button} implementation which is modified directly from user code and has to be

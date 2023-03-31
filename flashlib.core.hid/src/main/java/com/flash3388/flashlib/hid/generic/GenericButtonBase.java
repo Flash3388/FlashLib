@@ -2,9 +2,9 @@ package com.flash3388.flashlib.hid.generic;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.hid.Button;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.triggers.Trigger;
+import com.flash3388.flashlib.scheduling.Trigger;
 
 public abstract class GenericButtonBase implements Button, Trigger {
 
@@ -19,42 +19,42 @@ public abstract class GenericButtonBase implements Button, Trigger {
     }
 
     @Override
-    public void whenActive(Action action) {
+    public void whenActive(ActionInterface action) {
         mTrigger.whenActive(action);
     }
 
     @Override
-    public void cancelWhenActive(Action action) {
+    public void cancelWhenActive(ActionInterface action) {
         mTrigger.cancelWhenActive(action);
     }
 
     @Override
-    public void toggleWhenActive(Action action) {
+    public void toggleWhenActive(ActionInterface action) {
         mTrigger.toggleWhenActive(action);
     }
 
     @Override
-    public void whileActive(Action action) {
+    public void whileActive(ActionInterface action) {
         mTrigger.whileActive(action);
     }
 
     @Override
-    public void whenInactive(Action action) {
+    public void whenInactive(ActionInterface action) {
         mTrigger.whenInactive(action);
     }
 
     @Override
-    public void cancelWhenInactive(Action action) {
+    public void cancelWhenInactive(ActionInterface action) {
         mTrigger.cancelWhenInactive(action);
     }
 
     @Override
-    public void toggleWhenInactive(Action action) {
+    public void toggleWhenInactive(ActionInterface action) {
         mTrigger.toggleWhenInactive(action);
     }
 
     @Override
-    public void whileInactive(Action action) {
+    public void whileInactive(ActionInterface action) {
         mTrigger.whileInactive(action);
     }
 }

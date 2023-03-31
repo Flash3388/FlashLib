@@ -2,11 +2,14 @@ package com.flash3388.flashlib.robot.motion.actions;
 
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.motion.Movable;
-import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.FinishReason;
 
 import java.util.function.DoubleSupplier;
 
-public class MoveAction extends ActionBase {
+public class MoveAction implements ActionInterface {
 
     private final Movable mMovable;
     private final DoubleSupplier mSpeedSupplier;
@@ -14,8 +17,6 @@ public class MoveAction extends ActionBase {
     public MoveAction(Movable movable, DoubleSupplier speedSupplier) {
         mMovable = movable;
         mSpeedSupplier = speedSupplier;
-
-        requires(movable);
     }
 
     public MoveAction(Movable movable, double speed) {
@@ -23,12 +24,17 @@ public class MoveAction extends ActionBase {
     }
 
     @Override
-    public void execute() {
+    public void configure(ActionConfigurationEditor editor) {
+        editor.addRequirements(mMovable);
+    }
+
+    @Override
+    public void execute(ActionControl control) {
         mMovable.move(mSpeedSupplier.getAsDouble());
     }
 
     @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         mMovable.stop();
     }
 }

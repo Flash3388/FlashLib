@@ -14,7 +14,7 @@ public final class ActionsMock {
     private ActionsMock() {
     }
 
-    public static class ActionMocker {
+    /*public static class ActionMocker {
 
         private ActionConfiguration mConfiguration;
         private boolean mIsFinished;
@@ -128,5 +128,5 @@ public final class ActionsMock {
         doThrow(new RuntimeException()).when(action).execute();
 
         return action;
-    }
+    }*/
 }

@@ -1,20 +1,25 @@
 package com.flash3388.flashlib.robot.systems.actions;
 
 import com.flash3388.flashlib.robot.systems.Valve;
-import com.flash3388.flashlib.scheduling.actions.InstantAction;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 
-public class OpenValveAction extends InstantAction {
+public class OpenValveAction implements ActionInterface {
 
     private final Valve mValve;
 
     public OpenValveAction(Valve valve) {
         mValve = valve;
-
-        requires(valve);
     }
 
     @Override
-    public void execute() {
+    public void configure(ActionConfigurationEditor editor) {
+        editor.addRequirements(mValve);
+    }
+
+    @Override
+    public void execute(ActionControl control) {
         mValve.open();
     }
 }

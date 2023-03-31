@@ -7,7 +7,7 @@ public interface ExecutionContext {
         FINISHED
     }
 
-    ExecutionResult execute(SchedulerMode mode);
+    ExecutionResult execute();
 
     void interrupt();
 }

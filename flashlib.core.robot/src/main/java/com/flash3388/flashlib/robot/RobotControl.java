@@ -13,7 +13,7 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.time.Clock;
 import org.slf4j.Logger;
 
@@ -144,13 +144,7 @@ public interface RobotControl extends FlashLibControl {
 
     /**
      * Gets the {@link Scheduler} object of the robot. Responsible for
-     * executing {@link com.flash3388.flashlib.scheduling.actions.Action Actions}.
-     * <p>
-     *     This normally has not much use directly, since starting actions
-     *     can be done with {@link Action#start()}. However, the scheduler provides
-     *     some additional functionality which some may find useful. For example,
-     *     canceling all actions:
-     * </p>
+     * executing {@link com.flash3388.flashlib.scheduling.ActionInterface Actions}.
      * <pre>
      *     robotControl.getScheduler().cancelAllActions();
      * </pre>

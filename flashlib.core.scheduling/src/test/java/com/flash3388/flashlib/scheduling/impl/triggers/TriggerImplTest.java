@@ -1,0 +1,104 @@
+package com.flash3388.flashlib.scheduling.impl.triggers;
+
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.actions.ActionsMock;
+import org.junit.jupiter.api.Test;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+public class TriggerImplTest {
+
+   /*  @Test
+    public void setState_stateChanges_updatesListenersWithChange() throws Exception {
+        TriggerStateListener listener = mock(TriggerStateListener.class);
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE, mock(Scheduler.class));
+        trigger.addStateListener(listener);
+
+        trigger.setState(TriggerState.ACTIVE);
+
+        verify(listener, times(1)).onStateChange(
+                eq(TriggerState.ACTIVE),
+                eq(TriggerState.INACTIVE));
+    }
+
+    @Test
+    public void whenActive_triggerActivates_startAction() throws Exception {
+        ActionInterface mockAction = mock(ActionInterface.class);
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE, mock(Scheduler.class));
+        trigger.whenActive(mockAction);
+
+        trigger.activate();
+
+        //verify(mockAction, times(1)).start();
+    }
+
+   @Test
+    public void whenInactive_triggerDeactivates_startAction() throws Exception {
+        Action mockAction = mock(Action.class);
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
+        trigger.whenInactive(mockAction);
+
+        trigger.deactivate();
+
+        verify(mockAction, times(1)).start();
+    }
+
+    @Test
+    public void cancelWhenActive_triggerActivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
+        trigger.cancelWhenActive(mockAction);
+
+        trigger.activate();
+
+        verify(mockAction, times(1)).cancel();
+    }
+
+    @Test
+    public void cancelWhenInactive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
+        trigger.cancelWhenInactive(mockAction);
+
+        trigger.deactivate();
+
+        verify(mockAction, times(1)).cancel();
+    }
+
+    @Test
+    public void whileActive_triggerActivates_startAction() throws Exception {
+        Action mockAction = mock(Action.class);
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
+        trigger.whileActive(mockAction);
+
+        trigger.activate();
+
+        verify(mockAction, times(1)).start();
+    }
+
+    @Test
+    public void whileActive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
+        Action mockAction = ActionsMock.actionMocker()
+                .mockIsRunning(true)
+                .build();
+
+        TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
+        trigger.whileActive(mockAction);
+
+        trigger.deactivate();
+
+        verify(mockAction, times(1)).cancel();
+    }*/
+}

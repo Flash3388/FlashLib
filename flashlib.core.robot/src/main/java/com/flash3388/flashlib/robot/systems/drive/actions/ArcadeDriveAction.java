@@ -3,12 +3,16 @@ package com.flash3388.flashlib.robot.systems.drive.actions;
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.ArcadeDriveSpeed;
 import com.flash3388.flashlib.robot.systems.drive.TankDrive;
-import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.FinishReason;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class ArcadeDriveAction extends ActionBase {
+
+public class ArcadeDriveAction implements ActionInterface {
 	
 	private final TankDrive mDriveInterface;
 	private final Supplier<? extends ArcadeDriveSpeed> mSpeedSupplier;
@@ -16,8 +20,6 @@ public class ArcadeDriveAction extends ActionBase {
     public ArcadeDriveAction(TankDrive driveInterface, Supplier<? extends ArcadeDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
-
-        requires(driveInterface);
     }
 
 	public ArcadeDriveAction(TankDrive driveInterface, DoubleSupplier move, DoubleSupplier rotate) {
@@ -31,15 +33,19 @@ public class ArcadeDriveAction extends ActionBase {
     public ArcadeDriveAction(TankDrive driveInterface, double move, double rotate) {
         this(driveInterface, new ArcadeDriveSpeed(move, rotate));
     }
-	
+
 	@Override
-	public void execute() {
+	public void configure(ActionConfigurationEditor editor) {
+		editor.addRequirements(mDriveInterface);
+	}
+
+	@Override
+	public void execute(ActionControl control) {
 		mDriveInterface.arcadeDrive(mSpeedSupplier.get());
 	}
 
 	@Override
-	public void end(boolean wasInterrupted) {
+	public void end(FinishReason reason) {
 		mDriveInterface.stop();
 	}
-
 }

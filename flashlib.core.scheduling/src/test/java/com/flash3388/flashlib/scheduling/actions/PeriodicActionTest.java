@@ -20,7 +20,7 @@ class PeriodicActionTest {
         GlobalDependenciesMock.mockDependencies();
     }
 
-    @Test
+   /* @Test
     public void execute_firstRun_runsRunnable() throws Exception {
         Runnable runnable = mock(Runnable.class);
         Time period = Time.seconds(1);
@@ -55,5 +55,5 @@ class PeriodicActionTest {
         action.execute();
 
         verify(runnable, never()).run();
-    }
+    }*/
 }

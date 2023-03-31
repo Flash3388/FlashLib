@@ -10,7 +10,7 @@ import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.systems.drive.actions.ArcadeDriveAction;
-import com.flash3388.flashlib.scheduling.actions.Actions;
+import com.flash3388.flashlib.scheduling.Actions;
 import robot.actions.CustomTankDriveAction;
 import robot.subsystems.CustomTankDrive;
 

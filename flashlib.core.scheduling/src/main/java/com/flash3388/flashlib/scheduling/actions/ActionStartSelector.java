@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionInterface;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class ActionStartSelector<T> {
     public static class Builder<T> {
 
         private final List<ConditionNode<T>> mNodes;
-        private Function<T, Action> mDefaultAction;
+        private Function<T, ActionInterface> mDefaultAction;
 
         public Builder() {
             mNodes = new LinkedList<>();
@@ -37,7 +39,7 @@ public class ActionStartSelector<T> {
          * @param condition condition to check the input value
          * @return this
          */
-        public Builder<T> useWhen(Function<T, Action> actionProvider, Predicate<T> condition) {
+        public Builder<T> useWhen(Function<T, ActionInterface> actionProvider, Predicate<T> condition) {
             mNodes.add(new ConditionNode<>(actionProvider, condition));
             return this;
         }
@@ -48,7 +50,7 @@ public class ActionStartSelector<T> {
          * @param actionProvider creator for the action
          * @return this
          */
-        public Builder<T> useElse(Function<T, Action> actionProvider) {
+        public Builder<T> useElse(Function<T, ActionInterface> actionProvider) {
             mDefaultAction = actionProvider;
             return this;
         }
@@ -59,19 +61,19 @@ public class ActionStartSelector<T> {
     }
 
     private static class ConditionNode<T> {
-        public Function<T, Action> actionProvider;
+        public Function<T, ActionInterface> actionProvider;
         public Predicate<T> condition;
 
-        ConditionNode(Function<T, Action> actionProvider, Predicate<T> condition) {
+        ConditionNode(Function<T, ActionInterface> actionProvider, Predicate<T> condition) {
             this.actionProvider = actionProvider;
             this.condition = condition;
         }
     }
 
     private final List<ConditionNode<T>> mNodes;
-    private final Function<T, Action> mDefaultAction;
+    private final Function<T, ActionInterface> mDefaultAction;
 
-    private ActionStartSelector(List<ConditionNode<T>> nodes, Function<T, Action> defaultAction) {
+    private ActionStartSelector(List<ConditionNode<T>> nodes, Function<T, ActionInterface> defaultAction) {
         mNodes = nodes;
         mDefaultAction = defaultAction;
     }
@@ -87,7 +89,7 @@ public class ActionStartSelector<T> {
      * @return action selected.
      * @throws NoSuchElementException if no condition is met and no default action exists.
      */
-    public Action create(T value) {
+    public ActionInterface create(T value) {
         for (ConditionNode<T> node : mNodes) {
             if (node.condition.test(value)) {
                 return node.actionProvider.apply(value);

@@ -3,12 +3,15 @@ package com.flash3388.flashlib.robot.systems.drive.actions;
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.OmniDrive;
 import com.flash3388.flashlib.robot.systems.drive.OmniDriveSpeed;
-import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.FinishReason;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class OmniDriveAction extends ActionBase {
+public class OmniDriveAction implements ActionInterface {
 	
 	private final OmniDrive mDriveInterface;
 	private final Supplier<? extends OmniDriveSpeed> mSpeedSupplier;
@@ -16,8 +19,6 @@ public class OmniDriveAction extends ActionBase {
     public OmniDriveAction(OmniDrive driveInterface, Supplier<? extends OmniDriveSpeed> speedSupplier) {
         mDriveInterface = driveInterface;
         mSpeedSupplier = speedSupplier;
-
-        requires(driveInterface);
     }
 
     public OmniDriveAction(OmniDrive driveInterface, OmniDriveSpeed driveSpeed) {
@@ -39,14 +40,19 @@ public class OmniDriveAction extends ActionBase {
     public OmniDriveAction(OmniDrive driveInterface, double front, double right, double back, double left) {
         this(driveInterface, ()->new OmniDriveSpeed(front, right, back, left));
     }
-	
-	@Override
-	public void execute() {
-		mDriveInterface.omniDrive(mSpeedSupplier.get());
-	}
 
-	@Override
-    public void end(boolean wasInterrupted) {
-		mDriveInterface.stop();
-	}
+    @Override
+    public void configure(ActionConfigurationEditor editor) {
+        editor.addRequirements(mDriveInterface);
+    }
+
+    @Override
+    public void execute(ActionControl control) {
+        mDriveInterface.omniDrive(mSpeedSupplier.get());
+    }
+
+    @Override
+    public void end(FinishReason reason) {
+        mDriveInterface.stop();
+    }
 }

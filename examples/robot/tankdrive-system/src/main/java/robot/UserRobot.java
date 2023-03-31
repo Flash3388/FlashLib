@@ -12,7 +12,7 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.systems.drive.TankDriveSystem;
 import com.flash3388.flashlib.robot.systems.drive.actions.ArcadeDriveAction;
 import com.flash3388.flashlib.robot.systems.drive.actions.TankDriveAction;
-import com.flash3388.flashlib.scheduling.actions.Actions;
+import com.flash3388.flashlib.scheduling.Actions;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 

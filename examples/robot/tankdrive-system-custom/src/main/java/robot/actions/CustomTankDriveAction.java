@@ -2,10 +2,13 @@ package robot.actions;
 
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
-import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.ActionConfigurationEditor;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import robot.subsystems.CustomTankDrive;
 
-public class CustomTankDriveAction extends ActionBase {
+public class CustomTankDriveAction implements ActionInterface {
     // This action, is a simple recreation of the TankDriveAction.
     // To implement an action, we first extend ActionBase.
 
@@ -20,11 +23,6 @@ public class CustomTankDriveAction extends ActionBase {
         mDrive = drive;
         mStickRight = stickRight;
         mStickLeft = stickLeft;
-
-        // Now we need to declare drive as a requirement for this action,
-        // reporting to the Scheduler that it is used here in order
-        // to prevent 2 actions from using this system at the same time.
-        requires(drive);
     }
 
     // Now we can start implementing the action's lifecycle.
@@ -46,12 +44,22 @@ public class CustomTankDriveAction extends ActionBase {
     // would be false. If someone canceled the action, it reached a timeout, or was overwritten by another action;
     // wasInterrupted would be true.
 
+
     @Override
-    public void initialize() {
+    public void configure(ActionConfigurationEditor editor) {
+        // Now we need to declare drive as a requirement for this action,
+        // reporting to the Scheduler that it is used here in order
+        // to prevent 2 actions from using this system at the same time.
+        editor.addRequirements(mDrive);
     }
 
     @Override
-    public void execute() {
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
+    public void execute(ActionControl control) {
         // We grab the values from the joysticks.
         // - right: right stick axis Y
         // - left: left stick axis Y
@@ -62,12 +70,7 @@ public class CustomTankDriveAction extends ActionBase {
     }
 
     @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         // When the action is done, we should stop the drive system.
         mDrive.stop();
     }
