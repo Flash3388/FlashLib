@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.net.channels.udp;
 
 import com.castle.util.closeables.Closeables;
-import com.castle.util.function.ThrowingConsumer;
 import com.castle.util.function.ThrowingFunction;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
@@ -20,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class UdpChannel implements NetChannel {
 
-    private final int mBindPort;
+    private final SocketAddress mBindAddress;
     protected final Logger mLogger;
     private final Runnable mOnOpen;
     private final ThrowingFunction<DatagramChannel, Closeable, IOException> mConfigureChannel;
@@ -30,9 +29,12 @@ public class UdpChannel implements NetChannel {
     private Closeable mCustomCloseable;
     private final Lock mChannelLock;
 
-    public UdpChannel(SocketAddress remote, int bindPort, Logger logger, Runnable onOpen,
+    public UdpChannel(SocketAddress remote,
+                      SocketAddress bindAddress,
+                      Logger logger,
+                      Runnable onOpen,
                       ThrowingFunction<DatagramChannel, Closeable, IOException> configureChannel) {
-        mBindPort = bindPort;
+        mBindAddress = bindAddress;
         mLogger = logger;
         mOnOpen = onOpen;
         mConfigureChannel = configureChannel;
@@ -43,17 +45,17 @@ public class UdpChannel implements NetChannel {
         mChannelLock = new ReentrantLock();
     }
 
-    public UdpChannel(SocketAddress remote, int bindPort, Logger logger, Runnable onOpen) {
-        this(remote, bindPort, logger, onOpen, null);
+    public UdpChannel(SocketAddress remote, SocketAddress bindAddress, Logger logger, Runnable onOpen) {
+        this(remote, bindAddress, logger, onOpen, null);
     }
 
-    public UdpChannel(int bindPort, Logger logger, Runnable onOpen) {
-        this(null, bindPort, logger, onOpen);
+    public UdpChannel(SocketAddress bindAddress, Logger logger, Runnable onOpen) {
+        this(null, bindAddress, logger, onOpen);
     }
 
-    public UdpChannel(int bindPort, Logger logger, Runnable onOpen,
+    public UdpChannel(SocketAddress bindAddress, Logger logger, Runnable onOpen,
                       ThrowingFunction<DatagramChannel, Closeable, IOException> configureChannel) {
-        this(null, bindPort, logger, onOpen, configureChannel);
+        this(null, bindAddress, logger, onOpen, configureChannel);
     }
 
     public void setRemoteAddress(SocketAddress remoteAddress) {
@@ -140,9 +142,8 @@ public class UdpChannel implements NetChannel {
                     mCustomCloseable = mConfigureChannel.apply(channel);
                 }
 
-                SocketAddress address = new InetSocketAddress(mBindPort);
-                channel.bind(address);
-                mLogger.debug("UDP socket bound at {}", address);
+                channel.bind(mBindAddress);
+                mLogger.debug("UDP socket bound at {}", mBindAddress);
 
                 mOnOpen.run();
                 mUnderlyingChannel.set(channel);

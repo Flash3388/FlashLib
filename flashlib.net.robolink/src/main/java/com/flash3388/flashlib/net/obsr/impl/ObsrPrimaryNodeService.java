@@ -44,8 +44,12 @@ public class ObsrPrimaryNodeService extends ObsrNodeServiceBase implements Objec
         mReadThread = null;
     }
 
+    public ObsrPrimaryNodeService(InstanceId ourId, String bindAddress, Clock clock) {
+        this(ourId, new InetSocketAddress(bindAddress, Constants.PRIMARY_NODE_PORT), clock);
+    }
+
     public ObsrPrimaryNodeService(InstanceId ourId, Clock clock) {
-        this(ourId, new InetSocketAddress("0.0.0.0", Constants.PRIMARY_NODE_PORT), clock);
+        this(ourId, "0.0.0.0", clock);
     }
 
     @Override

@@ -45,8 +45,13 @@ public class NetworkInterfaceImpl implements NetworkInterface {
             NetworkConfiguration.ObjectStorageConfiguration objectStorageConfiguration =
                     configuration.getObjectStorageConfiguration();
             if (objectStorageConfiguration.isPrimaryNode) {
-                ObsrPrimaryNodeService obsrPrimaryNodeService = new ObsrPrimaryNodeService(
-                        instanceId, clock);
+                ObsrPrimaryNodeService obsrPrimaryNodeService;
+                String bindAddress = objectStorageConfiguration.primaryNodeAddress;
+                if (bindAddress == null) {
+                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, clock);
+                } else {
+                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, bindAddress, clock);
+                }
                 serviceRegistry.register(obsrPrimaryNodeService);
                 mObjectStorage = obsrPrimaryNodeService;
             } else {
@@ -62,50 +67,43 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
             if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
                 HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
 
-                hfcsService = HfcsServices.autoReplyTarget(instanceId, clock, bindPort);
+                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
+
+                hfcsService = HfcsServices.autoReplyTarget(instanceId, clock, bindAddress);
 
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
                 HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                SocketAddress remote = configuration.getHfcsConfiguration().specificTargetAddress;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
 
-                hfcsService = HfcsServices.unicast(instanceId, clock, bindPort, remote);
+                SocketAddress remote = configuration.getHfcsConfiguration().specificTargetAddress;
+                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
+
+                hfcsService = HfcsServices.unicast(instanceId, clock, bindAddress, remote);
 
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().multicastModeEnabled) {
                 HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
+
                 java.net.NetworkInterface networkInterface = configuration.getHfcsConfiguration().multicastInterface;
                 InetAddress group = configuration.getHfcsConfiguration().multicastGroup;
                 int remotePort = configuration.getHfcsConfiguration().remotePort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
+                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
 
-                hfcsService = HfcsServices.multicast(instanceId, clock, bindPort, remotePort, networkInterface, group);
+                hfcsService = HfcsServices.multicast(instanceId, clock, bindAddress, remotePort, networkInterface, group);
 
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;
             } else if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
                 HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                int remotePort = configuration.getHfcsConfiguration().remotePort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
 
-                hfcsService = HfcsServices.broadcast(instanceId, clock, bindPort, remotePort);
+                InetAddress broadcastAddress = configuration.getHfcsConfiguration().broadcastAddress;
+                int remotePort = configuration.getHfcsConfiguration().remotePort;
+                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
+
+                hfcsService = HfcsServices.broadcast(instanceId, clock, bindAddress, broadcastAddress, remotePort);
 
                 serviceRegistry.register(hfcsService);
                 mHfcsRegistry = hfcsService;

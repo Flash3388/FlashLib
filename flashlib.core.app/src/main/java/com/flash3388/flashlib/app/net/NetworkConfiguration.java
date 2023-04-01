@@ -1,12 +1,17 @@
 package com.flash3388.flashlib.app.net;
 
+import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
+
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
 public class NetworkConfiguration implements NetworkingMode {
 
     public static class ObjectStorageConfiguration {
+
         final boolean isEnabled;
         final boolean isPrimaryNode;
         final String primaryNodeAddress;
@@ -18,20 +23,36 @@ public class NetworkConfiguration implements NetworkingMode {
         }
 
         public static ObjectStorageConfiguration disabled() {
-            return new ObjectStorageConfiguration(false, false, null);
+            return new ObjectStorageConfiguration(
+                    false,
+                    false,
+                    null);
         }
 
         public static ObjectStorageConfiguration primaryNode() {
-            return new ObjectStorageConfiguration(true, true, null);
+            return new ObjectStorageConfiguration(
+                    true,
+                    true,
+                    null);
+        }
+
+        public static ObjectStorageConfiguration primaryNode(String bindAddress) {
+            return new ObjectStorageConfiguration(
+                    true,
+                    true,
+                    bindAddress);
         }
 
         public static ObjectStorageConfiguration secondaryNode(String primaryNodeAddress) {
-            return new ObjectStorageConfiguration(true, false, primaryNodeAddress);
+            return new ObjectStorageConfiguration(
+                    true,
+                    false,
+                    primaryNodeAddress);
         }
     }
 
     public static class HfcsConfiguration {
-        static final int INVALID_PORT = -1;
+        private static final int DEFAULT_PORT = HfcsServices.DEFAULT_PORT;
 
         final boolean isEnabled;
         final boolean replyToSenderModeEnabled;
@@ -42,7 +63,8 @@ public class NetworkConfiguration implements NetworkingMode {
         final NetworkInterface multicastInterface;
         final InetAddress multicastGroup;
         final int remotePort;
-        final int bindPort;
+        final SocketAddress bindAddress;
+        final InetAddress broadcastAddress;
 
         private HfcsConfiguration(boolean isEnabled,
                                   boolean replyToSenderModeEnabled,
@@ -53,7 +75,8 @@ public class NetworkConfiguration implements NetworkingMode {
                                   NetworkInterface multicastInterface,
                                   InetAddress multicastGroup,
                                   int remotePort,
-                                  int bindPort) {
+                                  SocketAddress bindAddress,
+                                  InetAddress broadcastAddress) {
             this.isEnabled = isEnabled;
             this.replyToSenderModeEnabled = replyToSenderModeEnabled;
             this.specificTargetModeEnabled = specificTargetModeEnabled;
@@ -63,7 +86,8 @@ public class NetworkConfiguration implements NetworkingMode {
             this.multicastInterface = multicastInterface;
             this.multicastGroup = multicastGroup;
             this.remotePort = remotePort;
-            this.bindPort = bindPort;
+            this.bindAddress = bindAddress;
+            this.broadcastAddress = broadcastAddress;
         }
 
         public static HfcsConfiguration disabled() {
@@ -76,8 +100,9 @@ public class NetworkConfiguration implements NetworkingMode {
                     null,
                     null,
                     null,
-                    INVALID_PORT,
-                    INVALID_PORT);
+                    0,
+                    null,
+                    null);
         }
 
         public static HfcsConfiguration replyToSenderMode(int bindPort) {
@@ -90,12 +115,13 @@ public class NetworkConfiguration implements NetworkingMode {
                     null,
                     null,
                     null,
-                    INVALID_PORT,
-                    bindPort);
+                    DEFAULT_PORT,
+                    new InetSocketAddress(bindPort),
+                    null);
         }
 
         public static HfcsConfiguration replyToSenderMode() {
-            return replyToSenderMode(INVALID_PORT);
+            return replyToSenderMode(DEFAULT_PORT);
         }
 
         public static HfcsConfiguration specificTargetMode(int bindPort, SocketAddress remote) {
@@ -108,12 +134,13 @@ public class NetworkConfiguration implements NetworkingMode {
                     remote,
                     null,
                     null,
-                    INVALID_PORT,
-                    bindPort);
+                    DEFAULT_PORT,
+                    new InetSocketAddress(bindPort),
+                    null);
         }
 
         public static HfcsConfiguration specificTargetMode(SocketAddress remote) {
-            return specificTargetMode(INVALID_PORT, remote);
+            return specificTargetMode(DEFAULT_PORT, remote);
         }
 
         public static HfcsConfiguration multicastMode(int bindPort,
@@ -130,10 +157,13 @@ public class NetworkConfiguration implements NetworkingMode {
                     networkInterface,
                     group,
                     remotePort,
-                    bindPort);
+                    new InetSocketAddress(bindPort),
+                    null);
         }
 
-        public static HfcsConfiguration broadcastMode(int bindPort, int remotePort) {
+        public static HfcsConfiguration broadcastMode(SocketAddress bindAddress,
+                                                      InetAddress broadcastAddress,
+                                                      int remotePort) {
             return new HfcsConfiguration(
                     true,
                     false,
@@ -144,7 +174,22 @@ public class NetworkConfiguration implements NetworkingMode {
                     null,
                     null,
                     remotePort,
-                    bindPort);
+                    bindAddress,
+                    broadcastAddress);
+        }
+
+        public static HfcsConfiguration broadcastMode(SocketAddress bindAddress,
+                                                      int remotePort) {
+            try {
+                InetAddress address = InetAddress.getByName("255.255.255.255");
+                return broadcastMode(bindAddress, address, remotePort);
+            } catch (IOException e) {
+                throw new Error(e);
+            }
+        }
+
+        public static HfcsConfiguration broadcastMode(int bindPort, int remotePort) {
+            return broadcastMode(new InetSocketAddress(bindPort), remotePort);
         }
     }
 

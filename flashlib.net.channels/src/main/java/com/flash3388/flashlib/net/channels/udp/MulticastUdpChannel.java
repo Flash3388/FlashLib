@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.MembershipKey;
 
@@ -13,8 +14,10 @@ public class MulticastUdpChannel extends UdpChannel {
     public MulticastUdpChannel(NetworkInterface multicastInterface,
                                InetAddress multicastGroup,
                                int remotePort,
-                               int bindPort, Logger logger, Runnable onOpen) {
-        super(bindPort, logger, onOpen, (channel)-> {
+                               SocketAddress bindAddress,
+                               Logger logger,
+                               Runnable onOpen) {
+        super(bindAddress, logger, onOpen, (channel)-> {
             channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, multicastInterface);
             MembershipKey key = channel.join(multicastGroup, multicastInterface);
             return key::drop;
