@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.util.unique;
 
 import com.castle.util.os.KnownOperatingSystem;
+import com.flash3388.flashlib.util.Binary;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -28,7 +29,7 @@ public class InstanceIdGenerator {
     }
 
     public static InstanceId generate(long processIdentifier) {
-        return generate(getLongAsBytes(processIdentifier));
+        return generate(Binary.longToBytes(processIdentifier));
     }
 
     public static InstanceId generate() {
@@ -104,11 +105,5 @@ public class InstanceIdGenerator {
             throw new IdGenerationException("ManagementFactory.getRuntimeMXBean().getName() " +
                     "returned an unexpected value", e);
         }
-    }
-
-    private static byte[] getLongAsBytes(long value) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(value);
-        return buffer.array();
     }
 }
