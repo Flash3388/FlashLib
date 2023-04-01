@@ -19,8 +19,9 @@ public class MulticastUdpChannel extends UdpChannel {
                                Runnable onOpen) {
         super(bindAddress, logger, onOpen, (channel)-> {
             channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, multicastInterface);
-            MembershipKey key = channel.join(multicastGroup, multicastInterface);
-            return key::drop;
+            channel.setOption(StandardSocketOptions.IP_MULTICAST_LOOP, true);
+            channel.join(multicastGroup, multicastInterface);
+            return ()->{};
         });
 
         setRemoteAddress(new InetSocketAddress(multicastGroup, remotePort));

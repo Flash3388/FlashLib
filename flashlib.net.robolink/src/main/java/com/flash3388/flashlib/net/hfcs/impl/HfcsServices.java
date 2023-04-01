@@ -9,6 +9,7 @@ import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -56,5 +57,14 @@ public class HfcsServices {
                                             int remotePort) {
         return new HfcsServiceImpl(ourId, clock,
                 (onConn)-> new BroadcastUdpChannel(broadcastAddress, remotePort, bindAddress, LOGGER, onConn));
+    }
+
+    public static HfcsServiceBase broadcast(InstanceId ourId,
+                                            Clock clock,
+                                            SocketAddress bindAddress,
+                                            int remotePort) throws IOException {
+        InetAddress address = InetAddress.getByName("255.255.255.255");
+        return new HfcsServiceImpl(ourId, clock,
+                (onConn)-> new BroadcastUdpChannel(address, remotePort, bindAddress, LOGGER, onConn));
     }
 }

@@ -9,6 +9,7 @@ import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.MessengerService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
 import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
 import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
 import com.flash3388.flashlib.time.Clock;
@@ -42,74 +43,32 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mMainThread = mainThread;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            NetworkConfiguration.ObjectStorageConfiguration objectStorageConfiguration =
-                    configuration.getObjectStorageConfiguration();
-            if (objectStorageConfiguration.isPrimaryNode) {
-                ObsrPrimaryNodeService obsrPrimaryNodeService;
-                String bindAddress = objectStorageConfiguration.primaryNodeAddress;
-                if (bindAddress == null) {
-                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, clock);
-                } else {
-                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, clock, bindAddress);
-                }
-                serviceRegistry.register(obsrPrimaryNodeService);
-                mObjectStorage = obsrPrimaryNodeService;
-            } else {
-                ObsrSecondaryNodeService obsrSecondaryNodeService = new ObsrSecondaryNodeService(
-                        instanceId, clock,
-                        objectStorageConfiguration.primaryNodeAddress);
-                serviceRegistry.register(obsrSecondaryNodeService);
-                mObjectStorage = obsrSecondaryNodeService;
+            try {
+                ObsrConfiguration.Creator creator = configuration.getObsrConfiguration().creator;
+                assert creator != null;
+
+                ObsrNodeServiceBase service = creator.create(instanceId, clock);
+                serviceRegistry.register(service);
+
+                mObjectStorage = service;
+            } catch (Exception e) {
+                throw new Error(e);
             }
         } else {
             mObjectStorage = null;
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsServiceBase hfcsService;
+            try {
+                HfcsConfiguration.Creator creator = configuration.getHfcsConfiguration().creator;
+                assert creator != null;
 
-                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
+                HfcsServiceBase service = creator.create(instanceId, clock);
+                serviceRegistry.register(service);
 
-                hfcsService = HfcsServices.autoReplyTarget(instanceId, clock, bindAddress);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
-                HfcsServiceBase hfcsService;
-
-                SocketAddress remote = configuration.getHfcsConfiguration().specificTargetAddress;
-                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
-
-                hfcsService = HfcsServices.unicast(instanceId, clock, bindAddress, remote);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().multicastModeEnabled) {
-                HfcsServiceBase hfcsService;
-
-                java.net.NetworkInterface networkInterface = configuration.getHfcsConfiguration().multicastInterface;
-                InetAddress group = configuration.getHfcsConfiguration().multicastGroup;
-                int remotePort = configuration.getHfcsConfiguration().remotePort;
-                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
-
-                hfcsService = HfcsServices.multicast(instanceId, clock, bindAddress, remotePort, networkInterface, group);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
-                HfcsServiceBase hfcsService;
-
-                InetAddress broadcastAddress = configuration.getHfcsConfiguration().broadcastAddress;
-                int remotePort = configuration.getHfcsConfiguration().remotePort;
-                SocketAddress bindAddress = configuration.getHfcsConfiguration().bindAddress;
-
-                hfcsService = HfcsServices.broadcast(instanceId, clock, bindAddress, broadcastAddress, remotePort);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else {
-                throw new UnsupportedOperationException("HFCS mode not supported");
+                mHfcsRegistry = service;
+            } catch (Exception e) {
+                throw new Error(e);
             }
         } else {
             mHfcsRegistry = null;
