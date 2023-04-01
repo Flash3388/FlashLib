@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.function.Supplier;
 
@@ -35,6 +36,7 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
     protected final KnownInDataTypes mInDataTypes;
     protected final EventController mEventController;
     protected final BlockingQueue<OutDataNode> mOutDataQueue;
+    protected final Map<InType<?>, InDataNode> mInDataNodes;
 
     private final List<Thread> mThreads;
 
@@ -46,6 +48,7 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
 
         mEventController = Controllers.newSyncExecutionController();
         mOutDataQueue = new DelayQueue<>();
+        mInDataNodes = new ConcurrentHashMap<>();
 
         mThreads = new LinkedList<>();
     }
@@ -56,8 +59,9 @@ public abstract class HfcsServiceBase extends SingleUseService implements HfcsRe
     }
 
     @Override
-    public <T> RegisteredIncoming<T> registerIncoming(InType<T> type) {
+    public <T> RegisteredIncoming<T> registerIncoming(InType<T> type, Time receiveTimeout) {
         mInDataTypes.put(type);
+        mInDataNodes.put(type, new InDataNode(type, receiveTimeout, LOGGER));
         return new RegisteredIncomingImpl<>(mEventController, type);
     }
 

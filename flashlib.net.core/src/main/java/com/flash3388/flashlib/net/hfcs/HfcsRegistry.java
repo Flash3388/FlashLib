@@ -30,8 +30,24 @@ public interface HfcsRegistry {
      * sent by instances in the network.
      *
      * @param type type of incoming data.
+     * @param receiveTimeout time after which, if no data was received, a timeout is declared
+     *                       and can be handled.
      * @return a control class for incoming data management.
      * @param <T> type of incoming data.
      */
-    <T> RegisteredIncoming<T> registerIncoming(InType<T> type);
+    <T> RegisteredIncoming<T> registerIncoming(InType<T> type, Time receiveTimeout);
+
+
+    /**
+     * Registers an incoming packet receiver. This receiver will listen for packets of the given type
+     * sent by instances in the network.
+     * The packet can never be timed out.
+     *
+     * @param type type of incoming data.
+     * @return a control class for incoming data management.
+     * @param <T> type of incoming data.
+     */
+    default <T> RegisteredIncoming<T> registerIncoming(InType<T> type) {
+        return registerIncoming(type, Time.INVALID);
+    }
 }
