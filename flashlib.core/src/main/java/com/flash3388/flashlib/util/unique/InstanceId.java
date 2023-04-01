@@ -11,7 +11,7 @@ public class InstanceId {
     private final byte[] mMachineId;
     private final byte[] mProcessId;
 
-    InstanceId(byte[] machineId, byte[] processId) {
+    public InstanceId(byte[] machineId, byte[] processId) {
         assert machineId.length > 1;
         assert PROCESS_ID_SIZE == processId.length;
 

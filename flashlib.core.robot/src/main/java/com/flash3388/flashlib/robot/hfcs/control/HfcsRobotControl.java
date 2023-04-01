@@ -26,7 +26,9 @@ public class HfcsRobotControl {
         RegisteredIncoming<TargetedControlData> incoming = registry.registerIncoming(
                 new ControlDataInType(), RECEIVE_TIMEOUT);
         incoming.addListener((event)-> {
-                    if (!event.getData().getTargetId().equals(ourId)) {
+                    InstanceId targetId = event.getData().getTargetId();
+                    if (!targetId.equals(ourId)) {
+                        LOGGER.debug("Received control data for another instance id={}", targetId);
                         return;
                     }
 

@@ -20,6 +20,7 @@ public class MulticastUdpChannel extends UdpChannel {
         super(bindAddress, logger, onOpen, (channel)-> {
             channel.setOption(StandardSocketOptions.IP_MULTICAST_IF, multicastInterface);
             channel.setOption(StandardSocketOptions.IP_MULTICAST_LOOP, true);
+            channel.setOption(StandardSocketOptions.IP_MULTICAST_TTL, 3);
             channel.join(multicastGroup, multicastInterface);
             return ()->{};
         });
