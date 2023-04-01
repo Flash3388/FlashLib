@@ -32,11 +32,15 @@ public class HfcsServiceImpl extends HfcsServiceBase {
     protected Map<String, Runnable> createTasks() {
         Map<String, Runnable> tasks = new HashMap<>();
         tasks.put("HfcsAutoReply-UpdateTask",
-                new BasicUpdateTask(mChannel, mClock, LOGGER,
+                new BasicUpdateTask(
+                        mChannel,
+                        mClock,
+                        LOGGER,
                         new BasicChannelUpdateHandler(mEventController, mClock, LOGGER, mInDataNodes),
-                        mInDataNodes.values(), mEventController));
-        tasks.put("HfcsAutoReply-WriteTask",
-                new BasicWriteTask(mOutDataQueue, mChannel, LOGGER, new HfcsMessageType(mInDataTypes)));
+                        mInDataNodes.values(),
+                        mEventController,
+                        mOutDataQueue,
+                        new HfcsMessageType(mInDataTypes)));
         return tasks;
     }
 

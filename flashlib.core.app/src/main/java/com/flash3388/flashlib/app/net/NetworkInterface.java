@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.annotations.MainThreadOnly;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;

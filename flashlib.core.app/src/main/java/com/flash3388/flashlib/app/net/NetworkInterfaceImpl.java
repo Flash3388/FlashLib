@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.tcp.TcpRoutingService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
@@ -50,13 +50,14 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                 if (bindAddress == null) {
                     obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, clock);
                 } else {
-                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, bindAddress, clock);
+                    obsrPrimaryNodeService = new ObsrPrimaryNodeService(instanceId, clock, bindAddress);
                 }
                 serviceRegistry.register(obsrPrimaryNodeService);
                 mObjectStorage = obsrPrimaryNodeService;
             } else {
                 ObsrSecondaryNodeService obsrSecondaryNodeService = new ObsrSecondaryNodeService(
-                        instanceId, objectStorageConfiguration.primaryNodeAddress, clock);
+                        instanceId, clock,
+                        objectStorageConfiguration.primaryNodeAddress);
                 serviceRegistry.register(obsrSecondaryNodeService);
                 mObjectStorage = obsrSecondaryNodeService;
             }

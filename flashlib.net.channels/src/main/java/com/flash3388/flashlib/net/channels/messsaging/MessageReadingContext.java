@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
 
 import java.io.ByteArrayInputStream;

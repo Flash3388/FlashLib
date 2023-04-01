@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.channels.tcp;
 
-import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
 import com.castle.util.throwables.ThrowableChain;
 import com.castle.util.throwables.Throwables;
@@ -26,8 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TcpServerChannel implements NetServerChannel {
-
-    private static final int SELECTOR_TIMEOUT_MS = 500;
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
@@ -55,39 +52,35 @@ public class TcpServerChannel implements NetServerChannel {
         openChannel();
 
         while (!Thread.interrupted()) {
-            try {
-                int available = mSelector.select(SELECTOR_TIMEOUT_MS);
-                if (available < 1) {
-                    throw new TimeoutException();
-                }
+            int available = mSelector.selectNow();
+            if (available < 1) {
+                return;
+            }
 
-                for (Iterator<SelectionKey> it = mSelector.selectedKeys().iterator(); it.hasNext();) {
-                    SelectionKey key = it.next();
+            for (Iterator<SelectionKey> it = mSelector.selectedKeys().iterator(); it.hasNext();) {
+                SelectionKey key = it.next();
 
-                    try {
-                        if (key.isAcceptable()) {
-                            // new client
-                            handleNewClient();
-                        } else if (key.isReadable()) {
-                            // new data from client
+                try {
+                    if (key.isAcceptable()) {
+                        // new client
+                        handleNewClient();
+                    } else if (key.isReadable()) {
+                        // new data from client
 
-                            //noinspection resource
-                            SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
-                            ClientNode clientNode = mClients.get(address);
-                            if (clientNode == null) {
-                                // no such client
-                                mLogger.error("Received data from unknown client at {}", address);
-                                continue;
-                            }
-
-                            handleClientNewData(clientNode);
+                        //noinspection resource
+                        SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
+                        ClientNode clientNode = mClients.get(address);
+                        if (clientNode == null) {
+                            // no such client
+                            mLogger.error("Received data from unknown client at {}", address);
+                            continue;
                         }
-                    } finally {
-                        it.remove();
+
+                        handleClientNewData(clientNode);
                     }
+                } finally {
+                    it.remove();
                 }
-            } catch (TimeoutException e) {
-                // oh, well, try again
             }
         }
     }
@@ -213,6 +206,10 @@ public class TcpServerChannel implements NetServerChannel {
             mReadBuffer.clear();
 
             IncomingData incomingData = node.getChannel().read(mReadBuffer);
+            if (incomingData == null || incomingData.getBytesReceived() < 1) {
+                onClientError(node);
+                return;
+            }
 
             mLogger.debug("Data received from {}: bytes={}",
                     node.getClientInfo().getAddress(),
