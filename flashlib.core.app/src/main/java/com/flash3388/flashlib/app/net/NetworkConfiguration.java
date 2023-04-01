@@ -5,6 +5,7 @@ import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 
@@ -186,6 +187,13 @@ public class NetworkConfiguration implements NetworkingMode {
             } catch (IOException e) {
                 throw new Error(e);
             }
+        }
+
+        public static HfcsConfiguration broadcastMode(InterfaceAddress interfaceAddress, int bindPort, int remotePort) {
+            return broadcastMode(
+                    new InetSocketAddress(interfaceAddress.getAddress(), bindPort),
+                    interfaceAddress.getBroadcast(),
+                    remotePort);
         }
 
         public static HfcsConfiguration broadcastMode(int bindPort, int remotePort) {
