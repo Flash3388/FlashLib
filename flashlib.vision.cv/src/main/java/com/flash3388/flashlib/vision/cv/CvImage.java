@@ -74,9 +74,4 @@ public class CvImage implements Image {
 
         return image;
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        mMat.release();
-    }
 }
