@@ -3,11 +3,13 @@ package com.flash3388.flashlib.net.channels.messsaging;
 import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
+import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class MessageReadingContext {
@@ -38,13 +40,16 @@ public class MessageReadingContext {
     }
 
     private final KnownMessageTypes mMessageTypes;
+    private final Logger mLogger;
+
     private final CircularByteBuffer mBuffer;
     private final byte[] mMessageHeaderBuffer;
 
     private MessageHeader mLastHeader;
 
-    public MessageReadingContext(KnownMessageTypes messageTypes) {
+    public MessageReadingContext(KnownMessageTypes messageTypes, Logger logger) {
         mMessageTypes = messageTypes;
+        mLogger = logger;
         mBuffer = new CircularByteBuffer(8192);
         mMessageHeaderBuffer = new byte[MessageHeader.SIZE];
 
@@ -67,6 +72,7 @@ public class MessageReadingContext {
         byte[] data = new byte[bytesInBuffer];
         buffer.get(data);
 
+        mLogger.trace("Updating context with new data");
         mBuffer.add(data, 0, data.length);
     }
 
@@ -76,16 +82,28 @@ public class MessageReadingContext {
             if (mLastHeader == null) {
                 // need to read header
                 if (mBuffer.getCurrentNumberOfBytes() >= MessageHeader.SIZE) {
+                    mLogger.trace("Enough bytes to read header");
                     mLastHeader = readHeader();
                 } else {
                     break;
                 }
             } else {
                 if (mBuffer.getCurrentNumberOfBytes() >= mLastHeader.getContentSize()) {
-                    ParseResult result = readMessage(mLastHeader);
-                    mLastHeader = null;
+                    mLogger.trace("Enough bytes to read message");
+                    try {
+                        ParseResult result = readMessage(mLastHeader);
+                        mLastHeader = null;
 
-                    return Optional.of(result);
+                        return Optional.of(result);
+                    } catch (IOException e) {
+                        if (e.getCause() != null && e.getCause().getClass().equals(NoSuchElementException.class)) {
+                            // ignore this message and inform
+                            mLogger.warn("Received unknown message. Ignoring it");
+                            mLastHeader = null;
+                        } else {
+                            throw e;
+                        }
+                    }
                 } else {
                     break;
                 }

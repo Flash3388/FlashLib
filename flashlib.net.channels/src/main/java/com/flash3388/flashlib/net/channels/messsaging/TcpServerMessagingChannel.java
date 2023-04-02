@@ -36,7 +36,7 @@ public class TcpServerMessagingChannel implements MessagingChannel {
         mOurId = ourId;
         mLogger = logger;
 
-        mReadingContext = new MessageReadingContext(messageTypes);
+        mReadingContext = new MessageReadingContext(messageTypes, logger);
         mHandler = new AtomicReference<>();
         mKnownClients = new HashSet<>();
         mSerializer = new MessageSerializer(ourId);

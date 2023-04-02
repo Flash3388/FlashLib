@@ -31,7 +31,7 @@ public class BasicMessagingChannel implements MessagingChannel {
                                  Logger logger,
                                  KnownMessageTypes messageTypes) {
         mReadBuffer = ByteBuffer.allocateDirect(1024);
-        mReadingContext = new MessageReadingContext(messageTypes);
+        mReadingContext = new MessageReadingContext(messageTypes, logger);
         mOurId = ourId;
         mLogger = logger;
         mSerializer = new MessageSerializer(ourId);
