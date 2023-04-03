@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.vision;
 
+import com.flash3388.flashlib.vision.color.ColorSpace;
+
 import java.io.IOException;
 
 /**
@@ -44,4 +46,11 @@ public interface Image {
      * @return {@link java.awt.Image} object containing the image.
      */
     java.awt.Image toAwt();
+
+    /**
+     * Gets the color space of the image.
+     *
+     * @return color space
+     */
+    ColorSpace getColorSpace();
 }

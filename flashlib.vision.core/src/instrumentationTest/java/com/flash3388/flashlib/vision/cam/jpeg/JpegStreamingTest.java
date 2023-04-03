@@ -59,7 +59,7 @@ public class JpegStreamingTest {
         Server server = createServer();
         MjpegServer mjpegServer = server.mMjpegServer;
         try {
-            mjpegServer.setCamera(CAMERA_NAME, CAMERA);
+            mjpegServer.setCamera(CAMERA_NAME, CAMERA, CAMERA.getFps());
             mjpegServer.start();
 
             CountDownLatch imageLatch = new CountDownLatch(1);
@@ -89,7 +89,7 @@ public class JpegStreamingTest {
     private Server createServer() throws IOException {
         for (int port : generatePorts()) {
             try {
-                MjpegServer server = MjpegServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1, mClock, mLogger);
+                MjpegServer server = MjpegServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1, mClock);
 
                 Server serverWrapper = new Server();
                 serverWrapper.mMjpegServer = server;

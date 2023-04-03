@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.vision.jpeg;
 
 import com.flash3388.flashlib.vision.Image;
+import com.flash3388.flashlib.vision.color.ColorSpace;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -55,5 +56,10 @@ public class JpegImage implements Image {
     @Override
     public java.awt.Image toAwt() {
         return mImage;
+    }
+
+    @Override
+    public ColorSpace getColorSpace() {
+        return ColorSpace.BGR;
     }
 }

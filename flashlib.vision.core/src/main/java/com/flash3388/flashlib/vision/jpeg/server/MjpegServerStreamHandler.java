@@ -2,7 +2,7 @@ package com.flash3388.flashlib.vision.jpeg.server;
 
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.vision.Camera;
+import com.flash3388.flashlib.vision.Source;
 import com.flash3388.flashlib.vision.VisionException;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.sun.net.httpserver.Headers;
@@ -19,12 +19,17 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private static final String BOUNDARY = "--boundary";
     private static final String HEADER_FORMAT = "\r\n\r\n%s\r\nContent-Type: image/jpeg\r\nContent-Length:%d\r\n\r\n";
 
-    private final WeakReference<Camera<JpegImage>> mCameraReference;
+    private final WeakReference<Source<? extends JpegImage>> mCameraReference;
+    private final int mFps;
     private final Clock mClock;
     private final Logger mLogger;
 
-    public MjpegServerStreamHandler(Camera<JpegImage> camera, Clock clock, Logger logger) {
+    public MjpegServerStreamHandler(Source<? extends JpegImage> camera,
+                                    int fps,
+                                    Clock clock,
+                                    Logger logger) {
         mCameraReference = new WeakReference<>(camera);
+        mFps = fps;
         mClock = clock;
         mLogger = logger;
     }
@@ -44,7 +49,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
     private void streamImages(OutputStream outputStream) throws IOException {
         while (!Thread.interrupted()) {
             try {
-                Camera<JpegImage> camera = mCameraReference.get();
+                Source<? extends JpegImage> camera = mCameraReference.get();
                 if (camera == null) {
                     mLogger.info("Camera collected by GC");
                     return;
@@ -52,7 +57,7 @@ public class MjpegServerStreamHandler implements HttpHandler {
 
                 Time startTime = mClock.currentTime();
 
-                JpegImage image = camera.capture();
+                JpegImage image = camera.get();
                 byte[] imageBytes = image.getRaw();
 
                 outputStream.write(String.format(HEADER_FORMAT, BOUNDARY, imageBytes.length).getBytes());
@@ -60,15 +65,18 @@ public class MjpegServerStreamHandler implements HttpHandler {
                 outputStream.flush();
 
                 Time timeTaken = mClock.currentTime().sub(startTime);
-                long sleepMillis = timeTaken.valueAsMillis() - (1000 / camera.getFps());
+                long sleepMillis = timeTaken.valueAsMillis() - (1000 / mFps);
 
                 if (sleepMillis > 0) {
                     Thread.sleep(sleepMillis);
                 }
             } catch (InterruptedException e) {
                 break;
-            } catch (IOException | VisionException e) {
+            } catch (VisionException e) {
                 mLogger.error("Error while writing stream", e);
+            } catch (IOException e) {
+                mLogger.error("Error while writing stream, stopping", e);
+                break;
             }
         }
     }
