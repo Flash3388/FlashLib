@@ -24,7 +24,7 @@ public class VisionServer implements AutoCloseable {
 
     public VisionServer(Messenger messenger,
                         Function<Consumer<Analysis>, AutoCloseable> runnerFactory,
-                        KnownVisionOptionTypes optionTypes) {
+                        KnownVisionOptions optionTypes) {
         mMessenger = messenger;
         mRunner = new VisionRunner(runnerFactory, this::newAnalysis);
         mVisionOptions = new VisionOptions();
@@ -77,12 +77,12 @@ public class VisionServer implements AutoCloseable {
 
         private final Messenger mMessenger;
         private final Service mService;
-        private final KnownVisionOptionTypes mOptionTypes;
+        private final KnownVisionOptions mOptionTypes;
         private final VisionOptions mVisionOptions;
 
         private MessageListener(Messenger messenger,
                                 Service service,
-                                KnownVisionOptionTypes optionTypes,
+                                KnownVisionOptions optionTypes,
                                 VisionOptions visionOptions) {
             mMessenger = messenger;
             mService = service;
@@ -99,14 +99,15 @@ public class VisionServer implements AutoCloseable {
                         mService.start();
                     } catch (ServiceException e) {
                     }
-
-                    mMessenger.send(new RunStatusMessage(true));
                 }
+
+                mMessenger.send(new RunStatusMessage(true));
             } else if (StopMessage.TYPE.equals(type)) {
                 if (mService.isRunning()) {
                     mService.stop();
-                    mMessenger.send(new RunStatusMessage(false));
                 }
+
+                mMessenger.send(new RunStatusMessage(false));
             } else if (OptionChangeMessage.TYPE.equals(type)) {
                 OptionChangeMessage message = (OptionChangeMessage) event.getMessage();
                 //noinspection rawtypes

@@ -30,13 +30,11 @@ public class BasicVisionControl implements VisionControl {
 
     @Override
     public void start() {
-        verifyNotRunning();
         mBackend.start();
     }
 
     @Override
     public void stop() {
-        verifyRunning();
         mBackend.stop();
     }
 

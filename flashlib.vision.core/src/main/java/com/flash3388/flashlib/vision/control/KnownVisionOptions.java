@@ -7,20 +7,20 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KnownVisionOptionTypes {
+public class KnownVisionOptions {
 
     private final Map<String, VisionOption<?>> mTypeMap;
 
-    public KnownVisionOptionTypes(Collection<VisionOption<?>> types) {
+    public KnownVisionOptions(Collection<VisionOption<?>> types) {
         mTypeMap = new ConcurrentHashMap<>();
         types.forEach(this::put);
     }
 
-    public KnownVisionOptionTypes(VisionOption<?>... types) {
+    public KnownVisionOptions(VisionOption<?>... types) {
         this(Arrays.asList(types));
     }
 
-    public KnownVisionOptionTypes() {
+    public KnownVisionOptions() {
         this(Collections.emptyList());
     }
 

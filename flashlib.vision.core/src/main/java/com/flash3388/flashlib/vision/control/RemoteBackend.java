@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.vision.control;
 
 import com.beans.observables.RegisteredListener;
-import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
@@ -23,7 +22,7 @@ public class RemoteBackend implements VisionBackend {
     private final AtomicBoolean mIsRunning;
     private final AtomicReference<Listener> mListener;
 
-    public RemoteBackend(Messenger messenger, KnownVisionOptionTypes optionTypes) {
+    public RemoteBackend(Messenger messenger, KnownVisionOptions optionTypes) {
         mMessenger = messenger;
 
         mIsRunning = new AtomicBoolean();
@@ -59,11 +58,11 @@ public class RemoteBackend implements VisionBackend {
 
     private static class MessageListener implements com.flash3388.flashlib.net.messaging.MessageListener {
 
-        private final KnownVisionOptionTypes mOptionTypes;
+        private final KnownVisionOptions mOptionTypes;
         private final AtomicBoolean mIsRunning;
         private final AtomicReference<Listener> mListener;
 
-        private MessageListener(KnownVisionOptionTypes optionTypes,
+        private MessageListener(KnownVisionOptions optionTypes,
                                 AtomicBoolean isRunning,
                                 AtomicReference<Listener> listener) {
             mOptionTypes = optionTypes;

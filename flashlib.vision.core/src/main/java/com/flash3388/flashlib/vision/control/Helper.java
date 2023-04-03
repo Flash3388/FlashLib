@@ -20,4 +20,11 @@ public class Helper {
 
         return messageTypes;
     }
+
+    public static KnownVisionOptions getOptions() {
+        KnownVisionOptions options = new KnownVisionOptions();
+        StandardVisionOptions.fill(options);
+
+        return options;
+    }
 }
