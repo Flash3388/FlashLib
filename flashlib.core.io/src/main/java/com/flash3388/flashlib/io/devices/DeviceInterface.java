@@ -24,7 +24,7 @@ public interface DeviceInterface {
      * @param <T> type which the implementation must support
      */
     @MainThreadOnly
-    <T> T newDevice(String id, Class<T> type, Map<String, Object> namedArgs);
+    <T> T newDevice(int id, Class<T> type, Map<String, Object> namedArgs);
 
     /**
      * Creates a new group of {@link SpeedController} devices, which is encapsulated under a single interface.

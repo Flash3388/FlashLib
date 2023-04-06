@@ -28,7 +28,7 @@ public class DeviceInterfaceImpl implements DeviceInterface {
     }
 
     @Override
-    public <T> T newDevice(String id, Class<T> type, Map<String, Object> namedArgs) {
+    public <T> T newDevice(int id, Class<T> type, Map<String, Object> namedArgs) {
         mMainThread.verifyCurrentThread();
 
         Class<? extends T> foundType = findType(id, type);
@@ -53,7 +53,7 @@ public class DeviceInterfaceImpl implements DeviceInterface {
         return new GroupBuilder<>(this, DoubleSolenoidGroup::new, DoubleSolenoid.class);
     }
 
-    private <T> Class<? extends T> findType(String id, Class<T> type) {
+    private <T> Class<? extends T> findType(int id, Class<T> type) {
         ThrowableChain chain = Throwables.newChain();
 
         ServiceLoader<DeviceProvider> providers = ServiceLoader.load(DeviceProvider.class);

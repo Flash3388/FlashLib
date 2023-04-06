@@ -35,9 +35,9 @@ public class GroupBuilder<E, T extends DeviceGroup<E>> {
      * @return this
      * @param <E2> type which the implementation must support
      *
-     * @see DeviceInterface#newDevice(String, Class, Map)
+     * @see DeviceInterface#newDevice(int, Class, Map)
      */
-    public <E2 extends E> GroupBuilder<E, T> addNewDevice(String id, Class<E2> type, Map<String, Object> namedArgs) {
+    public <E2 extends E> GroupBuilder<E, T> addNewDevice(int id, Class<E2> type, Map<String, Object> namedArgs) {
         E2 device = mDeviceInterface.newDevice(id, type, namedArgs);
         return add(device);
     }
@@ -52,9 +52,9 @@ public class GroupBuilder<E, T extends DeviceGroup<E>> {
      * @param namedArgs arguments to the constructor
      * @return this
      *
-     * @see DeviceInterface#newDevice(String, Class, Map)
+     * @see DeviceInterface#newDevice(int, Class, Map)
      */
-    public GroupBuilder<E, T> addNewDevice(String id, Map<String, Object> namedArgs) {
+    public GroupBuilder<E, T> addNewDevice(int id, Map<String, Object> namedArgs) {
         return addNewDevice(id, mElementType, namedArgs);
     }
 

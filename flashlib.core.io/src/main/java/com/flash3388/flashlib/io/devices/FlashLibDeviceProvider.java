@@ -15,16 +15,16 @@ public class FlashLibDeviceProvider extends AbstractDeviceProvider {
 
     public FlashLibDeviceProvider() {
         // actuators
-        registerDevice("flashlib.device.PwmSpeedController", PwmSpeedController.class);
-        registerDevice("flashlib.device.PwmPositionController", PwmPositionController.class);
-        registerDevice("flashlib.device.TalonSrx", PwmTalonSrx.class);
-        registerDevice("flashlib.device.Talon", Talon.class);
+        registerDevice(FlashLibDevicesIds.PwmSpeedController, PwmSpeedController.class);
+        registerDevice(FlashLibDevicesIds.PwmPositionController, PwmPositionController.class);
+        registerDevice(FlashLibDevicesIds.TalonSrx, PwmTalonSrx.class);
+        registerDevice(FlashLibDevicesIds.Talon, Talon.class);
         // sensors
-        registerDevice("flashlib.device.AnalogAccelerometer", AnalogAccelerometer.class);
-        registerDevice("flashlib.device.AnalogGyro", AnalogGyro.class);
-        registerDevice("flashlib.device.AnalogRangeFinder", AnalogRangeFinder.class);
-        registerDevice("flashlib.device.PulseEncoder", PulseEncoder.class);
-        registerDevice("flashlib.device.PulseWidthRangeFinder", PulseWidthRangeFinder.class);
-        registerDevice("flashlib.device.Ultrasonic", Ultrasonic.class);
+        registerDevice(FlashLibDevicesIds.AnalogAccelerometer, AnalogAccelerometer.class);
+        registerDevice(FlashLibDevicesIds.AnalogGyro, AnalogGyro.class);
+        registerDevice(FlashLibDevicesIds.AnalogRangeFinder, AnalogRangeFinder.class);
+        registerDevice(FlashLibDevicesIds.PulseEncoder, PulseEncoder.class);
+        registerDevice(FlashLibDevicesIds.PulseWidthRangeFinder, PulseWidthRangeFinder.class);
+        registerDevice(FlashLibDevicesIds.Ultrasonic, Ultrasonic.class);
     }
 }
