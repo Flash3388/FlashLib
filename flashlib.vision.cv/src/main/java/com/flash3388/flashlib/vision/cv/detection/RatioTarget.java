@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.vision.cv.detection;
 
+import com.flash3388.flashlib.vision.detection.RealTargetConfig;
 import com.flash3388.flashlib.vision.detection.ScorableTarget;
 import com.jmath.vectors.Vector2;
 import org.opencv.core.Rect;
