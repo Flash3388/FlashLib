@@ -175,11 +175,11 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
     @Override
     public void end(FinishReason reason) {
-        if (reason != FinishReason.FINISHED && mWhenInterrupted != null) {
+        if (reason.isInterrupt() && mWhenInterrupted != null) {
             mWhenInterrupted.run();
         }
 
-        if (reason != FinishReason.FINISHED || mForcedEarlyFinish) {
+        if (reason.isInterrupt() || mForcedEarlyFinish) {
             for (ExecutionContext context : mRunningActions) {
                 context.interrupt();
             }
