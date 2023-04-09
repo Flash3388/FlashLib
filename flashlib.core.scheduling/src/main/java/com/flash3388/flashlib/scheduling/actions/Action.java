@@ -17,7 +17,7 @@ import java.util.Collection;
  * <p>
  * An action has few running phases:
  * <ul>
- * 	<li> {@link #initialize()} called once at the start </li>
+ * 	<li> {@link #initialize(ActionControl)} called once at the start </li>
  * 	<li> {@link #execute(ActionControl)}: called repeatedly until
  * 	{@link ActionControl#finish()} or {@link ActionControl#cancel()} are called</li>
  * 	<li> {@link #end(FinishReason)}: called when the action is done</li>
@@ -34,7 +34,7 @@ import java.util.Collection;
  * that system. To do that, users must explicitly call {@link #configure()} and pass a system which is
  * used (multiple systems can be required). By doing so, the {@link Scheduler} now knows to stop any other action
  * with at least one similar system requirement. If an action is running and another starts with a similar system
- * requirement, the previous action is canceled, invoking a call to {@link #end(boolean) end(true)}.
+ * requirement, the previous action is canceled, invoking a call to {@link #end(FinishReason) end(FinishReason.CANCELLED)}.
  *
  * @since FlashLib 1.0.0
  */
@@ -42,8 +42,9 @@ public interface Action {
 
     /**
      * Called once when the action is started.
+     * @param control component for controlling and querying the action execution state.
      */
-    default void initialize() {
+    default void initialize(ActionControl control) {
     }
 
     /**

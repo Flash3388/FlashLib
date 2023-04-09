@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 public class GenericAction extends ActionBase {
 
     public static class Builder {
-        private Runnable mOnInitialize;
+        private Consumer<ActionControl> mOnInitialize;
         private Consumer<ActionControl> mOnExecute;
         private Consumer<FinishReason> mOnEnd;
 
-        public Builder onInitialize(Runnable runnable) {
+        public Builder onInitialize(Consumer<ActionControl> runnable) {
             mOnInitialize = runnable;
             return this;
         }
@@ -33,20 +33,20 @@ public class GenericAction extends ActionBase {
         }
     }
 
-    private final Runnable mOnInitialize;
+    private final Consumer<ActionControl> mOnInitialize;
     private final Consumer<ActionControl> mOnExecute;
     private final Consumer<FinishReason> mOnEnd;
 
-    public GenericAction(Runnable onInitialize, Consumer<ActionControl> onExecute, Consumer<FinishReason> onEnd) {
+    public GenericAction(Consumer<ActionControl> onInitialize, Consumer<ActionControl> onExecute, Consumer<FinishReason> onEnd) {
         mOnInitialize = onInitialize;
         mOnExecute = onExecute;
         mOnEnd = onEnd;
     }
 
     @Override
-    public final void initialize() {
+    public final void initialize(ActionControl control) {
         if (mOnInitialize != null) {
-            mOnInitialize.run();
+            mOnInitialize.accept(control);
         }
     }
 

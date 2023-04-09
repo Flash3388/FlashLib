@@ -28,7 +28,7 @@ class PeriodicActionTest {
         when(mClock.currentTime()).thenReturn(Time.seconds(1));
 
         PeriodicAction action = new PeriodicAction(mClock, runnable, period);
-        action.initialize();
+        action.initialize(mock(ActionControl.class));
         action.execute(mock(ActionControl.class));
 
         verify(runnable, times(1)).run();

@@ -33,7 +33,7 @@ public class MoveToDistanceAction extends ActionBase {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
         mPidController.reset();
     }
 

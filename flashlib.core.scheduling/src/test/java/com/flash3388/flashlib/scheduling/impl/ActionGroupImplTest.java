@@ -46,9 +46,10 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.execute(mock(ActionControl.class));
+        ActionControl control = mock(ActionControl.class);
+        actionGroup.execute(control);
 
-        verify(mScheduler, times(1)).createExecutionContext(eq(actionGroup), eq(action));
+        verify(control, times(1)).createExecutionContext(eq(action));
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
     }
 
@@ -116,7 +117,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.initialize();
+        actionGroup.initialize(mock(ActionControl.class));
 
         assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(1));
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
@@ -132,7 +133,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallel();
 
-        actionGroup.initialize();
+        actionGroup.initialize(mock(ActionControl.class));
 
         assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(0));
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(2));
@@ -148,7 +149,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallelRace();
 
-        actionGroup.initialize();
+        actionGroup.initialize(mock(ActionControl.class));
 
         assertThat(mActionsToExecute, IsCollectionWithSize.hasSize(0));
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(2));
@@ -221,19 +222,22 @@ class ActionGroupImplTest {
     }
 
     private ActionGroupImpl createSequential() {
-        return new ActionGroupImpl(mScheduler, mock(Logger.class),
+        return new ActionGroupImpl(mScheduler,
+                mock(Logger.class),
                 GroupPolicy.sequential(),
                 mActions, mActionsToExecute, mRunningActions);
     }
 
     private ActionGroupImpl createParallel() {
-        return new ActionGroupImpl(mScheduler, mock(Logger.class),
+        return new ActionGroupImpl(mScheduler,
+                mock(Logger.class),
                 GroupPolicy.parallel(),
                 mActions, mActionsToExecute, mRunningActions);
     }
 
     private ActionGroupImpl createParallelRace() {
-        return new ActionGroupImpl(mScheduler, mock(Logger.class),
+        return new ActionGroupImpl(mScheduler,
+                mock(Logger.class),
                 GroupPolicy.parallelRace(),
                 mActions, mActionsToExecute, mRunningActions);
     }

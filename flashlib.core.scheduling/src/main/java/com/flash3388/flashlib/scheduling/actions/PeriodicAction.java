@@ -23,7 +23,7 @@ public class PeriodicAction extends ActionBase {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
         mNextRun = Time.INVALID;
     }
 

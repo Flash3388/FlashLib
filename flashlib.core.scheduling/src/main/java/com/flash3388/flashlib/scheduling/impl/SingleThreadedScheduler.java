@@ -235,17 +235,6 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
-        mMainThread.verifyCurrentThread();
-
-        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
-        RunningActionContext context = new RunningActionContext(action, group,
-                new ObsrActionContext(object),
-                mClock, LOGGER);
-        return new ExecutionContextImpl(mClock, LOGGER, context);
-    }
-
-    @Override
     public ActionGroup newActionGroup(ActionGroupType type) {
         mMainThread.verifyCurrentThread();
 

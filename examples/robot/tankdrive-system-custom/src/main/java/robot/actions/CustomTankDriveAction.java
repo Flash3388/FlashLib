@@ -49,7 +49,7 @@ public class CustomTankDriveAction extends ActionBase {
     // wasInterrupted would be true.
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
     }
 
     @Override

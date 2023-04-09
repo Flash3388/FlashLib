@@ -5,7 +5,6 @@ import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import java.util.Set;
 public class RunningActionContext {
 
     private final Action mAction;
-    private final ActionGroup mParent;
+    private final Action mParent;
     private final ObsrActionContext mObsrContext;
     private final Logger mLogger;
 
@@ -26,7 +25,7 @@ public class RunningActionContext {
     private boolean mIsInitialized;
 
     public RunningActionContext(Action action,
-                                ActionGroup parent,
+                                Action parent,
                                 ObsrActionContext obsrContext,
                                 Clock clock,
                                 Logger logger) {
@@ -37,7 +36,7 @@ public class RunningActionContext {
 
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
         mExecutionState = new ActionExecutionState(mConfiguration, obsrContext, clock, logger);
-        mControl = new ActionControlImpl(mConfiguration, mExecutionState);
+        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrContext, clock, logger);
 
         mIsInitialized = false;
 
@@ -113,7 +112,7 @@ public class RunningActionContext {
     private void initialize() {
         try {
             mLogger.trace("Calling initialize for {}", this);
-            mAction.initialize();
+            mAction.initialize(mControl);
         } catch (Throwable t) {
             mExecutionState.markErrored(t);
         }

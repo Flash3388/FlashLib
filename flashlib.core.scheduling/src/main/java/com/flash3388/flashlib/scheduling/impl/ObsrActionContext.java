@@ -41,6 +41,10 @@ public class ObsrActionContext {
         mRequirements.setString("");
     }
 
+    public StoredObject getRootObject() {
+        return mRootObject;
+    }
+
     public void updateFromAction(Action action) {
         mClass.setString(action.getClass().getName());
     }

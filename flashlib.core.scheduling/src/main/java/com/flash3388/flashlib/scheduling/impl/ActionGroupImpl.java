@@ -22,7 +22,6 @@ import java.util.Queue;
 
 public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
-    private final WeakReference<Scheduler> mScheduler;
     private final Logger mLogger;
     private final GroupPolicy mGroupPolicy;
     private final Collection<Action> mActions;
@@ -31,15 +30,15 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     private final Collection<ExecutionContext> mRunningActions;
 
     private Runnable mWhenInterrupted;
-
     private boolean mForcedEarlyFinish;
 
-    public ActionGroupImpl(Scheduler scheduler, Logger logger, GroupPolicy groupPolicy,
+    public ActionGroupImpl(Scheduler scheduler,
+                           Logger logger,
+                           GroupPolicy groupPolicy,
                            Collection<Action> actions,
                            Queue<Action> actionsToExecute,
                            Collection<ExecutionContext> runningActions) {
         super(scheduler);
-        mScheduler = new WeakReference<>(scheduler);
         mLogger = logger;
         mGroupPolicy = groupPolicy;
         mActions = actions;
@@ -140,7 +139,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
         mForcedEarlyFinish = false;
 
         mActionsToExecute.addAll(mActions);
@@ -148,9 +147,9 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         if (mGroupPolicy.shouldExecuteActionsInParallel()) {
             // start all actions
             //noinspection StatementWithEmptyBody
-            while (startNextAction());
+            while (startNextAction(control));
         } else {
-            startNextAction();
+            startNextAction(control);
         }
     }
 
@@ -166,7 +165,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         }
 
         if (!mGroupPolicy.shouldExecuteActionsInParallel() && mRunningActions.isEmpty()) {
-            startNextAction();
+            startNextAction(control);
         }
 
         if (mRunningActions.isEmpty() && mActionsToExecute.isEmpty()) {
@@ -190,18 +189,13 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         mRunningActions.clear();
     }
 
-    private boolean startNextAction() {
+    private boolean startNextAction(ActionControl control) {
         if (mActionsToExecute.isEmpty()) {
             return false;
         }
 
-        Scheduler scheduler = mScheduler.get();
-        if (scheduler == null) {
-            throw new IllegalStateException("scheduler was garbage collected");
-        }
-
         Action action = mActionsToExecute.poll();
-        ExecutionContext context = scheduler.createExecutionContext(this, action);
+        ExecutionContext context = control.createExecutionContext(action);
         mRunningActions.add(context);
 
         return true;
