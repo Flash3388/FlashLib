@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
-import java.nio.channels.MembershipKey;
 
 public class MulticastUdpChannel extends UdpChannel {
 

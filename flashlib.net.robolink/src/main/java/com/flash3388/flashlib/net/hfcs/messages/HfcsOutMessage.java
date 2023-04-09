@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.net.hfcs.messages;
 
-import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.Type;
+import com.flash3388.flashlib.net.messaging.OutMessage;
 
 import java.io.DataOutput;
 import java.io.IOException;

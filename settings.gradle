@@ -12,8 +12,9 @@ include 'flashlib.net.robolink'
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
 
-include 'flashlib.core.robot'
 include 'flashlib.core.app'
+include 'flashlib.core.robot'
+include 'flashlib.robot.systems'
 
 include 'flashlib.hid.sdl2'
 

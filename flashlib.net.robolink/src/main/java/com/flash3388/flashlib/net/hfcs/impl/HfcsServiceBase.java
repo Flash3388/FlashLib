@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.hfcs.impl;
 
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
@@ -8,6 +7,7 @@ import com.flash3388.flashlib.net.hfcs.OutData;
 import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
 import com.flash3388.flashlib.net.hfcs.Type;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.util.NetServiceBase;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;

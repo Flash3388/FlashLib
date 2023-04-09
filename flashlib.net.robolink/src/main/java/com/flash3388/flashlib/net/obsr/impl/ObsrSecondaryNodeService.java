@@ -2,9 +2,9 @@ package com.flash3388.flashlib.net.obsr.impl;
 
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.PendingWriteMessage;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.Storage;

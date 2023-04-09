@@ -11,11 +11,9 @@ import org.slf4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
-import java.util.function.Function;
 
 public class DeviceInterfaceImpl implements DeviceInterface {
 

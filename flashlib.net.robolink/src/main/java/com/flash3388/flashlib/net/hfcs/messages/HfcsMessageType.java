@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.net.hfcs.messages;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
-import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.KnownInDataTypes;
+import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.MessageType;
 
 import java.io.DataInput;
 import java.io.IOException;

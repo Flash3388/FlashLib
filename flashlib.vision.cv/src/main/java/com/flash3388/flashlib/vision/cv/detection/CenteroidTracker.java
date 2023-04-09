@@ -3,7 +3,6 @@ package com.flash3388.flashlib.vision.cv.detection;
 import com.flash3388.flashlib.vision.detection.ObjectTracker;
 import com.flash3388.flashlib.vision.detection.ScorableTarget;
 import com.jmath.vectors.Vector2;
-import org.opencv.core.Point;
 
 import java.util.ArrayList;
 import java.util.Collection;

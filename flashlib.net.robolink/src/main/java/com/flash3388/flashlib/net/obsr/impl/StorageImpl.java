@@ -2,9 +2,9 @@ package com.flash3388.flashlib.net.obsr.impl;
 
 import com.beans.observables.RegisteredListener;
 import com.beans.observables.listeners.RegisteredListenerImpl;
+import com.flash3388.flashlib.net.obsr.EntryListener;
 import com.flash3388.flashlib.net.obsr.EntryModificationEvent;
 import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
-import com.flash3388.flashlib.net.obsr.EntryListener;
 import com.flash3388.flashlib.net.obsr.ModificationType;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;

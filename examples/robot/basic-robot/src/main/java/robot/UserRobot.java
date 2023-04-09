@@ -9,13 +9,9 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.MotorSystem;
+import com.flash3388.flashlib.robot.systems.OmniDriveSystem;
 import com.flash3388.flashlib.robot.systems.SolenoidSystem;
-import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
-import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
-import com.flash3388.flashlib.robot.systems.drive.OmniDriveSystem;
-import com.flash3388.flashlib.robot.systems.drive.actions.OmniDriveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
@@ -58,7 +54,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
 
         // The drive system can have a default action, which simply
         // moves it based on the xbox controller.
-        mDriveSystem.setDefaultAction(new OmniDriveAction(mDriveSystem,
+        mDriveSystem.setDefaultAction(mDriveSystem.omniDrive(
                 mController.getAxis(XboxAxis.RightStickY),
                 mController.getAxis(XboxAxis.RightStickX)));
 
@@ -71,13 +67,13 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // active if it passes the threshold to either side (- and +). However, RT
         // has only 0->1 values, so it can't be directional.
         mController.getAxis(XboxAxis.RT).asButton(0.8, false)
-                .whileActive(new RotateAction(mShooter, 0.6));
+                .whileActive(mShooter.rotate(0.6));
 
         // We'll use the DPad to control the shooter piston.
         // The DPad as 4 buttons: up, down, left, right. We'll use UP to raise and DOWN to
         // lower the shooter, i.e. open and close the piston respectively.
-        mController.getDpad().up().whenActive(new OpenValveAction(mShooterPiston));
-        mController.getDpad().down().whenActive(new CloseValveAction(mShooterPiston));
+        mController.getDpad().up().whenActive(mShooterPiston.open());
+        mController.getDpad().down().whenActive(mShooterPiston.close());
     }
 
     @Override

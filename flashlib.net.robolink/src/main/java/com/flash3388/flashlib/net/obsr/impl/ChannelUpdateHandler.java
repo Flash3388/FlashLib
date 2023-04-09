@@ -1,11 +1,10 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
-import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.messaging.OutMessage;
+import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.PendingWriteMessage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.function.BiConsumer;
 
 public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 

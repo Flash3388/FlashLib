@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.flash3388.flashlib.net.messaging.MessageType;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

@@ -4,7 +4,6 @@ import com.flash3388.flashlib.net.channels.IncomingData;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 

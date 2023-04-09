@@ -3,7 +3,6 @@ package com.flash3388.flashlib.scheduling.actions;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.FinishReason;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class GenericAction extends ActionBase {

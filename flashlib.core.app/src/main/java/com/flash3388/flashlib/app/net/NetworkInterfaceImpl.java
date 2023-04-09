@@ -1,23 +1,17 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.tcp.TcpRoutingService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.MessengerService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
-import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
-import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
-
-import java.net.InetAddress;
-import java.net.SocketAddress;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
 

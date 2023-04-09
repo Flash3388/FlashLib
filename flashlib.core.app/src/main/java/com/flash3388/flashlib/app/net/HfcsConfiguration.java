@@ -2,7 +2,6 @@ package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
-import com.flash3388.flashlib.net.util.NetInterfaces;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.unique.InstanceId;
 

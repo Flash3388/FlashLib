@@ -9,7 +9,6 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.ClockMock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +22,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SingleThreadedSchedulerTest {

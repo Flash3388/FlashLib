@@ -10,7 +10,6 @@ import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import org.slf4j.Logger;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;

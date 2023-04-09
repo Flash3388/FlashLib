@@ -1,6 +1,5 @@
 package example;
 
-import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.time.SystemMillisClock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
