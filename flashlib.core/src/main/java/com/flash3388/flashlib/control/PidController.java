@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.control;
+package com.flash3388.flashlib.control;
 
 import com.flash3388.flashlib.control.ClosedLoopController;
 import com.flash3388.flashlib.time.Clock;
