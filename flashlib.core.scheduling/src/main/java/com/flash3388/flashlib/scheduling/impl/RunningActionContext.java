@@ -95,6 +95,10 @@ public class RunningActionContext {
         } else {
             execute();
 
+            if (isFinished()) {
+                mExecutionState.markForFinish();
+            }
+
             if (mExecutionState.isMarkedForEnd()) {
                 finish();
                 return true;
@@ -127,6 +131,17 @@ public class RunningActionContext {
         } catch (Throwable t) {
             mExecutionState.markErrored(t);
         }
+    }
+
+    private boolean isFinished() {
+        try {
+            mLogger.trace("Calling isFinished for {}", this);
+            return mAction.isFinished();
+        } catch (Throwable t) {
+            mExecutionState.markErrored(t);
+        }
+
+        return false;
     }
 
     private void finish() {

@@ -54,6 +54,14 @@ public interface Action {
     void execute(ActionControl control);
 
     /**
+     * Returns true when the action should end.
+     * @return true when the action should end, false otherwise.
+     */
+    default boolean isFinished() {
+        return false;
+    }
+
+    /**
      * Called when the action ends run.
      * @param reason reason for execution finish
      */
