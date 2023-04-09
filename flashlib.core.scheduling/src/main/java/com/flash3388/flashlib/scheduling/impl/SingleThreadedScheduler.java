@@ -9,6 +9,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
@@ -158,6 +159,11 @@ public class SingleThreadedScheduler implements Scheduler {
                 iterator.remove();
             }
         }
+    }
+
+    @Override
+    public void cancelActionsIfWithoutFlag(ActionFlag flag) {
+        cancelActionsIf((action)-> !action.getConfiguration().hasFlags(flag));
     }
 
     @Override

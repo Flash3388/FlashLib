@@ -4,6 +4,7 @@ import com.flash3388.flashlib.app.StartupException;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
+import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 
 /**
  * A {@link RobotBase} implementation for loop-based (iterative) robots.
@@ -95,7 +96,7 @@ public class LoopingRobotBase implements RobotBase {
         mRobotControl.getLogger().debug("Initializing mode {}", mode);
 
         if (mode.isDisabled()) {
-            mRobotControl.getScheduler().cancelActionsIf((a)->!a.getConfiguration().shouldRunWhenDisabled());
+            mRobotControl.getScheduler().cancelActionsIfWithoutFlag(ActionFlag.RUN_ON_DISABLED);
             mRobot.disabledInit();
         } else {
             mRobot.modeInit(mode);
