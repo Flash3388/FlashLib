@@ -9,6 +9,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
@@ -88,7 +89,7 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
-        RunningActionContext context = new RunningActionContext(action, LOGGER, new ObsrActionContext(object));
+        RunningActionContext context = new RunningActionContext(action, new ObsrActionContext(object), mClock, LOGGER);
 
         if (!tryStartingAction(context)) {
             mPendingActions.put(action, context);
@@ -138,7 +139,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
         RunningActionContext context = mRunningActions.get(action);
         if (context != null) {
-            return context.getStartTime();
+            return context.getRunTime();
         }
 
         throw new IllegalArgumentException("Action not running");
@@ -158,6 +159,11 @@ public class SingleThreadedScheduler implements Scheduler {
                 iterator.remove();
             }
         }
+    }
+
+    @Override
+    public void cancelActionsIfWithoutFlag(ActionFlag flag) {
+        cancelActionsIf((action)-> !action.getConfiguration().hasFlags(flag));
     }
 
     @Override
@@ -235,15 +241,6 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public ExecutionContext createExecutionContext(ActionGroup group, Action action) {
-        mMainThread.verifyCurrentThread();
-
-        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
-        RunningActionContext context = new RunningActionContext(action, group, new ObsrActionContext(object), LOGGER);
-        return new ExecutionContextImpl(mClock, LOGGER, context);
-    }
-
-    @Override
     public ActionGroup newActionGroup(ActionGroupType type) {
         mMainThread.verifyCurrentThread();
 
@@ -280,7 +277,7 @@ public class SingleThreadedScheduler implements Scheduler {
                     LOGGER.warn("Action {} is not allowed to run in disabled. Cancelling", context);
                 }
 
-                if (context.iterate(mClock.currentTime())) {
+                if (context.iterate()) {
                     // finished execution
                     removeFromRequirements(context);
                     iterator.remove();
@@ -346,7 +343,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
             // no conflicts, let's start
 
-            context.markStarted(mClock.currentTime());
+            context.markStarted();
             setOnRequirements(context);
             mRunningActions.put(context.getAction(), context);
 
@@ -376,7 +373,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
     private void cancelAndEnd(RunningActionContext context) {
         context.markForCancellation();
-        context.iterate(mClock.currentTime());
+        context.iterate();
         removeFromRequirements(context);
 
         LOGGER.debug("Action {} finished", context);

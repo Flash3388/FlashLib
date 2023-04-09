@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependenciesMock;
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.time.Time;
@@ -27,8 +28,8 @@ class PeriodicActionTest {
         when(mClock.currentTime()).thenReturn(Time.seconds(1));
 
         PeriodicAction action = new PeriodicAction(mClock, runnable, period);
-        action.initialize();
-        action.execute();
+        action.initialize(mock(ActionControl.class));
+        action.execute(mock(ActionControl.class));
 
         verify(runnable, times(1)).run();
     }
@@ -40,7 +41,7 @@ class PeriodicActionTest {
         when(mClock.currentTime()).thenReturn(nextRun);
 
         PeriodicAction action = new PeriodicAction(mClock, runnable, Time.seconds(1), nextRun);
-        action.execute();
+        action.execute(mock(ActionControl.class));
 
         verify(runnable, times(1)).run();
     }
@@ -52,7 +53,7 @@ class PeriodicActionTest {
         when(mClock.currentTime()).thenReturn(Time.seconds(1));
 
         PeriodicAction action = new PeriodicAction(mClock, runnable, Time.seconds(1), nextRun);
-        action.execute();
+        action.execute(mock(ActionControl.class));
 
         verify(runnable, never()).run();
     }

@@ -3,6 +3,8 @@ package com.flash3388.flashlib.robot.systems.drive.actions;
 import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDrive;
 import com.flash3388.flashlib.robot.systems.drive.HolonomicDriveSpeed;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.jmath.vectors.Vector2;
 
@@ -42,12 +44,12 @@ public class HolonomicDriveAction extends ActionBase {
 	}
 	
 	@Override
-	public void execute() {
+	public void execute(ActionControl control) {
 		mDriveInterface.holonomicDrive(mSpeedSupplier.get());
 	}
 
 	@Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
 		mDriveInterface.stop();
 	}
 }

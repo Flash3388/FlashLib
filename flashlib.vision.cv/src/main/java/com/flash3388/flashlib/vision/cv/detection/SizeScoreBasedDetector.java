@@ -3,6 +3,7 @@ package com.flash3388.flashlib.vision.cv.detection;
 import com.flash3388.flashlib.vision.cv.CvHelper;
 import com.flash3388.flashlib.vision.cv.CvImage;
 import com.flash3388.flashlib.vision.detection.ObjectDetector;
+import com.flash3388.flashlib.vision.detection.RealTargetConfig;
 import com.flash3388.flashlib.vision.detection.ScorableTarget;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;

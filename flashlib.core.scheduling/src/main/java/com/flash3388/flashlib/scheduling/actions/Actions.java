@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
@@ -22,7 +23,7 @@ public final class Actions {
     public static Action empty() {
         return new ActionBase() {
             @Override
-            public void execute() { }
+            public void execute(ActionControl control) { }
         };
     }
 
@@ -52,7 +53,11 @@ public final class Actions {
     public static Action waitUntil(BooleanSupplier condition) {
         Objects.requireNonNull(condition, "condition is null");
         return new GenericAction.Builder()
-                .isFinished(condition)
+                .onExecute((control)-> {
+                    if (condition.getAsBoolean()) {
+                        control.finish();
+                    }
+                })
                 .build();
     }
 
@@ -66,7 +71,7 @@ public final class Actions {
     }
 
     /**
-     * Creates a canceling action for an action. This is an {@link InstantAction} which calls {@link Action#cancel()}
+     * Creates a canceling action for an action. This is an instant action which calls {@link Action#cancel()}
      * for a given action when started.
      *
      * @param action action to cancel
@@ -75,12 +80,13 @@ public final class Actions {
     public static Action canceling(Action action){
         Objects.requireNonNull(action, "action is null");
         return new GenericAction.Builder()
-                .onExecute(()-> {
+                .onExecute((control)-> {
                     if (action.isRunning()) {
                         action.cancel();
                     }
+
+                    control.finish();
                 })
-                .isFinished(()-> true)
                 .build();
     }
 
@@ -94,8 +100,10 @@ public final class Actions {
     public static Action instant(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
         return new GenericAction.Builder()
-                .onExecute(runnable)
-                .isFinished(()-> true)
+                .onExecute((control)-> {
+                    runnable.run();
+                    control.finish();
+                })
                 .build();
     }
 
@@ -113,7 +121,7 @@ public final class Actions {
     public static Action fromRunnable(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
         return new GenericAction.Builder()
-                .onExecute(runnable)
+                .onExecute((control)-> runnable.run())
                 .build();
     }
 

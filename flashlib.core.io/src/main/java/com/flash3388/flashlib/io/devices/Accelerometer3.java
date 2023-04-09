@@ -12,19 +12,19 @@ public interface Accelerometer3 extends Closeable {
 
 	/**
 	 * Gets the x-axis acceleration
-	 * @return acceleration along the x-axis
+	 * @return acceleration along the x-axis in G
 	 */
 	double getX();
 
 	/**
 	 * Gets the y-axis acceleration
-	 * @return acceleration along the y-axis
+	 * @return acceleration along the y-axis in G
 	 */
 	double getY();
 
 	/**
 	 * Gets the z-axis acceleration
-	 * @return acceleration along the z-axis
+	 * @return acceleration along the z-axis in G
 	 */
 	double getZ();
 }

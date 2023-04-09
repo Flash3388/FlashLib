@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
@@ -22,7 +23,7 @@ public class TriggerActivationAction extends ActionBase {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         boolean isConditionMet = mCondition.getAsBoolean();
 
         if (isConditionMet) {

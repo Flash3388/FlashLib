@@ -1,10 +1,11 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
@@ -13,35 +14,41 @@ import java.util.Set;
 public class RunningActionContext {
 
     private final Action mAction;
-    private final ActionGroup mParent;
+    private final Action mParent;
     private final ObsrActionContext mObsrContext;
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
+    private final ActionExecutionState mExecutionState;
+    private final ActionControl mControl;
 
     private boolean mIsInitialized;
-    private boolean mIsCanceled;
-    private Time mStartTime;
-    private Time mEndTime;
 
-    public RunningActionContext(Action action, ActionGroup parent, ObsrActionContext obsrContext, Logger logger) {
+    public RunningActionContext(Action action,
+                                Action parent,
+                                ObsrActionContext obsrContext,
+                                Clock clock,
+                                Logger logger) {
         mAction = action;
         mParent = parent;
         mObsrContext = obsrContext;
         mLogger = logger;
 
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
+        mExecutionState = new ActionExecutionState(mConfiguration, obsrContext, clock, logger);
+        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrContext, clock, logger);
+
         mIsInitialized = false;
-        mIsCanceled = false;
-        mStartTime = Time.INVALID;
-        mEndTime = Time.INVALID;
 
         mObsrContext.updateFromAction(action);
         mObsrContext.updateFromConfiguration(mConfiguration);
     }
 
-    public RunningActionContext(Action action, Logger logger, ObsrActionContext obsrContext) {
-        this(action, null, obsrContext, logger);
+    public RunningActionContext(Action action,
+                                ObsrActionContext obsrContext,
+                                Clock clock,
+                                Logger logger) {
+        this(action, null, obsrContext, clock, logger);
     }
 
     public Action getAction() {
@@ -60,31 +67,24 @@ public class RunningActionContext {
         return mConfiguration.getRequirements();
     }
 
-    public Time getStartTime() {
-        return mStartTime;
+    public Time getRunTime() {
+        return mExecutionState.getRunTime();
     }
 
-    public void markStarted(Time now) {
-        mStartTime = now;
-        if (mConfiguration.getTimeout().isValid()) {
-            mEndTime = now.add(mConfiguration.getTimeout());
-        }
-
-        mObsrContext.updateStatus(ExecutionStatus.RUNNING);
-        mObsrContext.updatePhase(ExecutionPhase.INITIALIZATION);
+    public void markStarted() {
+        mExecutionState.markStarted();
     }
 
     public void markForCancellation() {
-        mIsCanceled = true;
-        mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
+        mExecutionState.markForCancellation();
     }
 
-    public boolean iterate(Time now) {
-        if (wasTimedOut(now)) {
-            markForCancellation();
+    public boolean iterate() {
+        if (wasTimedOut()) {
+            mExecutionState.markTimedOut();
         }
 
-        if (mIsCanceled) {
+        if (mExecutionState.isMarkedForEnd()) {
             finish();
             return true;
         }
@@ -95,13 +95,17 @@ public class RunningActionContext {
         } else {
             execute();
 
-            if (mIsCanceled || isFinished()) {
+            if (isFinished()) {
+                mExecutionState.markForFinish();
+            }
+
+            if (mExecutionState.isMarkedForEnd()) {
                 finish();
                 return true;
             }
         }
 
-        if (mIsCanceled) {
+        if (mExecutionState.isMarkedForEnd()) {
             finish();
             return true;
         }
@@ -111,10 +115,10 @@ public class RunningActionContext {
 
     private void initialize() {
         try {
-            mAction.initialize();
+            mLogger.trace("Calling initialize for {}", this);
+            mAction.initialize(mControl);
         } catch (Throwable t) {
-            mLogger.error("Error while running an action", t);
-            markForCancellation();
+            mExecutionState.markErrored(t);
         }
 
         mObsrContext.updatePhase(ExecutionPhase.EXECUTION);
@@ -122,42 +126,48 @@ public class RunningActionContext {
 
     private void execute() {
         try {
-            mAction.execute();
+            mLogger.trace("Calling execute for {}", this);
+            mAction.execute(mControl);
         } catch (Throwable t) {
-            mLogger.error("Error while running an action", t);
-            markForCancellation();
+            mExecutionState.markErrored(t);
         }
     }
 
     private boolean isFinished() {
         try {
+            mLogger.trace("Calling isFinished for {}", this);
             return mAction.isFinished();
         } catch (Throwable t) {
-            mLogger.error("Error while running an action", t);
-            markForCancellation();
-            return false;
+            mExecutionState.markErrored(t);
         }
+
+        return false;
     }
 
     private void finish() {
         mObsrContext.updatePhase(ExecutionPhase.END);
 
         try {
-            mAction.end(mIsCanceled);
-            mObsrContext.updateStatus(ExecutionStatus.FINISHED);
-            mObsrContext.finished();
+            mLogger.trace("Calling end for {}", this);
+            mAction.end(mExecutionState.getFinishReason());
+            mExecutionState.markFinishedExecution();
         } catch (Throwable t) {
-            mLogger.error("Error while running an action (in end!!!)", t);
-            markForCancellation();
+            mLogger.warn("Error occurred in action during the end phase. " +
+                    "It is likely the action has not finished it's teardown properly");
+            mExecutionState.markErrored(t);
+
+            // try doing it again, so we can maybe make sure end runs.
+            try {
+                mLogger.debug("Re-Calling end for {}", this);
+                mAction.end(mExecutionState.getFinishReason());
+            } catch (Throwable t1) {}
+
+            mExecutionState.markFinishedExecution();
         }
     }
 
-    private boolean wasTimedOut(Time now) {
-        if (!mEndTime.isValid()) {
-            return false;
-        }
-
-        return now.largerThanOrEquals(mEndTime);
+    private boolean wasTimedOut() {
+        return mExecutionState.isTimedOut();
     }
 
     @Override

@@ -1,9 +1,10 @@
 package com.flash3388.flashlib.robot.systems.actions;
 
 import com.flash3388.flashlib.robot.systems.Valve;
-import com.flash3388.flashlib.scheduling.actions.InstantAction;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
-public class OpenValveAction extends InstantAction {
+public class OpenValveAction extends ActionBase {
 
     private final Valve mValve;
 
@@ -14,7 +15,8 @@ public class OpenValveAction extends InstantAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         mValve.open();
+        control.finish();
     }
 }

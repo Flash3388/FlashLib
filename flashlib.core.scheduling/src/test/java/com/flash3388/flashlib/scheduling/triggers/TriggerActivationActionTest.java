@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.triggers;
 
 import com.beans.BooleanProperty;
 import com.beans.properties.SimpleBooleanProperty;
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import org.junit.jupiter.api.Test;
 
@@ -16,10 +17,10 @@ public class TriggerActivationActionTest {
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
                 condition, trigger);
-        triggerActivationAction.execute(); // not met
+        triggerActivationAction.execute(mock(ActionControl.class)); // not met
 
         condition.setAsBoolean(true);
-        triggerActivationAction.execute(); // is met
+        triggerActivationAction.execute(mock(ActionControl.class)); // is met
 
         verify(trigger, times(1)).activate();
     }
@@ -31,10 +32,10 @@ public class TriggerActivationActionTest {
 
         TriggerActivationAction triggerActivationAction = new TriggerActivationAction(mock(Scheduler.class),
                 condition, trigger);
-        triggerActivationAction.execute(); // is met
+        triggerActivationAction.execute(mock(ActionControl.class)); // is met
 
         condition.setAsBoolean(false);
-        triggerActivationAction.execute(); // not met
+        triggerActivationAction.execute(mock(ActionControl.class)); // not met
 
         verify(trigger, times(1)).deactivate();
     }

@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.vision.cv.detection;
+package com.flash3388.flashlib.vision.detection;
 
 public class RealTargetConfig {
 
