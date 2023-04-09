@@ -18,14 +18,14 @@ public interface Gyro extends Closeable {
 	/**
 	 * Gets the angle of the robot measured by the sensor.
 	 * 
-	 * @return angle of the robot with degrees
+	 * @return angle along the axis measured with degrees
 	 */
 	double getAngle();
 
 	/**
 	 * Gets the rate of angular rotation measured by the sensor.
 	 * 
-	 * @return rate of rotation in degrees per second
+	 * @return rate of rotation along the axis in degrees per second
 	 */
 	double getRate();
 }

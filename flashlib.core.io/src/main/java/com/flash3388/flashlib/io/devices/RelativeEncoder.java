@@ -12,26 +12,38 @@ import java.io.Closeable;
  *
  * @since FlashLib 1.0.0
  */
-public interface Encoder extends Closeable {
+public interface RelativeEncoder extends Closeable {
 	
 	/**
 	 * Resets the encoder. 
 	 */
 	void reset();
-	
+
 	/**
-	 * Gets the raw count of pulses measured by the encoder.
-	 * 
-	 * @return pulse count.
+	 * Gets the current position of the encoder along the axis of rotation.
+	 *
+	 * @return position in degrees
 	 */
-	int getRaw();
+	double getPosition();
 
 	/**
 	 * Gets the rate of rotation measured by the encoder.
 	 * 
-	 * @return rate of rotation in RPM.
+	 * @return rate of rotation in degrees per second.
 	 */
 	double getRate();
+
+	/**
+	 * Gets the distance passed by the wheel the sensor measures.
+	 * <p>
+	 * Distance is measured by the amount of completed revolutions measured by the sensor. This value
+	 * is than multiplied by a constant which describes the distance passed per one revolution. For wheels,
+	 * that value is equal to the circumference of the wheel.
+	 * </p>
+	 *
+	 * @return distance passed in meters.
+	 */
+	double getDistancePassed();
 
 	/**
 	 * Gets the current linear velocity measured by the encoder.
@@ -42,24 +54,4 @@ public interface Encoder extends Closeable {
 	 * @return linear velocity in meters per second.
 	 */
 	double getVelocity();
-
-	/**
-	 * Gets the distance passed by the wheel the sensor measures. 
-	 * <p>
-	 * Distance is measured by the amount of completed revolutions measured by the sensor. This value 
-	 * is than multiplied by a constant which describes the distance passed per one revolution. For wheels,
-	 * that value is equal to the circumference of the wheel.
-	 * </p>
-	 * 
-	 * @return distance passed in meters.
-	 */
-	double getDistance();
-
-	/**
-	 * Gets the rotation direction measured by the encoder. If the encoder is not quadrature, rotation direction
-	 * cannot be determined and the value returned will always be true.
-	 * 
-	 * @return true for clockwise rotation, false for counter-clockwise rotation.
-	 */
-	boolean getDirection();
 }
