@@ -56,7 +56,10 @@ public interface Action {
     /**
      * Returns true when the action should end.
      * @return true when the action should end, false otherwise.
+     *
+     * @deprecated use {@link ActionControl#finish()} in {@link #execute(ActionControl)} instead.
      */
+    @Deprecated
     default boolean isFinished() {
         return false;
     }
