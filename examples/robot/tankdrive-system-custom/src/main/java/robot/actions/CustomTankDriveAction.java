@@ -2,6 +2,8 @@ package robot.actions;
 
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import robot.subsystems.CustomTankDrive;
 
@@ -51,7 +53,7 @@ public class CustomTankDriveAction extends ActionBase {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         // We grab the values from the joysticks.
         // - right: right stick axis Y
         // - left: left stick axis Y
@@ -62,12 +64,7 @@ public class CustomTankDriveAction extends ActionBase {
     }
 
     @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         // When the action is done, we should stop the drive system.
         mDrive.stop();
     }

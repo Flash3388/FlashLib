@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.Subsystem;
@@ -16,15 +18,16 @@ import java.util.Collection;
  * An action has few running phases:
  * <ul>
  * 	<li> {@link #initialize()} called once at the start </li>
- * 	<li> {@link #execute()}: called repeatedly until {@link #isFinished()} returns true</li>
- * 	<li> {@link #end(boolean)}: called when the action is done</li>
+ * 	<li> {@link #execute(ActionControl)}: called repeatedly until
+ * 	{@link ActionControl#finish()} or {@link ActionControl#cancel()} are called</li>
+ * 	<li> {@link #end(FinishReason)}: called when the action is done</li>
  * </ul>
- * To indicate whether an action should stop running, users can override the {@link #isFinished()} method and
- * return true to stop the action, or false to keep running. To manually stop an action, {@link #cancel()} can
- * be called.
+ * To indicate whether an action should stop running, users can use {@link ActionControl} and
+ * invoke its various methods to stop the action. To manually stop an action, {@link #cancel()} can be called.
  * <p>
  * An action can have a timeout. If the time since the action started running has passed a given timeout, the
- * action is canceled, invoking a call to {@link #end(boolean) end(true)}. Set the timeout by calling {@link #configure()}.
+ * action is canceled, invoking a call to {@link #end(FinishReason) end(FinishReason.TIMEDOUT)}.
+ * Set the timeout by calling {@link #configure()}.
  * <p>
  * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Subsystem} object
  * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
@@ -45,23 +48,15 @@ public interface Action {
 
     /**
      * Called repeatedly during the execution of the action.
+     * @param control component for controlling and querying the action execution state.
      */
-    void execute();
-
-    /**
-     * Returns true when the action should end.
-     * @return true when the action should end, false otherwise.
-     */
-    default boolean isFinished() {
-        return false;
-    }
+    void execute(ActionControl control);
 
     /**
      * Called when the action ends run.
-     * @param wasInterrupted <b>true</b> if the action ended was before {@link #isFinished()} returns true,
-     *                      <b>false</b> otherwise.
+     * @param reason reason for execution finish
      */
-    default void end(boolean wasInterrupted) {
+    default void end(FinishReason reason) {
     }
 
     /**

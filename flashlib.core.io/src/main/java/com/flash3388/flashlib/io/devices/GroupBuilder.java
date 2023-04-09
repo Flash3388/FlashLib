@@ -48,7 +48,6 @@ public class GroupBuilder<E, T extends DeviceGroup<E>> {
      * count and an instance is created.
      *
      * @param id implementation identifier
-     * @param type type which the implementation must support (usually interface)
      * @param namedArgs arguments to the constructor
      * @return this
      *

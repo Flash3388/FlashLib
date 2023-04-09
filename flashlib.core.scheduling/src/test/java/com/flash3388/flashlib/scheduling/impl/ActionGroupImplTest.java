@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
@@ -44,7 +46,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.execute();
+        actionGroup.execute(mock(ActionControl.class));
 
         verify(mScheduler, times(1)).createExecutionContext(eq(actionGroup), eq(action));
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
@@ -58,7 +60,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.execute();
+        actionGroup.execute(mock(ActionControl.class));
 
         verify(context, times(1)).execute(any());
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(1));
@@ -72,7 +74,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.execute();
+        actionGroup.execute(mock(ActionControl.class));
 
         verify(context, times(1)).execute(any());
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(0));
@@ -86,7 +88,7 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createSequential();
 
-        actionGroup.end(true);
+        actionGroup.end(FinishReason.CANCELED);
 
         verify(context, times(1)).interrupt();
         assertThat(mRunningActions, IsCollectionWithSize.hasSize(0));
@@ -99,7 +101,7 @@ class ActionGroupImplTest {
         ActionGroupImpl actionGroup = createSequential();
         actionGroup.whenInterrupted(callback);
 
-        actionGroup.end(true);
+        actionGroup.end(FinishReason.CANCELED);
 
         verify(callback, times(1)).run();
     }
@@ -163,8 +165,9 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallelRace();
 
-        actionGroup.execute();
-        assertThat(actionGroup.isFinished(), equalTo(true));
+        ActionControl actionControl = mock(ActionControl.class);
+        actionGroup.execute(actionControl);
+        verify(actionControl, times(1)).finish();
     }
 
     @Test
@@ -178,8 +181,9 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallelRace();
 
-        actionGroup.execute();
-        assertThat(actionGroup.isFinished(), equalTo(true));
+        ActionControl actionControl = mock(ActionControl.class);
+        actionGroup.execute(actionControl);
+        verify(actionControl, times(1)).finish();
     }
 
     @Test
@@ -193,8 +197,8 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallel();
 
-        actionGroup.execute();
-        actionGroup.end(true);
+        actionGroup.execute(mock(ActionControl.class));
+        actionGroup.end(FinishReason.CANCELED);
 
         verify(context1, times(1)).interrupt();
     }
@@ -210,8 +214,8 @@ class ActionGroupImplTest {
 
         ActionGroupImpl actionGroup = createParallelRace();
 
-        actionGroup.execute();
-        actionGroup.end(true);
+        actionGroup.execute(mock(ActionControl.class));
+        actionGroup.end(FinishReason.CANCELED);
 
         verify(context1, times(1)).interrupt();
     }

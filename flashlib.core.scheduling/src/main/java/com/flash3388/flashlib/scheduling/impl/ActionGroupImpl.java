@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
@@ -29,7 +31,8 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     private final Collection<ExecutionContext> mRunningActions;
 
     private Runnable mWhenInterrupted;
-    private boolean mForceFinish;
+
+    private boolean mForcedEarlyFinish;
 
     public ActionGroupImpl(Scheduler scheduler, Logger logger, GroupPolicy groupPolicy,
                            Collection<Action> actions,
@@ -43,7 +46,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         mActionsToExecute = actionsToExecute;
         mRunningActions = runningActions;
         mWhenInterrupted = null;
-        mForceFinish = false;
+        mForcedEarlyFinish = false;
     }
 
     public ActionGroupImpl(Scheduler scheduler, Logger logger, GroupPolicy groupPolicy) {
@@ -138,7 +141,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
     @Override
     public void initialize() {
-        mForceFinish = false;
+        mForcedEarlyFinish = false;
 
         mActionsToExecute.addAll(mActions);
 
@@ -152,11 +155,12 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         if (handleCurrentActions()) {
             // action finished
             if (mGroupPolicy.shouldStopOnFirstActionFinished()) {
-                mForceFinish = true;
+                mForcedEarlyFinish = true;
+                control.finish();
                 return;
             }
         }
@@ -164,20 +168,19 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         if (!mGroupPolicy.shouldExecuteActionsInParallel() && mRunningActions.isEmpty()) {
             startNextAction();
         }
+
+        if (mRunningActions.isEmpty() && mActionsToExecute.isEmpty()) {
+            control.finish();
+        }
     }
 
     @Override
-    public boolean isFinished() {
-        return (mRunningActions.isEmpty() && mActionsToExecute.isEmpty()) || mForceFinish;
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
-        if (wasInterrupted && mWhenInterrupted != null) {
+    public void end(FinishReason reason) {
+        if (reason != FinishReason.FINISHED && mWhenInterrupted != null) {
             mWhenInterrupted.run();
         }
 
-        if (wasInterrupted || mForceFinish) {
+        if (reason != FinishReason.FINISHED || mForcedEarlyFinish) {
             for (ExecutionContext context : mRunningActions) {
                 context.interrupt();
             }

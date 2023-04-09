@@ -2,6 +2,8 @@ package com.flash3388.flashlib.robot.motion.actions;
 
 import com.flash3388.flashlib.robot.control.PidController;
 import com.flash3388.flashlib.robot.motion.Movable;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.time.Time;
 
@@ -36,18 +38,17 @@ public class MoveToDistanceAction extends ActionBase {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         double pidResult = mPidController.applyAsDouble(mCurrentPositionSupplier.getAsDouble(), mWantedDistance);
         mMovable.move(pidResult);
+
+        if (mPidController.atSetpoint(mCurrentPositionSupplier.getAsDouble(), mWantedDistance)) {
+            control.finish();
+        }
     }
 
     @Override
-    public boolean isFinished() {
-        return mPidController.atSetpoint(mCurrentPositionSupplier.getAsDouble(), mWantedDistance);
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         mMovable.stop();
     }
 }

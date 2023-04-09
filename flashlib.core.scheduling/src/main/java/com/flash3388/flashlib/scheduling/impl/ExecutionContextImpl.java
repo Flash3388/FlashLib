@@ -16,7 +16,7 @@ public class ExecutionContextImpl implements ExecutionContext {
         mLogger = logger;
         mContext = context;
 
-        mContext.markStarted(mClock.currentTime());
+        mContext.markStarted();
         mLogger.debug("Action {} started running", mContext);
     }
 
@@ -29,7 +29,7 @@ public class ExecutionContextImpl implements ExecutionContext {
             return ExecutionResult.FINISHED;
         }
 
-        if (mContext.iterate(mClock.currentTime())) {
+        if (mContext.iterate()) {
             mLogger.debug("Action {} finished", mContext);
             return ExecutionResult.FINISHED;
         }
@@ -40,7 +40,7 @@ public class ExecutionContextImpl implements ExecutionContext {
     @Override
     public void interrupt() {
         mContext.markForCancellation();
-        mContext.iterate(mClock.currentTime());
+        mContext.iterate();
 
         mLogger.debug("Action {} interrupted", mContext);
     }
