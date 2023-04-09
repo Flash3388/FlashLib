@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.control;
 
+import com.flash3388.flashlib.control.ClosedLoopController;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
@@ -19,7 +20,7 @@ import java.util.function.DoubleSupplier;
  * @since FlashLib 1.0.0
  * @see <a href="https://en.wikipedia.org/wiki/PID_controller">https://en.wikipedia.org/wiki/PID_controller</a>
  */
-public class PidController implements DoubleBinaryOperator {
+public class PidController implements ClosedLoopController {
 
     private final Clock mClock;
     private final DoubleSupplier mKp;
@@ -248,7 +249,8 @@ public class PidController implements DoubleBinaryOperator {
      *
      * @return <b>true</b> if the error can be acceptably considered as within the setpoint range, <b>false</b> otherwise.
      */
-    public boolean atSetpoint(double processVariable, double setpoint) {
+    @Override
+    public boolean isInTolerance(double processVariable, double setpoint) {
         double error = setpoint - processVariable;
         if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
             if (!mToleranceTimeout.isValid()) {
