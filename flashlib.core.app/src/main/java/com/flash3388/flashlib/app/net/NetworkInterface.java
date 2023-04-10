@@ -63,8 +63,8 @@ public interface NetworkInterface {
     Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration);
 
     class MessengerConfiguration {
-        final boolean serverMode;
-        final SocketAddress serverAddress;
+        public final boolean serverMode;
+        public final SocketAddress serverAddress;
 
         private MessengerConfiguration(boolean serverMode, SocketAddress serverAddress) {
             this.serverMode = serverMode;
