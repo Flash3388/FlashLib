@@ -50,7 +50,7 @@ public class MessageReadingContext {
     public MessageReadingContext(KnownMessageTypes messageTypes, Logger logger) {
         mMessageTypes = messageTypes;
         mLogger = logger;
-        mBuffer = new CircularByteBuffer(8192);
+        mBuffer = new CircularByteBuffer(2048);
         mMessageHeaderBuffer = new byte[MessageHeader.SIZE];
 
         mLastHeader = null;
