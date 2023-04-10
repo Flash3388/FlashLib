@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collection;
@@ -57,7 +59,16 @@ public final class ActionsMock {
 
         public Action build() {
             Action action = mock(Action.class);
-            when(action.isFinished()).thenReturn(mIsFinished);
+            doAnswer(new Answer() {
+                @Override
+                public Object answer(InvocationOnMock invocation) throws Throwable {
+                    ActionControl control = invocation.getArgument(0);
+                    if (mIsFinished) {
+                        control.finish();
+                    }
+                    return null;
+                }
+            }).when(action).execute(any(ActionControl.class));
             when(action.getConfiguration()).thenReturn(mConfiguration);
             when(action.isRunning()).thenReturn(mIsRunning);
             when(action.configure()).thenAnswer(invocation ->
@@ -75,58 +86,5 @@ public final class ActionsMock {
 
     public static ActionMocker actionMocker() {
         return new ActionMocker();
-    }
-
-    public static class ContextMocker {
-
-        private boolean mRunFinished;
-
-        private ContextMocker() {
-            mRunFinished = true;
-        }
-
-        public ContextMocker runFinished(boolean runFinished) {
-            mRunFinished = runFinished;
-            return this;
-        }
-
-        public ActionContext build() {
-            ActionContext actionContext = mock(ActionContext.class);
-            when(actionContext.run()).thenReturn(!mRunFinished);
-
-            return actionContext;
-        }
-    }
-
-    public static ContextMocker contextMocker() {
-        return new ContextMocker();
-    }
-
-    public static ActionContext mockNonFinishingActionContext() {
-        ActionContext actionContext = mock(ActionContext.class);
-        when(actionContext.run()).thenReturn(true);
-
-        return actionContext;
-    }
-
-    public static ActionContext mockFinishedActionContext() {
-        ActionContext actionContext = mock(ActionContext.class);
-        when(actionContext.run()).thenReturn(false);
-
-        return actionContext;
-    }
-
-    public static Action mockActionIsFinishedMarkedTrue() {
-        Action action = mock(Action.class);
-        when(action.isFinished()).thenReturn(true);
-
-        return action;
-    }
-
-    public static Action mockThrowingAction() {
-        Action action = mock(Action.class);
-        doThrow(new RuntimeException()).when(action).execute();
-
-        return action;
     }
 }

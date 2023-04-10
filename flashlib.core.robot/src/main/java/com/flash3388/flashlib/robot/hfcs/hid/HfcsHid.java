@@ -5,20 +5,30 @@ import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.resources.CircularResourceHolder;
+import org.slf4j.Logger;
 
 public class HfcsHid {
 
     private HfcsHid() {}
 
+    private static final Logger LOGGER = Logging.getMainLogger();
+    private static final Time RECEIVE_TIMEOUT = Time.seconds(2);
+
     public static HidInterface createReceiver(HfcsRegistry registry, FlashLibMainThread mainThread) {
         HidData data = new HidData();
         CircularResourceHolder<RawHidData> dataStore = new CircularResourceHolder<>(3, RawHidData::new);
 
-        registry.registerIncoming(new HidDataInType(dataStore))
-                .addListener(new NewDataListener(data, dataStore));
+        RegisteredIncoming<RawHidData> incoming = registry.registerIncoming(new HidDataInType(dataStore), RECEIVE_TIMEOUT);
+        incoming.addListener(new NewDataListener(data, dataStore));
+        incoming.addTimeoutListener((event)-> {
+            LOGGER.warn("HID Data from HFCS not received in a while and packet has timed out. Resetting data");
+            data.clearChannels();
+        });
 
         return new WeakHidInterface(new HfcsHidInterface(data), mainThread);
     }

@@ -8,11 +8,8 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.motion.actions.RotateAction;
 import com.flash3388.flashlib.robot.systems.MotorSystem;
 import com.flash3388.flashlib.robot.systems.SolenoidSystem;
-import com.flash3388.flashlib.robot.systems.actions.CloseValveAction;
-import com.flash3388.flashlib.robot.systems.actions.OpenValveAction;
 import robot.pnuematics.StubSolenoid;
 
 public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
@@ -41,13 +38,13 @@ public class MyRobot extends DelegatingRobotControl implements IterativeRobot {
         mStick = getHidInterface().newJoystick(RobotMap.STICK);
 
         // To shoot, we'll use the trigger button from the joystick.
-        mStick.getButton(JoystickButton.TRIGGER).whileActive(new RotateAction(mShooter, 0.6));
+        mStick.getButton(JoystickButton.TRIGGER).whileActive(mShooter.rotate(0.6));
 
         // Let's also make buttons to control the pistons, allowing us to raise
         // or lower our shooter.
         // We'll use two buttons, one raises, one lowers:
-        mStick.getButton(1).whenActive(new OpenValveAction(mShooterDirector));
-        mStick.getButton(2).whenActive(new CloseValveAction(mShooterDirector));
+        mStick.getButton(1).whenActive(mShooterDirector.open());
+        mStick.getButton(2).whenActive(mShooterDirector.close());
     }
 
     @Override

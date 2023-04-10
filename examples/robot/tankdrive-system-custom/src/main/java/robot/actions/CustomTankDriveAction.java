@@ -2,6 +2,8 @@ package robot.actions;
 
 import com.flash3388.flashlib.hid.Joystick;
 import com.flash3388.flashlib.hid.JoystickAxis;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import robot.subsystems.CustomTankDrive;
 
@@ -35,10 +37,7 @@ public class CustomTankDriveAction extends ActionBase {
     //
     // execute: the main phase for an action. Runs periodically (timing differs but will likely be around 25ms).
     // In it we will perform the main logic of the action. In this case, moving the drive system.
-    //
-    // isFinished: also a part of the execute phase. It defines when the action should stop. If it returns true,
-    // the action will stop running. In our case, we don't really want to stop the action, from our end, so we will return
-    // false. If someone wants to stop this action, they can cancel it, or overwrite it with another one.
+    // To stop the action we can use ActionControl, which provides various functionalities to the action.
     //
     // end: the end phase runs after the execution phase. In this phase we stop and deinitialize anything used during the
     // action. In our case, that would mean stopping the drive system.
@@ -47,11 +46,11 @@ public class CustomTankDriveAction extends ActionBase {
     // wasInterrupted would be true.
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         // We grab the values from the joysticks.
         // - right: right stick axis Y
         // - left: left stick axis Y
@@ -62,12 +61,7 @@ public class CustomTankDriveAction extends ActionBase {
     }
 
     @Override
-    public boolean isFinished() {
-        return false;
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         // When the action is done, we should stop the drive system.
         mDrive.stop();
     }

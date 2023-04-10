@@ -11,9 +11,7 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.DelegatingRobotControl;
 import com.flash3388.flashlib.robot.base.iterative.IterativeRobot;
 import com.flash3388.flashlib.robot.modes.RobotMode;
-import com.flash3388.flashlib.robot.systems.drive.TankDriveSystem;
-import com.flash3388.flashlib.robot.systems.drive.actions.ArcadeDriveAction;
-import com.flash3388.flashlib.robot.systems.drive.actions.TankDriveAction;
+import com.flash3388.flashlib.robot.systems.TankDriveSystem;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
 
@@ -62,11 +60,13 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
 
         // Configuring to run a TankDriveAction while the trigger is active. This means that when the property is set
         // to true, the action will start, but when the property is set to false, the action is be cancelled.
-        trigger.whileActive(new TankDriveAction(mDriveSystem, mStickRight.getAxis(JoystickAxis.Y),
+        trigger.whileActive(mDriveSystem.tankDrive(
+                mStickRight.getAxis(JoystickAxis.Y),
                 mStickLeft.getAxis(JoystickAxis.Y)));
         // Configuring to run a ArcadeDriveAction while the trigger is inactive. This means that when the property is set
         // to false, the action will start, but when the property is set to true, the action is be cancelled.
-        trigger.whileInactive(new ArcadeDriveAction(mDriveSystem, mStickRight.getAxis(JoystickAxis.Y),
+        trigger.whileInactive(mDriveSystem.arcadeDrive(
+                mStickRight.getAxis(JoystickAxis.Y),
                 mStickRight.getAxis(JoystickAxis.X)));
     }
 

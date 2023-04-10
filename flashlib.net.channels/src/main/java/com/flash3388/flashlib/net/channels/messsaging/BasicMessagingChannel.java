@@ -4,6 +4,7 @@ import com.flash3388.flashlib.net.channels.AutoConnectingChannel;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelConnector;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -30,7 +31,7 @@ public class BasicMessagingChannel implements MessagingChannel {
                                  Logger logger,
                                  KnownMessageTypes messageTypes) {
         mReadBuffer = ByteBuffer.allocateDirect(1024);
-        mReadingContext = new MessageReadingContext(messageTypes);
+        mReadingContext = new MessageReadingContext(messageTypes, logger);
         mOurId = ourId;
         mLogger = logger;
         mSerializer = new MessageSerializer(ourId);

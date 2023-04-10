@@ -5,7 +5,6 @@ import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
 import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
 import com.flash3388.flashlib.time.Clock;

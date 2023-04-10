@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.annotations.MainThreadOnly;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 
@@ -63,8 +63,8 @@ public interface NetworkInterface {
     Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration);
 
     class MessengerConfiguration {
-        final boolean serverMode;
-        final SocketAddress serverAddress;
+        public final boolean serverMode;
+        public final SocketAddress serverAddress;
 
         private MessengerConfiguration(boolean serverMode, SocketAddress serverAddress) {
             this.serverMode = serverMode;

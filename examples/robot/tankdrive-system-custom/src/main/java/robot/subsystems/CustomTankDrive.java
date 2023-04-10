@@ -1,9 +1,9 @@
 package robot.subsystems;
 
 import com.flash3388.flashlib.io.devices.SpeedController;
-import com.flash3388.flashlib.robot.systems.drive.TankDrive;
-import com.flash3388.flashlib.robot.systems.drive.TankDriveSpeed;
-import com.flash3388.flashlib.robot.systems.drive.algorithms.DriveAlgorithms;
+import com.flash3388.flashlib.robot.motion.DriveAlgorithms;
+import com.flash3388.flashlib.robot.motion.TankDrive;
+import com.flash3388.flashlib.robot.motion.TankDriveSpeed;
 import com.flash3388.flashlib.scheduling.Subsystem;
 
 public class CustomTankDrive extends Subsystem implements TankDrive {

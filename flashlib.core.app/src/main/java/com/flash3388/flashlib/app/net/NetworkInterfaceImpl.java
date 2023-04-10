@@ -1,22 +1,17 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.tcp.TcpRoutingService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
+import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.MessengerService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
-import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
-import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
+import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
-
-import java.net.InetAddress;
-import java.net.SocketAddress;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
 
@@ -42,75 +37,32 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mMainThread = mainThread;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            NetworkConfiguration.ObjectStorageConfiguration objectStorageConfiguration =
-                    configuration.getObjectStorageConfiguration();
-            if (objectStorageConfiguration.isPrimaryNode) {
-                ObsrPrimaryNodeService obsrPrimaryNodeService = new ObsrPrimaryNodeService(
-                        instanceId, clock);
-                serviceRegistry.register(obsrPrimaryNodeService);
-                mObjectStorage = obsrPrimaryNodeService;
-            } else {
-                ObsrSecondaryNodeService obsrSecondaryNodeService = new ObsrSecondaryNodeService(
-                        instanceId, objectStorageConfiguration.primaryNodeAddress, clock);
-                serviceRegistry.register(obsrSecondaryNodeService);
-                mObjectStorage = obsrSecondaryNodeService;
+            try {
+                ObsrConfiguration.Creator creator = configuration.getObsrConfiguration().creator;
+                assert creator != null;
+
+                ObsrNodeServiceBase service = creator.create(instanceId, clock);
+                serviceRegistry.register(service);
+
+                mObjectStorage = service;
+            } catch (Exception e) {
+                throw new Error(e);
             }
         } else {
             mObjectStorage = null;
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            if (configuration.getHfcsConfiguration().replyToSenderModeEnabled) {
-                HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
+            try {
+                HfcsConfiguration.Creator creator = configuration.getHfcsConfiguration().creator;
+                assert creator != null;
 
-                hfcsService = HfcsServices.autoReplyTarget(instanceId, clock, bindPort);
+                HfcsServiceBase service = creator.create(instanceId, clock);
+                serviceRegistry.register(service);
 
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().specificTargetModeEnabled) {
-                HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                SocketAddress remote = configuration.getHfcsConfiguration().specificTargetAddress;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
-
-                hfcsService = HfcsServices.unicast(instanceId, clock, bindPort, remote);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().multicastModeEnabled) {
-                HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                java.net.NetworkInterface networkInterface = configuration.getHfcsConfiguration().multicastInterface;
-                InetAddress group = configuration.getHfcsConfiguration().multicastGroup;
-                int remotePort = configuration.getHfcsConfiguration().remotePort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
-
-                hfcsService = HfcsServices.multicast(instanceId, clock, bindPort, remotePort, networkInterface, group);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else if (configuration.getHfcsConfiguration().broadcastModeEnabled) {
-                HfcsServiceBase hfcsService;
-                int bindPort = configuration.getHfcsConfiguration().bindPort;
-                int remotePort = configuration.getHfcsConfiguration().remotePort;
-                if (bindPort == NetworkConfiguration.HfcsConfiguration.INVALID_PORT) {
-                    bindPort = HfcsServices.DEFAULT_PORT;
-                }
-
-                hfcsService = HfcsServices.broadcast(instanceId, clock, bindPort, remotePort);
-
-                serviceRegistry.register(hfcsService);
-                mHfcsRegistry = hfcsService;
-            } else {
-                throw new UnsupportedOperationException("HFCS mode not supported");
+                mHfcsRegistry = service;
+            } catch (Exception e) {
+                throw new Error(e);
             }
         } else {
             mHfcsRegistry = null;

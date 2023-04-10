@@ -9,20 +9,28 @@ import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsInMessage;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
 import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.time.Clock;
 import com.notifier.EventController;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
     private final EventController mEventController;
+    private final Clock mClock;
     private final Logger mLogger;
 
-    public BasicChannelUpdateHandler(EventController eventController, Logger logger) {
+    protected final Map<InType<?>, InDataNode> mInDataNodes;
+
+    public BasicChannelUpdateHandler(EventController eventController, Clock clock, Logger logger,
+                                     Map<InType<?>, InDataNode> inDataNodes) {
         mEventController = eventController;
+        mClock = clock;
         mLogger = logger;
+        mInDataNodes = inDataNodes;
     }
 
     @Override
@@ -37,6 +45,11 @@ public class BasicChannelUpdateHandler implements MessagingChannel.UpdateHandler
         assert inData.getClass().isInstance(inData);
 
         mLogger.debug("Received new data of type {}", inType.getKey());
+
+        InDataNode inDataNode = mInDataNodes.get(inType);
+        if (inDataNode != null) {
+            inDataNode.updateReceived(mClock.currentTime());
+        }
 
         // send to listeners
         //noinspection unchecked,rawtypes

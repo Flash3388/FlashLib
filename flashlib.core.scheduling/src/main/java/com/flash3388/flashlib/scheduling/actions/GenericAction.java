@@ -1,76 +1,65 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import java.util.function.BooleanSupplier;
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
+
 import java.util.function.Consumer;
 
 public class GenericAction extends ActionBase {
 
     public static class Builder {
-        private Runnable mOnInitialize;
-        private Runnable mOnExecute;
-        private BooleanSupplier mIsFinished;
-        private Consumer<Boolean> mOnEnd;
+        private Consumer<ActionControl> mOnInitialize;
+        private Consumer<ActionControl> mOnExecute;
+        private Consumer<FinishReason> mOnEnd;
 
-        public Builder onInitialize(Runnable runnable) {
+        public Builder onInitialize(Consumer<ActionControl> runnable) {
             mOnInitialize = runnable;
             return this;
         }
 
-        public Builder onExecute(Runnable runnable) {
+        public Builder onExecute(Consumer<ActionControl> runnable) {
             mOnExecute = runnable;
             return this;
         }
 
-        public Builder isFinished(BooleanSupplier supplier) {
-            mIsFinished = supplier;
-            return this;
-        }
-
-        public Builder onEnd(Consumer<Boolean> consumer) {
+        public Builder onEnd(Consumer<FinishReason> consumer) {
             mOnEnd = consumer;
             return this;
         }
 
         public Action build() {
-            return new GenericAction(mOnInitialize, mOnExecute, mIsFinished, mOnEnd);
+            return new GenericAction(mOnInitialize, mOnExecute, mOnEnd);
         }
     }
 
-    private final Runnable mOnInitialize;
-    private final Runnable mOnExecute;
-    private final BooleanSupplier mIsFinished;
-    private final Consumer<Boolean> mOnEnd;
+    private final Consumer<ActionControl> mOnInitialize;
+    private final Consumer<ActionControl> mOnExecute;
+    private final Consumer<FinishReason> mOnEnd;
 
-    public GenericAction(Runnable onInitialize, Runnable onExecute, BooleanSupplier isFinished, Consumer<Boolean> onEnd) {
+    public GenericAction(Consumer<ActionControl> onInitialize, Consumer<ActionControl> onExecute, Consumer<FinishReason> onEnd) {
         mOnInitialize = onInitialize;
         mOnExecute = onExecute;
-        mIsFinished = isFinished;
         mOnEnd = onEnd;
     }
 
     @Override
-    public final void initialize() {
+    public final void initialize(ActionControl control) {
         if (mOnInitialize != null) {
-            mOnInitialize.run();
+            mOnInitialize.accept(control);
         }
     }
 
     @Override
-    public final void execute() {
+    public final void execute(ActionControl control) {
         if (mOnExecute != null) {
-            mOnExecute.run();
+            mOnExecute.accept(control);
         }
     }
 
     @Override
-    public final boolean isFinished() {
-        return mIsFinished != null && mIsFinished.getAsBoolean();
-    }
-
-    @Override
-    public void end(boolean wasInterrupted) {
+    public void end(FinishReason reason) {
         if (mOnEnd != null) {
-            mOnEnd.accept(wasInterrupted);
+            mOnEnd.accept(reason);
         }
     }
 }

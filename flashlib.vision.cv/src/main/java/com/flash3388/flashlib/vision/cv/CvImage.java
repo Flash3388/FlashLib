@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.vision.cv;
 
 import com.flash3388.flashlib.vision.Image;
+import com.flash3388.flashlib.vision.color.ColorSpace;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfInt;
@@ -12,14 +13,16 @@ import java.awt.image.DataBufferByte;
 public class CvImage implements Image {
 
     private final Mat mMat;
+    private final ColorSpace mColorSpace;
 
-    public CvImage(Mat mat) {
+    public CvImage(Mat mat, ColorSpace colorSpace) {
         mMat = mat;
+        mColorSpace = colorSpace;
     }
 
-    public static CvImage fromBytes(byte[] bytes) {
+    public static CvImage fromBytes(byte[] bytes, ColorSpace colorSpace) {
         Mat mat = Imgcodecs.imdecode(new MatOfByte(bytes), Imgcodecs.IMREAD_UNCHANGED);
-        return new CvImage(mat);
+        return new CvImage(mat, colorSpace);
     }
 
     public Mat getMat() {
@@ -76,7 +79,7 @@ public class CvImage implements Image {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        mMat.release();
+    public ColorSpace getColorSpace() {
+        return mColorSpace;
     }
 }

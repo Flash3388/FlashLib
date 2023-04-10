@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
@@ -97,5 +98,20 @@ public abstract class ActionBase implements Action {
             throw new IllegalStateException("scheduler was garbage collected");
         }
         return scheduler.getActionRunTime(this);
+    }
+
+    @Override
+    public final Action requires(Requirement... requirements) {
+        return Action.super.requires(requirements);
+    }
+
+    @Override
+    public final Action withTimeout(Time timeout) {
+        return Action.super.withTimeout(timeout);
+    }
+
+    @Override
+    public final Action flags(ActionFlag... flags) {
+        return Action.super.flags(flags);
     }
 }

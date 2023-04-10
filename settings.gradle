@@ -12,8 +12,9 @@ include 'flashlib.net.robolink'
 include 'flashlib.vision.core'
 include 'flashlib.vision.cv'
 
-include 'flashlib.core.robot'
 include 'flashlib.core.app'
+include 'flashlib.core.robot'
+include 'flashlib.robot.systems'
 
 include 'flashlib.hid.sdl2'
 
@@ -29,6 +30,4 @@ include 'examples:robot:basic-trigger'
 include 'examples:robot:sdl2-hid'
 
 include 'examples:vision:basic-vision'
-include 'examples:vision:cv-2020-vision'
-include 'examples:vision:cv-colorfilter'
 include 'examples:vision:vision-control'

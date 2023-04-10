@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.channels.messsaging.MessageAndType;
 import com.flash3388.flashlib.net.channels.messsaging.MessageInfo;
-import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.messaging.OutMessage;
+import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.MessageType;
+import com.flash3388.flashlib.net.messaging.PendingWriteMessage;
 import com.flash3388.flashlib.net.obsr.Storage;
 import com.flash3388.flashlib.net.obsr.StorageOpFlag;
 import com.flash3388.flashlib.net.obsr.StoragePath;
@@ -23,19 +23,20 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.Queue;
 
 public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
 
     protected final Storage mStorage;
     protected final Logger mLogger;
-    private final BiConsumer<MessageType, OutMessage> mMessageConsumer;
+    private final Queue<PendingWriteMessage> mWriteQueue;
 
-    protected ChannelUpdateHandler(Storage storage, Logger logger,
-                                   BiConsumer<MessageType, OutMessage> messageConsumer) {
+    protected ChannelUpdateHandler(Storage storage,
+                                   Logger logger,
+                                   Queue<PendingWriteMessage> writeQueue) {
         mStorage = storage;
         mLogger = logger;
-        mMessageConsumer = messageConsumer;
+        mWriteQueue = writeQueue;
     }
 
     @Override
@@ -107,6 +108,6 @@ public class ChannelUpdateHandler implements MessagingChannel.UpdateHandler {
     private void handleRequestContent(RequestContentMessage message) {
         mLogger.debug("Handling message: Storage contents update request");
         Map<String, Value> entries = mStorage.getAll();
-        mMessageConsumer.accept(StorageContentsMessage.TYPE, new StorageContentsMessage(entries));
+        mWriteQueue.add(new PendingWriteMessage(StorageContentsMessage.TYPE, new StorageContentsMessage(entries)));
     }
 }

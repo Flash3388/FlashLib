@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.util.unique;
 
+import com.flash3388.flashlib.util.Binary;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -11,12 +13,16 @@ public class InstanceId {
     private final byte[] mMachineId;
     private final byte[] mProcessId;
 
-    InstanceId(byte[] machineId, byte[] processId) {
+    public InstanceId(byte[] machineId, byte[] processId) {
         assert machineId.length > 1;
         assert PROCESS_ID_SIZE == processId.length;
 
         mMachineId = machineId;
         mProcessId = processId;
+    }
+
+    public InstanceId(String machineId, String processId) {
+        this(Binary.hexToBytes(machineId), Binary.hexToBytes(processId));
     }
 
     public static InstanceId createFrom(DataInput dataInput) throws IOException {
@@ -72,20 +78,7 @@ public class InstanceId {
     @Override
     public String toString() {
         return String.format("{0x%s-0x%s}",
-                bytesToHex(mMachineId),
-                bytesToHex(mProcessId));
-    }
-
-    public static String bytesToHex(byte[] bytes) {
-        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-        char[] hexChars = new char[bytes.length * 2];
-
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-
-        return new String(hexChars);
+                Binary.bytesToHex(mMachineId),
+                Binary.bytesToHex(mProcessId));
     }
 }

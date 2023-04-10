@@ -1,9 +1,6 @@
 package com.flash3388.flashlib.net.messaging;
 
 
-import com.flash3388.flashlib.net.messaging.MessageType;
-import com.flash3388.flashlib.net.messaging.OutMessage;
-
 public class PendingWriteMessage {
 
     private final MessageType mMessageType;

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.vision;
 
 import com.castle.util.throwables.ThrowableHandler;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.ArrayDeque;
@@ -33,28 +34,45 @@ public interface Source<T> {
      *
      * @param executorService executor service for executing the polling task
      * @param pipeline pipeline to poll into
-     * @param throwableHandler handler for any error while polling
+     * @param observer observer of the processing run, or null
+     * @param clock clock
+     * @param processTime time expected for a single run. If a single process takes less, it will
+     *                    suspend for the remainder of the time frame. Can be used for FPS
+     *                    timing.
      *
      * @return a future controlling the async task
      */
     default Future<?> asyncPoll(ExecutorService executorService,
                                 Pipeline<? super T> pipeline,
-                                ThrowableHandler throwableHandler) {
-        return executorService.submit(new SourcePoller<>(this, pipeline, throwableHandler));
+                                SourcePollingObserver observer,
+                                Clock clock,
+                                Time processTime) {
+        return executorService.submit(new SourcePollTask<>(this, pipeline,
+                observer, clock, processTime));
     }
 
     /**
      * Executes a single poll from this source asynchronously into a pipeline.
      *
      * @param pipeline pipeline to poll into.
-     * @param throwableHandler handler for any error while polling.
+     * @param observer observer of the processing run, or null
+     * @param clock clock
+     * @param processTime time expected for a single run. If a single process takes less, it will
+     *                    suspend for the remainder of the time frame. Can be used for FPS
+     *                    timing.
+     *
+     * @return the running thread
      */
-    default void asyncPoll(Pipeline<? super T> pipeline,
-                           ThrowableHandler throwableHandler) {
-        Thread thread = new Thread(new SourcePoller<>(this, pipeline, throwableHandler),
+    default Thread asyncPoll(Pipeline<? super T> pipeline,
+                             SourcePollingObserver observer,
+                             Clock clock,
+                             Time processTime) {
+        Thread thread = new Thread(new SourcePollTask<>(this, pipeline, observer, clock, processTime),
                 this + "-poller");
         thread.setDaemon(true);
         thread.start();
+
+        return thread;
     }
 
     /**
@@ -63,33 +81,19 @@ public interface Source<T> {
      * @param executorService executor service for executing the polling task
      * @param rate rate of polling
      * @param pipeline pipeline to poll into
-     * @param throwableHandler handler for any error while polling.
+     * @param observer observer of the processing run, or null
+     * @param clock clock
      *
      * @return a future controlling the async task
      */
     default Future<?> asyncPollAtFixedRate(ScheduledExecutorService executorService,
                                            Time rate,
                                            Pipeline<? super T> pipeline,
-                                           ThrowableHandler throwableHandler) {
+                                           SourcePollingObserver observer,
+                                           Clock clock) {
         return executorService.scheduleAtFixedRate(
-                new SourcePoller<>(this, pipeline, throwableHandler),
+                new SourceSinglePollTask<>(this, pipeline, observer, clock),
                 0, rate.value(), rate.unit());
-    }
-
-    /**
-     * Runs an asynchronous periodic polling task which polls from this source into a pipeline at a fixed rate.
-     *
-     * @param rate rate of polling
-     * @param pipeline pipeline to poll into
-     * @param throwableHandler handler for any error while polling.
-     */
-    default void asyncPollAtFixedRate(Time rate,
-                                      Pipeline<? super T> pipeline,
-                                      ThrowableHandler throwableHandler) {
-        Thread thread = new Thread(new PeriodicPoller<>(this, rate, pipeline, throwableHandler),
-                this + "-poller");
-        thread.setDaemon(true);
-        thread.start();
     }
 
     /**

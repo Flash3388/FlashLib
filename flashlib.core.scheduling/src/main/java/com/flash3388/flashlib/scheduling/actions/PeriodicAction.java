@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 
@@ -22,12 +23,12 @@ public class PeriodicAction extends ActionBase {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(ActionControl control) {
         mNextRun = Time.INVALID;
     }
 
     @Override
-    public void execute() {
+    public void execute(ActionControl control) {
         if (!mNextRun.isValid() || mClock.currentTime().largerThanOrEquals(mNextRun)) {
             mRunnable.run();
             mNextRun = mClock.currentTime().add(mPeriod);

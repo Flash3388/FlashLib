@@ -1,10 +1,11 @@
 package example;
 
-import com.castle.util.throwables.Throwables;
+import com.flash3388.flashlib.time.SystemMillisClock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.vision.Image;
 import com.flash3388.flashlib.vision.Pipeline;
 import com.flash3388.flashlib.vision.Source;
+import com.flash3388.flashlib.vision.SourcePollingObserver;
 import com.flash3388.flashlib.vision.analysis.Analysis;
 import com.flash3388.flashlib.vision.jpeg.JpegImage;
 import com.flash3388.flashlib.vision.processing.VisionPipeline;
@@ -83,7 +84,8 @@ public class Main {
     private static Future<?> startVisionPipeline(Source<Image> source, Pipeline<Image> guiPipeline,
                                                  ScheduledExecutorService executorService) {
         // we'll poll images from imageSource with executeService
-        return source.asyncPollAtFixedRate(executorService,
+        return source.asyncPollAtFixedRate(
+                executorService,
                 Time.milliseconds(1000), // polling rate
                 guiPipeline.divergeTo(new VisionPipeline.Builder<>()
                         .process((img) -> {
@@ -91,14 +93,14 @@ public class Main {
                             // return the result image to be used by the next processor or by the analyzer;
                             return img;
                         })
-                        .analyse((original, postProcess)-> {
+                        .analyse((original, postProcess) -> {
                             // analyze the image for the information we want
                             // and return an analysis if possible
                             return Optional.of(Analysis.builder()
                                     .put("somedatakey", "some data")
                                     .build());
                         })
-                        .analysisTo((analysis)-> {
+                        .analysisTo((analysis) -> {
                             // the analysis will be transferred here to where we want
                             // some output destination, like the robot or some log
 
@@ -106,8 +108,25 @@ public class Main {
                             System.out.println(analysis);
                         })
                         .build()),
-                // if there is an error, it will be ignored. Normally not recommended, but it's okay for an example
-                Throwables.silentHandler());
+                // tracker for execution of image polling
+                new SourcePollingObserver() {
+                    @Override
+                    public void onStartProcess() {
+
+                    }
+
+                    @Override
+                    public void onEndProcess(Time runTime) {
+
+                    }
+
+                    @Override
+                    public void onErroredProcess(Throwable t) {
+
+                    }
+                },
+                new SystemMillisClock()
+        );
     }
 
     private static Collection<Image> loadImages(Path folder) throws IOException {

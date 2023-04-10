@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
@@ -8,7 +9,6 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.ClockMock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SingleThreadedSchedulerTest {
@@ -82,7 +81,7 @@ class SingleThreadedSchedulerTest {
         mScheduler.start(newAction);
 
         verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRunningActions, IsMapContaining.hasKey(newAction));
@@ -139,7 +138,7 @@ class SingleThreadedSchedulerTest {
         mScheduler.cancel(action);
 
         verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -201,7 +200,7 @@ class SingleThreadedSchedulerTest {
         mScheduler.cancelActionsIf((a)-> a.equals(action));
 
         verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -232,7 +231,7 @@ class SingleThreadedSchedulerTest {
         mScheduler.cancelAllActions();
 
         verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -254,12 +253,12 @@ class SingleThreadedSchedulerTest {
     public void run_hasRunningActionNotFinishing_iteratesOnContextAndKeepsAction() {
         Action action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate(any(Time.class))).thenReturn(false);
+        when(context.iterate()).thenReturn(false);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
     }
@@ -271,12 +270,12 @@ class SingleThreadedSchedulerTest {
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate(any(Time.class))).thenReturn(true);
+        when(context.iterate()).thenReturn(true);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -290,13 +289,13 @@ class SingleThreadedSchedulerTest {
                 .mockRunWhenDisabled(false)
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate(any(Time.class))).thenReturn(true);
+        when(context.iterate()).thenReturn(true);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
 
         verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -310,14 +309,14 @@ class SingleThreadedSchedulerTest {
                 .mockRunWhenDisabled(true)
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate(any(Time.class))).thenReturn(false);
+        when(context.iterate()).thenReturn(false);
         when(context.shouldRunInDisabled()).thenReturn(true);
         mRunningActions.put(action, context);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
 
         verify(context, never()).markForCancellation();
-        verify(context, times(1)).iterate(any(Time.class));
+        verify(context, times(1)).iterate();
 
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
     }
@@ -365,13 +364,9 @@ class SingleThreadedSchedulerTest {
                 .build();
         Action startingAction = new ActionBase(mScheduler) {
             @Override
-            public void execute() {
+            public void execute(ActionControl control) {
                 mScheduler.start(actionToStart);
-            }
-
-            @Override
-            public boolean isFinished() {
-                return true;
+                control.finish();
             }
         };
 

@@ -7,7 +7,9 @@ dependencies {
     api project(':flashlib.core.hid')
     api project(':flashlib.core.app')
     api project(':flashlib.net.core')
-    api project(':flashlib.net.robolink')
+
+    implementation project(':flashlib.net.channels')
+    implementation project(':flashlib.net.robolink')
 
     api javabeans()
     api jmath()

@@ -11,11 +11,9 @@ import org.slf4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
-import java.util.function.Function;
 
 public class DeviceInterfaceImpl implements DeviceInterface {
 
@@ -28,7 +26,7 @@ public class DeviceInterfaceImpl implements DeviceInterface {
     }
 
     @Override
-    public <T> T newDevice(String id, Class<T> type, Map<String, Object> namedArgs) {
+    public <T> T newDevice(int id, Class<T> type, Map<String, Object> namedArgs) {
         mMainThread.verifyCurrentThread();
 
         Class<? extends T> foundType = findType(id, type);
@@ -36,12 +34,24 @@ public class DeviceInterfaceImpl implements DeviceInterface {
     }
 
     @Override
-    public <E, T extends DeviceGroup<E>> GroupBuilder<E, T> newGroup(Class<T> groupType, Function<List<E>, T> creator) {
+    public GroupBuilder<SpeedController, SpeedControllerGroup> newSpeedControllerGroup() {
         mMainThread.verifyCurrentThread();
-        return new GroupBuilder<>(creator);
+        return new GroupBuilder<>(this, SpeedControllerGroup::new, SpeedController.class);
     }
 
-    private <T> Class<? extends T> findType(String id, Class<T> type) {
+    @Override
+    public GroupBuilder<Solenoid, SolenoidGroup> newSolenoidGroup() {
+        mMainThread.verifyCurrentThread();
+        return new GroupBuilder<>(this, SolenoidGroup::new, Solenoid.class);
+    }
+
+    @Override
+    public GroupBuilder<DoubleSolenoid, DoubleSolenoidGroup> newDoubleSolenoidGroup() {
+        mMainThread.verifyCurrentThread();
+        return new GroupBuilder<>(this, DoubleSolenoidGroup::new, DoubleSolenoid.class);
+    }
+
+    private <T> Class<? extends T> findType(int id, Class<T> type) {
         ThrowableChain chain = Throwables.newChain();
 
         ServiceLoader<DeviceProvider> providers = ServiceLoader.load(DeviceProvider.class);
