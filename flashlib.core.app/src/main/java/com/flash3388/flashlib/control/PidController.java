@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.control;
 
 import com.flash3388.flashlib.control.ClosedLoopController;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
@@ -54,7 +55,7 @@ public class PidController implements ClosedLoopController {
      * @param kd    the differential constant
      * @param kf    the feed forward constant
      */
-    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
+    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
         mClock = clock;
         mKp = kp;
         mKi = ki;
@@ -80,6 +81,14 @@ public class PidController implements ClosedLoopController {
 
     public PidController(Clock clock, double kp, double ki, double kd, double kf) {
         this(clock, () -> kp, () -> ki, () ->  kd, () -> kf);
+    }
+
+    public PidController(Clock clock, StoredObject object) {
+        this(clock,
+                object.getEntry("kp").valueProperty().asDouble(0.0),
+                object.getEntry("ki").valueProperty().asDouble(0.0),
+                object.getEntry("kd").valueProperty().asDouble(0.0),
+                object.getEntry("kf").valueProperty().asDouble(0.0));
     }
 
     /**
