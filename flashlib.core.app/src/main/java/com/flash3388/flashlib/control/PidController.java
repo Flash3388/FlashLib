@@ -1,7 +1,10 @@
 package com.flash3388.flashlib.control;
 
+import com.beans.DoubleProperty;
 import com.flash3388.flashlib.control.ClosedLoopController;
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
@@ -83,12 +86,17 @@ public class PidController implements ClosedLoopController {
         this(clock, () -> kp, () -> ki, () ->  kd, () -> kf);
     }
 
-    public PidController(Clock clock, StoredObject object) {
+    public PidController(Clock clock, StoredObject object, double kp, double ki, double kd, double kf) {
         this(clock,
-                object.getEntry("kp").valueProperty().asDouble(0.0),
-                object.getEntry("ki").valueProperty().asDouble(0.0),
-                object.getEntry("kd").valueProperty().asDouble(0.0),
-                object.getEntry("kf").valueProperty().asDouble(0.0));
+                createEntryForVariable(object, "kp", kp),
+                createEntryForVariable(object, "ki", ki),
+                createEntryForVariable(object, "kd", kd),
+                createEntryForVariable(object, "kf", kf)
+        );
+    }
+
+    public PidController(Clock clock, StoredObject object) {
+        this(clock, object, 0.0, 0.0, 0.0, 0.0);
     }
 
     /**
@@ -272,5 +280,11 @@ public class PidController implements ClosedLoopController {
         }
 
         return false;
+    }
+
+    private static DoubleSupplier createEntryForVariable(StoredObject object, String name, double initialValue) {
+        ValueProperty property = object.getEntry(name).valueProperty();
+        property.set(Value.newDouble(initialValue));
+        return property.asDouble(0.0);
     }
 }
