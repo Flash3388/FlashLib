@@ -1,7 +1,11 @@
 package com.flash3388.flashlib.control;
 
 import com.beans.DoubleProperty;
+import com.flash3388.flashlib.app.FlashLibControl;
+import com.flash3388.flashlib.app.FlashLibInstance;
+import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.control.ClosedLoopController;
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueProperty;
@@ -97,6 +101,18 @@ public class PidController implements ClosedLoopController {
 
     public PidController(Clock clock, StoredObject object) {
         this(clock, object, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    public static PidController newNamedController(String name, double kp, double ki, double kd, double kf) {
+        FlashLibControl control = FlashLibInstance.getControl();
+
+        NetworkInterface networkInterface = control.getNetworkInterface();
+        ObjectStorage objectStorage = networkInterface.getMode().isObjectStorageEnabled() ?
+                networkInterface.getObjectStorage() :
+                new ObjectStorage.Stub();
+        StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
+
+        return new PidController(control.getClock(), root, kp, ki, kd, kf);
     }
 
     /**
