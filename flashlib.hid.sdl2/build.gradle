@@ -8,7 +8,6 @@ configurations {
 
 dependencies {
     api project(':flashlib.core.hid')
-    api project(':flashlib.core.robot')
     api castle()
 
     implementation 'com.github.tomtzook:jsdl2:0.1.0'

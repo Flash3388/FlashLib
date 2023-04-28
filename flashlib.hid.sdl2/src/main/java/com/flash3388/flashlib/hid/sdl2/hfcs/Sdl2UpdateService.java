@@ -2,7 +2,7 @@ package com.flash3388.flashlib.hid.sdl2.hfcs;
 
 import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
-import com.flash3388.flashlib.robot.hfcs.hid.HidData;
+import com.flash3388.flashlib.hid.data.HidData;
 
 public class Sdl2UpdateService extends SingleUseService {
 

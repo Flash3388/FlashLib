@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.hid.sdl2.hfcs;
 
 import com.flash3388.flashlib.hid.sdl2.Sdl2DataHelper;
-import com.flash3388.flashlib.robot.hfcs.hid.HidData;
-import com.flash3388.flashlib.robot.hfcs.hid.RawHidData;
+import com.flash3388.flashlib.hid.data.HidData;
+import com.flash3388.flashlib.hid.data.RawHidData;
 import sdl2.SDL;
 import sdl2.SDLEvents;
 import sdl2.SDLJoystick;
