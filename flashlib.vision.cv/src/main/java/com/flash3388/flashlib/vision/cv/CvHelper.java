@@ -8,6 +8,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoWriter;
 
@@ -160,6 +161,17 @@ public class CvHelper {
                 contours.remove(idx);
             }
         }
+    }
+
+    /**
+     * Resizes the given image by a given factor. If the scale factor is positive, the image is enlarged, otherwise
+     * it's size is decreased.
+     *
+     * @param img the image to resize
+     * @param scaleFactor the size factor in pixels
+     */
+    public static void resize(Mat img, double scaleFactor){
+        Imgproc.resize(img, img, new Size(0,0), scaleFactor, scaleFactor, Imgproc.INTER_CUBIC);
     }
 
     private static int getColorSpaceConversionCode(ColorSpace src, ColorSpace dst) {

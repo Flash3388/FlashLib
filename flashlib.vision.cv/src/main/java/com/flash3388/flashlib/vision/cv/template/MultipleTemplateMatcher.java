@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.vision.cv.template;
 
-import com.flash3388.flashlib.vision.cv.CvProcessing;
 import org.opencv.core.Mat;
 
 import java.util.ArrayList;
@@ -16,13 +15,11 @@ public class MultipleTemplateMatcher implements TemplateMatcher {
 
     private final Collection<Mat> mTemplates;
     private final TemplateMatchingMethod mTemplateMatchingMethod;
-    private final CvProcessing mCvProcessing;
     private final ExecutorService mExecutorService;
 
-    public MultipleTemplateMatcher(Collection<Mat> templates, TemplateMatchingMethod templateMatchingMethod, CvProcessing cvProcessing, ExecutorService executorService) {
+    public MultipleTemplateMatcher(Collection<Mat> templates, TemplateMatchingMethod templateMatchingMethod, ExecutorService executorService) {
         mTemplates = templates;
         mTemplateMatchingMethod = templateMatchingMethod;
-        mCvProcessing = cvProcessing;
         mExecutorService = executorService;
     }
 
@@ -31,7 +28,7 @@ public class MultipleTemplateMatcher implements TemplateMatcher {
         try {
             return runMatchOnTemplates((template) ->
                     new TemplateMatchingTask(
-                            new SingleTemplateMatcher(template, mTemplateMatchingMethod, mCvProcessing),
+                            new SingleTemplateMatcher(template, mTemplateMatchingMethod),
                             scene));
         } catch (InterruptedException e) {
             throw new TemplateMatchingException(e);
@@ -43,7 +40,7 @@ public class MultipleTemplateMatcher implements TemplateMatcher {
         try {
             return runMatchOnTemplates((template) ->
                     new ScaledTemplateMatchingTask(
-                            new SingleTemplateMatcher(template, mTemplateMatchingMethod, mCvProcessing),
+                            new SingleTemplateMatcher(template, mTemplateMatchingMethod),
                             scene,
                             initialScaleFactor));
         } catch (InterruptedException e) {

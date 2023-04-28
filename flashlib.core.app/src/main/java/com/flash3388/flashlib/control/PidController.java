@@ -111,6 +111,8 @@ public class PidController implements ClosedLoopController {
             ObjectStorage objectStorage = networkInterface.getObjectStorage();
             StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
             return new PidController(control.getClock(), root, kp, ki, kd, kf);
+        } else {
+            control.getLogger().warn("OBSR not enabled, creating non-named PID controller");
         }
 
         return new PidController(control.getClock(), kp, ki, kd, kf);

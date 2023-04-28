@@ -8,7 +8,6 @@ import com.flash3388.flashlib.vision.control.SingleThreadVisionControl;
 import com.flash3388.flashlib.vision.control.VisionControl;
 import com.flash3388.flashlib.vision.cv.CvCamera;
 import com.flash3388.flashlib.vision.cv.CvImage;
-import com.flash3388.flashlib.vision.cv.CvProcessing;
 import com.flash3388.flashlib.vision.processing.VisionProcessor;
 import org.opencv.core.Core;
 
@@ -69,8 +68,6 @@ public class Main {
     private static VisionControl createVisionControl(Source<CvImage> source,
                                                  Pipeline<CvImage> guiPipeline,
                                                  ScheduledExecutorService executorService) {
-        CvProcessing cvProcessing = new CvProcessing();
-
         VisionControl control = SingleThreadVisionControl.<CvImage>withExecutorService(executorService, Time.milliseconds(1000))
                 .source(source)
                 .preProcess(guiPipeline)
