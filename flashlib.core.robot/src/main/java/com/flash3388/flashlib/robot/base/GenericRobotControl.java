@@ -113,6 +113,7 @@ public class GenericRobotControl implements RobotControl {
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
                                NetworkConfiguration networkConfiguration,
+                               RobotModeSupplier modeSupplier,
                                Configuration configuration) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
@@ -130,16 +131,27 @@ public class GenericRobotControl implements RobotControl {
                 new ObjectStorage.Stub();
 
         if (configuration.hfcsRobotControl) {
+            if (!mNetworkInterface.getMode().isHfcsEnabled()) {
+                throw new IllegalStateException("HFCS control requested but HFCS not enabled");
+            }
             HfcsRegistry hfcsRegistry = mNetworkInterface.getHfcsRegistry();
             HfcsPing.registerReceiver(hfcsRegistry, (a, b)->{});
             Supplier<RobotControlData> controlDataSupplier =
                     HfcsRobotControl.registerReceiver(hfcsRegistry, instanceId);
 
-            mModeSupplier = ()-> controlDataSupplier.get().getMode();
+            if (modeSupplier == null) {
+                mModeSupplier = ()-> controlDataSupplier.get().getMode();
+            } else {
+                mModeSupplier = modeSupplier;
+            }
 
             HfcsRobotState.registerProvider(this, Time.milliseconds(100));
         } else {
-            mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
+            if (modeSupplier == null) {
+                mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
+            } else {
+                mModeSupplier = modeSupplier;
+            }
         }
 
         mScheduler = RobotFactory.newDefaultScheduler(mClock, objectStorage, mMainThread);
@@ -147,6 +159,13 @@ public class GenericRobotControl implements RobotControl {
 
         mHidInterface = configuration.hidBackend.createInterface(this);
         mIoInterface = configuration.ioBackend.createInterface(this);
+    }
+
+    public GenericRobotControl(InstanceId instanceId,
+                               ResourceHolder resourceHolder,
+                               NetworkConfiguration networkConfiguration,
+                               Configuration configuration) {
+        this(instanceId, resourceHolder, networkConfiguration, null, configuration);
     }
 
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Configuration configuration) {
