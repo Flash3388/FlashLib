@@ -107,12 +107,13 @@ public class PidController implements ClosedLoopController {
         FlashLibControl control = FlashLibInstance.getControl();
 
         NetworkInterface networkInterface = control.getNetworkInterface();
-        ObjectStorage objectStorage = networkInterface.getMode().isObjectStorageEnabled() ?
-                networkInterface.getObjectStorage() :
-                new ObjectStorage.Stub();
-        StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
+        if (networkInterface.getMode().isObjectStorageEnabled()) {
+            ObjectStorage objectStorage = networkInterface.getObjectStorage();
+            StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
+            return new PidController(control.getClock(), root, kp, ki, kd, kf);
+        }
 
-        return new PidController(control.getClock(), root, kp, ki, kd, kf);
+        return new PidController(control.getClock(), kp, ki, kd, kf);
     }
 
     /**
