@@ -16,7 +16,6 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.hfcs.control.HfcsRobotControl;
 import com.flash3388.flashlib.robot.hfcs.control.RobotControlData;
-import com.flash3388.flashlib.robot.hfcs.hid.HfcsHid;
 import com.flash3388.flashlib.robot.hfcs.state.HfcsRobotState;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
@@ -37,21 +36,37 @@ import java.util.function.Supplier;
 public class GenericRobotControl implements RobotControl {
 
     public static class Configuration {
-        final boolean fullHfcsControl;
+        final boolean hfcsRobotControl;
+        final HidBackend hidBackend;
+        final IoBackend ioBackend;
 
-        private Configuration(boolean fullHfcsControl) {
-            this.fullHfcsControl = fullHfcsControl;
+        Configuration(boolean hfcsRobotControl, HidBackend hidBackend, IoBackend ioBackend) {
+            this.hfcsRobotControl = hfcsRobotControl;
+            this.hidBackend = hidBackend;
+            this.ioBackend = ioBackend;
+        }
+
+        public static Configuration custom(boolean hfcsRobotControl, HidBackend hidBackend, IoBackend ioBackend) {
+            return new Configuration(
+                    hfcsRobotControl,
+                    hidBackend,
+                    ioBackend
+            );
         }
 
         public static Configuration fullHfcsControl() {
             return new Configuration(
-                    true
+                    true,
+                    HidBackend.HFCS,
+                    IoBackend.STUB
             );
         }
 
         public static Configuration controlStubs() {
             return new Configuration(
-                    false
+                    false,
+                    HidBackend.STUB,
+                    IoBackend.STUB
             );
         }
     }
@@ -114,24 +129,24 @@ public class GenericRobotControl implements RobotControl {
                 mNetworkInterface.getObjectStorage() :
                 new ObjectStorage.Stub();
 
-        if (configuration.fullHfcsControl) {
+        if (configuration.hfcsRobotControl) {
             HfcsRegistry hfcsRegistry = mNetworkInterface.getHfcsRegistry();
             HfcsPing.registerReceiver(hfcsRegistry, (a, b)->{});
             Supplier<RobotControlData> controlDataSupplier =
                     HfcsRobotControl.registerReceiver(hfcsRegistry, instanceId);
 
             mModeSupplier = ()-> controlDataSupplier.get().getMode();
-            mHidInterface = HfcsHid.createReceiver(hfcsRegistry, mMainThread);
 
             HfcsRobotState.registerProvider(this, Time.milliseconds(100));
         } else {
             mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);
-            mHidInterface = new HidInterface.Stub();
         }
 
-        mIoInterface = new IoInterface.Stub();
         mScheduler = RobotFactory.newDefaultScheduler(mClock, objectStorage, mMainThread);
         mDeviceInterface = new DeviceInterfaceImpl(mMainThread);
+
+        mHidInterface = configuration.hidBackend.createInterface(this);
+        mIoInterface = configuration.ioBackend.createInterface(this);
     }
 
     public GenericRobotControl(InstanceId instanceId, ResourceHolder resourceHolder, Configuration configuration) {
