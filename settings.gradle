@@ -17,6 +17,7 @@ include 'flashlib.core.robot'
 include 'flashlib.robot.systems'
 
 include 'flashlib.hid.sdl2'
+include 'flashlib.io.hal'
 
 include 'examples:robot:tankdrive'
 include 'examples:robot:tankdrive-modes'
