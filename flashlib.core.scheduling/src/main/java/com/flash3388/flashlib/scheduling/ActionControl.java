@@ -42,6 +42,7 @@ public interface ActionControl {
      * Marks the associated action as finished.
      */
     void finish();
+
     /**
      * Marks the associated action as cancelled.
      */

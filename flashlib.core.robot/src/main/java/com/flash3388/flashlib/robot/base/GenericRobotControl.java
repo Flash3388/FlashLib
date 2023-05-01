@@ -46,19 +46,11 @@ public class GenericRobotControl implements RobotControl {
             this.ioBackend = ioBackend;
         }
 
-        public static Configuration custom(boolean hfcsRobotControl, HidBackend hidBackend, IoBackend ioBackend) {
+        public static Configuration create(boolean hfcsRobotControl, HidBackend hidBackend, IoBackend ioBackend) {
             return new Configuration(
                     hfcsRobotControl,
                     hidBackend,
                     ioBackend
-            );
-        }
-
-        public static Configuration fullHfcsControl() {
-            return new Configuration(
-                    true,
-                    HidBackend.HFCS,
-                    IoBackend.STUB
             );
         }
 
