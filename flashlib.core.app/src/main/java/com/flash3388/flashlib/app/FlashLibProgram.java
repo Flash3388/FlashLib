@@ -38,6 +38,12 @@ public class FlashLibProgram {
     private void runApplication() throws Exception {
         ResourceHolder resourceHolder = ResourceHolder.empty();
         try {
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                try {
+                    resourceHolder.freeAll();
+                } catch (Throwable e) { }
+            }));
+
             LOGGER.debug("Creating user app class");
             AppImplementation app = mCreator.create(mInstanceId, resourceHolder);
             FlashLibInstance.setControl(app.getControl());
