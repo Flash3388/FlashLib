@@ -18,6 +18,10 @@ public class RobotIntervalLooper implements RobotLooper {
         mSleeper = sleeper;
         mIterationInterval = iterationInterval;
         mRunLoopProperty = new SimpleBooleanProperty(true);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            mRunLoopProperty.setAsBoolean(false);
+        }));
     }
 
     public RobotIntervalLooper() {
@@ -26,7 +30,7 @@ public class RobotIntervalLooper implements RobotLooper {
 
     @Override
 	public void startLooping(Clock clock, Runnable loopTask) {
-        while(mRunLoopProperty.getAsBoolean()){
+        while(mRunLoopProperty.getAsBoolean() && !Thread.interrupted()){
             Time start = clock.currentTime();
             loopTask.run();
 

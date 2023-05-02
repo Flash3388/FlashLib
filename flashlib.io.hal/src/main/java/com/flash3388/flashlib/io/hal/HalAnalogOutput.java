@@ -3,9 +3,8 @@ package com.flash3388.flashlib.io.hal;
 import com.flash3388.flashlib.io.AnalogOutput;
 import hal.HALAIOJNI;
 import hal.HALJNI;
-import hal.HalConfig;
 
-public class HalAnalogOutput extends HalPort implements AnalogOutput {
+public class HalAnalogOutput extends HalAnalogPort implements AnalogOutput {
 
     public HalAnalogOutput(long env, String name) {
         super(env, name, HALJNI.HAL_TYPE_ANALOG_OUTPUT);
@@ -23,21 +22,11 @@ public class HalAnalogOutput extends HalPort implements AnalogOutput {
 
     @Override
     public void setVoltage(double voltage) {
-        setValue((int) (voltage / getMaxVoltage() * getMaxValue()));
+        setValue(voltsToValue(voltage));
     }
 
     @Override
     public double getVoltage() {
-        return getValue() / (double) getMaxValue() * getMaxVoltage();
-    }
-
-    @Override
-    public double getMaxVoltage() {
-        return HALJNI.getProperty_f(mEnv, mHandle, HalConfig.KEY_ANALOG_MAX_VOLTAGE);
-    }
-
-    @Override
-    public int getMaxValue() {
-        return HALJNI.getProperty(mEnv, mHandle, HalConfig.KEY_ANALOG_MAX_VALUE);
+        return valueToVolts(getValue());
     }
 }

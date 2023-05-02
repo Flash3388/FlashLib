@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.io;
 
-import com.flash3388.flashlib.io.devices.sensors.AnalogAccelerometer;
-
 /**
  * Interface for analog input ports. This interface is used by devices
  * which require analog input ports for input, allowing for different implementations.
@@ -24,14 +22,6 @@ public interface AnalogInput extends AnalogPort {
 	 * @return analog input voltage in volts
 	 */
 	double getVoltage();
-	
-	/**
-	 * Gets the {@link AnalogAccelerometer} accumulator object used by this input port
-	 * to accumulate values.
-	 * 
-	 * @return the accumulator object, or null if none exist.
-	 */
-	AnalogAccumulator getAccumulator();
 	
 	/**
 	 * Gets the port sample rate in second. This value indicates the period

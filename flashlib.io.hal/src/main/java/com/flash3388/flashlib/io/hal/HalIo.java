@@ -30,7 +30,12 @@ public class HalIo {
     public static synchronized Closeable initialize() {
         sEnv = HALJNI.init();
         return ()-> {
-            HALJNI.shutdown(sEnv);
+            synchronized (HalIo.class) {
+                if (sEnv != 0) {
+                    HALJNI.shutdown(sEnv);
+                    sEnv = 0;
+                }
+            }
         };
     }
 
