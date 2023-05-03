@@ -46,6 +46,7 @@ public class HalIoInterface implements IoInterface {
 
     @Override
     public Pwm newPwm(IoChannel channel) {
-        throw new UnsupportedOperationException();
+        HalIoChannel ioChannel = IoChannel.cast(channel, HalIoChannel.class);
+        return new HalPwmOutput(mEnv, ioChannel.getName());
     }
 }
