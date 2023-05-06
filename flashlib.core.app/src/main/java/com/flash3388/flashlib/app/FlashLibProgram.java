@@ -57,6 +57,12 @@ public class FlashLibProgram {
         FlashLibApp app = appImplementation.getApp();
         FlashLibControl control = appImplementation.getControl();
 
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            try {
+                control.getMainThread().interrupt();
+            } catch (Throwable e) { }
+        }));
+
         try {
             appInitialize(app, control);
             appMain(app, control);

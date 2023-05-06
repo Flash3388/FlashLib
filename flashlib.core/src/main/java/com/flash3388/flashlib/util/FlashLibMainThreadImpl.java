@@ -55,4 +55,9 @@ public class FlashLibMainThreadImpl implements FlashLibMainThread {
             runnable.run();
         }
     }
+
+    @Override
+    public void interrupt() {
+        mThread.interrupt();
+    }
 }

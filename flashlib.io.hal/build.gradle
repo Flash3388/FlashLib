@@ -1,0 +1,8 @@
+apply from: rootProject.file('jcomponent.gradle')
+
+dependencies {
+    api project(':flashlib.core.io')
+    api castle()
+
+    implementation group: 'com.github.tomtzook', name: 'hal-jni', version: '0.3.0'
+}

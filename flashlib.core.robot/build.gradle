@@ -10,7 +10,9 @@ dependencies {
 
     implementation project(':flashlib.net.channels')
     implementation project(':flashlib.net.robolink')
-    implementation project(':flashlib.hid.sdl2')
+
+    api project(':flashlib.hid.sdl2')
+    api project(':flashlib.io.hal')
 
     api javabeans()
     api jmath()
