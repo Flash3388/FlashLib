@@ -8,7 +8,7 @@ import com.flash3388.flashlib.scheduling.actions.ActionBase;
 
 import java.util.function.DoubleSupplier;
 
-public class ControlledDrive extends ActionBase {
+public class ControlledMove extends ActionBase {
 
     private final Movable mMovable;
     private final ClosedLoopController mController;
@@ -16,11 +16,11 @@ public class ControlledDrive extends ActionBase {
     private final double mSetPoint;
     private final boolean mIsContinous;
 
-    public ControlledDrive(Movable movable,
-                           ClosedLoopController controller,
-                           DoubleSupplier processVariable,
-                           double setPoint,
-                           boolean isContinous) {
+    public ControlledMove(Movable movable,
+                          ClosedLoopController controller,
+                          DoubleSupplier processVariable,
+                          double setPoint,
+                          boolean isContinous) {
         mMovable = movable;
         mController = controller;
         mProcessVariable = processVariable;
