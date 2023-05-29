@@ -2,6 +2,8 @@ package com.flash3388.flashlib.robot.hfcs.hid;
 
 import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.HidInterface;
+import com.flash3388.flashlib.hid.data.HidData;
+import com.flash3388.flashlib.hid.data.RawHidData;
 import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;

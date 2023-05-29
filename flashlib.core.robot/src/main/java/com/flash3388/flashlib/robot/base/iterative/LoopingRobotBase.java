@@ -71,8 +71,12 @@ public class LoopingRobotBase implements RobotBase {
     public final void robotShutdown(){
         mRobotLooper.stop();
 
-        mRobotControl.getScheduler().cancelAllActions();
-        mRobot.robotStop();
+        if (mRobotControl != null) {
+            mRobotControl.getScheduler().cancelAllActions();
+        }
+        if (mRobot != null) {
+            mRobot.robotStop();
+        }
     }
 
     protected final void robotLoop(){

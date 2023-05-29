@@ -9,7 +9,9 @@ def flashlibModules = [
         project('flashlib.vision.cv'),
         project('flashlib.core.app'),
         project('flashlib.core.robot'),
-        project('flashlib.hid.sdl2')
+        project('flashlib.hid.sdl2'),
+        project('flashlib.robot.systems'),
+        project('flashlib.io.hal')
 ]
 
 flashlibModules.each { subproject -> evaluationDependsOn(subproject.path) }

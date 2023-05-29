@@ -21,30 +21,6 @@ public interface Pwm extends IoPort {
      * @return duty cycle between 0 and 1.
      */
     double getDuty();
-
-    /**
-     * Sets the pwm output value for the port. This corresponds to
-     * a duty cycle value and depends on the used implementation.
-     *
-     * @param value pwm value
-     */
-	void setValue(int value);
-
-    /**
-     * Gets the current pwm value measured set in the port. This corresponds to
-     * a duty cycle value and depends on the used implementation.
-     *
-     * @return pwm value
-     */
-	int getValue();
-
-    /**
-     * Gets the maximum raw value of the port. This value corresponds to
-     * a duty cycle value and depends on the used implementation.
-     *
-     * @return maximum raw value.
-     */
-	int getMaxValue();
 	
 	/**
 	 * Sets the Pwm port's frequency.

@@ -1,6 +1,14 @@
 package com.flash3388.flashlib.control;
 
+import com.beans.DoubleProperty;
+import com.flash3388.flashlib.app.FlashLibControl;
+import com.flash3388.flashlib.app.FlashLibInstance;
+import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.control.ClosedLoopController;
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
@@ -54,7 +62,7 @@ public class PidController implements ClosedLoopController {
      * @param kd    the differential constant
      * @param kf    the feed forward constant
      */
-    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf){
+    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
         mClock = clock;
         mKp = kp;
         mKi = ki;
@@ -80,6 +88,34 @@ public class PidController implements ClosedLoopController {
 
     public PidController(Clock clock, double kp, double ki, double kd, double kf) {
         this(clock, () -> kp, () -> ki, () ->  kd, () -> kf);
+    }
+
+    public PidController(Clock clock, StoredObject object, double kp, double ki, double kd, double kf) {
+        this(clock,
+                createEntryForVariable(object, "kp", kp),
+                createEntryForVariable(object, "ki", ki),
+                createEntryForVariable(object, "kd", kd),
+                createEntryForVariable(object, "kf", kf)
+        );
+    }
+
+    public PidController(Clock clock, StoredObject object) {
+        this(clock, object, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    public static PidController newNamedController(String name, double kp, double ki, double kd, double kf) {
+        FlashLibControl control = FlashLibInstance.getControl();
+
+        NetworkInterface networkInterface = control.getNetworkInterface();
+        if (networkInterface.getMode().isObjectStorageEnabled()) {
+            ObjectStorage objectStorage = networkInterface.getObjectStorage();
+            StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
+            return new PidController(control.getClock(), root, kp, ki, kd, kf);
+        } else {
+            control.getLogger().warn("OBSR not enabled, creating non-named PID controller");
+        }
+
+        return new PidController(control.getClock(), kp, ki, kd, kf);
     }
 
     /**
@@ -263,5 +299,11 @@ public class PidController implements ClosedLoopController {
         }
 
         return false;
+    }
+
+    private static DoubleSupplier createEntryForVariable(StoredObject object, String name, double initialValue) {
+        ValueProperty property = object.getEntry(name).valueProperty();
+        property.set(Value.newDouble(initialValue));
+        return property.asDouble(0.0);
     }
 }

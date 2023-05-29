@@ -16,6 +16,8 @@ public interface FlashLibMainThread {
     @MainThreadOnly
     void executePendingTasks();
 
+    void interrupt();
+
     class Stub implements FlashLibMainThread {
 
         @Override
@@ -35,6 +37,11 @@ public interface FlashLibMainThread {
 
         @Override
         public void executePendingTasks() {
+
+        }
+
+        @Override
+        public void interrupt() {
 
         }
     }

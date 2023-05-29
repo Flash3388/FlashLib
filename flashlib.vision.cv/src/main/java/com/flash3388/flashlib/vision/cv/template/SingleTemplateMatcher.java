@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.vision.cv.template;
 
-import com.flash3388.flashlib.vision.cv.CvProcessing;
+import com.flash3388.flashlib.vision.cv.CvHelper;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -11,12 +11,10 @@ public class SingleTemplateMatcher implements TemplateMatcher {
 
     private final Mat mTemplate;
     private final TemplateMatchingMethod mMatchingMethod;
-    private final CvProcessing mCvProcessing;
 
-    public SingleTemplateMatcher(Mat template, TemplateMatchingMethod matchingMethod, CvProcessing cvProcessing) {
+    public SingleTemplateMatcher(Mat template, TemplateMatchingMethod matchingMethod) {
         mTemplate = template;
         mMatchingMethod = matchingMethod;
-        mCvProcessing = cvProcessing;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class SingleTemplateMatcher implements TemplateMatcher {
 
         for (Mat copyScene = scene.clone();
              copyScene.height() > templateHeight && copyScene.width() > templateWidth;
-             mCvProcessing.resize(copyScene, currentScaleFactor)) {
+             CvHelper.resize(copyScene, currentScaleFactor)) {
 
             TemplateMatchingResult templateMatchingResult = match(copyScene);
 

@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.robot.hfcs.hid;
+package com.flash3388.flashlib.hid.data;
 
 import com.flash3388.flashlib.hid.generic.ChannelType;
 

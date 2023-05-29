@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.robot.hfcs.hid;
 
+import com.flash3388.flashlib.hid.data.HidDataSerializer;
+import com.flash3388.flashlib.hid.data.RawHidData;
 import com.flash3388.flashlib.net.hfcs.InType;
 import com.flash3388.flashlib.util.resources.CircularResourceHolder;
 

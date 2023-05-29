@@ -1,10 +1,28 @@
 apply from: rootProject.file('jcomponent.gradle')
 
+def SUPPORTED_ARCHES = ['linux-aarch64', 'linux-amd64', 'linux-gnueabihf-arm', 'windows-x86_x64']
+
+configurations {
+    nativeDep
+}
+
 dependencies {
     api project(':flashlib.core.hid')
-    api project(':flashlib.core.robot')
     api castle()
 
-    // users will have to specify natives manually
     implementation 'com.github.tomtzook:jsdl2:0.1.0'
+    SUPPORTED_ARCHES.forEach {
+        nativeDep group: 'com.github.tomtzook', name: 'jsdl2-jni', version: '0.1.0', classifier: "$it"
+    }
+}
+
+jar {
+    configurations.nativeDep.forEach { file ->
+        from(file.isDirectory() ? file : zipTree(file)) {
+            def baseName = file.getName().replace('jsdl2-jni-0.1.0-', '').replace('.jar', '')
+
+            exclude('META-INF')
+            into("natives/$baseName")
+        }
+    }
 }

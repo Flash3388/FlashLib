@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.hfcs.hid;
 
+import com.flash3388.flashlib.hid.data.HidData;
 import com.flash3388.flashlib.hid.generic.ChannelType;
 import com.flash3388.flashlib.hid.generic.RawHidInterface;
 
