@@ -1,8 +1,11 @@
 package com.flash3388.flashlib.vision.cv;
 
 import com.flash3388.flashlib.vision.ImageCodec;
+import com.flash3388.flashlib.vision.color.ColorDimension;
 import com.flash3388.flashlib.vision.color.ColorRange;
 import com.flash3388.flashlib.vision.color.ColorSpace;
+import com.flash3388.flashlib.vision.color.DimensionRange;
+import com.sun.tools.javac.util.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -14,6 +17,8 @@ import org.opencv.videoio.VideoWriter;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 public class CvHelper {
 
@@ -32,6 +37,55 @@ public class CvHelper {
         return new Scalar(values);
     }
 
+    private static CvImage filterInvertedColors(CvImage source, ColorRange filterRange,
+                                                ColorDimension invertedDimension) {
+
+        Pair<ColorRange, ColorRange> invertedRanges = createInvertedColorRanges(filterRange, invertedDimension);
+        CvImage bottomThresh = filterColors(source, invertedRanges.fst);
+        CvImage topThresh = filterColors(source, invertedRanges.snd);
+
+        Mat combinedMat = new Mat();
+        Core.add(bottomThresh.getMat(), topThresh.getMat(), combinedMat);
+
+        return new CvImage(combinedMat, bottomThresh.getColorSpace());
+    }
+
+    private static Pair<ColorRange, ColorRange> createInvertedColorRanges(
+            ColorRange originalRange, ColorDimension dimensionToInvert) {
+        List<DimensionRange> bottomDimensionRanges = new ArrayList<>(originalRange.getDimensions());
+        List<DimensionRange> topDimensionRanges = new ArrayList<>(originalRange.getDimensions());
+
+        OptionalInt indexToInvert = findDimensionRangeIndexByDimension(originalRange.getDimensions(),
+                dimensionToInvert);
+
+        if (!indexToInvert.isPresent()) {
+            throw new IllegalArgumentException("range doesn't contain " + dimensionToInvert.name());
+        }
+
+        DimensionRange bottomRange = new DimensionRange(dimensionToInvert,
+                dimensionToInvert.getValueRange().getMin(),
+                originalRange.getDimensions().get(indexToInvert.getAsInt()).getMin());
+
+        DimensionRange topRange = new DimensionRange(dimensionToInvert,
+                originalRange.getDimensions().get(indexToInvert.getAsInt()).getMax(),
+                dimensionToInvert.getValueRange().getMax());
+
+        bottomDimensionRanges.set(indexToInvert.getAsInt(), bottomRange);
+        topDimensionRanges.set(indexToInvert.getAsInt(), topRange);
+
+        return new Pair<>(
+                new ColorRange(originalRange.getColorSpace(), bottomDimensionRanges),
+                new ColorRange(originalRange.getColorSpace(), topDimensionRanges));
+    }
+
+    public static OptionalInt findDimensionRangeIndexByDimension(List<DimensionRange> ranges,
+                                                                       ColorDimension colorDimension) {
+        return IntStream.range(0, ranges.size())
+                .filter(i -> ranges.get(i).getDimension().equals(colorDimension))
+                .findAny();
+
+    }
+
     public static CvImage filterColors(CvImage source, ColorRange filterRange, EnumSet<CvOpOption> options) {
         if (source.getColorSpace() != filterRange.getColorSpace()) {
             throw new IllegalArgumentException("range and image do not share color space");
@@ -40,6 +94,18 @@ public class CvHelper {
         Mat dst = source.getMat();
         if (options.contains(CvOpOption.PRESERVE_ORIGINAL_MAT)) {
             dst = new Mat();
+        }
+
+
+
+        if (filterRange.getDimensions().stream().anyMatch(DimensionRange::isInverted)) {
+            ColorDimension firstInverted = filterRange.getDimensions().stream()
+                    .filter(DimensionRange::isInverted)
+                    .findFirst().get().getDimension();
+
+            CvImage thresh = filterInvertedColors(source, filterRange, firstInverted);
+            thresh.getMat().copyTo(dst);
+            return thresh;
         }
 
         Core.inRange(source.getMat(),
