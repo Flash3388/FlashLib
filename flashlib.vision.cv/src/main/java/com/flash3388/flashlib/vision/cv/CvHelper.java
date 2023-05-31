@@ -211,7 +211,7 @@ public class CvHelper {
      *
      * @see Imgproc#approxPolyDP(MatOfPoint2f, MatOfPoint2f, double, boolean)
      */
-    public static void detectContoursByShape(List<MatOfPoint> contours, int vertices, double accuracy){
+    public static void filterContoursByShape(List<MatOfPoint> contours, int vertices, double accuracy){
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
         MatOfPoint2f approxCurve = new MatOfPoint2f();
 
