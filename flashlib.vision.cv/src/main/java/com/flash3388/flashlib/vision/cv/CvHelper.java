@@ -5,7 +5,6 @@ import com.flash3388.flashlib.vision.color.ColorDimension;
 import com.flash3388.flashlib.vision.color.ColorRange;
 import com.flash3388.flashlib.vision.color.ColorSpace;
 import com.flash3388.flashlib.vision.color.DimensionRange;
-import com.sun.tools.javac.util.Pair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -13,7 +12,6 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoWriter;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -40,17 +38,17 @@ public class CvHelper {
     private static CvImage filterInvertedColors(CvImage source, ColorRange filterRange,
                                                 ColorDimension invertedDimension) {
 
-        Pair<ColorRange, ColorRange> invertedRanges = createInvertedColorRanges(filterRange, invertedDimension);
-        CvImage bottomThresh = filterColors(source, invertedRanges.fst);
-        CvImage topThresh = filterColors(source, invertedRanges.snd);
+        ColorRange[] invertedRanges = createInvertedColorRanges(filterRange, invertedDimension);
+        CvImage bottomThresh = filterColors(source, invertedRanges[0]);
+        CvImage topThresh = filterColors(source, invertedRanges[1]);
 
         Mat combinedMat = new Mat();
-        Core.add(bottomThresh.getMat(), topThresh.getMat(), combinedMat);
+        Core.bitwise_or(bottomThresh.getMat(), topThresh.getMat(), combinedMat);
 
         return new CvImage(combinedMat, bottomThresh.getColorSpace());
     }
 
-    private static Pair<ColorRange, ColorRange> createInvertedColorRanges(
+    private static ColorRange[] createInvertedColorRanges(
             ColorRange originalRange, ColorDimension dimensionToInvert) {
         List<DimensionRange> bottomDimensionRanges = new ArrayList<>(originalRange.getDimensions());
         List<DimensionRange> topDimensionRanges = new ArrayList<>(originalRange.getDimensions());
@@ -73,9 +71,9 @@ public class CvHelper {
         bottomDimensionRanges.set(indexToInvert.getAsInt(), bottomRange);
         topDimensionRanges.set(indexToInvert.getAsInt(), topRange);
 
-        return new Pair<>(
+        return new ColorRange[] {
                 new ColorRange(originalRange.getColorSpace(), bottomDimensionRanges),
-                new ColorRange(originalRange.getColorSpace(), topDimensionRanges));
+                new ColorRange(originalRange.getColorSpace(), topDimensionRanges)};
     }
 
     public static OptionalInt findDimensionRangeIndexByDimension(List<DimensionRange> ranges,
