@@ -24,8 +24,12 @@ public class ColoredShapeDetector implements ObjectDetector<CvImage, Target> {
     DoubleSupplier accuracySupplier;
 
 
-    public ColoredShapeDetector(Supplier<ColorRange> colorRangeSupplier) {
+    public ColoredShapeDetector(Supplier<ColorRange> colorRangeSupplier,
+                                IntSupplier verticesSupplier,
+                                DoubleSupplier accuracySupplier) {
         this.colorRangeSupplier = colorRangeSupplier;
+        this.verticesSupplier = verticesSupplier;
+        this.accuracySupplier = accuracySupplier;
     }
 
     @Override
