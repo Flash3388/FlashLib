@@ -2,6 +2,7 @@ package com.flash3388.flashlib.vision.cv.detection;
 
 import com.flash3388.flashlib.vision.detection.ObjectTracker;
 import com.flash3388.flashlib.vision.detection.ScorableTarget;
+import com.flash3388.flashlib.vision.detection.Target;
 import com.jmath.vectors.Vector2;
 
 import java.util.ArrayList;
@@ -13,10 +14,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class CenteroidTracker implements ObjectTracker<ScorableTarget> {
+public class CenteroidTracker implements ObjectTracker<Target> {
 
-    private final Map<Integer, ScorableTarget> mTrackedObjects;
-    private final Map<Integer, ScorableTarget> mOldObjects;
+    private final Map<Integer, Target> mTrackedObjects;
+    private final Map<Integer, Target> mOldObjects;
 
     private int mNextId;
 
@@ -27,14 +28,14 @@ public class CenteroidTracker implements ObjectTracker<ScorableTarget> {
     }
 
     @Override
-    public Map<Integer, ? extends ScorableTarget> updateTracked(Collection<? extends ScorableTarget> objects) {
-        List<ScorableTarget> targetsList = new LinkedList<>(objects);
-        Map<Integer, ScorableTarget> updates = new HashMap<>();
-        Map<Integer, ScorableTarget> knownIds = new HashMap<>(mTrackedObjects);
+    public Map<Integer, ? extends Target> updateTracked(Collection<? extends Target> objects) {
+        List<Target> targetsList = new LinkedList<>(objects);
+        Map<Integer, Target> updates = new HashMap<>();
+        Map<Integer, Target> knownIds = new HashMap<>(mTrackedObjects);
 
-        Map<Integer, ScorableTarget> tracks = new HashMap<>(mOldObjects);
+        Map<Integer, Target> tracks = new HashMap<>(mOldObjects);
         tracks.putAll(mTrackedObjects);
-        for (Map.Entry<Integer, ScorableTarget> entry : tracks.entrySet()) {
+        for (Map.Entry<Integer, Target> entry : tracks.entrySet()) {
             List<TrackPair> trackPairs = new ArrayList<>();
             for (int i = 0; i < targetsList.size(); i++) {
                 trackPairs.add(new TrackPair(entry.getValue(), i, targetsList.get(i)));
@@ -58,13 +59,13 @@ public class CenteroidTracker implements ObjectTracker<ScorableTarget> {
         mTrackedObjects.putAll(updates);
 
         // handle lost objects
-        for (Map.Entry<Integer, ScorableTarget> entry : knownIds.entrySet()) {
+        for (Map.Entry<Integer,Target> entry : knownIds.entrySet()) {
             mTrackedObjects.remove(entry.getKey());
             mOldObjects.put(entry.getKey(), entry.getValue());
         }
 
         // add new objects
-        for (ScorableTarget target : targetsList) {
+        for (Target target : targetsList) {
             int id = mNextId++;
             mTrackedObjects.put(id, target);
         }
@@ -74,11 +75,11 @@ public class CenteroidTracker implements ObjectTracker<ScorableTarget> {
 
     private static class TrackPair {
 
-        final ScorableTarget mOriginal;
+        final Target mOriginal;
         final int mIndex;
-        final ScorableTarget mUpdated;
+        final Target mUpdated;
 
-        private TrackPair(ScorableTarget original, int index, ScorableTarget updated) {
+        private TrackPair(Target original, int index, Target updated) {
             mOriginal = original;
             mIndex = index;
             mUpdated = updated;
