@@ -17,7 +17,7 @@ public class FlashLibInstance {
         return control;
     }
 
-    static void setControl(FlashLibControl control) {
+    public static void setControl(FlashLibControl control) {
         FlashLibControl old = sControl.getAndSet(control);
         if (old != null) {
             control.getLogger().warn("FlashLibControl global modified after initial setup");

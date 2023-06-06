@@ -1,19 +1,17 @@
-package com.flash3388.flashlib.control;
+package com.flash3388.flashlib.robot.control;
 
-import com.beans.DoubleProperty;
-import com.flash3388.flashlib.app.FlashLibControl;
-import com.flash3388.flashlib.app.FlashLibInstance;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.control.ClosedLoopController;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueProperty;
+import com.flash3388.flashlib.robot.RobotControl;
+import com.flash3388.flashlib.robot.RunningRobot;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
 
-import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -104,7 +102,7 @@ public class PidController implements ClosedLoopController {
     }
 
     public static PidController newNamedController(String name, double kp, double ki, double kd, double kf) {
-        FlashLibControl control = FlashLibInstance.getControl();
+        RobotControl control = RunningRobot.getControl();
 
         NetworkInterface networkInterface = control.getNetworkInterface();
         if (networkInterface.getMode().isObjectStorageEnabled()) {

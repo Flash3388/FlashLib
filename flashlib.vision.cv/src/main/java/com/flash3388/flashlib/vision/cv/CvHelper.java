@@ -175,13 +175,33 @@ public class CvHelper {
     }
 
     private static int getColorSpaceConversionCode(ColorSpace src, ColorSpace dst) {
-        if (src == ColorSpace.BGR && dst == ColorSpace.HSV) {
-            return Imgproc.COLOR_BGR2HSV;
+        switch (src) {
+            case BGR: {
+                switch (dst) {
+                    case HSV: return Imgproc.COLOR_BGR2HSV;
+                    case RGB: return Imgproc.COLOR_BGR2RGB;
+                    default:
+                        throw new UnsupportedOperationException("no code for color space conversion");
+                }
+            }
+            case RGB: {
+                switch (dst) {
+                    case HSV: return Imgproc.COLOR_RGB2HSV;
+                    case BGR: return Imgproc.COLOR_RGB2BGR;
+                    default:
+                        throw new UnsupportedOperationException("no code for color space conversion");
+                }
+            }
+            case HSV: {
+                switch (dst) {
+                    case RGB: return Imgproc.COLOR_HSV2RGB;
+                    case BGR: return Imgproc.COLOR_HSV2BGR;
+                    default:
+                        throw new UnsupportedOperationException("no code for color space conversion");
+                }
+            }
+            default:
+                throw new UnsupportedOperationException("no code for color space conversion");
         }
-        if (src == ColorSpace.BGR && dst == ColorSpace.RGB) {
-            return Imgproc.COLOR_BGR2RGB;
-        }
-
-        throw new UnsupportedOperationException("no code for color space conversion");
     }
 }
