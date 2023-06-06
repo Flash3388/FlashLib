@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot;
 
+import com.flash3388.flashlib.app.FlashLibInstance;
 import com.flash3388.flashlib.global.GlobalDependencies;
 
 import java.util.concurrent.atomic.AtomicReference;
