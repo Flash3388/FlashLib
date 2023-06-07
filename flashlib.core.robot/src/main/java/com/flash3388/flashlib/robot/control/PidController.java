@@ -3,6 +3,7 @@ package com.flash3388.flashlib.robot.control;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.control.ClosedLoopController;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueProperty;
@@ -28,6 +29,10 @@ import java.util.function.DoubleSupplier;
  */
 public class PidController implements ClosedLoopController {
 
+    private final StoredEntry mErrorEntry;
+    private final StoredEntry mProcessVariableEntry;
+    private final StoredEntry mSetPointEntry;
+
     private final Clock mClock;
     private final DoubleSupplier mKp;
     private final DoubleSupplier mKi;
@@ -37,7 +42,6 @@ public class PidController implements ClosedLoopController {
     private double mMinimumOutput;
     private double mMaximumOutput;
 
-    private double mSetPointRange;
     private double mOutRampRate;
     private double mTolerance;
     private Time mToleranceTimeout;
@@ -60,7 +64,12 @@ public class PidController implements ClosedLoopController {
      * @param kd    the differential constant
      * @param kf    the feed forward constant
      */
-    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
+    public PidController(StoredObject object, Clock clock,
+                         DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
+        mErrorEntry = object.getEntry("Error");
+        mProcessVariableEntry = object.getEntry("ProcessVariable");
+        mSetPointEntry = object.getEntry("SetPoint");
+
         mClock = clock;
         mKp = kp;
         mKi = ki;
@@ -70,7 +79,6 @@ public class PidController implements ClosedLoopController {
         mMinimumOutput = -1;
         mMaximumOutput = 1;
 
-        mSetPointRange = 0;
         mOutRampRate = 0;
         mTolerance = 0;
         mToleranceTimeout = Time.INVALID;
@@ -84,12 +92,16 @@ public class PidController implements ClosedLoopController {
         mIsFirstRun = true;
     }
 
+    public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
+        this(new StoredObject.Stub(), clock, kp, ki, kd, kf);
+    }
+
     public PidController(Clock clock, double kp, double ki, double kd, double kf) {
         this(clock, () -> kp, () -> ki, () ->  kd, () -> kf);
     }
 
-    public PidController(Clock clock, StoredObject object, double kp, double ki, double kd, double kf) {
-        this(clock,
+    public PidController(StoredObject object, Clock clock, double kp, double ki, double kd, double kf) {
+        this(object, clock,
                 createEntryForVariable(object, "kp", kp),
                 createEntryForVariable(object, "ki", ki),
                 createEntryForVariable(object, "kd", kd),
@@ -97,8 +109,8 @@ public class PidController implements ClosedLoopController {
         );
     }
 
-    public PidController(Clock clock, StoredObject object) {
-        this(clock, object, 0.0, 0.0, 0.0, 0.0);
+    public PidController(StoredObject object, Clock clock) {
+        this(object, clock, 0.0, 0.0, 0.0, 0.0);
     }
 
     public static PidController newNamedController(String name, double kp, double ki, double kd, double kf) {
@@ -108,7 +120,7 @@ public class PidController implements ClosedLoopController {
         if (networkInterface.getMode().isObjectStorageEnabled()) {
             ObjectStorage objectStorage = networkInterface.getObjectStorage();
             StoredObject root = objectStorage.getInstanceRoot().getChild("PIDControllers").getChild(name);
-            return new PidController(control.getClock(), root, kp, ki, kd, kf);
+            return new PidController(root, control.getClock(), kp, ki, kd, kf);
         } else {
             control.getLogger().warn("OBSR not enabled, creating non-named PID controller");
         }
@@ -125,6 +137,10 @@ public class PidController implements ClosedLoopController {
         mToleranceAcceptableTime = Time.INVALID;
         mLastOutput = 0;
         mLastError = 0;
+
+        mErrorEntry.setDouble(0);
+        mProcessVariableEntry.setDouble(0);
+        mSetPointEntry.setDouble(0);
     }
 
     /**
@@ -134,15 +150,6 @@ public class PidController implements ClosedLoopController {
      */
     public void setOutputRampRate(double rate) {
         mOutRampRate = rate;
-    }
-
-    /**
-     * Set a limit on how far the setpoint can be from the current position.
-     *
-     * @param range range of setpoint
-     */
-    public void setSetpointRange(double range) {
-        mSetPointRange = range;
     }
 
     /**
@@ -224,11 +231,11 @@ public class PidController implements ClosedLoopController {
      */
     @Override
     public double applyAsDouble(double processVariable, double setpoint) {
-        if(mSetPointRange != 0) {
-            processVariable = ExtendedMath.constrain(processVariable, processVariable - mSetPointRange, processVariable + mSetPointRange);
-        }
+        mProcessVariableEntry.setDouble(processVariable);
+        mSetPointEntry.setDouble(setpoint);
 
         double error = setpoint - processVariable;
+        mErrorEntry.setDouble(error);
 
         double pOut = mKp.getAsDouble() * error;
         double fOut = mKf.getAsDouble() * setpoint;
