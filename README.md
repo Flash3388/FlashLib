@@ -1,6 +1,6 @@
 # FlashLib
 ![Maven Central](https://img.shields.io/maven-central/v/com.flash3388.flashlib/flashlib.core.svg)
-![Travis Build]([https://img.shields.io/travis/Flash3388/FlashLib/master.svg](https://img.shields.io/travis/com/Flash3388/FlashLib/master)
+![Travis (.com) branch](https://img.shields.io/travis/com/Flash3388/FlashLib/master)
 ![GitHub](https://img.shields.io/github/license/FLASH3388/FlashLib.svg)
 
 FlashLib is a robotics software development library for Java, originally designed to improve and help FRC teams, 
