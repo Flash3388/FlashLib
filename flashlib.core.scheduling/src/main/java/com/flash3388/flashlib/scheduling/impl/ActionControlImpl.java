@@ -50,11 +50,6 @@ public class ActionControlImpl implements ActionControl {
     }
 
     @Override
-    public StoredObject getPropertiesRoot() {
-        return mObsrActionContext.getPropertiesRoot();
-    }
-
-    @Override
     public ExecutionContext createExecutionContext(Action action) {
         StoredObject object = mObsrActionContext.getRootObject().getChild(UUID.randomUUID().toString());
         RunningActionContext context = new RunningActionContext(action,
@@ -73,5 +68,30 @@ public class ActionControlImpl implements ActionControl {
     @Override
     public void cancel() {
         mExecutionState.markForCancellation();
+    }
+
+    @Override
+    public void putBooleanProperty(String name, boolean value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setBoolean(value);
+    }
+
+    @Override
+    public void putIntProperty(String name, int value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setInt(value);
+    }
+
+    @Override
+    public void putLongProperty(String name, long value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setLong(value);
+    }
+
+    @Override
+    public void putDoubleProperty(String name, double value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setDouble(value);
+    }
+
+    @Override
+    public void putStringProperty(String name, String value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setString(value);
     }
 }
