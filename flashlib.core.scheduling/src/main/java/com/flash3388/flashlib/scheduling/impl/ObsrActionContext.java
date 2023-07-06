@@ -18,6 +18,7 @@ public class ObsrActionContext {
     private final StoredEntry mName;
     private final StoredEntry mTimeout;
     private final StoredEntry mRequirements;
+    private final StoredObject mPropertiesRoot;
 
     public ObsrActionContext(StoredObject object) {
         mRootObject = object;
@@ -39,10 +40,16 @@ public class ObsrActionContext {
 
         mRequirements = object.getEntry("requirements");
         mRequirements.setString("");
+
+        mPropertiesRoot = mRootObject.getChild("properties");
     }
 
     public StoredObject getRootObject() {
         return mRootObject;
+    }
+
+    public StoredObject getPropertiesRoot() {
+        return mPropertiesRoot;
     }
 
     public void updateFromAction(Action action) {

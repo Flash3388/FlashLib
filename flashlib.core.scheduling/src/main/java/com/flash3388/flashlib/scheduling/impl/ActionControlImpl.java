@@ -50,6 +50,11 @@ public class ActionControlImpl implements ActionControl {
     }
 
     @Override
+    public StoredObject getPropertiesRoot() {
+        return mObsrActionContext.getPropertiesRoot();
+    }
+
+    @Override
     public ExecutionContext createExecutionContext(Action action) {
         StoredObject object = mObsrActionContext.getRootObject().getChild(UUID.randomUUID().toString());
         RunningActionContext context = new RunningActionContext(action,

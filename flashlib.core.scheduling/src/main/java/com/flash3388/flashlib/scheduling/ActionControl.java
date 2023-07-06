@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Time;
@@ -27,6 +29,13 @@ public interface ActionControl {
      * @return time left until timeout, or {@link Time#INVALID} if timeout was not defined.
      */
     Time getTimeLeft();
+
+    /**
+     * Gets the OBSR root object for registering properties for the action.
+     *
+     * @return {@link StoredObject} for properties
+     */
+    StoredObject getPropertiesRoot();
 
     /**
      * Creates a context for running actions. Can be used to manually execute actions. Should be
