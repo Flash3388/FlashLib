@@ -174,14 +174,14 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
     @Override
     public void end(FinishReason reason) {
-        if (reason.isInterrupt() && mWhenInterrupted != null) {
-            mWhenInterrupted.run();
-        }
-
         if (reason.isInterrupt() || mForcedEarlyFinish) {
             for (ExecutionContext context : mRunningActions) {
                 context.interrupt();
             }
+        }
+
+        if (reason.isInterrupt() && mWhenInterrupted != null) {
+            mWhenInterrupted.run();
         }
 
         mActionsToExecute.clear();
