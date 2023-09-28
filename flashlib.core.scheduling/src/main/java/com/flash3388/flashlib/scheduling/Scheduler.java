@@ -69,23 +69,6 @@ public interface Scheduler {
 
     /**
      * <p>
-     *     Gets the total time passed since the given {@link Action} started running.
-     * </p>
-     * <p>
-     *     The action must be running.
-     * </p>
-     *
-     * @param action action to get runtime for.
-     *
-     * @return {@link Time} passed since the action started running.
-     *
-     * @throws IllegalStateException if the action is not running.
-     */
-    @MainThreadOnly
-    Time getActionRunTime(Action action);
-
-    /**
-     * <p>
      *     Cancels all actions running on this scheduler if they match the
      *     given predicate as described by {@link Predicate#test(Object)} of
      *     that predicate.

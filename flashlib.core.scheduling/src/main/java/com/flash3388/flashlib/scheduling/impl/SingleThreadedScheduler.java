@@ -132,22 +132,6 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public Time getActionRunTime(Action action) {
-        mMainThread.verifyCurrentThread();
-
-        if (mPendingActions.containsKey(action)) {
-            return Time.seconds(0);
-        }
-
-        RunningActionContext context = mRunningActions.get(action);
-        if (context != null) {
-            return context.getRunTime();
-        }
-
-        throw new IllegalArgumentException("Action not running");
-    }
-
-    @Override
     public void cancelActionsIf(Predicate<? super Action> predicate) {
         mMainThread.verifyCurrentThread();
 
