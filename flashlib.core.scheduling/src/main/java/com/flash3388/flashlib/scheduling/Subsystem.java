@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
 import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.lang.ref.WeakReference;
@@ -36,7 +35,7 @@ public class Subsystem implements Requirement {
     }
 
     protected Subsystem() {
-        this(GlobalDependencies.getScheduler());
+        this(GlobalScheduler.getScheduler());
     }
 
     /**

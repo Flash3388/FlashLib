@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
@@ -26,7 +26,7 @@ public abstract class ActionBase implements Action {
     }
 
     protected ActionBase() {
-        this(GlobalDependencies.getScheduler(), new ActionConfiguration());
+        this(GlobalScheduler.getScheduler(), new ActionConfiguration());
     }
 
     @Override

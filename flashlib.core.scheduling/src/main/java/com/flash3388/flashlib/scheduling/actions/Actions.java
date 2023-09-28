@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
-import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
@@ -176,7 +175,7 @@ public final class Actions {
      * @return action group
      */
     public static ActionGroup sequential(Action... actions) {
-        return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.SEQUENTIAL)
+        return GlobalScheduler.getScheduler().newActionGroup(ActionGroupType.SEQUENTIAL)
                 .add(actions);
     }
 
@@ -189,7 +188,7 @@ public final class Actions {
      * @return action group
      */
     public static ActionGroup parallel(Action... actions) {
-        return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.PARALLEL)
+        return GlobalScheduler.getScheduler().newActionGroup(ActionGroupType.PARALLEL)
                 .add(actions);
     }
 
@@ -202,7 +201,7 @@ public final class Actions {
      * @return action group
      */
     public static ActionGroup race(Action... actions) {
-        return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.PARALLEL_RACE)
+        return GlobalScheduler.getScheduler().newActionGroup(ActionGroupType.PARALLEL_RACE)
                 .add(actions);
     }
 

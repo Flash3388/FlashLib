@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.hid.generic;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.hid.Button;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -15,7 +15,7 @@ public abstract class GenericButtonBase implements Button, Trigger {
     }
 
     public GenericButtonBase() {
-        this(GlobalDependencies.getScheduler());
+        this(GlobalScheduler.getScheduler());
     }
 
     @Override
