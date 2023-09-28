@@ -107,7 +107,7 @@ public class ActionConfiguration {
     }
 
     public ActionConfiguration(ActionConfiguration other) {
-        this(other.getRequirements(), other.getTimeout(), other.getName(), other.flags());
+        this(other.mRequirements, other.mTimeout, other.mName, other.mFlags);
     }
 
     public Set<Requirement> getRequirements() {
@@ -160,6 +160,6 @@ public class ActionConfiguration {
     }
 
     void removeFlags(ActionFlag... flags) {
-        mFlags.removeAll(Arrays.asList(flags));
+        Arrays.asList(flags).forEach(mFlags::remove);
     }
 }
