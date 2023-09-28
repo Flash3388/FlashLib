@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
@@ -12,27 +11,27 @@ public class EmptyScheduler implements Scheduler {
 
 
     @Override
-    public void start(Action action) {
+    public void start(ActionInterface action) {
 
     }
 
     @Override
-    public void cancel(Action action) {
+    public void cancel(ActionInterface action) {
 
     }
 
     @Override
-    public boolean isRunning(Action action) {
+    public boolean isRunning(ActionInterface action) {
         return false;
     }
 
     @Override
-    public Time getActionRunTime(Action action) {
+    public Time getActionRunTime(ActionInterface action) {
         return null;
     }
 
     @Override
-    public void cancelActionsIf(Predicate<? super Action> predicate) {
+    public void cancelActionsIf(Predicate<? super ActionInterface> predicate) {
     }
 
     @Override
@@ -41,12 +40,12 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public void setDefaultAction(Subsystem subsystem, ActionInterface action) {
 
     }
 
     @Override
-    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+    public Optional<ActionInterface> getActionRunningOnRequirement(Requirement requirement) {
         return Optional.empty();
     }
 

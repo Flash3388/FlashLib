@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.EmptyAction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -22,7 +21,7 @@ public class SchedulerStopBenchmark {
     private RequirementState mRequirementState;
 
     private Scheduler mScheduler;
-    private Action mAction;
+    private ActionInterface mAction;
 
     @Setup(Level.Iteration)
     public void setup() {
@@ -44,11 +43,11 @@ public class SchedulerStopBenchmark {
     public enum RequirementState {
         NO_REQUIREMENTS {
             @Override
-            void setupRequirements(Scheduler scheduler, Action action) { }
+            void setupRequirements(Scheduler scheduler, ActionInterface action) { }
         },
         ONE_REQUIREMENTS {
             @Override
-            void setupRequirements(Scheduler scheduler, Action action) {
+            void setupRequirements(Scheduler scheduler, ActionInterface action) {
                 Requirement requirement = new EmptyRequirement();
                 action.configure()
                         .requires(requirement)
@@ -57,7 +56,7 @@ public class SchedulerStopBenchmark {
         },
         THREE_REQUIREMENTS {
             @Override
-            void setupRequirements(Scheduler scheduler, Action action) {
+            void setupRequirements(Scheduler scheduler, ActionInterface action) {
                 for (int i = 0; i < 3; i++) {
                     Requirement requirement = new EmptyRequirement();
                     action.configure()
@@ -68,6 +67,6 @@ public class SchedulerStopBenchmark {
         }
         ;
 
-        abstract void setupRequirements(Scheduler scheduler, Action action);
+        abstract void setupRequirements(Scheduler scheduler, ActionInterface action);
     }
 }

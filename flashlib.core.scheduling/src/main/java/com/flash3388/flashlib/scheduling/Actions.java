@@ -1,8 +1,14 @@
-package com.flash3388.flashlib.scheduling.actions;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.ActionGroup;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
+import com.flash3388.flashlib.scheduling.actions.ActionBase;
+import com.flash3388.flashlib.scheduling.actions.ActionStartSelector;
+import com.flash3388.flashlib.scheduling.actions.GenericAction;
+import com.flash3388.flashlib.scheduling.actions.PeriodicAction;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.Triggers;
 import com.flash3388.flashlib.time.Clock;
@@ -20,7 +26,7 @@ public final class Actions {
      *
      * @return an empty action.
      */
-    public static Action empty() {
+    public static ActionInterface empty() {
         return new ActionBase() {
             @Override
             public void execute(ActionControl control) { }
@@ -36,7 +42,7 @@ public final class Actions {
      * @param waitTime time to run
      * @return action
      */
-    public static Action wait(Time waitTime) {
+    public static ActionInterface wait(Time waitTime) {
         Objects.requireNonNull(waitTime, "waitTime is null");
         return empty().configure()
                 .setTimeout(waitTime)
@@ -50,7 +56,7 @@ public final class Actions {
      * @param condition condition
      * @return action
      */
-    public static Action waitUntil(BooleanSupplier condition) {
+    public static ActionInterface waitUntil(BooleanSupplier condition) {
         Objects.requireNonNull(condition, "condition is null");
         return new GenericAction.Builder()
                 .onExecute((control)-> {
@@ -71,13 +77,13 @@ public final class Actions {
     }
 
     /**
-     * Creates a canceling action for an action. This is an instant action which calls {@link Action#cancel()}
+     * Creates a canceling action for an action. This is an instant action which calls {@link ActionInterface#cancel()}
      * for a given action when started.
      *
      * @param action action to cancel
      * @return canceling action
      */
-    public static Action canceling(Action action){
+    public static ActionInterface canceling(ActionInterface action){
         Objects.requireNonNull(action, "action is null");
         return new GenericAction.Builder()
                 .onExecute((control)-> {
@@ -97,7 +103,7 @@ public final class Actions {
      * @param runnable runnable to run
      * @return action
      */
-    public static Action instant(Runnable runnable) {
+    public static ActionInterface instant(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
         return new GenericAction.Builder()
                 .onExecute((control)-> {
@@ -112,13 +118,13 @@ public final class Actions {
      * it ends.
      *
      * The action is not configured with a specified end point,
-     * use {@link Action#withTimeout(Time)}, add requirements or interrupt the action
+     * use {@link ActionInterface#withTimeout(Time)}, add requirements or interrupt the action
      * manually to end it.
      *
      * @param runnable runnable which runs in the execution phase.
      * @return action
      */
-    public static Action fromRunnable(Runnable runnable) {
+    public static ActionInterface fromRunnable(Runnable runnable) {
         Objects.requireNonNull(runnable, "runnable is null");
         return new GenericAction.Builder()
                 .onExecute((control)-> runnable.run())
@@ -131,7 +137,7 @@ public final class Actions {
      * configured.
      *
      * The action is not configured with a specified end point,
-     * use {@link Action#withTimeout(Time)}, add requirements or interrupt the action
+     * use {@link ActionInterface#withTimeout(Time)}, add requirements or interrupt the action
      * manually to end it.
      *
      * @param clock clock
@@ -139,7 +145,7 @@ public final class Actions {
      * @param period period of execution
      * @return action
      */
-    public static Action periodic(Clock clock, Runnable runnable, Time period) {
+    public static ActionInterface periodic(Clock clock, Runnable runnable, Time period) {
         Objects.requireNonNull(clock, "clock is null");
         Objects.requireNonNull(runnable, "runnable is null");
         Objects.requireNonNull(period, "period is null");
@@ -178,7 +184,7 @@ public final class Actions {
      * @param actions actions to group
      * @return action group
      */
-    public static ActionGroup sequential(Action... actions) {
+    public static ActionGroup sequential(ActionInterface... actions) {
         return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.SEQUENTIAL)
                 .add(actions);
     }
@@ -191,7 +197,7 @@ public final class Actions {
      * @param actions actions to group
      * @return action group
      */
-    public static ActionGroup parallel(Action... actions) {
+    public static ActionGroup parallel(ActionInterface... actions) {
         return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.PARALLEL)
                 .add(actions);
     }
@@ -204,7 +210,7 @@ public final class Actions {
      * @param actions actions to group
      * @return action group
      */
-    public static ActionGroup race(Action... actions) {
+    public static ActionGroup race(ActionInterface... actions) {
         return GlobalDependencies.getScheduler().newActionGroup(ActionGroupType.PARALLEL_RACE)
                 .add(actions);
     }
@@ -216,7 +222,7 @@ public final class Actions {
      * @param action action to start on condition
      * @return trigger
      */
-    public static Trigger onCondition(BooleanSupplier condition, Action action) {
+    public static Trigger onCondition(BooleanSupplier condition, ActionInterface action) {
         Objects.requireNonNull(condition, "condition is null");
         Objects.requireNonNull(action, "action is null");
 

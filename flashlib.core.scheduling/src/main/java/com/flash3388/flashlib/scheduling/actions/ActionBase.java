@@ -1,6 +1,9 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionFlag;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
@@ -8,7 +11,7 @@ import com.flash3388.flashlib.time.Time;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-public abstract class ActionBase implements Action {
+public abstract class ActionBase implements ActionInterface {
 
     private final WeakReference<Scheduler> mScheduler;
     private ActionConfiguration mConfiguration;
@@ -101,17 +104,17 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public final Action requires(Requirement... requirements) {
-        return Action.super.requires(requirements);
+    public final ActionInterface requires(Requirement... requirements) {
+        return ActionInterface.super.requires(requirements);
     }
 
     @Override
-    public final Action withTimeout(Time timeout) {
-        return Action.super.withTimeout(timeout);
+    public final ActionInterface withTimeout(Time timeout) {
+        return ActionInterface.super.withTimeout(timeout);
     }
 
     @Override
-    public final Action flags(ActionFlag... flags) {
-        return Action.super.flags(flags);
+    public final ActionInterface flags(ActionFlag... flags) {
+        return ActionInterface.super.flags(flags);
     }
 }

@@ -1,9 +1,6 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.annotations.MainThreadOnly;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionFlag;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
@@ -13,7 +10,7 @@ import java.util.function.Predicate;
 
 /**
  * Scheduler is the executor for FlashLib's scheduling component. It is responsible for executing all
- * running actions (as described by {@link Action}) and managing their requirements, ensuring that there's no conflict.
+ * running actions (as described by {@link ActionInterface}) and managing their requirements, ensuring that there's no conflict.
  * <p>
  *     In addition, the scheduler provides support for default {@link Subsystem} actions, executing them when
  *     no other actions are running for the given subsystem.
@@ -24,65 +21,17 @@ import java.util.function.Predicate;
  */
 public interface Scheduler {
 
-    /**
-     * <p>
-     *     Starts running an {@link Action}. Generally, this
-     *     should be called from {@link Action#start()} implementations
-     *     and not directly.
-     * </p>
-     *
-     * @param action action to start
-     *
-     * @throws IllegalStateException if the action is already running on this scheduler.
-     */
     @MainThreadOnly
-    void start(Action action);
+    Action createAction(ActionInterface action, ActionConfiguration configuration);
 
-    /**
-     * <p>
-     *     Cancels an {@link Action} being ran by the scheduler. Generally,
-     *     this should be called from {@link Action#cancel()} implementations
-     *     and not directly.
-     * </p>
-     * <p>
-     *     It is not guaranteed that the action will stop immediately. This depends on the implementation.
-     * </p>
-     *
-     * @param action action to cancel.
-     *
-     * @throws IllegalStateException if the action is not running on the scheduler.
-     */
     @MainThreadOnly
-    void cancel(Action action);
+    Action createAction(ActionInterface action);
 
-    /**
-     * <p>
-     *     Gets whether or not the given {@link Action} is running on this scheduler.
-     * </p>
-     *
-     * @param action action to test
-     *
-     * @return <b>true</b> if running, <b>false</b> otherwise.
-     */
     @MainThreadOnly
-    boolean isRunning(Action action);
+    ActionBuilder buildAction(ActionInterface action, ActionConfiguration configuration);
 
-    /**
-     * <p>
-     *     Gets the total time passed since the given {@link Action} started running.
-     * </p>
-     * <p>
-     *     The action must be running.
-     * </p>
-     *
-     * @param action action to get runtime for.
-     *
-     * @return {@link Time} passed since the action started running.
-     *
-     * @throws IllegalStateException if the action is not running.
-     */
     @MainThreadOnly
-    Time getActionRunTime(Action action);
+    ActionBuilder buildAction(ActionInterface action);
 
     /**
      * <p>
@@ -99,7 +48,7 @@ public interface Scheduler {
      *                                   an action.
      */
     @MainThreadOnly
-    void cancelActionsIf(Predicate<? super Action> predicate);
+    void cancelActionsIf(Predicate<? super ActionInterface> predicate);
 
     /**
      * <p>
@@ -114,7 +63,7 @@ public interface Scheduler {
      * @param flag flag, which, if missing from an action, will cause the action to be cancelled.
      */
     @MainThreadOnly
-    void cancelActionsIfWithoutFlag(ActionFlag flag);
+    void cancelActionsWithoutFlag(ActionFlag flag);
 
     /**
      * <p>
@@ -130,7 +79,7 @@ public interface Scheduler {
 
     /**
      * <p>
-     *     Sets the default {@link Action} for a given {@link Subsystem}.
+     *     Sets the default {@link ActionInterface} for a given {@link Subsystem}.
      *     The given action will be started automatically when the subsystem in question
      *     has no other action running.
      * </p>
@@ -150,7 +99,7 @@ public interface Scheduler {
      *      subsystem.
      */
     @MainThreadOnly
-    void setDefaultAction(Subsystem subsystem, Action action);
+    void setDefaultAction(Subsystem subsystem, ActionInterface action);
 
     /**
      * <p>
@@ -163,7 +112,7 @@ public interface Scheduler {
      *  if there is no action running.
      */
     @MainThreadOnly
-    Optional<Action> getActionRunningOnRequirement(Requirement requirement);
+    Optional<ActionInterface> getActionRunningOnRequirement(Requirement requirement);
 
     /**
      * <p>

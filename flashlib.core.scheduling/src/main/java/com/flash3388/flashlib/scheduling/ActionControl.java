@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Time;
 
 public interface ActionControl {
@@ -36,7 +34,7 @@ public interface ActionControl {
      * @param action action to use.
      * @return execution context.
      */
-    ExecutionContext createExecutionContext(Action action);
+    ExecutionContext createExecutionContext(ActionInterface action);
 
     /**
      * Marks the associated action as finished.
@@ -59,6 +57,7 @@ public interface ActionControl {
      * @param value value to set
      */
     void putBooleanProperty(String name, boolean value);
+
     /**
      * Puts a typed-property if a specified name and value.
      * If the property does not exist, it is created, otherwise its value
@@ -70,6 +69,7 @@ public interface ActionControl {
      * @param value value to set
      */
     void putIntProperty(String name,  int value);
+
     /**
      * Puts a typed-property if a specified name and value.
      * If the property does not exist, it is created, otherwise its value
@@ -81,6 +81,7 @@ public interface ActionControl {
      * @param value value to set
      */
     void putLongProperty(String name, long value);
+
     /**
      * Puts a typed-property if a specified name and value.
      * If the property does not exist, it is created, otherwise its value
@@ -92,6 +93,7 @@ public interface ActionControl {
      * @param value value to set
      */
     void putDoubleProperty(String name, double value);
+
     /**
      * Puts a typed-property if a specified name and value.
      * If the property does not exist, it is created, otherwise its value

@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionInterface;
+
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Function;
@@ -19,13 +21,13 @@ public class TestActions {
                 new GenericSequentialActionGroup(ActionType.SMALL, 3, params))
         ;
 
-        private final Function<TestActionParams, Action> mActionGenerator;
+        private final Function<TestActionParams, ActionInterface> mActionGenerator;
 
-        ActionType(Function<TestActionParams, Action> actionGenerator) {
+        ActionType(Function<TestActionParams, ActionInterface> actionGenerator) {
             mActionGenerator = actionGenerator;
         }
 
-        public Action create(TestActionParams params) {
+        public ActionInterface create(TestActionParams params) {
             return mActionGenerator.apply(params);
         }
     }

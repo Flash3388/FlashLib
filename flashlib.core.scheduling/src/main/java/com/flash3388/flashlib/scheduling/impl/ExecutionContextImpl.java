@@ -7,12 +7,10 @@ import org.slf4j.Logger;
 
 public class ExecutionContextImpl implements ExecutionContext {
 
-    private final Clock mClock;
     private final Logger mLogger;
     private final RunningActionContext mContext;
 
-    public ExecutionContextImpl(Clock clock, Logger logger, RunningActionContext context) {
-        mClock = clock;
+    public ExecutionContextImpl(Logger logger, RunningActionContext context) {
         mLogger = logger;
         mContext = context;
 
@@ -29,6 +27,12 @@ public class ExecutionContextImpl implements ExecutionContext {
             return ExecutionResult.FINISHED;
         }
 
+        // execute normally
+        return execute();
+    }
+
+    @Override
+    public ExecutionResult execute() {
         if (mContext.iterate()) {
             mLogger.debug("Action {} finished", mContext);
             return ExecutionResult.FINISHED;

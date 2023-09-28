@@ -4,7 +4,7 @@ import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +25,8 @@ class ActionGroupImplTest {
 
     private Scheduler mScheduler;
 
-    private Collection<Action> mActions;
-    private Queue<Action> mActionsToExecute;
+    private Collection<ActionInterface> mActions;
+    private Queue<ActionInterface> mActionsToExecute;
     private Collection<ExecutionContext> mRunningActions;
 
     @BeforeEach
@@ -40,7 +40,7 @@ class ActionGroupImplTest {
 
     @Test
     public void execute_noActionCurrentlyRunning_startsNextAction() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         mActionsToExecute.add(action);
 
         ActionGroupImpl actionGroup = createSequential();
@@ -108,7 +108,7 @@ class ActionGroupImplTest {
 
     @Test
     public void initialize_forSequential_startsOneAction() throws Exception {
-        List<Action> actions = Arrays.asList(
+        List<ActionInterface> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
                 ActionsMock.actionMocker().build()
         );
@@ -124,7 +124,7 @@ class ActionGroupImplTest {
 
     @Test
     public void initialize_forParallel_startsAllActions() throws Exception {
-        List<Action> actions = Arrays.asList(
+        List<ActionInterface> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
                 ActionsMock.actionMocker().build()
         );
@@ -140,7 +140,7 @@ class ActionGroupImplTest {
 
     @Test
     public void initialize_forParallelRace_startsAllActions() throws Exception {
-        List<Action> actions = Arrays.asList(
+        List<ActionInterface> actions = Arrays.asList(
                 ActionsMock.actionMocker().build(),
                 ActionsMock.actionMocker().build()
         );

@@ -5,7 +5,7 @@ import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.time.ClockMock;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.*;
 
 class SingleThreadedSchedulerTest {
 
-    private Map<Action, RunningActionContext> mPendingActions;
-    private Map<Action, RunningActionContext> mRunningActions;
-    private Map<Requirement, Action> mRequirementsUsage;
-    private Map<Subsystem, Action> mDefaultActions;
+    private Map<ActionInterface, RunningActionContext> mPendingActions;
+    private Map<ActionInterface, RunningActionContext> mRunningActions;
+    private Map<Requirement, ActionInterface> mRequirementsUsage;
+    private Map<Subsystem, ActionInterface> mDefaultActions;
 
     private SingleThreadedScheduler mScheduler;
 
@@ -55,7 +55,7 @@ class SingleThreadedSchedulerTest {
     public void start_actionNotRunningNoConflicts_putsActionInRunningAndUpdatesRequirements() throws Exception {
         Requirement requirement = mock(Requirement.class);
 
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(action);
@@ -67,7 +67,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void start_actionNotRunningHasNonPreferredConflicts_cancelsAndEndsConflictingStartsNew() throws Exception {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mRequirementsUsage.put(requirement, action);
@@ -75,7 +75,7 @@ class SingleThreadedSchedulerTest {
         when(context.getAction()).thenReturn(action);
         mRunningActions.put(action, context);
 
-        Action newAction = ActionsMock.actionMocker()
+        ActionInterface newAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(newAction);
@@ -91,14 +91,14 @@ class SingleThreadedSchedulerTest {
     @Test
     public void start_actionNotRunningHasConflicts_marksConflictingForCancellation() throws Exception {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         mRequirementsUsage.put(requirement, action);
         mRunningActions.put(action, context);
 
-        Action newAction = ActionsMock.actionMocker()
+        ActionInterface newAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(newAction);
@@ -108,7 +108,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void start_actionIsRunning_throwsIllegalArgumentException() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         mRunningActions.put(action, mock(RunningActionContext.class));
 
         assertThrows(IllegalArgumentException.class, ()-> {
@@ -118,7 +118,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void start_actionIsPending_throwsIllegalArgumentException() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         mPendingActions.put(action, mock(RunningActionContext.class));
 
         assertThrows(IllegalArgumentException.class, ()-> {
@@ -129,7 +129,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancel_actionIsRunning_cancelsAndEndsAction() throws Exception {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
@@ -146,7 +146,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void cancel_actionIsPending_removesAction() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
         mPendingActions.put(action, context);
 
@@ -157,7 +157,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void cancel_actionNotRunning_throwsIllegalArgumentException() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
 
         assertThrows(IllegalArgumentException.class, ()-> {
             mScheduler.cancel(action);
@@ -166,14 +166,14 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void isRunning_actionNotRunning_returnsFalse() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
 
         assertFalse(mScheduler.isRunning(action));
     }
 
     @Test
     public void isRunning_actionIsRunning_returnsTrue() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         mRunningActions.put(action, mock(RunningActionContext.class));
 
         assertTrue(mScheduler.isRunning(action));
@@ -181,7 +181,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void isRunning_actionIsPending_returnsTrue() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         mPendingActions.put(action, mock(RunningActionContext.class));
 
         assertTrue(mScheduler.isRunning(action));
@@ -190,7 +190,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancelActionsIf_predicateMatchesOnRunningAction_cancelsAndEndsAction() throws Exception {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
@@ -208,7 +208,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void cancelActionsIf_predicateMatchesOnPendingAction_removesAction() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.getAction()).thenReturn(action);
         mPendingActions.put(action, context);
@@ -221,7 +221,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancelAllActions_hasRunningAction_cancelsAndEndsAction() throws Exception {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
@@ -239,7 +239,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void cancelAllActions_hasPendingAction_removesAction() throws Exception {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.getAction()).thenReturn(action);
         mPendingActions.put(action, context);
@@ -251,7 +251,7 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void run_hasRunningActionNotFinishing_iteratesOnContextAndKeepsAction() {
-        Action action = ActionsMock.actionMocker().build();
+        ActionInterface action = ActionsMock.actionMocker().build();
         RunningActionContext context = mock(RunningActionContext.class);
         when(context.iterate()).thenReturn(false);
         mRunningActions.put(action, context);
@@ -266,7 +266,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasRunningActionFinishing_iteratesOnContextAndRemovesAction() {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
@@ -284,7 +284,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasRunningActionDisabledModeWhenShouldNot_cancelsIteratesOnActionAndRemoves() {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .mockRunWhenDisabled(false)
                 .build();
@@ -304,7 +304,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasRunningActionDisabledModeWhenShould_iteratesOnActionAndKeeps() {
         Requirement requirement = mock(Requirement.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .mockRunWhenDisabled(true)
                 .build();
@@ -324,7 +324,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasDefaultActionAndCanRun_startsAction() {
         Subsystem subsystem = mock(Subsystem.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
         mDefaultActions.put(subsystem, action);
@@ -338,14 +338,14 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasDefaultActionAndCannotRun_doesNotStartAction() {
         Subsystem subsystem = mock(Subsystem.class);
-        Action action = ActionsMock.actionMocker()
+        ActionInterface action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
         RunningActionContext context = mock(RunningActionContext.class);
         mRunningActions.put(action, context);
         mRequirementsUsage.put(subsystem, action);
 
-        Action defaultAction = ActionsMock.actionMocker()
+        ActionInterface defaultAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
         mDefaultActions.put(subsystem, defaultAction);
@@ -359,10 +359,10 @@ class SingleThreadedSchedulerTest {
 
     @Test
     public void run_actionCallsStart_newActionStarts() throws Exception {
-        Action actionToStart = ActionsMock.actionMocker()
+        ActionInterface actionToStart = ActionsMock.actionMocker()
                 .mockIsFinished(false)
                 .build();
-        Action startingAction = new ActionBase(mScheduler) {
+        ActionInterface startingAction = new ActionBase(mScheduler) {
             @Override
             public void execute(ActionControl control) {
                 mScheduler.start(actionToStart);

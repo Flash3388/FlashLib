@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.global.GlobalDependencies;
-import com.flash3388.flashlib.scheduling.actions.Action;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -9,7 +8,7 @@ import java.util.Optional;
 
 /**
  * A specialized {@link Requirement} representing a subsystem of a robot. Other than being a possible
- * requirement of {@link Action Actions}, Subsystems offer additional functionality. It is recommended that robot
+ * requirement of {@link ActionInterface Actions}, Subsystems offer additional functionality. It is recommended that robot
  * subsystems be represented in separate classes, all of which extend this class. Each such subsystem, should
  * have only one instance.
  * <pre>
@@ -48,9 +47,9 @@ public class Subsystem implements Requirement {
      *
      * @param action action to set as default.
      *
-     * @see Scheduler#setDefaultAction(Subsystem, Action)
+     * @see Scheduler#setDefaultAction(Subsystem, ActionInterface)
      */
-    public void setDefaultAction(Action action) {
+    public void setDefaultAction(ActionInterface action) {
         Scheduler scheduler = mScheduler.get();
         if (scheduler == null) {
             throw new IllegalStateException("scheduler garbage collected");
@@ -80,7 +79,7 @@ public class Subsystem implements Requirement {
      * If there is no such action, nothing happens.
      *
      * @see Scheduler#getActionRunningOnRequirement(Requirement)
-     * @see Action#cancel()
+     * @see ActionInterface#cancel()
      */
     public void cancelCurrentAction() {
         Scheduler scheduler = mScheduler.get();
@@ -88,8 +87,8 @@ public class Subsystem implements Requirement {
             throw new IllegalStateException("scheduler garbage collected");
         }
 
-        Optional<Action> currentAction = scheduler.getActionRunningOnRequirement(this);
-        currentAction.ifPresent(Action::cancel);
+        Optional<ActionInterface> currentAction = scheduler.getActionRunningOnRequirement(this);
+        currentAction.ifPresent(ActionInterface::cancel);
     }
 
     @Override

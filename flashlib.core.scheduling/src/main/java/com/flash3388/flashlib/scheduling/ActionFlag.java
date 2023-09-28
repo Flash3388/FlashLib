@@ -1,5 +1,6 @@
-package com.flash3388.flashlib.scheduling.actions;
+package com.flash3388.flashlib.scheduling;
 
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 
 public enum ActionFlag {
@@ -11,7 +12,7 @@ public enum ActionFlag {
     /**
      * When set, the scheduler considers the action to be preferred for running and thus
      * does not allow interrupting it as a result of a requirements conflict.
-     * For this action to stop, it must finish naturally, via {@link Action#cancel()},
+     * For this action to stop, it must finish naturally, via {@link ActionInterface#cancel()},
      * or when in {@link SchedulerMode#isDisabled() DISABLED mode}.
      */
     PREFERRED_FOR_REQUIREMENTS

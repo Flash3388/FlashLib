@@ -3,8 +3,8 @@ package com.flash3388.flashlib.scheduling.impl;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.Requirement;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.Arrays;
@@ -52,7 +52,7 @@ public class ObsrActionContext {
         return mPropertiesRoot;
     }
 
-    public void updateFromAction(Action action) {
+    public void updateFromAction(ActionInterface action) {
         mClass.setString(action.getClass().getName());
     }
 

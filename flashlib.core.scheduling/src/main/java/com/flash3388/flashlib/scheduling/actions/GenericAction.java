@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.FinishReason;
 
@@ -27,7 +28,7 @@ public class GenericAction extends ActionBase {
             return this;
         }
 
-        public Action build() {
+        public ActionInterface build() {
             return new GenericAction(mOnInitialize, mOnExecute, mOnEnd);
         }
     }

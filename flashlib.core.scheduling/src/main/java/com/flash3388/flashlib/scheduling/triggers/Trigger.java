@@ -1,10 +1,10 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 
 /**
  * A trigger is an object which can be either active or inactive. It is possible
- * to link {@link Action Actions} to be done depending on the state of a trigger.
+ * to link {@link ActionInterface Actions} to be done depending on the state of a trigger.
  *
  * @since FlashLib 1.2.0
  *
@@ -14,93 +14,93 @@ public interface Trigger {
 
     /**
      * <p>
-     *     Registers an {@link Action} to run when this trigger is activated, i.e. when
+     *     Registers an {@link ActionInterface} to run when this trigger is activated, i.e. when
      *     this action goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called.
+     *     the action is not running, {@link ActionInterface#start()} is called.
      * </p>
      * 
      * @param action action to register
      */
-    void whenActive(Action action);
+    void whenActive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to be canceled when this trigger is activated, i.e. when
+     *     Registers an {@link ActionInterface} to be canceled when this trigger is activated, i.e. when
      *     this action goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
-     *     the action is running, {@link Action#cancel()} is called.
+     *     the action is running, {@link ActionInterface#cancel()} is called.
      * </p>
      *
      * @param action action to register
      */    
-    void cancelWhenActive(Action action);
+    void cancelWhenActive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to be toggled when this trigger is activated, i.e. when
+     *     Registers an {@link ActionInterface} to be toggled when this trigger is activated, i.e. when
      *     this action goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called; if the action is running {@link Action#cancel()}
+     *     the action is not running, {@link ActionInterface#start()} is called; if the action is running {@link ActionInterface#cancel()}
      *     is called.
      * </p>
      *
      * @param action action to register
      */
-    void toggleWhenActive(Action action);
+    void toggleWhenActive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to run while this trigger is active, i.e. when
+     *     Registers an {@link ActionInterface} to run while this trigger is active, i.e. when
      *     this action goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called. When the state goes back to {@link TriggerState#INACTIVE},
-     *     {@link Action#cancel()} is called.
+     *     the action is not running, {@link ActionInterface#start()} is called. When the state goes back to {@link TriggerState#INACTIVE},
+     *     {@link ActionInterface#cancel()} is called.
      * </p>
      *
      * @param action action to register
      */
-    void whileActive(Action action);
+    void whileActive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to run when this trigger is inactivated, i.e. when
+     *     Registers an {@link ActionInterface} to run when this trigger is inactivated, i.e. when
      *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called.
+     *     the action is not running, {@link ActionInterface#start()} is called.
      * </p>
      *
      * @param action action to register
      */
-    void whenInactive(Action action);
+    void whenInactive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to be canceled when this trigger is inactivated, i.e. when
+     *     Registers an {@link ActionInterface} to be canceled when this trigger is inactivated, i.e. when
      *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
-     *     the action is running, {@link Action#cancel()} is called.
+     *     the action is running, {@link ActionInterface#cancel()} is called.
      * </p>
      *
      * @param action action to register
      */
-    void cancelWhenInactive(Action action);
+    void cancelWhenInactive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to be toggled when this trigger is inactivated, i.e. when
+     *     Registers an {@link ActionInterface} to be toggled when this trigger is inactivated, i.e. when
      *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called; if the action is running {@link Action#cancel()}
+     *     the action is not running, {@link ActionInterface#start()} is called; if the action is running {@link ActionInterface#cancel()}
      *     is called.
      * </p>
      *
      * @param action action to register
      */
-    void toggleWhenInactive(Action action);
+    void toggleWhenInactive(ActionInterface action);
 
     /**
      * <p>
-     *     Registers an {@link Action} to run while this trigger is inactive, i.e. when
+     *     Registers an {@link ActionInterface} to run while this trigger is inactive, i.e. when
      *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
-     *     the action is not running, {@link Action#start()} is called. When the state goes back to {@link TriggerState#ACTIVE},
-     *     {@link Action#cancel()} is called.
+     *     the action is not running, {@link ActionInterface#start()} is called. When the state goes back to {@link TriggerState#ACTIVE},
+     *     {@link ActionInterface#cancel()} is called.
      * </p>
      *
      * @param action action to register
      */
-    void whileInactive(Action action);
+    void whileInactive(ActionInterface action);
 }

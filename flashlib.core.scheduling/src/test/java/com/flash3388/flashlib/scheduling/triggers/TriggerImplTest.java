@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ public class TriggerImplTest {
 
     @Test
     public void whenActive_triggerActivates_startAction() throws Exception {
-        Action mockAction = mock(Action.class);
+        ActionInterface mockAction = mock(ActionInterface.class);
 
         TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.whenActive(mockAction);
@@ -37,7 +37,7 @@ public class TriggerImplTest {
 
     @Test
     public void whenInactive_triggerDeactivates_startAction() throws Exception {
-        Action mockAction = mock(Action.class);
+        ActionInterface mockAction = mock(ActionInterface.class);
 
         TriggerImpl trigger = new TriggerImpl(TriggerState.ACTIVE);
         trigger.whenInactive(mockAction);
@@ -49,7 +49,7 @@ public class TriggerImplTest {
 
     @Test
     public void cancelWhenActive_triggerActivatesAndActionRunning_cancelsAction() throws Exception {
-        Action mockAction = ActionsMock.actionMocker()
+        ActionInterface mockAction = ActionsMock.actionMocker()
                 .mockIsRunning(true)
                 .build();
 
@@ -63,7 +63,7 @@ public class TriggerImplTest {
 
     @Test
     public void cancelWhenInactive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
-        Action mockAction = ActionsMock.actionMocker()
+        ActionInterface mockAction = ActionsMock.actionMocker()
                 .mockIsRunning(true)
                 .build();
 
@@ -77,7 +77,7 @@ public class TriggerImplTest {
 
     @Test
     public void whileActive_triggerActivates_startAction() throws Exception {
-        Action mockAction = mock(Action.class);
+        ActionInterface mockAction = mock(ActionInterface.class);
 
         TriggerImpl trigger = new TriggerImpl(TriggerState.INACTIVE);
         trigger.whileActive(mockAction);
@@ -89,7 +89,7 @@ public class TriggerImplTest {
 
     @Test
     public void whileActive_triggerDeactivatesAndActionRunning_cancelsAction() throws Exception {
-        Action mockAction = ActionsMock.actionMocker()
+        ActionInterface mockAction = ActionsMock.actionMocker()
                 .mockIsRunning(true)
                 .build();
 

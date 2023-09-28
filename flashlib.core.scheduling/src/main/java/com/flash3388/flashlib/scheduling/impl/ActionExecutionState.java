@@ -1,17 +1,15 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.scheduling.FinishReason;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 public class ActionExecutionState {
 
-    private final ActionConfiguration mConfiguration;
     private final ObsrActionContext mObsrContext;
     private final Clock mClock;
-    private final Logger mLogger;
 
     private Time mStartTime;
     private Time mEndTime;
@@ -19,14 +17,10 @@ public class ActionExecutionState {
 
     private boolean mMarkedForEnd;
 
-    public ActionExecutionState(ActionConfiguration configuration,
-                                ObsrActionContext obsrContext,
-                                Clock clock,
-                                Logger logger) {
-        mConfiguration = configuration;
+    public ActionExecutionState(ObsrActionContext obsrContext,
+                                Clock clock) {
         mObsrContext = obsrContext;
         mClock = clock;
-        mLogger = logger;
 
         mStartTime = Time.INVALID;
         mEndTime = Time.INVALID;
@@ -58,6 +52,10 @@ public class ActionExecutionState {
         return mClock.currentTime().largerThanOrEquals(mEndTime);
     }
 
+    public void updatePhase(ExecutionPhase phase) {
+        mObsrContext.updatePhase(phase);
+    }
+
     public FinishReason getFinishReason() {
         return mFinishReason;
     }
@@ -66,12 +64,12 @@ public class ActionExecutionState {
         return mMarkedForEnd;
     }
 
-    public void markStarted() {
+    public void markStarted(ActionConfiguration configuration) {
         Time now = mClock.currentTime();
 
         mStartTime = now;
-        if (mConfiguration.getTimeout().isValid()) {
-            mEndTime = now.add(mConfiguration.getTimeout());
+        if (configuration.getTimeout().isValid()) {
+            mEndTime = now.add(configuration.getTimeout());
         } else {
             mEndTime = Time.INVALID;
         }
@@ -91,12 +89,10 @@ public class ActionExecutionState {
         mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
     }
 
-    public void markErrored(Throwable t) {
+    public void markErrored() {
         mMarkedForEnd = true;
         mFinishReason = FinishReason.ERRORED;
         mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
-
-        mLogger.error("Error while running an action", t);
     }
 
     public void markTimedOut() {

@@ -3,8 +3,8 @@ package com.flash3388.flashlib.scheduling.impl;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
@@ -13,14 +13,14 @@ import java.util.UUID;
 
 public class ActionControlImpl implements ActionControl {
 
-    private final Action mAction;
+    private final ActionInterface mAction;
     private final ActionConfiguration mConfiguration;
     private final ActionExecutionState mExecutionState;
     private final ObsrActionContext mObsrActionContext;
     private final Clock mClock;
     private final Logger mLogger;
 
-    public ActionControlImpl(Action action,
+    public ActionControlImpl(ActionInterface action,
                              ActionConfiguration configuration,
                              ActionExecutionState executionState,
                              ObsrActionContext obsrActionContext,
@@ -50,14 +50,16 @@ public class ActionControlImpl implements ActionControl {
     }
 
     @Override
-    public ExecutionContext createExecutionContext(Action action) {
+    public ExecutionContext createExecutionContext(ActionInterface action) {
+        // TODO: CREATE FROM SCHEDULER
         StoredObject object = mObsrActionContext.getRootObject().getChild(UUID.randomUUID().toString());
         RunningActionContext context = new RunningActionContext(action,
-                mAction,
+                mConfiguration,
+                true,
                 new ObsrActionContext(object),
                 mClock,
                 mLogger);
-        return new ExecutionContextImpl(mClock, mLogger, context);
+        return new ExecutionContextImpl(mLogger, context);
     }
 
     @Override

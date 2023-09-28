@@ -1,8 +1,8 @@
-package com.flash3388.flashlib.scheduling.actions;
+package com.flash3388.flashlib.scheduling;
 
 import java.util.Collection;
 
-public interface ActionGroup extends Action {
+public interface ActionGroup extends ActionInterface {
 
     /**
      * <p>
@@ -13,7 +13,7 @@ public interface ActionGroup extends Action {
      *
      * @return this
      */
-    ActionGroup add(Action action);
+    ActionGroup add(ActionInterface action);
 
     /**
      * <p>
@@ -24,7 +24,7 @@ public interface ActionGroup extends Action {
      *
      * @return this
      */
-    ActionGroup add(Action... actions);
+    ActionGroup add(ActionInterface... actions);
 
     /**
      * <p>
@@ -35,7 +35,7 @@ public interface ActionGroup extends Action {
      *
      * @return this
      */
-    ActionGroup add(Collection<Action> actions);
+    ActionGroup add(Collection<ActionInterface> actions);
 
     /**
      * Sets a callback to run when the action group is interrupted.

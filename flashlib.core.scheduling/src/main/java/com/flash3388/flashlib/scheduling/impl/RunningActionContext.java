@@ -1,10 +1,11 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.Action;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
-import com.flash3388.flashlib.scheduling.actions.ActionFlag;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionFlag;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
@@ -13,8 +14,8 @@ import java.util.Set;
 
 public class RunningActionContext {
 
-    private final Action mAction;
-    private final Action mParent;
+    private final ActionInterface mAction;
+    private final boolean mParent;
     private final ObsrActionContext mObsrContext;
     private final Logger mLogger;
 
@@ -24,17 +25,18 @@ public class RunningActionContext {
 
     private boolean mIsInitialized;
 
-    public RunningActionContext(Action action,
-                                Action parent,
+    public RunningActionContext(ActionInterface action,
+                                ActionConfiguration configuration,
+                                boolean hasParent,
                                 ObsrActionContext obsrContext,
                                 Clock clock,
                                 Logger logger) {
         mAction = action;
-        mParent = parent;
+        mParent = hasParent;
         mObsrContext = obsrContext;
         mLogger = logger;
 
-        mConfiguration = new ActionConfiguration(mAction.getConfiguration());
+        mConfiguration = new ActionConfiguration(configuration);
         mExecutionState = new ActionExecutionState(mConfiguration, obsrContext, clock, logger);
         mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrContext, clock, logger);
 
@@ -44,14 +46,15 @@ public class RunningActionContext {
         mObsrContext.updateFromConfiguration(mConfiguration);
     }
 
-    public RunningActionContext(Action action,
+    public RunningActionContext(ActionInterface action,
+                                ActionConfiguration configuration,
                                 ObsrActionContext obsrContext,
                                 Clock clock,
                                 Logger logger) {
-        this(action, null, obsrContext, clock, logger);
+        this(action, configuration, null, obsrContext, clock, logger);
     }
 
-    public Action getAction() {
+    public ActionInterface getAction() {
         return mAction;
     }
 
@@ -95,10 +98,6 @@ public class RunningActionContext {
         } else {
             execute();
 
-            if (isFinished()) {
-                mExecutionState.markForFinish();
-            }
-
             if (mExecutionState.isMarkedForEnd()) {
                 finish();
                 return true;
@@ -118,6 +117,7 @@ public class RunningActionContext {
             mLogger.trace("Calling initialize for {}", this);
             mAction.initialize(mControl);
         } catch (Throwable t) {
+            mLogger.warn("Error occurred during initialization phase of action");
             mExecutionState.markErrored(t);
         }
 
@@ -129,19 +129,9 @@ public class RunningActionContext {
             mLogger.trace("Calling execute for {}", this);
             mAction.execute(mControl);
         } catch (Throwable t) {
+            mLogger.warn("Error occurred during execution phase of action");
             mExecutionState.markErrored(t);
         }
-    }
-
-    private boolean isFinished() {
-        try {
-            mLogger.trace("Calling isFinished for {}", this);
-            return mAction.isFinished();
-        } catch (Throwable t) {
-            mExecutionState.markErrored(t);
-        }
-
-        return false;
     }
 
     private void finish() {
@@ -160,7 +150,10 @@ public class RunningActionContext {
             try {
                 mLogger.debug("Re-Calling end for {}", this);
                 mAction.end(mExecutionState.getFinishReason());
-            } catch (Throwable t1) {}
+            } catch (Throwable t1) {
+                // oh well. not much we can do
+                mLogger.warn("Error occurred AGAIN in action during end phase. Terminating forcibly");
+            }
 
             mExecutionState.markFinishedExecution();
         }
@@ -172,15 +165,13 @@ public class RunningActionContext {
 
     @Override
     public String toString() {
-        if (mParent == null) {
+        if (!mParent) {
             return mAction.toString();
         } else {
             //noinspection StringBufferReplaceableByString
             StringBuilder builder = new StringBuilder();
             builder.append(mAction.toString());
-            builder.append(" (IN GROUP ");
-            builder.append(mParent);
-            builder.append(")");
+            builder.append(" (IN GROUP)");
             return builder.toString();
         }
     }

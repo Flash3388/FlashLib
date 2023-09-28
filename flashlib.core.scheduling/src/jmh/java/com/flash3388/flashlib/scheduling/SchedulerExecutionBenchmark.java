@@ -2,7 +2,6 @@ package com.flash3388.flashlib.scheduling;
 
 import com.beans.Property;
 import com.beans.properties.SimpleProperty;
-import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.TestActionParams;
 import com.flash3388.flashlib.scheduling.actions.TestActions;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -45,7 +44,7 @@ public class SchedulerExecutionBenchmark {
 
         IntStream.range(0, mActionsCount)
                 .mapToObj((i) -> mActionType.create(new TestActionParams(mScheduler, consumer)))
-                .forEach(Action::start);
+                .forEach(ActionInterface::start);
         // to start running the actions
         mScheduler.run(SCHEDULER_MODE);
     }

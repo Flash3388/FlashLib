@@ -4,10 +4,10 @@ import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionGroup;
 import org.slf4j.Logger;
 
 import java.util.ArrayDeque;
@@ -23,9 +23,9 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
     private final Logger mLogger;
     private final GroupPolicy mGroupPolicy;
-    private final Collection<Action> mActions;
+    private final Collection<ActionInterface> mActions;
 
-    private final Queue<Action> mActionsToExecute;
+    private final Queue<ActionInterface> mActionsToExecute;
     private final Collection<ExecutionContext> mRunningActions;
 
     private Runnable mWhenInterrupted;
@@ -34,8 +34,8 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     public ActionGroupImpl(Scheduler scheduler,
                            Logger logger,
                            GroupPolicy groupPolicy,
-                           Collection<Action> actions,
-                           Queue<Action> actionsToExecute,
+                           Collection<ActionInterface> actions,
+                           Queue<ActionInterface> actionsToExecute,
                            Collection<ExecutionContext> runningActions) {
         super(scheduler);
         mLogger = logger;
@@ -55,7 +55,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public ActionGroup add(Action action) {
+    public ActionGroup add(ActionInterface action) {
         Objects.requireNonNull(action, "action is null");
 
         ActionConfiguration configuration = action.getConfiguration();
@@ -86,13 +86,13 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public ActionGroup add(Action... actions) {
+    public ActionGroup add(ActionInterface... actions) {
         Objects.requireNonNull(actions, "actions is null");
         return add(Arrays.asList(actions));
     }
 
     @Override
-    public ActionGroup add(Collection<Action> actions) {
+    public ActionGroup add(Collection<ActionInterface> actions) {
         Objects.requireNonNull(actions, "actions is null");
         actions.forEach(this::add);
 
@@ -100,7 +100,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public ActionGroup andThen(Action... actions) {
+    public ActionGroup andThen(ActionInterface... actions) {
         if (!mGroupPolicy.shouldExecuteActionsInParallel()) {
             return add(actions);
         } else {
@@ -109,7 +109,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public ActionGroup alongWith(Action... actions) {
+    public ActionGroup alongWith(ActionInterface... actions) {
         if (mGroupPolicy.shouldExecuteActionsInParallel()) {
             return add(actions);
         } else {
@@ -118,7 +118,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     }
 
     @Override
-    public ActionGroup raceWith(Action... actions) {
+    public ActionGroup raceWith(ActionInterface... actions) {
         if (mGroupPolicy.shouldExecuteActionsInParallel() &&
                 mGroupPolicy.shouldStopOnFirstActionFinished()) {
             return add(actions);
@@ -193,7 +193,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
             return false;
         }
 
-        Action action = mActionsToExecute.poll();
+        ActionInterface action = mActionsToExecute.poll();
         ExecutionContext context = control.createExecutionContext(action);
         mRunningActions.add(context);
 
@@ -210,7 +210,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
         for (Iterator<ExecutionContext> iterator = mRunningActions.iterator(); iterator.hasNext();) {
             ExecutionContext context = iterator.next();
 
-            if (context.execute(null) == ExecutionContext.ExecutionResult.FINISHED) {
+            if (context.execute() == ExecutionContext.ExecutionResult.FINISHED) {
                 iterator.remove();
                 actionFinished = true;
             }

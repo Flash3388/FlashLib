@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.beans.Property;
 import com.beans.properties.SimpleProperty;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.EmptyScheduler;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -24,7 +25,7 @@ public class ActionsBenchmark {
     @Param({"SMALL", "MEDIUM", "SHORT_SLEEP", "SMALL_SINGLE_SEQ_GROUP", "SMALL_MULTI_SEQ_GROUP"})
     private TestActions.ActionType mActionType;
 
-    private Action mAction;
+    private ActionInterface mAction;
 
     @Setup(Level.Trial)
     public void setup() {

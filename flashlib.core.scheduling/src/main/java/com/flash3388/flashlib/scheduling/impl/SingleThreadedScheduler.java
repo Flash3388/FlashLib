@@ -1,15 +1,17 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.Action;
+import com.flash3388.flashlib.scheduling.ActionBuilder;
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
-import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.actions.ActionFlag;
-import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.ActionInterface;
+import com.flash3388.flashlib.scheduling.ActionFlag;
+import com.flash3388.flashlib.scheduling.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
 import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
@@ -41,22 +43,22 @@ public class SingleThreadedScheduler implements Scheduler {
     private final FlashLibMainThread mMainThread;
 
     private final StoredObject mRootObject;
-    private final Map<Action, RunningActionContext> mPendingActions;
-    private final Map<Action, RunningActionContext> mRunningActions;
-    private final Collection<Action> mActionsToRemove;
-    private final Map<Requirement, Action> mRequirementsUsage;
-    private final Map<Subsystem, Action> mDefaultActions;
+    private final Map<ActionInterface, RunningActionContext> mPendingActions;
+    private final Map<ActionInterface, RunningActionContext> mRunningActions;
+    private final Collection<ActionInterface> mActionsToRemove;
+    private final Map<Requirement, ActionInterface> mRequirementsUsage;
+    private final Map<Subsystem, ActionInterface> mDefaultActions;
 
     private boolean mCanModifyRunningActions;
 
     SingleThreadedScheduler(Clock clock,
                             FlashLibMainThread mainThread,
                             StoredObject rootObject,
-                            Map<Action, RunningActionContext> pendingActions,
-                            Map<Action, RunningActionContext> runningActions,
-                            Collection<Action> actionsToRemove,
-                            Map<Requirement, Action> requirementsUsage,
-                            Map<Subsystem, Action> defaultActions) {
+                            Map<ActionInterface, RunningActionContext> pendingActions,
+                            Map<ActionInterface, RunningActionContext> runningActions,
+                            Collection<ActionInterface> actionsToRemove,
+                            Map<Requirement, ActionInterface> requirementsUsage,
+                            Map<Subsystem, ActionInterface> defaultActions) {
         mClock = clock;
         mMainThread = mainThread;
         mRootObject = rootObject;
@@ -80,7 +82,28 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void start(Action action) {
+    public Action createAction(ActionInterface action, ActionConfiguration configuration) {
+        return buildAction(action, configuration).build();
+    }
+
+    @Override
+    public Action createAction(ActionInterface action) {
+        return buildAction(action).build();
+    }
+
+    @Override
+    public ActionBuilder buildAction(ActionInterface action, ActionConfiguration configuration) {
+        return new ActionBuilderImpl(action, configuration);
+    }
+
+    @Override
+    public ActionBuilder buildAction(ActionInterface action) {
+        ActionConfiguration configuration = new ActionConfiguration();
+        return buildAction(action, configuration);
+    }
+
+    @Override
+    public void start(ActionInterface action) {
         mMainThread.verifyCurrentThread();
 
         if (mPendingActions.containsKey(action) || mRunningActions.containsKey(action)) {
@@ -97,7 +120,7 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void cancel(Action action) {
+    public void cancel(ActionInterface action) {
         mMainThread.verifyCurrentThread();
 
         RunningActionContext context = mPendingActions.remove(action);
@@ -122,14 +145,14 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public boolean isRunning(Action action) {
+    public boolean isRunning(ActionInterface action) {
         mMainThread.verifyCurrentThread();
 
         return mPendingActions.containsKey(action) || mRunningActions.containsKey(action);
     }
 
     @Override
-    public Time getActionRunTime(Action action) {
+    public Time getActionRunTime(ActionInterface action) {
         mMainThread.verifyCurrentThread();
 
         if (mPendingActions.containsKey(action)) {
@@ -145,7 +168,7 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void cancelActionsIf(Predicate<? super Action> predicate) {
+    public void cancelActionsIf(Predicate<? super ActionInterface> predicate) {
         mMainThread.verifyCurrentThread();
 
         mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
@@ -179,14 +202,14 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public void setDefaultAction(Subsystem subsystem, ActionInterface action) {
         mMainThread.verifyCurrentThread();
 
         mDefaultActions.put(subsystem, action);
     }
 
     @Override
-    public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
+    public Optional<ActionInterface> getActionRunningOnRequirement(Requirement requirement) {
         mMainThread.verifyCurrentThread();
 
         return Optional.ofNullable(mRequirementsUsage.get(requirement));
@@ -198,8 +221,8 @@ public class SingleThreadedScheduler implements Scheduler {
 
         executeRunningActions(mode);
 
-        for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
-            Action action = iterator.next();
+        for (Iterator<ActionInterface> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
+            ActionInterface action = iterator.next();
             RunningActionContext context = mRunningActions.remove(action);
             if (context != null) {
                 cancelAndEnd(context);
@@ -218,7 +241,7 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         if (!mode.isDisabled()) {
-            for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
+            for (Map.Entry<Subsystem, ActionInterface> entry : mDefaultActions.entrySet()) {
                 if (canStartDefaultAction(entry.getValue())) {
                     start(entry.getValue());
                 }
@@ -232,7 +255,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
         TriggerImpl trigger = new TriggerImpl();
 
-        Action action = new TriggerActivationAction(this, condition, trigger)
+        ActionInterface action = new TriggerActivationAction(this, condition, trigger)
                 .requires(trigger);
         start(action);
 
@@ -292,7 +315,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private Set<RunningActionContext> getConflictingOnRequirements(RunningActionContext context) {
         Set<RunningActionContext> conflicts = new HashSet<>();
         for (Requirement requirement : context.getRequirements()) {
-            Action current = mRequirementsUsage.get(requirement);
+            ActionInterface current = mRequirementsUsage.get(requirement);
             if (current != null) {
                 RunningActionContext currentContext = mRunningActions.get(current);
                 if (currentContext.isPreferred()) {
@@ -354,7 +377,7 @@ public class SingleThreadedScheduler implements Scheduler {
         }
     }
 
-    private boolean canStartDefaultAction(Action action) {
+    private boolean canStartDefaultAction(ActionInterface action) {
         for(Requirement requirement : action.getConfiguration().getRequirements()) {
             if (mRequirementsUsage.containsKey(requirement)) {
                 return false;

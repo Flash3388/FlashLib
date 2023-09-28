@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling;
 
-import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.EmptyAction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -22,7 +21,7 @@ public class SchedulerStartBenchmark {
     private ConflictState mConflictState;
 
     private Scheduler mScheduler;
-    private Action mAction;
+    private ActionInterface mAction;
 
     @Setup(Level.Invocation)
     public void setup() {
@@ -58,19 +57,19 @@ public class SchedulerStartBenchmark {
             mConflictCount = conflictCount;
         }
 
-        void generateConflicts(Scheduler scheduler, Action action) {
+        void generateConflicts(Scheduler scheduler, ActionInterface action) {
             for (int i = 0; i < mConflictCount; i++) {
                 ConflictState.generateSingleRequirement(scheduler, action);
             }
         }
 
-        private static void generateSingleRequirement(Scheduler scheduler, Action action) {
+        private static void generateSingleRequirement(Scheduler scheduler, ActionInterface action) {
             Requirement requirement = new EmptyRequirement();
             action.configure()
                     .requires(requirement)
                     .save();
 
-            Action conflictingAction = new EmptyAction(scheduler);
+            ActionInterface conflictingAction = new EmptyAction(scheduler);
             conflictingAction.configure()
                     .requires(requirement)
                     .save();

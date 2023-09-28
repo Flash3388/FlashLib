@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.scheduling;
+package com.flash3388.flashlib.scheduling.impl;
 
 public class ActionHasPreferredException extends RuntimeException {
 

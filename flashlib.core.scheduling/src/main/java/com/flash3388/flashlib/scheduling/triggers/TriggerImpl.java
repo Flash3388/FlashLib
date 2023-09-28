@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
 import com.flash3388.flashlib.scheduling.Requirement;
-import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.triggers.handlers.CancelOnState;
 import com.flash3388.flashlib.scheduling.triggers.handlers.RunOnState;
 import com.flash3388.flashlib.scheduling.triggers.handlers.StartOnState;
@@ -45,42 +45,42 @@ public class TriggerImpl implements ManualTrigger, Requirement {
     }
 
     @Override
-    public void whenActive(Action action) {
+    public void whenActive(ActionInterface action) {
         addStateListener(new StartOnState(TriggerState.ACTIVE, action));
     }
 
     @Override
-    public void cancelWhenActive(Action action) {
+    public void cancelWhenActive(ActionInterface action) {
         addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
     }
 
     @Override
-    public void toggleWhenActive(Action action) {
+    public void toggleWhenActive(ActionInterface action) {
         addStateListener(new ToggleOnState(TriggerState.ACTIVE, action));
     }
 
     @Override
-    public void whileActive(Action action) {
+    public void whileActive(ActionInterface action) {
         addStateListener(new RunOnState(TriggerState.ACTIVE, action));
     }
 
     @Override
-    public void whenInactive(Action action) {
+    public void whenInactive(ActionInterface action) {
         addStateListener(new StartOnState(TriggerState.INACTIVE, action));
     }
 
     @Override
-    public void cancelWhenInactive(Action action) {
+    public void cancelWhenInactive(ActionInterface action) {
         addStateListener(new CancelOnState(TriggerState.INACTIVE, action));
     }
 
     @Override
-    public void toggleWhenInactive(Action action) {
+    public void toggleWhenInactive(ActionInterface action) {
         addStateListener(new ToggleOnState(TriggerState.INACTIVE, action));
     }
 
     @Override
-    public void whileInactive(Action action) {
+    public void whileInactive(ActionInterface action) {
         addStateListener(new RunOnState(TriggerState.INACTIVE, action));
     }
 

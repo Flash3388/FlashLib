@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionConfiguration;
+import com.flash3388.flashlib.scheduling.ActionFlag;
+import com.flash3388.flashlib.scheduling.ActionInterface;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
 import org.mockito.invocation.InvocationOnMock;
@@ -57,8 +60,8 @@ public final class ActionsMock {
             return this;
         }
 
-        public Action build() {
-            Action action = mock(Action.class);
+        public ActionInterface build() {
+            ActionInterface action = mock(ActionInterface.class);
             doAnswer(new Answer() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
