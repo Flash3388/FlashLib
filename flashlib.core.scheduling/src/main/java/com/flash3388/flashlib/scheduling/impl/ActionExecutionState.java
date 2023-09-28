@@ -66,6 +66,10 @@ public class ActionExecutionState {
         return mMarkedForEnd;
     }
 
+    public void updatePhase(ExecutionPhase phase) {
+        mObsrContext.updatePhase(phase);
+    }
+
     public void markStarted() {
         Time now = mClock.currentTime();
 

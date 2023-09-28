@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -15,7 +16,6 @@ public class RunningActionContext {
 
     private final Action mAction;
     private final Action mParent;
-    private final ObsrActionContext mObsrContext;
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
@@ -26,13 +26,14 @@ public class RunningActionContext {
 
     public RunningActionContext(Action action,
                                 Action parent,
-                                ObsrActionContext obsrContext,
+                                StoredObject obsrRoot,
                                 Clock clock,
                                 Logger logger) {
         mAction = action;
         mParent = parent;
-        mObsrContext = obsrContext;
         mLogger = logger;
+
+        ObsrActionContext obsrContext = new ObsrActionContext(obsrRoot);
 
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
         mExecutionState = new ActionExecutionState(mConfiguration, obsrContext, clock, logger);
@@ -40,15 +41,15 @@ public class RunningActionContext {
 
         mIsInitialized = false;
 
-        mObsrContext.updateFromAction(action);
-        mObsrContext.updateFromConfiguration(mConfiguration);
+        obsrContext.updateFromAction(action);
+        obsrContext.updateFromConfiguration(mConfiguration);
     }
 
     public RunningActionContext(Action action,
-                                ObsrActionContext obsrContext,
+                                StoredObject obsrRoot,
                                 Clock clock,
                                 Logger logger) {
-        this(action, null, obsrContext, clock, logger);
+        this(action, null, obsrRoot, clock, logger);
     }
 
     public Action getAction() {
@@ -117,7 +118,7 @@ public class RunningActionContext {
             mExecutionState.markErrored(t);
         }
 
-        mObsrContext.updatePhase(ExecutionPhase.EXECUTION);
+        mExecutionState.updatePhase(ExecutionPhase.EXECUTION);
     }
 
     private void execute() {
@@ -130,7 +131,7 @@ public class RunningActionContext {
     }
 
     private void finish() {
-        mObsrContext.updatePhase(ExecutionPhase.END);
+        mExecutionState.updatePhase(ExecutionPhase.END);
 
         try {
             mLogger.trace("Calling end for {}", this);

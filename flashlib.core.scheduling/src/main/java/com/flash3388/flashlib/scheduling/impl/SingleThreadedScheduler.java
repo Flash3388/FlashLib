@@ -48,6 +48,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private final Map<Subsystem, Action> mDefaultActions;
 
     private boolean mCanModifyRunningActions;
+    private long mActionIdNext;
 
     SingleThreadedScheduler(Clock clock,
                             FlashLibMainThread mainThread,
@@ -65,7 +66,9 @@ public class SingleThreadedScheduler implements Scheduler {
         mActionsToRemove = actionsToRemove;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
+
         mCanModifyRunningActions = true;
+        mActionIdNext = 0;
     }
 
     public SingleThreadedScheduler(Clock clock, StoredObject rootObject, FlashLibMainThread mainThread) {
@@ -87,8 +90,8 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalArgumentException("Action already started");
         }
 
-        StoredObject object = mRootObject.getChild(UUID.randomUUID().toString());
-        RunningActionContext context = new RunningActionContext(action, new ObsrActionContext(object), mClock, LOGGER);
+        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
+        RunningActionContext context = new RunningActionContext(action, object, mClock, LOGGER);
 
         if (!tryStartingAction(context)) {
             mPendingActions.put(action, context);
