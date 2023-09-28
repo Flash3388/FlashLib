@@ -1,47 +1,33 @@
-package com.flash3388.flashlib.scheduling.triggers;
+package com.flash3388.flashlib.scheduling.impl.triggers;
 
-import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.triggers.handlers.CancelOnState;
-import com.flash3388.flashlib.scheduling.triggers.handlers.RunOnState;
-import com.flash3388.flashlib.scheduling.triggers.handlers.StartOnState;
-import com.flash3388.flashlib.scheduling.triggers.handlers.ToggleOnState;
+import com.flash3388.flashlib.scheduling.impl.triggers.handlers.CancelOnState;
+import com.flash3388.flashlib.scheduling.impl.triggers.handlers.RunOnState;
+import com.flash3388.flashlib.scheduling.impl.triggers.handlers.StartOnState;
+import com.flash3388.flashlib.scheduling.impl.triggers.handlers.ToggleOnState;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
 
-public class TriggerImpl implements ManualTrigger, Requirement {
+public class TriggerBaseImpl implements Trigger {
 
     private final Collection<TriggerStateListener> mTriggerStateListeners;
     private TriggerState mCurrentState;
 
-    public TriggerImpl(Collection<TriggerStateListener> triggerStateListeners,
-                            TriggerState currentState) {
+    public TriggerBaseImpl(Collection<TriggerStateListener> triggerStateListeners,
+                           TriggerState currentState) {
         mTriggerStateListeners = triggerStateListeners;
         mCurrentState = currentState;
     }
 
-    public TriggerImpl(TriggerState currentState) {
+    public TriggerBaseImpl(TriggerState currentState) {
         this(new ArrayList<>(), currentState);
     }
 
-    public TriggerImpl() {
+    public TriggerBaseImpl() {
         this(TriggerState.INACTIVE);
-    }
-
-    @Override
-    public void activate() {
-        setState(TriggerState.ACTIVE);
-    }
-
-    @Override
-    public void deactivate() {
-        setState(TriggerState.INACTIVE);
-    }
-
-    @Override
-    public boolean isActive() {
-        return mCurrentState == TriggerState.ACTIVE;
     }
 
     @Override
@@ -84,20 +70,25 @@ public class TriggerImpl implements ManualTrigger, Requirement {
         addStateListener(new RunOnState(TriggerState.INACTIVE, action));
     }
 
+    void update(BooleanSupplier supplier, TriggerActionController controller) {
+        boolean isConditionMet = supplier.getAsBoolean();
+        TriggerState newState = isConditionMet ? TriggerState.ACTIVE : TriggerState.INACTIVE;
+
+        setState(newState, controller);
+    }
+
+    void setState(TriggerState newState, TriggerActionController controller) {
+        TriggerState lastState = mCurrentState;
+        if (lastState != newState) {
+            mCurrentState = newState;
+
+            for (TriggerStateListener listener : mTriggerStateListeners) {
+                listener.onStateChange(newState, lastState, controller);
+            }
+        }
+    }
+
     void addStateListener(TriggerStateListener handler) {
         mTriggerStateListeners.add(handler);
-    }
-
-    void setState(TriggerState newState) {
-        if (mCurrentState != newState) {
-            handleStateChange(newState, mCurrentState);
-            mCurrentState = newState;
-        }
-    }
-
-    private void handleStateChange(TriggerState newState, TriggerState lastState) {
-        for (TriggerStateListener listener : mTriggerStateListeners) {
-            listener.onStateChange(newState, lastState);
-        }
     }
 }

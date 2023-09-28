@@ -10,11 +10,14 @@ import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
+import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
+import com.flash3388.flashlib.scheduling.impl.triggers.ManualBasedTrigger;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
+import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
-import com.flash3388.flashlib.scheduling.triggers.TriggerActivationAction;
-import com.flash3388.flashlib.scheduling.triggers.TriggerImpl;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
@@ -29,7 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
@@ -44,6 +46,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private final Map<Action, RunningActionContext> mPendingActions;
     private final Map<Action, RunningActionContext> mRunningActions;
     private final Collection<Action> mActionsToRemove;
+    private final Collection<GenericTrigger> mTriggers;
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
@@ -56,6 +59,7 @@ public class SingleThreadedScheduler implements Scheduler {
                             Map<Action, RunningActionContext> pendingActions,
                             Map<Action, RunningActionContext> runningActions,
                             Collection<Action> actionsToRemove,
+                            Collection<GenericTrigger> triggers,
                             Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
@@ -64,6 +68,7 @@ public class SingleThreadedScheduler implements Scheduler {
         mPendingActions = pendingActions;
         mRunningActions = runningActions;
         mActionsToRemove = actionsToRemove;
+        mTriggers = triggers;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
 
@@ -78,6 +83,7 @@ public class SingleThreadedScheduler implements Scheduler {
                 new LinkedHashMap<>(5),
                 new LinkedHashMap<>(10),
                 new ArrayList<>(2),
+                new ArrayList<>(15),
                 new HashMap<>(10),
                 new HashMap<>(5));
     }
@@ -183,6 +189,7 @@ public class SingleThreadedScheduler implements Scheduler {
     public void run(SchedulerMode mode) {
         mMainThread.verifyCurrentThread();
 
+        executeTriggers();
         executeRunningActions(mode);
 
         for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
@@ -217,11 +224,18 @@ public class SingleThreadedScheduler implements Scheduler {
     public Trigger newTrigger(BooleanSupplier condition) {
         mMainThread.verifyCurrentThread();
 
-        TriggerImpl trigger = new TriggerImpl();
+        ConditionBasedTrigger trigger = new ConditionBasedTrigger(condition);
+        mTriggers.add(trigger);
 
-        Action action = new TriggerActivationAction(this, condition, trigger)
-                .requires(trigger);
-        start(action);
+        return trigger;
+    }
+
+    @Override
+    public ManualTrigger newManualTrigger() {
+        mMainThread.verifyCurrentThread();
+
+        ManualBasedTrigger trigger = new ManualBasedTrigger();
+        mTriggers.add(trigger);
 
         return trigger;
     }
@@ -246,6 +260,33 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         return new ActionGroupImpl(this, LOGGER, policy);
+    }
+
+    private void executeTriggers() {
+        TriggerActionController controller = new TriggerActionController();
+        for (GenericTrigger trigger : mTriggers) {
+            trigger.update(controller);
+        }
+
+        for (Action action : controller.getActionsToStopIfRunning()) {
+            if (isRunning(action)) {
+                cancel(action);
+            }
+        }
+
+        for (Action action : controller.getActionsToToggle()) {
+            if (!isRunning(action)) {
+                start(action);
+            } else {
+                cancel(action);
+            }
+        }
+
+        for (Action action : controller.getActionsToStartIfRunning()) {
+            if (!isRunning(action)) {
+                start(action);
+            }
+        }
     }
 
     private void executeRunningActions(SchedulerMode mode) {

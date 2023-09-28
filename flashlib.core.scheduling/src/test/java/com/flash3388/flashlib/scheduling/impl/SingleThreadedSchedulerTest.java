@@ -48,6 +48,7 @@ class SingleThreadedSchedulerTest {
                 mPendingActions,
                 mRunningActions,
                 new ArrayList<>(),
+                new ArrayList<>(),
                 mRequirementsUsage,
                 mDefaultActions);
     }

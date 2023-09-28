@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.global;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Scheduler;

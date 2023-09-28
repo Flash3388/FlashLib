@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependenciesMock;
+import com.flash3388.flashlib.scheduling.GlobalDependenciesMock;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.ClockMock;

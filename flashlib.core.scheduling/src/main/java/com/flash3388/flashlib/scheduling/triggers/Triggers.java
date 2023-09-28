@@ -27,11 +27,11 @@ public final class Triggers {
 
     /**
      * Creates a new {@link ManualTrigger}, used to activate manually rather
-     * then automatically.
+     * than automatically.
      *
      * @return a trigger.
      */
     public static ManualTrigger manual() {
-        return new TriggerImpl();
+        return GlobalScheduler.getScheduler().newManualTrigger();
     }
 }
