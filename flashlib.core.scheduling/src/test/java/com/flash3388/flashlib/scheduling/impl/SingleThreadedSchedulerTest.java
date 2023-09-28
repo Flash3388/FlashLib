@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
@@ -46,6 +47,7 @@ class SingleThreadedSchedulerTest {
                 new StoredObject.Stub(),
                 mPendingActions,
                 mRunningActions,
+                new ArrayList<>(),
                 new ArrayList<>(),
                 mRequirementsUsage,
                 mDefaultActions);
@@ -364,10 +366,16 @@ class SingleThreadedSchedulerTest {
                 .build();
         Action startingAction = new ActionBase(mScheduler) {
             @Override
+            public void initialize(ActionControl control) {}
+
+            @Override
             public void execute(ActionControl control) {
                 mScheduler.start(actionToStart);
                 control.finish();
             }
+
+            @Override
+            public void end(FinishReason reason) {}
         };
 
         mScheduler.start(startingAction);

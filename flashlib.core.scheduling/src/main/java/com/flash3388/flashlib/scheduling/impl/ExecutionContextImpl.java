@@ -22,13 +22,19 @@ public class ExecutionContextImpl implements ExecutionContext {
 
     @Override
     public ExecutionResult execute(SchedulerMode mode) {
-        if (mode != null && mode.isDisabled() && !mContext.shouldRunInDisabled()) {
+        if (mode.isDisabled() && !mContext.shouldRunInDisabled()) {
             mLogger.warn("Action {} is not allowed to run in disabled. Cancelling", mContext);
             interrupt();
 
             return ExecutionResult.FINISHED;
         }
 
+        // run normally
+        return execute();
+    }
+
+    @Override
+    public ExecutionResult execute() {
         if (mContext.iterate()) {
             mLogger.debug("Action {} finished", mContext);
             return ExecutionResult.FINISHED;

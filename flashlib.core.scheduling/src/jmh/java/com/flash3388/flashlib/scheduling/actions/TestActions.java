@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.scheduling.actions;
 
+import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
+
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Function;
@@ -40,11 +43,21 @@ public class TestActions {
         }
 
         @Override
-        public void execute() {
+        public void initialize(ActionControl control) {
+
+        }
+
+        @Override
+        public void execute(ActionControl control) {
             byte[] bytes = new byte[1024];
             mRandom.nextBytes(bytes);
 
             output(bytes);
+        }
+
+        @Override
+        public void end(FinishReason reason) {
+
         }
     }
 
@@ -58,13 +71,23 @@ public class TestActions {
         }
 
         @Override
-        public void execute() {
+        public void initialize(ActionControl control) {
+
+        }
+
+        @Override
+        public void execute(ActionControl control) {
             Collection<Integer> numbers = IntStream.range(0, 100)
                     .mapToObj((i) -> mRandom.nextInt())
                     .sorted(Integer::compareTo)
                     .collect(Collectors.toList());
 
             output(numbers);
+        }
+
+        @Override
+        public void end(FinishReason reason) {
+
         }
     }
 
@@ -78,12 +101,22 @@ public class TestActions {
         }
 
         @Override
-        public void execute() {
+        public void initialize(ActionControl control) {
+
+        }
+
+        @Override
+        public void execute(ActionControl control) {
             try {
                 Thread.sleep(mSleepTimeMs);
             } catch (InterruptedException e) {
                 output(e);
             }
+        }
+
+        @Override
+        public void end(FinishReason reason) {
+
         }
     }
 

@@ -44,8 +44,7 @@ public interface Action {
      * Called once when the action is started.
      * @param control component for controlling and querying the action execution state.
      */
-    default void initialize(ActionControl control) {
-    }
+    void initialize(ActionControl control);
 
     /**
      * Called repeatedly during the execution of the action.
@@ -54,22 +53,10 @@ public interface Action {
     void execute(ActionControl control);
 
     /**
-     * Returns true when the action should end.
-     * @return true when the action should end, false otherwise.
-     *
-     * @deprecated use {@link ActionControl#finish()} in {@link #execute(ActionControl)} instead.
-     */
-    @Deprecated
-    default boolean isFinished() {
-        return false;
-    }
-
-    /**
      * Called when the action ends run.
      * @param reason reason for execution finish
      */
-    default void end(FinishReason reason) {
-    }
+    void end(FinishReason reason);
 
     /**
      * <p>
@@ -149,10 +136,7 @@ public interface Action {
      * @return this
      * @see ActionConfiguration.Editor#requires(Collection)
      */
-    default Action requires(Requirement... requirements) {
-        getConfiguration().requires(Arrays.asList(requirements));
-        return this;
-    }
+    Action requires(Requirement... requirements);
 
     /**
      * <p>
@@ -165,15 +149,20 @@ public interface Action {
      * @return this
      * @see ActionConfiguration.Editor#setTimeout(Time)
      */
-    default Action withTimeout(Time timeout) {
-        getConfiguration().setTimeout(timeout);
-        return this;
-    }
+    Action withTimeout(Time timeout);
 
-    default Action flags(ActionFlag... flags) {
-        getConfiguration().addFlags(flags);
-        return this;
-    }
+    /**
+     * <p>
+     *     Updates the flags of the current action. Effectively updates
+     *     the configuration of the action.
+     * </p>
+     *
+     * @param flags flags to add
+     *
+     * @return this
+     * @see ActionConfiguration.Editor#addFlags(ActionFlag...)
+     */
+    Action flags(ActionFlag... flags);
 
     // convenience methods for grouping
 
@@ -188,10 +177,7 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in sequence this and the given actions.
      */
-    default ActionGroup andThen(Action... actions) {
-        return Actions.sequential(this)
-                .add(actions);
-    }
+    ActionGroup andThen(Action... actions);
 
     /**
      * <p>
@@ -204,10 +190,7 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
      */
-    default ActionGroup alongWith(Action... actions) {
-        return Actions.parallel(this)
-                .add(actions);
-    }
+    ActionGroup alongWith(Action... actions);
 
     /**
      * <p>
@@ -225,8 +208,5 @@ public interface Action {
      *
      * @return {@link ActionGroup} running in parallel this and the given actions.
      */
-    default ActionGroup raceWith(Action... actions) {
-        return Actions.race(this)
-                .add(actions);
-    }
+    ActionGroup raceWith(Action... actions);
 }

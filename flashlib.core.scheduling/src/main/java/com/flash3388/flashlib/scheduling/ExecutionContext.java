@@ -8,6 +8,7 @@ public interface ExecutionContext {
     }
 
     ExecutionResult execute(SchedulerMode mode);
+    ExecutionResult execute();
 
     void interrupt();
 }

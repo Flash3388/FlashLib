@@ -19,6 +19,11 @@ public class DriveTank extends ActionBase {
     }
 
     @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
     public void execute(ActionControl control) {
         mDrive.tankDrive(mSpeed.get());
     }

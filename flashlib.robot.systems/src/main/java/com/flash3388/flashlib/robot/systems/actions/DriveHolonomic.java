@@ -19,6 +19,11 @@ public class DriveHolonomic extends ActionBase {
     }
 
     @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
     public void execute(ActionControl control) {
         mDrive.holonomicDrive(mSpeed.get());
     }

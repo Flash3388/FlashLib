@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerState;
 
 /**
  * A trigger is an object which can be either active or inactive. It is possible

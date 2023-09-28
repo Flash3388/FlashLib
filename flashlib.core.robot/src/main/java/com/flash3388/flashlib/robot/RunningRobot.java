@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.robot;
 
-import com.flash3388.flashlib.app.FlashLibInstance;
-import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,7 +22,7 @@ public final class RunningRobot {
     public static void setControlInstance(RobotControl instance) {
         RobotControl previousInstance = sControlInstance.getAndSet(instance);
 
-        GlobalDependencies.setSchedulerInstance(instance.getScheduler());
+        GlobalScheduler.setSchedulerInstance(instance.getScheduler());
 
         if (previousInstance != null) {
             previousInstance.getLogger().warn("RunningRobot instance replaced");

@@ -20,6 +20,8 @@ public class ActionControlImpl implements ActionControl {
     private final Clock mClock;
     private final Logger mLogger;
 
+    private int mExecutionContextNextNum;
+
     public ActionControlImpl(Action action,
                              ActionConfiguration configuration,
                              ActionExecutionState executionState,
@@ -32,6 +34,8 @@ public class ActionControlImpl implements ActionControl {
         mObsrActionContext = obsrActionContext;
         mClock = clock;
         mLogger = logger;
+
+        mExecutionContextNextNum = 0;
     }
 
     @Override
@@ -51,10 +55,10 @@ public class ActionControlImpl implements ActionControl {
 
     @Override
     public ExecutionContext createExecutionContext(Action action) {
-        StoredObject object = mObsrActionContext.getRootObject().getChild(UUID.randomUUID().toString());
+        StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(++mExecutionContextNextNum));
         RunningActionContext context = new RunningActionContext(action,
                 mAction,
-                new ObsrActionContext(object),
+                object,
                 mClock,
                 mLogger);
         return new ExecutionContextImpl(mClock, mLogger, context);

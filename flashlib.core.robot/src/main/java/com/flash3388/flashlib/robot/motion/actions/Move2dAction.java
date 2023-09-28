@@ -26,6 +26,11 @@ public class Move2dAction extends ActionBase {
     }
 
     @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
     public void execute(ActionControl control) {
         mMovable.move(mMotionVectorSupplier.get());
     }

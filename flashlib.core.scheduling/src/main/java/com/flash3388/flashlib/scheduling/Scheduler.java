@@ -4,6 +4,7 @@ import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
 
@@ -66,23 +67,6 @@ public interface Scheduler {
      */
     @MainThreadOnly
     boolean isRunning(Action action);
-
-    /**
-     * <p>
-     *     Gets the total time passed since the given {@link Action} started running.
-     * </p>
-     * <p>
-     *     The action must be running.
-     * </p>
-     *
-     * @param action action to get runtime for.
-     *
-     * @return {@link Time} passed since the action started running.
-     *
-     * @throws IllegalStateException if the action is not running.
-     */
-    @MainThreadOnly
-    Time getActionRunTime(Action action);
 
     /**
      * <p>
@@ -190,6 +174,14 @@ public interface Scheduler {
      */
     @MainThreadOnly
     Trigger newTrigger(BooleanSupplier condition);
+
+    /**
+     * Creates a new trigger which can be activated or deactivated manually.
+     *
+     * @return {@link ManualTrigger}
+     */
+    @MainThreadOnly
+    ManualTrigger newManualTrigger();
 
     /**
      * Creates a new group for executes actions.

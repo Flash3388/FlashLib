@@ -1,11 +1,12 @@
 package com.flash3388.flashlib.scheduling.actions;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Objects;
 
 public abstract class ActionBase implements Action {
@@ -26,7 +27,7 @@ public abstract class ActionBase implements Action {
     }
 
     protected ActionBase() {
-        this(GlobalDependencies.getScheduler(), new ActionConfiguration());
+        this(GlobalScheduler.getScheduler(), new ActionConfiguration());
     }
 
     @Override
@@ -85,33 +86,47 @@ public abstract class ActionBase implements Action {
 
     @Override
     public String toString() {
-        return String.format("%s{name=%s}",
-                getClass().getSimpleName().isEmpty() ?
-                        getClass().getName() :
-                        getClass().getSimpleName(),
-                mConfiguration.getName());
-    }
-
-    public final Time getRunTime() {
-        Scheduler scheduler = mScheduler.get();
-        if (scheduler == null) {
-            throw new IllegalStateException("scheduler was garbage collected");
+        String clsName = getClass().getSimpleName();
+        if (clsName.isEmpty()) {
+            clsName = getClass().getName();
         }
-        return scheduler.getActionRunTime(this);
+
+        return String.format("%s{name=%s}", clsName, mConfiguration.getName());
     }
 
     @Override
     public final Action requires(Requirement... requirements) {
-        return Action.super.requires(requirements);
+        getConfiguration().requires(Arrays.asList(requirements));
+        return this;
     }
 
     @Override
     public final Action withTimeout(Time timeout) {
-        return Action.super.withTimeout(timeout);
+        getConfiguration().setTimeout(timeout);
+        return this;
     }
 
     @Override
     public final Action flags(ActionFlag... flags) {
-        return Action.super.flags(flags);
+        getConfiguration().addFlags(flags);
+        return this;
+    }
+
+    @Override
+    public ActionGroup andThen(Action... actions) {
+        return Actions.sequential(this)
+                .add(actions);
+    }
+
+    @Override
+    public ActionGroup alongWith(Action... actions) {
+        return Actions.parallel(this)
+                .add(actions);
+    }
+
+    @Override
+    public ActionGroup raceWith(Action... actions) {
+        return Actions.race(this)
+                .add(actions);
     }
 }

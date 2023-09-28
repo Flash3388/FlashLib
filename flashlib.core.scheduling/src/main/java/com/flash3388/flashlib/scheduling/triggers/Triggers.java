@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.scheduling.triggers;
 
-import com.flash3388.flashlib.global.GlobalDependencies;
+import com.flash3388.flashlib.scheduling.GlobalScheduler;
 
 import java.util.function.BooleanSupplier;
 
@@ -22,16 +22,16 @@ public final class Triggers {
      * @return a trigger
      */
     public static Trigger onCondition(BooleanSupplier condition) {
-        return GlobalDependencies.getScheduler().newTrigger(condition);
+        return GlobalScheduler.getScheduler().newTrigger(condition);
     }
 
     /**
      * Creates a new {@link ManualTrigger}, used to activate manually rather
-     * then automatically.
+     * than automatically.
      *
      * @return a trigger.
      */
     public static ManualTrigger manual() {
-        return new TriggerImpl();
+        return GlobalScheduler.getScheduler().newManualTrigger();
     }
 }

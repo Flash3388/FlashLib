@@ -1,10 +1,10 @@
-package com.flash3388.flashlib.global;
+package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.Scheduler;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class GlobalDependencies {
+public class GlobalScheduler {
     private static final AtomicReference<Scheduler> sScheduler = new AtomicReference<>();
 
     public static Scheduler getScheduler() {
