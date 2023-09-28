@@ -152,15 +152,17 @@ public class RunningActionContext {
             mAction.end(mExecutionState.getFinishReason());
             mExecutionState.markFinishedExecution();
         } catch (Throwable t) {
-            mLogger.warn("Error occurred in action during the end phase. " +
-                    "It is likely the action has not finished it's teardown properly");
+            mLogger.warn("Error occurred in action during the end phase. Calling again.");
             mExecutionState.markErrored(t);
 
             // try doing it again, so we can maybe make sure end runs.
             try {
                 mLogger.debug("Re-Calling end for {}", this);
                 mAction.end(mExecutionState.getFinishReason());
-            } catch (Throwable t1) {}
+            } catch (Throwable t1) {
+                mLogger.warn("Error occurred AGAIN in action during end phase." +
+                        "It is likely the action has not finished it's teardown properly");
+            }
 
             mExecutionState.markFinishedExecution();
         }
