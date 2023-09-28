@@ -86,19 +86,12 @@ public abstract class ActionBase implements Action {
 
     @Override
     public String toString() {
-        return String.format("%s{name=%s}",
-                getClass().getSimpleName().isEmpty() ?
-                        getClass().getName() :
-                        getClass().getSimpleName(),
-                mConfiguration.getName());
-    }
-
-    public final Time getRunTime() {
-        Scheduler scheduler = mScheduler.get();
-        if (scheduler == null) {
-            throw new IllegalStateException("scheduler was garbage collected");
+        String clsName = getClass().getSimpleName();
+        if (clsName.isEmpty()) {
+            clsName = getClass().getName();
         }
-        return scheduler.getActionRunTime(this);
+
+        return String.format("%s{name=%s}", clsName, mConfiguration.getName());
     }
 
     @Override
