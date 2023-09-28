@@ -41,8 +41,13 @@ public class OmniDriveAction extends ActionBase {
     public OmniDriveAction(OmniDrive driveInterface, double front, double right, double back, double left) {
         this(driveInterface, ()->new OmniDriveSpeed(front, right, back, left));
     }
-	
-	@Override
+
+    @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
 	public void execute(ActionControl control) {
 		mDriveInterface.omniDrive(mSpeedSupplier.get());
 	}

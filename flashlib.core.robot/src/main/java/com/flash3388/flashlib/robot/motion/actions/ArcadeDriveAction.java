@@ -33,7 +33,12 @@ public class ArcadeDriveAction extends ActionBase {
     public ArcadeDriveAction(TankDrive driveInterface, double move, double rotate) {
         this(driveInterface, new ArcadeDriveSpeed(move, rotate));
     }
-	
+
+	@Override
+	public void initialize(ActionControl control) {
+
+	}
+
 	@Override
 	public void execute(ActionControl control) {
 		mDriveInterface.arcadeDrive(mSpeedSupplier.get());

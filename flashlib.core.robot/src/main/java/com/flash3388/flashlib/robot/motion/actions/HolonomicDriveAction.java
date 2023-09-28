@@ -42,8 +42,13 @@ public class HolonomicDriveAction extends ActionBase {
 	public static HolonomicDriveAction polar(HolonomicDrive driveInterface, DoubleSupplier magnitude, DoubleSupplier direction, DoubleSupplier rotate) {
 		return new HolonomicDriveAction(driveInterface, ()->new HolonomicDriveSpeed(Vector2.polar(magnitude.getAsDouble(), direction.getAsDouble()), rotate.getAsDouble()));
 	}
-	
-	@Override
+
+    @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
 	public void execute(ActionControl control) {
 		mDriveInterface.holonomicDrive(mSpeedSupplier.get());
 	}

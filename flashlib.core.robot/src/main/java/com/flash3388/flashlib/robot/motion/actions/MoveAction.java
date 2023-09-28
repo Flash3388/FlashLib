@@ -25,6 +25,11 @@ public class MoveAction extends ActionBase {
     }
 
     @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
     public void execute(ActionControl control) {
         mMovable.move(mSpeedSupplier.getAsDouble());
     }

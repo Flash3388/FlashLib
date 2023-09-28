@@ -37,8 +37,13 @@ public class TankDriveAction extends ActionBase {
     public TankDriveAction(TankDrive driveInterface, double speed) {
         this(driveInterface, speed, speed);
     }
-	
-	@Override
+
+    @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
 	public void execute(ActionControl control) {
 		mDriveInterface.tankDrive(mSpeedSupplier.get());
 	}

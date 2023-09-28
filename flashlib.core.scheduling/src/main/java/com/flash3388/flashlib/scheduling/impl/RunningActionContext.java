@@ -80,7 +80,7 @@ public class RunningActionContext {
     }
 
     public boolean iterate() {
-        if (wasTimedOut()) {
+        if (mExecutionState.isTimedOut()) {
             mExecutionState.markTimedOut();
         }
 
@@ -94,10 +94,6 @@ public class RunningActionContext {
             mIsInitialized = true;
         } else {
             execute();
-
-            if (isFinished()) {
-                mExecutionState.markForFinish();
-            }
 
             if (mExecutionState.isMarkedForEnd()) {
                 finish();
@@ -133,17 +129,6 @@ public class RunningActionContext {
         }
     }
 
-    private boolean isFinished() {
-        try {
-            mLogger.trace("Calling isFinished for {}", this);
-            return mAction.isFinished();
-        } catch (Throwable t) {
-            mExecutionState.markErrored(t);
-        }
-
-        return false;
-    }
-
     private void finish() {
         mObsrContext.updatePhase(ExecutionPhase.END);
 
@@ -166,10 +151,6 @@ public class RunningActionContext {
 
             mExecutionState.markFinishedExecution();
         }
-    }
-
-    private boolean wasTimedOut() {
-        return mExecutionState.isTimedOut();
     }
 
     @Override

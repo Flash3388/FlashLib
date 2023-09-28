@@ -18,6 +18,11 @@ public class Rotate extends ActionBase {
     }
 
     @Override
+    public void initialize(ActionControl control) {
+
+    }
+
+    @Override
     public void execute(ActionControl control) {
         mRotatable.rotate(mSpeed.getAsDouble());
     }

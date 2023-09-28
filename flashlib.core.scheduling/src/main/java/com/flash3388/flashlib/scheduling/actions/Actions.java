@@ -21,10 +21,7 @@ public final class Actions {
      * @return an empty action.
      */
     public static Action empty() {
-        return new ActionBase() {
-            @Override
-            public void execute(ActionControl control) { }
-        };
+        return new EmptyAction();
     }
 
     /**

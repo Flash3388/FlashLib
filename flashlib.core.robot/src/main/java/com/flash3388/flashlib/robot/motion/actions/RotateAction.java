@@ -28,7 +28,12 @@ public class RotateAction extends ActionBase {
     public RotateAction(Rotatable rotatable, double speed, Direction direction) {
         this(rotatable, speed * direction.sign());
     }
-	
+
+	@Override
+	public void initialize(ActionControl control) {
+
+	}
+
 	@Override
 	public void execute(ActionControl control) {
 		mRotatable.rotate(mSpeedSource.getAsDouble());
