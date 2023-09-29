@@ -9,6 +9,9 @@ import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
+import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
+import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +33,7 @@ class SingleThreadedSchedulerTest {
 
     private Map<Action, RunningActionContext> mPendingActions;
     private Map<Action, RunningActionContext> mRunningActions;
+    private Collection<GenericTrigger> mTriggers;
     private Map<Requirement, Action> mRequirementsUsage;
     private Map<Subsystem, Action> mDefaultActions;
 
@@ -38,6 +43,7 @@ class SingleThreadedSchedulerTest {
     public void setUp() throws Exception {
         mPendingActions = new HashMap<>();
         mRunningActions = new HashMap<>();
+        mTriggers = new ArrayList<>();
         mRequirementsUsage = new HashMap<>();
         mDefaultActions = new HashMap<>();
 
@@ -48,7 +54,7 @@ class SingleThreadedSchedulerTest {
                 mPendingActions,
                 mRunningActions,
                 new ArrayList<>(),
-                new ArrayList<>(),
+                mTriggers,
                 mRequirementsUsage,
                 mDefaultActions);
     }
@@ -383,5 +389,116 @@ class SingleThreadedSchedulerTest {
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
         assertThat(mRunningActions, IsMapContaining.hasKey(actionToStart));
+    }
+
+    @Test
+    public void run_withTriggersWithActionNotRunning_startsActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToStartIfRunning(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+    }
+
+    @Test
+    public void run_withTriggersWithActionRunning_notStartsActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate()).thenReturn(false);
+        mRunningActions.put(action, context);
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToStartIfRunning(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+    }
+
+    @Test
+    public void run_withTriggersAndActionRunning_stopsActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate()).thenReturn(false);
+        mRunningActions.put(action, context);
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToStopIfRunning(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+    }
+
+    @Test
+    public void run_withTriggersAndActionNotRunning_notStopsActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToStopIfRunning(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
+    }
+
+    @Test
+    public void run_withTriggersAndActionNotRunning_toggleToStartActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToToggle(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, IsMapContaining.hasKey(action));
+    }
+
+    @Test
+    public void run_withTriggersAndActionRunning_toggleToStopActionFromTrigger() throws Exception {
+        Action action = ActionsMock.actionMocker().build();
+        RunningActionContext context = mock(RunningActionContext.class);
+        when(context.iterate()).thenReturn(false);
+        mRunningActions.put(action, context);
+
+        GenericTrigger trigger = new GenericTrigger() {
+            @Override
+            public void update(TriggerActionController controller) {
+                controller.addActionToToggle(action);
+            }
+        };
+        mTriggers.add(trigger);
+
+        mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
+
+        assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
     }
 }
