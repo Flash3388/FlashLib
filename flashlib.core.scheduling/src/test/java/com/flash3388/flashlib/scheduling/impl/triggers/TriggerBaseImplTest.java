@@ -18,12 +18,12 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.INACTIVE);
         trigger.addStateListener(listener);
 
-        trigger.setState(TriggerState.ACTIVE, mock(TriggerActionController.class));
+        trigger.setState(TriggerState.ACTIVE, mock(TriggerActionControllerImpl.class));
 
         verify(listener, times(1)).onStateChange(
                 eq(TriggerState.ACTIVE),
                 eq(TriggerState.INACTIVE),
-                any(TriggerActionController.class));
+                any(TriggerActionControllerImpl.class));
     }
 
     @Test
@@ -33,7 +33,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.INACTIVE);
         trigger.whenActive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.ACTIVE, controller);
 
         assertThat(controller.getActionsToStartIfRunning(), IsIterableContainingInOrder.contains(mockAction));
@@ -46,7 +46,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.ACTIVE);
         trigger.whenInactive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.INACTIVE, controller);
 
         assertThat(controller.getActionsToStartIfRunning(), IsIterableContainingInOrder.contains(mockAction));
@@ -61,7 +61,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.INACTIVE);
         trigger.cancelWhenActive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.ACTIVE, controller);
 
         assertThat(controller.getActionsToStopIfRunning(), IsIterableContainingInOrder.contains(mockAction));
@@ -76,7 +76,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.ACTIVE);
         trigger.cancelWhenInactive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.INACTIVE, controller);
 
         assertThat(controller.getActionsToStopIfRunning(), IsIterableContainingInOrder.contains(mockAction));
@@ -89,7 +89,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.INACTIVE);
         trigger.whileActive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.ACTIVE, controller);
 
         assertThat(controller.getActionsToStartIfRunning(), IsIterableContainingInOrder.contains(mockAction));
@@ -104,7 +104,7 @@ public class TriggerBaseImplTest {
         TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.ACTIVE);
         trigger.whileActive(mockAction);
 
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.INACTIVE, controller);
 
         assertThat(controller.getActionsToStopIfRunning(), IsIterableContainingInOrder.contains(mockAction));

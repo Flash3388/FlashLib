@@ -14,6 +14,7 @@ import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.ManualBasedTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
+import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionControllerImpl;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
@@ -263,7 +264,7 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     private void executeTriggers() {
-        TriggerActionController controller = new TriggerActionController();
+        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         for (GenericTrigger trigger : mTriggers) {
             trigger.update(controller);
         }
