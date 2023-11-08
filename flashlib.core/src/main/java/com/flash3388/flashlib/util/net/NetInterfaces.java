@@ -1,10 +1,11 @@
-package com.flash3388.flashlib.net.util;
+package com.flash3388.flashlib.util.net;
 
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
 public class NetInterfaces {
@@ -34,5 +35,22 @@ public class NetInterfaces {
         }
 
         throw new NoSuchElementException("address not found");
+    }
+
+    public static byte[] getMacAddress() throws IOException {
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        if (!interfaces.hasMoreElements()) {
+            throw new IOException("no network interfaces available");
+        }
+
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = interfaces.nextElement();
+            byte[] hardwareAddress = networkInterface.getHardwareAddress();
+            if (hardwareAddress != null) {
+                return hardwareAddress;
+            }
+        }
+
+        throw new IOException("unable to obtain hardware address");
     }
 }

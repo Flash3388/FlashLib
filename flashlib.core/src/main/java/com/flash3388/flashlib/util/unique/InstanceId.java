@@ -6,6 +6,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class InstanceId {
     private static final int PROCESS_ID_SIZE = Long.BYTES;
@@ -14,6 +15,9 @@ public class InstanceId {
     private final byte[] mProcessId;
 
     public InstanceId(byte[] machineId, byte[] processId) {
+        Objects.requireNonNull(machineId, "machineId");
+        Objects.requireNonNull(processId, "processId");
+
         assert machineId.length > 1;
         assert PROCESS_ID_SIZE == processId.length;
 
