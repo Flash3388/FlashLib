@@ -7,6 +7,8 @@ import com.flash3388.flashlib.io.DigitalOutput;
 import com.flash3388.flashlib.io.IoChannel;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.io.Pwm;
+import com.flash3388.flashlib.io.QuadratureCounter;
+import com.flash3388.flashlib.io.UnsupportedChannelException;
 
 public class HalIoInterface implements IoInterface {
 
@@ -48,5 +50,10 @@ public class HalIoInterface implements IoInterface {
     public Pwm newPwm(IoChannel channel) {
         HalIoChannel ioChannel = IoChannel.cast(channel, HalIoChannel.class);
         return new HalPwmOutput(mEnv, ioChannel.getName());
+    }
+
+    @Override
+    public QuadratureCounter newQuadratureCounter(IoChannel upChannel, IoChannel downChannel) {
+        throw new UnsupportedChannelException();
     }
 }

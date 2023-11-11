@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.io.devices.sensors;
 
-import com.flash3388.flashlib.io.Counter;
+import com.flash3388.flashlib.io.PulseLengthCounter;
 import com.flash3388.flashlib.io.devices.DeviceConstructor;
 import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.RangeFinder;
@@ -23,7 +23,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 
     public static final double DEFAULT_SENSITIVITY = 147.0 * 2.54;
 	
-	private Counter mCounter;
+	private PulseLengthCounter mCounter;
 	private double mSensitivity;
 
     /**
@@ -38,11 +38,11 @@ public class PulseWidthRangeFinder implements RangeFinder {
      */
 	@DeviceConstructor
     public PulseWidthRangeFinder(
-			@NamedArg("counter") Counter counter,
+			@NamedArg("counter") PulseLengthCounter counter,
 			@NamedArg("sensitivity") double sensitivity
 	) {
-        this.mCounter = counter;
-        this.mSensitivity = sensitivity;
+        mCounter = counter;
+        mSensitivity = sensitivity;
     }
 
 	/**
@@ -55,7 +55,7 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 * 
 	 * @param counter pulse counter for the input port
 	 */
-	public PulseWidthRangeFinder(Counter counter) {
+	public PulseWidthRangeFinder(PulseLengthCounter counter) {
 		this(counter, DEFAULT_SENSITIVITY);
 	}
 	
@@ -104,6 +104,6 @@ public class PulseWidthRangeFinder implements RangeFinder {
 	 */
 	@Override
 	public double getRangeCm() {
-		return mCounter.getPulseLength() * 1e6 / mSensitivity;
+		return mCounter.getLengthSeconds() * 1e6 / mSensitivity;
 	}
 }

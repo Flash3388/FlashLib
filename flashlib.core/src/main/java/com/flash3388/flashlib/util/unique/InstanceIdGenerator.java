@@ -8,14 +8,12 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 

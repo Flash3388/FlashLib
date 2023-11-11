@@ -86,6 +86,27 @@ public interface IoInterface {
     Pwm newPwm(IoChannel channel);
 
     /**
+     * Creates a new {@link QuadratureCounter} representing a low-level hardware/software component which measures
+     * and counts pulses received on two channels.
+     * <p>
+     * Pulses received on the <em>Up</em> channel increment the counter.
+     * Pulses received on the <em>Down</em> channel decrement the counter.
+     * <p>
+     * Only supports counting for digital input channels.
+     *
+     * @param upChannel <em>up</em> counting channel, must represent a compatible channel
+     * @param downChannel <em>down</em> counting channel, must represent a compatible channel
+     *
+     * @return {@link QuadratureCounter} object for the given channels
+     *
+     * @throws IllegalArgumentException if the given channels do not represent digital input channel
+     * @throws UnsupportedChannelException if the given channels do not support counters
+     */
+    @MainThreadOnly
+    QuadratureCounter newQuadratureCounter(IoChannel upChannel, IoChannel downChannel);
+
+
+    /**
      * A stub implementation of {@link IoInterface}. All the methods throw {@link UnsupportedOperationException}.
      *
      * @since FlashLib 3.0.0
@@ -114,6 +135,11 @@ public interface IoInterface {
 
         @Override
         public Pwm newPwm(IoChannel channel) {
+            throw new UnsupportedOperationException("stub");
+        }
+
+        @Override
+        public QuadratureCounter newQuadratureCounter(IoChannel upChannel, IoChannel downChannel) {
             throw new UnsupportedOperationException("stub");
         }
     }
