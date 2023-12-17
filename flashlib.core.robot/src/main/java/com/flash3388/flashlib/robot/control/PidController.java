@@ -39,6 +39,8 @@ public class PidController implements ClosedLoopController {
     private final DoubleSupplier mKd;
     private final DoubleSupplier mKf;
 
+    private double mPeriodSeconds;
+
     private double mMinimumOutput;
     private double mMaximumOutput;
 
@@ -75,6 +77,8 @@ public class PidController implements ClosedLoopController {
         mKi = ki;
         mKd = kd;
         mKf = kf;
+
+        mPeriodSeconds = 0.02;
 
         mMinimumOutput = -1;
         mMaximumOutput = 1;
@@ -141,6 +145,22 @@ public class PidController implements ClosedLoopController {
         mErrorEntry.setDouble(0);
         mProcessVariableEntry.setDouble(0);
         mSetPointEntry.setDouble(0);
+    }
+
+    /**
+     * Gets the <em>calculate</em> calling period, i.e. the time between each <em>calculate</em> calls.
+     * @param period time
+     */
+    public void setPeriod(Time period) {
+        mPeriodSeconds = period.valueAsSeconds();
+    }
+
+    /**
+     * Sets the <em>calculate</em> calling period, i.e. the time between each <em>calculate</em> calls.
+     * @return period
+     */
+    public Time getPeriod() {
+        return Time.seconds(mPeriodSeconds);
     }
 
     /**
@@ -248,7 +268,7 @@ public class PidController implements ClosedLoopController {
         }
 
         double iOut = mKi.getAsDouble() * mTotalError;
-        double dOut = mKd.getAsDouble() * (error - mLastError);
+        double dOut = mKd.getAsDouble() * ((error - mLastError) / mPeriodSeconds);
 
         double output = pOut + iOut + dOut + fOut;
 

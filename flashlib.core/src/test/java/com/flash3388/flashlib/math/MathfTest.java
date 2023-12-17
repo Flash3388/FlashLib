@@ -57,4 +57,16 @@ public class MathfTest {
         double distance = Mathf.shortestAngularDistance(current, last);
         assertEquals(expectedResult, distance, EQUAL_MARGIN);
     }
+
+    @ParameterizedTest(name = "motionDirection({0}, {1}) = {2}")
+    @CsvSource({
+            "180.0, 0.0, 1",
+            "270.0, 0.0, -1",
+            "90.0, 360.0, 1",
+            "90.0, 0.0, 1"
+    })
+    public void motionDirection_ofParameters_producesExpectedResult(double current, double last, double expectedResult) throws Exception {
+        double distance = Mathf.motionDirection(current, last);
+        assertEquals(expectedResult, distance, EQUAL_MARGIN);
+    }
 }
