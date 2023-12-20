@@ -86,10 +86,17 @@ public final class Mathf {
 		return (value - min) / (max - min);
 	}
 
-    public static double shortestAngularDistance(double current, double last) {
-        Vector3 currentVector = new Vector3(current - 360.0, current, current + 360.0);
+	public static double shortestAngularDistance(double from, double to) {
+		double absDistance = shortestAngularDistanceAbsolute(from, to);
+		Direction direction = shortestAngularDistanceMotionDirection(from, to);
 
-        Vector3 diffVector = currentVector.sub(last);
+		return absDistance * direction.sign();
+	}
+
+    public static double shortestAngularDistanceAbsolute(double from, double to) {
+        Vector3 currentVector = new Vector3(to - 360.0, to, to + 360.0);
+
+        Vector3 diffVector = currentVector.sub(from);
         double result = diffVector.abs().min();
 
         if (result > 180.0) {
