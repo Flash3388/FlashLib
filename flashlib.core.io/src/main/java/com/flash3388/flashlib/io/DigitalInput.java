@@ -15,4 +15,28 @@ public interface DigitalInput extends IoPort {
 	 * @return true if current input is digital HIGH, false otherwise
 	 */
 	boolean get();
+
+	/**
+	 * Creates a new {@link PulseCounter} associated with this port.
+	 * The counter will count pulses from the port.
+	 * <p>
+	 * Depending on the underlying implementation, multiple counters (of the same
+	 * or different types) might not be supported.
+	 *
+	 * @return {@link PulseCounter}
+	 * @throws UnsupportedChannelException if the port does not support this counter
+	 */
+	PulseCounter createCounter();
+
+	/**
+	 * Creates a new {@link PulseLengthCounter} associated with this port.
+	 * The counter will measure the length of pulses received by the port.
+	 * <p>
+	 * Depending on the underlying implementation, multiple counters (of the same
+	 * or different types) might not be supported.
+	 *
+	 * @return {@link PulseLengthCounter}
+	 * @throws UnsupportedChannelException if the port does not support this counter
+	 */
+	PulseLengthCounter createLengthCounter();
 }

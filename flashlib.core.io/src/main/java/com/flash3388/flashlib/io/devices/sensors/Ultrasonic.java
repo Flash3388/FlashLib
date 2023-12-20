@@ -2,8 +2,8 @@ package com.flash3388.flashlib.io.devices.sensors;
 
 import com.castle.util.closeables.Closer;
 import com.castle.util.throwables.Throwables;
-import com.flash3388.flashlib.io.Counter;
 import com.flash3388.flashlib.io.DigitalOutput;
+import com.flash3388.flashlib.io.PulseLengthCounter;
 import com.flash3388.flashlib.io.devices.DeviceConstructor;
 import com.flash3388.flashlib.io.devices.NamedArg;
 import com.flash3388.flashlib.io.devices.RangeFinder;
@@ -29,7 +29,7 @@ public class Ultrasonic implements RangeFinder {
 	private static final double PING_TIME = 10 * 1e-6;
 	private static final double SPEED_OF_SOUND = 340.29 * 100;//cm/sec
 	
-	private Counter mCounter;
+	private PulseLengthCounter mCounter;
 	private DigitalOutput mPingPort;
 
 	/**
@@ -44,17 +44,16 @@ public class Ultrasonic implements RangeFinder {
 	@DeviceConstructor
 	public Ultrasonic(
 			@NamedArg("pingChannel") DigitalOutput pingChannel,
-			@NamedArg("counter") Counter counter
+			@NamedArg("counter") PulseLengthCounter counter
 	) {
-		this.mCounter = counter;
-		this.mPingPort = pingChannel;
+		mCounter = counter;
+		mPingPort = pingChannel;
 	}
 	
 	/**
 	 * Sends a pulse to the ultrasonic sending our a sound wave.
 	 */
 	public void ping(){
-		mCounter.reset();
 		mPingPort.pulse(PING_TIME);
 	}
 
@@ -67,7 +66,7 @@ public class Ultrasonic implements RangeFinder {
 	 * @return true if a range was measured, false otherwise
 	 */
 	public boolean isRangeValid(){
-		return mCounter.get() > 0;
+		return mCounter.getLengthSeconds() > 0;
 	}
 	
 	/**
@@ -83,7 +82,7 @@ public class Ultrasonic implements RangeFinder {
 			return 0.0;
 		}
 
-		return mCounter.getPulseLength() * SPEED_OF_SOUND * 0.5;
+		return mCounter.getLengthSeconds() * SPEED_OF_SOUND * 0.5;
 	}
 
     /**

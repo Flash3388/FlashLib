@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.math;
 
+import com.flash3388.flashlib.control.Direction;
 import com.jmath.vectors.Vector3;
 
 /**
@@ -97,4 +98,33 @@ public final class Mathf {
 
         return result;
     }
+
+	public static Direction shortestAngularDistanceMotionDirection(double from, double to) {
+		from = translateAngle(from);
+		to = translateAngle(to);
+
+		if (from == to) {
+			return Direction.FORWARD;
+		}
+
+		double max = Math.max(from, to);
+		double min = Math.min(from, to);
+
+		if (max - min < 180) {
+			return max == to ? Direction.FORWARD : Direction.BACKWARD;
+		}
+		if (360 - max + min < 180) {
+			return max == to ? Direction.BACKWARD : Direction.FORWARD;
+		}
+
+		if (max == from && max - min < 180) {
+			return Direction.BACKWARD;
+		}
+
+		if (max == to && Math.abs(max - min) > 180) {
+			return Direction.BACKWARD;
+		}
+
+		return Direction.FORWARD;
+	}
 }
