@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.math;
 
+import com.flash3388.flashlib.control.Direction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -45,7 +46,7 @@ public class MathfTest {
         assertEquals(expectedResult, translated, EQUAL_MARGIN);
     }
 
-    @ParameterizedTest(name = "shortestAngularDistance({0}, {1}) = {2}")
+    @ParameterizedTest(name = "shortestAngularDistanceAbsolute({0}, {1}) = {2}")
     @CsvSource({
             "0.0, 0.0, 0.0",
             "180.0, 0.0, 180.0",
@@ -53,20 +54,20 @@ public class MathfTest {
             "90.0, 360.0, 90.0",
             "90.0, 0.0, 90.0"
     })
-    public void shortestAngularDistance_ofParameters_producesExpectedResult(double current, double last, double expectedResult) throws Exception {
-        double distance = Mathf.shortestAngularDistance(current, last);
+    public void shortestAngularDistanceAbsolute_ofParameters_producesExpectedResult(double from, double to, double expectedResult) throws Exception {
+        double distance = Mathf.shortestAngularDistanceAbsolute(from, to);
         assertEquals(expectedResult, distance, EQUAL_MARGIN);
     }
 
     @ParameterizedTest(name = "motionDirection({0}, {1}) = {2}")
     @CsvSource({
             "180.0, 0.0, 1",
-            "270.0, 0.0, -1",
-            "90.0, 360.0, 1",
-            "90.0, 0.0, 1"
+            "270.0, 0.0, 1",
+            "90.0, 360.0, -1",
+            "90.0, 0.0, -1"
     })
-    public void motionDirection_ofParameters_producesExpectedResult(double current, double last, double expectedResult) throws Exception {
-        double distance = Mathf.motionDirection(current, last);
-        assertEquals(expectedResult, distance, EQUAL_MARGIN);
+    public void motionDirection_ofParameters_producesExpectedResult(double from, double to, double expectedResult) throws Exception {
+        Direction direction = Mathf.shortestAngularDistanceMotionDirection(from, to);
+        assertEquals(expectedResult, direction.sign(), EQUAL_MARGIN);
     }
 }
