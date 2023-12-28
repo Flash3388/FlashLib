@@ -29,6 +29,7 @@ include 'examples:robot:basic-robot'
 include 'examples:robot:robot-manual-mode-control'
 include 'examples:robot:basic-trigger'
 include 'examples:robot:sdl2-hid'
+include 'examples:robot:basic-statemachine'
 
 include 'examples:vision:basic-vision'
 include 'examples:vision:vision-control'

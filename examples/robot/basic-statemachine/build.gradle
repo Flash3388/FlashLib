@@ -1,0 +1,10 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':flashlib.core.robot')
+    implementation project(':flashlib.robot.systems')
+}
+
+mainClassName = 'robot.Main'
