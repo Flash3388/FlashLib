@@ -4,6 +4,8 @@ import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.statemachines.State;
+import com.flash3388.flashlib.scheduling.statemachines.StateMachine;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Time;
@@ -191,4 +193,6 @@ public interface Scheduler {
      */
     @MainThreadOnly
     ActionGroup newActionGroup(ActionGroupType type);
+
+    StateMachine newStateMachine(String name);
 }

@@ -10,12 +10,12 @@ import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.impl.statemachines.StateMachineImpl;
 import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.ManualBasedTrigger;
-import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionControllerImpl;
-import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
+import com.flash3388.flashlib.scheduling.statemachines.StateMachine;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Clock;
@@ -261,6 +261,12 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         return new ActionGroupImpl(this, LOGGER, policy);
+    }
+
+    @Override
+    public StateMachine newStateMachine(String name) {
+        StoredObject root = mRootObject.getChild("statemachines").getChild(name);
+        return new StateMachineImpl(this, name, root);
     }
 
     private void executeTriggers() {
