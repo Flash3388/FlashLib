@@ -2,9 +2,11 @@ package com.flash3388.flashlib.scheduling.impl.triggers;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.impl.triggers.handlers.CancelOnState;
+import com.flash3388.flashlib.scheduling.impl.triggers.handlers.InitiateOnState;
 import com.flash3388.flashlib.scheduling.impl.triggers.handlers.RunOnState;
 import com.flash3388.flashlib.scheduling.impl.triggers.handlers.StartOnState;
 import com.flash3388.flashlib.scheduling.impl.triggers.handlers.ToggleOnState;
+import com.flash3388.flashlib.scheduling.statemachines.Transition;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 import java.util.ArrayList;
@@ -33,6 +35,11 @@ public class TriggerBaseImpl implements Trigger {
     @Override
     public void whenActive(Action action) {
         addStateListener(new StartOnState(TriggerState.ACTIVE, action));
+    }
+
+    @Override
+    public void whenActive(Transition transition) {
+        addStateListener(new InitiateOnState(TriggerState.ACTIVE, transition));
     }
 
     @Override

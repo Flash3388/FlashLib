@@ -10,6 +10,7 @@ import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
+import com.flash3388.flashlib.scheduling.impl.statemachines.InternalStateMachine;
 import com.flash3388.flashlib.scheduling.impl.statemachines.StateMachineImpl;
 import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
@@ -48,6 +49,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private final Map<Action, RunningActionContext> mRunningActions;
     private final Collection<Action> mActionsToRemove;
     private final Collection<GenericTrigger> mTriggers;
+    private final Collection<InternalStateMachine> mStateMachines;
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, Action> mDefaultActions;
 
@@ -61,6 +63,7 @@ public class SingleThreadedScheduler implements Scheduler {
                             Map<Action, RunningActionContext> runningActions,
                             Collection<Action> actionsToRemove,
                             Collection<GenericTrigger> triggers,
+                            Collection<InternalStateMachine> stateMachines,
                             Map<Requirement, Action> requirementsUsage,
                             Map<Subsystem, Action> defaultActions) {
         mClock = clock;
@@ -70,6 +73,7 @@ public class SingleThreadedScheduler implements Scheduler {
         mRunningActions = runningActions;
         mActionsToRemove = actionsToRemove;
         mTriggers = triggers;
+        mStateMachines = stateMachines;
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
 
@@ -85,6 +89,7 @@ public class SingleThreadedScheduler implements Scheduler {
                 new LinkedHashMap<>(10),
                 new ArrayList<>(2),
                 new ArrayList<>(15),
+                new ArrayList<>(2),
                 new HashMap<>(10),
                 new HashMap<>(5));
     }
@@ -191,6 +196,7 @@ public class SingleThreadedScheduler implements Scheduler {
         mMainThread.verifyCurrentThread();
 
         executeTriggers();
+        updateStateMachines(mode);
         executeRunningActions(mode);
 
         for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
@@ -266,7 +272,10 @@ public class SingleThreadedScheduler implements Scheduler {
     @Override
     public StateMachine newStateMachine(String name) {
         StoredObject root = mRootObject.getChild("statemachines").getChild(name);
-        return new StateMachineImpl(this, name, root);
+        InternalStateMachine stateMachine = new StateMachineImpl(this, name, root);
+        mStateMachines.add(stateMachine);
+
+        return stateMachine;
     }
 
     private void executeTriggers() {
@@ -293,6 +302,12 @@ public class SingleThreadedScheduler implements Scheduler {
             if (!isRunning(action)) {
                 start(action);
             }
+        }
+    }
+
+    private void updateStateMachines(SchedulerMode mode) {
+        for (InternalStateMachine stateMachine : mStateMachines) {
+            stateMachine.update(mode);
         }
     }
 

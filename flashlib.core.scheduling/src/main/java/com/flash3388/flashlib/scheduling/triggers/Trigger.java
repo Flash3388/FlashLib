@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.triggers;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerState;
+import com.flash3388.flashlib.scheduling.statemachines.Transition;
 
 /**
  * A trigger is an object which can be either active or inactive. It is possible
@@ -23,6 +24,17 @@ public interface Trigger {
      * @param action action to register
      */
     void whenActive(Action action);
+
+    /**
+     * <p>
+     *     Registers a {@link Transition} to run when this trigger is activated, i.e. when
+     *     this trigger goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE},
+     *     the transition is initiated.
+     * </p>
+     *
+     * @param transition transition to register
+     */
+    void whenActive(Transition transition);
 
     /**
      * <p>

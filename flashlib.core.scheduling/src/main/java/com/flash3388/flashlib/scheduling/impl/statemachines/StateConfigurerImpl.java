@@ -1,11 +1,12 @@
 package com.flash3388.flashlib.scheduling.impl.statemachines;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.statemachines.ActionAttacher;
 import com.flash3388.flashlib.scheduling.statemachines.State;
 import com.flash3388.flashlib.scheduling.statemachines.StateConfigurer;
-import com.flash3388.flashlib.scheduling.statemachines.Transition;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 public class StateConfigurerImpl implements StateConfigurer {
 
@@ -16,26 +17,14 @@ public class StateConfigurerImpl implements StateConfigurer {
     }
 
     @Override
-    public StateConfigurer whileActive(Action action) {
-        mContainer.addAction(action);
-        return this;
-    }
-
-    @Override
-    public StateConfigurer whileActive(Action action, Transition onFinish) {
-        mContainer.addAction(action, onFinish);
-        return this;
-    }
-
-    @Override
     public StateConfigurer onEnter(Runnable runnable) {
-        mContainer.addOnEnter(runnable);
+        mContainer.setOnEnter(runnable);
         return this;
     }
 
     @Override
     public StateConfigurer onExit(Runnable runnable) {
-        mContainer.addOnExit(runnable);
+        mContainer.setOnExit(runnable);
         return this;
     }
 
@@ -43,5 +32,10 @@ public class StateConfigurerImpl implements StateConfigurer {
     public StateConfigurer allowTransitionTo(Collection<? extends State> states) {
         mContainer.allowTransitionTo(states);
         return this;
+    }
+
+    @Override
+    public ActionAttacher attach(Supplier<Action> actionSupplier) {
+        return new ActionAttacherImpl(this, mContainer, actionSupplier);
     }
 }

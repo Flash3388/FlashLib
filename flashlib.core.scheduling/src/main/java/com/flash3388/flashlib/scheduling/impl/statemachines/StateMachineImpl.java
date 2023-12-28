@@ -3,9 +3,9 @@ package com.flash3388.flashlib.scheduling.impl.statemachines;
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.Scheduler;
+import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.statemachines.State;
 import com.flash3388.flashlib.scheduling.statemachines.StateConfigurer;
-import com.flash3388.flashlib.scheduling.statemachines.StateMachine;
 import com.flash3388.flashlib.scheduling.statemachines.Transition;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
@@ -17,8 +17,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class StateMachineImpl implements StateMachine {
+public class StateMachineImpl implements InternalStateMachine {
 
     private static final String[] EMPTY_STRING_ARR = new String[0];
 
@@ -29,27 +30,35 @@ public class StateMachineImpl implements StateMachine {
 
     private final Map<State, StateContainer> mStates;
     private final Set<State> mActiveStates;
+    private final Set<State> mIdleStates;
 
     private final StoredEntry mActiveStatesEntry;
+
+    private boolean mWasIdleModeInitialized;
 
     StateMachineImpl(Scheduler scheduler,
                      String name,
                      StoredObject rootObject,
                      Map<State, StateContainer> states,
-                     Set<State> activeStates) {
+                     Set<State> activeStates,
+                     Set<State> idleStates) {
         mScheduler = new WeakReference<>(scheduler);
         mName = name;
         mStates = states;
         mActiveStates = activeStates;
+        mIdleStates = idleStates;
 
         mActiveStatesEntry = rootObject.getEntry("activeStates");
         mActiveStatesEntry.setStringArray(EMPTY_STRING_ARR);
+
+        mWasIdleModeInitialized = false;
     }
 
     public StateMachineImpl(Scheduler scheduler, String name, StoredObject rootObject) {
         this(scheduler, name, rootObject,
                 new HashMap<>(10),
-                new HashSet<>(5));
+                new HashSet<>(5),
+                new HashSet<>(2));
     }
 
     @Override
@@ -57,6 +66,13 @@ public class StateMachineImpl implements StateMachine {
         StateContainer container = new StateContainer(mScheduler, state, state.getClass());
         mStates.put(state, container);
         return new StateConfigurerImpl(container);
+    }
+
+    @Override
+    public void configureIdleStates(Collection<? extends State> states) {
+        mIdleStates.clear();
+        mIdleStates.addAll(states);
+        mWasIdleModeInitialized = false;
     }
 
     @Override
@@ -83,6 +99,25 @@ public class StateMachineImpl implements StateMachine {
         onEnter(states);
     }
 
+    @Override
+    public void resetToIdleStates() {
+        reset(mIdleStates);
+    }
+
+    @Override
+    public void update(SchedulerMode mode) {
+        if (mode.isDisabled()) {
+            if (!mWasIdleModeInitialized) {
+                LOGGER.info("StateMachine {} entering idle mode", mName);
+
+                mWasIdleModeInitialized = true;
+                reset(mIdleStates);
+            }
+        } else {
+            mWasIdleModeInitialized = false;
+        }
+    }
+
     void transitionTo(Collection<? extends State> states) {
         LOGGER.info("StateMachine {} preparing transition", mName);
 
@@ -104,7 +139,10 @@ public class StateMachineImpl implements StateMachine {
             mActiveStates.add(state);
         }
 
-        mActiveStatesEntry.setStringArray(mActiveStates.toArray(EMPTY_STRING_ARR));
+        Set<String> activeStateNames = mActiveStates.stream()
+                .map(State::name)
+                .collect(Collectors.toSet());
+        mActiveStatesEntry.setStringArray(activeStateNames.toArray(EMPTY_STRING_ARR));
     }
 
     private void onExit(Collection<? extends State> states) {

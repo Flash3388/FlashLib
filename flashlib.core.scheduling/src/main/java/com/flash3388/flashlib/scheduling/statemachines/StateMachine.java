@@ -7,6 +7,12 @@ public interface StateMachine {
 
     <T extends Enum<?> & State> StateConfigurer configure(T state);
 
+    void configureIdleStates(Collection<? extends State> states);
+
+    default void configureIdleStates(State... states) {
+        configureIdleStates(Arrays.asList(states));
+    }
+
     Transition newTransition(Collection<? extends State> states);
 
     default Transition newTransition(State... states) {
@@ -24,4 +30,6 @@ public interface StateMachine {
     default void reset(State... states) {
         reset(Arrays.asList(states));
     }
+
+    void resetToIdleStates();
 }

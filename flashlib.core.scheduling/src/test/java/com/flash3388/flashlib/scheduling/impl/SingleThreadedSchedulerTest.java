@@ -11,7 +11,6 @@ import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
-import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
@@ -55,7 +54,7 @@ class SingleThreadedSchedulerTest {
                 mRunningActions,
                 new ArrayList<>(),
                 mTriggers,
-                mRequirementsUsage,
+                stateMachines, mRequirementsUsage,
                 mDefaultActions);
     }
 

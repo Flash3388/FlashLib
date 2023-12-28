@@ -5,17 +5,18 @@ import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionBase;
-import com.flash3388.flashlib.scheduling.statemachines.Transition;
+
+import java.util.Collection;
 
 public class AttachedAction extends ActionBase {
 
     private final Action mWrapperAction;
-    private final Transition mOnFinish;
+    private final Collection<AttachmentTransition> mTransitions;
 
-    public AttachedAction(Scheduler scheduler, Action wrapperAction, Transition onFinish) {
+    public AttachedAction(Scheduler scheduler, Action wrapperAction, Collection<AttachmentTransition> transitions) {
         super(scheduler);
         mWrapperAction = wrapperAction;
-        mOnFinish = onFinish;
+        mTransitions = transitions;
 
         setConfiguration(wrapperAction.getConfiguration());
     }
@@ -34,8 +35,10 @@ public class AttachedAction extends ActionBase {
     public void end(FinishReason reason) {
         mWrapperAction.end(reason);
 
-        if (mOnFinish != null) {
-            mOnFinish.initiate();
+        for (AttachmentTransition transition : mTransitions) {
+            if (transition.transitionIfNeeded(reason)) {
+                break;
+            }
         }
     }
 }

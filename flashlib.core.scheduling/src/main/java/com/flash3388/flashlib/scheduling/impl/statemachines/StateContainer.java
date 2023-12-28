@@ -3,14 +3,14 @@ package com.flash3388.flashlib.scheduling.impl.statemachines;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.statemachines.State;
-import com.flash3388.flashlib.scheduling.statemachines.Transition;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class StateContainer {
 
@@ -21,25 +21,26 @@ public class StateContainer {
     private final Class<?> mStateCls;
 
     private final Collection<State> mAllowedTransitions;
-    private final Collection<AttachedAction> mActions;
-    private final Collection<Runnable> mCallbacksOnEnter;
-    private final Collection<Runnable> mCallbacksOnExit;
+    private final Collection<Function<Scheduler, Action>> mActionSuppliers;
+    private final Collection<Action> mRunningActions;
+    private Runnable mCallbackOnEnter;
+    private Runnable mCallbackOnExit;
 
 
     public StateContainer(WeakReference<Scheduler> scheduler,
                           State state,
                           Class<?> stateCls,
                           Collection<State> allowedTransitions,
-                          Collection<AttachedAction> actions,
-                          Collection<Runnable> callbacksOnEnter,
-                          Collection<Runnable> callbacksOnExit) {
+                          Collection<Function<Scheduler, Action>> actionSuppliers,
+                          Collection<Action> runningActions) {
         mScheduler = scheduler;
         mState = state;
         mStateCls = stateCls;
         mAllowedTransitions = allowedTransitions;
-        mActions = actions;
-        mCallbacksOnEnter = callbacksOnEnter;
-        mCallbacksOnExit = callbacksOnExit;
+        mActionSuppliers = actionSuppliers;
+        mRunningActions = runningActions;
+        mCallbackOnEnter = null;
+        mCallbackOnExit = null;
     }
 
     public StateContainer(WeakReference<Scheduler> scheduler,
@@ -48,8 +49,7 @@ public class StateContainer {
         this(scheduler, state, stateCls,
                 new ArrayList<>(4),
                 new ArrayList<>(2),
-                new ArrayList<>(1),
-                new ArrayList<>(1));
+                new ArrayList<>(2));
     }
 
     public State getState() {
@@ -60,60 +60,57 @@ public class StateContainer {
         return mStateCls;
     }
 
-    public Collection<State> getAllowedTransitions() {
-        return Collections.unmodifiableCollection(mAllowedTransitions);
-    }
-
-    public Collection<Action> getActions() {
-        return Collections.unmodifiableCollection(mActions);
-    }
-
-    public Collection<Runnable> getCallbacksOnEnter() {
-        return Collections.unmodifiableCollection(mCallbacksOnEnter);
-    }
-
-    public Collection<Runnable> getCallbacksOnExit() {
-        return Collections.unmodifiableCollection(mCallbacksOnExit);
-    }
-
     public boolean canTransitionTo(State newState) {
         return mAllowedTransitions.contains(newState);
-    }
-
-    public void allowTransitionTo(State state) {
-        mAllowedTransitions.add(state);
     }
 
     public void allowTransitionTo(Collection<? extends State> states) {
         mAllowedTransitions.addAll(states);
     }
 
-    public void addAction(Action action) {
-        addAction(action, null);
+    public void setOnEnter(Runnable runnable) {
+        mCallbackOnEnter = runnable;
     }
 
-    public void addAction(Action action, Transition onFinish) {
+    public void setOnExit(Runnable runnable) {
+        mCallbackOnExit = runnable;
+    }
+
+    public void addAction(Function<Scheduler, Action> action) {
+        mActionSuppliers.add(action);
+    }
+
+    public void onEnter() {
+        LOGGER.trace("State {} onEnter", mState.name());
+
         Scheduler scheduler = mScheduler.get();
         if (scheduler == null) {
             throw new IllegalStateException("scheduler garbage collected");
         }
 
-        mActions.add(new AttachedAction(scheduler, action, onFinish));
-    }
+        if (mCallbackOnEnter != null) {
+            mCallbackOnEnter.run();
+        }
 
-    public void addOnEnter(Runnable runnable) {
-        mCallbacksOnEnter.add(runnable);
-    }
-
-    public void addOnExit(Runnable runnable) {
-        mCallbacksOnExit.add(runnable);
-    }
-
-    public void onEnter() {
-        LOGGER.trace("State {} onEnter", mState.name());
+        for (Function<Scheduler, Action> actionSupplier : mActionSuppliers) {
+            Action action = actionSupplier.apply(scheduler);
+            if (!action.isRunning()) {
+                action.start();
+                mRunningActions.add(action);
+            }
+        }
     }
 
     public void onExit() {
         LOGGER.trace("State {} onExit", mState.name());
+
+        if (mCallbackOnExit != null) {
+            mCallbackOnExit.run();
+        }
+
+        for (Action action : mRunningActions) {
+            action.cancel();
+        }
+        mRunningActions.clear();
     }
 }
