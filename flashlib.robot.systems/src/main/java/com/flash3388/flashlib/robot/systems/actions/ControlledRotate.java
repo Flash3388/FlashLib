@@ -13,19 +13,22 @@ public class ControlledRotate extends ActionBase {
     private final Rotatable mRotatable;
     private final ClosedLoopController mController;
     private final DoubleSupplier mProcessVariable;
-    private final double mSetpoint;
+    private final DoubleSupplier mSetpoint;
     private final boolean mIsContinous;
+    private final boolean mShouldStopOnFinish;
 
     public ControlledRotate(Rotatable rotatable,
                             ClosedLoopController controller,
                             DoubleSupplier processVariable,
-                            double setpoint,
-                            boolean isContinous) {
+                            DoubleSupplier setpoint,
+                            boolean isContinous,
+                            boolean shouldStopOnFinish) {
         mRotatable = rotatable;
         mController = controller;
         mProcessVariable = processVariable;
         mSetpoint = setpoint;
         mIsContinous = isContinous;
+        mShouldStopOnFinish = shouldStopOnFinish;
     }
 
     @Override
@@ -47,6 +50,8 @@ public class ControlledRotate extends ActionBase {
 
     @Override
     public void end(FinishReason reason) {
-        mRotatable.stop();
+        if (reason.isInterrupt() || mShouldStopOnFinish) {
+            mRotatable.stop();
+        }
     }
 }
