@@ -46,6 +46,12 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
 
         // TODO: AUTO TRANSITIONS WHEN ACTIONS ARE STARTED OR FINISHED
         // TODO: LINK MULTIPLE CHANGES FOR TRANSITION
+        // TODO: DEFINE EXIT STATES ON TRANSITION
+        // TODO: MAINTAIN CERTAIN STATES ON DISABLED
+        // TODO: CONFIGURE COMPLEX MULTI-STATE CHANGE TRANSITIONS
+        //      like: if state1, transition to state2 via action1, if state3 transition to state2 via action2
+        //      basically: if elevator at height1, move to height2 by action up; if elevator at height3, move to height2 by action down
+        //      TRANSITIONS MUST BE CONFIGURED COMPLETELY LIKE STATES
 
         // FEEDER
 
