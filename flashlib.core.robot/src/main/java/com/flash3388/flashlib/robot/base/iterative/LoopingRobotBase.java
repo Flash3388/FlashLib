@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.robot.base.iterative;
 
 import com.flash3388.flashlib.app.StartupException;
+import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.base.RobotBase;
 import com.flash3388.flashlib.robot.modes.RobotMode;
@@ -21,6 +22,7 @@ public class LoopingRobotBase implements RobotBase {
 
     private RobotControl mRobotControl;
     private IterativeRobot mRobot;
+    private Watchdog mLoopWatchdog;
     private RobotMode mCurrentMode;
     private RobotMode mLastMode;
     private boolean mWasCurrentModeInitialized;
@@ -29,7 +31,7 @@ public class LoopingRobotBase implements RobotBase {
      * Creates a new looping base.
      *
      * @param robotInitializer initializer for user robot logic.
-     * @param robotLooper looper object to run the loops periodically.
+     * @param robotLooper      looper object to run the loops periodically.
      */
     public LoopingRobotBase(IterativeRobot.Initializer robotInitializer, RobotLooper robotLooper) {
         mRobotInitializer = robotInitializer;
@@ -59,6 +61,8 @@ public class LoopingRobotBase implements RobotBase {
     @Override
     public final void robotInit(RobotControl robotControl) throws StartupException {
         mRobotControl = robotControl;
+        mLoopWatchdog = robotControl.newWatchdog("LoopingRobotBase", mRobotLooper.getLoopRunPeriod());
+
         mRobot = mRobotInitializer.init(robotControl);
     }
 
@@ -80,9 +84,11 @@ public class LoopingRobotBase implements RobotBase {
     }
 
     protected final void robotLoop(){
+        mLoopWatchdog.enable();
+
         mCurrentMode = mRobotControl.getMode();
 
-        if (!mCurrentMode.equals(mLastMode)) {
+        if (!mCurrentMode.equals(mLastMode) && mWasCurrentModeInitialized) {
             exitMode(mCurrentMode);
             mLastMode = mCurrentMode;
             mWasCurrentModeInitialized = false;
@@ -94,6 +100,9 @@ public class LoopingRobotBase implements RobotBase {
         }
 
         periodicMode(mCurrentMode);
+
+        mLoopWatchdog.feed();
+        mLoopWatchdog.disable();
     }
 
     private void initMode(RobotMode mode) {
@@ -111,18 +120,24 @@ public class LoopingRobotBase implements RobotBase {
         mRobotControl.getLogger().debug("Periodic mode {}", mode);
 
         mRobotControl.getMainThread().executePendingTasks();
+        mLoopWatchdog.reportTimestamp("MainThread.executePendingTasks");
+
         mRobotControl.getServiceRegistry().startAll();
+        mLoopWatchdog.reportTimestamp("ServiceRegistry.startAll");
+
         mRobotControl.getScheduler().run(mode);
+        mLoopWatchdog.reportTimestamp("Scheduler.run");
 
         if (mode.isDisabled()) {
             mRobot.disabledPeriodic();
         } else {
             mRobot.modePeriodic(mode);
         }
+        mLoopWatchdog.reportTimestamp("ModePeriodic");
 
         mRobotControl.getLogger().debug("Robot periodic");
-
         mRobot.robotPeriodic();
+        mLoopWatchdog.reportTimestamp("robotPeriodic");
     }
 
     private void exitMode(RobotMode mode) {

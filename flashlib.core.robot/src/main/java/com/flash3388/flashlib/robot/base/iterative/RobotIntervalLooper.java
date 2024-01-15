@@ -29,6 +29,11 @@ public class RobotIntervalLooper implements RobotLooper {
     }
 
     @Override
+    public Time getLoopRunPeriod() {
+        return mIterationInterval;
+    }
+
+    @Override
 	public void startLooping(Clock clock, Runnable loopTask) {
         while(mRunLoopProperty.getAsBoolean() && !Thread.interrupted()){
             Time start = clock.currentTime();

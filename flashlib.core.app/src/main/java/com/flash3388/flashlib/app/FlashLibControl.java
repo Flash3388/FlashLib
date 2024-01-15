@@ -3,7 +3,10 @@ package com.flash3388.flashlib.app;
 import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkingMode;
+import com.flash3388.flashlib.app.watchdog.FeedReporter;
+import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -114,4 +117,44 @@ public interface FlashLibControl {
      */
     FlashLibMainThread getMainThread();
 
+    /**
+     * Creates a new watchdog, used to track run of services, threads or loops. As a way to ensure
+     * it runs within a specific time.
+     *
+     * To use the watchdog, the target must periodically call {@link Watchdog#feed()}. As long as
+     * it keeps updating the {@link Watchdog} in time, then we can assume that it is up and running.
+     * If the target does not update the watchdog within a set amount of time, then it is considered <em>expired</em>
+     * while will be reported.
+     *
+     * The watchdog must first be enabled for usage with {@link Watchdog#enable()}.
+     *
+     * @param name name of the watchdog
+     * @param timeout time within the watchdog is expected to be updated, if the watchdog was not updated within
+     *                 the given time, it is <em>expired</em> and this will be reported.
+     * @param reporter reporter to updated on <em>expiration</em>
+     * @return {@link Watchdog}
+     *
+     * @see #newWatchdog(String, Time)
+     */
+    Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter);
+
+    /**
+     * Creates a new watchdog, used to track run of services, threads or loops. As a way to ensure
+     * it runs within a specific time.
+     *
+     * To use the watchdog, the target must periodically call {@link Watchdog#feed()}. As long as
+     * it keeps updating the {@link Watchdog} in time, then we can assume that it is up and running.
+     * If the target does not update the watchdog within a set amount of time, then it is considered <em>expired</em>
+     * while will be reported to the log.
+     *
+     * The watchdog must first be enabled for usage with {@link Watchdog#enable()}.
+     *
+     * @param name name of the watchdog
+     * @param timeout time within the watchdog is expected to be updated, if the watchdog was not updated within
+     *                 the given time, it is <em>expired</em> and this will be reported.
+     * @return {@link Watchdog}
+     *
+     * @see #newWatchdog(String, Time, FeedReporter)
+     */
+    Watchdog newWatchdog(String name, Time timeout);
 }

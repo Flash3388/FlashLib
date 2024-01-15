@@ -1,7 +1,10 @@
 package com.flash3388.flashlib.app;
 
 import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.app.watchdog.FeedReporter;
+import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -49,5 +52,15 @@ public class DelegatingAppBase implements FlashLibControl {
     @Override
     public FlashLibMainThread getMainThread() {
         return mControl.getMainThread();
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter) {
+        return mControl.newWatchdog(name, timeout, reporter);
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout) {
+        return mControl.newWatchdog(name, timeout);
     }
 }

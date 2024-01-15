@@ -2,6 +2,8 @@ package com.flash3388.flashlib.robot.base;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.app.watchdog.FeedReporter;
+import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.io.devices.DeviceInterface;
@@ -9,6 +11,7 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -116,5 +119,15 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public FlashLibMainThread getMainThread() {
         return mRobotControl.getMainThread();
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter) {
+        return mRobotControl.newWatchdog(name, timeout, reporter);
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout) {
+        return mRobotControl.newWatchdog(name, timeout);
     }
 }
