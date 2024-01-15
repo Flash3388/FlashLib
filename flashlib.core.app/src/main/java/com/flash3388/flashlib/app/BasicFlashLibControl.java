@@ -10,6 +10,8 @@ import com.flash3388.flashlib.app.watchdog.MultiFeedReporters;
 import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.app.watchdog.WatchdogImpl;
 import com.flash3388.flashlib.app.watchdog.WatchdogService;
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;
 import com.flash3388.flashlib.time.Time;
@@ -94,8 +96,9 @@ public class BasicFlashLibControl implements FlashLibControl {
 
     @Override
     public Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter) {
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
         FeedReporter feedReporter = new MultiFeedReporters(Arrays.asList(new LoggingFeedReporter(), reporter));
-        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, feedReporter);
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, feedReporter, rootObject);
         mWatchdogService.register(watchdog);
 
         return watchdog;
@@ -103,7 +106,8 @@ public class BasicFlashLibControl implements FlashLibControl {
 
     @Override
     public Watchdog newWatchdog(String name, Time timeout) {
-        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, new LoggingFeedReporter());
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, new LoggingFeedReporter(), rootObject);
         mWatchdogService.register(watchdog);
 
         return watchdog;

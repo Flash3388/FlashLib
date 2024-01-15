@@ -1,5 +1,10 @@
 package com.flash3388.flashlib.app.watchdog;
 
+import com.flash3388.flashlib.app.FlashLibControl;
+import com.flash3388.flashlib.app.net.NetworkInterface;
+import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredEntry;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -19,17 +24,25 @@ public class WatchdogImpl implements InternalWatchdog {
     private final Time mTimeout;
     private final FeedReporter mReporter;
 
+    private final StoredEntry mLastFeedTimeEntry;
+    private final StoredEntry mIsEnabledEntry;
+    private final StoredEntry mIsExpiredEntry;
+
     private final Lock mLock;
     private final List<TimestampReport> mReports;
     private Time mLastFeedTime;
     private boolean mDisabled;
     private boolean mIsExpired;
 
-    public WatchdogImpl(Clock clock, String name, Time timeout, FeedReporter reporter) {
+    public WatchdogImpl(Clock clock, String name, Time timeout, FeedReporter reporter, StoredObject rootObject) {
         mClock = clock;
         mName = name;
         mTimeout = timeout;
         mReporter = reporter;
+
+        mLastFeedTimeEntry = rootObject.getEntry("LastFeedTime");
+        mIsEnabledEntry = rootObject.getEntry("IsEnabled");
+        mIsExpiredEntry = rootObject.getEntry("IsExpired");
 
         mLock = new ReentrantLock();
         mReports = new ArrayList<>(5);
@@ -70,6 +83,10 @@ public class WatchdogImpl implements InternalWatchdog {
             mIsExpired = false;
             mLastFeedTime = Time.INVALID;
             mReports.clear();
+
+            mIsEnabledEntry.setBoolean(false);
+            mIsExpiredEntry.setBoolean(false);
+            mLastFeedTimeEntry.setDouble(-1);
         } finally {
             mLock.unlock();
         }
@@ -86,6 +103,11 @@ public class WatchdogImpl implements InternalWatchdog {
             mReports.clear();
             mIsExpired = false;
             mLastFeedTime = mClock.currentTime();
+
+            mIsEnabledEntry.setBoolean(true);
+            mIsExpiredEntry.setBoolean(false);
+            mLastFeedTimeEntry.setDouble(mLastFeedTime.valueAsSeconds());
+
             mDisabled = false;
         } finally {
             mLock.unlock();
@@ -133,6 +155,9 @@ public class WatchdogImpl implements InternalWatchdog {
             mIsExpired = false;
             mLastFeedTime = now;
             mReports.clear();
+
+            mIsExpiredEntry.setBoolean(false);
+            mLastFeedTimeEntry.setDouble(mLastFeedTime.valueAsSeconds());
         } finally {
             mLock.unlock();
         }
@@ -142,6 +167,10 @@ public class WatchdogImpl implements InternalWatchdog {
     public Time getTimeLeftToTimeout() {
         mLock.lock();
         try {
+            if (mDisabled) {
+                return Time.INVALID;
+            }
+
             Time now = mClock.currentTime();
             return now.sub(mLastFeedTime);
         } finally {
@@ -168,9 +197,22 @@ public class WatchdogImpl implements InternalWatchdog {
 
                 Time overrun = timePassed.sub(mTimeout);
                 mReporter.reportFeedExpired(mName, overrun, mReports);
+
+                mIsExpiredEntry.setBoolean(true);
             }
         } finally {
             mLock.unlock();
+        }
+    }
+
+    public static StoredObject getWatchdogStoredObject(FlashLibControl control, String name) {
+        NetworkInterface networkInterface = control.getNetworkInterface();
+        if (networkInterface.getMode().isObjectStorageEnabled()) {
+            ObjectStorage objectStorage = networkInterface.getObjectStorage();
+            return objectStorage.getInstanceRoot().getChild("Watchdogs").getChild(name);
+        } else {
+            control.getLogger().warn("OBSR not enabled, creating non attached Watchdog");
+            return new StoredObject.Stub();
         }
     }
 }

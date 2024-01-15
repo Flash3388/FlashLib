@@ -19,6 +19,7 @@ import com.flash3388.flashlib.io.devices.DeviceInterfaceImpl;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.ping.HfcsPing;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.hfcs.control.HfcsRobotControl;
@@ -241,8 +242,9 @@ public class GenericRobotControl implements RobotControl {
 
     @Override
     public Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter) {
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
         FeedReporter feedReporter = new MultiFeedReporters(Arrays.asList(new LoggingFeedReporter(), reporter));
-        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, feedReporter);
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, feedReporter, rootObject);
         mWatchdogService.register(watchdog);
 
         return watchdog;
@@ -250,7 +252,8 @@ public class GenericRobotControl implements RobotControl {
 
     @Override
     public Watchdog newWatchdog(String name, Time timeout) {
-        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, new LoggingFeedReporter());
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, new LoggingFeedReporter(), rootObject);
         mWatchdogService.register(watchdog);
 
         return watchdog;

@@ -2,6 +2,7 @@ package com.flash3388.flashlib.app.watchdog;
 
 import com.castle.concurrent.service.TerminalServiceBase;
 import com.castle.exceptions.ServiceException;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.concurrent.Sleeper;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
@@ -61,7 +62,11 @@ public class WatchdogService extends TerminalServiceBase {
                         }
 
                         // TODO: BETTER WAIT FOR TIMEOUT
-                        mSleeper.sleep(watchdog.getTimeLeftToTimeout());
+                        Time waitTime = watchdog.getTimeLeftToTimeout();
+                        if (waitTime.isValid()) {
+                            mSleeper.sleep(waitTime);
+                        }
+
                         watchdog.checkFed();
                     } finally {
                         mWatchdogs.add(watchdog);
