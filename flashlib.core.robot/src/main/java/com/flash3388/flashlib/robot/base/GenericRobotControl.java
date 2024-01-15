@@ -5,6 +5,13 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkConfiguration;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
+import com.flash3388.flashlib.app.watchdog.FeedReporter;
+import com.flash3388.flashlib.app.watchdog.InternalWatchdog;
+import com.flash3388.flashlib.app.watchdog.LoggingFeedReporter;
+import com.flash3388.flashlib.app.watchdog.MultiFeedReporters;
+import com.flash3388.flashlib.app.watchdog.Watchdog;
+import com.flash3388.flashlib.app.watchdog.WatchdogImpl;
+import com.flash3388.flashlib.app.watchdog.WatchdogService;
 import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.io.devices.DeviceInterface;
@@ -12,6 +19,7 @@ import com.flash3388.flashlib.io.devices.DeviceInterfaceImpl;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.ping.HfcsPing;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
 import com.flash3388.flashlib.robot.hfcs.control.HfcsRobotControl;
@@ -30,6 +38,7 @@ import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -77,6 +86,7 @@ public class GenericRobotControl implements RobotControl {
     private final ServiceRegistry mServiceRegistry;
     private final FlashLibMainThread mMainThread;
     private final DeviceInterface mDeviceInterface;
+    private final WatchdogService mWatchdogService;
 
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
@@ -100,6 +110,9 @@ public class GenericRobotControl implements RobotControl {
         mServiceRegistry = serviceRegistry;
         mMainThread = mainThread;
         mDeviceInterface = deviceInterface;
+
+        mWatchdogService = new WatchdogService();
+        mServiceRegistry.register(mWatchdogService);
     }
 
     public GenericRobotControl(InstanceId instanceId,
@@ -151,6 +164,9 @@ public class GenericRobotControl implements RobotControl {
 
         mHidInterface = configuration.hidBackend.createInterface(this);
         mIoInterface = configuration.ioBackend.createInterface(this);
+
+        mWatchdogService = new WatchdogService();
+        mServiceRegistry.register(mWatchdogService);
     }
 
     public GenericRobotControl(InstanceId instanceId,
@@ -222,6 +238,25 @@ public class GenericRobotControl implements RobotControl {
     @Override
     public FlashLibMainThread getMainThread() {
         return mMainThread;
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout, FeedReporter reporter) {
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
+        FeedReporter feedReporter = new MultiFeedReporters(Arrays.asList(new LoggingFeedReporter(), reporter));
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, feedReporter, rootObject);
+        mWatchdogService.register(watchdog);
+
+        return watchdog;
+    }
+
+    @Override
+    public Watchdog newWatchdog(String name, Time timeout) {
+        StoredObject rootObject = WatchdogImpl.getWatchdogStoredObject(this, name);
+        InternalWatchdog watchdog = new WatchdogImpl(getClock(), name, timeout, new LoggingFeedReporter(), rootObject);
+        mWatchdogService.register(watchdog);
+
+        return watchdog;
     }
 
     @Override
