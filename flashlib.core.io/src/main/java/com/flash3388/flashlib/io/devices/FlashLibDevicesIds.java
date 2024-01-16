@@ -94,6 +94,8 @@ public class FlashLibDevicesIds {
      * which use two channels: trigger which forces the device to send a pulse, and echo which the device uses
      * to reply with the distance.
      *
+     * Based on <em>HC-SR04</em>.
+     *
      * <p>
      * Params:
      * <ul>
