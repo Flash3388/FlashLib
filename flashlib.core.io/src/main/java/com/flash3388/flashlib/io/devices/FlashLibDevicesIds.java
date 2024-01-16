@@ -7,6 +7,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a basic PWM speed (motor) controller.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>port</em> ({@link com.flash3388.flashlib.io.Pwm}): port the device is connected to.</li>
@@ -19,6 +20,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a basic PWM position controller.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>port</em> ({@link com.flash3388.flashlib.io.Pwm}): port the device is connected to.</li>
@@ -31,6 +33,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a TalonSRX speed (motor) controller connected via a PWM port.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>port</em> ({@link com.flash3388.flashlib.io.Pwm}): port the device is connected to.</li>
@@ -41,6 +44,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a Talon speed (motor) controller connected via a PWM port.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>port</em> ({@link com.flash3388.flashlib.io.Pwm}): port the device is connected to.</li>
@@ -51,6 +55,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a basic accelerometer which is connected via an analog port.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>input</em> ({@link com.flash3388.flashlib.io.AnalogInput}): port the device is connected to.</li>
@@ -63,6 +68,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a basic range finder which is connected via an analog port.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>input</em> ({@link com.flash3388.flashlib.io.AnalogInput}): port the device is connected to.</li>
@@ -74,6 +80,7 @@ public class FlashLibDevicesIds {
     /**
      * Defines a basic range finder which is connected via a digital port and uses pulses to report the range.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>counter</em> ({@link com.flash3388.flashlib.io.PulseLengthCounter}): counter on the port the device is connected to.</li>
@@ -87,6 +94,7 @@ public class FlashLibDevicesIds {
      * which use two channels: trigger which forces the device to send a pulse, and echo which the device uses
      * to reply with the distance.
      *
+     * <p>
      * Params:
      * <ul>
      *     <li><em>pingChannel</em> ({@link com.flash3388.flashlib.io.DigitalOutput}): channel used to trigger pings (trigger).</li>
