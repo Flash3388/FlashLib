@@ -34,6 +34,16 @@ public class DeviceInterfaceImpl implements DeviceInterface {
     }
 
     @Override
+    public <T> T newDevice(DeviceId<T> id, Map<String, Object> namedArgs) {
+        return newDevice(id.id(), id.baseType(), namedArgs);
+    }
+
+    @Override
+    public <T, T2 extends T> T2 newDevice(DeviceId<T> id, Class<T2> type, Map<String, Object> namedArgs) {
+        return newDevice(id.id(), type, namedArgs);
+    }
+
+    @Override
     public GroupBuilder<SpeedController, SpeedControllerGroup> newSpeedControllerGroup() {
         mMainThread.verifyCurrentThread();
         return new GroupBuilder<>(this, SpeedControllerGroup::new, SpeedController.class);

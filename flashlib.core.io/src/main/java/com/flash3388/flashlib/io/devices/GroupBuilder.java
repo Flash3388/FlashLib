@@ -57,6 +57,21 @@ public class GroupBuilder<E, T extends DeviceGroup<E>> {
         return addNewDevice(id, mElementType, namedArgs);
     }
 
+    /**
+     * Finds a registered implementation for the given ID which matches the wanted type.
+     * Once the implementation is found, a constructor is matched to the given arguments
+     * count and an instance is created.
+     *
+     * @param id implementation identifier
+     * @param namedArgs arguments to the constructor
+     * @return this
+     *
+     * @see DeviceInterface#newDevice(int, Class, Map)
+     */
+    public <T2 extends T> GroupBuilder<E, T> addNewDevice(DeviceId<T2> id, Map<String, Object> namedArgs) {
+        return addNewDevice(id.id(), mElementType, namedArgs);
+    }
+
     public T build() {
         return mCreator.apply(mParts);
     }
