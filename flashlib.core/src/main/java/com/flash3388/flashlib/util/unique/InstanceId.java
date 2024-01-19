@@ -9,7 +9,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class InstanceId {
+
+    private static final int MACHINE_ID_SIZE = Long.BYTES;
     private static final int PROCESS_ID_SIZE = Long.BYTES;
+    public static final int SIZE = MACHINE_ID_SIZE + PROCESS_ID_SIZE;
 
     private final byte[] mMachineId;
     private final byte[] mProcessId;
@@ -18,7 +21,10 @@ public class InstanceId {
         Objects.requireNonNull(machineId, "machineId");
         Objects.requireNonNull(processId, "processId");
 
-        assert machineId.length > 1;
+        machineId = padId(machineId, MACHINE_ID_SIZE);
+        processId = padId(processId, PROCESS_ID_SIZE);
+
+        assert MACHINE_ID_SIZE == machineId.length;
         assert PROCESS_ID_SIZE == processId.length;
 
         mMachineId = machineId;
@@ -84,5 +90,13 @@ public class InstanceId {
         return String.format("{0x%s-0x%s}",
                 Binary.bytesToHex(mMachineId),
                 Binary.bytesToHex(mProcessId));
+    }
+
+    private static byte[] padId(byte[] bytes, int wantedLength) {
+        if (bytes.length >= wantedLength) {
+            return bytes;
+        }
+
+        return Arrays.copyOf(bytes, wantedLength);
     }
 }

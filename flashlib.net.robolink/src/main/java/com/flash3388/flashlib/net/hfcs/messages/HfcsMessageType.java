@@ -25,7 +25,7 @@ public class HfcsMessageType implements MessageType {
     }
 
     @Override
-    public InMessage parse(DataInput dataInput) throws IOException {
+    public InMessage read(DataInput dataInput) throws IOException {
         InType<?> type = readType(dataInput);
         Object data = readFrom(dataInput, type);
         return new HfcsInMessage(type, data);

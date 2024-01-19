@@ -1,8 +1,7 @@
 package com.flash3388.flashlib.net.obsr.messages;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
-import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.net.obsr.Value;
 
 import java.io.DataInput;
@@ -11,30 +10,28 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StorageContentsMessage implements InMessage, OutMessage {
+public class StorageContentsMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(100004, StorageContentsMessage::readFrom);
+    // TODO: DEPENDING ON AMOUNT OF DATA, THIS MESSAGE MIGHT BE TOO BIG
+    //      CAN PROBABLY BE BROKEN DOWN INTO PIECES
 
-    private Map<String, Value> mEntries;
+    public static final MessageType TYPE = MessageType.create(100004,
+            StorageContentsMessage::readFrom,
+            StorageContentsMessage::writeInto);
+
+    private final Map<String, Value> mEntries;
 
     public StorageContentsMessage(Map<String, Value> entries) {
         mEntries = entries;
     }
 
-    private StorageContentsMessage() {
+    @Override
+    public MessageType getType() {
+        return null;
     }
 
     public Map<String, Value> getEntries() {
         return mEntries;
-    }
-
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-        output.writeInt(mEntries.size());
-        for (Map.Entry<String, Value> entry : mEntries.entrySet()) {
-            output.writeUTF(entry.getKey());
-            EntryHelper.writeValueTo(output, entry.getValue());
-        }
     }
 
     private static StorageContentsMessage readFrom(DataInput input) throws IOException {
@@ -49,5 +46,15 @@ public class StorageContentsMessage implements InMessage, OutMessage {
         }
 
         return new StorageContentsMessage(entries);
+    }
+
+    private static void writeInto(Message message, DataOutput output) throws IOException {
+        StorageContentsMessage actualMessage = (StorageContentsMessage) message;
+
+        output.writeInt(actualMessage.mEntries.size());
+        for (Map.Entry<String, Value> entry : actualMessage.mEntries.entrySet()) {
+            output.writeUTF(entry.getKey());
+            EntryHelper.writeValueTo(output, entry.getValue());
+        }
     }
 }

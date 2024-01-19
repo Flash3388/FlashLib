@@ -15,25 +15,31 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AutoConnectingChannel implements NetChannel {
 
+    public interface Listener {
+        void onConnection();
+    }
+
     private static final Time CONNECTION_WAIT_TIME = Time.milliseconds(100);
 
     private final NetChannelConnector mConnector;
     private final SocketAddress mRemoteAddress;
     private final Logger mLogger;
-    private final Runnable mOnConnection;
+    private final ChannelStateListener mStateListener;
 
     private final AtomicReference<NetChannel> mUnderlyingChannel;
     private final Lock mLock;
 
-    public AutoConnectingChannel(NetChannelConnector connector, SocketAddress remoteAddress, Logger logger, Runnable onConnection) {
+    public AutoConnectingChannel(NetChannelConnector connector, SocketAddress remoteAddress, Logger logger, ChannelStateListener stateListener) {
         mConnector = connector;
         mRemoteAddress = remoteAddress;
         mLogger = logger;
-        mOnConnection = onConnection;
+        mStateListener = stateListener;
 
         mUnderlyingChannel = new AtomicReference<>();
         mLock = new ReentrantLock();
     }
+
+    // TODO: MAYBE ON CERTAIN EXCEPTIONS, RESET THE CHANNEL
 
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
@@ -54,6 +60,11 @@ public class AutoConnectingChannel implements NetChannel {
             NetChannel channel = mUnderlyingChannel.getAndSet(null);
             Closeables.silentClose(channel);
             Closeables.silentClose(mConnector);
+
+            if (channel != null) {
+                NetClientInfo clientInfo = new NetClientInfo(mRemoteAddress);
+                mStateListener.onDisconnect(clientInfo);
+            }
         } finally {
             mLock.unlock();
         }
@@ -72,7 +83,9 @@ public class AutoConnectingChannel implements NetChannel {
                 throw new ClosedChannelException();
             }
 
-            mOnConnection.run();
+            NetClientInfo clientInfo = new NetClientInfo(mRemoteAddress);
+            mStateListener.onConnect(clientInfo);
+
             mUnderlyingChannel.set(channel);
 
             return channel;

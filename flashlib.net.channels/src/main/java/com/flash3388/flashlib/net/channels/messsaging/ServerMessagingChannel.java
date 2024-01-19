@@ -1,14 +1,15 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.net.messaging.Message;
+import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.IOException;
 
-public interface MessagingChannel extends OutMessagingChannel {
+public interface ServerMessagingChannel extends OutMessagingChannel {
 
     interface UpdateHandler {
-        void onConnect();
-        void onDisconnect();
+        void onClientConnected(InstanceId clientId);
+        void onClientDisconnected(InstanceId clientId);
         void onNewMessage(MessageHeader header, Message message);
     }
 

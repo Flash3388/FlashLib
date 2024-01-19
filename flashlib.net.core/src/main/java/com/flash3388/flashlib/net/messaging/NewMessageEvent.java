@@ -5,9 +5,9 @@ import com.notifier.Event;
 public class NewMessageEvent implements Event {
 
     private final MessageMetadata mMetadata;
-    private final InMessage mMessage;
+    private final Message mMessage;
 
-    public NewMessageEvent(MessageMetadata metadata, InMessage message) {
+    public NewMessageEvent(MessageMetadata metadata, Message message) {
         mMetadata = metadata;
         mMessage = message;
     }
@@ -16,11 +16,11 @@ public class NewMessageEvent implements Event {
         return mMetadata;
     }
 
-    public InMessage getMessage() {
+    public Message getMessage() {
         return mMessage;
     }
 
-    public <T extends InMessage> T getMessage(Class<T> type) {
+    public <T extends Message> T getMessage(Class<T> type) {
         if (type.isInstance(mMessage)) {
             return type.cast(mMessage);
         }

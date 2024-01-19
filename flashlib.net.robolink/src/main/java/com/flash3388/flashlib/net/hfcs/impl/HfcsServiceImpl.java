@@ -2,7 +2,7 @@ package com.flash3388.flashlib.net.hfcs.impl;
 
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.NetChannel;
-import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.hfcs.messages.HfcsMessageType;
 import com.flash3388.flashlib.time.Clock;
@@ -20,7 +20,7 @@ public class HfcsServiceImpl extends HfcsServiceBase {
         super(ourId, clock);
 
 
-        mChannel = new BasicMessagingChannel(
+        mChannel = new BasicMessagingChannelImpl(
                 channelCreator,
                 ourId,
                 LOGGER,

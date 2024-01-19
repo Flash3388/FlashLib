@@ -4,6 +4,7 @@ import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelConnector;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
@@ -15,7 +16,10 @@ import java.nio.channels.SocketChannel;
 
 public class TcpClientConnector implements NetChannelConnector {
 
+    private static final int MIN_CONNECTION_WAIT_TIME_MS = 5;
+
     private final int mBindPort;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private NetChannel mChannel;
@@ -23,8 +27,9 @@ public class TcpClientConnector implements NetChannelConnector {
 
     private boolean mLastAttemptError;
 
-    public TcpClientConnector(int bindPort, Logger logger) {
+    public TcpClientConnector(int bindPort, Clock clock, Logger logger) {
         mBindPort = bindPort;
+        mClock = clock;
         mLogger = logger;
 
         mChannel = null;
@@ -32,8 +37,8 @@ public class TcpClientConnector implements NetChannelConnector {
         mLastAttemptError = false;
     }
 
-    public TcpClientConnector(Logger logger) {
-        this(-1, logger);
+    public TcpClientConnector(Clock clock, Logger logger) {
+        this(-1, clock, logger);
     }
 
     @Override
@@ -45,16 +50,24 @@ public class TcpClientConnector implements NetChannelConnector {
             Thread.sleep(timeout.valueAsMillis());
         }
 
+        Time startTime = mClock.currentTime();
+        Time sleepTime = Time.milliseconds(Math.max(MIN_CONNECTION_WAIT_TIME_MS, timeout.valueAsMillis() / 4));
+
         SocketChannel channel = openChannel();
 
         try {
             if (!channel.connect(remote)) {
                 while (!channel.finishConnect()) {
+                    Time now = mClock.currentTime();
+                    if (now.sub(startTime).largerThanOrEquals(timeout)) {
+                        throw new TimeoutException();
+                    }
+
                     //noinspection BusyWait
-                    Thread.sleep(timeout.valueAsMillis());
+                    Thread.sleep(sleepTime.valueAsMillis());
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | TimeoutException e) {
             Closeables.silentClose(mBaseChannel);
             mBaseChannel = null;
             mLastAttemptError = true;
@@ -68,6 +81,7 @@ public class TcpClientConnector implements NetChannelConnector {
         mLogger.debug("TCP Client {} connected to {}",
                 mBaseChannel.getLocalAddress(),
                 mBaseChannel.getRemoteAddress());
+
         return new TcpChannel(mBaseChannel);
     }
 

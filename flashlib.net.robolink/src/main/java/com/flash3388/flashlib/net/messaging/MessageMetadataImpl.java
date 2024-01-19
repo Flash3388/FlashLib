@@ -9,7 +9,7 @@ public class MessageMetadataImpl implements MessageMetadata {
     private final Time mTimestamp;
     private final MessageType mType;
 
-    public MessageMetadataImpl(InstanceId sender, Time timestamp, MessageType type) {
+    MessageMetadataImpl(InstanceId sender, Time timestamp, MessageType type) {
         mSender = sender;
         mTimestamp = timestamp;
         mType = type;

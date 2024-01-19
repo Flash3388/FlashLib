@@ -1,17 +1,18 @@
 package com.flash3388.flashlib.net.obsr.messages;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
+import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
-import com.flash3388.flashlib.net.messaging.OutMessage;
 import com.flash3388.flashlib.net.obsr.Value;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class EntryChangeMessage implements InMessage, OutMessage {
+public class EntryChangeMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(100001, EntryChangeMessage::readFrom);
+    public static final MessageType TYPE = MessageType.create(100001,
+            EntryChangeMessage::readFrom,
+            EntryChangeMessage::writeInto);
 
     private String mEntryPath;
     private Value mValue;
@@ -21,8 +22,9 @@ public class EntryChangeMessage implements InMessage, OutMessage {
         mValue = value;
     }
 
-    private EntryChangeMessage() {
-
+    @Override
+    public MessageType getType() {
+        return TYPE;
     }
 
     public String getEntryPath() {
@@ -33,10 +35,10 @@ public class EntryChangeMessage implements InMessage, OutMessage {
         return mValue;
     }
 
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-        output.writeUTF(mEntryPath);
-        EntryHelper.writeValueTo(output, mValue);
+    private static void writeInto(Message message, DataOutput output) throws IOException {
+        EntryChangeMessage actualMessage = (EntryChangeMessage) message;
+        output.writeUTF(actualMessage.mEntryPath);
+        EntryHelper.writeValueTo(output, actualMessage.mValue);
     }
 
     private static EntryChangeMessage readFrom(DataInput input) throws IOException {

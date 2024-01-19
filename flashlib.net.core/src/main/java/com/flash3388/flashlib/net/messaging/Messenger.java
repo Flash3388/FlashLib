@@ -2,6 +2,8 @@ package com.flash3388.flashlib.net.messaging;
 
 import com.beans.observables.RegisteredListener;
 
+import java.util.Set;
+
 /**
  * A sender/receiver service for {@link Message} objects with other processes.
  *
@@ -20,13 +22,13 @@ public interface Messenger {
 
     /**
      * Registers a listener for messages. Receives notifications only for messages
-     * of a specific type.
+     * of specific types.
      *
      * @param listener listener
-     * @param type type of message
+     * @param types types of messages
      * @return a registrations
      */
-    RegisteredListener addListener(MessageListener listener, MessageType type);
+    RegisteredListener addListener(MessageListener listener, Set<? extends MessageType> types);
 
     /**
      * Sends a message to the connected remote. If not connected, the message

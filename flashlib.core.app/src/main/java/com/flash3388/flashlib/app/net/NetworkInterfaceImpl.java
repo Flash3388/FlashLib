@@ -6,7 +6,7 @@ import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
 import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Messenger;
-import com.flash3388.flashlib.net.messaging.MessengerService;
+import com.flash3388.flashlib.net.messaging.MessengerServiceBase;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
 import com.flash3388.flashlib.time.Clock;
@@ -101,7 +101,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
             mServiceRegistry.register(routingService);
         }
 
-        MessengerService service = new MessengerService(mInstanceId, mClock, messageTypes, configuration.serverAddress);
+        MessengerServiceBase service = new MessengerServiceBase(mInstanceId, mClock, messageTypes, configuration.serverAddress);
         mServiceRegistry.register(service);
         return service;
     }

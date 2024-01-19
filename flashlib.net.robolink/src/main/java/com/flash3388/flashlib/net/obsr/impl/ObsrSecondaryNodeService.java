@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
 import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
@@ -31,7 +31,7 @@ public class ObsrSecondaryNodeService extends ObsrNodeServiceBase implements Obj
         super(ourId, clock);
 
         KnownMessageTypes messageTypes = getMessageTypes();
-        mChannel = new BasicMessagingChannel(
+        mChannel = new BasicMessagingChannelImpl(
                 new TcpClientConnector(LOGGER),
                 serverAddress,
                 ourId,

@@ -1,13 +1,15 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
-import com.flash3388.flashlib.net.messaging.InMessage;
 import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.Message;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -17,12 +19,10 @@ public class MessageReadingContext {
     public static class ParseResult {
 
         private final MessageHeader mHeader;
-        private final MessageInfo mInfo;
-        private final InMessage mMessage;
+        private final Message mMessage;
 
-        public ParseResult(MessageHeader header, MessageInfo info, InMessage message) {
+        public ParseResult(MessageHeader header, Message message) {
             mHeader = header;
-            mInfo = info;
             mMessage = message;
         }
 
@@ -30,11 +30,7 @@ public class MessageReadingContext {
             return mHeader;
         }
 
-        public MessageInfo getInfo() {
-            return mInfo;
-        }
-
-        public InMessage getMessage() {
+        public Message getMessage() {
             return mMessage;
         }
     }
@@ -42,26 +38,26 @@ public class MessageReadingContext {
     private final KnownMessageTypes mMessageTypes;
     private final Logger mLogger;
 
-    private final CircularByteBuffer mBuffer;
-    private final byte[] mMessageHeaderBuffer;
+    private final CircularByteBuffer mDataToReadBuffer;
+    private final byte[] mReadBuffer;
 
     private MessageHeader mLastHeader;
 
     public MessageReadingContext(KnownMessageTypes messageTypes, Logger logger) {
         mMessageTypes = messageTypes;
         mLogger = logger;
-        mBuffer = new CircularByteBuffer(2048);
-        mMessageHeaderBuffer = new byte[MessageHeader.SIZE];
+        // TODO: USE THIS OR SOME OTHER BUFFER FOR BOTH READING FROM THE CHANNEL AND PARSING
+        mDataToReadBuffer = new CircularByteBuffer(2048);
+        mReadBuffer = new byte[1024];
 
         mLastHeader = null;
     }
 
     public void clear() {
-        mBuffer.clear();
-    }
+        mLogger.trace("Resetting message reading context");
 
-    public boolean hasEnoughSpace() {
-        return mBuffer.hasSpace(1024);
+        mDataToReadBuffer.clear();
+        mLastHeader = null;
     }
 
     public void updateBuffer(ByteBuffer buffer, int bytesInBuffer) {
@@ -69,68 +65,80 @@ public class MessageReadingContext {
             return;
         }
 
-        byte[] data = new byte[bytesInBuffer];
-        buffer.get(data);
-
         mLogger.trace("Updating context with new data");
-        mBuffer.add(data, 0, data.length);
+
+        if (!mDataToReadBuffer.hasSpace(bytesInBuffer)) {
+            // our side data buffer doesn't have enough space to
+            // store the additional incoming data.
+            throw new BufferOverflowException();
+        }
+
+        while (bytesInBuffer > 0) {
+            int bytesToRead = Math.min(bytesInBuffer, mReadBuffer.length);
+            buffer.get(mReadBuffer, 0, bytesToRead);
+            bytesInBuffer -= bytesToRead;
+
+            mDataToReadBuffer.add(mReadBuffer, 0, bytesToRead);
+        }
     }
 
     public Optional<ParseResult> parse() throws IOException {
-        // run parsing loop to handle multiple phases of parsing
-        while (true) {
-            if (mLastHeader == null) {
-                // need to read header
-                if (mBuffer.getCurrentNumberOfBytes() >= MessageHeader.SIZE) {
-                    mLogger.trace("Enough bytes to read header");
-                    mLastHeader = readHeader();
-                } else {
-                    break;
-                }
+        if (mLastHeader == null) {
+            // need to read header
+            if (mDataToReadBuffer.getCurrentNumberOfBytes() >= MessageHeader.SIZE) {
+                mLogger.trace("Enough bytes to read header");
+                mLastHeader = readHeader();
             } else {
-                if (mBuffer.getCurrentNumberOfBytes() >= mLastHeader.getContentSize()) {
-                    mLogger.trace("Enough bytes to read message");
-                    try {
-                        ParseResult result = readMessage(mLastHeader);
-                        mLastHeader = null;
+                // not enough bytes to read header, so try again later when we have enough
+                return Optional.empty();
+            }
+        }
 
-                        return Optional.of(result);
-                    } catch (IOException e) {
-                        if (e.getCause() != null && e.getCause().getClass().equals(NoSuchElementException.class)) {
-                            // ignore this message and inform
-                            mLogger.warn("Received unknown message. Ignoring it");
-                            mLastHeader = null;
-                        } else {
-                            throw e;
-                        }
-                    }
+        if (mDataToReadBuffer.getCurrentNumberOfBytes() >= mLastHeader.getContentSize()) {
+            mLogger.trace("Enough bytes to read message");
+            try {
+                ParseResult result = readMessage(mLastHeader);
+                mLastHeader = null;
+                return Optional.of(result);
+            } catch (IOException e) {
+                if (e.getCause() != null && e.getCause().getClass().equals(NoSuchElementException.class)) {
+                    // ignore this message and inform
+                    mLogger.warn("Received unknown message. Ignoring it");
+                    mLastHeader = null;
                 } else {
-                    break;
+                    throw e;
                 }
             }
         }
 
+        // either failure to read/parse the message
+        // or not enough data to parse it yet.
         return Optional.empty();
     }
 
     private MessageHeader readHeader() throws IOException {
-        mBuffer.read(mMessageHeaderBuffer, 0, mMessageHeaderBuffer.length);
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mMessageHeaderBuffer);
+        mDataToReadBuffer.read(mReadBuffer, 0, mReadBuffer.length);
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             return new MessageHeader(dataInputStream);
         }
     }
 
     private ParseResult readMessage(MessageHeader header) throws IOException {
-        byte[] buffer = new byte[header.getContentSize()];
-        mBuffer.read(buffer, 0, buffer.length);
+        if (header.getContentSize() > mReadBuffer.length) {
+            // our reading buffer doesn't have enough space to read from the buffered data.
+            // TODO: CREATE AN INPUT STREAM WHICH DYNAMICALLY FILLS FROM THE BUFFERED DATA
+            throw new BufferOverflowException();
+        }
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+        mDataToReadBuffer.read(mReadBuffer, 0, mReadBuffer.length);
+
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-            MessageInfo messageInfo = new MessageInfo(dataInputStream, mMessageTypes);
-            InMessage message = messageInfo.getType().parse(dataInputStream);
+            MessageType type = mMessageTypes.get(header.getMessageType());
+            Message message = type.read(dataInputStream);
 
-            return new ParseResult(header, messageInfo, message);
+            return new ParseResult(header, message);
         }
     }
 }
