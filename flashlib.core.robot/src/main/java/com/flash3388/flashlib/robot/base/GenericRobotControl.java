@@ -16,15 +16,10 @@ import com.flash3388.flashlib.hid.HidInterface;
 import com.flash3388.flashlib.io.IoInterface;
 import com.flash3388.flashlib.io.devices.DeviceInterface;
 import com.flash3388.flashlib.io.devices.DeviceInterfaceImpl;
-import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.hfcs.ping.HfcsPing;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RobotFactory;
-import com.flash3388.flashlib.robot.hfcs.control.HfcsRobotControl;
-import com.flash3388.flashlib.robot.hfcs.control.RobotControlData;
-import com.flash3388.flashlib.robot.hfcs.state.HfcsRobotState;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.robot.modes.RobotModeSupplier;
 import com.flash3388.flashlib.robot.modes.StaticRobotModeSupplier;
@@ -40,7 +35,6 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Supplier;
 
 public class GenericRobotControl implements RobotControl {
 
@@ -136,7 +130,7 @@ public class GenericRobotControl implements RobotControl {
                 new ObjectStorage.Stub();
 
         if (configuration.hfcsRobotControl) {
-            if (!mNetworkInterface.getMode().isHfcsEnabled()) {
+            /*if (!mNetworkInterface.getMode().isHfcsEnabled()) {
                 throw new IllegalStateException("HFCS control requested but HFCS not enabled");
             }
             HfcsRegistry hfcsRegistry = mNetworkInterface.getHfcsRegistry();
@@ -150,7 +144,8 @@ public class GenericRobotControl implements RobotControl {
                 mModeSupplier = modeSupplier;
             }
 
-            HfcsRobotState.registerProvider(this, Time.milliseconds(100));
+            HfcsRobotState.registerProvider(this, Time.milliseconds(100));*/
+            throw new UnsupportedOperationException();
         } else {
             if (modeSupplier == null) {
                 mModeSupplier = new StaticRobotModeSupplier(RobotMode.DISABLED);

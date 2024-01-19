@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.obsr.impl;
 
-import com.flash3388.flashlib.net.obsr.EntryValueObservableProperty;
 import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueProperty;
@@ -17,7 +16,7 @@ public class StoredEntryNode {
     public StoredEntryNode(StorageBasedEntry entry, EntryValueObservableProperty valueProperty) {
         mEntry = entry;
         mValueProperty = valueProperty;
-        mValue = new Value();
+        mValue = Value.empty();
         mLastChangeTimestamp = Time.INVALID;
     }
 

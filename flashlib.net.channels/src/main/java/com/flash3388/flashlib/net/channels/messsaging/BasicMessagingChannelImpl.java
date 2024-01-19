@@ -1,14 +1,15 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.AutoConnectingChannel;
 import com.flash3388.flashlib.net.channels.ChannelStateListener;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelConnector;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -20,7 +21,8 @@ import java.util.Optional;
 
 public class BasicMessagingChannelImpl implements MessagingChannel {
 
-    protected final NetChannel mChannel;
+    private final NetChannel mChannel;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private final ChannelStateListenerImpl mChannelStateListener;
@@ -36,11 +38,12 @@ public class BasicMessagingChannelImpl implements MessagingChannel {
                                      KnownMessageTypes messageTypes) {
         mChannelStateListener = new ChannelStateListenerImpl(this);
         mChannel = new AutoConnectingChannel(connector, remote, logger, mChannelStateListener);
+        mClock = clock;
         mLogger = logger;
 
         mReadBuffer = ByteBuffer.allocateDirect(1024);
         mReadingContext = new MessageReadingContext(messageTypes, logger);
-        mSerializer = new MessageSerializer(ourId, clock);
+        mSerializer = new MessageSerializer(ourId);
     }
 
     @Override
@@ -80,9 +83,15 @@ public class BasicMessagingChannelImpl implements MessagingChannel {
     }
 
     @Override
+    public void resetConnection() {
+        Closeables.silentClose(mChannel);
+    }
+
+    @Override
     public void write(Message message) throws IOException {
         // TODO: OPTIMIZE FOR REUSING BUFFERS
-        byte[] content = mSerializer.serialize(message);
+        Time now = mClock.currentTime();
+        byte[] content = mSerializer.serialize(now, message);
         mChannel.write(ByteBuffer.wrap(content));
     }
 

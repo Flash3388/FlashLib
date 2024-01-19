@@ -1,4 +1,6 @@
-package com.flash3388.flashlib.net.messaging;
+package com.flash3388.flashlib.net.channels.messsaging;
+
+import com.flash3388.flashlib.net.messaging.MessageType;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +28,10 @@ public class KnownMessageTypes {
 
     public void put(MessageType type) {
         mTypeMap.put(type.getKey(), type);
+    }
+
+    public void putAll(Collection<? extends MessageType> types) {
+        types.forEach(this::put);
     }
 
     public MessageType get(int key) {

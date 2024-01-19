@@ -1,12 +1,13 @@
 package com.flash3388.flashlib.net.messaging;
 
 import com.flash3388.flashlib.net.channels.messsaging.OutMessagingChannel;
+import com.flash3388.flashlib.net.messaging.Message;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 
-public class WriteTask implements Runnable {
+class WriteTask implements Runnable {
 
     private final OutMessagingChannel mChannel;
     private final BlockingQueue<Message> mQueue;
@@ -27,10 +28,12 @@ public class WriteTask implements Runnable {
                 Message message = mQueue.take();
                 mChannel.write(message);
             } catch (IOException e) {
-                mLogger.debug("Error writing message", e);
+                mLogger.debug("WriteTask: Error writing message", e);
                 // TODO: WE CAN REQUEUE MESSAGE, FOR A FEW ATTEMPTS
             } catch (InterruptedException e) {
                 break;
+            } catch (Throwable t) {
+                mLogger.debug("WriteTask: Unknown error", t);
             }
         }
     }

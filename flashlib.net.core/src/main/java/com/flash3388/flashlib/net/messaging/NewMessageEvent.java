@@ -16,6 +16,10 @@ public class NewMessageEvent implements Event {
         return mMetadata;
     }
 
+    public MessageType getType() {
+        return mMetadata.getType();
+    }
+
     public Message getMessage() {
         return mMessage;
     }

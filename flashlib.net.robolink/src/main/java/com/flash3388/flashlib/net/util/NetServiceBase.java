@@ -2,8 +2,6 @@ package com.flash3388.flashlib.net.util;
 
 import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,15 +9,9 @@ import java.util.Map;
 
 public abstract class NetServiceBase extends SingleUseService {
 
-    protected final InstanceId mOurId;
-    protected final Clock mClock;
-
     private final List<Thread> mThreads;
 
-    public NetServiceBase(InstanceId ourId, Clock clock) {
-        mOurId = ourId;
-        mClock = clock;
-
+    public NetServiceBase() {
         mThreads = new LinkedList<>();
     }
 

@@ -39,18 +39,26 @@ public class AutoConnectingChannel implements NetChannel {
         mLock = new ReentrantLock();
     }
 
-    // TODO: MAYBE ON CERTAIN EXCEPTIONS, RESET THE CHANNEL
-
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
-        NetChannel channel = getChannel();
-        return channel.read(buffer);
+        try {
+            NetChannel channel = getChannel();
+            return channel.read(buffer);
+        } catch (IOException e) {
+            Closeables.silentClose(this);
+            throw e;
+        }
     }
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        NetChannel channel = getChannel();
-        channel.write(buffer);
+        try {
+            NetChannel channel = getChannel();
+            channel.write(buffer);
+        } catch (IOException e) {
+            Closeables.silentClose(this);
+            throw e;
+        }
     }
 
     @Override

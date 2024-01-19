@@ -2,9 +2,9 @@ package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -17,6 +17,7 @@ import java.util.Optional;
 public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
     private final NetServerChannel mChannel;
+    private final Clock mClock;
 
     private final ServerUpdateHandler mUpdateHandler;
     private final MessageSerializer mSerializer;
@@ -27,9 +28,10 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                                       Clock clock,
                                       Logger logger) {
         mChannel = channel;
+        mClock = clock;
 
         mUpdateHandler = new ServerUpdateHandler(messageTypes, logger);
-        mSerializer = new MessageSerializer(ourId, clock);
+        mSerializer = new MessageSerializer(ourId);
     }
 
 
@@ -42,7 +44,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     @Override
     public void write(Message message) throws IOException {
         // TODO: OPTIMIZE FOR REUSING BUFFERS
-        byte[] content = mSerializer.serialize(message);
+        Time now = mClock.currentTime();
+        byte[] content = mSerializer.serialize(now, message);
         ByteBuffer buffer = ByteBuffer.wrap(content);
         mChannel.writeToAll(buffer);
     }
@@ -96,11 +99,11 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         @Override
         public void onNewData(NetClientInfo sender, ByteBuffer buffer, int amountReceived) throws IOException {
+            buffer.rewind();
+
             if (mClientUpdateHandler == null) {
                 return;
             }
-
-            buffer.rewind();
 
             ClientNode node = mClients.get(sender);
             if (node == null) {
@@ -127,7 +130,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         public void onNewData(ServerMessagingChannel.UpdateHandler updateHandler, ByteBuffer buffer, int amountReceived) throws IOException {
             mReadingContext.updateBuffer(buffer, amountReceived);
 
-            boolean hasMoreToParse = false;
+            boolean hasMoreToParse;
             do {
                 Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
                 if (resultOptional.isPresent()) {
@@ -160,6 +163,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
                     // TODO: THE SERVER ALSO NEEDS TO ROUTE ALL THE MESSAGES TO CLIENTS, MAYBE JUST
                     //  CALL WRITEALL? OR LET IT BE DONE BY THE UPDATEHANDLER?
+                } else {
+                    hasMoreToParse = false;
                 }
             } while (hasMoreToParse);
         }

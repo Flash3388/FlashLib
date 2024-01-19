@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr.messages;
+package com.flash3388.flashlib.net.obsr.impl.messages;
 
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
@@ -14,12 +14,18 @@ public class EntryChangeMessage implements Message {
             EntryChangeMessage::readFrom,
             EntryChangeMessage::writeInto);
 
-    private String mEntryPath;
-    private Value mValue;
+    // bits 1 & 2, can't be both
+    public static final int FLAG_CLEARED = 1;
+    public static final int FLAG_DELETED = 2;
 
-    public EntryChangeMessage(String entryPath, Value value) {
+    private final String mEntryPath;
+    private final Value mValue;
+    private final int mFlags;
+
+    public EntryChangeMessage(String entryPath, Value value, int flags) {
         mEntryPath = entryPath;
         mValue = value;
+        mFlags = flags;
     }
 
     @Override
@@ -35,15 +41,21 @@ public class EntryChangeMessage implements Message {
         return mValue;
     }
 
+    public int getFlags() {
+        return mFlags;
+    }
+
     private static void writeInto(Message message, DataOutput output) throws IOException {
         EntryChangeMessage actualMessage = (EntryChangeMessage) message;
         output.writeUTF(actualMessage.mEntryPath);
         EntryHelper.writeValueTo(output, actualMessage.mValue);
+        output.writeInt(actualMessage.mFlags);
     }
 
     private static EntryChangeMessage readFrom(DataInput input) throws IOException {
         String entryPath = input.readUTF();
         Value value = EntryHelper.readValueFrom(input);
-        return new EntryChangeMessage(entryPath, value);
+        int flags = input.readInt();
+        return new EntryChangeMessage(entryPath, value, flags);
     }
 }

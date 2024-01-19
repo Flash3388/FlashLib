@@ -3,12 +3,12 @@ package com.flash3388.flashlib.app.net;
 public class NetworkConfiguration implements NetworkingMode {
 
     private final boolean mEnabled;
-    private final ObsrConfiguration mObsrConfiguration;
-    private final HfcsConfiguration mHfcsConfiguration;
+    private final Object mObsrConfiguration;
+    private final Object mHfcsConfiguration;
 
     private NetworkConfiguration(boolean enabled,
-                                 ObsrConfiguration obsrConfiguration,
-                                 HfcsConfiguration hfcsConfiguration) {
+                                 Object obsrConfiguration,
+                                 Object hfcsConfiguration) {
         mEnabled = enabled;
         mObsrConfiguration = obsrConfiguration;
         mHfcsConfiguration = hfcsConfiguration;
@@ -22,8 +22,8 @@ public class NetworkConfiguration implements NetworkingMode {
         return new NetworkConfiguration();
     }
 
-    public static NetworkConfiguration enabled(ObsrConfiguration objectStorageConfiguration,
-                                               HfcsConfiguration hfcsConfiguration) {
+    public static NetworkConfiguration enabled(Object objectStorageConfiguration,
+                                               Object hfcsConfiguration) {
         return new NetworkConfiguration(true, objectStorageConfiguration, hfcsConfiguration);
     }
 
@@ -34,19 +34,11 @@ public class NetworkConfiguration implements NetworkingMode {
 
     @Override
     public boolean isObjectStorageEnabled() {
-        return mObsrConfiguration != null && mObsrConfiguration.creator != null;
+        return mObsrConfiguration != null;// && mObsrConfiguration.creator != null;
     }
 
     @Override
     public boolean isHfcsEnabled() {
-        return mHfcsConfiguration != null && mHfcsConfiguration.creator != null;
-    }
-
-    public ObsrConfiguration getObsrConfiguration() {
-        return mObsrConfiguration;
-    }
-
-    public HfcsConfiguration getHfcsConfiguration() {
-        return mHfcsConfiguration;
+        return mHfcsConfiguration != null;// && mHfcsConfiguration.creator != null;
     }
 }

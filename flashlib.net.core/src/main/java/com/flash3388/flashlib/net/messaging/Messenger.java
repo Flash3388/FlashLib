@@ -1,15 +1,26 @@
 package com.flash3388.flashlib.net.messaging;
 
 import com.beans.observables.RegisteredListener;
+import com.castle.concurrent.service.Service;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
- * A sender/receiver service for {@link Message} objects with other processes.
+ * A sender/receiver service for {@link Message} objects with other FlashLib applications.
  *
  * @since FlashLib 3.2.0
  */
-public interface Messenger {
+public interface Messenger extends Service {
+
+    /**
+     * Register message types expected to be sent and received via
+     * this messenger. Unregistered types received or sent will be ignored,
+     * be sure to register all used types before use.
+     *
+     * @param types types to register
+     */
+    void registerMessageTypes(Collection<? extends MessageType> types);
 
     /**
      * Registers a listener for messages. Receives notifications

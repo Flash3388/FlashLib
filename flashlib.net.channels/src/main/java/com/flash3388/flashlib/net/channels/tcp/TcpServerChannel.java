@@ -7,6 +7,7 @@ import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
+import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.io.Closeable;
@@ -27,6 +28,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
 
 public class TcpServerChannel implements NetServerChannel {
+
+    private static final Time SELECT_TIMEOUT = Time.milliseconds(20);
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
@@ -56,7 +59,10 @@ public class TcpServerChannel implements NetServerChannel {
 
         disconnectClientList(updateHandler);
 
-        int available = mSelector.selectNow();
+        // TODO: WE MIGHT WANT THE WRITE THREADS TO ALERT THIS THREAD ON OCCASION DUE
+        //  TO CLIENT CHANGES
+        mLogger.trace("Entering select");
+        int available = mSelector.select(SELECT_TIMEOUT.valueAsMillis());
         if (available < 1) {
             return;
         }
@@ -67,9 +73,11 @@ public class TcpServerChannel implements NetServerChannel {
             try {
                 if (key.isAcceptable()) {
                     // new client
+                    mLogger.trace("Select registered accept");
                     handleNewClient(updateHandler);
                 } else if (key.isReadable()) {
                     // new data from client
+                    mLogger.trace("Select registered read");
 
                     //noinspection resource
                     SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
@@ -215,7 +223,7 @@ public class TcpServerChannel implements NetServerChannel {
 
             handler.onNewData(clientInfo, mReadBuffer, incomingData.getBytesReceived());
         } catch (IOException e) {
-            mLogger.error("Error processing new data from client at {}", clientInfo.getAddress());
+            mLogger.error("Error processing new data from client at {}", clientInfo.getAddress(), e);
             disconnectClient(node, handler);
         }
     }

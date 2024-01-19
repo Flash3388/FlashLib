@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
@@ -98,16 +97,12 @@ public class MessageReadingContext {
             mLogger.trace("Enough bytes to read message");
             try {
                 ParseResult result = readMessage(mLastHeader);
-                mLastHeader = null;
                 return Optional.of(result);
-            } catch (IOException e) {
-                if (e.getCause() != null && e.getCause().getClass().equals(NoSuchElementException.class)) {
-                    // ignore this message and inform
-                    mLogger.warn("Received unknown message. Ignoring it");
-                    mLastHeader = null;
-                } else {
-                    throw e;
-                }
+            } catch (NoSuchElementException e) {
+                // ignore this message and inform
+                mLogger.warn("Received unknown message. Ignoring it");
+            } finally {
+                mLastHeader = null;
             }
         }
 
@@ -117,7 +112,7 @@ public class MessageReadingContext {
     }
 
     private MessageHeader readHeader() throws IOException {
-        mDataToReadBuffer.read(mReadBuffer, 0, mReadBuffer.length);
+        mDataToReadBuffer.read(mReadBuffer, 0, MessageHeader.SIZE);
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             return new MessageHeader(dataInputStream);
@@ -131,7 +126,7 @@ public class MessageReadingContext {
             throw new BufferOverflowException();
         }
 
-        mDataToReadBuffer.read(mReadBuffer, 0, mReadBuffer.length);
+        mDataToReadBuffer.read(mReadBuffer, 0, header.getContentSize());
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {

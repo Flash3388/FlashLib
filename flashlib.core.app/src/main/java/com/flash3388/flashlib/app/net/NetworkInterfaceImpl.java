@@ -1,17 +1,15 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.net.channels.tcp.TcpRoutingService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
-import com.flash3388.flashlib.net.messaging.MessengerServiceBase;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
-import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
+
+import java.util.Set;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
 
@@ -37,33 +35,13 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mMainThread = mainThread;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            try {
-                ObsrConfiguration.Creator creator = configuration.getObsrConfiguration().creator;
-                assert creator != null;
-
-                ObsrNodeServiceBase service = creator.create(instanceId, clock);
-                serviceRegistry.register(service);
-
-                mObjectStorage = service;
-            } catch (Exception e) {
-                throw new Error(e);
-            }
+            throw new UnsupportedOperationException();
         } else {
             mObjectStorage = null;
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            try {
-                HfcsConfiguration.Creator creator = configuration.getHfcsConfiguration().creator;
-                assert creator != null;
-
-                HfcsServiceBase service = creator.create(instanceId, clock);
-                serviceRegistry.register(service);
-
-                mHfcsRegistry = service;
-            } catch (Exception e) {
-                throw new Error(e);
-            }
+            throw new UnsupportedOperationException();
         } else {
             mHfcsRegistry = null;
         }
@@ -93,16 +71,8 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     }
 
     @Override
-    public Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration) {
+    public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
-
-        if (configuration.serverMode) {
-            TcpRoutingService routingService = new TcpRoutingService(configuration.serverAddress);
-            mServiceRegistry.register(routingService);
-        }
-
-        MessengerServiceBase service = new MessengerServiceBase(mInstanceId, mClock, messageTypes, configuration.serverAddress);
-        mServiceRegistry.register(service);
-        return service;
+        throw new UnsupportedOperationException();
     }
 }

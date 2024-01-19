@@ -2,29 +2,25 @@ package com.flash3388.flashlib.net.messaging;
 
 import com.flash3388.flashlib.net.channels.messsaging.MessageHeader;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.EventController;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.util.function.Consumer;
+import java.lang.ref.WeakReference;
 
-public class ServerReadTask implements Runnable {
+class ServerReadTask implements Runnable {
 
     private final ServerMessagingChannel mChannel;
     private final Logger mLogger;
     private final ServerMessagingChannel.UpdateHandler mHandler;
 
-    ServerReadTask(ServerMessagingChannel channel,
+    ServerReadTask(Messenger messenger,
+                   ServerMessagingChannel channel,
                    EventController eventController,
-                   Clock clock,
-                   Logger logger,
-                   Consumer<InstanceId> onClientConnection) {
+                   Logger logger) {
         mChannel = channel;
         mLogger = logger;
-        mHandler = new UpdateHandlerImpl(eventController, clock, onClientConnection);
+        mHandler = new UpdateHandlerImpl(messenger, eventController, logger);
     }
 
     @Override
@@ -32,33 +28,36 @@ public class ServerReadTask implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 mChannel.processUpdates(mHandler);
-            } catch (IOException e) {
-                mLogger.error("Error processing changes", e);
+            } catch (Throwable t) {
+                mLogger.error("ServerReadTask: Error processing updated", t);
             }
         }
     }
 
     private static class UpdateHandlerImpl implements ServerMessagingChannel.UpdateHandler {
 
+        private final WeakReference<Messenger> mMessenger;
         private final EventController mEventController;
-        private final Clock mClock;
-        private final Consumer<InstanceId> mOnClientConnection;
+        private final Logger mLogger;
 
-        private UpdateHandlerImpl(EventController eventController,
-                                  Clock clock,
-                                  Consumer<InstanceId> onClientConnection) {
+        private UpdateHandlerImpl(Messenger messenger,
+                                  EventController eventController,
+                                  Logger logger) {
+            mMessenger = new WeakReference<>(messenger);
             mEventController = eventController;
-            mClock = clock;
-            mOnClientConnection = onClientConnection;
+            mLogger = logger;
         }
 
         @Override
         public void onClientConnected(InstanceId clientId) {
-            if (mOnClientConnection != null) {
-                mOnClientConnection.accept(clientId);
-            }
+            mLogger.debug("ServerReadTask: received new client, alerting listeners");
 
-            // MAKE SURE THAT OBSR STORAGE USES LATEST VALUE BY TIMESTAMP
+            mEventController.fire(
+                    new NewClientEvent(clientId),
+                    NewClientEvent.class,
+                    ConnectionListener.class,
+                    ConnectionListener::onClientConnected
+            );
         }
 
         @Override
@@ -68,18 +67,29 @@ public class ServerReadTask implements Runnable {
 
         @Override
         public void onNewMessage(MessageHeader header, Message message) {
-            Time now = mClock.currentTime();
-            MessageMetadata metadata = new MessageMetadataImpl(header.getSender(), now, message.getType());
+            MessageMetadata metadata = new MessageMetadataImpl(
+                    header.getSender(),
+                    header.getSendTime(),
+                    message.getType());
 
-            mEventController.fire(
-                    new NewMessageEvent(
-                            metadata,
-                            message
-                    ),
-                    NewMessageEvent.class,
-                    MessageListener.class,
-                    MessageListener::onNewMessage
-            );
+            if (message.getType().equals(PingMessage.TYPE)) {
+                mLogger.debug("ServerReadTask: received ping message, responding");
+
+                // resend the ping message with the same time
+                Messenger messenger = mMessenger.get();
+                if (messenger != null) {
+                    messenger.send(message);
+                }
+            } else {
+                mLogger.debug("ServerReadTask: received message, alerting listeners");
+
+                mEventController.fire(
+                        new NewMessageEvent(metadata, message),
+                        NewMessageEvent.class,
+                        MessageListener.class,
+                        MessageListener::onNewMessage
+                );
+            }
         }
     }
 }

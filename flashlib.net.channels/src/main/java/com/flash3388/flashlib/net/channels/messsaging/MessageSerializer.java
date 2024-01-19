@@ -13,14 +13,12 @@ import java.io.IOException;
 public class MessageSerializer {
 
     private final InstanceId mOurId;
-    private final Clock mClock;
 
-    public MessageSerializer(InstanceId ourId, Clock clock) {
+    public MessageSerializer(InstanceId ourId) {
         mOurId = ourId;
-        mClock = clock;
     }
 
-    public byte[] serialize(Message message) throws IOException {
+    public byte[] serialize(Time sendTime, Message message) throws IOException {
         MessageType type = message.getType();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -29,7 +27,6 @@ public class MessageSerializer {
         }
 
         byte[] content = outputStream.toByteArray();
-        Time sendTime = mClock.currentTime();
         MessageHeader header = new MessageHeader(content.length, mOurId, type.getKey(), sendTime);
 
         outputStream = new ByteArrayOutputStream();

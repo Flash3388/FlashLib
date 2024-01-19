@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr.messages;
+package com.flash3388.flashlib.net.obsr.impl.messages;
 
 import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueType;
@@ -18,6 +18,10 @@ public class EntryHelper {
 
     public static Value readValueFrom(DataInput input) throws IOException {
         ValueType type = readTypeFrom(input);
+        if (type == ValueType.EMPTY) {
+            return Value.empty();
+        }
+
         Object rawValue = readRawValueFrom(input, type);
         return new Value(type, rawValue);
     }

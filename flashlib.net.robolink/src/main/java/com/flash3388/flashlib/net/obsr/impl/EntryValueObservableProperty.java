@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr;
+package com.flash3388.flashlib.net.obsr.impl;
 
 import com.beans.observables.ObservableValue;
 import com.beans.observables.RegisteredListener;
@@ -10,6 +10,10 @@ import com.beans.observables.listeners.ObservableEventController;
 import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.beans.observables.properties.ObservableProperty;
 import com.beans.observables.properties.ObservablePropertyBase;
+import com.flash3388.flashlib.net.obsr.Storage;
+import com.flash3388.flashlib.net.obsr.StoragePath;
+import com.flash3388.flashlib.net.obsr.Value;
+import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.notifier.Event;
 import com.notifier.EventController;
 
@@ -111,7 +115,7 @@ public class EntryValueObservableProperty extends ObservablePropertyBase<Value> 
 
         @Override
         public boolean test(Event event) {
-            return event instanceof ChangeEvent && ((ChangeEvent)event).getObservableValue().equals(mObservable.get());
+            return event instanceof ChangeEvent && ((ChangeEvent<?>)event).getObservableValue().equals(mObservable.get());
         }
     }
 

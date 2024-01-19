@@ -13,4 +13,5 @@ public interface MessagingChannel extends OutMessagingChannel {
     }
 
     void processUpdates(UpdateHandler handler) throws IOException;
+    void resetConnection();
 }
