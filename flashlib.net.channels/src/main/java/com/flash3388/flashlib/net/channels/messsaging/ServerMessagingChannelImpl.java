@@ -1,7 +1,14 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.castle.time.exceptions.TimeoutException;
+import com.castle.util.closeables.Closeables;
+import com.castle.util.throwables.ThrowableChain;
+import com.castle.util.throwables.Throwables;
+import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetClient;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
+import com.flash3388.flashlib.net.channels.ServerUpdate;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -9,18 +16,31 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
-    private final NetServerChannel mChannel;
-    private final Clock mClock;
+    private static final Time READ_TIMEOUT = Time.milliseconds(20);
 
-    private final ServerUpdateHandler mUpdateHandler;
+    private final NetServerChannel mChannel;
+    private final KnownMessageTypes mMessageTypes;
+    private final Clock mClock;
+    private final Logger mLogger;
+
     private final MessageSerializer mSerializer;
+    private final Map<SocketAddress, ClientNode> mClients;
+    private final Set<ClientNode> mClientsToDisconnect;
+    private final ByteBuffer mReadBuffer;
 
     public ServerMessagingChannelImpl(NetServerChannel channel,
                                       InstanceId ourId,
@@ -28,157 +48,257 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                                       Clock clock,
                                       Logger logger) {
         mChannel = channel;
+        mMessageTypes = messageTypes;
         mClock = clock;
+        mLogger = logger;
 
-        mUpdateHandler = new ServerUpdateHandler(messageTypes, logger);
         mSerializer = new MessageSerializer(ourId);
+        mClients = new ConcurrentHashMap<>();
+        mClientsToDisconnect = new CopyOnWriteArraySet<>();
+        mReadBuffer = ByteBuffer.allocateDirect(1024);
     }
-
 
     @Override
     public void processUpdates(UpdateHandler handler) throws IOException {
-        mUpdateHandler.mClientUpdateHandler = handler;
-        mChannel.processUpdates(mUpdateHandler);
+        disconnectClientsInErrorList(handler);
+
+        ServerUpdate update;
+        try {
+            update = mChannel.readNextUpdate(READ_TIMEOUT);
+        } catch (TimeoutException ignore) {
+            return;
+        }
+
+        try {
+            switch (update.getType()) {
+                case NONE:
+                    return;
+                case NEW_CLIENT:
+                    handleNewClient();
+                    break;
+                case NEW_DATA:
+                    handleNewData(update.getClientAddress(), handler);
+                    break;
+            }
+        } finally {
+            update.done();
+        }
     }
 
     @Override
-    public void write(Message message) throws IOException {
+    public void write(Message message, boolean onlyForServer) throws IOException {
         // TODO: OPTIMIZE FOR REUSING BUFFERS
         Time now = mClock.currentTime();
-        byte[] content = mSerializer.serialize(now, message);
+        byte[] content = mSerializer.serialize(now, message, onlyForServer);
         ByteBuffer buffer = ByteBuffer.wrap(content);
-        mChannel.writeToAll(buffer);
+
+        write(buffer, null);
     }
 
     @Override
     public void close() throws IOException {
-        mChannel.close();
+        Closeables.silentClose(mChannel);
+        mClients.clear();
+        mClientsToDisconnect.clear();
+
+        // TODO: HOW TO REPORT OF DISCONNECTION OF ALL CLIENTS AS RESULT OF THIS?
+        //      IF CLOSED EXTERNALLY, THEN IT SHOULDN'T MATTER
     }
 
-    private static class ServerUpdateHandler implements NetServerChannel.UpdateHandler {
+    private void handleNewClient() throws IOException {
+        NetClient client = mChannel.acceptNewClient();
+        NetClientInfo info = client.getInfo();
 
-        private final KnownMessageTypes mMessageTypes;
-        private final Logger mLogger;
+        mLogger.debug("Server received new client from {}",
+                info.getAddress());
 
-        private final Map<NetClientInfo, ClientNode> mClients;
-        private ServerMessagingChannel.UpdateHandler mClientUpdateHandler;
+        mClients.put(info.getAddress(), new ClientNode(client, mMessageTypes, mLogger));
+    }
 
-        private ServerUpdateHandler(KnownMessageTypes messageTypes, Logger logger) {
-            mMessageTypes = messageTypes;
-            mLogger = logger;
-
-            mClients = new HashMap<>();
-            mClientUpdateHandler = null;
+    private void handleNewData(SocketAddress clientAddress, UpdateHandler updateHandler) throws IOException {
+        ClientNode node = mClients.get(clientAddress);
+        if (node == null) {
+            // no such client
+            mLogger.error("Received data from unknown client at {}", clientAddress);
+            return;
         }
 
-        @Override
-        public void onClientConnected(NetClientInfo clientInfo) {
-            if (mClientUpdateHandler == null) {
+        mReadBuffer.clear();
+        node.mReadLock.lock();
+        try {
+            IncomingData data = node.mClient.read(mReadBuffer);
+            if (data == null || data.getBytesReceived() < 1) {
+                disconnectClientImmediate(node, updateHandler);
                 return;
             }
 
-            mLogger.debug("New client in server: {}", clientInfo.getAddress());
+            if (data.getBytesReceived() >= 1) {
+                mLogger.debug("New data from client: {}, size={}",
+                        data.getSender(),
+                        data.getBytesReceived());
 
-            ClientNode node = new ClientNode(mMessageTypes, mLogger);
-            mClients.put(clientInfo, node);
+                mReadBuffer.rewind();
+                node.mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
+            }
+
+            parseNewData(node, updateHandler);
+        } catch (IOException | RuntimeException | Error e) {
+            mLogger.error("Error processing new data from client at {}", node, e);
+            disconnectClientImmediate(node, updateHandler);
+            throw e;
+        } finally {
+            node.mReadLock.unlock();
+        }
+    }
+
+    private void parseNewData(ClientNode node, UpdateHandler updateHandler) throws IOException {
+        boolean hasMoreToParse;
+        do {
+            Optional<MessageReadingContext.ParseResult> resultOptional = node.mReadingContext.parse();
+            if (resultOptional.isPresent()) {
+                MessageReadingContext.ParseResult parseResult = resultOptional.get();
+
+                MessageHeader header = parseResult.getHeader();
+                Message message = parseResult.getMessage();
+                mLogger.debug("New message received: sender={}, type={}",
+                        header.getSender(),
+                        header.getMessageType());
+
+                if (node.mInstanceId == null) {
+                    node.mInstanceId = header.getSender();
+
+                    try {
+                        updateHandler.onClientConnected(node.mInstanceId);
+                    } catch (Throwable t) {
+                        mLogger.error("Unexpected error from UpdateHandler.onClientConnected. Ignored", t);
+                    }
+                }
+
+                try {
+                    updateHandler.onNewMessage(header, message);
+                } catch (Throwable t) {
+                    mLogger.error("Unexpected error from UpdateHandler.onNewMessage. Ignored", t);
+                }
+
+                if (!header.isOnlyForServer()) {
+                    try {
+                        // TODO: OPTIMIZE FOR REUSING BUFFERS
+                        byte[] content = mSerializer.serialize(header, message);
+                        ByteBuffer buffer = ByteBuffer.wrap(content);
+
+                        write(buffer, node);
+                    } catch (Throwable t) {
+                        mLogger.error("Error while routing received messages to other clients", t);
+                    }
+                }
+
+                hasMoreToParse = true;
+            } else {
+                hasMoreToParse = false;
+            }
+        } while (hasMoreToParse);
+    }
+
+    private void write(ByteBuffer buffer, ClientNode skipClient) throws IOException {
+        Set<ClientNode> erroredClients = new HashSet<>();
+
+        ThrowableChain chain = Throwables.newChain();
+        for (ClientNode node : mClients.values()) {
+            try {
+                if (skipClient != null && node == skipClient) {
+                    continue;
+                }
+
+                mLogger.debug("Writing message to client: {}, size={}",
+                        node,
+                        buffer.limit());
+
+                buffer.rewind();
+                node.mWriteLock.lock();
+                try {
+                    node.mClient.write(buffer);
+                } finally {
+                    node.mWriteLock.unlock();
+                }
+            } catch (IOException | RuntimeException | Error e) {
+                mLogger.error("Error sending data to client {}", node);
+
+                chain.chain(e);
+                erroredClients.add(node);
+            }
         }
 
-        @Override
-        public void onClientDisconnected(NetClientInfo clientInfo) {
-            if (mClientUpdateHandler == null) {
-                return;
-            }
+        mClientsToDisconnect.addAll(erroredClients);
 
-            mLogger.debug("Client disconnected from server: {}", clientInfo.getAddress());
+        chain.throwIfType(IOException.class);
+        chain.throwAsRuntime();
+    }
 
-            ClientNode node = mClients.remove(clientInfo);
-            if (node != null) {
-                node.onDisconnect(mClientUpdateHandler);
+    private void disconnectClientImmediate(ClientNode node, UpdateHandler updateHandler) {
+        // should only be called from processUpdates
+
+        NetClientInfo clientInfo = node.getInfo();
+
+        mClients.remove(clientInfo.getAddress());
+        Closeables.silentClose(node.mClient);
+
+        if (node.mInstanceId != null) {
+            try {
+                updateHandler.onClientDisconnected(node.mInstanceId);
+            } catch (Throwable t) {
+                // the client is already disconnected, so not much to do here.
+                mLogger.error("Unexpected error from UpdateHandler.onClientDisconnected. Ignored", t);
             }
         }
+    }
 
-        @Override
-        public void onNewData(NetClientInfo sender, ByteBuffer buffer, int amountReceived) throws IOException {
-            buffer.rewind();
+    private void disconnectClientsInErrorList(UpdateHandler updateHandler) {
+        // should only be called from processUpdates
+        if (mClientsToDisconnect.isEmpty()) {
+            return;
+        }
 
-            if (mClientUpdateHandler == null) {
-                return;
+        for (Iterator<ClientNode> it = mClientsToDisconnect.iterator();
+             it.hasNext(); ) {
+            ClientNode node = it.next();
+            try {
+                disconnectClientImmediate(node, updateHandler);
+            } finally {
+                it.remove();
             }
-
-            ClientNode node = mClients.get(sender);
-            if (node == null) {
-                mLogger.error("Received data from unknown client, sender={}", sender);
-                return;
-            }
-
-            node.onNewData(mClientUpdateHandler, buffer, amountReceived);
         }
     }
 
     private static class ClientNode {
 
-        private final Logger mLogger;
-        private final MessageReadingContext mReadingContext;
-        private InstanceId mInstanceId;
+        final NetClient mClient;
 
-        private ClientNode(KnownMessageTypes messageTypes, Logger logger) {
-            mLogger = logger;
+        final MessageReadingContext mReadingContext;
+        // readLock can hold writeLock but not reversed. IMPORTANT!
+        final Lock mReadLock;
+        final Lock mWriteLock;
+
+        InstanceId mInstanceId;
+
+        private ClientNode(NetClient client,
+                           KnownMessageTypes messageTypes,
+                           Logger logger) {
+            mClient = client;
+
             mReadingContext = new MessageReadingContext(messageTypes, logger);
+            mReadLock = new ReentrantLock();
+            mWriteLock = new ReentrantLock();
+
             mInstanceId = null;
         }
 
-        public void onNewData(ServerMessagingChannel.UpdateHandler updateHandler, ByteBuffer buffer, int amountReceived) throws IOException {
-            mReadingContext.updateBuffer(buffer, amountReceived);
-
-            boolean hasMoreToParse;
-            do {
-                Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
-                if (resultOptional.isPresent()) {
-                    MessageReadingContext.ParseResult parseResult = resultOptional.get();
-
-                    MessageHeader header = parseResult.getHeader();
-                    Message message = parseResult.getMessage();
-                    mLogger.debug("New message received: sender={}, type={}",
-                            header.getSender(),
-                            header.getMessageType());
-
-                    if (mInstanceId == null) {
-                        mInstanceId = header.getSender();
-
-                        try {
-                            updateHandler.onClientConnected(mInstanceId);
-                        } catch (Throwable t) {
-                            mLogger.error("Unexpected error from UpdateHandler.onClientConnected. Ignored", t);
-                        }
-                    }
-
-                    try {
-                        updateHandler.onNewMessage(header, message);
-                    } catch (Throwable t) {
-                        mLogger.error("Unexpected error from UpdateHandler.onNewMessage. Ignored", t);
-                    }
-
-                    // we managed to parse the message, so we can start trying to parse the next one
-                    hasMoreToParse = true;
-
-                    // TODO: THE SERVER ALSO NEEDS TO ROUTE ALL THE MESSAGES TO CLIENTS, MAYBE JUST
-                    //  CALL WRITEALL? OR LET IT BE DONE BY THE UPDATEHANDLER?
-                } else {
-                    hasMoreToParse = false;
-                }
-            } while (hasMoreToParse);
+        public NetClientInfo getInfo() {
+            return mClient.getInfo();
         }
 
-        public void onDisconnect(ServerMessagingChannel.UpdateHandler updateHandler) {
-            if (mInstanceId == null) {
-                return;
-            }
-
-            try {
-                updateHandler.onClientDisconnected(mInstanceId);
-            } catch (Throwable t) {
-                mLogger.error("Unexpected error from UpdateHandler.onClientDisconnected. Ignored", t);
-            }
+        @Override
+        public String toString() {
+            return mClient.getInfo().toString();
         }
     }
 }

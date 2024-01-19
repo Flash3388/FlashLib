@@ -29,7 +29,7 @@ class ServerReadTask implements Runnable {
             try {
                 mChannel.processUpdates(mHandler);
             } catch (Throwable t) {
-                mLogger.error("ServerReadTask: Error processing updated", t);
+                mLogger.error("ServerReadTask: Error processing updates", t);
             }
         }
     }

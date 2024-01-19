@@ -7,5 +7,5 @@ import java.io.IOException;
 
 public interface OutMessagingChannel extends Closeable {
 
-    void write(Message message) throws IOException;
+    void write(Message message, boolean onlyForServer) throws IOException;
 }

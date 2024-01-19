@@ -88,10 +88,10 @@ public class BasicMessagingChannelImpl implements MessagingChannel {
     }
 
     @Override
-    public void write(Message message) throws IOException {
+    public void write(Message message, boolean onlyForServer) throws IOException {
         // TODO: OPTIMIZE FOR REUSING BUFFERS
         Time now = mClock.currentTime();
-        byte[] content = mSerializer.serialize(now, message);
+        byte[] content = mSerializer.serialize(now, message, onlyForServer);
         mChannel.write(ByteBuffer.wrap(content));
     }
 

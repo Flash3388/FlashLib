@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class MessageHeader {
 
-    public static final int SIZE = Integer.BYTES * 3 + InstanceId.SIZE;
+    public static final int SIZE = 1 + Integer.BYTES * 3 + Long.BYTES + InstanceId.BYTES;
 
     static final int VERSION = 1;
 
@@ -17,12 +17,14 @@ public class MessageHeader {
     private final InstanceId mSender;
     private final int mMessageType;
     private final Time mSendTime;
+    private final boolean mOnlyForServer;
 
-    public MessageHeader(int contentSize, InstanceId sender, int messageType, Time sendTime) {
+    public MessageHeader(int contentSize, InstanceId sender, int messageType, Time sendTime, boolean onlyForServer) {
         mContentSize = contentSize;
         mSender = sender;
         mMessageType = messageType;
         mSendTime = sendTime;
+        mOnlyForServer = onlyForServer;
     }
 
     public MessageHeader(DataInput dataInput) throws IOException {
@@ -36,6 +38,7 @@ public class MessageHeader {
         mMessageType = dataInput.readInt();
         // MAYBE SEND AS NANOS OR MICROS FOR BETTER ACCURACY
         mSendTime = Time.milliseconds(dataInput.readLong());
+        mOnlyForServer = dataInput.readBoolean();
     }
 
     public int getContentSize() {
@@ -54,11 +57,16 @@ public class MessageHeader {
         return mSendTime;
     }
 
+    public boolean isOnlyForServer() {
+        return mOnlyForServer;
+    }
+
     public void writeTo(DataOutput dataOutput) throws IOException {
         dataOutput.writeInt(VERSION);
         dataOutput.writeInt(mContentSize);
         mSender.writeTo(dataOutput);
         dataOutput.writeInt(mMessageType);
         dataOutput.writeLong(mSendTime.valueAsMillis());
+        dataOutput.writeBoolean(mOnlyForServer);
     }
 }

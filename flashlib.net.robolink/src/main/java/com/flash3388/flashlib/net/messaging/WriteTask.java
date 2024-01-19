@@ -26,7 +26,9 @@ class WriteTask implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 Message message = mQueue.take();
-                mChannel.write(message);
+                boolean isOnlyForServer = message.getType().equals(PingMessage.TYPE);
+
+                mChannel.write(message, isOnlyForServer);
             } catch (IOException e) {
                 mLogger.debug("WriteTask: Error writing message", e);
                 // TODO: WE CAN REQUEUE MESSAGE, FOR A FEW ATTEMPTS

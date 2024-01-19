@@ -27,4 +27,9 @@ public class NetClientInfo {
     public int hashCode() {
         return Objects.hash(mAddress);
     }
+
+    @Override
+    public String toString() {
+        return mAddress.toString();
+    }
 }

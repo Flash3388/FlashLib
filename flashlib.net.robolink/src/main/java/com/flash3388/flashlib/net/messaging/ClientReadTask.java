@@ -36,7 +36,7 @@ class ClientReadTask implements Runnable {
             try {
                 mChannel.processUpdates(mHandler);
             } catch (Throwable t) {
-                mLogger.error("ClientReadTask: Error processing updated", t);
+                mLogger.error("ClientReadTask: Error processing updates", t);
             }
         }
     }

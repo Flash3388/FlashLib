@@ -1,135 +1,92 @@
 package com.flash3388.flashlib.net.channels.tcp;
 
+import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.castle.util.throwables.ThrowableChain;
-import com.castle.util.throwables.Throwables;
-import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
+import com.flash3388.flashlib.net.channels.NetClient;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
+import com.flash3388.flashlib.net.channels.ServerUpdate;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Predicate;
 
 public class TcpServerChannel implements NetServerChannel {
-
-    private static final Time SELECT_TIMEOUT = Time.milliseconds(20);
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
 
-    private final Map<SocketAddress, ClientNode> mClients;
-    private final Set<ClientNode> mClientsToDisconnect;
-    private final ByteBuffer mReadBuffer;
-
+    private final ServerUpdateImpl mServerUpdate;
     private ServerSocketChannel mUnderlyingChannel;
     private Selector mSelector;
+    private Iterator<SelectionKey> mLastSelectionKeyIterator;
 
     public TcpServerChannel(SocketAddress bindAddress, Logger logger) {
         mBindAddress = bindAddress;
         mLogger = logger;
 
-        mClients = new ConcurrentHashMap<>();
-        mClientsToDisconnect = new CopyOnWriteArraySet<>();
-        mReadBuffer = ByteBuffer.allocateDirect(1024);
+        mServerUpdate = new ServerUpdateImpl();
+        mServerUpdate.clear();
 
         mUnderlyingChannel = null;
         mSelector = null;
+        mLastSelectionKeyIterator = null;
     }
 
     @Override
-    public void processUpdates(UpdateHandler updateHandler) throws IOException {
+    public ServerUpdate readNextUpdate(Time timeout) throws IOException, TimeoutException {
+        if (mServerUpdate.getType() != ServerUpdate.UpdateType.NONE) {
+            throw new IllegalStateException("last update was not handled completely");
+        }
+
         openChannelIfNecessary();
 
-        disconnectClientList(updateHandler);
+        Iterator<SelectionKey> iterator;
+        iterator = mLastSelectionKeyIterator;
 
-        // TODO: WE MIGHT WANT THE WRITE THREADS TO ALERT THIS THREAD ON OCCASION DUE
-        //  TO CLIENT CHANGES
-        mLogger.trace("Entering select");
-        int available = mSelector.select(SELECT_TIMEOUT.valueAsMillis());
-        if (available < 1) {
-            return;
+        // try and process any old, remaining events before trying to select again.
+        if (processUpdatesFromSelector(iterator, mServerUpdate)) {
+            return mServerUpdate;
         }
 
-        for (Iterator<SelectionKey> it = mSelector.selectedKeys().iterator(); it.hasNext();) {
-            SelectionKey key = it.next();
-
-            try {
-                if (key.isAcceptable()) {
-                    // new client
-                    mLogger.trace("Select registered accept");
-                    handleNewClient(updateHandler);
-                } else if (key.isReadable()) {
-                    // new data from client
-                    mLogger.trace("Select registered read");
-
-                    //noinspection resource
-                    SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
-                    ClientNode node = mClients.get(address);
-                    if (node == null) {
-                        // no such client
-                        mLogger.error("Received data from unknown client at {}", address);
-                        continue;
-                    }
-
-                    handleClientNewData(node, updateHandler);
-                }
-            } finally {
-                it.remove();
-            }
+        mLastSelectionKeyIterator = null;
+        iterator = getNewUpdatesFromSelector(timeout);
+        if (iterator == null) {
+            return mServerUpdate;
         }
+
+        mLastSelectionKeyIterator = iterator;
+        if (!processUpdatesFromSelector(iterator, mServerUpdate)) {
+            mLastSelectionKeyIterator = null;
+        }
+
+        return mServerUpdate;
     }
 
     @Override
-    public void writeToAll(ByteBuffer buffer) throws IOException {
-        writeToMatching(buffer, null);
-    }
+    public NetClient acceptNewClient() throws IOException {
+        SocketChannel baseChannel = mUnderlyingChannel.accept();
+        try {
+            baseChannel.configureBlocking(false);
+            baseChannel.register(mSelector, SelectionKey.OP_READ);
 
-    @Override
-    public void writeToMatching(ByteBuffer buffer, Predicate<NetClientInfo> predicate) throws IOException {
-        Set<ClientNode> erroredClients = new HashSet<>();
+            SocketAddress address = baseChannel.getRemoteAddress();
+            NetClientInfo clientInfo = new NetClientInfo(address);
+            NetChannel channel = new TcpChannel(baseChannel);
 
-        ThrowableChain chain = Throwables.newChain();
-        for (ClientNode node : mClients.values()) {
-            NetClientInfo clientInfo = node.getClientInfo();
-
-            if (predicate != null && !predicate.test(clientInfo)) {
-                continue;
-            }
-
-            try {
-                mLogger.debug("Writing message to client: {}, size={}",
-                        clientInfo.getAddress(),
-                        buffer.limit());
-
-                buffer.rewind();
-                node.getChannel().write(buffer);
-            } catch (IOException e) {
-                mLogger.error("Error sending data to client at {}", clientInfo.getAddress());
-
-                chain.chain(e);
-                erroredClients.add(node);
-            }
+            return new NetClientImpl(clientInfo, channel);
+        } catch (IOException | RuntimeException | Error e) {
+            Closeables.silentClose(baseChannel);
+            throw e;
         }
-
-        mClientsToDisconnect.addAll(erroredClients);
-        chain.throwIfType(IOException.class);
     }
 
     @Override
@@ -146,86 +103,8 @@ public class TcpServerChannel implements NetServerChannel {
             mSelector = null;
         }
 
-        // TODO: HOW TO UPDATE CLIENTS ON DISCONNECTIONS?
-        //      MAYBE THE UPDATEHANDLER NEEDS TO BE SOMETHING SET INSTEAD OF PASSED AS PARAM
-
-        mClients.clear();
-        mClientsToDisconnect.clear();
-    }
-
-    private void disconnectClientList(UpdateHandler handler) {
-        for (Iterator<ClientNode> it = mClientsToDisconnect.iterator();
-             it.hasNext(); ) {
-            ClientNode node = it.next();
-            try {
-                disconnectClient(node, handler);
-            } finally {
-                it.remove();
-            }
-        }
-    }
-
-    private void disconnectClient(ClientNode node, UpdateHandler handler) {
-        NetClientInfo clientInfo = node.getClientInfo();
-
-        //noinspection resource
-        mClients.remove(clientInfo.getAddress());
-        Closeables.silentClose(node);
-
-        try {
-            handler.onClientDisconnected(clientInfo);
-        } catch (Throwable ignored) {
-            // the client is already disconnected, so not much to do here.
-        }
-    }
-
-    private void handleNewClient(UpdateHandler handler) throws IOException {
-        SocketChannel baseChannel = mUnderlyingChannel.accept();
-
-        SocketAddress address = baseChannel.getRemoteAddress();
-        mLogger.debug("Server received new client from {} at {}",
-                address,
-                baseChannel.getLocalAddress());
-        try {
-            baseChannel.configureBlocking(false);
-            baseChannel.register(mSelector, SelectionKey.OP_READ);
-
-            NetClientInfo clientInfo = new NetClientInfo(address);
-            NetChannel channel = new TcpChannel(baseChannel);
-            ClientNode node = new ClientNode(clientInfo, channel);
-            mClients.put(address, node);
-
-            try {
-                handler.onClientConnected(clientInfo);
-            } catch (Throwable ignored) {
-                // we'll ignore this for now, mostly I don't think this is
-                // a good enough reason to reset everything.
-            }
-        } catch (IOException e) {
-            Closeables.silentClose(baseChannel);
-        }
-    }
-
-    private void handleClientNewData(ClientNode node, UpdateHandler handler) {
-        NetClientInfo clientInfo = node.getClientInfo();
-        try {
-            mReadBuffer.clear();
-
-            IncomingData incomingData = node.getChannel().read(mReadBuffer);
-            if (incomingData == null || incomingData.getBytesReceived() < 1) {
-                disconnectClient(node, handler);
-                return;
-            }
-
-            mLogger.debug("Data received from {}: bytes={}",
-                    clientInfo.getAddress(),
-                    incomingData.getBytesReceived());
-
-            handler.onNewData(clientInfo, mReadBuffer, incomingData.getBytesReceived());
-        } catch (IOException e) {
-            mLogger.error("Error processing new data from client at {}", clientInfo.getAddress(), e);
-            disconnectClient(node, handler);
-        }
+        mLastSelectionKeyIterator = null;
+        mServerUpdate.clear();
     }
 
     private synchronized void openChannelIfNecessary() throws IOException {
@@ -243,34 +122,61 @@ public class TcpServerChannel implements NetServerChannel {
                 mUnderlyingChannel.bind(mBindAddress);
 
                 mUnderlyingChannel.register(mSelector, SelectionKey.OP_ACCEPT);
-            } catch (IOException e) {
+            } catch (IOException | RuntimeException | Error e) {
+                mLogger.error("Error while opening server channel", e);
                 close();
                 throw e;
             }
         }
     }
 
-    private static class ClientNode implements Closeable {
-
-        private final NetClientInfo mClientInfo;
-        private final NetChannel mChannel;
-
-        private ClientNode(NetClientInfo clientInfo, NetChannel channel) {
-            mClientInfo = clientInfo;
-            mChannel = channel;
+    private Iterator<SelectionKey> getNewUpdatesFromSelector(Time timeout) throws IOException, TimeoutException {
+        // TODO: WHEN TO THROW TIMEOUTEXCEPTION
+        int available = mSelector.select(timeout.valueAsMillis());
+        if (available < 1) {
+            return null;
         }
 
-        public NetClientInfo getClientInfo() {
-            return mClientInfo;
+        return mSelector.selectedKeys().iterator();
+    }
+
+    private boolean processUpdatesFromSelector(Iterator<SelectionKey> iterator, ServerUpdateImpl serverUpdate) {
+        if (iterator == null) {
+            return false;
         }
 
-        public NetChannel getChannel() {
-            return mChannel;
-        }
+        boolean tryAgain;
+        do {
+            if (!iterator.hasNext()) {
+                return false;
+            }
 
-        @Override
-        public void close() throws IOException {
-            mChannel.close();
-        }
+            SelectionKey key = iterator.next();
+            try {
+                if (key.isAcceptable()) {
+                    // new client
+                    mLogger.trace("Select registered accept");
+                    serverUpdate.mType = ServerUpdate.UpdateType.NEW_CLIENT;
+                } else if (key.isReadable()) {
+                    // new data from client
+                    mLogger.trace("Select registered read");
+
+                    //noinspection resource
+                    SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
+                    serverUpdate.mType = ServerUpdate.UpdateType.NEW_DATA;
+                    serverUpdate.mClientAddress = address;
+                }
+
+                tryAgain = false;
+            } catch (IOException | RuntimeException | Error e) {
+                mLogger.error("Error while reading updates in server channel", e);
+                serverUpdate.clear();
+                tryAgain = true;
+            }
+        } while (tryAgain);
+
+        serverUpdate.mSelectorIterator = iterator;
+
+        return true;
     }
 }

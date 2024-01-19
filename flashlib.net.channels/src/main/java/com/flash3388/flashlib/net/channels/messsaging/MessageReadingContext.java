@@ -113,6 +113,7 @@ public class MessageReadingContext {
 
     private MessageHeader readHeader() throws IOException {
         mDataToReadBuffer.read(mReadBuffer, 0, MessageHeader.SIZE);
+
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             return new MessageHeader(dataInputStream);

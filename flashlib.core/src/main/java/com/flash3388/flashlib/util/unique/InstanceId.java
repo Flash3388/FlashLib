@@ -10,9 +10,9 @@ import java.util.Objects;
 
 public class InstanceId {
 
-    private static final int MACHINE_ID_SIZE = Long.BYTES;
+    private static final int MACHINE_ID_SIZE = Long.BYTES * 2;
     private static final int PROCESS_ID_SIZE = Long.BYTES;
-    public static final int SIZE = MACHINE_ID_SIZE + PROCESS_ID_SIZE;
+    public static final int BYTES = MACHINE_ID_SIZE + PROCESS_ID_SIZE;
 
     private final byte[] mMachineId;
     private final byte[] mProcessId;
@@ -24,8 +24,13 @@ public class InstanceId {
         machineId = padId(machineId, MACHINE_ID_SIZE);
         processId = padId(processId, PROCESS_ID_SIZE);
 
-        assert MACHINE_ID_SIZE == machineId.length;
-        assert PROCESS_ID_SIZE == processId.length;
+        if (machineId.length != MACHINE_ID_SIZE) {
+            throw new IllegalArgumentException("machineId bad size");
+        }
+
+        if (processId.length != PROCESS_ID_SIZE) {
+            throw new IllegalArgumentException("processId bad size");
+        }
 
         mMachineId = machineId;
         mProcessId = processId;
@@ -36,11 +41,9 @@ public class InstanceId {
     }
 
     public static InstanceId createFrom(DataInput dataInput) throws IOException {
-        int size = dataInput.readInt();
-        byte[] machineId = new byte[size];
+        byte[] machineId = new byte[MACHINE_ID_SIZE];
         dataInput.readFully(machineId);
-        size = dataInput.readInt();
-        byte[] processId = new byte[size];
+        byte[] processId = new byte[PROCESS_ID_SIZE];
         dataInput.readFully(processId);
 
         return new InstanceId(machineId, processId);
@@ -63,9 +66,7 @@ public class InstanceId {
     }
 
     public void writeTo(DataOutput dataOutput) throws IOException {
-        dataOutput.writeInt(mMachineId.length);
         dataOutput.write(mMachineId);
-        dataOutput.writeInt(mProcessId.length);
         dataOutput.write(mProcessId);
     }
 
