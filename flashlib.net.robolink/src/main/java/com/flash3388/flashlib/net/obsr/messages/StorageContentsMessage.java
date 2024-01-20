@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr.impl.messages;
+package com.flash3388.flashlib.net.obsr.messages;
 
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;

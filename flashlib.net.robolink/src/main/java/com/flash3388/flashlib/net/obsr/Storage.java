@@ -2,12 +2,11 @@ package com.flash3388.flashlib.net.obsr;
 
 import com.beans.observables.RegisteredListener;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
+import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 
 import java.util.Map;
 
 public interface Storage {
-
-    Map<String, Value> getAll();
 
     StoredObject getObject(StoragePath path);
     void deleteObject(StoragePath path);
@@ -20,5 +19,6 @@ public interface Storage {
     void clearEntryValue(StoragePath path);
     void deleteEntry(StoragePath path);
 
+    StorageContentsMessage createContentsMessage();
     void updateFromMessage(NewMessageEvent event);
 }

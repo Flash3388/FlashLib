@@ -67,11 +67,6 @@ class ServerReadTask implements Runnable {
 
         @Override
         public void onNewMessage(MessageHeader header, Message message) {
-            MessageMetadata metadata = new MessageMetadataImpl(
-                    header.getSender(),
-                    header.getSendTime(),
-                    message.getType());
-
             if (message.getType().equals(PingMessage.TYPE)) {
                 mLogger.debug("ServerReadTask: received ping message, responding");
 
@@ -82,6 +77,11 @@ class ServerReadTask implements Runnable {
                 }
             } else {
                 mLogger.debug("ServerReadTask: received message, alerting listeners");
+
+                MessageMetadata metadata = new MessageMetadataImpl(
+                        header.getSender(),
+                        header.getSendTime(),
+                        message.getType());
 
                 mEventController.fire(
                         new NewMessageEvent(metadata, message),

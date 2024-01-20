@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr.impl;
+package com.flash3388.flashlib.net.obsr;
 
 import com.beans.observables.ObservableValue;
 import com.beans.observables.RegisteredListener;

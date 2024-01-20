@@ -3,7 +3,7 @@ package com.flash3388.flashlib.net.obsr;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-public class StorageBasedEntry implements StoredEntry {
+class StorageBasedEntry implements StoredEntry {
 
     private final StoragePath mPath;
     private final WeakReference<Storage> mStorage;

@@ -4,7 +4,7 @@ import com.beans.observables.RegisteredListener;
 
 import java.lang.ref.WeakReference;
 
-public class StorageBasedObject implements StoredObject {
+class StorageBasedObject implements StoredObject {
 
     private final StoragePath mPath;
     private final WeakReference<Storage> mStorage;

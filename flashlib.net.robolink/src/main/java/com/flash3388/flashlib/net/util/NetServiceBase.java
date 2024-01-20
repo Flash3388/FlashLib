@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.net.util;
 
-import com.castle.concurrent.service.SingleUseService;
+import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class NetServiceBase extends SingleUseService {
+public abstract class NetServiceBase extends ServiceBase {
 
     private final List<Thread> mThreads;
 

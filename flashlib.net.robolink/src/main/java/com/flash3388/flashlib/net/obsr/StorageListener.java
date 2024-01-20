@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.obsr.impl;
+package com.flash3388.flashlib.net.obsr;
 
 import com.flash3388.flashlib.net.obsr.StoragePath;
 import com.flash3388.flashlib.net.obsr.Value;

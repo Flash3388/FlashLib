@@ -1,44 +1,32 @@
-package com.flash3388.flashlib.net.obsr.impl;
+package com.flash3388.flashlib.net.obsr;
 
-import com.beans.Property;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.Messenger;
-import com.flash3388.flashlib.net.obsr.StoragePath;
-import com.flash3388.flashlib.net.obsr.Value;
-import com.flash3388.flashlib.net.obsr.impl.messages.EntryChangeMessage;
+import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
 
-public class StorageListenerImpl implements StorageListener {
+class StorageListenerImpl implements StorageListener {
 
-    private final Property<Messenger> mMessenger;
+    private final Messenger mMessenger;
 
-    public StorageListenerImpl(Property<Messenger> messenger) {
+    public StorageListenerImpl(Messenger messenger) {
         mMessenger = messenger;
     }
 
     @Override
     public void onEntryUpdate(StoragePath path, Value value) {
         Message message = new EntryChangeMessage(path.toString(), value, 0);
-        send(message);
+        mMessenger.send(message);
     }
 
     @Override
     public void onEntryClear(StoragePath path) {
         Message message = new EntryChangeMessage(path.toString(), Value.empty(), EntryChangeMessage.FLAG_CLEARED);
-        send(message);
+        mMessenger.send(message);
     }
 
     @Override
     public void onEntryDeleted(StoragePath path) {
         Message message = new EntryChangeMessage(path.toString(), Value.empty(), EntryChangeMessage.FLAG_DELETED);
-        send(message);
-    }
-
-    private void send(Message message) {
-        Messenger messenger = mMessenger.get();
-        if (messenger == null) {
-            return;
-        }
-
-        messenger.send(message);
+        mMessenger.send(message);
     }
 }

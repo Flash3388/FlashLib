@@ -1,23 +1,12 @@
-package com.flash3388.flashlib.net.obsr.impl;
+package com.flash3388.flashlib.net.obsr;
 
 import com.beans.observables.RegisteredListener;
 import com.beans.observables.listeners.RegisteredListenerImpl;
-import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageMetadata;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
-import com.flash3388.flashlib.net.obsr.EntryListener;
-import com.flash3388.flashlib.net.obsr.EntryModificationEvent;
-import com.flash3388.flashlib.net.obsr.ModificationType;
-import com.flash3388.flashlib.net.obsr.Storage;
-import com.flash3388.flashlib.net.obsr.StorageBasedEntry;
-import com.flash3388.flashlib.net.obsr.StorageBasedObject;
-import com.flash3388.flashlib.net.obsr.StoragePath;
-import com.flash3388.flashlib.net.obsr.StoredEntry;
-import com.flash3388.flashlib.net.obsr.StoredObject;
-import com.flash3388.flashlib.net.obsr.Value;
-import com.flash3388.flashlib.net.obsr.ValueProperty;
-import com.flash3388.flashlib.net.obsr.impl.messages.EntryChangeMessage;
+import com.flash3388.flashlib.net.obsr.messages.EntryChangeMessage;
+import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.notifier.EventController;
@@ -32,37 +21,21 @@ import java.util.concurrent.locks.ReentrantLock;
 public class StorageImpl implements Storage {
 
     private final StorageListener mListener;
-    private final Clock mClock;
     private final EventController mEventController;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private final Map<String, StoredEntryNode> mEntries;
     private final Lock mLock;
 
-    public StorageImpl(StorageListener listener, Clock clock, EventController eventController, Logger logger) {
+    public StorageImpl(StorageListener listener, EventController eventController, Clock clock, Logger logger) {
         mListener = listener;
-        mClock = clock;
         mEventController = eventController;
+        mClock = clock;
         mLogger = logger;
 
         mEntries = new HashMap<>();
         mLock = new ReentrantLock();
-    }
-
-    @Override
-    public Map<String, Value> getAll() {
-        mLock.lock();
-        try {
-            Map<String, Value> result = new HashMap<>();
-            for (Map.Entry<String, StoredEntryNode> entry : mEntries.entrySet()) {
-                StoredEntryNode node = entry.getValue();
-                result.put(entry.getKey(), node.getValue());
-            }
-
-            return result;
-        } finally {
-            mLock.unlock();
-        }
     }
 
     @Override
@@ -173,6 +146,11 @@ public class StorageImpl implements Storage {
     }
 
     @Override
+    public StorageContentsMessage createContentsMessage() {
+        return new StorageContentsMessage(getAll());
+    }
+
+    @Override
     public void updateFromMessage(NewMessageEvent event) {
         MessageType type = event.getType();
 
@@ -182,16 +160,28 @@ public class StorageImpl implements Storage {
 
             mLock.lock();
             try {
-                handleEntryChangeMessage(event.getMetadata(), message);
+                handleEntryChangeMessage(message);
             } finally {
                 mLock.unlock();
             }
+        } else if (type.equals(StorageContentsMessage.TYPE)) {
+            StorageContentsMessage message = event.getMessage(StorageContentsMessage.class);
+            mLogger.debug("Handling message: Update storage");
+
+            mLock.lock();
+            try {
+                handleStorageUpdate(message);
+            } finally {
+                mLock.unlock();
+            }
+        } else {
+            mLogger.debug("Storage received unsupported message for handling");
         }
     }
 
-    private void handleEntryChangeMessage(MessageMetadata metadata, EntryChangeMessage message) {
+    private void handleEntryChangeMessage(EntryChangeMessage message) {
         StoragePath path = StoragePath.create(message.getEntryPath());
-        Time changeTime = metadata.getTimestamp();
+        Time changeTime = mClock.currentTime();
 
         if ((message.getFlags() & EntryChangeMessage.FLAG_CLEARED) != 0) {
             clearEntryValue(path, changeTime, false);
@@ -202,12 +192,30 @@ public class StorageImpl implements Storage {
         }
     }
 
+    private void handleStorageUpdate(StorageContentsMessage message) {
+        Map<String, Value> entries = message.getEntries();
+        Time changeTime = mClock.currentTime();
+
+        for (Map.Entry<String, Value> entry : entries.entrySet()) {
+            StoragePath path = StoragePath.create(entry.getKey());
+            Value value = entry.getValue();
+
+            // TODO: HOW TO HANDLE DELETION PROPERLY IN THIS KIND OF UPDATE
+            if (value.isEmpty()) {
+                clearEntryValue(path, changeTime, false);
+            } else {
+                updateEntryValue(path, value, changeTime, false);
+            }
+        }
+    }
+
     private void updateEntryValue(StoragePath path, Value value, Time changeTime, boolean shouldReport) {
         StoredEntryNode node = getOrCreateEntryNode(path);
-        if (node.getLastChangeTimestamp().after(changeTime)) {
+        if (!isChangedAllowed(node, changeTime)) {
             return;
         }
 
+        mLogger.debug("Setting new value for {}: value={}, time={}", path, value, changeTime);
         node.setValue(value, changeTime);
 
         if (shouldReport && mListener != null) {
@@ -227,10 +235,11 @@ public class StorageImpl implements Storage {
 
     private void clearEntryValue(StoragePath path, Time changeTime, boolean shouldReport) {
         StoredEntryNode node = getOrCreateEntryNode(path);
-        if (node.getLastChangeTimestamp().after(changeTime)) {
+        if (!isChangedAllowed(node, changeTime)) {
             return;
         }
 
+        mLogger.debug("Clearing value for {}: time={}", path, changeTime);
         node.setValue(Value.empty(), changeTime);
 
         if (shouldReport && mListener != null) {
@@ -256,10 +265,11 @@ public class StorageImpl implements Storage {
             return;
         }
 
-        if (node.getLastChangeTimestamp().after(changeTime)) {
+        if (!isChangedAllowed(node, changeTime)) {
             return;
         }
 
+        mLogger.debug("Deleting entry {}: time={}", path, changeTime);
         mEntries.remove(strPath);
 
         if (shouldReport && mListener != null) {
@@ -285,6 +295,21 @@ public class StorageImpl implements Storage {
         }
     }
 
+    private Map<String, Value> getAll() {
+        mLock.lock();
+        try {
+            Map<String, Value> result = new HashMap<>();
+            for (Map.Entry<String, StoredEntryNode> entry : mEntries.entrySet()) {
+                StoredEntryNode node = entry.getValue();
+                result.put(entry.getKey(), node.getValue());
+            }
+
+            return result;
+        } finally {
+            mLock.unlock();
+        }
+    }
+
     private StoredEntryNode getOrCreateEntryNode(StoragePath path) {
         String strPath = path.toString();
 
@@ -298,8 +323,20 @@ public class StorageImpl implements Storage {
                     entry);
             node = new StoredEntryNode(entry, valueProperty);
             mEntries.put(strPath, node);
+
+            mLogger.debug("New entry created {}", path);
         }
 
         return node;
+    }
+
+    private boolean isChangedAllowed(StoredEntryNode node, Time changeTime) {
+        // the usage of timestamps here is just
+        Time lastChangeTime = node.getLastChangeTimestamp();
+        if (!changeTime.isValid() || !lastChangeTime.isValid()) {
+            return true;
+        }
+
+        return lastChangeTime.before(changeTime);
     }
 }

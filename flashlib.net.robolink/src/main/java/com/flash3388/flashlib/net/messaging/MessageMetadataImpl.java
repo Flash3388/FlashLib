@@ -1,11 +1,9 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.flash3388.flashlib.net.messaging.MessageMetadata;
-import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
-public class MessageMetadataImpl implements MessageMetadata {
+class MessageMetadataImpl implements MessageMetadata {
 
     private final InstanceId mSender;
     private final Time mTimestamp;

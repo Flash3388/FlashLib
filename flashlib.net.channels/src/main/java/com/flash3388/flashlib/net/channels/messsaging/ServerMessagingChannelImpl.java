@@ -167,6 +167,10 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 if (node.mInstanceId == null) {
                     node.mInstanceId = header.getSender();
 
+                    mLogger.info("New client connected and identified {}, at {}",
+                            node.mInstanceId,
+                            node.getInfo().getAddress());
+
                     try {
                         updateHandler.onClientConnected(node.mInstanceId);
                     } catch (Throwable t) {

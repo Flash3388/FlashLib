@@ -16,7 +16,6 @@ class ClientReadTask implements Runnable {
 
     private final PingContext mPingContext;
 
-
     ClientReadTask(Messenger service,
                    MessagingChannel channel,
                    EventController eventController,
@@ -25,7 +24,7 @@ class ClientReadTask implements Runnable {
         mChannel = channel;
         mLogger = logger;
         mPingContext = new PingContext(service, channel, clock, logger);
-        mHandler = new UpdateHandlerImpl(eventController, mPingContext, logger);
+        mHandler = new UpdateHandlerImpl(eventController, clock, mPingContext, logger);
     }
 
     @Override
@@ -44,13 +43,16 @@ class ClientReadTask implements Runnable {
     private static class UpdateHandlerImpl implements MessagingChannel.UpdateHandler {
 
         private final EventController mEventController;
+        private final ServerClock mClock;
         private final PingContext mPingContext;
         private final Logger mLogger;
 
         private UpdateHandlerImpl(EventController eventController,
+                                  ServerClock clock,
                                   PingContext pingContext,
                                   Logger logger) {
             mEventController = eventController;
+            mClock = clock;
             mPingContext = pingContext;
             mLogger = logger;
         }
@@ -67,16 +69,19 @@ class ClientReadTask implements Runnable {
 
         @Override
         public void onNewMessage(MessageHeader header, Message message) {
-            MessageMetadata metadata = new MessageMetadataImpl(
-                    header.getSender(),
-                    header.getSendTime(),
-                    message.getType());
-
             if (message.getType().equals(PingMessage.TYPE)) {
                 PingMessage pingMessage = (PingMessage) message;
                 mPingContext.onPingResponse(header, pingMessage);
             } else {
                 mLogger.debug("ClientReadTask: received message, alerting listeners");
+
+                // fixed timestamp to client-only times
+                Time sendTime = mClock.adjustToClientTime(header.getSendTime());
+
+                MessageMetadata metadata = new MessageMetadataImpl(
+                        header.getSender(),
+                        sendTime,
+                        message.getType());
 
                 mEventController.fire(
                         new NewMessageEvent(metadata, message),
@@ -136,7 +141,7 @@ class ClientReadTask implements Runnable {
                 return;
             }
 
-            Time now = mClock.getBaseClock().currentTime();
+            Time now = mClock.currentTimeUnmodified();
             if (!mLastPingTime.isValid() || now.sub(mLastPingTime).after(PING_INTERVAL)) {
                 if (mPingSent && !mLastPingResponded) {
                     mLogger.warn("ClientReadTask: Last ping did not receive response");
@@ -161,7 +166,7 @@ class ClientReadTask implements Runnable {
 
             mLogger.debug("ClientReadTask: Sending ping message");
 
-            Time now = mClock.getBaseClock().currentTime();
+            Time now = mClock.currentTimeUnmodified();
             mLastPingTime = now;
             mPingSent = true;
             mLastPingResponded = false;

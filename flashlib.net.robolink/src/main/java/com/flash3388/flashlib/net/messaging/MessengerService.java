@@ -12,6 +12,7 @@ import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
 import com.flash3388.flashlib.net.channels.tcp.TcpServerChannel;
 import com.flash3388.flashlib.net.util.NetServiceBase;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.Controllers;
 import com.notifier.EventController;
@@ -29,9 +30,10 @@ import java.util.function.Function;
 
 public class MessengerService extends NetServiceBase implements Messenger {
 
-    private final InstanceId mInstanceId;
+    private static final Logger LOGGER = Logging.getLogger("Comm", "Messenger");
+
+    private final InstanceId mOurId;
     private final Clock mClock;
-    private final Logger mLogger;
     private final EventController mEventController;
     private final KnownMessageTypes mKnownMessageTypes;
     private final BlockingQueue<Message> mWriteQueue;
@@ -39,10 +41,9 @@ public class MessengerService extends NetServiceBase implements Messenger {
     private Function<Messenger, Context> mContextSupplier;
     private Context mContext;
 
-    public MessengerService(InstanceId instanceId, Clock clock, Logger logger) {
-        mInstanceId = instanceId;
+    public MessengerService(InstanceId ourId, Clock clock) {
+        mOurId = ourId;
         mClock = clock;
-        mLogger = logger;
 
         mEventController = Controllers.newSyncExecutionController();
         mKnownMessageTypes = new KnownMessageTypes();
@@ -60,10 +61,10 @@ public class MessengerService extends NetServiceBase implements Messenger {
         }
 
         mContextSupplier = new ServerContextCreator(
-                mInstanceId,
+                mOurId,
                 mClock,
                 bindAddress,
-                mLogger,
+                LOGGER,
                 mEventController,
                 mKnownMessageTypes,
                 mWriteQueue);
@@ -75,10 +76,10 @@ public class MessengerService extends NetServiceBase implements Messenger {
         }
 
         mContextSupplier = new ClientContextSupplier(
-                mInstanceId,
+                mOurId,
                 mClock,
                 serverAddress,
-                mLogger,
+                LOGGER,
                 mEventController,
                 mKnownMessageTypes,
                 mWriteQueue);
@@ -108,7 +109,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
 
     @Override
     public void send(Message message) {
-        mLogger.debug("Queueing message of type {}", message.getType().getKey());
+        LOGGER.debug("Queueing message of type {}", message.getType().getKey());
         mWriteQueue.add(message);
     }
 
@@ -228,7 +229,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
 
         @Override
         public Context apply(Messenger messenger) {
-            ServerClock clock = new ServerClock(mClock);
+            ServerClock clock = new ServerClock(mClock, mLogger);
 
             MessagingChannel channel = new BasicMessagingChannelImpl(
                     new TcpClientConnector(clock, mLogger),
