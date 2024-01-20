@@ -47,11 +47,11 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
         mMessenger.addListener(new MessageListenerImpl(mStorage), messageTypes);
     }
 
-    public void configureServer(SocketAddress bindAddress) {
+    public void configurePrimary(SocketAddress bindAddress) {
         mMessenger.configureServer(bindAddress);
     }
 
-    public void configureClient(SocketAddress serverAddress) {
+    public void configureSecondary(SocketAddress serverAddress) {
         mMessenger.configureClient(serverAddress);
     }
 

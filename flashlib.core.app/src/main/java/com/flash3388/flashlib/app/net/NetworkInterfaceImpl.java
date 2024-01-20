@@ -4,7 +4,9 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
+import com.flash3388.flashlib.net.messaging.MessengerService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
+import com.flash3388.flashlib.net.obsr.ObsrService;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -35,7 +37,15 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mMainThread = mainThread;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            throw new UnsupportedOperationException();
+            ObsrService service = new ObsrService(mInstanceId, mClock);
+            if (configuration.mObsrConfiguration.isPrimaryMode) {
+                service.configurePrimary(configuration.mObsrConfiguration.serverAddress);
+            } else {
+                service.configureSecondary(configuration.mObsrConfiguration.serverAddress);
+            }
+
+            mServiceRegistry.register(service);
+            mObjectStorage = service;
         } else {
             mObjectStorage = null;
         }
@@ -73,6 +83,17 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     @Override
     public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
-        throw new UnsupportedOperationException();
+
+        MessengerService service = new MessengerService(mInstanceId, mClock);
+        if (configuration.serverMode) {
+            service.configureServer(configuration.serverAddress);
+        } else {
+            service.configureClient(configuration.serverAddress);
+        }
+
+        service.registerMessageTypes(messageTypes);
+        mServiceRegistry.register(service);
+
+        return service;
     }
 }

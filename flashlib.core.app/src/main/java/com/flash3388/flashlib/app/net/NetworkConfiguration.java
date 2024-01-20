@@ -2,12 +2,12 @@ package com.flash3388.flashlib.app.net;
 
 public class NetworkConfiguration implements NetworkingMode {
 
-    private final boolean mEnabled;
-    private final Object mObsrConfiguration;
-    private final Object mHfcsConfiguration;
+    final boolean mEnabled;
+    final ObsrConfiguration mObsrConfiguration;
+    final Object mHfcsConfiguration;
 
     private NetworkConfiguration(boolean enabled,
-                                 Object obsrConfiguration,
+                                 ObsrConfiguration obsrConfiguration,
                                  Object hfcsConfiguration) {
         mEnabled = enabled;
         mObsrConfiguration = obsrConfiguration;
@@ -22,7 +22,7 @@ public class NetworkConfiguration implements NetworkingMode {
         return new NetworkConfiguration();
     }
 
-    public static NetworkConfiguration enabled(Object objectStorageConfiguration,
+    public static NetworkConfiguration enabled(ObsrConfiguration objectStorageConfiguration,
                                                Object hfcsConfiguration) {
         return new NetworkConfiguration(true, objectStorageConfiguration, hfcsConfiguration);
     }
@@ -34,7 +34,7 @@ public class NetworkConfiguration implements NetworkingMode {
 
     @Override
     public boolean isObjectStorageEnabled() {
-        return mObsrConfiguration != null;// && mObsrConfiguration.creator != null;
+        return mObsrConfiguration != null && mObsrConfiguration.isEnabled;
     }
 
     @Override
