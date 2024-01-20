@@ -63,10 +63,7 @@ public class EntryValueObservableProperty extends ObservablePropertyBase<Value> 
 
     @Override
     public void set(Value value) {
-        Objects.requireNonNull(value, "value is null");
-
-        Storage storage = getStorage();
-        storage.setEntryValue(mPath, value);
+        setInternalDirect(value);
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.flash3388.flashlib.hid.data.RawHidData;
 import com.flash3388.flashlib.hid.generic.GenericHidChannel;
 import com.flash3388.flashlib.hid.generic.weak.WeakHidInterface;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.hfcs.RegisteredIncoming;
+import com.flash3388.flashlib.net.hfcs.HfcsRegisteredIncoming;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
@@ -25,12 +25,8 @@ public class HfcsHid {
         HidData data = new HidData();
         CircularResourceHolder<RawHidData> dataStore = new CircularResourceHolder<>(3, RawHidData::new);
 
-        RegisteredIncoming<RawHidData> incoming = registry.registerIncoming(new HidDataInType(dataStore), RECEIVE_TIMEOUT);
-        incoming.addListener(new NewDataListener(data, dataStore));
-        incoming.addTimeoutListener((event)-> {
-            LOGGER.warn("HID Data from HFCS not received in a while and packet has timed out. Resetting data");
-            data.clearChannels();
-        });
+        HfcsRegisteredIncoming<RawHidData> incoming = registry.registerIncoming(new HidDataInType(dataStore), RECEIVE_TIMEOUT);
+        incoming.addListener(new NewDataListener(data, dataStore, LOGGER));
 
         return new WeakHidInterface(new HfcsHidInterface(data), mainThread);
     }

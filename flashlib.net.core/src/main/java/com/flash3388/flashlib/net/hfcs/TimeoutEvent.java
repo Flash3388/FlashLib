@@ -4,13 +4,13 @@ import com.notifier.Event;
 
 public class TimeoutEvent<T> implements Event {
 
-    private final InType<T> mType;
+    private final HfcsInType<T> mType;
 
-    public TimeoutEvent(InType<T> type) {
+    public TimeoutEvent(HfcsInType<T> type) {
         mType = type;
     }
 
-    public InType<T> getType() {
+    public HfcsInType<T> getType() {
         return mType;
     }
 }

@@ -6,10 +6,10 @@ import com.notifier.Event;
 public class DataReceivedEvent<T> implements Event {
 
     private final InstanceId mSender;
-    private final InType<T> mType;
+    private final HfcsInType<T> mType;
     private final T mData;
 
-    public DataReceivedEvent(InstanceId sender, InType<T> type, T data) {
+    public DataReceivedEvent(InstanceId sender, HfcsInType<T> type, T data) {
         mSender = sender;
         mType = type;
         mData = data;
@@ -19,7 +19,7 @@ public class DataReceivedEvent<T> implements Event {
         return mSender;
     }
 
-    public InType<T> getType() {
+    public HfcsInType<T> getType() {
         return mType;
     }
 

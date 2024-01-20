@@ -9,7 +9,7 @@ import java.io.IOException;
  * @param <T> type of data (object).
  * @since FlashLib 3.2.0
  */
-public interface InType<T> extends Type {
+public interface HfcsInType<T> extends HfcsType {
 
     Class<T> getClassType();
 

@@ -8,8 +8,7 @@ import com.beans.observables.RegisteredListener;
  * @param <T> type of data
  * @since FlashLib 3.2.0
  */
-public interface RegisteredIncoming<T> {
+public interface HfcsRegisteredIncoming<T> {
 
-    RegisteredListener addListener(DataListener<T> listener);
-    RegisteredListener addTimeoutListener(TimeoutListener<T> listener);
+    RegisteredListener addListener(HfcsInListener<T> listener);
 }

@@ -15,10 +15,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AutoConnectingChannel implements NetChannel {
 
-    public interface Listener {
-        void onConnection();
-    }
-
     private static final Time CONNECTION_WAIT_TIME = Time.milliseconds(100);
 
     private final NetChannelConnector mConnector;
@@ -105,11 +101,23 @@ public class AutoConnectingChannel implements NetChannel {
     private NetChannel doConnection() {
         while (true) {
             try {
+                // TODO: SUPPORT CYCLYING BETWEEN DIFFERENT REMOTES UNTIL
+                //      SUCCESS
                 mLogger.debug("Attempting to connect to {}", mRemoteAddress);
                 return mConnector.connect(mRemoteAddress, CONNECTION_WAIT_TIME);
             } catch (IOException e) {
                 mLogger.error("Encountered error while connecting", e);
                 // oh well, try again
+
+                try {
+                    // wait before retrying
+                    //noinspection BusyWait
+                    Thread.sleep(CONNECTION_WAIT_TIME.valueAsMillis());
+                } catch (InterruptedException e1) {
+                    mLogger.warn("Current thread interrupted");
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
             } catch (TimeoutException e) {
                 // oh well, try again
             } catch (InterruptedException e) {

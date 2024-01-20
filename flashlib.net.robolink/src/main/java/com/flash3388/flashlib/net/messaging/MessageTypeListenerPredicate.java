@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.flash3388.flashlib.net.messaging.MessageType;
-import com.flash3388.flashlib.net.messaging.NewMessageEvent;
 import com.notifier.Event;
 
 import java.util.Set;

@@ -5,7 +5,7 @@ package com.flash3388.flashlib.net.hfcs;
  *
  * @since FlashLib 3.2.0.
  */
-public interface Type {
+public interface HfcsType {
 
     int getKey();
 }

@@ -1,11 +1,11 @@
 package com.flash3388.flashlib.robot.hfcs.state;
 
-import com.flash3388.flashlib.net.hfcs.OutData;
+import com.flash3388.flashlib.io.Serializable;
 
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class StateOutData implements OutData {
+public class StateOutData implements Serializable {
 
     private final RobotStateData mData;
 

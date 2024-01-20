@@ -1,13 +1,13 @@
 package com.flash3388.flashlib.robot.hfcs.state;
 
-import com.flash3388.flashlib.net.hfcs.InType;
+import com.flash3388.flashlib.net.hfcs.HfcsInType;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.time.Time;
 
 import java.io.DataInput;
 import java.io.IOException;
 
-public class StateDataInType extends StateDataType implements InType<RobotStateData> {
+public class StateDataInType extends StateDataType implements HfcsInType<RobotStateData> {
 
     @Override
     public Class<RobotStateData> getClassType() {

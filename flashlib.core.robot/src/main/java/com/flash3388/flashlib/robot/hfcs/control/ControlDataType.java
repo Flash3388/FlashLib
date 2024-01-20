@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.robot.hfcs.control;
 
-import com.flash3388.flashlib.net.hfcs.Type;
+import com.flash3388.flashlib.net.hfcs.HfcsType;
 
-public class ControlDataType implements Type {
+public class ControlDataType implements HfcsType {
 
     @Override
     public int getKey() {
