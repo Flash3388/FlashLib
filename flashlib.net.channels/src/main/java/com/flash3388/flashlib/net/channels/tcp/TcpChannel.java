@@ -20,6 +20,7 @@ public class TcpChannel implements NetChannel {
 
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
+        // todo: how to use non-blocking appropriately here?
         int received = mChannel.read(buffer);
         if (received < 1) {
             return new IncomingData(null, 0);

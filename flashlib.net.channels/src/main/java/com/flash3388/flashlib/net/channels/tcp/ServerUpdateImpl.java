@@ -1,15 +1,15 @@
 package com.flash3388.flashlib.net.channels.tcp;
 
-import com.flash3388.flashlib.net.channels.ServerUpdate;
+import com.flash3388.flashlib.net.channels.NetClient;
+import com.flash3388.flashlib.net.channels.NetServerChannel;
 
-import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 
-class ServerUpdateImpl implements ServerUpdate {
+class ServerUpdateImpl implements NetServerChannel.Update {
 
     UpdateType mType;
-    SocketAddress mClientAddress;
+    NetClient mUpdatedClient;
     Iterator<SelectionKey> mSelectorIterator;
 
     @Override
@@ -18,8 +18,8 @@ class ServerUpdateImpl implements ServerUpdate {
     }
 
     @Override
-    public SocketAddress getClientAddress() {
-        return mClientAddress;
+    public NetClient getUpdatedClient() {
+        return mUpdatedClient;
     }
 
     @Override
@@ -33,7 +33,7 @@ class ServerUpdateImpl implements ServerUpdate {
 
     public void clear() {
         mType = UpdateType.NONE;
-        mClientAddress = null;
+        mUpdatedClient = null;
         mSelectorIterator = null;
     }
 }

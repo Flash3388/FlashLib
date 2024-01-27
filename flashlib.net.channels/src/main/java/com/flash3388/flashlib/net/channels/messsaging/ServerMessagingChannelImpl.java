@@ -8,7 +8,6 @@ import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetClient;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
-import com.flash3388.flashlib.net.channels.ServerUpdate;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -16,7 +15,6 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +36,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private final Logger mLogger;
 
     private final MessageSerializer mSerializer;
-    private final Map<SocketAddress, ClientNode> mClients;
+    private final Map<NetClientInfo, ClientNode> mClients;
     private final Set<ClientNode> mClientsToDisconnect;
     private final ByteBuffer mReadBuffer;
 
@@ -62,7 +60,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     public void processUpdates(UpdateHandler handler) throws IOException {
         disconnectClientsInErrorList(handler);
 
-        ServerUpdate update;
+        NetServerChannel.Update update;
         try {
             update = mChannel.readNextUpdate(READ_TIMEOUT);
         } catch (TimeoutException ignore) {
@@ -77,7 +75,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     handleNewClient();
                     break;
                 case NEW_DATA:
-                    handleNewData(update.getClientAddress(), handler);
+                    handleNewData(update.getUpdatedClient(), handler);
                     break;
             }
         } finally {
@@ -110,16 +108,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         NetClientInfo info = client.getInfo();
 
         mLogger.debug("Server received new client from {}",
-                info.getAddress());
+                info);
 
-        mClients.put(info.getAddress(), new ClientNode(client, mMessageTypes, mLogger));
+        mClients.put(info, new ClientNode(client, mMessageTypes, mLogger));
     }
 
-    private void handleNewData(SocketAddress clientAddress, UpdateHandler updateHandler) throws IOException {
-        ClientNode node = mClients.get(clientAddress);
+    private void handleNewData(NetClient client, UpdateHandler updateHandler) throws IOException {
+        NetClientInfo info = client.getInfo();
+        ClientNode node = mClients.get(info);
         if (node == null) {
             // no such client
-            mLogger.error("Received data from unknown client at {}", clientAddress);
+            mLogger.error("Received data from unknown client {}", info);
             return;
         }
 
@@ -243,7 +242,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         NetClientInfo clientInfo = node.getInfo();
 
-        mClients.remove(clientInfo.getAddress());
+        mClients.remove(clientInfo);
         Closeables.silentClose(node.mClient);
 
         if (node.mInstanceId != null) {

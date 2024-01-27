@@ -6,7 +6,6 @@ import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetClient;
 import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
-import com.flash3388.flashlib.net.channels.ServerUpdate;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
@@ -17,13 +16,16 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class TcpServerChannel implements NetServerChannel {
 
     private final SocketAddress mBindAddress;
     private final Logger mLogger;
 
+    private final Map<SocketAddress, NetClient> mClientMap;
     private final ServerUpdateImpl mServerUpdate;
     private ServerSocketChannel mUnderlyingChannel;
     private Selector mSelector;
@@ -33,6 +35,7 @@ public class TcpServerChannel implements NetServerChannel {
         mBindAddress = bindAddress;
         mLogger = logger;
 
+        mClientMap = new HashMap<>();
         mServerUpdate = new ServerUpdateImpl();
         mServerUpdate.clear();
 
@@ -42,8 +45,8 @@ public class TcpServerChannel implements NetServerChannel {
     }
 
     @Override
-    public ServerUpdate readNextUpdate(Time timeout) throws IOException, TimeoutException {
-        if (mServerUpdate.getType() != ServerUpdate.UpdateType.NONE) {
+    public Update readNextUpdate(Time timeout) throws IOException, TimeoutException {
+        if (mServerUpdate.getType() != Update.UpdateType.NONE) {
             throw new IllegalStateException("last update was not handled completely");
         }
 
@@ -82,7 +85,10 @@ public class TcpServerChannel implements NetServerChannel {
             NetClientInfo clientInfo = new NetClientInfo(address);
             NetChannel channel = new TcpChannel(baseChannel);
 
-            return new NetClientImpl(clientInfo, channel);
+            NetClient client = new NetClientImpl(clientInfo, channel);
+            mClientMap.put(address, client);
+
+            return client;
         } catch (IOException | RuntimeException | Error e) {
             Closeables.silentClose(baseChannel);
             throw e;
@@ -156,15 +162,23 @@ public class TcpServerChannel implements NetServerChannel {
                 if (key.isAcceptable()) {
                     // new client
                     mLogger.trace("Select registered accept");
-                    serverUpdate.mType = ServerUpdate.UpdateType.NEW_CLIENT;
+                    serverUpdate.mType = Update.UpdateType.NEW_CLIENT;
                 } else if (key.isReadable()) {
                     // new data from client
                     mLogger.trace("Select registered read");
 
                     //noinspection resource
                     SocketAddress address = ((SocketChannel) key.channel()).getRemoteAddress();
-                    serverUpdate.mType = ServerUpdate.UpdateType.NEW_DATA;
-                    serverUpdate.mClientAddress = address;
+                    NetClient client = mClientMap.get(address);
+                    if (client == null) {
+                        mLogger.warn("Data received from unknown client at {}", address);
+                        iterator.remove();
+                        tryAgain = true;
+                        continue;
+                    }
+
+                    serverUpdate.mType = Update.UpdateType.NEW_DATA;
+                    serverUpdate.mUpdatedClient = client;
                 }
 
                 tryAgain = false;
