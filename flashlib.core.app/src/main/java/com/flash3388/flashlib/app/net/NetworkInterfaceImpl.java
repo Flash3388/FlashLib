@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdaterService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
@@ -24,6 +26,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     private final NetworkingMode mMode;
     private final ObjectStorage mObjectStorage;
     private final HfcsRegistry mHfcsRegistry;
+    private final ChannelUpdater mChannelUpdater;
 
     public NetworkInterfaceImpl(NetworkConfiguration configuration,
                                 InstanceId instanceId,
@@ -36,8 +39,12 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mClock = clock;
         mMainThread = mainThread;
 
+        ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService();
+        mServiceRegistry.register(channelUpdaterService);
+        mChannelUpdater = channelUpdaterService;
+
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            ObsrService service = new ObsrService(mInstanceId, mClock);
+            ObsrService service = new ObsrService(channelUpdaterService, mInstanceId, mClock);
             if (configuration.mObsrConfiguration.isPrimaryMode) {
                 service.configurePrimary(configuration.mObsrConfiguration.serverAddress);
             } else {
@@ -84,7 +91,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
 
-        MessengerService service = new MessengerService(mInstanceId, mClock);
+        MessengerService service = new MessengerService(mChannelUpdater, mInstanceId, mClock);
         if (configuration.serverMode) {
             service.configureServer(configuration.serverAddress);
         } else {

@@ -1,13 +1,14 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
-import com.castle.time.exceptions.TimeoutException;
 import com.castle.util.closeables.Closeables;
-import com.castle.util.throwables.ThrowableChain;
-import com.castle.util.throwables.Throwables;
 import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.NetClient;
-import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
+import com.flash3388.flashlib.net.channels.nio.ChannelListener;
+import com.flash3388.flashlib.net.channels.nio.ChannelOpenListener;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
@@ -15,293 +16,447 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.nio.channels.SelectionKey;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
-    private static final Time READ_TIMEOUT = Time.milliseconds(20);
-
-    private final NetServerChannel mChannel;
-    private final KnownMessageTypes mMessageTypes;
+    private final NetChannelOpener<? extends NetServerChannel> mChannelOpener;
+    private final ChannelUpdater mChannelUpdater;
     private final Clock mClock;
     private final Logger mLogger;
 
+    private final AtomicReference<ChannelData> mChannel;
+    private final AtomicReference<Listener> mListener;
+    private final Map<SelectionKey, ClientNode> mClients;
     private final MessageSerializer mSerializer;
-    private final Map<NetClientInfo, ClientNode> mClients;
-    private final Set<ClientNode> mClientsToDisconnect;
-    private final ByteBuffer mReadBuffer;
+    private final ChannelListener mServerChannelListener;
+    private final ChannelListener mClientsChannelListener;
+    private final ChannelOpenListener<NetServerChannel> mOpenListener;
 
-    public ServerMessagingChannelImpl(NetServerChannel channel,
-                                      InstanceId ourId,
+    public ServerMessagingChannelImpl(NetChannelOpener<? extends NetServerChannel> channelOpener,
+                                      ChannelUpdater channelUpdater,
                                       KnownMessageTypes messageTypes,
+                                      InstanceId ourId,
                                       Clock clock,
                                       Logger logger) {
-        mChannel = channel;
-        mMessageTypes = messageTypes;
+        mChannelOpener = channelOpener;
+        mChannelUpdater = channelUpdater;
         mClock = clock;
         mLogger = logger;
 
+        mChannel = new AtomicReference<>();
+        mListener = new AtomicReference<>();
+        mClients = new HashMap<>();
         mSerializer = new MessageSerializer(ourId);
-        mClients = new ConcurrentHashMap<>();
-        mClientsToDisconnect = new CopyOnWriteArraySet<>();
-        mReadBuffer = ByteBuffer.allocateDirect(1024);
+        mServerChannelListener = new ServerChannelListenerImpl(this, logger);
+        mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, logger);
+        mOpenListener = new OpenListenerImpl(this, logger);
+
+        startOpenChannel();
     }
 
     @Override
-    public void processUpdates(UpdateHandler handler) throws IOException {
-        disconnectClientsInErrorList(handler);
+    public void setListener(Listener listener) {
+        mListener.set(listener);
+    }
 
-        NetServerChannel.Update update;
-        try {
-            update = mChannel.readNextUpdate(READ_TIMEOUT);
-        } catch (TimeoutException ignore) {
-            return;
-        }
+    @Override
+    public void queue(Message message) {
+        mLogger.debug("Queuing new message for all clients");
 
+        boolean failed = false;
         try {
-            switch (update.getType()) {
-                case NONE:
-                    return;
-                case NEW_CLIENT:
-                    handleNewClient();
-                    break;
-                case NEW_DATA:
-                    handleNewData(update.getUpdatedClient(), handler);
-                    break;
+            // todo: serialize on when sending
+            Time now = mClock.currentTime();
+            byte[] content = mSerializer.serialize(now, message, false);
+
+            synchronized (mClients) {
+                for (ClientNode node : mClients.values()) {
+                    node.outQueue.add(content);
+                    node.registration.requestReadWriteUpdates();
+                }
             }
-        } finally {
-            update.done();
+        } catch (IOException e) {
+            mLogger.error("Failed to queue message", e);
+            failed = true;
         }
-    }
 
-    @Override
-    public void write(Message message, boolean onlyForServer) throws IOException {
-        // TODO: OPTIMIZE FOR REUSING BUFFERS
-        Time now = mClock.currentTime();
-        byte[] content = mSerializer.serialize(now, message, onlyForServer);
-        ByteBuffer buffer = ByteBuffer.wrap(content);
-
-        write(buffer, null);
+        if (failed) {
+            Listener listener = mListener.get();
+            if (listener != null) {
+                try {
+                    // todo: this can actually lead to stackoverflow
+                    //      if it keeps happening
+                    listener.onMessageSendingFailed(message);
+                } catch (Throwable ignore) {}
+            }
+        }
     }
 
     @Override
     public void close() throws IOException {
-        Closeables.silentClose(mChannel);
-        mClients.clear();
-        mClientsToDisconnect.clear();
-
-        // TODO: HOW TO REPORT OF DISCONNECTION OF ALL CLIENTS AS RESULT OF THIS?
-        //      IF CLOSED EXTERNALLY, THEN IT SHOULDN'T MATTER
+        ChannelData channel = mChannel.getAndSet(null);
+        if (channel != null) {
+            Closeables.silentClose(channel.channel);
+        }
     }
 
-    private void handleNewClient() throws IOException {
-        NetClient client = mChannel.acceptNewClient();
-        NetClientInfo info = client.getInfo();
-
-        mLogger.debug("Server received new client from {}",
-                info);
-
-        mClients.put(info, new ClientNode(client, mMessageTypes, mLogger));
+    private void startOpenChannel() {
+        mLogger.debug("Requesting open channel");
+        mChannelUpdater.requestOpenChannel(mChannelOpener, mOpenListener, mServerChannelListener);
     }
 
-    private void handleNewData(NetClient client, UpdateHandler updateHandler) throws IOException {
-        NetClientInfo info = client.getInfo();
-        ClientNode node = mClients.get(info);
-        if (node == null) {
-            // no such client
-            mLogger.error("Received data from unknown client {}", info);
+    private void onChannelOpen(NetServerChannel channel, UpdateRegistration registration) {
+        mLogger.debug("Channel opened");
+        mChannel.set(new ChannelData(channel, registration));
+    }
+
+    private void onNewClient(NetClient client) {
+        UpdateRegistration registration = null;
+        try {
+            registration = client.register(mChannelUpdater, mClientsChannelListener);
+
+            ClientNode node = new ClientNode(client, registration);
+            mLogger.debug("New client connected {}", node);
+
+            synchronized (mClients) {
+                mClients.put(registration.getKey(), node);
+            }
+
+            registration.requestReadWriteUpdates();
+        } catch (Throwable t) {
+            mLogger.error("Error while trying to handle new client", t);
+            Closeables.silentClose(client);
+
+            if (registration != null) {
+                try {
+                    registration.cancel();
+                } catch (Throwable ignore) {}
+            }
+        }
+    }
+
+    private void onNewMessage(ClientNode sender, MessageHeader header, Message message) {
+        mLogger.debug("New message received: client={}, sender={}, type={}",
+                sender,
+                header.getSender(),
+                header.getMessageType());
+
+        Listener listener = mListener.get();
+        if (sender.instanceId == null) {
+            sender.instanceId = header.getSender();
+            mLogger.debug("First message from client {}, setting instanceId={}", sender, header.getSender());
+
+            if (listener != null) {
+                // TODO: DON'T USE INSTANCEID AS CLIENTID AS ONE INSTANCE CAN HAVE SEVERAL CLIENTS???
+                listener.onClientConnected(sender.instanceId);
+            }
+        }
+
+        if (listener != null) {
+            try {
+                listener.onNewMessage(header, message);
+            } catch (Throwable ignore) {}
+        }
+
+        if (header.isOnlyForServer()) {
             return;
         }
 
-        mReadBuffer.clear();
-        node.mReadLock.lock();
+        mLogger.debug("Directing new message to all other clients");
         try {
-            IncomingData data = node.mClient.read(mReadBuffer);
-            if (data == null || data.getBytesReceived() < 1) {
-                disconnectClientImmediate(node, updateHandler);
+            Time now = mClock.currentTime();
+            byte[] content = mSerializer.serialize(now, message, false);
+
+            synchronized (mClients) {
+                for (ClientNode node : mClients.values()) {
+                    if (node.registration.getKey().equals(sender.registration.getKey())) {
+                        continue;
+                    }
+
+                    node.outQueue.add(content);
+                    node.registration.requestReadWriteUpdates();
+                }
+            }
+        } catch (IOException e) {
+            // we should report this failure to the listener, as it is internal
+            mLogger.error("Error while handling new message", e);
+        }
+    }
+
+    private void disconnectClient(SelectionKey key, ClientNode node) {
+        // todo: how to recognize disconnection made by client, not by us???
+        //      will be known on read/write attempt
+        //      but how to push it?? key.isvalud???
+        mLogger.debug("Disconnecting client {}", node);
+
+        synchronized (mClients) {
+            mClients.remove(key);
+        }
+
+        Closeables.silentClose(node.client);
+        try {
+            node.registration.cancel();
+        } catch (Throwable ignore) {}
+
+        Listener listener = mListener.get();
+        if (listener != null && node.instanceId != null) {
+            listener.onClientDisconnected(node.instanceId);
+        }
+    }
+
+    private static class ServerChannelListenerImpl implements ChannelListener {
+
+        private final WeakReference<ServerMessagingChannelImpl> mChannel;
+        private final Logger mLogger;
+
+        private ServerChannelListenerImpl(ServerMessagingChannelImpl channel, Logger logger) {
+            mChannel = new WeakReference<>(channel);
+            mLogger = logger;
+        }
+
+        @Override
+        public void onAcceptable(SelectionKey key) {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
                 return;
             }
 
-            if (data.getBytesReceived() >= 1) {
-                mLogger.debug("New data from client: {}, size={}",
-                        data.getSender(),
-                        data.getBytesReceived());
-
-                mReadBuffer.rewind();
-                node.mReadingContext.updateBuffer(mReadBuffer, data.getBytesReceived());
+            ChannelData channel = ourChannel.mChannel.get();
+            if (channel == null) {
+                mLogger.warn("Received accept update but channel is closed");
+                return;
             }
 
-            parseNewData(node, updateHandler);
-        } catch (IOException | RuntimeException | Error e) {
-            mLogger.error("Error processing new data from client at {}", node, e);
-            disconnectClientImmediate(node, updateHandler);
-            throw e;
-        } finally {
-            node.mReadLock.unlock();
+            try {
+                NetClient client = channel.channel.acceptNewClient();
+                ourChannel.onNewClient(client);
+            } catch (IOException e) {
+                mLogger.error("Error accepting new client", e);
+            }
+        }
+
+        @Override
+        public void onConnectable(SelectionKey key) {
+            // unused
+        }
+
+        @Override
+        public void onReadable(SelectionKey key) {
+            // unused
+        }
+
+        @Override
+        public void onWritable(SelectionKey key) {
+            // unused
+        }
+
+        @Override
+        public void onRequestedUpdate(SelectionKey key, Object param) {
+            // unused
         }
     }
 
-    private void parseNewData(ClientNode node, UpdateHandler updateHandler) throws IOException {
-        boolean hasMoreToParse;
-        do {
-            Optional<MessageReadingContext.ParseResult> resultOptional = node.mReadingContext.parse();
-            if (resultOptional.isPresent()) {
-                MessageReadingContext.ParseResult parseResult = resultOptional.get();
+    private static class ClientChannelListenerImpl implements ChannelListener {
 
-                MessageHeader header = parseResult.getHeader();
-                Message message = parseResult.getMessage();
-                mLogger.debug("New message received: sender={}, type={}",
-                        header.getSender(),
-                        header.getMessageType());
+        private final WeakReference<ServerMessagingChannelImpl> mChannel;
+        private final Logger mLogger;
 
-                if (node.mInstanceId == null) {
-                    node.mInstanceId = header.getSender();
+        private final MessageReadingContext mReadingContext;
+        private final List<byte[]> mWriteQueueLocal;
 
-                    mLogger.info("New client connected and identified {}, at {}",
-                            node.mInstanceId,
-                            node.getInfo().getAddress());
+        private ClientChannelListenerImpl(ServerMessagingChannelImpl channel,
+                                          KnownMessageTypes messageTypes,
+                                          Logger logger) {
+            mChannel = new WeakReference<>(channel);
+            mLogger = logger;
 
-                    try {
-                        updateHandler.onClientConnected(node.mInstanceId);
-                    } catch (Throwable t) {
-                        mLogger.error("Unexpected error from UpdateHandler.onClientConnected. Ignored", t);
-                    }
+            mReadingContext = new MessageReadingContext(messageTypes, logger);
+            mWriteQueueLocal = new ArrayList<>();
+        }
+
+        @Override
+        public void onAcceptable(SelectionKey key) {
+            // unused
+        }
+
+        @Override
+        public void onConnectable(SelectionKey key) {
+            // unused
+        }
+
+        @Override
+        public void onReadable(SelectionKey key) {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return;
+            }
+
+            ClientNode client;
+            synchronized (ourChannel.mClients) {
+                client = ourChannel.mClients.get(key);
+            }
+
+            if (client == null) {
+                // client was likely closed
+                mLogger.warn("Received read update on non-existing client {}", key);
+                return;
+            }
+
+            try {
+                IncomingData data = mReadingContext.readFromChannel(client.client);
+                if (data.getBytesReceived() >= 1) {
+                    mLogger.debug("New data from remote: {}, size={}",
+                            data.getSender(),
+                            data.getBytesReceived());
                 }
 
+                parseMessages(ourChannel, client);
+            } catch (IOException e) {
+                mLogger.error("Error while reading and processing new data", e);
+                ourChannel.disconnectClient(key, client);
+            }
+        }
+
+        @Override
+        public void onWritable(SelectionKey key) {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return;
+            }
+
+            ClientNode client;
+            synchronized (ourChannel.mClients) {
+                client = ourChannel.mClients.get(key);
+            }
+
+            if (client == null) {
+                // client was likely closed
+                mLogger.warn("Received write update on non-existing client {}", key);
+                return;
+            }
+
+            mWriteQueueLocal.clear();
+            synchronized (client.outQueue) {
+                mWriteQueueLocal.addAll(client.outQueue);
+                client.outQueue.clear();
+
+                client.registration.requestReadUpdates();
+            }
+
+            for (byte[] buffer : mWriteQueueLocal) {
                 try {
-                    updateHandler.onNewMessage(header, message);
-                } catch (Throwable t) {
-                    mLogger.error("Unexpected error from UpdateHandler.onNewMessage. Ignored", t);
+                    mLogger.debug("Writing data to channel: client={}, size={}", client, buffer.length);
+                    client.client.write(ByteBuffer.wrap(buffer));
+                } catch (IOException e) {
+                    mLogger.error("Error while writing data", e);
+
+                    // todo: we need to alert on failure to send message
+                    //      but we only know the buffer not the message
+
+                    ourChannel.disconnectClient(key, client);
+                    break;
                 }
-
-                if (!header.isOnlyForServer()) {
-                    try {
-                        // TODO: OPTIMIZE FOR REUSING BUFFERS
-                        byte[] content = mSerializer.serialize(header, message);
-                        ByteBuffer buffer = ByteBuffer.wrap(content);
-
-                        write(buffer, node);
-                    } catch (Throwable t) {
-                        mLogger.error("Error while routing received messages to other clients", t);
-                    }
-                }
-
-                hasMoreToParse = true;
-            } else {
-                hasMoreToParse = false;
-            }
-        } while (hasMoreToParse);
-    }
-
-    private void write(ByteBuffer buffer, ClientNode skipClient) throws IOException {
-        Set<ClientNode> erroredClients = new HashSet<>();
-
-        ThrowableChain chain = Throwables.newChain();
-        for (ClientNode node : mClients.values()) {
-            try {
-                if (skipClient != null && node == skipClient) {
-                    continue;
-                }
-
-                mLogger.debug("Writing message to client: {}, size={}",
-                        node,
-                        buffer.limit());
-
-                buffer.rewind();
-                node.mWriteLock.lock();
-                try {
-                    node.mClient.write(buffer);
-                } finally {
-                    node.mWriteLock.unlock();
-                }
-            } catch (IOException | RuntimeException | Error e) {
-                mLogger.error("Error sending data to client {}", node);
-
-                chain.chain(e);
-                erroredClients.add(node);
             }
         }
 
-        mClientsToDisconnect.addAll(erroredClients);
+        @Override
+        public void onRequestedUpdate(SelectionKey key, Object param) {
+            // unused
+        }
 
-        chain.throwIfType(IOException.class);
-        chain.throwAsRuntime();
-    }
+        private void parseMessages(ServerMessagingChannelImpl ourChannel, ClientNode sender) throws IOException {
+            boolean hasMoreToParse;
+            do {
+                Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
+                if (resultOptional.isPresent()) {
+                    MessageReadingContext.ParseResult parseResult = resultOptional.get();
 
-    private void disconnectClientImmediate(ClientNode node, UpdateHandler updateHandler) {
-        // should only be called from processUpdates
+                    MessageHeader header = parseResult.getHeader();
+                    Message message = parseResult.getMessage();
 
-        NetClientInfo clientInfo = node.getInfo();
+                    ourChannel.onNewMessage(sender, header, message);
 
-        mClients.remove(clientInfo);
-        Closeables.silentClose(node.mClient);
-
-        if (node.mInstanceId != null) {
-            try {
-                updateHandler.onClientDisconnected(node.mInstanceId);
-            } catch (Throwable t) {
-                // the client is already disconnected, so not much to do here.
-                mLogger.error("Unexpected error from UpdateHandler.onClientDisconnected. Ignored", t);
-            }
+                    hasMoreToParse = true;
+                } else {
+                    hasMoreToParse = false;
+                }
+            } while (hasMoreToParse);
         }
     }
 
-    private void disconnectClientsInErrorList(UpdateHandler updateHandler) {
-        // should only be called from processUpdates
-        if (mClientsToDisconnect.isEmpty()) {
-            return;
+    private static class OpenListenerImpl implements ChannelOpenListener<NetServerChannel> {
+
+        private final WeakReference<ServerMessagingChannelImpl> mChannel;
+        private final Logger mLogger;
+
+        private OpenListenerImpl(ServerMessagingChannelImpl channel, Logger logger) {
+            mChannel = new WeakReference<>(channel);
+            mLogger = logger;
         }
 
-        for (Iterator<ClientNode> it = mClientsToDisconnect.iterator();
-             it.hasNext(); ) {
-            ClientNode node = it.next();
-            try {
-                disconnectClientImmediate(node, updateHandler);
-            } finally {
-                it.remove();
+        @Override
+        public void onOpen(NetServerChannel channel, UpdateRegistration registration) {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return;
             }
+
+            ourChannel.onChannelOpen(channel, registration);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return;
+            }
+
+            ourChannel.startOpenChannel();
         }
     }
 
     private static class ClientNode {
+        public final NetClient client;
+        public final UpdateRegistration registration;
+        public final Queue<byte[]> outQueue;
+        public InstanceId instanceId;
 
-        final NetClient mClient;
-
-        final MessageReadingContext mReadingContext;
-        // readLock can hold writeLock but not reversed. IMPORTANT!
-        final Lock mReadLock;
-        final Lock mWriteLock;
-
-        InstanceId mInstanceId;
-
-        private ClientNode(NetClient client,
-                           KnownMessageTypes messageTypes,
-                           Logger logger) {
-            mClient = client;
-
-            mReadingContext = new MessageReadingContext(messageTypes, logger);
-            mReadLock = new ReentrantLock();
-            mWriteLock = new ReentrantLock();
-
-            mInstanceId = null;
-        }
-
-        public NetClientInfo getInfo() {
-            return mClient.getInfo();
+        private ClientNode(NetClient client, UpdateRegistration registration) {
+            this.client = client;
+            this.registration = registration;
+            this.outQueue = new ArrayDeque<>();
+            this.instanceId = null;
         }
 
         @Override
         public String toString() {
-            return mClient.getInfo().toString();
+            return client.getInfo().toString();
+        }
+    }
+
+    private static class ChannelData {
+        public final NetServerChannel channel;
+        public final UpdateRegistration registration;
+
+        private ChannelData(NetServerChannel channel, UpdateRegistration registration) {
+            this.channel = channel;
+            this.registration = registration;
         }
     }
 }

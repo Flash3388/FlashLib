@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import org.apache.commons.io.input.buffer.CircularByteBuffer;
@@ -37,6 +39,7 @@ public class MessageReadingContext {
     private final KnownMessageTypes mMessageTypes;
     private final Logger mLogger;
 
+    private final ByteBuffer mDirectReadBuffer;
     private final CircularByteBuffer mDataToReadBuffer;
     private final byte[] mReadBuffer;
 
@@ -45,7 +48,9 @@ public class MessageReadingContext {
     public MessageReadingContext(KnownMessageTypes messageTypes, Logger logger) {
         mMessageTypes = messageTypes;
         mLogger = logger;
+
         // TODO: USE THIS OR SOME OTHER BUFFER FOR BOTH READING FROM THE CHANNEL AND PARSING
+        mDirectReadBuffer = ByteBuffer.allocateDirect(1024);
         mDataToReadBuffer = new CircularByteBuffer(2048);
         mReadBuffer = new byte[1024];
 
@@ -57,6 +62,20 @@ public class MessageReadingContext {
 
         mDataToReadBuffer.clear();
         mLastHeader = null;
+    }
+
+    public IncomingData readFromChannel(NetChannel channel) throws IOException {
+        mDirectReadBuffer.clear();
+
+        IncomingData data = channel.read(mDirectReadBuffer);
+        if (data == null) {
+            return null;
+        }
+
+        mDirectReadBuffer.rewind();
+        updateBuffer(mDirectReadBuffer, data.getBytesReceived());
+
+        return data;
     }
 
     public void updateBuffer(ByteBuffer buffer, int bytesInBuffer) {

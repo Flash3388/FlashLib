@@ -2,38 +2,39 @@ package com.flash3388.flashlib.net.channels.tcp;
 
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
-import com.flash3388.flashlib.net.channels.NetClient;
-import com.flash3388.flashlib.net.channels.NetClientInfo;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
-class NetClientImpl implements NetClient {
+public class ConnectedTcpChannel implements NetChannel {
 
-    private final NetClientInfo mClientInfo;
-    private final NetChannel mChannel;
+    private final SocketChannel mChannel;
+    private final SocketAddress mRemoteAddress;
 
-    public NetClientImpl(NetClientInfo clientInfo, NetChannel channel) {
-        mClientInfo = clientInfo;
+    public ConnectedTcpChannel(SocketChannel channel) throws IOException {
         mChannel = channel;
-    }
-
-    @Override
-    public NetClientInfo getInfo() {
-        return mClientInfo;
+        mRemoteAddress = channel.getRemoteAddress();
     }
 
     @Override
     public UpdateRegistration register(ChannelUpdater updater, ChannelListener listener) throws IOException {
-        return mChannel.register(updater, listener);
+        return updater.register(mChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, listener);
     }
 
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
-        return mChannel.read(buffer);
+        int received = mChannel.read(buffer);
+        if (received < 1) {
+            return new IncomingData(null, 0);
+        }
+
+        return new IncomingData(mRemoteAddress, received);
     }
 
     @Override

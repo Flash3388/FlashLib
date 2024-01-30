@@ -1,42 +1,22 @@
 package com.flash3388.flashlib.net.hfcs;
 
-import com.flash3388.flashlib.io.Serializable;
-import com.flash3388.flashlib.net.channels.NetChannelConnector;
-import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannelImpl;
-import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
-import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.channels.udp.UdpConnector;
-import com.flash3388.flashlib.net.messaging.Message;
-import com.flash3388.flashlib.net.messaging.ServerClock;
-import com.flash3388.flashlib.net.util.NetServiceBase;
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
-import com.flash3388.flashlib.util.unique.InstanceId;
-import com.notifier.Controllers;
-import com.notifier.EventController;
 import org.slf4j.Logger;
 
-import java.io.Closeable;
-import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
-import java.util.function.Supplier;
-
-public class HfcsService extends NetServiceBase implements HfcsRegistry {
+public class HfcsService /*extends NetServiceBase implements HfcsRegistry*/ {
 
     private static final Logger LOGGER = Logging.getLogger("Comm", "HFCSService");
 
-    private final InstanceId mOurId;
+   /* private final InstanceId mOurId;
     private final Clock mClock;
 
     private final KnownInDataTypes mInDataTypes;
     private final EventController mEventController;
     private final BlockingQueue<OutDataNode> mOutDataQueue;
     private final Map<HfcsInType<?>, InDataNode> mInDataNodes;
+
+    private Supplier<Context> mContextSupplier;
+    private Context mContext;
 
     public HfcsService(InstanceId ourId, Clock clock) {
         mOurId = ourId;
@@ -48,16 +28,46 @@ public class HfcsService extends NetServiceBase implements HfcsRegistry {
         mInDataNodes = new ConcurrentHashMap<>();
     }
 
-    public void configureTargeted(SocketAddress remoteAddress) {
-
+    public void configureTargeted(SocketAddress bindAddress, SocketAddress remoteAddress) {
+        mContextSupplier = new SimpleContextSupplier(
+                mOurId,
+                mClock,
+                remoteAddress,
+                LOGGER,
+                mEventController,
+                bindAddress);
     }
 
-    public void configureMulticast() {
-
+    public void configureMulticast(NetworkInterface multicastInterface,
+                                   InetAddress multicastGroup,
+                                   SocketAddress bindAddress,
+                                   int remotePort) {
+        mContextSupplier = new MulticastContextSupplier(
+                mOurId,
+                mClock,
+                new InetSocketAddress(multicastGroup, remotePort),
+                LOGGER,
+                mEventController,
+                bindAddress,
+                multicastInterface,
+                multicastGroup);
     }
 
-    public void configureBroadcast() {
+    public void configureBroadcast(SocketAddress bindAddress,
+                                   int remotePort) {
+        try {
+            InetAddress address = InetAddress.getByName("255.255.255.255");
 
+            mContextSupplier = new BroadcastContextSupplier(
+                    mOurId,
+                    mClock,
+                    new InetSocketAddress(address, remotePort),
+                    LOGGER,
+                    mEventController,
+                    bindAddress);
+        } catch (UnknownHostException e) {
+            throw new Error("broadcast address not found", e);
+        }
     }
 
     @Override
@@ -74,10 +84,14 @@ public class HfcsService extends NetServiceBase implements HfcsRegistry {
 
     @Override
     protected Map<String, Runnable> createTasks() {
+        if (mContextSupplier == null) {
+            throw new IllegalStateException("not configured");
+        }
 
+        mContext = mContextSupplier.get();
 
         Map<String, Runnable> tasks = new HashMap<>();
-        tasks.put("MessengerService-ReadTask", mContext.readTask);
+        tasks.put("HfcsService.UpdateTask", mContext.updateTask);
 
         return tasks;
     }
@@ -103,40 +117,102 @@ public class HfcsService extends NetServiceBase implements HfcsRegistry {
         private final InstanceId mInstanceId;
         private final Clock mClock;
         private final SocketAddress mServerAddress;
-        private final Logger mLogger;
+        protected final Logger mLogger;
         private final EventController mEventController;
-        private final KnownMessageTypes mKnownMessageTypes;
-        private final BlockingQueue<Message> mWriteQueue;
 
         private ContextSupplierBase(InstanceId instanceId,
                                     Clock clock,
                                     SocketAddress serverAddress,
-                                      Logger logger,
-                                      EventController eventController,
-                                      KnownMessageTypes knownMessageTypes,
-                                      BlockingQueue<Message> writeQueue) {
+                                    Logger logger,
+                                    EventController eventController) {
             mInstanceId = instanceId;
             mClock = clock;
             mServerAddress = serverAddress;
             mLogger = logger;
             mEventController = eventController;
-            mKnownMessageTypes = knownMessageTypes;
-            mWriteQueue = writeQueue;
         }
 
         @Override
         public Context get() {
+            KnownMessageTypes messageTypes = new KnownMessageTypes();
             MessagingChannel channel = new BasicMessagingChannelImpl(
-                    new UdpConnector(),
+                    createConnector(),
                     mServerAddress,
                     mInstanceId,
-                    clock,
+                    mClock,
                     mLogger,
-                    mKnownMessageTypes);
+                    messageTypes);
 
-            return new Context(channel, readTask, writeTask);
+            Runnable task = new UpdateTask(channel);
+            return new Context(channel, task);
         }
 
-        protected abstract MessagingChannel createChannel();
+        protected abstract UdpConnector createConnector();
     }
+
+    private static class SimpleContextSupplier extends ContextSupplierBase {
+
+        private final SocketAddress mBindAddress;
+
+        private SimpleContextSupplier(InstanceId instanceId,
+                                      Clock clock,
+                                      SocketAddress serverAddress,
+                                      Logger logger,
+                                      EventController eventController,
+                                      SocketAddress bindAddress) {
+            super(instanceId, clock, serverAddress, logger, eventController);
+            mBindAddress = bindAddress;
+        }
+
+        @Override
+        protected UdpConnector createConnector() {
+            return new UdpConnector(mBindAddress, mLogger);
+        }
+    }
+
+    private static class MulticastContextSupplier extends ContextSupplierBase {
+
+        private final SocketAddress mBindAddress;
+        private final NetworkInterface mMulticastInterface;
+        private final InetAddress mMulticastGroup;
+
+        private MulticastContextSupplier(InstanceId instanceId,
+                                         Clock clock,
+                                         SocketAddress serverAddress,
+                                         Logger logger,
+                                         EventController eventController,
+                                         SocketAddress bindAddress,
+                                         NetworkInterface multicastInterface,
+                                         InetAddress multicastGroup) {
+            super(instanceId, clock, serverAddress, logger, eventController);
+            mBindAddress = bindAddress;
+            mMulticastInterface = multicastInterface;
+            mMulticastGroup = multicastGroup;
+        }
+
+        @Override
+        protected UdpConnector createConnector() {
+            return UdpConnector.multicast(mMulticastInterface, mMulticastGroup, mBindAddress, mLogger);
+        }
+    }
+
+    private static class BroadcastContextSupplier extends ContextSupplierBase {
+
+        private final SocketAddress mBindAddress;
+
+        private BroadcastContextSupplier(InstanceId instanceId,
+                                         Clock clock,
+                                         SocketAddress serverAddress,
+                                         Logger logger,
+                                         EventController eventController,
+                                         SocketAddress bindAddress) {
+            super(instanceId, clock, serverAddress, logger, eventController);
+            mBindAddress = bindAddress;
+        }
+
+        @Override
+        protected UdpConnector createConnector() {
+            return UdpConnector.broadcast(mBindAddress, mLogger);
+        }
+    }*/
 }

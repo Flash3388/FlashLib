@@ -2,15 +2,17 @@ package com.flash3388.flashlib.net.messaging;
 
 import com.beans.observables.RegisteredListener;
 import com.beans.observables.listeners.RegisteredListenerImpl;
+import com.castle.concurrent.service.ServiceBase;
+import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannelImpl;
-import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
-import com.flash3388.flashlib.net.channels.tcp.TcpServerChannel;
-import com.flash3388.flashlib.net.util.NetServiceBase;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.tcp.TcpChannelOpener;
+import com.flash3388.flashlib.net.channels.tcp.TcpServerChannelOpener;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -21,33 +23,30 @@ import org.slf4j.Logger;
 import java.io.Closeable;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Function;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class MessengerService extends NetServiceBase implements Messenger {
+public class MessengerService extends ServiceBase implements Messenger {
 
     private static final Logger LOGGER = Logging.getLogger("Comm", "Messenger");
 
+    private final ChannelUpdater mChannelUpdater;
     private final InstanceId mOurId;
     private final Clock mClock;
     private final EventController mEventController;
     private final KnownMessageTypes mKnownMessageTypes;
-    private final BlockingQueue<Message> mWriteQueue;
 
-    private Function<Messenger, Context> mContextSupplier;
+    private Supplier<Context> mContextSupplier;
     private Context mContext;
 
-    public MessengerService(InstanceId ourId, Clock clock) {
+    public MessengerService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
+        mChannelUpdater = channelUpdater;
         mOurId = ourId;
         mClock = clock;
 
         mEventController = Controllers.newSyncExecutionController();
         mKnownMessageTypes = new KnownMessageTypes();
-        mWriteQueue = new LinkedBlockingQueue<>();
 
         mKnownMessageTypes.put(PingMessage.TYPE);
 
@@ -67,7 +66,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
                 LOGGER,
                 mEventController,
                 mKnownMessageTypes,
-                mWriteQueue);
+                mChannelUpdater);
     }
 
     public void configureClient(SocketAddress serverAddress) {
@@ -82,7 +81,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
                 LOGGER,
                 mEventController,
                 mKnownMessageTypes,
-                mWriteQueue);
+                mChannelUpdater);
     }
 
     public RegisteredListener addListener(ConnectionListener listener) {
@@ -109,49 +108,43 @@ public class MessengerService extends NetServiceBase implements Messenger {
 
     @Override
     public void send(Message message) {
+        if (mContext == null) {
+            throw new IllegalStateException("no channel to queue messages");
+        }
+
         LOGGER.debug("Queueing message of type {}", message.getType().getKey());
-        mWriteQueue.add(message);
+        mContext.queuer.accept(message);
     }
 
     @Override
-    protected Map<String, Runnable> createTasks() {
+    protected void startRunning() throws ServiceException {
         if (mContextSupplier == null) {
             throw new IllegalStateException("not configured");
         }
 
-        mContext = mContextSupplier.apply(this);
-
-        Map<String, Runnable> tasks = new HashMap<>();
-        tasks.put("MessengerService-ReadTask", mContext.readTask);
-        tasks.put("MessengerService-WriteTask", mContext.writeTask);
-
-        return tasks;
+        mContext = mContextSupplier.get();
     }
 
     @Override
-    protected void freeResources() {
+    protected void stopRunning() {
         if (mContext != null) {
             Closeables.silentClose(mContext.channel);
             mContext = null;
         }
-
-        mWriteQueue.clear();
     }
 
     private static class Context {
 
         public final Closeable channel;
-        public final Runnable readTask;
-        public final Runnable writeTask;
+        public final Consumer<Message> queuer;
 
-        public Context(Closeable channel, Runnable readTask, Runnable writeTask) {
+        private Context(Closeable channel, Consumer<Message> queuer) {
             this.channel = channel;
-            this.readTask = readTask;
-            this.writeTask = writeTask;
+            this.queuer = queuer;
         }
     }
 
-    private static class ServerContextCreator implements Function<Messenger, Context> {
+    private static class ServerContextCreator implements Supplier<Context> {
 
         private final InstanceId mInstanceId;
         private final Clock mClock;
@@ -159,7 +152,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
         private final Logger mLogger;
         private final EventController mEventController;
         private final KnownMessageTypes mKnownMessageTypes;
-        private final BlockingQueue<Message> mWriteQueue;
+        private final ChannelUpdater mChannelUpdater;
 
         private ServerContextCreator(InstanceId instanceId,
                                      Clock clock,
@@ -167,41 +160,33 @@ public class MessengerService extends NetServiceBase implements Messenger {
                                      Logger logger,
                                      EventController eventController,
                                      KnownMessageTypes knownMessageTypes,
-                                     BlockingQueue<Message> writeQueue) {
+                                     ChannelUpdater channelUpdater) {
             mInstanceId = instanceId;
             mClock = clock;
             mBindAddress = bindAddress;
             mLogger = logger;
             mEventController = eventController;
             mKnownMessageTypes = knownMessageTypes;
-            mWriteQueue = writeQueue;
+            mChannelUpdater = channelUpdater;
         }
 
         @Override
-        public Context apply(Messenger messenger) {
+        public Context get() {
             ServerMessagingChannel channel = new ServerMessagingChannelImpl(
-                    new TcpServerChannel(mBindAddress, mLogger),
-                    mInstanceId,
+                    new TcpServerChannelOpener(mBindAddress, mLogger),
+                    mChannelUpdater,
                     mKnownMessageTypes,
+                    mInstanceId,
                     mClock,
                     mLogger);
 
-            Runnable readTask = new ServerReadTask(
-                    messenger,
-                    channel,
-                    mEventController,
-                    mLogger);
+            channel.setListener(new ServerChannelListener(channel, mEventController, mLogger));
 
-            Runnable writeTask = new WriteTask(
-                    channel,
-                    mWriteQueue,
-                    mLogger);
-
-            return new Context(channel, readTask, writeTask);
+            return new Context(channel, channel::queue);
         }
     }
 
-    private static class ClientContextSupplier implements Function<Messenger, Context> {
+    private static class ClientContextSupplier implements Supplier<Context> {
 
         private final InstanceId mInstanceId;
         private final Clock mClock;
@@ -209,7 +194,7 @@ public class MessengerService extends NetServiceBase implements Messenger {
         private final Logger mLogger;
         private final EventController mEventController;
         private final KnownMessageTypes mKnownMessageTypes;
-        private final BlockingQueue<Message> mWriteQueue;
+        private final ChannelUpdater mChannelUpdater;
 
         private ClientContextSupplier(InstanceId instanceId,
                                       Clock clock,
@@ -217,41 +202,35 @@ public class MessengerService extends NetServiceBase implements Messenger {
                                       Logger logger,
                                       EventController eventController,
                                       KnownMessageTypes knownMessageTypes,
-                                      BlockingQueue<Message> writeQueue) {
+                                      ChannelUpdater channelUpdater) {
             mInstanceId = instanceId;
             mClock = clock;
             mServerAddress = serverAddress;
             mLogger = logger;
             mEventController = eventController;
             mKnownMessageTypes = knownMessageTypes;
-            mWriteQueue = writeQueue;
+            mChannelUpdater = channelUpdater;
         }
 
         @Override
-        public Context apply(Messenger messenger) {
+        public Context get() {
             ServerClock clock = new ServerClock(mClock, mLogger);
 
-            MessagingChannel channel = new BasicMessagingChannelImpl(
-                    new TcpClientConnector(clock, mLogger),
+            MessagingChannel channel = new MessagingChannelImpl(
+                    new TcpChannelOpener(mLogger),
+                    mChannelUpdater,
                     mServerAddress,
+                    mKnownMessageTypes,
                     mInstanceId,
                     clock,
-                    mLogger,
-                    mKnownMessageTypes);
-
-            Runnable readTask = new ClientReadTask(
-                    messenger,
-                    channel,
-                    mEventController,
-                    clock,
                     mLogger);
 
-            Runnable writeTask = new WriteTask(
-                    channel,
-                    mWriteQueue,
-                    mLogger);
+            // TODO: NEED SOMETHING TO USE PINGCONTEXT
+            PingContext pingContext = new PingContext(channel, clock, mLogger);
+            channel.setListener(new ClientChannelListener(pingContext, mEventController, clock, mLogger));
 
-            return new Context(channel, readTask, writeTask);
+            return new Context(channel, (message)-> channel.queue(message, false));
         }
     }
+
 }

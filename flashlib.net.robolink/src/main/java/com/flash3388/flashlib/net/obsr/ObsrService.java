@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.obsr;
 
 import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.messaging.ConnectionListener;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageListener;
@@ -32,10 +33,10 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
     private final MessengerService mMessenger;
     private final Storage mStorage;
 
-    public ObsrService(InstanceId ourId, Clock clock) {
+    public ObsrService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
         mOurId = ourId;
 
-        mMessenger = new MessengerService(ourId, clock);
+        mMessenger = new MessengerService(channelUpdater, ourId, clock);
 
         StorageListener storageListener = new StorageListenerImpl(mMessenger);
         EventController eventController = Controllers.newSyncExecutionController();
