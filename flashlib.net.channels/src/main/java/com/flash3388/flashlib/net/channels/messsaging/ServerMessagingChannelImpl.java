@@ -9,10 +9,10 @@ import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelOpenListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
+import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -32,13 +32,12 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
     private final NetChannelOpener<? extends NetServerChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
-    private final Clock mClock;
+    private final ChannelId mOurId;
     private final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
     private final AtomicReference<Listener> mListener;
     private final Map<SelectionKey, ClientNode> mClients;
-    private final MessageSerializer mSerializer;
     private final ChannelListener mServerChannelListener;
     private final ChannelListener mClientsChannelListener;
     private final ChannelOpenListener<NetServerChannel> mOpenListener;
@@ -46,20 +45,19 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     public ServerMessagingChannelImpl(NetChannelOpener<? extends NetServerChannel> channelOpener,
                                       ChannelUpdater channelUpdater,
                                       KnownMessageTypes messageTypes,
-                                      InstanceId ourId,
+                                      ChannelId ourId,
                                       Clock clock,
                                       Logger logger) {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
-        mClock = clock;
+        mOurId = ourId;
         mLogger = logger;
 
         mChannel = new AtomicReference<>();
         mListener = new AtomicReference<>();
         mClients = new HashMap<>();
-        mSerializer = new MessageSerializer(ourId);
         mServerChannelListener = new ServerChannelListenerImpl(this, logger);
-        mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, logger);
+        mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
 
         startOpenChannel();
@@ -74,31 +72,11 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     public void queue(Message message) {
         mLogger.debug("Queuing new message for all clients");
 
-        boolean failed = false;
-        try {
-            // todo: serialize on when sending
-            Time now = mClock.currentTime();
-            byte[] content = mSerializer.serialize(now, message, false);
-
-            synchronized (mClients) {
-                for (ClientNode node : mClients.values()) {
-                    node.outQueue.add(content);
-                    node.registration.requestReadWriteUpdates();
-                }
-            }
-        } catch (IOException e) {
-            mLogger.error("Failed to queue message", e);
-            failed = true;
-        }
-
-        if (failed) {
-            Listener listener = mListener.get();
-            if (listener != null) {
-                try {
-                    // todo: this can actually lead to stackoverflow
-                    //      if it keeps happening
-                    listener.onMessageSendingFailed(message);
-                } catch (Throwable ignore) {}
+        SendRequest request = new SendRequest(message, null, mOurId);
+        synchronized (mClients) {
+            for (ClientNode node : mClients.values()) {
+                node.outQueue.add(request);
+                node.registration.requestReadWriteUpdates();
             }
         }
     }
@@ -153,13 +131,19 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 header.getMessageType());
 
         Listener listener = mListener.get();
-        if (sender.instanceId == null) {
-            sender.instanceId = header.getSender();
-            mLogger.debug("First message from client {}, setting instanceId={}", sender, header.getSender());
+        if (!sender.isRegistered()) {
+            sender.id = header.getSender();
+
+            // client is now registered, handle any queued messages.
+            sender.registration.requestReadWriteUpdates();
+
+            mLogger.debug("First message from client {}, setting id={}",
+                    sender, header.getSender());
 
             if (listener != null) {
-                // TODO: DON'T USE INSTANCEID AS CLIENTID AS ONE INSTANCE CAN HAVE SEVERAL CLIENTS???
-                listener.onClientConnected(sender.instanceId);
+                try {
+                    listener.onClientConnected(sender.id);
+                } catch (Throwable ignored) {}
             }
         }
 
@@ -174,23 +158,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         }
 
         mLogger.debug("Directing new message to all other clients");
-        try {
-            Time now = mClock.currentTime();
-            byte[] content = mSerializer.serialize(now, message, false);
 
-            synchronized (mClients) {
-                for (ClientNode node : mClients.values()) {
-                    if (node.registration.getKey().equals(sender.registration.getKey())) {
-                        continue;
-                    }
-
-                    node.outQueue.add(content);
-                    node.registration.requestReadWriteUpdates();
+        SendRequest request = new SendRequest(message, header, header.getSender());
+        synchronized (mClients) {
+            for (ClientNode node : mClients.values()) {
+                if (node.registration.getKey().equals(sender.registration.getKey())) {
+                    continue;
                 }
+
+                node.outQueue.add(request);
+                node.registration.requestReadWriteUpdates();
             }
-        } catch (IOException e) {
-            // we should report this failure to the listener, as it is internal
-            mLogger.error("Error while handling new message", e);
         }
     }
 
@@ -210,8 +188,10 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         } catch (Throwable ignore) {}
 
         Listener listener = mListener.get();
-        if (listener != null && node.instanceId != null) {
-            listener.onClientDisconnected(node.instanceId);
+        if (listener != null && node.isRegistered()) {
+            // if id is not null, then we did not report this channel as connected,
+            // and such we will not report it as disconnected
+            listener.onClientDisconnected(node.id);
         }
     }
 
@@ -271,18 +251,24 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private static class ClientChannelListenerImpl implements ChannelListener {
 
         private final WeakReference<ServerMessagingChannelImpl> mChannel;
+        private final Clock mClock;
         private final Logger mLogger;
 
         private final MessageReadingContext mReadingContext;
-        private final List<byte[]> mWriteQueueLocal;
+        private final MessageSerializer mSerializer;
+        private final List<SendRequest> mWriteQueueLocal;
 
         private ClientChannelListenerImpl(ServerMessagingChannelImpl channel,
                                           KnownMessageTypes messageTypes,
+                                          ChannelId ourId,
+                                          Clock clock,
                                           Logger logger) {
             mChannel = new WeakReference<>(channel);
+            mClock = clock;
             mLogger = logger;
 
             mReadingContext = new MessageReadingContext(messageTypes, logger);
+            mSerializer = new MessageSerializer(ourId);
             mWriteQueueLocal = new ArrayList<>();
         }
 
@@ -349,6 +335,12 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 return;
             }
 
+            if (!client.isRegistered()) {
+                // not registered yet, don't send anything
+                client.registration.requestReadUpdates();
+                return;
+            }
+
             mWriteQueueLocal.clear();
             synchronized (client.outQueue) {
                 mWriteQueueLocal.addAll(client.outQueue);
@@ -357,16 +349,36 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 client.registration.requestReadUpdates();
             }
 
-            for (byte[] buffer : mWriteQueueLocal) {
+            for (SendRequest request : mWriteQueueLocal) {
+                byte[] content;
                 try {
-                    mLogger.debug("Writing data to channel: client={}, size={}", client, buffer.length);
-                    client.client.write(ByteBuffer.wrap(buffer));
+                    // todo: improve data usage when serializing and writing
+                    if (request.header != null) {
+                        content = mSerializer.serialize(request.header, request.message);
+                    } else {
+                        Time now = mClock.currentTime();
+                        content = mSerializer.serialize(now, request.message, false);
+                    }
+                } catch (IOException e) {
+                    mLogger.error("Error serializing message data", e);
+
+                    Listener listener = ourChannel.mListener.get();
+                    if (listener != null) {
+                        try {
+                            listener.onMessageSendingFailed(request.senderId, request.message);
+                        } catch (Throwable ignore) {}
+                    }
+
+                    continue;
+                }
+
+                try {
+                    mLogger.debug("Writing data to channel: client={}, size={}", client, content.length);
+                    client.client.write(ByteBuffer.wrap(content));
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
 
-                    // todo: we need to alert on failure to send message
-                    //      but we only know the buffer not the message
-
+                    // todo: we may not want to reset connection on every failure
                     ourChannel.disconnectClient(key, client);
                     break;
                 }
@@ -434,14 +446,18 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private static class ClientNode {
         public final NetClient client;
         public final UpdateRegistration registration;
-        public final Queue<byte[]> outQueue;
-        public InstanceId instanceId;
+        public final Queue<SendRequest> outQueue;
+        public ChannelId id;
 
         private ClientNode(NetClient client, UpdateRegistration registration) {
             this.client = client;
             this.registration = registration;
             this.outQueue = new ArrayDeque<>();
-            this.instanceId = null;
+            this.id = null;
+        }
+
+        public boolean isRegistered() {
+            return id != null;
         }
 
         @Override
@@ -457,6 +473,18 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         private ChannelData(NetServerChannel channel, UpdateRegistration registration) {
             this.channel = channel;
             this.registration = registration;
+        }
+    }
+
+    private static class SendRequest {
+        public final Message message;
+        public final MessageHeader header;
+        public final ChannelId senderId;
+
+        private SendRequest(Message message, MessageHeader header, ChannelId senderId) {
+            this.message = message;
+            this.header = header;
+            this.senderId = senderId;
         }
     }
 }

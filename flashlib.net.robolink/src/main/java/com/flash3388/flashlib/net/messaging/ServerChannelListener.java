@@ -2,7 +2,6 @@ package com.flash3388.flashlib.net.messaging;
 
 import com.flash3388.flashlib.net.channels.messsaging.MessageHeader;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
-import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.EventController;
 import org.slf4j.Logger;
 
@@ -21,7 +20,7 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
     }
 
     @Override
-    public void onClientConnected(InstanceId clientId) {
+    public void onClientConnected(ChannelId clientId) {
         mLogger.debug("ServerChannel: received new client, alerting listeners");
 
         mEventController.fire(
@@ -33,7 +32,7 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
     }
 
     @Override
-    public void onClientDisconnected(InstanceId clientId) {
+    public void onClientDisconnected(ChannelId clientId) {
 
     }
 
@@ -65,7 +64,7 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
     }
 
     @Override
-    public void onMessageSendingFailed(Message message) {
+    public void onMessageSendingFailed(ChannelId id, Message message) {
         // todo: what to do??
     }
 }

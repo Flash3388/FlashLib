@@ -1,7 +1,6 @@
 package com.flash3388.flashlib.net.messaging;
 
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 
 /**
  * Meta-data for a message received.
@@ -11,11 +10,11 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 public interface MessageMetadata {
 
     /**
-     * Gets the id of the sender in the form on {@link InstanceId}
+     * Gets the id of the sender.
      *
      * @return sender
      */
-    InstanceId getSender();
+    ChannelId getSender();
 
     /**
      * Gets the time at which the message was received.

@@ -8,10 +8,10 @@ import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelOpenListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
+import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -35,13 +35,11 @@ public class MessagingChannelImpl implements MessagingChannel {
     private final NetChannelOpener<? extends ConnectableNetChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
     private final SocketAddress mRemoteAddress;
-    private final Clock mClock;
     private final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
     private final AtomicReference<Listener> mListener;
-    private final Queue<byte[]> mQueue;
-    private final MessageSerializer mSerializer;
+    private final Queue<SendRequest> mQueue;
     private final ChannelListenerImpl mChannelListener;
     private final ChannelOpenListener<ConnectableNetChannel> mOpenListener;
 
@@ -49,20 +47,18 @@ public class MessagingChannelImpl implements MessagingChannel {
                                 ChannelUpdater channelUpdater,
                                 SocketAddress remoteAddress,
                                 KnownMessageTypes messageTypes,
-                                InstanceId ourId,
+                                ChannelId ourId,
                                 Clock clock,
                                 Logger logger) {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
         mRemoteAddress = remoteAddress;
-        mClock = clock;
         mLogger = logger;
 
         mChannel = new AtomicReference<>();
         mListener = new AtomicReference<>();
         mQueue = new LinkedList<>();
-        mSerializer = new MessageSerializer(ourId);
-        mChannelListener = new ChannelListenerImpl(this, messageTypes, logger);
+        mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
 
         startChannelOpen();
@@ -83,34 +79,12 @@ public class MessagingChannelImpl implements MessagingChannel {
     public void queue(Message message, boolean onlyForServer) {
         mLogger.debug("Queuing new message");
 
-        ChannelData data = mChannel.get();
+        synchronized (mQueue) {
+            ChannelData data = mChannel.get();
+            mQueue.add(new SendRequest(message, onlyForServer));
 
-        boolean failed = false;
-        try {
-            // todo: serialize on when sending
-            Time now = mClock.currentTime();
-            byte[] content = mSerializer.serialize(now, message, onlyForServer);
-
-            synchronized (mQueue) {
-                mQueue.add(content);
-
-                if (data != null && data.isConnected) {
-                    data.registration.requestReadWriteUpdates();
-                }
-            }
-        } catch (IOException e) {
-            mLogger.error("Error while trying to send a message", e);
-            failed = true;
-        }
-
-        if (failed) {
-            Listener listener = mListener.get();
-            if (listener != null) {
-                try {
-                    // todo: this can actually lead to stackoverflow
-                    //      if it keeps happening
-                    listener.onMessageSendingFailed(message);
-                } catch (Throwable ignore) {}
+            if (data != null && data.isConnected) {
+                data.registration.requestReadWriteUpdates();
             }
         }
     }
@@ -213,18 +187,24 @@ public class MessagingChannelImpl implements MessagingChannel {
     private static class ChannelListenerImpl implements ChannelListener {
 
         private final WeakReference<MessagingChannelImpl> mChannel;
+        private final Clock mClock;
         private final Logger mLogger;
 
         private final MessageReadingContext mReadingContext;
-        private final List<byte[]> mWriteQueueLocal;
+        private final MessageSerializer mSerializer;
+        private final List<SendRequest> mWriteQueueLocal;
 
         private ChannelListenerImpl(MessagingChannelImpl channel,
                                     KnownMessageTypes messageTypes,
+                                    ChannelId ourId,
+                                    Clock clock,
                                     Logger logger) {
             mChannel = new WeakReference<>(channel);
+            mClock = clock;
             mLogger = logger;
 
             mReadingContext = new MessageReadingContext(messageTypes, logger);
+            mSerializer = new MessageSerializer(ourId);
             mWriteQueueLocal = new ArrayList<>();
         }
 
@@ -307,18 +287,32 @@ public class MessagingChannelImpl implements MessagingChannel {
                 channel.registration.requestReadUpdates();
             }
 
-            for (byte[] buffer : mWriteQueueLocal) {
+            for (SendRequest request : mWriteQueueLocal) {
+                byte[] content;
                 try {
-                    mLogger.debug("Writing data to channel: size={}", buffer.length);
-                    channel.channel.write(ByteBuffer.wrap(buffer));
+                    // todo: improve data usage when serializing and writing
+                    Time now = mClock.currentTime();
+                    content = mSerializer.serialize(now, request.message, request.isOnlyForServer);
+                } catch (IOException e) {
+                    mLogger.error("Error serializing message data", e);
+
+                    Listener listener = ourChannel.mListener.get();
+                    if (listener != null) {
+                        try {
+                            listener.onMessageSendingFailed(request.message);
+                        } catch (Throwable ignore) {}
+                    }
+
+                    continue;
+                }
+
+                try {
+                    mLogger.debug("Writing data to channel: size={}", content.length);
+                    channel.channel.write(ByteBuffer.wrap(content));
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
 
-                    // todo: we need to alert on failure to send message
-                    //      but we only know the buffer not the message
-                    // todo: we lose all messages not send if we reset channel
-                    //      now, need to return them to queue
-
+                    // todo: we may not want to reset connection on every failure
                     ourChannel.resetConnection();
                     break;
                 }
@@ -409,6 +403,16 @@ public class MessagingChannelImpl implements MessagingChannel {
             this.channel = channel;
             this.registration = registration;
             this.isConnected = false;
+        }
+    }
+
+    private static class SendRequest {
+        public final Message message;
+        public final boolean isOnlyForServer;
+
+        private SendRequest(Message message, boolean isOnlyForServer) {
+            this.message = message;
+            this.isOnlyForServer = isOnlyForServer;
         }
     }
 }

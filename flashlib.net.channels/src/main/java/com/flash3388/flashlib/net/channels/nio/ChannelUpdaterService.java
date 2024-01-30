@@ -24,9 +24,6 @@ import java.util.Queue;
 
 public class ChannelUpdaterService extends SingleUseService implements ChannelUpdater {
 
-    // TODO: INTEGRATE WITH EVENTCONTROLLER???
-    // TODO: ABSTRACT SELECTION KEY???
-
     private static final Logger LOGGER = Logging.getLogger("Comm", "ChannelUpdater");
     private static final Time SELECT_TIMEOUT = Time.milliseconds(100);
 

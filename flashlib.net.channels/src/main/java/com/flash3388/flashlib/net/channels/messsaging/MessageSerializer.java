@@ -1,9 +1,9 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -11,9 +11,9 @@ import java.io.IOException;
 
 public class MessageSerializer {
 
-    private final InstanceId mOurId;
+    private final ChannelId mOurId;
 
-    public MessageSerializer(InstanceId ourId) {
+    public MessageSerializer(ChannelId ourId) {
         mOurId = ourId;
     }
 

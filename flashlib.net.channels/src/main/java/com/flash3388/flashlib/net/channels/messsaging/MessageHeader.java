@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -9,17 +9,17 @@ import java.io.IOException;
 
 public class MessageHeader {
 
-    public static final int SIZE = 1 + Integer.BYTES * 3 + Long.BYTES + InstanceId.BYTES;
+    public static final int SIZE = 1 + Integer.BYTES * 3 + Long.BYTES + ChannelId.SIZE;
 
     static final int VERSION = 1;
 
     private final int mContentSize;
-    private final InstanceId mSender;
+    private final ChannelId mSender;
     private final int mMessageType;
     private final Time mSendTime;
     private final boolean mOnlyForServer;
 
-    public MessageHeader(int contentSize, InstanceId sender, int messageType, Time sendTime, boolean onlyForServer) {
+    public MessageHeader(int contentSize, ChannelId sender, int messageType, Time sendTime, boolean onlyForServer) {
         mContentSize = contentSize;
         mSender = sender;
         mMessageType = messageType;
@@ -34,7 +34,7 @@ public class MessageHeader {
         }
 
         mContentSize = dataInput.readInt();
-        mSender = InstanceId.createFrom(dataInput);
+        mSender = new ChannelId(dataInput);
         mMessageType = dataInput.readInt();
         // MAYBE SEND AS NANOS OR MICROS FOR BETTER ACCURACY
         mSendTime = Time.milliseconds(dataInput.readLong());
@@ -45,7 +45,7 @@ public class MessageHeader {
         return mContentSize;
     }
 
-    public InstanceId getSender() {
+    public ChannelId getSender() {
         return mSender;
     }
 
@@ -64,7 +64,7 @@ public class MessageHeader {
     public void writeTo(DataOutput dataOutput) throws IOException {
         dataOutput.writeInt(VERSION);
         dataOutput.writeInt(mContentSize);
-        mSender.writeTo(dataOutput);
+        mSender.writeInto(dataOutput);
         dataOutput.writeInt(mMessageType);
         dataOutput.writeLong(mSendTime.valueAsMillis());
         dataOutput.writeBoolean(mOnlyForServer);
