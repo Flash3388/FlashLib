@@ -4,6 +4,7 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdaterService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.MessengerService;
@@ -28,6 +29,8 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     private final HfcsRegistry mHfcsRegistry;
     private final ChannelUpdater mChannelUpdater;
 
+    private int mNextMessengerId;
+
     public NetworkInterfaceImpl(NetworkConfiguration configuration,
                                 InstanceId instanceId,
                                 ServiceRegistry serviceRegistry,
@@ -38,6 +41,8 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mServiceRegistry = serviceRegistry;
         mClock = clock;
         mMainThread = mainThread;
+
+        mNextMessengerId = 0;
 
         ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService();
         mServiceRegistry.register(channelUpdaterService);
@@ -91,7 +96,10 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
 
-        MessengerService service = new MessengerService(mChannelUpdater, mInstanceId, mClock);
+        int messengerId = ++mNextMessengerId;
+        ChannelId channelId = new ChannelId(mInstanceId, messengerId);
+
+        MessengerService service = new MessengerService(mChannelUpdater, channelId, mClock);
         if (configuration.serverMode) {
             service.configureServer(configuration.serverAddress);
         } else {

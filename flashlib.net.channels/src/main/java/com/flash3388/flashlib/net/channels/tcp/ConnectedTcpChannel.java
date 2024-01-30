@@ -9,6 +9,7 @@ import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -30,6 +31,9 @@ public class ConnectedTcpChannel implements NetChannel {
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         int received = mChannel.read(buffer);
+        if (received < 0) {
+            throw new ClosedChannelException();
+        }
         if (received < 1) {
             return new IncomingData(null, 0);
         }

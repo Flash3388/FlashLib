@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -49,8 +50,10 @@ public class TcpChannel implements ConnectableNetChannel {
 
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
-        // will throw when not connected
         int received = mChannel.read(buffer);
+        if (received < 0) {
+            throw new ClosedChannelException();
+        }
         if (received < 1) {
             return new IncomingData(null, 0);
         }
@@ -60,7 +63,6 @@ public class TcpChannel implements ConnectableNetChannel {
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        // will throw when not connected
         mChannel.write(buffer);
     }
 

@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -75,8 +76,10 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         SendRequest request = new SendRequest(message, null, mOurId);
         synchronized (mClients) {
             for (ClientNode node : mClients.values()) {
-                node.outQueue.add(request);
-                node.registration.requestReadWriteUpdates();
+                synchronized (node.outQueue) {
+                    node.outQueue.add(request);
+                    node.registration.requestReadWriteUpdates();
+                }
             }
         }
     }
@@ -166,8 +169,10 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     continue;
                 }
 
-                node.outQueue.add(request);
-                node.registration.requestReadWriteUpdates();
+                synchronized (node.outQueue) {
+                    node.outQueue.add(request);
+                    node.registration.requestReadWriteUpdates();
+                }
             }
         }
     }
@@ -310,6 +315,9 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 }
 
                 parseMessages(ourChannel, client);
+            } catch (ClosedChannelException e) {
+                mLogger.debug("Client channel reported closed");
+                ourChannel.disconnectClient(key, client);
             } catch (IOException e) {
                 mLogger.error("Error while reading and processing new data", e);
                 ourChannel.disconnectClient(key, client);

@@ -100,7 +100,7 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
         private final ChannelUpdaterService mService;
         private final Logger mLogger;
 
-        private final List<OpenRequest> mOpenRequestsLocal;
+        private final List<OpenRequest<?>> mOpenRequestsLocal;
         private final List<UpdateRequest> mUpdateRequestsLocal;
 
         Task(ChannelUpdaterService service, Logger logger) {

@@ -15,7 +15,6 @@ import com.flash3388.flashlib.net.channels.tcp.TcpChannelOpener;
 import com.flash3388.flashlib.net.channels.tcp.TcpServerChannelOpener;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
-import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.Controllers;
 import com.notifier.EventController;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class MessengerService extends ServiceBase implements Messenger {
     private static final Logger LOGGER = Logging.getLogger("Comm", "Messenger");
 
     private final ChannelUpdater mChannelUpdater;
-    private final InstanceId mOurId;
+    private final ChannelId mOurId;
     private final Clock mClock;
     private final EventController mEventController;
     private final KnownMessageTypes mKnownMessageTypes;
@@ -40,7 +39,7 @@ public class MessengerService extends ServiceBase implements Messenger {
     private Supplier<Context> mContextSupplier;
     private Context mContext;
 
-    public MessengerService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
+    public MessengerService(ChannelUpdater channelUpdater, ChannelId ourId, Clock clock) {
         mChannelUpdater = channelUpdater;
         mOurId = ourId;
         mClock = clock;
@@ -146,7 +145,7 @@ public class MessengerService extends ServiceBase implements Messenger {
 
     private static class ServerContextCreator implements Supplier<Context> {
 
-        private final InstanceId mInstanceId;
+        private final ChannelId mId;
         private final Clock mClock;
         private final SocketAddress mBindAddress;
         private final Logger mLogger;
@@ -154,14 +153,14 @@ public class MessengerService extends ServiceBase implements Messenger {
         private final KnownMessageTypes mKnownMessageTypes;
         private final ChannelUpdater mChannelUpdater;
 
-        private ServerContextCreator(InstanceId instanceId,
+        private ServerContextCreator(ChannelId id,
                                      Clock clock,
                                      SocketAddress bindAddress,
                                      Logger logger,
                                      EventController eventController,
                                      KnownMessageTypes knownMessageTypes,
                                      ChannelUpdater channelUpdater) {
-            mInstanceId = instanceId;
+            mId = id;
             mClock = clock;
             mBindAddress = bindAddress;
             mLogger = logger;
@@ -176,7 +175,7 @@ public class MessengerService extends ServiceBase implements Messenger {
                     new TcpServerChannelOpener(mBindAddress, mLogger),
                     mChannelUpdater,
                     mKnownMessageTypes,
-                    mInstanceId,
+                    mId,
                     mClock,
                     mLogger);
 
@@ -188,7 +187,7 @@ public class MessengerService extends ServiceBase implements Messenger {
 
     private static class ClientContextSupplier implements Supplier<Context> {
 
-        private final InstanceId mInstanceId;
+        private final ChannelId mId;
         private final Clock mClock;
         private final SocketAddress mServerAddress;
         private final Logger mLogger;
@@ -196,14 +195,14 @@ public class MessengerService extends ServiceBase implements Messenger {
         private final KnownMessageTypes mKnownMessageTypes;
         private final ChannelUpdater mChannelUpdater;
 
-        private ClientContextSupplier(InstanceId instanceId,
+        private ClientContextSupplier(ChannelId id,
                                       Clock clock,
                                       SocketAddress serverAddress,
                                       Logger logger,
                                       EventController eventController,
                                       KnownMessageTypes knownMessageTypes,
                                       ChannelUpdater channelUpdater) {
-            mInstanceId = instanceId;
+            mId = id;
             mClock = clock;
             mServerAddress = serverAddress;
             mLogger = logger;
@@ -221,7 +220,7 @@ public class MessengerService extends ServiceBase implements Messenger {
                     mChannelUpdater,
                     mServerAddress,
                     mKnownMessageTypes,
-                    mInstanceId,
+                    mId,
                     clock,
                     mLogger);
 
