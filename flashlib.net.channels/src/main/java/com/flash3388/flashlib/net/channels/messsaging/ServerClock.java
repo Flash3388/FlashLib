@@ -1,4 +1,4 @@
-package com.flash3388.flashlib.net.messaging;
+package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;

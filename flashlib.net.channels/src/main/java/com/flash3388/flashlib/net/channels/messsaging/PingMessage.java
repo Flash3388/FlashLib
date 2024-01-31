@@ -1,5 +1,7 @@
-package com.flash3388.flashlib.net.messaging;
+package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.Message;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.time.Time;
 
 import java.io.DataInput;

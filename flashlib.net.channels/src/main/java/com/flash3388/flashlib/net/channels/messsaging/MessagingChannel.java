@@ -2,9 +2,7 @@ package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.net.messaging.Message;
 
-import java.io.Closeable;
-
-public interface MessagingChannel extends Closeable {
+public interface MessagingChannel extends BaseMessagingChannel {
 
     interface Listener {
         void onConnect();
@@ -14,9 +12,7 @@ public interface MessagingChannel extends Closeable {
     }
 
     void setListener(Listener listener);
-    // connection listener
+    void enableKeepAlive();
 
     void resetConnection();
-
-    void queue(Message message, boolean onlyForServer);
 }

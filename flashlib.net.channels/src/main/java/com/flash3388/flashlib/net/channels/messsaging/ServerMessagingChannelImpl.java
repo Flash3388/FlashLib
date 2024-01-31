@@ -54,19 +54,25 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         mOurId = ourId;
         mLogger = logger;
 
+        messageTypes.put(PingMessage.TYPE);
+
         mChannel = new AtomicReference<>();
         mListener = new AtomicReference<>();
         mClients = new HashMap<>();
         mServerChannelListener = new ServerChannelListenerImpl(this, logger);
         mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
-
-        startOpenChannel();
     }
 
     @Override
     public void setListener(Listener listener) {
         mListener.set(listener);
+    }
+
+    @Override
+    public void start() {
+        // todo: should not be called more then once
+        startOpenChannel();
     }
 
     @Override
@@ -148,6 +154,18 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     listener.onClientConnected(sender.id);
                 } catch (Throwable ignored) {}
             }
+        }
+
+        if (message.getType().equals(PingMessage.TYPE)) {
+            mLogger.debug("ServerChannel: received ping message, responding");
+
+            // resend the ping message with the same time
+            synchronized (sender.outQueue) {
+                sender.outQueue.add(new SendRequest(message, null, mOurId));
+                sender.registration.requestReadWriteUpdates();
+            }
+
+            return;
         }
 
         if (listener != null) {

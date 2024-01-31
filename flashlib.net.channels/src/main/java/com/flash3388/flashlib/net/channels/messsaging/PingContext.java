@@ -1,30 +1,32 @@
-package com.flash3388.flashlib.net.messaging;
+package com.flash3388.flashlib.net.channels.messsaging;
 
-import com.flash3388.flashlib.net.channels.messsaging.MessageHeader;
-import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
+import java.lang.ref.WeakReference;
+
 class PingContext {
 
-    private static final Time PING_INTERVAL = Time.milliseconds(500);
+    private static final Time PING_INTERVAL = Time.milliseconds(1500);
     private static final int MAX_UNRESPONDED_PINGS = 3;
 
-    private final MessagingChannel mChannel;
+    private final WeakReference<MessagingChannelImpl> mChannel;
     private final ServerClock mClock;
     private final Logger mLogger;
 
+    private boolean mEnabled;
     private boolean mShouldPing;
     private Time mLastPingTime;
     private boolean mPingSent;
     private boolean mLastPingResponded;
     private int mUnrespondedPingCount;
 
-    PingContext(MessagingChannel channel, ServerClock clock, Logger logger) {
-        mChannel = channel;
+    PingContext(MessagingChannelImpl channel, ServerClock clock, Logger logger) {
+        mChannel = new WeakReference<>(channel);
         mClock = clock;
         mLogger = logger;
 
+        mEnabled = false;
         mShouldPing = false;
         mLastPingTime = Time.INVALID;
         mUnrespondedPingCount = 0;
@@ -32,7 +34,15 @@ class PingContext {
         mLastPingResponded = false;
     }
 
+    public void enable() {
+        mEnabled = true;
+    }
+
     public void onConnect() {
+        if (!mEnabled) {
+            return;
+        }
+
         mShouldPing = true;
         mLastPingTime = Time.INVALID;
         mUnrespondedPingCount = 0;
@@ -43,11 +53,21 @@ class PingContext {
     }
 
     public void onDisconnect() {
+        if (!mEnabled) {
+            return;
+        }
+
         mShouldPing = false;
     }
 
     public void pingIfNecessary() {
-        if (!mShouldPing) {
+        if (!mEnabled || !mShouldPing) {
+            return;
+        }
+
+        MessagingChannel channel = mChannel.get();
+        if (channel == null) {
+            mLogger.warn("MessagingChannel was garbage collected");
             return;
         }
 
@@ -59,7 +79,7 @@ class PingContext {
             }
             if (mUnrespondedPingCount >= MAX_UNRESPONDED_PINGS) {
                 mLogger.warn("PingContext: Too many pings did not receive response, resetting");
-                mChannel.resetConnection();
+                channel.resetConnection();
                 mShouldPing = false;
                 return;
             }
@@ -69,6 +89,10 @@ class PingContext {
     }
 
     public void sendPing() {
+        if (!mEnabled) {
+            return;
+        }
+
         mLogger.debug("PingContext: Sending ping message");
 
         Time now = mClock.currentTimeUnmodified();
@@ -77,10 +101,20 @@ class PingContext {
         mPingSent = true;
         mLastPingResponded = false;
 
-        mChannel.queue(new PingMessage(now), true);
+        MessagingChannelImpl channel = mChannel.get();
+        if (channel == null) {
+            mLogger.warn("MessagingChannel was garbage collected");
+            return;
+        }
+
+        channel.queue(new PingMessage(now), true);
     }
 
     public void onPingResponse(MessageHeader header, PingMessage message) {
+        if (!mEnabled) {
+            return;
+        }
+
         mLogger.debug("PingContext: Received ping response");
         mLastPingResponded = true;
         mPingSent = false;

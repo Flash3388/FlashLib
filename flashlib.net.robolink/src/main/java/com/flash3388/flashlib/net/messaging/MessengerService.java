@@ -5,9 +5,12 @@ import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.net.channels.messsaging.BaseMessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannelImpl;
+import com.flash3388.flashlib.net.channels.messsaging.PingMessage;
+import com.flash3388.flashlib.net.channels.messsaging.ServerClock;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
@@ -19,11 +22,9 @@ import com.notifier.Controllers;
 import com.notifier.EventController;
 import org.slf4j.Logger;
 
-import java.io.Closeable;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class MessengerService extends ServiceBase implements Messenger {
@@ -36,8 +37,8 @@ public class MessengerService extends ServiceBase implements Messenger {
     private final EventController mEventController;
     private final KnownMessageTypes mKnownMessageTypes;
 
-    private Supplier<Context> mContextSupplier;
-    private Context mContext;
+    private Supplier<BaseMessagingChannel> mContextSupplier;
+    private BaseMessagingChannel mChannel;
 
     public MessengerService(ChannelUpdater channelUpdater, ChannelId ourId, Clock clock) {
         mChannelUpdater = channelUpdater;
@@ -50,7 +51,7 @@ public class MessengerService extends ServiceBase implements Messenger {
         mKnownMessageTypes.put(PingMessage.TYPE);
 
         mContextSupplier = null;
-        mContext = null;
+        mChannel = null;
     }
 
     public void configureServer(SocketAddress bindAddress) {
@@ -107,12 +108,12 @@ public class MessengerService extends ServiceBase implements Messenger {
 
     @Override
     public void send(Message message) {
-        if (mContext == null) {
+        if (mChannel == null) {
             throw new IllegalStateException("no channel to queue messages");
         }
 
         LOGGER.debug("Queueing message of type {}", message.getType().getKey());
-        mContext.queuer.accept(message);
+        mChannel.queue(message);
     }
 
     @Override
@@ -121,29 +122,19 @@ public class MessengerService extends ServiceBase implements Messenger {
             throw new IllegalStateException("not configured");
         }
 
-        mContext = mContextSupplier.get();
+        mChannel = mContextSupplier.get();
+        mChannel.start();
     }
 
     @Override
     protected void stopRunning() {
-        if (mContext != null) {
-            Closeables.silentClose(mContext.channel);
-            mContext = null;
+        if (mChannel != null) {
+            Closeables.silentClose(mChannel);
+            mChannel = null;
         }
     }
 
-    private static class Context {
-
-        public final Closeable channel;
-        public final Consumer<Message> queuer;
-
-        private Context(Closeable channel, Consumer<Message> queuer) {
-            this.channel = channel;
-            this.queuer = queuer;
-        }
-    }
-
-    private static class ServerContextCreator implements Supplier<Context> {
+    private static class ServerContextCreator implements Supplier<BaseMessagingChannel> {
 
         private final ChannelId mId;
         private final Clock mClock;
@@ -170,7 +161,7 @@ public class MessengerService extends ServiceBase implements Messenger {
         }
 
         @Override
-        public Context get() {
+        public BaseMessagingChannel get() {
             ServerMessagingChannel channel = new ServerMessagingChannelImpl(
                     new TcpServerChannelOpener(mBindAddress, mLogger),
                     mChannelUpdater,
@@ -181,11 +172,11 @@ public class MessengerService extends ServiceBase implements Messenger {
 
             channel.setListener(new ServerChannelListener(channel, mEventController, mLogger));
 
-            return new Context(channel, channel::queue);
+            return channel;
         }
     }
 
-    private static class ClientContextSupplier implements Supplier<Context> {
+    private static class ClientContextSupplier implements Supplier<BaseMessagingChannel> {
 
         private final ChannelId mId;
         private final Clock mClock;
@@ -212,23 +203,20 @@ public class MessengerService extends ServiceBase implements Messenger {
         }
 
         @Override
-        public Context get() {
-            ServerClock clock = new ServerClock(mClock, mLogger);
-
+        public BaseMessagingChannel get() {
             MessagingChannel channel = new MessagingChannelImpl(
                     new TcpChannelOpener(mLogger),
                     mChannelUpdater,
                     mServerAddress,
                     mKnownMessageTypes,
                     mId,
-                    clock,
+                    mClock,
                     mLogger);
 
-            // TODO: NEED SOMETHING TO USE PINGCONTEXT
-            PingContext pingContext = new PingContext(channel, clock, mLogger);
-            channel.setListener(new ClientChannelListener(pingContext, mEventController, clock, mLogger));
+            channel.setListener(new ClientChannelListener(mEventController, mLogger));
+            channel.enableKeepAlive();
 
-            return new Context(channel, (message)-> channel.queue(message, false));
+            return channel;
         }
     }
 

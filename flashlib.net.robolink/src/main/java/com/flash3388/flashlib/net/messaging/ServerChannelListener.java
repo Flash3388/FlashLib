@@ -38,29 +38,19 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
 
     @Override
     public void onNewMessage(MessageHeader header, Message message) {
-        if (message.getType().equals(PingMessage.TYPE)) {
-            mLogger.debug("ServerChannel: received ping message, responding");
+        mLogger.debug("ServerChannel: received message, alerting listeners");
 
-            // resend the ping message with the same time
-            ServerMessagingChannel channel = mChannel.get();
-            if (channel != null) {
-                channel.queue(message);
-            }
-        } else {
-            mLogger.debug("ServerChannel: received message, alerting listeners");
+        MessageMetadata metadata = new MessageMetadataImpl(
+                header.getSender(),
+                header.getSendTime(),
+                message.getType());
 
-            MessageMetadata metadata = new MessageMetadataImpl(
-                    header.getSender(),
-                    header.getSendTime(),
-                    message.getType());
-
-            mEventController.fire(
-                    new NewMessageEvent(metadata, message),
-                    NewMessageEvent.class,
-                    MessageListener.class,
-                    MessageListener::onNewMessage
-            );
-        }
+        mEventController.fire(
+                new NewMessageEvent(metadata, message),
+                NewMessageEvent.class,
+                MessageListener.class,
+                MessageListener::onNewMessage
+        );
     }
 
     @Override

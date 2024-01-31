@@ -29,17 +29,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MessagingChannelImpl implements MessagingChannel {
 
     enum UpdateRequest {
-        START_CONNECT
+        START_CONNECT,
+        PING_CHECK
     }
 
     private final NetChannelOpener<? extends ConnectableNetChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
     private final SocketAddress mRemoteAddress;
+    private final ServerClock mClock;
     private final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
     private final AtomicReference<Listener> mListener;
     private final Queue<SendRequest> mQueue;
+    private final PingContext mPingContext;
     private final ChannelListenerImpl mChannelListener;
     private final ChannelOpenListener<ConnectableNetChannel> mOpenListener;
 
@@ -53,15 +56,17 @@ public class MessagingChannelImpl implements MessagingChannel {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
         mRemoteAddress = remoteAddress;
+        mClock = new ServerClock(clock, logger);
         mLogger = logger;
+
+        messageTypes.put(PingMessage.TYPE);
 
         mChannel = new AtomicReference<>();
         mListener = new AtomicReference<>();
         mQueue = new LinkedList<>();
-        mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, clock, logger);
+        mPingContext = new PingContext(this, mClock, logger);
+        mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, mClock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
-
-        startChannelOpen();
     }
 
     @Override
@@ -70,12 +75,28 @@ public class MessagingChannelImpl implements MessagingChannel {
     }
 
     @Override
+    public void enableKeepAlive() {
+        mPingContext.enable();
+    }
+
+    @Override
+    public void start() {
+        // todo: should not be called more then once
+        startChannelOpen();
+    }
+
+    @Override
     public void resetConnection() {
+        // todo: if this is done during channel open procedure, then it causes problems
         Closeables.silentClose(this);
         startChannelOpen();
     }
 
     @Override
+    public void queue(Message message) {
+        queue(message, false);
+    }
+
     public void queue(Message message, boolean onlyForServer) {
         mLogger.debug("Queuing new message");
 
@@ -100,7 +121,9 @@ public class MessagingChannelImpl implements MessagingChannel {
             data.registration.cancel();
         } catch (Throwable ignore) {}
 
-        data.channel.close();
+        Closeables.silentClose(data.channel);
+
+        mPingContext.onDisconnect();
 
         Listener listener = mListener.get();
         if (listener != null) {
@@ -163,6 +186,9 @@ public class MessagingChannelImpl implements MessagingChannel {
             channel.registration.requestReadWriteUpdates();
         }
 
+        mPingContext.onConnect();
+        channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
+
         Listener listener = mListener.get();
         if (listener != null) {
             try {
@@ -176,10 +202,26 @@ public class MessagingChannelImpl implements MessagingChannel {
                 header.getSender(),
                 header.getMessageType());
 
+        if (message.getType().equals(PingMessage.TYPE)) {
+            PingMessage pingMessage = (PingMessage) message;
+            mPingContext.onPingResponse(header, pingMessage);
+            return;
+        }
+
+        // fixed timestamp to client-only times
+        Time sendTime = mClock.adjustToClientTime(header.getSendTime());
+        MessageHeader newHeader = new MessageHeader(
+                header.getContentSize(),
+                header.getSender(),
+                header.getMessageType(),
+                sendTime,
+                header.isOnlyForServer()
+        );
+
         Listener listener = mListener.get();
         if (listener != null) {
             try {
-                listener.onNewMessage(header, message);
+                listener.onNewMessage(newHeader, message);
             } catch (Throwable ignore) {}
         }
     }
@@ -336,6 +378,22 @@ public class MessagingChannelImpl implements MessagingChannel {
                 case START_CONNECT:
                     ourChannel.startConnection();
                     break;
+                case PING_CHECK: {
+                    ChannelData channel = ourChannel.mChannel.get();
+                    if (channel == null) {
+                        mLogger.warn("Channel is closed but received ping check update");
+                        break;
+                    }
+
+                    if (!channel.isConnected) {
+                        mLogger.warn("Channel is not connected but received ping check update");
+                        break;
+                    }
+
+                    ourChannel.mPingContext.pingIfNecessary();
+                    channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
+                    break;
+                }
                 default:
                     break;
             }

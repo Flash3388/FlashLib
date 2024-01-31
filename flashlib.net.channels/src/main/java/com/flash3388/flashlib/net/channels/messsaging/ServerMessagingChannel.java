@@ -5,7 +5,7 @@ import com.flash3388.flashlib.net.messaging.Message;
 
 import java.io.Closeable;
 
-public interface ServerMessagingChannel extends Closeable {
+public interface ServerMessagingChannel extends BaseMessagingChannel {
 
     interface Listener {
         void onClientConnected(ChannelId id);
@@ -15,6 +15,4 @@ public interface ServerMessagingChannel extends Closeable {
     }
 
     void setListener(Listener listener);
-
-    void queue(Message message);
 }
