@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayDeque;
@@ -42,6 +41,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private final ChannelListener mServerChannelListener;
     private final ChannelListener mClientsChannelListener;
     private final ChannelOpenListener<NetServerChannel> mOpenListener;
+    private boolean mStarted;
+    private boolean mClosed;
 
     public ServerMessagingChannelImpl(NetChannelOpener<? extends NetServerChannel> channelOpener,
                                       ChannelUpdater channelUpdater,
@@ -62,21 +63,44 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         mServerChannelListener = new ServerChannelListenerImpl(this, logger);
         mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
+        mStarted = false;
+        mClosed = false;
     }
 
     @Override
     public void setListener(Listener listener) {
+        if (mStarted) {
+            throw new IllegalStateException("should not set listener after already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         mListener.set(listener);
     }
 
     @Override
     public void start() {
-        // todo: should not be called more then once
+        if (mStarted) {
+            throw new IllegalStateException("already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         startOpenChannel();
+        mStarted = true;
     }
 
     @Override
     public void queue(Message message) {
+        if (!mStarted) {
+            throw new IllegalStateException("not started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         mLogger.debug("Queuing new message for all clients");
 
         SendRequest request = new SendRequest(message, null, mOurId);
@@ -92,6 +116,12 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
     @Override
     public void close() throws IOException {
+        if (mClosed) {
+            return;
+        }
+
+        mClosed = true;
+
         ChannelData channel = mChannel.getAndSet(null);
         if (channel != null) {
             Closeables.silentClose(channel.channel);
@@ -196,9 +226,6 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     }
 
     private void disconnectClient(SelectionKey key, ClientNode node) {
-        // todo: how to recognize disconnection made by client, not by us???
-        //      will be known on read/write attempt
-        //      but how to push it?? key.isvalud???
         mLogger.debug("Disconnecting client {}", node);
 
         synchronized (mClients) {

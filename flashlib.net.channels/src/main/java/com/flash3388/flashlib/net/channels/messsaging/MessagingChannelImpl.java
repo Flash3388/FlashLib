@@ -47,6 +47,8 @@ public class MessagingChannelImpl implements MessagingChannel {
     private final PingContext mPingContext;
     private final ChannelListenerImpl mChannelListener;
     private final ChannelOpenListener<ConnectableNetChannel> mOpenListener;
+    private boolean mStarted;
+    private boolean mClosed;
 
     public MessagingChannelImpl(NetChannelOpener<? extends ConnectableNetChannel> channelOpener,
                                 ChannelUpdater channelUpdater,
@@ -69,37 +71,89 @@ public class MessagingChannelImpl implements MessagingChannel {
         mPingContext = new PingContext(this, mClock, logger);
         mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, mClock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
+        mStarted = false;
+        mClosed = false;
     }
 
     @Override
     public void setListener(Listener listener) {
+        if (mStarted) {
+            throw new IllegalStateException("should not set listener after already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         mListener.set(listener);
     }
 
     @Override
     public void enableKeepAlive() {
+        if (mStarted) {
+            throw new IllegalStateException("should not enable keepalive after already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         mPingContext.enable();
     }
 
     @Override
     public void start() {
-        // todo: should not be called more then once
+        if (mStarted) {
+            throw new IllegalStateException("already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         startChannelOpen(false);
+        mStarted = true;
     }
 
     @Override
     public void resetConnection() {
-        // todo: if this is done during channel open procedure, then it causes problems
-        Closeables.silentClose(this);
+        if (!mStarted) {
+            throw new IllegalStateException("not started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
+        ChannelData channelData = mChannel.get();
+        if (channelData == null) {
+            // no need to reset, as channel not yet opened
+            return;
+        }
+
+        Closeables.silentClose(this::closeChannel);
         startChannelOpen(true);
     }
 
     @Override
     public void queue(Message message) {
+        if (!mStarted) {
+            throw new IllegalStateException("not started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
         queue(message, false);
     }
 
-    public void queue(Message message, boolean onlyForServer) {
+    @Override
+    public void close() throws IOException {
+        if (mClosed) {
+            return;
+        }
+
+        mClosed = true;
+        closeChannel();
+    }
+
+    void queue(Message message, boolean onlyForServer) {
         mLogger.debug("Queuing new message");
 
         synchronized (mQueue) {
@@ -109,29 +163,6 @@ public class MessagingChannelImpl implements MessagingChannel {
             if (data != null && data.isConnected) {
                 data.registration.requestReadWriteUpdates();
             }
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        ChannelData data = mChannel.getAndSet(null);
-        if (data == null) {
-            return;
-        }
-
-        try {
-            data.registration.cancel();
-        } catch (Throwable ignore) {}
-
-        Closeables.silentClose(data.channel);
-
-        mPingContext.onDisconnect();
-
-        Listener listener = mListener.get();
-        if (listener != null) {
-            try {
-                listener.onDisconnect();
-            } catch (Throwable ignore) {}
         }
     }
 
@@ -225,6 +256,28 @@ public class MessagingChannelImpl implements MessagingChannel {
         if (listener != null) {
             try {
                 listener.onNewMessage(newHeader, message);
+            } catch (Throwable ignore) {}
+        }
+    }
+
+    private void closeChannel() {
+        ChannelData data = mChannel.getAndSet(null);
+        if (data == null) {
+            return;
+        }
+
+        try {
+            data.registration.cancel();
+        } catch (Throwable ignore) {}
+
+        Closeables.silentClose(data.channel);
+
+        mPingContext.onDisconnect();
+
+        Listener listener = mListener.get();
+        if (listener != null) {
+            try {
+                listener.onDisconnect();
             } catch (Throwable ignore) {}
         }
     }
