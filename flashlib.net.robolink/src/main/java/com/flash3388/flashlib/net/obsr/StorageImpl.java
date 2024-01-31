@@ -212,6 +212,8 @@ public class StorageImpl implements Storage {
     private void updateEntryValue(StoragePath path, Value value, Time changeTime, boolean shouldReport) {
         StoredEntryNode node = getOrCreateEntryNode(path);
         if (!isChangedAllowed(node, changeTime)) {
+            mLogger.debug("Entry value update not allowed due to stale timestamps: changeTime={}, currentEntryTime={}",
+                    changeTime, node.getLastChangeTimestamp());
             return;
         }
 
@@ -236,6 +238,8 @@ public class StorageImpl implements Storage {
     private void clearEntryValue(StoragePath path, Time changeTime, boolean shouldReport) {
         StoredEntryNode node = getOrCreateEntryNode(path);
         if (!isChangedAllowed(node, changeTime)) {
+            mLogger.debug("Entry value clear not allowed due to stale timestamps: changeTime={}, currentEntryTime={}",
+                    changeTime, node.getLastChangeTimestamp());
             return;
         }
 
@@ -266,6 +270,8 @@ public class StorageImpl implements Storage {
         }
 
         if (!isChangedAllowed(node, changeTime)) {
+            mLogger.debug("Entry value delete not allowed due to stale timestamps: changeTime={}, currentEntryTime={}",
+                    changeTime, node.getLastChangeTimestamp());
             return;
         }
 
@@ -331,7 +337,6 @@ public class StorageImpl implements Storage {
     }
 
     private boolean isChangedAllowed(StoredEntryNode node, Time changeTime) {
-        // the usage of timestamps here is just
         Time lastChangeTime = node.getLastChangeTimestamp();
         if (!changeTime.isValid() || !lastChangeTime.isValid()) {
             return true;
