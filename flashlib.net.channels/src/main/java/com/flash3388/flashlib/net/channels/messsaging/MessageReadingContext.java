@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public class MessageReadingContext {
 
+    private static final int MAX_ALLOWED_READ_BUFFER_CAP = 8192;
+    private static final int START_READ_BUFFER_CAP = 1024;
+
     public static class ParseResult {
 
         private final MessageHeader mHeader;
@@ -38,17 +41,16 @@ public class MessageReadingContext {
     private final KnownMessageTypes mMessageTypes;
     private final Logger mLogger;
 
-    private final ByteBuffer mDirectReadBuffer;
-    private final byte[] mReadBuffer;
-
+    private ByteBuffer mDirectReadBuffer;
+    private byte[] mReadBuffer;
     private MessageHeader mLastHeader;
 
     public MessageReadingContext(KnownMessageTypes messageTypes, Logger logger) {
         mMessageTypes = messageTypes;
         mLogger = logger;
 
-        mDirectReadBuffer = ByteBuffer.allocateDirect(2048);
-        mReadBuffer = new byte[1024];
+        mDirectReadBuffer = ByteBuffer.allocateDirect(START_READ_BUFFER_CAP);
+        mReadBuffer = new byte[START_READ_BUFFER_CAP];
 
         mLastHeader = null;
     }
@@ -68,7 +70,19 @@ public class MessageReadingContext {
             return null;
         }
 
-        // todo: if buffer becomes too full, allocate a new bigger buffer
+        if (!mDirectReadBuffer.hasRemaining()) {
+            mLogger.debug("read buffer is full, expanding it");
+
+            int newCapacity = mDirectReadBuffer.capacity() * 2;
+            if (newCapacity >= MAX_ALLOWED_READ_BUFFER_CAP) {
+                throw new IllegalStateException("buffer capacity has reached its limit");
+            }
+
+            ByteBuffer newBuffer = ByteBuffer.allocateDirect(newCapacity);
+            newBuffer.put(mDirectReadBuffer);
+
+            mDirectReadBuffer = newBuffer;
+        }
 
         return data;
     }
@@ -116,9 +130,12 @@ public class MessageReadingContext {
 
     private ParseResult readMessage(MessageHeader header) throws IOException {
         if (header.getContentSize() > mReadBuffer.length) {
-            // our reading buffer doesn't have enough space to read from the buffered data.
-            // TODO: CREATE AN INPUT STREAM WHICH DYNAMICALLY FILLS FROM THE BUFFERED DATA
-            throw new BufferOverflowException();
+            int newCapacity = Math.max(header.getContentSize(), mReadBuffer.length * 2);
+            if (newCapacity >= MAX_ALLOWED_READ_BUFFER_CAP) {
+                throw new IllegalStateException("buffer capacity has reached its limit");
+            }
+
+            mReadBuffer = new byte[newCapacity];
         }
 
         mDirectReadBuffer.flip();

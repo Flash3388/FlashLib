@@ -331,8 +331,6 @@ public class MessagingChannelImpl implements MessagingChannel {
                 mReadingContext.clear();
             } catch (IOException e) {
                 mLogger.error("Error while trying to connect, retrying", e);
-
-                // todo: add delay before doing this or it will cause a too big a busy loop
                 ourChannel.resetConnection();
             }
         }
@@ -412,8 +410,6 @@ public class MessagingChannelImpl implements MessagingChannel {
                     serialized.writeInto(channel.channel);
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
-
-                    // todo: we may not want to reset connection on every failure
                     ourChannel.resetConnection();
                     break;
                 }

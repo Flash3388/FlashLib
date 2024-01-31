@@ -67,12 +67,7 @@ public class StorageImpl implements Storage {
     public RegisteredListener addListener(StoragePath path, EntryListener listener) {
         mLock.lock();
         try {
-            mEventController.registerListener(listener, (event)-> {
-                // TODO: MAKE ACTUAL CLASS
-                return event instanceof EntryModificationEvent &&
-                        ((EntryModificationEvent)event).getPath().startsWith(path.toString());
-            });
-
+            mEventController.registerListener(listener, new PathListenerPredicate(path.toString()));
             return new RegisteredListenerImpl(mEventController, listener);
         } finally {
             mLock.unlock();

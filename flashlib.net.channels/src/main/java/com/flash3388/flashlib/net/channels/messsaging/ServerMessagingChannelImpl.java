@@ -429,8 +429,6 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     serialized.writeInto(client.client);
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
-
-                    // todo: we may not want to reset connection on every failure
                     ourChannel.disconnectClient(key, client);
                     break;
                 }
