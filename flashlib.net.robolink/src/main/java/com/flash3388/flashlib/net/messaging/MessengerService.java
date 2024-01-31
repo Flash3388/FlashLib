@@ -6,9 +6,8 @@ import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.messsaging.BaseMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.ClientMessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
-import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.channels.messsaging.MessagingChannelImpl;
 import com.flash3388.flashlib.net.channels.messsaging.PingMessage;
 import com.flash3388.flashlib.net.channels.messsaging.ServerClock;
 import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
@@ -204,14 +203,14 @@ public class MessengerService extends ServiceBase implements Messenger {
 
         @Override
         public BaseMessagingChannel get() {
-            MessagingChannel channel = new MessagingChannelImpl(
+            ClientMessagingChannel channel = new ClientMessagingChannel(
                     new TcpChannelOpener(mLogger),
                     mChannelUpdater,
-                    mServerAddress,
                     mKnownMessageTypes,
                     mId,
-                    mClock,
-                    mLogger);
+                    new ServerClock(mClock, mLogger),
+                    mLogger,
+                    mServerAddress);
 
             channel.setListener(new ClientChannelListener(mEventController, mLogger));
             channel.enableKeepAlive();

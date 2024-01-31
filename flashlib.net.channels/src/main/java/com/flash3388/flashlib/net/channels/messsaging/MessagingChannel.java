@@ -12,7 +12,6 @@ public interface MessagingChannel extends BaseMessagingChannel {
     }
 
     void setListener(Listener listener);
-    void enableKeepAlive();
 
-    void resetConnection();
+    void resetChannel();
 }

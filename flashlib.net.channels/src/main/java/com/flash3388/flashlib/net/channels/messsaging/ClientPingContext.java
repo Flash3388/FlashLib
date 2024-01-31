@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
 
-class PingContext {
+class ClientPingContext {
 
     private static final Time PING_INTERVAL = Time.milliseconds(1500);
     private static final int MAX_UNRESPONDED_PINGS = 3;
 
-    private final WeakReference<MessagingChannelImpl> mChannel;
+    private final WeakReference<MessagingChannelBase> mChannel;
     private final ServerClock mClock;
     private final Logger mLogger;
 
@@ -21,7 +21,7 @@ class PingContext {
     private boolean mLastPingResponded;
     private int mUnrespondedPingCount;
 
-    PingContext(MessagingChannelImpl channel, ServerClock clock, Logger logger) {
+    ClientPingContext(MessagingChannelBase channel, ServerClock clock, Logger logger) {
         mChannel = new WeakReference<>(channel);
         mClock = clock;
         mLogger = logger;
@@ -79,7 +79,7 @@ class PingContext {
             }
             if (mUnrespondedPingCount >= MAX_UNRESPONDED_PINGS) {
                 mLogger.warn("PingContext: Too many pings did not receive response, resetting");
-                channel.resetConnection();
+                channel.resetChannel();
                 mShouldPing = false;
                 return;
             }
@@ -101,7 +101,7 @@ class PingContext {
         mPingSent = true;
         mLastPingResponded = false;
 
-        MessagingChannelImpl channel = mChannel.get();
+        MessagingChannelBase channel = mChannel.get();
         if (channel == null) {
             mLogger.warn("MessagingChannel was garbage collected");
             return;

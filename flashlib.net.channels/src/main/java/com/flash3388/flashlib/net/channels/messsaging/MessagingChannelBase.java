@@ -1,8 +1,8 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.channels.ConnectableNetChannel;
 import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelOpenListener;
@@ -16,91 +16,83 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MessagingChannelImpl implements MessagingChannel {
+public abstract class MessagingChannelBase implements MessagingChannel {
+
+    protected static class ChannelData {
+        public final NetChannel channel;
+        public final UpdateRegistration registration;
+        public boolean readyForWriting;
+
+        protected ChannelData(NetChannel channel, UpdateRegistration registration) {
+            this.channel = channel;
+            this.registration = registration;
+            this.readyForWriting = false;
+        }
+    }
+
+    protected static class SendRequest {
+        public final Message message;
+        public final boolean isOnlyForServer;
+
+        protected SendRequest(Message message, boolean isOnlyForServer) {
+            this.message = message;
+            this.isOnlyForServer = isOnlyForServer;
+        }
+    }
+
+    protected static class ReceivedMessage {
+        public final MessageHeader header;
+        public final Message message;
+
+        public ReceivedMessage(MessageHeader header, Message message) {
+            this.header = header;
+            this.message = message;
+        }
+    }
 
     private static final Time OPEN_DELAY = Time.seconds(1);
 
-    enum UpdateRequest {
-        START_CONNECT,
-        PING_CHECK
-    }
-
-    private final NetChannelOpener<? extends ConnectableNetChannel> mChannelOpener;
+    private final NetChannelOpener<? extends NetChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
-    private final SocketAddress mRemoteAddress;
-    private final ServerClock mClock;
-    private final Logger mLogger;
+    protected final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
     private final AtomicReference<Listener> mListener;
     private final Queue<SendRequest> mQueue;
-    private final PingContext mPingContext;
-    private final ChannelListenerImpl mChannelListener;
-    private final ChannelOpenListener<ConnectableNetChannel> mOpenListener;
-    private boolean mStarted;
-    private boolean mClosed;
+    private final ChannelListener mChannelListener;
+    private final ChannelOpenListener<NetChannel> mOpenListener;
+    protected boolean mStarted;
+    protected boolean mClosed;
 
-    public MessagingChannelImpl(NetChannelOpener<? extends ConnectableNetChannel> channelOpener,
-                                ChannelUpdater channelUpdater,
-                                SocketAddress remoteAddress,
-                                KnownMessageTypes messageTypes,
-                                ChannelId ourId,
-                                Clock clock,
-                                Logger logger) {
+    protected MessagingChannelBase(NetChannelOpener<? extends NetChannel> channelOpener,
+                                   ChannelUpdater channelUpdater,
+                                   KnownMessageTypes messageTypes,
+                                   ChannelId ourId,
+                                   Clock clock,
+                                   Logger logger) {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
-        mRemoteAddress = remoteAddress;
-        mClock = new ServerClock(clock, logger);
         mLogger = logger;
-
-        messageTypes.put(PingMessage.TYPE);
 
         mChannel = new AtomicReference<>();
         mListener = new AtomicReference<>();
-        mQueue = new LinkedList<>();
-        mPingContext = new PingContext(this, mClock, logger);
-        mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, mClock, logger);
+        mQueue = new ArrayDeque<>();
+        mChannelListener = new ChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
         mStarted = false;
         mClosed = false;
     }
 
     @Override
-    public void setListener(Listener listener) {
-        if (mStarted) {
-            throw new IllegalStateException("should not set listener after already started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
-
-        mListener.set(listener);
-    }
-
-    @Override
-    public void enableKeepAlive() {
-        if (mStarted) {
-            throw new IllegalStateException("should not enable keepalive after already started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
-
-        mPingContext.enable();
-    }
-
-    @Override
-    public void start() {
+    public final void start() {
         if (mStarted) {
             throw new IllegalStateException("already started");
         }
@@ -113,7 +105,31 @@ public class MessagingChannelImpl implements MessagingChannel {
     }
 
     @Override
-    public void resetConnection() {
+    public final void queue(Message message) {
+        if (!mStarted) {
+            throw new IllegalStateException("not started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
+        queue(message, false);
+    }
+
+    @Override
+    public final void setListener(Listener listener) {
+        if (mStarted) {
+            throw new IllegalStateException("should not set listener after already started");
+        }
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
+
+        mListener.set(listener);
+    }
+
+    @Override
+    public final void resetChannel() {
         if (!mStarted) {
             throw new IllegalStateException("not started");
         }
@@ -132,19 +148,7 @@ public class MessagingChannelImpl implements MessagingChannel {
     }
 
     @Override
-    public void queue(Message message) {
-        if (!mStarted) {
-            throw new IllegalStateException("not started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
-
-        queue(message, false);
-    }
-
-    @Override
-    public void close() throws IOException {
+    public final void close() throws IOException {
         if (mClosed) {
             return;
         }
@@ -153,76 +157,44 @@ public class MessagingChannelImpl implements MessagingChannel {
         closeChannel();
     }
 
-    void queue(Message message, boolean onlyForServer) {
+    protected final void queue(Message message, boolean onlyForServer) {
         mLogger.debug("Queuing new message");
 
         synchronized (mQueue) {
-            ChannelData data = mChannel.get();
+            ChannelData channel = mChannel.get();
             mQueue.add(new SendRequest(message, onlyForServer));
 
-            if (data != null && data.isConnected) {
-                data.registration.requestReadWriteUpdates();
+            if (channel != null && channel.readyForWriting) {
+                channel.registration.requestReadWriteUpdates();
             }
         }
     }
 
-    private void startChannelOpen(boolean delayed) {
-        mLogger.debug("Requesting open channel");
-        mChannelUpdater.requestOpenChannel(mChannelOpener, mOpenListener, mChannelListener, delayed ? OPEN_DELAY : Time.seconds(0));
-    }
-
-    private void onChannelOpen(ConnectableNetChannel channel, UpdateRegistration registration) {
-        mLogger.debug("Channel opened");
-        mChannel.set(new ChannelData(channel, registration));
-        startConnection();
-    }
-
-    private void startConnection() {
+    protected final void markReadyForWriting() {
         ChannelData channel = mChannel.get();
         if (channel == null) {
-            mLogger.warn("start connection requested while channel is null");
             return;
         }
-
-        mLogger.debug("Requesting channel connect to {}", mRemoteAddress);
-        try {
-            // TODO: SUPPORT CHANGING REMOTES
-            channel.channel.startConnection(mRemoteAddress);
-            channel.registration.requestConnectionUpdates();
-        } catch (IOException | RuntimeException | Error e) {
-            mLogger.error("Error while trying to start connection, retrying", e);
-            retryConnection();
-        }
-    }
-
-    private void retryConnection() {
-        ChannelData channel = mChannel.get();
-        if (channel == null) {
-            mLogger.warn("retry connection requested while channel is null");
-            return;
-        }
-
-        mLogger.debug("Requesting retry start connect");
-        channel.registration.requestUpdate(UpdateRequest.START_CONNECT);
-    }
-
-    private void onConnectionSuccessful() {
-        ChannelData channel = mChannel.get();
-        if (channel == null) {
-            mLogger.warn("connection successful while channel is null");
-            return;
-        }
-
-        mLogger.debug("Channel connected");
 
         synchronized (mQueue) {
-            channel.isConnected = true;
+            channel.readyForWriting = true;
             channel.registration.requestReadWriteUpdates();
         }
+    }
 
-        mPingContext.onConnect();
-        channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
+    protected final void markNotReadyForWriting() {
+        ChannelData channel = mChannel.get();
+        if (channel == null) {
+            return;
+        }
 
+        synchronized (mQueue) {
+            channel.readyForWriting = false;
+            channel.registration.requestReadUpdates();
+        }
+    }
+
+    protected final void reportToUserAsConnected() {
         Listener listener = mListener.get();
         if (listener != null) {
             try {
@@ -231,31 +203,44 @@ public class MessagingChannelImpl implements MessagingChannel {
         }
     }
 
+    protected ChannelData getChannel() {
+        return mChannel.get();
+    }
+
+    private void startChannelOpen(boolean delayed) {
+        mLogger.debug("Requesting open channel");
+        mChannelUpdater.requestOpenChannel(mChannelOpener, mOpenListener, mChannelListener, delayed ? OPEN_DELAY : Time.seconds(0));
+    }
+
+    private void onChannelOpen(NetChannel channel, UpdateRegistration registration) {
+        mLogger.debug("Channel opened");
+
+        ChannelData channelWrapper = implCreateChannelWrapper(channel, registration);
+        mChannel.set(channelWrapper);
+
+        implDoOnChannelOpen(channelWrapper);
+    }
+
     private void onNewMessage(MessageHeader header, Message message) {
         mLogger.debug("New message received: sender={}, type={}",
                 header.getSender(),
                 header.getMessageType());
 
-        if (message.getType().equals(PingMessage.TYPE)) {
-            PingMessage pingMessage = (PingMessage) message;
-            mPingContext.onPingResponse(header, pingMessage);
+        ChannelData channel = mChannel.get();
+        if (channel == null) {
+            mLogger.warn("new message while channel is null");
             return;
         }
 
-        // fixed timestamp to client-only times
-        Time sendTime = mClock.adjustToClientTime(header.getSendTime());
-        MessageHeader newHeader = new MessageHeader(
-                header.getContentSize(),
-                header.getSender(),
-                header.getMessageType(),
-                sendTime,
-                header.isOnlyForServer()
-        );
+        Optional<ReceivedMessage> processed = implDoOnNewMessage(channel, header, message);
+        if (!processed.isPresent()) {
+            return;
+        }
 
         Listener listener = mListener.get();
         if (listener != null) {
             try {
-                listener.onNewMessage(newHeader, message);
+                listener.onNewMessage(header, message);
             } catch (Throwable ignore) {}
         }
     }
@@ -272,7 +257,7 @@ public class MessagingChannelImpl implements MessagingChannel {
 
         Closeables.silentClose(data.channel);
 
-        mPingContext.onDisconnect();
+        implDoOnChannelClose();
 
         Listener listener = mListener.get();
         if (listener != null) {
@@ -282,9 +267,17 @@ public class MessagingChannelImpl implements MessagingChannel {
         }
     }
 
+    protected abstract ChannelData implCreateChannelWrapper(NetChannel channel, UpdateRegistration registration);
+
+    protected abstract void implDoOnChannelOpen(ChannelData channel);
+    protected abstract Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, MessageHeader header, Message message);
+    protected abstract void implDoOnChannelConnectable();
+    protected abstract void implDoOnChannelUpdate(Object param);
+    protected abstract void implDoOnChannelClose();
+
     private static class ChannelListenerImpl implements ChannelListener {
 
-        private final WeakReference<MessagingChannelImpl> mChannel;
+        private final WeakReference<MessagingChannelBase> mChannel;
         private final Clock mClock;
         private final Logger mLogger;
 
@@ -292,7 +285,7 @@ public class MessagingChannelImpl implements MessagingChannel {
         private final MessageSerializer mSerializer;
         private final List<SendRequest> mWriteQueueLocal;
 
-        private ChannelListenerImpl(MessagingChannelImpl channel,
+        private ChannelListenerImpl(MessagingChannelBase channel,
                                     KnownMessageTypes messageTypes,
                                     ChannelId ourId,
                                     Clock clock,
@@ -308,36 +301,23 @@ public class MessagingChannelImpl implements MessagingChannel {
 
         @Override
         public void onAcceptable(SelectionKey key) {
-            // not used
+
         }
 
         @Override
         public void onConnectable(SelectionKey key) {
-            MessagingChannelImpl ourChannel = mChannel.get();
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
             }
 
-            ChannelData channel = ourChannel.mChannel.get();
-            if (channel == null) {
-                mLogger.warn("Channel is closed but received new connect update");
-                return;
-            }
-
-            try {
-                channel.channel.finishConnection();
-                ourChannel.onConnectionSuccessful();
-                mReadingContext.clear();
-            } catch (IOException e) {
-                mLogger.error("Error while trying to connect, retrying", e);
-                ourChannel.resetConnection();
-            }
+            ourChannel.implDoOnChannelConnectable();
         }
 
         @Override
         public void onReadable(SelectionKey key) {
-            MessagingChannelImpl ourChannel = mChannel.get();
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
@@ -360,13 +340,13 @@ public class MessagingChannelImpl implements MessagingChannel {
                 parseMessages(ourChannel);
             } catch (IOException e) {
                 mLogger.error("Error while reading and processing new data", e);
-                ourChannel.resetConnection();
+                ourChannel.resetChannel();
             }
         }
 
         @Override
         public void onWritable(SelectionKey key) {
-            MessagingChannelImpl ourChannel = mChannel.get();
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
@@ -389,7 +369,6 @@ public class MessagingChannelImpl implements MessagingChannel {
             for (SendRequest request : mWriteQueueLocal) {
                 MessageSerializer.SerializedMessage serialized;
                 try {
-                    // todo: improve data usage when serializing and writing
                     Time now = mClock.currentTime();
                     serialized = mSerializer.serialize(now, request.message, request.isOnlyForServer);
                 } catch (IOException e) {
@@ -410,7 +389,7 @@ public class MessagingChannelImpl implements MessagingChannel {
                     serialized.writeInto(channel.channel);
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
-                    ourChannel.resetConnection();
+                    ourChannel.resetChannel();
                     break;
                 }
             }
@@ -418,43 +397,16 @@ public class MessagingChannelImpl implements MessagingChannel {
 
         @Override
         public void onRequestedUpdate(SelectionKey key, Object param) {
-            if (!(param instanceof UpdateRequest)) {
-                return;
-            }
-
-            MessagingChannelImpl ourChannel = mChannel.get();
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
             }
 
-            UpdateRequest request = (UpdateRequest) param;
-            switch (request) {
-                case START_CONNECT:
-                    ourChannel.startConnection();
-                    break;
-                case PING_CHECK: {
-                    ChannelData channel = ourChannel.mChannel.get();
-                    if (channel == null) {
-                        mLogger.warn("Channel is closed but received ping check update");
-                        break;
-                    }
-
-                    if (!channel.isConnected) {
-                        mLogger.warn("Channel is not connected but received ping check update");
-                        break;
-                    }
-
-                    ourChannel.mPingContext.pingIfNecessary();
-                    channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
-                    break;
-                }
-                default:
-                    break;
-            }
+            ourChannel.implDoOnChannelUpdate(param);
         }
 
-        private void parseMessages(MessagingChannelImpl ourChannel) throws IOException {
+        private void parseMessages(MessagingChannelBase ourChannel) throws IOException {
             boolean hasMoreToParse;
             do {
                 Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
@@ -474,19 +426,19 @@ public class MessagingChannelImpl implements MessagingChannel {
         }
     }
 
-    private static class OpenListenerImpl implements ChannelOpenListener<ConnectableNetChannel> {
+    private static class OpenListenerImpl implements ChannelOpenListener<NetChannel> {
 
-        private final WeakReference<MessagingChannelImpl> mChannel;
+        private final WeakReference<MessagingChannelBase> mChannel;
         private final Logger mLogger;
 
-        private OpenListenerImpl(MessagingChannelImpl channel, Logger logger) {
+        private OpenListenerImpl(MessagingChannelBase channel, Logger logger) {
             mChannel = new WeakReference<>(channel);
             mLogger = logger;
         }
 
         @Override
-        public void onOpen(ConnectableNetChannel channel, UpdateRegistration registration) {
-            MessagingChannelImpl ourChannel = mChannel.get();
+        public void onOpen(NetChannel channel, UpdateRegistration registration) {
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
@@ -497,35 +449,13 @@ public class MessagingChannelImpl implements MessagingChannel {
 
         @Override
         public void onError(Throwable t) {
-            MessagingChannelImpl ourChannel = mChannel.get();
+            MessagingChannelBase ourChannel = mChannel.get();
             if (ourChannel == null) {
                 mLogger.warn("MessagingChannel was garbage collected");
                 return;
             }
 
             ourChannel.startChannelOpen(true);
-        }
-    }
-
-    private static class ChannelData {
-        public final ConnectableNetChannel channel;
-        public final UpdateRegistration registration;
-        public boolean isConnected;
-
-        private ChannelData(ConnectableNetChannel channel, UpdateRegistration registration) {
-            this.channel = channel;
-            this.registration = registration;
-            this.isConnected = false;
-        }
-    }
-
-    private static class SendRequest {
-        public final Message message;
-        public final boolean isOnlyForServer;
-
-        private SendRequest(Message message, boolean isOnlyForServer) {
-            this.message = message;
-            this.isOnlyForServer = isOnlyForServer;
         }
     }
 }
