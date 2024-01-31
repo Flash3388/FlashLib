@@ -376,14 +376,13 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             }
 
             for (SendRequest request : mWriteQueueLocal) {
-                byte[] content;
+                MessageSerializer.SerializedMessage serialized;
                 try {
-                    // todo: improve data usage when serializing and writing
                     if (request.header != null) {
-                        content = mSerializer.serialize(request.header, request.message);
+                        serialized = mSerializer.serialize(request.header, request.message);
                     } else {
                         Time now = mClock.currentTime();
-                        content = mSerializer.serialize(now, request.message, false);
+                        serialized = mSerializer.serialize(now, request.message, false);
                     }
                 } catch (IOException e) {
                     mLogger.error("Error serializing message data", e);
@@ -399,8 +398,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 }
 
                 try {
-                    mLogger.debug("Writing data to channel: client={}, size={}", client, content.length);
-                    client.client.write(ByteBuffer.wrap(content));
+                    mLogger.debug("Writing data to channel: client={}, size={}", client, serialized.getSize());
+                    serialized.writeInto(client.client);
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
 

@@ -4,7 +4,6 @@ import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageType;
-import org.apache.commons.io.input.buffer.CircularByteBuffer;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
@@ -40,7 +39,6 @@ public class MessageReadingContext {
     private final Logger mLogger;
 
     private final ByteBuffer mDirectReadBuffer;
-    private final CircularByteBuffer mDataToReadBuffer;
     private final byte[] mReadBuffer;
 
     private MessageHeader mLastHeader;
@@ -49,9 +47,7 @@ public class MessageReadingContext {
         mMessageTypes = messageTypes;
         mLogger = logger;
 
-        // TODO: USE THIS OR SOME OTHER BUFFER FOR BOTH READING FROM THE CHANNEL AND PARSING
-        mDirectReadBuffer = ByteBuffer.allocateDirect(1024);
-        mDataToReadBuffer = new CircularByteBuffer(2048);
+        mDirectReadBuffer = ByteBuffer.allocateDirect(2048);
         mReadBuffer = new byte[1024];
 
         mLastHeader = null;
@@ -60,50 +56,27 @@ public class MessageReadingContext {
     public void clear() {
         mLogger.trace("Resetting message reading context");
 
-        mDataToReadBuffer.clear();
+        mDirectReadBuffer.clear();
         mLastHeader = null;
     }
 
     public IncomingData readFromChannel(NetChannel channel) throws IOException {
-        mDirectReadBuffer.clear();
+        mLogger.trace("Updating context with new data");
 
         IncomingData data = channel.read(mDirectReadBuffer);
         if (data == null) {
             return null;
         }
 
-        mDirectReadBuffer.rewind();
-        updateBuffer(mDirectReadBuffer, data.getBytesReceived());
+        // todo: if buffer becomes too full, allocate a new bigger buffer
 
         return data;
-    }
-
-    public void updateBuffer(ByteBuffer buffer, int bytesInBuffer) {
-        if (bytesInBuffer < 1) {
-            return;
-        }
-
-        mLogger.trace("Updating context with new data");
-
-        if (!mDataToReadBuffer.hasSpace(bytesInBuffer)) {
-            // our side data buffer doesn't have enough space to
-            // store the additional incoming data.
-            throw new BufferOverflowException();
-        }
-
-        while (bytesInBuffer > 0) {
-            int bytesToRead = Math.min(bytesInBuffer, mReadBuffer.length);
-            buffer.get(mReadBuffer, 0, bytesToRead);
-            bytesInBuffer -= bytesToRead;
-
-            mDataToReadBuffer.add(mReadBuffer, 0, bytesToRead);
-        }
     }
 
     public Optional<ParseResult> parse() throws IOException {
         if (mLastHeader == null) {
             // need to read header
-            if (mDataToReadBuffer.getCurrentNumberOfBytes() >= MessageHeader.SIZE) {
+            if (mDirectReadBuffer.position() >= MessageHeader.SIZE) {
                 mLogger.trace("Enough bytes to read header");
                 mLastHeader = readHeader();
             } else {
@@ -112,7 +85,7 @@ public class MessageReadingContext {
             }
         }
 
-        if (mDataToReadBuffer.getCurrentNumberOfBytes() >= mLastHeader.getContentSize()) {
+        if (mDirectReadBuffer.position() >= mLastHeader.getContentSize()) {
             mLogger.trace("Enough bytes to read message");
             try {
                 ParseResult result = readMessage(mLastHeader);
@@ -131,7 +104,9 @@ public class MessageReadingContext {
     }
 
     private MessageHeader readHeader() throws IOException {
-        mDataToReadBuffer.read(mReadBuffer, 0, MessageHeader.SIZE);
+        mDirectReadBuffer.flip();
+        mDirectReadBuffer.get(mReadBuffer, 0, MessageHeader.SIZE);
+        mDirectReadBuffer.compact();
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
@@ -146,7 +121,9 @@ public class MessageReadingContext {
             throw new BufferOverflowException();
         }
 
-        mDataToReadBuffer.read(mReadBuffer, 0, header.getContentSize());
+        mDirectReadBuffer.flip();
+        mDirectReadBuffer.get(mReadBuffer, 0, header.getContentSize());
+        mDirectReadBuffer.compact();
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {

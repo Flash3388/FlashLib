@@ -272,6 +272,7 @@ public class MessagingChannelImpl implements MessagingChannel {
             try {
                 channel.channel.finishConnection();
                 ourChannel.onConnectionSuccessful();
+                mReadingContext.clear();
             } catch (IOException e) {
                 mLogger.error("Error while trying to connect, retrying", e);
                 ourChannel.retryConnection();
@@ -330,11 +331,11 @@ public class MessagingChannelImpl implements MessagingChannel {
             }
 
             for (SendRequest request : mWriteQueueLocal) {
-                byte[] content;
+                MessageSerializer.SerializedMessage serialized;
                 try {
                     // todo: improve data usage when serializing and writing
                     Time now = mClock.currentTime();
-                    content = mSerializer.serialize(now, request.message, request.isOnlyForServer);
+                    serialized = mSerializer.serialize(now, request.message, request.isOnlyForServer);
                 } catch (IOException e) {
                     mLogger.error("Error serializing message data", e);
 
@@ -349,8 +350,8 @@ public class MessagingChannelImpl implements MessagingChannel {
                 }
 
                 try {
-                    mLogger.debug("Writing data to channel: size={}", content.length);
-                    channel.channel.write(ByteBuffer.wrap(content));
+                    mLogger.debug("Writing data to channel: size={}", serialized.getSize());
+                    serialized.writeInto(channel.channel);
                 } catch (IOException e) {
                     mLogger.error("Error while writing data", e);
 
