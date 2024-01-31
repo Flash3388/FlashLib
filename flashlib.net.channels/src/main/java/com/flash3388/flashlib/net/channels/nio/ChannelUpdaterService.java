@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 public class ChannelUpdaterService extends SingleUseService implements ChannelUpdater {
 
@@ -28,7 +31,7 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
     private static final Time SELECT_TIMEOUT = Time.milliseconds(100);
 
     private final Map<SelectionKey, ChannelListener> mListeners;
-    private final Queue<OpenRequest<?>> mOpenRequests;
+    private final DelayQueue<OpenRequest<?>> mOpenRequests;
     private final Queue<UpdateRequest> mCustomUpdateRequests;
 
     private Selector mSelector;
@@ -36,15 +39,16 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
 
     public ChannelUpdaterService() {
         mListeners = new HashMap<>();
-        mOpenRequests = new ArrayDeque<>();
+        mOpenRequests = new DelayQueue<>();
         mCustomUpdateRequests = new ArrayDeque<>();
     }
 
     @Override
-    public <T extends BaseChannel> void requestOpenChannel(NetChannelOpener<? extends T> opener, ChannelOpenListener<? super T> listener, ChannelListener listenerToRegister) {
-        synchronized (mOpenRequests) {
-            mOpenRequests.add(new OpenRequest<T>(opener, listener, listenerToRegister));
-        }
+    public <T extends BaseChannel> void requestOpenChannel(NetChannelOpener<? extends T> opener,
+                                                           ChannelOpenListener<? super T> listener,
+                                                           ChannelListener listenerToRegister,
+                                                           Time delay) {
+        mOpenRequests.add(new OpenRequest<T>(opener, listener, listenerToRegister, delay));
     }
 
     @Override
@@ -209,14 +213,7 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
 
         private void processOpenRequests() {
             mOpenRequestsLocal.clear();
-            synchronized (mService.mOpenRequests) {
-                if (mService.mOpenRequests.isEmpty()) {
-                    return;
-                }
-
-                mOpenRequestsLocal.addAll(mService.mOpenRequests);
-                mService.mOpenRequests.clear();
-            }
+            mService.mOpenRequests.drainTo(mOpenRequestsLocal);
 
             for (OpenRequest<?> request : mOpenRequestsLocal) {
                 BaseChannel channel = null;
@@ -293,22 +290,40 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
         }
     }
 
-    private static class OpenRequest<T extends BaseChannel> {
+    private static class OpenRequest<T extends BaseChannel> implements Delayed {
         public final NetChannelOpener<? extends T> opener;
         public final ChannelOpenListener<? super T> listener;
         public final ChannelListener listenerToRegister;
+        public final long expirationTimeMillis;
 
         private OpenRequest(NetChannelOpener<? extends T> opener,
                             ChannelOpenListener<? super T> listener,
-                            ChannelListener listenerToRegister) {
+                            ChannelListener listenerToRegister,
+                            Time delayTime) {
             this.opener = opener;
             this.listener = listener;
             this.listenerToRegister = listenerToRegister;
+            this.expirationTimeMillis = System.currentTimeMillis() + delayTime.valueAsMillis();
         }
 
         void onOpen(BaseChannel channel, UpdateRegistration registration) {
             //noinspection unchecked
             listener.onOpen((T) channel, registration);
+        }
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            long diffMs = expirationTimeMillis - System.currentTimeMillis();
+            return unit.convert(diffMs, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int compareTo(Delayed o) {
+            long diffMillis = getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS);
+            diffMillis = Math.min(diffMillis, 1);
+            diffMillis = Math.max(diffMillis, -1);
+
+            return (int) diffMillis;
         }
     }
 }

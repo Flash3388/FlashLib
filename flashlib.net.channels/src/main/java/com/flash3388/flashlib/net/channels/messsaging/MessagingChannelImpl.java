@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MessagingChannelImpl implements MessagingChannel {
 
+    private static final Time OPEN_DELAY = Time.seconds(1);
+
     enum UpdateRequest {
         START_CONNECT,
         PING_CHECK
@@ -82,14 +84,14 @@ public class MessagingChannelImpl implements MessagingChannel {
     @Override
     public void start() {
         // todo: should not be called more then once
-        startChannelOpen();
+        startChannelOpen(false);
     }
 
     @Override
     public void resetConnection() {
         // todo: if this is done during channel open procedure, then it causes problems
         Closeables.silentClose(this);
-        startChannelOpen();
+        startChannelOpen(true);
     }
 
     @Override
@@ -133,9 +135,9 @@ public class MessagingChannelImpl implements MessagingChannel {
         }
     }
 
-    private void startChannelOpen() {
+    private void startChannelOpen(boolean delayed) {
         mLogger.debug("Requesting open channel");
-        mChannelUpdater.requestOpenChannel(mChannelOpener, mOpenListener, mChannelListener);
+        mChannelUpdater.requestOpenChannel(mChannelOpener, mOpenListener, mChannelListener, delayed ? OPEN_DELAY : Time.seconds(0));
     }
 
     private void onChannelOpen(ConnectableNetChannel channel, UpdateRegistration registration) {
@@ -147,7 +149,7 @@ public class MessagingChannelImpl implements MessagingChannel {
     private void startConnection() {
         ChannelData channel = mChannel.get();
         if (channel == null) {
-            // we were just closed
+            mLogger.warn("start connection requested while channel is null");
             return;
         }
 
@@ -157,6 +159,7 @@ public class MessagingChannelImpl implements MessagingChannel {
             channel.channel.startConnection(mRemoteAddress);
             channel.registration.requestConnectionUpdates();
         } catch (IOException | RuntimeException | Error e) {
+            mLogger.error("Error while trying to start connection, retrying", e);
             retryConnection();
         }
     }
@@ -164,7 +167,7 @@ public class MessagingChannelImpl implements MessagingChannel {
     private void retryConnection() {
         ChannelData channel = mChannel.get();
         if (channel == null) {
-            // we were just closed
+            mLogger.warn("retry connection requested while channel is null");
             return;
         }
 
@@ -175,7 +178,7 @@ public class MessagingChannelImpl implements MessagingChannel {
     private void onConnectionSuccessful() {
         ChannelData channel = mChannel.get();
         if (channel == null) {
-            // we were just closed
+            mLogger.warn("connection successful while channel is null");
             return;
         }
 
@@ -275,7 +278,9 @@ public class MessagingChannelImpl implements MessagingChannel {
                 mReadingContext.clear();
             } catch (IOException e) {
                 mLogger.error("Error while trying to connect, retrying", e);
-                ourChannel.retryConnection();
+
+                // todo: add delay before doing this or it will cause a too big a busy loop
+                ourChannel.resetConnection();
             }
         }
 
@@ -449,7 +454,7 @@ public class MessagingChannelImpl implements MessagingChannel {
                 return;
             }
 
-            ourChannel.startChannelOpen();
+            ourChannel.startChannelOpen(true);
         }
     }
 
