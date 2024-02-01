@@ -142,15 +142,24 @@ public class SingleThreadedScheduler implements Scheduler {
     public void cancelActionsIf(Predicate<? super Action> predicate) {
         mMainThread.verifyCurrentThread();
 
+        if (!mCanModifyRunningActions) {
+            throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
+        }
+
         mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
 
-        for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
+        mCanModifyRunningActions = false;
+        try {
+            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                RunningActionContext context = iterator.next();
 
-            if (predicate.test(context.getAction())) {
-                cancelAndEnd(context);
-                iterator.remove();
+                if (predicate.test(context.getAction())) {
+                    cancelAndEnd(context);
+                    iterator.remove();
+                }
             }
+        } finally {
+            mCanModifyRunningActions = true;
         }
     }
 
@@ -163,12 +172,21 @@ public class SingleThreadedScheduler implements Scheduler {
     public void cancelAllActions() {
         mMainThread.verifyCurrentThread();
 
+        if (!mCanModifyRunningActions) {
+            throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
+        }
+
         mPendingActions.clear();
 
-        for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
-            cancelAndEnd(context);
-            iterator.remove();
+        mCanModifyRunningActions = false;
+        try {
+            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                RunningActionContext context = iterator.next();
+                cancelAndEnd(context);
+                iterator.remove();
+            }
+        } finally {
+            mCanModifyRunningActions = true;
         }
     }
 
@@ -264,29 +282,38 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     private void executeTriggers() {
-        TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
-        for (GenericTrigger trigger : mTriggers) {
-            trigger.update(controller);
-        }
-
-        for (Action action : controller.getActionsToStopIfRunning()) {
-            if (isRunning(action)) {
-                cancel(action);
+        // while in this method, calls to start and cancel methods cannot occur due
+        // to modifications of the collections.
+        // since this implementation is meant for single-thread, then such calls
+        // can only occur from within other actions.
+        mCanModifyRunningActions = false;
+        try {
+            TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
+            for (GenericTrigger trigger : mTriggers) {
+                trigger.update(controller);
             }
-        }
 
-        for (Action action : controller.getActionsToToggle()) {
-            if (!isRunning(action)) {
-                start(action);
-            } else {
-                cancel(action);
+            for (Action action : controller.getActionsToStopIfRunning()) {
+                if (isRunning(action)) {
+                    cancel(action);
+                }
             }
-        }
 
-        for (Action action : controller.getActionsToStartIfRunning()) {
-            if (!isRunning(action)) {
-                start(action);
+            for (Action action : controller.getActionsToToggle()) {
+                if (!isRunning(action)) {
+                    start(action);
+                } else {
+                    cancel(action);
+                }
             }
+
+            for (Action action : controller.getActionsToStartIfRunning()) {
+                if (!isRunning(action)) {
+                    start(action);
+                }
+            }
+        } finally {
+            mCanModifyRunningActions = true;
         }
     }
 

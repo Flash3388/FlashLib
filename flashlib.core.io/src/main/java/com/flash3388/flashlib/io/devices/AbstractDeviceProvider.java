@@ -39,4 +39,8 @@ public abstract class AbstractDeviceProvider implements DeviceProvider {
             LOGGER.warn("Device of id {} override", id);
         }
     }
+
+    protected <T, T2 extends T> void registerDevice(DeviceId<T> id, Class<T2> type) {
+        registerDevice(id.id(), type);
+    }
 }
