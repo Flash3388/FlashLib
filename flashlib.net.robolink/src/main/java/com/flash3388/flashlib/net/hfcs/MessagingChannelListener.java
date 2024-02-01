@@ -4,21 +4,32 @@ import com.flash3388.flashlib.net.channels.messsaging.MessageHeader;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.messaging.Message;
 
-public class MessagingChannelListener implements MessagingChannel.Listener {
+class MessagingChannelListener implements MessagingChannel.Listener {
+
+    private final HfcsContext mContext;
+
+    MessagingChannelListener(HfcsContext context) {
+        mContext = context;
+    }
 
     @Override
     public void onConnect() {
-
+        mContext.markedAttached();
     }
 
     @Override
     public void onDisconnect() {
-
+        mContext.markedUnattached();
     }
 
     @Override
     public void onNewMessage(MessageHeader header, Message message) {
+        if (message.getType().getKey() != HfcsMessageType.KEY) {
+            return;
+        }
 
+        HfcsUpdateMessage updateMessage = (HfcsUpdateMessage) message;
+        mContext.updateReceivedNewData(header, updateMessage);
     }
 
     @Override

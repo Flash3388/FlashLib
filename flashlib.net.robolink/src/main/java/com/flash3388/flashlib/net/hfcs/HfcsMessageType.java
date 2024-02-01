@@ -10,14 +10,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-public class HfcsMessageType implements MessageType {
+class HfcsMessageType implements MessageType {
 
     public static final int KEY = 1111;
 
     private final KnownInDataTypes mInDataTypes;
     private final Logger mLogger;
 
-    public HfcsMessageType(KnownInDataTypes inDataTypes, Logger logger) {
+    HfcsMessageType(KnownInDataTypes inDataTypes, Logger logger) {
         mInDataTypes = inDataTypes;
         mLogger = logger;
     }

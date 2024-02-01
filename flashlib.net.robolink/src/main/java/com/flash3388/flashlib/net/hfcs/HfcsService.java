@@ -12,12 +12,11 @@ import com.flash3388.flashlib.net.channels.messsaging.NonConnectedMessagingChann
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.udp.UdpChannelOpener;
 import com.flash3388.flashlib.net.messaging.ChannelId;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
-import com.notifier.Controllers;
-import com.notifier.EventController;
 import org.slf4j.Logger;
 
 import java.net.InetAddress;
@@ -34,34 +33,28 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
     private final ChannelId mOurId;
     private final Clock mClock;
 
-    private final KnownInDataTypes mInDataTypes;
-    private final HfcsMessageType mMessageType;
-    private final EventController mEventController;
-    private final BlockingQueue<OutDataNode> mOutDataQueue;
-    private final Map<HfcsInType<?>, InDataNode> mInDataNodes;
-
-    private Supplier<MessagingChannel> mContextSupplier;
+    private final HfcsContext mContext;
+    private Supplier<MessagingChannel> mChannelSupplier;
     private MessagingChannel mChannel;
+    private Thread mUpdateThread;
 
     public HfcsService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
         mChannelUpdater = channelUpdater;
         mOurId = new ChannelId(ourId, MESSENGER_ID);
         mClock = clock;
-
-        mInDataTypes = new KnownInDataTypes();
-        mMessageType = new HfcsMessageType(mInDataTypes, LOGGER);
-        mEventController = Controllers.newSyncExecutionController();
-        mOutDataQueue = new DelayQueue<>();
-        mInDataNodes = new ConcurrentHashMap<>();
+        mContext = new HfcsContext(clock, LOGGER);
+        mChannelSupplier = null;
+        mChannel = null;
+        mUpdateThread = null;
     }
 
     public void configureTargeted(SocketAddress bindAddress, SocketAddress remoteAddress) {
-        mContextSupplier = new TargetedContextSupplier(
+        mChannelSupplier = new TargetedContextSupplier(
                 mOurId,
                 mClock,
                 mChannelUpdater,
                 LOGGER,
-                mMessageType,
+                mContext.getMessageType(),
                 bindAddress,
                 remoteAddress);
     }
@@ -70,12 +63,12 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                                    InetAddress multicastGroup,
                                    SocketAddress bindAddress,
                                    int remotePort) {
-        mContextSupplier = new MulticastContextSupplier(
+        mChannelSupplier = new MulticastContextSupplier(
                 mOurId,
                 mClock,
                 mChannelUpdater,
                 LOGGER,
-                mMessageType,
+                mContext.getMessageType(),
                 bindAddress,
                 multicastInterface,
                 multicastGroup,
@@ -84,44 +77,54 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
 
     public void configureBroadcast(SocketAddress bindAddress,
                                    int remotePort) {
-        mContextSupplier = new BroadcastContextSupplier(
+        mChannelSupplier = new BroadcastContextSupplier(
                 mOurId,
                 mClock,
                 mChannelUpdater,
                 LOGGER,
-                mMessageType,
+                mContext.getMessageType(),
                 bindAddress,
                 remotePort);
     }
 
     @Override
     public void registerOutgoing(HfcsType type, Time period, Supplier<? extends Serializable> supplier) {
-        mOutDataQueue.add(new OutDataNode(mClock, type, supplier, period));
+        mContext.updateNewOutgoing(type, period, supplier);
     }
 
     @Override
-    public <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout) {
-        mInDataTypes.put(type);
-        mInDataNodes.put(type, new InDataNode(type, receiveTimeout, LOGGER));
-        return new RegisteredIncomingImpl<>(mEventController, type);
+    public <T extends Serializable> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout) {
+        return mContext.updateNewIncoming(type, receiveTimeout);
     }
 
     @Override
     protected void startRunning() throws ServiceException {
-        if (mContextSupplier == null) {
+        if (mChannelSupplier == null) {
             throw new IllegalStateException("not configured");
         }
 
-        mChannel = mContextSupplier.get();
-        mChannel.setListener();
+        mContext.markedUnattached();
+
+        mChannel = mChannelSupplier.get();
+        mChannel.setListener(new MessagingChannelListener(mContext));
         mChannel.start();
 
-        Thread updateThread = new Thread()
+        Thread updateThread = new Thread(new UpdateTask(mChannel, mContext), "HFCS-Updater");
+        updateThread.start();
+        mUpdateThread = updateThread;
     }
 
     @Override
     protected void stopRunning() {
-        Closeables.silentClose(mChannel);
+        if (mUpdateThread != null) {
+            mUpdateThread.interrupt();
+            mUpdateThread = null;
+        }
+
+        if (mChannel != null) {
+            Closeables.silentClose(mChannel);
+            mChannel = null;
+        }
     }
 
     private static abstract class ContextSupplierBase implements Supplier<MessagingChannel> {
@@ -130,13 +133,13 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         private final Clock mClock;
         private final ChannelUpdater mChannelUpdater;
         protected final Logger mLogger;
-        private final HfcsMessageType mMessageType;
+        private final MessageType mMessageType;
 
         private ContextSupplierBase(ChannelId id,
                                     Clock clock,
                                     ChannelUpdater channelUpdater,
                                     Logger logger,
-                                    HfcsMessageType messageType) {
+                                    MessageType messageType) {
             mId = id;
             mClock = clock;
             mChannelUpdater = channelUpdater;
@@ -172,7 +175,7 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                                         Clock clock,
                                         ChannelUpdater channelUpdater,
                                         Logger logger,
-                                        HfcsMessageType messageType,
+                                        MessageType messageType,
                                         SocketAddress bindAddress,
                                         SocketAddress remoteAddress) {
             super(id, clock, channelUpdater, logger, messageType);
@@ -197,7 +200,7 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                                          Clock clock,
                                          ChannelUpdater channelUpdater,
                                          Logger logger,
-                                         HfcsMessageType messageType,
+                                         MessageType messageType,
                                          SocketAddress bindAddress,
                                          NetworkInterface multicastInterface,
                                          InetAddress multicastGroup,
@@ -224,7 +227,7 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                                          Clock clock,
                                          ChannelUpdater channelUpdater,
                                          Logger logger,
-                                         HfcsMessageType messageType,
+                                         MessageType messageType,
                                          SocketAddress bindAddress,
                                          int remotePort) {
             super(id, clock, channelUpdater, logger, messageType);

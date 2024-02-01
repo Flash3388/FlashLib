@@ -11,21 +11,21 @@ public class ChannelId implements Serializable {
 
     public static final int SIZE = Long.BYTES + InstanceId.BYTES;
 
-    private final InstanceId mSender;
+    private final InstanceId mInstanceId;
     private final long mMessengerId;
 
-    public ChannelId(InstanceId sender, long messengerId) {
-        mSender = sender;
+    public ChannelId(InstanceId instanceId, long messengerId) {
+        mInstanceId = instanceId;
         mMessengerId = messengerId;
     }
 
     public ChannelId(DataInput dataInput) throws IOException {
-        mSender = InstanceId.createFrom(dataInput);
+        mInstanceId = InstanceId.createFrom(dataInput);
         mMessengerId = dataInput.readLong();
     }
 
-    public InstanceId getSender() {
-        return mSender;
+    public InstanceId getInstanceId() {
+        return mInstanceId;
     }
 
     public long getMessengerId() {
@@ -34,13 +34,13 @@ public class ChannelId implements Serializable {
 
     @Override
     public void writeInto(DataOutput output) throws IOException {
-        mSender.writeTo(output);
+        mInstanceId.writeTo(output);
         output.writeLong(mMessengerId);
     }
 
     @Override
     public String toString() {
         return String.format("ChannelId{instanceId=%s, messengerId=%s}",
-                mSender.toString(), Long.toHexString(mMessengerId));
+                mInstanceId.toString(), Long.toHexString(mMessengerId));
     }
 }

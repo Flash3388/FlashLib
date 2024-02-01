@@ -4,11 +4,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KnownInDataTypes {
+class KnownInDataTypes {
 
     private final Map<Integer, HfcsInType<?>> mTypeMap;
 
-    public KnownInDataTypes() {
+    KnownInDataTypes() {
         mTypeMap = new ConcurrentHashMap<>();
     }
 
