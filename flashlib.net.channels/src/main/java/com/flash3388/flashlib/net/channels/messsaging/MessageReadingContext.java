@@ -103,7 +103,9 @@ public class MessageReadingContext {
             mLogger.trace("Enough bytes to read message");
             try {
                 ParseResult result = readMessage(mLastHeader);
-                return Optional.of(result);
+                if (result != null) {
+                    return Optional.of(result);
+                }
             } catch (NoSuchElementException e) {
                 // ignore this message and inform
                 mLogger.warn("Received unknown message. Ignoring it");
@@ -146,6 +148,10 @@ public class MessageReadingContext {
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             MessageType type = mMessageTypes.get(header.getMessageType());
             Message message = type.read(dataInputStream);
+            if (message == null) {
+                // bad message
+                return null;
+            }
 
             return new ParseResult(header, message);
         }

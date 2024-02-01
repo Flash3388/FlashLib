@@ -1,41 +1,69 @@
 package com.flash3388.flashlib.net.hfcs;
 
+import com.castle.concurrent.service.SingleUseService;
+import com.castle.exceptions.ServiceException;
+import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.io.Serializable;
+import com.flash3388.flashlib.net.channels.NetChannel;
+import com.flash3388.flashlib.net.channels.NetChannelOpener;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.NonConnectedMessagingChannel;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.udp.UdpChannelOpener;
+import com.flash3388.flashlib.net.messaging.ChannelId;
+import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.logging.Logging;
+import com.flash3388.flashlib.util.unique.InstanceId;
+import com.notifier.Controllers;
+import com.notifier.EventController;
 import org.slf4j.Logger;
 
-public class HfcsService /*extends NetServiceBase implements HfcsRegistry*/ {
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.util.function.Supplier;
+
+public class HfcsService extends SingleUseService implements HfcsRegistry {
 
     private static final Logger LOGGER = Logging.getLogger("Comm", "HFCSService");
+    private static final long MESSENGER_ID = 777;
 
-   /* private final InstanceId mOurId;
+    private final ChannelUpdater mChannelUpdater;
+    private final ChannelId mOurId;
     private final Clock mClock;
 
     private final KnownInDataTypes mInDataTypes;
+    private final HfcsMessageType mMessageType;
     private final EventController mEventController;
     private final BlockingQueue<OutDataNode> mOutDataQueue;
     private final Map<HfcsInType<?>, InDataNode> mInDataNodes;
 
-    private Supplier<Context> mContextSupplier;
-    private Context mContext;
+    private Supplier<MessagingChannel> mContextSupplier;
+    private MessagingChannel mChannel;
 
-    public HfcsService(InstanceId ourId, Clock clock) {
-        mOurId = ourId;
+    public HfcsService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
+        mChannelUpdater = channelUpdater;
+        mOurId = new ChannelId(ourId, MESSENGER_ID);
         mClock = clock;
 
         mInDataTypes = new KnownInDataTypes();
+        mMessageType = new HfcsMessageType(mInDataTypes, LOGGER);
         mEventController = Controllers.newSyncExecutionController();
         mOutDataQueue = new DelayQueue<>();
         mInDataNodes = new ConcurrentHashMap<>();
     }
 
     public void configureTargeted(SocketAddress bindAddress, SocketAddress remoteAddress) {
-        mContextSupplier = new SimpleContextSupplier(
+        mContextSupplier = new TargetedContextSupplier(
                 mOurId,
                 mClock,
-                remoteAddress,
+                mChannelUpdater,
                 LOGGER,
-                mEventController,
-                bindAddress);
+                mMessageType,
+                bindAddress,
+                remoteAddress);
     }
 
     public void configureMulticast(NetworkInterface multicastInterface,
@@ -45,29 +73,25 @@ public class HfcsService /*extends NetServiceBase implements HfcsRegistry*/ {
         mContextSupplier = new MulticastContextSupplier(
                 mOurId,
                 mClock,
-                new InetSocketAddress(multicastGroup, remotePort),
+                mChannelUpdater,
                 LOGGER,
-                mEventController,
+                mMessageType,
                 bindAddress,
                 multicastInterface,
-                multicastGroup);
+                multicastGroup,
+                remotePort);
     }
 
     public void configureBroadcast(SocketAddress bindAddress,
                                    int remotePort) {
-        try {
-            InetAddress address = InetAddress.getByName("255.255.255.255");
-
-            mContextSupplier = new BroadcastContextSupplier(
-                    mOurId,
-                    mClock,
-                    new InetSocketAddress(address, remotePort),
-                    LOGGER,
-                    mEventController,
-                    bindAddress);
-        } catch (UnknownHostException e) {
-            throw new Error("broadcast address not found", e);
-        }
+        mContextSupplier = new BroadcastContextSupplier(
+                mOurId,
+                mClock,
+                mChannelUpdater,
+                LOGGER,
+                mMessageType,
+                bindAddress,
+                remotePort);
     }
 
     @Override
@@ -83,90 +107,82 @@ public class HfcsService /*extends NetServiceBase implements HfcsRegistry*/ {
     }
 
     @Override
-    protected Map<String, Runnable> createTasks() {
+    protected void startRunning() throws ServiceException {
         if (mContextSupplier == null) {
             throw new IllegalStateException("not configured");
         }
 
-        mContext = mContextSupplier.get();
+        mChannel = mContextSupplier.get();
+        mChannel.setListener();
+        mChannel.start();
 
-        Map<String, Runnable> tasks = new HashMap<>();
-        tasks.put("HfcsService.UpdateTask", mContext.updateTask);
-
-        return tasks;
+        Thread updateThread = new Thread()
     }
 
     @Override
-    protected void freeResources() {
-
+    protected void stopRunning() {
+        Closeables.silentClose(mChannel);
     }
 
-    private static class Context {
+    private static abstract class ContextSupplierBase implements Supplier<MessagingChannel> {
 
-        public final Closeable channel;
-        public final Runnable updateTask;
-
-        public Context(Closeable channel, Runnable updateTask) {
-            this.channel = channel;
-            this.updateTask = updateTask;
-        }
-    }
-
-    private static abstract class ContextSupplierBase implements Supplier<Context> {
-
-        private final InstanceId mInstanceId;
+        private final ChannelId mId;
         private final Clock mClock;
-        private final SocketAddress mServerAddress;
+        private final ChannelUpdater mChannelUpdater;
         protected final Logger mLogger;
-        private final EventController mEventController;
+        private final HfcsMessageType mMessageType;
 
-        private ContextSupplierBase(InstanceId instanceId,
+        private ContextSupplierBase(ChannelId id,
                                     Clock clock,
-                                    SocketAddress serverAddress,
+                                    ChannelUpdater channelUpdater,
                                     Logger logger,
-                                    EventController eventController) {
-            mInstanceId = instanceId;
+                                    HfcsMessageType messageType) {
+            mId = id;
             mClock = clock;
-            mServerAddress = serverAddress;
+            mChannelUpdater = channelUpdater;
             mLogger = logger;
-            mEventController = eventController;
+            mMessageType = messageType;
         }
 
         @Override
-        public Context get() {
+        public MessagingChannel get() {
             KnownMessageTypes messageTypes = new KnownMessageTypes();
-            MessagingChannel channel = new BasicMessagingChannelImpl(
-                    createConnector(),
-                    mServerAddress,
-                    mInstanceId,
-                    mClock,
-                    mLogger,
-                    messageTypes);
+            messageTypes.put(mMessageType);
 
-            Runnable task = new UpdateTask(channel);
-            return new Context(channel, task);
+            MessagingChannel channel = new NonConnectedMessagingChannel(
+                    createChannelOpener(),
+                    mChannelUpdater,
+                    messageTypes,
+                    mId,
+                    mClock,
+                    mLogger);
+
+            return channel;
         }
 
-        protected abstract UdpConnector createConnector();
+        protected abstract NetChannelOpener<NetChannel> createChannelOpener();
     }
 
-    private static class SimpleContextSupplier extends ContextSupplierBase {
+    private static class TargetedContextSupplier extends ContextSupplierBase {
 
         private final SocketAddress mBindAddress;
+        private final SocketAddress mRemoteAddress;
 
-        private SimpleContextSupplier(InstanceId instanceId,
-                                      Clock clock,
-                                      SocketAddress serverAddress,
-                                      Logger logger,
-                                      EventController eventController,
-                                      SocketAddress bindAddress) {
-            super(instanceId, clock, serverAddress, logger, eventController);
+        private TargetedContextSupplier(ChannelId id,
+                                        Clock clock,
+                                        ChannelUpdater channelUpdater,
+                                        Logger logger,
+                                        HfcsMessageType messageType,
+                                        SocketAddress bindAddress,
+                                        SocketAddress remoteAddress) {
+            super(id, clock, channelUpdater, logger, messageType);
             mBindAddress = bindAddress;
+            mRemoteAddress = remoteAddress;
         }
 
         @Override
-        protected UdpConnector createConnector() {
-            return new UdpConnector(mBindAddress, mLogger);
+        protected NetChannelOpener<NetChannel> createChannelOpener() {
+            return UdpChannelOpener.targeted(mBindAddress, mRemoteAddress, mLogger);
         }
     }
 
@@ -175,44 +191,50 @@ public class HfcsService /*extends NetServiceBase implements HfcsRegistry*/ {
         private final SocketAddress mBindAddress;
         private final NetworkInterface mMulticastInterface;
         private final InetAddress mMulticastGroup;
+        private final int mRemotePort;
 
-        private MulticastContextSupplier(InstanceId instanceId,
+        private MulticastContextSupplier(ChannelId id,
                                          Clock clock,
-                                         SocketAddress serverAddress,
+                                         ChannelUpdater channelUpdater,
                                          Logger logger,
-                                         EventController eventController,
+                                         HfcsMessageType messageType,
                                          SocketAddress bindAddress,
                                          NetworkInterface multicastInterface,
-                                         InetAddress multicastGroup) {
-            super(instanceId, clock, serverAddress, logger, eventController);
+                                         InetAddress multicastGroup,
+                                         int remotePort) {
+            super(id, clock, channelUpdater, logger, messageType);
             mBindAddress = bindAddress;
             mMulticastInterface = multicastInterface;
             mMulticastGroup = multicastGroup;
+            mRemotePort = remotePort;
         }
 
         @Override
-        protected UdpConnector createConnector() {
-            return UdpConnector.multicast(mMulticastInterface, mMulticastGroup, mBindAddress, mLogger);
+        protected NetChannelOpener<NetChannel> createChannelOpener() {
+            return UdpChannelOpener.multicast(mMulticastInterface, mMulticastGroup, mRemotePort, mBindAddress, mLogger);
         }
     }
 
     private static class BroadcastContextSupplier extends ContextSupplierBase {
 
         private final SocketAddress mBindAddress;
+        private final int mRemotePort;
 
-        private BroadcastContextSupplier(InstanceId instanceId,
+        private BroadcastContextSupplier(ChannelId id,
                                          Clock clock,
-                                         SocketAddress serverAddress,
+                                         ChannelUpdater channelUpdater,
                                          Logger logger,
-                                         EventController eventController,
-                                         SocketAddress bindAddress) {
-            super(instanceId, clock, serverAddress, logger, eventController);
+                                         HfcsMessageType messageType,
+                                         SocketAddress bindAddress,
+                                         int remotePort) {
+            super(id, clock, channelUpdater, logger, messageType);
             mBindAddress = bindAddress;
+            mRemotePort = remotePort;
         }
 
         @Override
-        protected UdpConnector createConnector() {
-            return UdpConnector.broadcast(mBindAddress, mLogger);
+        protected NetChannelOpener<NetChannel> createChannelOpener() {
+            return UdpChannelOpener.broadcast(mBindAddress, mRemotePort, mLogger);
         }
-    }*/
+    }
 }
