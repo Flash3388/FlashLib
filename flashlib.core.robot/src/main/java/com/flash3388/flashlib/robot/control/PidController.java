@@ -29,6 +29,8 @@ import java.util.function.DoubleSupplier;
  */
 public class PidController implements ClosedLoopController {
 
+    private static final Time DEFAULT_TOLERANCE = Time.milliseconds(20);
+
     private final StoredEntry mErrorEntry;
     private final StoredEntry mProcessVariableEntry;
     private final StoredEntry mSetPointEntry;
@@ -78,7 +80,7 @@ public class PidController implements ClosedLoopController {
         mKd = kd;
         mKf = kf;
 
-        mPeriodSeconds = 0.02;
+        mPeriodSeconds = DEFAULT_TOLERANCE.valueAsSeconds();
 
         mMinimumOutput = -1;
         mMaximumOutput = 1;
@@ -87,13 +89,7 @@ public class PidController implements ClosedLoopController {
         mTolerance = 0;
         mToleranceTimeout = Time.INVALID;
 
-        mTotalError = 0;
-        mLastError = 0;
-        mToleranceAcceptableTime = Time.INVALID;
-
-        mLastOutput = 0;
-
-        mIsFirstRun = true;
+        reset();
     }
 
     public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
