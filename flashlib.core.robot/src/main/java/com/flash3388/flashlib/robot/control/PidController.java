@@ -320,18 +320,13 @@ public class PidController implements ClosedLoopController {
         return output;
     }
 
-    /**
-     * Determines whether the current error can be acceptably considered as within the setpoint range.
-     *
-     * @param processVariable the process variable of the system.
-     * @param setpoint the desired set point.
-     *
-     * @return <b>true</b> if the error can be acceptably considered as within the setpoint range, <b>false</b> otherwise.
-     */
     @Override
-    public boolean isInTolerance(double processVariable, double setpoint) {
-        double error = setpoint - processVariable;
-        if (ExtendedMath.constrained(error, -mTolerance, mTolerance)) {
+    public boolean isInTolerance() {
+        if (mIsFirstRun) {
+            return false;
+        }
+
+        if (ExtendedMath.constrained(mLastError, -mTolerance, mTolerance)) {
             if (!mToleranceTimeout.isValid()) {
                 // no timeout so immediately true.
                 return true;

@@ -42,7 +42,7 @@ public class MoveToDistanceAction extends ActionBase {
         double pidResult = mPidController.applyAsDouble(mCurrentPositionSupplier.getAsDouble(), mWantedDistance);
         mMovable.move(pidResult);
 
-        if (mPidController.isInTolerance(mCurrentPositionSupplier.getAsDouble(), mWantedDistance)) {
+        if (mPidController.isInTolerance()) {
             control.finish();
         }
     }

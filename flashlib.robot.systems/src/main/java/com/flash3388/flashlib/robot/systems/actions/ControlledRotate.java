@@ -40,7 +40,7 @@ public class ControlledRotate extends ActionBase {
 
         mRotatable.rotate(output);
 
-        if (!mIsContinous && mController.isInTolerance(processVariable, mSetpoint)) {
+        if (!mIsContinous && mController.isInTolerance()) {
             control.finish();
         }
     }
