@@ -29,6 +29,8 @@ import java.util.function.DoubleSupplier;
  */
 public class PidController implements ClosedLoopController {
 
+    private static final Time DEFAULT_TOLERANCE = Time.milliseconds(20);
+
     private final StoredEntry mErrorEntry;
     private final StoredEntry mProcessVariableEntry;
     private final StoredEntry mSetPointEntry;
@@ -44,6 +46,7 @@ public class PidController implements ClosedLoopController {
     private double mMinimumOutput;
     private double mMaximumOutput;
 
+    private double mIZone;
     private double mOutRampRate;
     private double mTolerance;
     private Time mToleranceTimeout;
@@ -60,7 +63,7 @@ public class PidController implements ClosedLoopController {
      * Creates a new PID controller. Uses given constant for the control loop, a DataSource for the set point and a pid mPidSource
      * for the feedback data.
      *
-     * @param clock
+     * @param clock the robot's clock
      * @param kp    the proportional constant
      * @param ki    the integral constant
      * @param kd    the differential constant
@@ -78,22 +81,17 @@ public class PidController implements ClosedLoopController {
         mKd = kd;
         mKf = kf;
 
-        mPeriodSeconds = 0.02;
+        mPeriodSeconds = DEFAULT_TOLERANCE.valueAsSeconds();
 
         mMinimumOutput = -1;
         mMaximumOutput = 1;
 
+        mIZone = 0;
         mOutRampRate = 0;
         mTolerance = 0;
         mToleranceTimeout = Time.INVALID;
 
-        mTotalError = 0;
-        mLastError = 0;
-        mToleranceAcceptableTime = Time.INVALID;
-
-        mLastOutput = 0;
-
-        mIsFirstRun = true;
+        reset();
     }
 
     public PidController(Clock clock, DoubleSupplier kp, DoubleSupplier ki, DoubleSupplier kd, DoubleSupplier kf) {
@@ -212,6 +210,26 @@ public class PidController implements ClosedLoopController {
     }
 
     /**
+     * Get the configured IZone.
+     * IZone is the error value at which the total error of the controller is reset automatically.
+     *
+     * @return IZone value
+     */
+    public double getIZone() {
+        return mIZone;
+    }
+
+    /**
+     * Get the configured IZone.
+     * IZone is the error value at which the total error of the controller is reset automatically.
+     *
+     * @param IZone new IZone value.
+     */
+    public void setIZone(double IZone) {
+        mIZone = IZone;
+    }
+
+    /**
      * Gets the error tolerance.
      *
      * @return tolerance, in measurement points used for set point.
@@ -267,6 +285,10 @@ public class PidController implements ClosedLoopController {
             mLastError = error;
         }
 
+        if (mIZone != 0 && Math.abs(error) >= mIZone) {
+            mTotalError = 0;
+        }
+
         double iOut = mKi.getAsDouble() * mTotalError;
         double dOut = mKd.getAsDouble() * ((error - mLastError) / mPeriodSeconds);
 
@@ -274,10 +296,6 @@ public class PidController implements ClosedLoopController {
 
         mTotalError += error;
         mLastError = error;
-
-        if(mMinimumOutput != mMaximumOutput && !ExtendedMath.constrained(output, mMinimumOutput, mMaximumOutput)) {
-            mTotalError = error;
-        }
 
         if(mOutRampRate != 0 && !ExtendedMath.constrained(output, mLastOutput - mOutRampRate, mLastOutput + mOutRampRate)){
             mTotalError = error;
@@ -290,7 +308,7 @@ public class PidController implements ClosedLoopController {
 
         mLastOutput = output;
 
-        if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
+        if (ExtendedMath.constrained(error, -mTolerance, mTolerance)) {
             if (mToleranceTimeout.isValid() && !mToleranceAcceptableTime.isValid()) {
                 Time now = mClock.currentTime();
                 mToleranceAcceptableTime = now.add(mToleranceTimeout);
@@ -302,18 +320,13 @@ public class PidController implements ClosedLoopController {
         return output;
     }
 
-    /**
-     * Determines whether the current error can be acceptably considered as within the setpoint range.
-     *
-     * @param processVariable the process variable of the system.
-     * @param setpoint the desired set point.
-     *
-     * @return <b>true</b> if the error can be acceptably considered as within the setpoint range, <b>false</b> otherwise.
-     */
     @Override
-    public boolean isInTolerance(double processVariable, double setpoint) {
-        double error = setpoint - processVariable;
-        if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
+    public boolean isInTolerance() {
+        if (mIsFirstRun) {
+            return false;
+        }
+
+        if (ExtendedMath.constrained(mLastError, -mTolerance, mTolerance)) {
             if (!mToleranceTimeout.isValid()) {
                 // no timeout so immediately true.
                 return true;

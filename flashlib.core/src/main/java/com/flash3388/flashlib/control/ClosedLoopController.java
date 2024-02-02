@@ -21,12 +21,11 @@ public interface ClosedLoopController extends DoubleBinaryOperator {
     double applyAsDouble(double processVariable, double setpoint);
 
     /**
-     * Determines whether the current error can be acceptably considered as within the setpoint range.
+     * Determines whether the last error can be acceptably considered as within the setpoint range.
+     * Must be called after {@link #applyAsDouble(double, double)}.
      *
-     * @param processVariable the process variable of the system.
-     * @param setpoint the desired set point.
      *
      * @return <b>true</b> if the error can be acceptably considered as within the setpoint range, <b>false</b> otherwise.
      */
-    boolean isInTolerance(double processVariable, double setpoint);
+    boolean isInTolerance();
 }

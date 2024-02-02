@@ -40,7 +40,7 @@ public class ControlledMove extends ActionBase {
 
         mMovable.move(output);
 
-        if (!mIsContinous && mController.isInTolerance(processVariable, mSetPoint)) {
+        if (!mIsContinous && mController.isInTolerance()) {
             control.finish();
         }
     }
