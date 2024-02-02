@@ -313,7 +313,7 @@ public class PidController implements ClosedLoopController {
     @Override
     public boolean isInTolerance(double processVariable, double setpoint) {
         double error = setpoint - processVariable;
-        if (ExtendedMath.constrained(error, setpoint - mTolerance, setpoint + mTolerance)) {
+        if (ExtendedMath.constrained(error, -mTolerance, mTolerance)) {
             if (!mToleranceTimeout.isValid()) {
                 // no timeout so immediately true.
                 return true;
