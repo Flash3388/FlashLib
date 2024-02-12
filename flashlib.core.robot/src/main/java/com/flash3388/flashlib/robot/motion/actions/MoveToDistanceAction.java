@@ -21,13 +21,13 @@ public class MoveToDistanceAction extends ActionBase {
                                 DoubleSupplier currentPositionSupplier,
                                 double wantedDistance,
                                 double distanceMargin,
-                                Time toleranceTime) {
+                                double velocityTolerance) {
         mPidController = pidController;
         mMovable = movable;
         mCurrentPositionSupplier = currentPositionSupplier;
         mWantedDistance = wantedDistance;
 
-        pidController.setTolerance(distanceMargin, toleranceTime);
+        pidController.setTolerance(distanceMargin, velocityTolerance);
 
         requires(movable);
     }
