@@ -1,14 +1,16 @@
 package com.flash3388.flashlib.app.net;
 
+import java.util.Objects;
+
 public class NetworkConfiguration implements NetworkingMode {
 
     final boolean mEnabled;
     final ObsrConfiguration mObsrConfiguration;
-    final Object mHfcsConfiguration;
+    final HfcsConfiguration mHfcsConfiguration;
 
     private NetworkConfiguration(boolean enabled,
                                  ObsrConfiguration obsrConfiguration,
-                                 Object hfcsConfiguration) {
+                                 HfcsConfiguration hfcsConfiguration) {
         mEnabled = enabled;
         mObsrConfiguration = obsrConfiguration;
         mHfcsConfiguration = hfcsConfiguration;
@@ -23,7 +25,9 @@ public class NetworkConfiguration implements NetworkingMode {
     }
 
     public static NetworkConfiguration enabled(ObsrConfiguration objectStorageConfiguration,
-                                               Object hfcsConfiguration) {
+                                               HfcsConfiguration hfcsConfiguration) {
+        Objects.requireNonNull(objectStorageConfiguration, "objectStorageConfiguration");
+        Objects.requireNonNull(hfcsConfiguration, "hfcsConfiguration");
         return new NetworkConfiguration(true, objectStorageConfiguration, hfcsConfiguration);
     }
 
@@ -39,6 +43,6 @@ public class NetworkConfiguration implements NetworkingMode {
 
     @Override
     public boolean isHfcsEnabled() {
-        return mHfcsConfiguration != null;// && mHfcsConfiguration.creator != null;
+        return mHfcsConfiguration != null && mHfcsConfiguration.isEnabled;
     }
 }

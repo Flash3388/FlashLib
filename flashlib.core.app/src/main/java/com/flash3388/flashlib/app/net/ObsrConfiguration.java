@@ -2,6 +2,7 @@ package com.flash3388.flashlib.app.net;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Objects;
 
 public class ObsrConfiguration {
 
@@ -26,6 +27,7 @@ public class ObsrConfiguration {
     }
 
     public static ObsrConfiguration primaryNode(SocketAddress bindAddress) {
+        Objects.requireNonNull(bindAddress, "bindAddress");
         return new ObsrConfiguration(true, true, bindAddress);
     }
 
@@ -34,6 +36,7 @@ public class ObsrConfiguration {
     }
 
     public static ObsrConfiguration secondaryNode(SocketAddress primaryNodeAddress) {
+        Objects.requireNonNull(primaryNodeAddress, "primaryNodeAddress");
         return new ObsrConfiguration(true, false, primaryNodeAddress);
     }
 

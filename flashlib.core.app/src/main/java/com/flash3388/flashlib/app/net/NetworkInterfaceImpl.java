@@ -4,6 +4,7 @@ import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdaterService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
+import com.flash3388.flashlib.net.hfcs.HfcsService;
 import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
@@ -63,7 +64,15 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            throw new UnsupportedOperationException();
+            HfcsService service = new HfcsService(channelUpdaterService, mInstanceId, mClock);
+            if (configuration.mHfcsConfiguration.isTargeted) {
+                service.configureTargeted(configuration.mHfcsConfiguration.localAddress, configuration.mHfcsConfiguration.remoteAddress);
+            } else {
+                service.configureReplying(configuration.mHfcsConfiguration.localAddress);
+            }
+
+            mServiceRegistry.register(service);
+            mHfcsRegistry = service;
         } else {
             mHfcsRegistry = null;
         }
