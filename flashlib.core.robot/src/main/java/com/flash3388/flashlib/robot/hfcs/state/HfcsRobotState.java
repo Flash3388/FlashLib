@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.hfcs.state;
 
 import com.beans.Property;
 import com.beans.properties.atomic.AtomicProperty;
+import com.flash3388.flashlib.net.hfcs.ConnectionEvent;
 import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.HfcsInListener;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
@@ -47,6 +48,16 @@ public class HfcsRobotState {
         }
 
         @Override
+        public void onConnect(ConnectionEvent event) {
+
+        }
+
+        @Override
+        public void onDisconnect(ConnectionEvent event) {
+
+        }
+
+        @Override
         public void onReceived(DataReceivedEvent<RobotStateData> event) {
             mStateDataProperty.set(event.getData());
         }
@@ -63,6 +74,16 @@ public class HfcsRobotState {
 
         private MultiTargetInListener(BiConsumer<InstanceId, RobotStateData> consumer) {
             mConsumer = consumer;
+        }
+
+        @Override
+        public void onConnect(ConnectionEvent event) {
+
+        }
+
+        @Override
+        public void onDisconnect(ConnectionEvent event) {
+
         }
 
         @Override

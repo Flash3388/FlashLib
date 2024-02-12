@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.hfcs.control;
 
 import com.beans.Property;
 import com.beans.properties.atomic.AtomicProperty;
+import com.flash3388.flashlib.net.hfcs.ConnectionEvent;
 import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.HfcsInListener;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
@@ -52,6 +53,16 @@ public class HfcsRobotControl {
             mOurId = ourId;
             mModeProperty = modeProperty;
             mInitialData = initialData;
+        }
+
+        @Override
+        public void onConnect(ConnectionEvent event) {
+
+        }
+
+        @Override
+        public void onDisconnect(ConnectionEvent event) {
+
         }
 
         @Override

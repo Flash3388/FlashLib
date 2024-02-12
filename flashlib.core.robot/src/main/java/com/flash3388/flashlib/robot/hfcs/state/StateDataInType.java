@@ -10,11 +10,6 @@ import java.io.IOException;
 public class StateDataInType extends StateDataType implements HfcsInType<RobotStateData> {
 
     @Override
-    public Class<RobotStateData> getClassType() {
-        return RobotStateData.class;
-    }
-
-    @Override
     public RobotStateData readFrom(DataInput input) throws IOException {
         int modeKey = input.readInt();
         String modeName = input.readUTF();

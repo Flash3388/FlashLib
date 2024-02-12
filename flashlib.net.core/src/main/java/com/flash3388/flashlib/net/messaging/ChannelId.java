@@ -6,6 +6,7 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ChannelId implements Serializable {
 
@@ -36,6 +37,19 @@ public class ChannelId implements Serializable {
     public void writeInto(DataOutput output) throws IOException {
         mInstanceId.writeTo(output);
         output.writeLong(mMessengerId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChannelId channelId = (ChannelId) o;
+        return mMessengerId == channelId.mMessengerId && Objects.equals(mInstanceId, channelId.mInstanceId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mInstanceId, mMessengerId);
     }
 
     @Override

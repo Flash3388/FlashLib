@@ -20,7 +20,7 @@ public class UpdateTask implements Runnable {
     public void run() {
         while (!Thread.interrupted()) {
             try {
-                if (!mContext.isAttached()) {
+                if (!mContext.isConnected()) {
                     Thread.sleep(MAX_SLEEP_TIME.valueAsMillis());
                     continue;
                 }

@@ -19,8 +19,6 @@ import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.util.function.Supplier;
 
@@ -48,6 +46,10 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         mUpdateThread = null;
     }
 
+    // TODO: SUPPORT FOR BROADCAST/MULTICAST MODES
+    //  FOR THIS MODE, CONNECTION DETECTION IS PER "CLIENT"
+    //  SO THESE MODES ARE A BIT MORE COMPLEX
+
     public void configureTargeted(SocketAddress bindAddress, SocketAddress remoteAddress) {
         mChannelSupplier = new TargetedContextSupplier(
                 mOurId,
@@ -59,41 +61,13 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                 remoteAddress);
     }
 
-    public void configureMulticast(NetworkInterface multicastInterface,
-                                   InetAddress multicastGroup,
-                                   SocketAddress bindAddress,
-                                   int remotePort) {
-        mChannelSupplier = new MulticastContextSupplier(
-                mOurId,
-                mClock,
-                mChannelUpdater,
-                LOGGER,
-                mContext.getMessageType(),
-                bindAddress,
-                multicastInterface,
-                multicastGroup,
-                remotePort);
-    }
-
-    public void configureBroadcast(SocketAddress bindAddress,
-                                   int remotePort) {
-        mChannelSupplier = new BroadcastContextSupplier(
-                mOurId,
-                mClock,
-                mChannelUpdater,
-                LOGGER,
-                mContext.getMessageType(),
-                bindAddress,
-                remotePort);
-    }
-
     @Override
     public void registerOutgoing(HfcsType type, Time period, Supplier<? extends Serializable> supplier) {
         mContext.updateNewOutgoing(type, period, supplier);
     }
 
     @Override
-    public <T extends Serializable> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout) {
+    public <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout) {
         return mContext.updateNewIncoming(type, receiveTimeout);
     }
 
@@ -103,13 +77,14 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
             throw new IllegalStateException("not configured");
         }
 
-        mContext.markedUnattached();
+        mContext.markNotConnected();
 
         mChannel = mChannelSupplier.get();
         mChannel.setListener(new MessagingChannelListener(mContext));
         mChannel.start();
 
         Thread updateThread = new Thread(new UpdateTask(mChannel, mContext), "HFCS-Updater");
+        updateThread.setDaemon(true);
         updateThread.start();
         mUpdateThread = updateThread;
     }
@@ -152,13 +127,14 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
             KnownMessageTypes messageTypes = new KnownMessageTypes();
             messageTypes.put(mMessageType);
 
-            MessagingChannel channel = new NonConnectedMessagingChannel(
+            NonConnectedMessagingChannel channel = new NonConnectedMessagingChannel(
                     createChannelOpener(),
                     mChannelUpdater,
                     messageTypes,
                     mId,
                     mClock,
                     mLogger);
+            channel.enableKeepAlive();
 
             return channel;
         }
@@ -186,58 +162,6 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         @Override
         protected NetChannelOpener<NetChannel> createChannelOpener() {
             return UdpChannelOpener.targeted(mBindAddress, mRemoteAddress, mLogger);
-        }
-    }
-
-    private static class MulticastContextSupplier extends ContextSupplierBase {
-
-        private final SocketAddress mBindAddress;
-        private final NetworkInterface mMulticastInterface;
-        private final InetAddress mMulticastGroup;
-        private final int mRemotePort;
-
-        private MulticastContextSupplier(ChannelId id,
-                                         Clock clock,
-                                         ChannelUpdater channelUpdater,
-                                         Logger logger,
-                                         MessageType messageType,
-                                         SocketAddress bindAddress,
-                                         NetworkInterface multicastInterface,
-                                         InetAddress multicastGroup,
-                                         int remotePort) {
-            super(id, clock, channelUpdater, logger, messageType);
-            mBindAddress = bindAddress;
-            mMulticastInterface = multicastInterface;
-            mMulticastGroup = multicastGroup;
-            mRemotePort = remotePort;
-        }
-
-        @Override
-        protected NetChannelOpener<NetChannel> createChannelOpener() {
-            return UdpChannelOpener.multicast(mMulticastInterface, mMulticastGroup, mRemotePort, mBindAddress, mLogger);
-        }
-    }
-
-    private static class BroadcastContextSupplier extends ContextSupplierBase {
-
-        private final SocketAddress mBindAddress;
-        private final int mRemotePort;
-
-        private BroadcastContextSupplier(ChannelId id,
-                                         Clock clock,
-                                         ChannelUpdater channelUpdater,
-                                         Logger logger,
-                                         MessageType messageType,
-                                         SocketAddress bindAddress,
-                                         int remotePort) {
-            super(id, clock, channelUpdater, logger, messageType);
-            mBindAddress = bindAddress;
-            mRemotePort = remotePort;
-        }
-
-        @Override
-        protected NetChannelOpener<NetChannel> createChannelOpener() {
-            return UdpChannelOpener.broadcast(mBindAddress, mRemotePort, mLogger);
         }
     }
 }

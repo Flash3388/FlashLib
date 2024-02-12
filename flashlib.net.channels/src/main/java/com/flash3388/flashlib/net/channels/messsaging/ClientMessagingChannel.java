@@ -11,6 +11,7 @@ import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.SocketAddress;
 import java.util.Optional;
 
@@ -24,7 +25,9 @@ public class ClientMessagingChannel extends MessagingChannelBase {
     private final SocketAddress mRemoteAddress;
     private final ServerClock mClock;
 
-    private final ClientPingContext mPingContext;
+    private final BasicPingContext mPingContext;
+
+    private boolean mIsConnected;
 
     public ClientMessagingChannel(NetChannelOpener<? extends ConnectableNetChannel> channelOpener,
                                   ChannelUpdater channelUpdater,
@@ -39,16 +42,21 @@ public class ClientMessagingChannel extends MessagingChannelBase {
 
         messageTypes.put(PingMessage.TYPE);
 
-        mPingContext = new ClientPingContext(this, clock, logger);
+        mPingContext = new BasicPingContext(
+                this,
+                ourId,
+                clock.baseClock(),
+                logger,
+                new PingContextListener(this, clock, logger),
+                Time.seconds(5),
+                3);
+
+        mIsConnected = false;
     }
 
     public void enableKeepAlive() {
-        if (mStarted) {
-            throw new IllegalStateException("should not enable keepalive after already started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
+        verifyNotClosed();
+        verifyNotStarted();
 
         mPingContext.enable();
     }
@@ -60,6 +68,7 @@ public class ClientMessagingChannel extends MessagingChannelBase {
 
     @Override
     protected void implDoOnChannelOpen(ChannelData channel) {
+        mIsConnected = false;
         startConnection();
     }
 
@@ -138,7 +147,12 @@ public class ClientMessagingChannel extends MessagingChannelBase {
 
     @Override
     protected void implDoOnChannelClose() {
-        mPingContext.onDisconnect();
+        mPingContext.stop();
+
+        if (mIsConnected) {
+            reportToUserAsDisconnected();
+            mIsConnected = false;
+        }
     }
 
     private void startConnection() {
@@ -183,9 +197,41 @@ public class ClientMessagingChannel extends MessagingChannelBase {
 
         markReadyForWriting();
 
-        mPingContext.onConnect();
-        channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
+        if (mPingContext.isEnabled()) {
+            mPingContext.start();
+            channel.registration.requestUpdate(UpdateRequest.PING_CHECK);
+        }
 
+        mIsConnected = true;
         reportToUserAsConnected();
+    }
+
+    private static class PingContextListener implements BasicPingContext.Listener {
+
+        private final WeakReference<MessagingChannelBase> mChannel;
+        private final ServerClock mClock;
+        private final Logger mLogger;
+
+        private PingContextListener(MessagingChannelBase channel, ServerClock clock, Logger logger) {
+            mChannel = new WeakReference<>(channel);
+            mClock = clock;
+            mLogger = logger;
+        }
+
+        @Override
+        public void onPingResponse(MessageHeader header, PingMessage message) {
+            mClock.readjustOffset(header.getSendTime(), message.getTime());
+        }
+
+        @Override
+        public void onPingNoResponse() {
+            MessagingChannelBase channel = mChannel.get();
+            if (channel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return;
+            }
+
+            channel.resetChannel();
+        }
     }
 }

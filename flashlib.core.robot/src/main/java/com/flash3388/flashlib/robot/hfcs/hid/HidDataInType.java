@@ -19,11 +19,6 @@ public class HidDataInType extends HidDataType implements HfcsInType<RawHidData>
     }
 
     @Override
-    public Class<RawHidData> getClassType() {
-        return RawHidData.class;
-    }
-
-    @Override
     public RawHidData readFrom(DataInput input) throws IOException {
         RawHidData rawHidData = mDataStore.retrieve();
         mParser.loadInto(input, rawHidData);

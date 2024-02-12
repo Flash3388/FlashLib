@@ -2,6 +2,7 @@ package com.flash3388.flashlib.robot.hfcs.hid;
 
 import com.flash3388.flashlib.hid.data.HidData;
 import com.flash3388.flashlib.hid.data.RawHidData;
+import com.flash3388.flashlib.net.hfcs.ConnectionEvent;
 import com.flash3388.flashlib.net.hfcs.HfcsInListener;
 import com.flash3388.flashlib.net.hfcs.DataReceivedEvent;
 import com.flash3388.flashlib.net.hfcs.TimeoutEvent;
@@ -18,6 +19,16 @@ public class NewDataListener implements HfcsInListener<RawHidData> {
         mHidData = hidData;
         mDataStore = dataStore;
         mLogger = logger;
+    }
+
+    @Override
+    public void onConnect(ConnectionEvent event) {
+
+    }
+
+    @Override
+    public void onDisconnect(ConnectionEvent event) {
+
     }
 
     @Override

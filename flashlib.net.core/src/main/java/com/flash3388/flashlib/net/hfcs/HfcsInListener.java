@@ -11,6 +11,20 @@ import com.notifier.Listener;
 public interface HfcsInListener<T> extends Listener {
 
     /**
+     * Invoked when HFCS connects with remote.
+     *
+     * @param event event
+     */
+    void onConnect(ConnectionEvent<T> event);
+
+    /**
+     * Invoked when HFCS disconnects from remote.
+     *
+     * @param event event
+     */
+    void onDisconnect(ConnectionEvent<T> event);
+
+    /**
      * Invoked when new data is received.
      *
      * @param event event describing the data received.

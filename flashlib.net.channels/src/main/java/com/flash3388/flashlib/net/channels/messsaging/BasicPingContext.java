@@ -1,18 +1,26 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.messaging.ChannelId;
+import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
 
-class ClientPingContext {
+class BasicPingContext {
 
-    private static final Time PING_INTERVAL = Time.milliseconds(1500);
-    private static final int MAX_UNRESPONDED_PINGS = 3;
+    interface Listener {
+        void onPingResponse(MessageHeader header, PingMessage message);
+        void onPingNoResponse();
+    }
 
     private final WeakReference<MessagingChannelBase> mChannel;
-    private final ServerClock mClock;
+    private final ChannelId mOurId;
+    private final Clock mClock;
     private final Logger mLogger;
+    private final Listener mListener;
+    private final Time mPingInterval;
+    private final int mMaxRespondedPings;
 
     private boolean mEnabled;
     private boolean mShouldPing;
@@ -21,10 +29,14 @@ class ClientPingContext {
     private boolean mLastPingResponded;
     private int mUnrespondedPingCount;
 
-    ClientPingContext(MessagingChannelBase channel, ServerClock clock, Logger logger) {
+    BasicPingContext(MessagingChannelBase channel, ChannelId ourId, Clock clock, Logger logger, Listener listener, Time pingInterval, int maxRespondedPings) {
         mChannel = new WeakReference<>(channel);
+        mOurId = ourId;
         mClock = clock;
         mLogger = logger;
+        mListener = listener;
+        mPingInterval = pingInterval;
+        mMaxRespondedPings = maxRespondedPings;
 
         mEnabled = false;
         mShouldPing = false;
@@ -34,11 +46,15 @@ class ClientPingContext {
         mLastPingResponded = false;
     }
 
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
     public void enable() {
         mEnabled = true;
     }
 
-    public void onConnect() {
+    public void start() {
         if (!mEnabled) {
             return;
         }
@@ -52,7 +68,7 @@ class ClientPingContext {
         sendPing();
     }
 
-    public void onDisconnect() {
+    public void stop() {
         if (!mEnabled) {
             return;
         }
@@ -71,16 +87,18 @@ class ClientPingContext {
             return;
         }
 
-        Time now = mClock.currentTimeUnmodified();
-        if (!mLastPingTime.isValid() || now.sub(mLastPingTime).after(PING_INTERVAL)) {
+        Time now = mClock.currentTime();
+        if (!mLastPingTime.isValid() || now.sub(mLastPingTime).after(mPingInterval)) {
             if (mPingSent && !mLastPingResponded) {
                 mLogger.warn("PingContext: Last ping did not receive response");
                 mUnrespondedPingCount++;
             }
-            if (mUnrespondedPingCount >= MAX_UNRESPONDED_PINGS) {
-                mLogger.warn("PingContext: Too many pings did not receive response, resetting");
-                channel.resetChannel();
+            if (mUnrespondedPingCount >= mMaxRespondedPings) {
+                mLogger.warn("PingContext: Too many pings did not receive response");
                 mShouldPing = false;
+
+                mListener.onPingNoResponse();
+
                 return;
             }
 
@@ -95,7 +113,7 @@ class ClientPingContext {
 
         mLogger.debug("PingContext: Sending ping message");
 
-        Time now = mClock.currentTimeUnmodified();
+        Time now = mClock.currentTime();
 
         mLastPingTime = now;
         mPingSent = true;
@@ -107,7 +125,7 @@ class ClientPingContext {
             return;
         }
 
-        channel.queue(new PingMessage(now), true);
+        channel.queue(new PingMessage(mOurId, now), true);
     }
 
     public void onPingResponse(MessageHeader header, PingMessage message) {
@@ -120,6 +138,6 @@ class ClientPingContext {
         mPingSent = false;
         mUnrespondedPingCount = 0;
 
-        mClock.readjustOffset(header.getSendTime(), message.getTime());
+        mListener.onPingResponse(header, message);
     }
 }

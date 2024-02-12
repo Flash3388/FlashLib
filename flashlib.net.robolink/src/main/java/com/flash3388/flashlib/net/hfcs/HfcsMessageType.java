@@ -32,7 +32,7 @@ class HfcsMessageType implements MessageType {
         try {
             int typeKey = dataInput.readInt();
             HfcsInType<?> type = mInDataTypes.get(typeKey);
-            Serializable data = type.readFrom(dataInput);
+            Object data = type.readFrom(dataInput);
 
             return new HfcsUpdateMessage(this, type, data);
         } catch (NoSuchElementException e) {
@@ -46,6 +46,12 @@ class HfcsMessageType implements MessageType {
     public void write(Message message, DataOutput dataOutput) throws IOException {
         HfcsUpdateMessage updateMessage = (HfcsUpdateMessage) message;
         dataOutput.writeInt(updateMessage.getHfcsType().getKey());
-        updateMessage.getData().writeInto(dataOutput);
+
+        Object data = updateMessage.getData();
+        // this cheat works because higher interfaces ensure that
+        // data used by hfcs out is serializable
+        // but it would be best to find a different way
+        // so that this will be enforced by java
+        ((Serializable)data).writeInto(dataOutput);
     }
 }

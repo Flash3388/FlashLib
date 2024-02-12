@@ -62,6 +62,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
 
     private final NetChannelOpener<? extends NetChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
+    private final ChannelId mOurId;
     protected final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
@@ -69,8 +70,8 @@ public abstract class MessagingChannelBase implements MessagingChannel {
     private final Queue<SendRequest> mQueue;
     private final ChannelListener mChannelListener;
     private final ChannelOpenListener<NetChannel> mOpenListener;
-    protected boolean mStarted;
-    protected boolean mClosed;
+    private boolean mStarted;
+    private boolean mClosed;
 
     protected MessagingChannelBase(NetChannelOpener<? extends NetChannel> channelOpener,
                                    ChannelUpdater channelUpdater,
@@ -80,6 +81,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
                                    Logger logger) {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
+        mOurId = ourId;
         mLogger = logger;
 
         mChannel = new AtomicReference<>();
@@ -93,12 +95,8 @@ public abstract class MessagingChannelBase implements MessagingChannel {
 
     @Override
     public final void start() {
-        if (mStarted) {
-            throw new IllegalStateException("already started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
+        verifyNotClosed();
+        verifyNotStarted();
 
         startChannelOpen(false);
         mStarted = true;
@@ -106,11 +104,9 @@ public abstract class MessagingChannelBase implements MessagingChannel {
 
     @Override
     public final void queue(Message message) {
+        verifyNotClosed();
         if (!mStarted) {
             throw new IllegalStateException("not started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
         }
 
         queue(message, false);
@@ -118,23 +114,17 @@ public abstract class MessagingChannelBase implements MessagingChannel {
 
     @Override
     public final void setListener(Listener listener) {
-        if (mStarted) {
-            throw new IllegalStateException("should not set listener after already started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
-        }
+        verifyNotClosed();
+        verifyNotStarted();
 
         mListener.set(listener);
     }
 
     @Override
     public final void resetChannel() {
+        verifyNotClosed();
         if (!mStarted) {
             throw new IllegalStateException("not started");
-        }
-        if (mClosed) {
-            throw new IllegalStateException("closed");
         }
 
         ChannelData channelData = mChannel.get();
@@ -154,6 +144,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
         }
 
         mClosed = true;
+        mStarted = false;
         closeChannel();
     }
 
@@ -203,8 +194,33 @@ public abstract class MessagingChannelBase implements MessagingChannel {
         }
     }
 
-    protected ChannelData getChannel() {
+    protected final void reportToUserAsDisconnected() {
+        Listener listener = mListener.get();
+        if (listener != null) {
+            try {
+                listener.onDisconnect();
+            } catch (Throwable ignore) {}
+        }
+    }
+
+    protected final ChannelData getChannel() {
         return mChannel.get();
+    }
+
+    protected final ChannelId getOurId() {
+        return mOurId;
+    }
+
+    protected final void verifyNotStarted() {
+        if (mStarted) {
+            throw new IllegalStateException("channel started");
+        }
+    }
+
+    protected final void verifyNotClosed() {
+        if (mClosed) {
+            throw new IllegalStateException("closed");
+        }
     }
 
     private void startChannelOpen(boolean delayed) {
@@ -258,13 +274,6 @@ public abstract class MessagingChannelBase implements MessagingChannel {
         Closeables.silentClose(data.channel);
 
         implDoOnChannelClose();
-
-        Listener listener = mListener.get();
-        if (listener != null) {
-            try {
-                listener.onDisconnect();
-            } catch (Throwable ignore) {}
-        }
     }
 
     protected abstract ChannelData implCreateChannelWrapper(NetChannel channel, UpdateRegistration registration);

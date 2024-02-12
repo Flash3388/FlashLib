@@ -14,12 +14,12 @@ class MessagingChannelListener implements MessagingChannel.Listener {
 
     @Override
     public void onConnect() {
-        mContext.markedAttached();
+        mContext.markedConnected();
     }
 
     @Override
     public void onDisconnect() {
-        mContext.markedUnattached();
+        mContext.markNotConnected();
     }
 
     @Override

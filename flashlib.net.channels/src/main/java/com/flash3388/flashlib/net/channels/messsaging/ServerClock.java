@@ -45,4 +45,8 @@ public class ServerClock implements Clock {
         long fixedMs = time.valueAsMillis() - mServerOffsetMs;
         return Time.milliseconds(fixedMs);
     }
+
+    public Clock baseClock() {
+        return mBaseClock;
+    }
 }

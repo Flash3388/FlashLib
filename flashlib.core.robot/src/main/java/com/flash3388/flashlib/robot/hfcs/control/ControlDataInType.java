@@ -10,11 +10,6 @@ import java.io.IOException;
 public class ControlDataInType extends ControlDataType implements HfcsInType<TargetedControlData> {
 
     @Override
-    public Class<TargetedControlData> getClassType() {
-        return TargetedControlData.class;
-    }
-
-    @Override
     public TargetedControlData readFrom(DataInput input) throws IOException {
         InstanceId targetId = InstanceId.createFrom(input);
 

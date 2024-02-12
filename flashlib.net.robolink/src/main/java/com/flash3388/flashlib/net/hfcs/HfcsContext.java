@@ -30,7 +30,7 @@ class HfcsContext {
     private final Map<HfcsType, InDataNode> mInDataNodes;
 
     private final List<OutDataNode> mLocalSendQueue;
-    private boolean mIsAttached;
+    private boolean mIsConnected;
 
     HfcsContext(Clock clock, Logger logger) {
         mClock = clock;
@@ -43,28 +43,38 @@ class HfcsContext {
         mInDataNodes = new ConcurrentHashMap<>();
 
         mLocalSendQueue = new ArrayList<>();
-        mIsAttached = false;
+        mIsConnected = false;
     }
 
     public MessageType getMessageType() {
         return mMessageType;
     }
 
-    public boolean isAttached() {
-        return mIsAttached;
+    public boolean isConnected() {
+        return mIsConnected;
     }
 
-    public void markedAttached() {
+    public void markedConnected() {
         resetNodes();
-        mIsAttached = true;
+
+        if (!mIsConnected) {
+            reportConnected();
+            mIsConnected = true;
+        }
+
+        mLogger.debug("HFCS is connected to remote");
     }
 
-    public void markedUnattached() {
-        // todo: report this to users
-        mIsAttached = false;
+    public void markNotConnected() {
+        if (mIsConnected) {
+            reportNotConnected();
+            mIsConnected = false;
+        }
+
+        mLogger.debug("HFCS is not connected to remote");
     }
 
-    public <T extends Serializable> HfcsRegisteredIncoming<T> updateNewIncoming(HfcsInType<T> type, Time receiveTimeout) {
+    public <T> HfcsRegisteredIncoming<T> updateNewIncoming(HfcsInType<T> type, Time receiveTimeout) {
         mInDataTypes.put(type);
         mInDataNodes.put(type, new InDataNode(type, receiveTimeout));
         return new RegisteredIncomingImpl<>(mEventController, type);
@@ -77,11 +87,11 @@ class HfcsContext {
     public void updateReceivedNewData(MessageHeader header, HfcsUpdateMessage message) {
         InDataNode node = mInDataNodes.get(message.getHfcsType());
         if (node == null) {
-            mLogger.debug("Received new data for unknown node: type={}", message.getHfcsType());
+            mLogger.debug("Received new data for unknown node: type={}", message.getHfcsType().getKey());
             return;
         }
 
-        mLogger.debug("Received new data for node type={}", node.getType());
+        mLogger.debug("Received new data for node type={}", node.getType().getKey());
 
         Time now = mClock.currentTime();
         node.updateReceived(now);
@@ -99,7 +109,7 @@ class HfcsContext {
         Time now = mClock.currentTime();
         for (InDataNode node : mInDataNodes.values()) {
             if (node.markTimedoutIfNecessary(now)) {
-                mLogger.warn("Incoming data type={} has reached timeout", node.getType());
+                mLogger.warn("Incoming data type={} has reached timeout", node.getType().getKey());
 
                 //noinspection unchecked
                 mEventController.fire(
@@ -122,7 +132,7 @@ class HfcsContext {
 
         for (OutDataNode node : mLocalSendQueue) {
             try {
-                mLogger.debug("Sending new data from type={}", node.getType());
+                mLogger.debug("Sending new data from type={}", node.getType().getKey());
 
                 Serializable data = node.getNewData();
                 channel.queue(new HfcsUpdateMessage(mMessageType, node.getType(), data));
@@ -151,6 +161,30 @@ class HfcsContext {
 
         for (OutDataNode node : mOutDataQueue) {
             node.reset();
+        }
+    }
+
+    private void reportConnected() {
+        for (InDataNode node : mInDataNodes.values()) {
+            //noinspection unchecked
+            mEventController.fire(
+                    new ConnectionEvent<>(node.getType()),
+                    ConnectionEvent.class,
+                    HfcsInListener.class,
+                    HfcsInListener::onConnect
+            );
+        }
+    }
+
+    private void reportNotConnected() {
+        for (InDataNode node : mInDataNodes.values()) {
+            //noinspection unchecked
+            mEventController.fire(
+                    new ConnectionEvent<>(node.getType()),
+                    ConnectionEvent.class,
+                    HfcsInListener.class,
+                    HfcsInListener::onDisconnect
+            );
         }
     }
 }

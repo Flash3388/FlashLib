@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.net.hfcs;
 
-import com.flash3388.flashlib.io.Serializable;
-
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -11,9 +9,7 @@ import java.io.IOException;
  * @param <T> type of data (object).
  * @since FlashLib 3.2.0
  */
-public interface HfcsInType<T extends Serializable> extends HfcsType {
-
-    Class<T> getClassType();
+public interface HfcsInType<T> extends HfcsType {
 
     T readFrom(DataInput input) throws IOException;
 }

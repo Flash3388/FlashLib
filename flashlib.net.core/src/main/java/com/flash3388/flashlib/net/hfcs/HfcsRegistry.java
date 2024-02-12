@@ -36,7 +36,7 @@ public interface HfcsRegistry {
      * @return a control class for incoming data management.
      * @param <T> type of incoming data.
      */
-    <T extends Serializable> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout);
+    <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout);
 
 
     /**
@@ -48,7 +48,7 @@ public interface HfcsRegistry {
      * @return a control class for incoming data management.
      * @param <T> type of incoming data.
      */
-    default <T extends Serializable> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type) {
+    default <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type) {
         return registerIncoming(type, Time.INVALID);
     }
 }
