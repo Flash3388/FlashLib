@@ -1,8 +1,9 @@
 package com.flash3388.flashlib.net.channels.udp;
 
 import com.castle.util.function.ThrowingConsumer;
-import com.flash3388.flashlib.net.channels.NetChannel;
+import com.flash3388.flashlib.net.channels.IpNetAddress;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
+import com.flash3388.flashlib.net.channels.RemoteConfigurableChannel;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.DatagramChannel;
 
-public class UdpChannelOpener implements NetChannelOpener<NetChannel> {
+public class UdpChannelOpener implements NetChannelOpener<RemoteConfigurableChannel> {
 
     private final SocketAddress mBindAddress;
     private final SocketAddress mRemoteAddress;
@@ -60,7 +61,10 @@ public class UdpChannelOpener implements NetChannelOpener<NetChannel> {
     }
 
     @Override
-    public NetChannel open() throws IOException {
-        return new UdpChannel(mBindAddress, mRemoteAddress, mConfigureChannel, mLogger);
+    public RemoteConfigurableChannel open() throws IOException {
+        UdpChannel channel = new UdpChannel(mBindAddress, mConfigureChannel, mLogger);
+        channel.setRemote(new IpNetAddress(mRemoteAddress));
+
+        return channel;
     }
 }

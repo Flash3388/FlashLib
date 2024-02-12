@@ -3,6 +3,7 @@ package com.flash3388.flashlib.net.channels.tcp;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.ConnectableNetChannel;
 import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.IpNetAddress;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
@@ -58,7 +59,7 @@ public class TcpChannel implements ConnectableNetChannel {
             return new IncomingData(null, 0);
         }
 
-        return new IncomingData(mRemoteAddress, received);
+        return new IncomingData(new IpNetAddress(mRemoteAddress), received);
     }
 
     @Override

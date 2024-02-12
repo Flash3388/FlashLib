@@ -3,7 +3,9 @@ package com.flash3388.flashlib.net.channels.udp;
 import com.castle.util.closeables.Closeables;
 import com.castle.util.function.ThrowingConsumer;
 import com.flash3388.flashlib.net.channels.IncomingData;
-import com.flash3388.flashlib.net.channels.NetChannel;
+import com.flash3388.flashlib.net.channels.IpNetAddress;
+import com.flash3388.flashlib.net.channels.NetAddress;
+import com.flash3388.flashlib.net.channels.RemoteConfigurableChannel;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
@@ -16,19 +18,29 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 
-public class UdpChannel implements NetChannel {
+public class UdpChannel implements RemoteConfigurableChannel {
 
-    private final SocketAddress mRemoteAddress;
     private final Logger mLogger;
     private final DatagramChannel mChannel;
 
-    public UdpChannel(SocketAddress remoteAddress,
-                      SocketAddress bindAddress,
+    private SocketAddress mRemoteAddress;
+
+    public UdpChannel(SocketAddress bindAddress,
                       ThrowingConsumer<DatagramChannel, IOException> configureChannel,
                       Logger logger) throws IOException {
-        mRemoteAddress = remoteAddress;
         mLogger = logger;
         mChannel = openChannel(bindAddress, configureChannel);
+
+        mRemoteAddress = null;
+    }
+
+    @Override
+    public void setRemote(NetAddress info) {
+        if (!(info instanceof IpNetAddress)) {
+            throw new IllegalArgumentException("expected IpNetInfo");
+        }
+
+        mRemoteAddress = ((IpNetAddress)info).getAddress();
     }
 
     @Override
@@ -46,11 +58,16 @@ public class UdpChannel implements NetChannel {
             return new IncomingData(null, 0);
         }
 
-        return new IncomingData(remote, buffer.position());
+        return new IncomingData(new IpNetAddress(remote), buffer.position());
     }
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
+        if (mRemoteAddress == null) {
+            mLogger.warn("Cannot write if remote address not configured");
+            return;
+        }
+
         mChannel.send(buffer, mRemoteAddress);
     }
 

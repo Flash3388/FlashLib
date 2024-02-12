@@ -4,11 +4,10 @@ import com.castle.concurrent.service.SingleUseService;
 import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.io.Serializable;
-import com.flash3388.flashlib.net.channels.NetChannel;
-import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
 import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
 import com.flash3388.flashlib.net.channels.messsaging.NonConnectedMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.ReplyingNonConnectedMesssagingChannel;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.udp.UdpChannelOpener;
 import com.flash3388.flashlib.net.messaging.ChannelId;
@@ -61,6 +60,16 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                 remoteAddress);
     }
 
+    public void configureReplying(SocketAddress bindAddress) {
+        mChannelSupplier = new ReplierContextSupplier(
+                mOurId,
+                mClock,
+                mChannelUpdater,
+                LOGGER,
+                mContext.getMessageType(),
+                bindAddress);
+    }
+
     @Override
     public void registerOutgoing(HfcsType type, Time period, Supplier<? extends Serializable> supplier) {
         mContext.updateNewOutgoing(type, period, supplier);
@@ -102,48 +111,13 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         }
     }
 
-    private static abstract class ContextSupplierBase implements Supplier<MessagingChannel> {
+    private static class TargetedContextSupplier implements Supplier<MessagingChannel> {
 
         private final ChannelId mId;
         private final Clock mClock;
         private final ChannelUpdater mChannelUpdater;
         protected final Logger mLogger;
         private final MessageType mMessageType;
-
-        private ContextSupplierBase(ChannelId id,
-                                    Clock clock,
-                                    ChannelUpdater channelUpdater,
-                                    Logger logger,
-                                    MessageType messageType) {
-            mId = id;
-            mClock = clock;
-            mChannelUpdater = channelUpdater;
-            mLogger = logger;
-            mMessageType = messageType;
-        }
-
-        @Override
-        public MessagingChannel get() {
-            KnownMessageTypes messageTypes = new KnownMessageTypes();
-            messageTypes.put(mMessageType);
-
-            NonConnectedMessagingChannel channel = new NonConnectedMessagingChannel(
-                    createChannelOpener(),
-                    mChannelUpdater,
-                    messageTypes,
-                    mId,
-                    mClock,
-                    mLogger);
-            channel.enableKeepAlive();
-
-            return channel;
-        }
-
-        protected abstract NetChannelOpener<NetChannel> createChannelOpener();
-    }
-
-    private static class TargetedContextSupplier extends ContextSupplierBase {
-
         private final SocketAddress mBindAddress;
         private final SocketAddress mRemoteAddress;
 
@@ -154,14 +128,70 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
                                         MessageType messageType,
                                         SocketAddress bindAddress,
                                         SocketAddress remoteAddress) {
-            super(id, clock, channelUpdater, logger, messageType);
+            mId = id;
+            mClock = clock;
+            mChannelUpdater = channelUpdater;
+            mLogger = logger;
+            mMessageType = messageType;
             mBindAddress = bindAddress;
             mRemoteAddress = remoteAddress;
         }
 
         @Override
-        protected NetChannelOpener<NetChannel> createChannelOpener() {
-            return UdpChannelOpener.targeted(mBindAddress, mRemoteAddress, mLogger);
+        public MessagingChannel get() {
+            KnownMessageTypes messageTypes = new KnownMessageTypes();
+            messageTypes.put(mMessageType);
+
+            NonConnectedMessagingChannel channel = new NonConnectedMessagingChannel(
+                    UdpChannelOpener.targeted(mBindAddress, mRemoteAddress, mLogger),
+                    mChannelUpdater,
+                    messageTypes,
+                    mId,
+                    mClock,
+                    mLogger);
+            channel.enableKeepAlive();
+
+            return channel;
+        }
+    }
+
+    private static class ReplierContextSupplier implements Supplier<MessagingChannel> {
+
+        private final ChannelId mId;
+        private final Clock mClock;
+        private final ChannelUpdater mChannelUpdater;
+        protected final Logger mLogger;
+        private final MessageType mMessageType;
+        private final SocketAddress mBindAddress;
+
+        private ReplierContextSupplier(ChannelId id,
+                                       Clock clock,
+                                       ChannelUpdater channelUpdater,
+                                       Logger logger,
+                                       MessageType messageType,
+                                       SocketAddress bindAddress) {
+            mId = id;
+            mClock = clock;
+            mChannelUpdater = channelUpdater;
+            mLogger = logger;
+            mMessageType = messageType;
+            mBindAddress = bindAddress;
+        }
+
+        @Override
+        public MessagingChannel get() {
+            KnownMessageTypes messageTypes = new KnownMessageTypes();
+            messageTypes.put(mMessageType);
+
+            ReplyingNonConnectedMesssagingChannel channel = new ReplyingNonConnectedMesssagingChannel(
+                    new UdpChannelOpener(mBindAddress, null, null, mLogger),
+                    mChannelUpdater,
+                    messageTypes,
+                    mId,
+                    mClock,
+                    mLogger);
+
+            return channel;
         }
     }
 }

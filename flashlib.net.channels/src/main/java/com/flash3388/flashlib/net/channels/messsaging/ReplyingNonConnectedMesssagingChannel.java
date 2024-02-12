@@ -1,7 +1,9 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.channels.NetAddress;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
+import com.flash3388.flashlib.net.channels.RemoteConfigurableChannel;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import com.flash3388.flashlib.net.messaging.ChannelId;
@@ -10,7 +12,6 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-import java.net.SocketAddress;
 import java.util.Optional;
 
 public class ReplyingNonConnectedMesssagingChannel extends MessagingChannelBase {
@@ -21,15 +22,17 @@ public class ReplyingNonConnectedMesssagingChannel extends MessagingChannelBase 
 
     private boolean mIsConnected;
     private Time mLastReceiveTime;
-    private SocketAddress mAcknowledgedRemote;
+    private NetAddress mAcknowledgedRemote;
 
-    public ReplyingNonConnectedMesssagingChannel(NetChannelOpener<? extends NetChannel> channelOpener,
+    public ReplyingNonConnectedMesssagingChannel(NetChannelOpener<? extends RemoteConfigurableChannel> channelOpener,
                                                  ChannelUpdater channelUpdater,
                                                  KnownMessageTypes messageTypes,
                                                  ChannelId ourId,
                                                  Clock clock,
                                                  Logger logger) {
         super(channelOpener, channelUpdater, messageTypes, ourId, clock, logger);
+
+        messageTypes.put(PingMessage.TYPE);
 
         mClock = clock;
         mIsConnected = false;
@@ -49,21 +52,31 @@ public class ReplyingNonConnectedMesssagingChannel extends MessagingChannelBase 
     }
 
     @Override
-    protected Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, MessageHeader header, Message message) {
+    protected Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, NetAddress sender, MessageHeader header, Message message) {
         mLastReceiveTime = mClock.currentTime();
 
         if (!mIsConnected) {
+            mLogger.info("Received first message from {}, registering as our remote", sender);
             mIsConnected = true;
 
-            // TODO: GET REMOTE
-            // TODO: ASSIGN REMOTE TO CHANNEL (use a specific channel connector and cast channel into wanted one)
-            mAcknowledgedRemote = null;
+            RemoteConfigurableChannel actualChannel = (RemoteConfigurableChannel) channel.channel;
+            actualChannel.setRemote(sender);
+
+            mAcknowledgedRemote = sender;
 
             channel.registration.requestUpdate(null);
             reportToUserAsConnected();
         }
+        if (!sender.equals(mAcknowledgedRemote)) {
+            mLogger.warn("Received data not from acknowledged remote, ignoring");
+            return Optional.empty();
+        }
 
-        // TODO: CHECK THIS IS FROM THE ACKNOWLEDGED REMOTE
+        if (PingMessage.TYPE.equals(message.getType())) {
+            // we do want to account for pings sent by remote, and respond
+            queue(message);
+            return Optional.empty();
+        }
 
         ReceivedMessage receivedMessage = new ReceivedMessage(header, message);
         return Optional.of(receivedMessage);

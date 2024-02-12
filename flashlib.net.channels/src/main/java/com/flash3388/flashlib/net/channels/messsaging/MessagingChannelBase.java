@@ -2,6 +2,7 @@ package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetAddress;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
@@ -237,7 +238,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
         implDoOnChannelOpen(channelWrapper);
     }
 
-    private void onNewMessage(MessageHeader header, Message message) {
+    private void onNewMessage(NetAddress address, MessageHeader header, Message message) {
         mLogger.debug("New message received: sender={}, type={}",
                 header.getSender(),
                 header.getMessageType());
@@ -248,7 +249,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
             return;
         }
 
-        Optional<ReceivedMessage> processed = implDoOnNewMessage(channel, header, message);
+        Optional<ReceivedMessage> processed = implDoOnNewMessage(channel, address, header, message);
         if (!processed.isPresent()) {
             return;
         }
@@ -279,7 +280,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
     protected abstract ChannelData implCreateChannelWrapper(NetChannel channel, UpdateRegistration registration);
 
     protected abstract void implDoOnChannelOpen(ChannelData channel);
-    protected abstract Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, MessageHeader header, Message message);
+    protected abstract Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, NetAddress sender, MessageHeader header, Message message);
     protected abstract void implDoOnChannelConnectable();
     protected abstract void implDoOnChannelUpdate(Object param);
     protected abstract void implDoOnChannelClose();
@@ -346,7 +347,8 @@ public abstract class MessagingChannelBase implements MessagingChannel {
                             data.getBytesReceived());
                 }
 
-                parseMessages(ourChannel);
+                // send should always be the same for this kind of channel
+                parseMessages(ourChannel, data.getSender());
             } catch (IOException e) {
                 mLogger.error("Error while reading and processing new data", e);
                 ourChannel.resetChannel();
@@ -415,7 +417,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
             ourChannel.implDoOnChannelUpdate(param);
         }
 
-        private void parseMessages(MessagingChannelBase ourChannel) throws IOException {
+        private void parseMessages(MessagingChannelBase ourChannel, NetAddress sender) throws IOException {
             boolean hasMoreToParse;
             do {
                 Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
@@ -425,7 +427,7 @@ public abstract class MessagingChannelBase implements MessagingChannel {
                     MessageHeader header = parseResult.getHeader();
                     Message message = parseResult.getMessage();
 
-                    ourChannel.onNewMessage(header, message);
+                    ourChannel.onNewMessage(sender, header, message);
 
                     hasMoreToParse = true;
                 } else {

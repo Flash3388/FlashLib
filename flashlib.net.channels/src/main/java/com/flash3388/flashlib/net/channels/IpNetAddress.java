@@ -3,11 +3,11 @@ package com.flash3388.flashlib.net.channels;
 import java.net.SocketAddress;
 import java.util.Objects;
 
-public class NetClientInfo {
+public class IpNetAddress implements NetAddress {
 
     private final SocketAddress mAddress;
 
-    public NetClientInfo(SocketAddress address) {
+    public IpNetAddress(SocketAddress address) {
         mAddress = address;
     }
 
@@ -19,7 +19,7 @@ public class NetClientInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NetClientInfo that = (NetClientInfo) o;
+        IpNetAddress that = (IpNetAddress) o;
         return Objects.equals(mAddress, that.mAddress);
     }
 

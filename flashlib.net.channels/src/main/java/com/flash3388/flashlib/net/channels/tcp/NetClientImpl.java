@@ -3,7 +3,7 @@ package com.flash3388.flashlib.net.channels.tcp;
 import com.flash3388.flashlib.net.channels.IncomingData;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetClient;
-import com.flash3388.flashlib.net.channels.NetClientInfo;
+import com.flash3388.flashlib.net.channels.NetAddress;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
@@ -13,17 +13,17 @@ import java.nio.ByteBuffer;
 
 class NetClientImpl implements NetClient {
 
-    private final NetClientInfo mClientInfo;
+    private final NetAddress mClientAddress;
     private final NetChannel mChannel;
 
-    public NetClientImpl(NetClientInfo clientInfo, NetChannel channel) {
-        mClientInfo = clientInfo;
+    public NetClientImpl(NetAddress clientAddress, NetChannel channel) {
+        mClientAddress = clientAddress;
         mChannel = channel;
     }
 
     @Override
-    public NetClientInfo getInfo() {
-        return mClientInfo;
+    public NetAddress getAddress() {
+        return mClientAddress;
     }
 
     @Override

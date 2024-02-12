@@ -1,9 +1,10 @@
 package com.flash3388.flashlib.net.channels.tcp;
 
 import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.net.channels.IpNetAddress;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetClient;
-import com.flash3388.flashlib.net.channels.NetClientInfo;
+import com.flash3388.flashlib.net.channels.NetAddress;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
 import com.flash3388.flashlib.net.channels.nio.ChannelListener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
@@ -40,10 +41,10 @@ public class TcpServerChannel implements NetServerChannel {
             baseChannel.configureBlocking(false);
 
             SocketAddress address = baseChannel.getRemoteAddress();
-            NetClientInfo clientInfo = new NetClientInfo(address);
+            NetAddress clientAddress = new IpNetAddress(address);
             NetChannel channel = new ConnectedTcpChannel(baseChannel);
 
-            return new NetClientImpl(clientInfo, channel);
+            return new NetClientImpl(clientAddress, channel);
         } catch (IOException | RuntimeException | Error e) {
             Closeables.silentClose(baseChannel);
             throw e;

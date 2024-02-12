@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.flash3388.flashlib.net.channels.NetAddress;
 import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
@@ -71,7 +72,7 @@ public class NonConnectedMessagingChannel extends MessagingChannelBase {
     }
 
     @Override
-    protected Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, MessageHeader header, Message message) {
+    protected Optional<ReceivedMessage> implDoOnNewMessage(ChannelData channel, NetAddress sender, MessageHeader header, Message message) {
         if (message.getType().equals(PingMessage.TYPE)) {
             PingMessage pingMessage = (PingMessage) message;
             if (pingMessage.getOriginalSender().equals(getOurId())) {

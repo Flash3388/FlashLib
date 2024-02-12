@@ -512,7 +512,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         @Override
         public String toString() {
-            return client.getInfo().toString();
+            return client.getAddress().toString();
         }
     }
 
