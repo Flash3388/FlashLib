@@ -6,7 +6,6 @@ import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
-import com.flash3388.flashlib.time.Time;
 
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -14,10 +13,106 @@ import java.util.function.Predicate;
 
 /**
  * Scheduler is the executor for FlashLib's scheduling component. It is responsible for executing all
- * running actions (as described by {@link Action}) and managing their requirements, ensuring that there's no conflict.
+ * running actions (as described by {@link Action}) and managing their requirements.
  * <p>
- *     In addition, the scheduler provides support for default {@link Subsystem} actions, executing them when
- *     no other actions are running for the given subsystem.
+ *     Each action is described by an instance {@link Action}. Different instances of the same class
+ *     are seen as different {@link Action Actions}.
+ * </p>
+ * <p>
+ *     Actions have {@link Requirement} being associated to them. These <em>dependencies</em> can be used
+ *     to ensure that no two actions use the same requirement at the same time.
+ *     Only one executing action may be associated with each one declared {@link Requirement}. One action
+ *     may have multiple associated {@link Requirement Requirements} to it. It is no necessary to register
+ *     {@link Requirement Requirements} with the scheduler as they are discovered when starting actions.
+ * </p>
+ * <p>
+ *     A <em>requirement conflict</em> is a situation wherein two different actions are requesting to run while sharing at
+ *     least one requirement. Such situations may occur when a new action is asked to run while an already running action
+ *     already has acquired at least one of the requirements requested by the new action, or perhaps when two actions
+ *     transition to an execution state while sharing some requirements. It is acceptable for users to intentionally cause
+ *     a conflict as a way to change the execution state of actions.
+ *
+ *     Whatever is the case, conflicts are handled as such:
+ *     <ul>
+ *         <li>
+ *             Normally, priority is given to the latest starting action. That is, to the action that has transitioned
+ *             to execution state last. In such a case, actions conflicting with the new action will be cancelled, their
+ *             requirements released and transferred to the new action.
+ *         </li>
+ *         <li>
+ *             When a running action is marked with {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS} and a new conflicting
+ *             action is scheduled to execute, the new action will not be allowed to start until the running action
+ *             has finished execution, effectively giving the running action priority.
+ *             The new action can either be placed in a pending mode, or rejected entirely. Such behaviour is implementation-dependent.
+ *         </li>
+ *     </ul>
+ * </p>
+ * <p>
+ *     Actions have different states in the scheduler:
+ *     <ul>
+ *         <li>
+ *             Pending actions are actions requested to execute, but haven't started execution yet.
+ *             This is evident by the action methods not having been called.
+ *             Such a state is usually the result of a current execution state that doesn't permit
+ *             starting a new action, an implementation preference to delay execution, or
+ *             due to a conflict with another actions marked by {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS}.
+ *             Actions may be cancelled or terminated during their pending state, meaning that they never got to execute
+ *             and no user code ran.
+ *         </li>
+ *         <li>
+ *             Executing actions are actions whose code is being run by the scheduler, such that user code is called.
+ *             Only running actions really hold onto requirements, so only when actions start their execution do they
+ *             acquire their associated requirements. It is guaranteed that {@link Action#end(FinishReason)} will
+ *             be called for any running action finished or having been cancelled.
+ *         </li>
+ *         <li>
+ *             Not running actions are actions which are not stored in the scheduler as either pending or executing.
+ *             Such is the case for actions which either finished execution or have not started execution yet.
+ *         </li>
+ *     </ul>
+ * </p>
+ * <p>
+ *     There are several ways by which an action may end its execution. These are divided into two categories:
+ *     <em>finish</em> and <em>interrupt</em>.
+ *     <ul>
+ *         <li>
+ *             <em>Finish</em> end refers to situations where the action stops by the request of the action itself,
+ *             via the invocation of {@link ActionControl#finish()}. These are considered the most graceful
+ *             end situations, as these occur by the request of the action and thus are likely due to the action
+ *             actually finishing its intended job.
+ *         </li>
+ *         <li>
+ *             <em>Interrupt</em> end refers to situations where the actions stops at the request of an outside
+ *             user, or the scheduler itself due to certain conditions. These are further divided into
+ *             <ul>
+ *                 <li>
+ *                     <em>user cancel</em> caused by a direct user call to {@link #cancel(Action)} or {@link Action#cancel()},
+ *                     or via the action invoking {@link ActionControl#cancel()}. Leads to {@link FinishReason#CANCELED}.
+ *                 </li>
+ *                 <li>
+ *                     <em>conflict interrupt</em>, caused when the scheduler detects a conflicts which was determined to
+ *                     be handled by cancelling one of the actions. Leads to {@link FinishReason#CANCELED}.
+ *                 </li>
+ *                 <li>
+ *                     <em>action timeout</em>, caused when actions configured with a timeout reach their defined maximum
+ *                     run time. Leads to {@link FinishReason#TIMEDOUT}.
+ *                 </li>
+ *                 <li>
+ *                     <em>action error</em>, caused when the actions throws an exception for any reason.
+ *                     Leads to {@link FinishReason#ERRORED}.
+ *                 </li>
+ *             </ul>
+ *         </li>
+ *     </ul>
+ * </p>
+ * <p>
+ *     Default actions are actions associated directly with a {@link Subsystem}. Such actions are special, as in
+ *     that they are automatically executed whenever no action has acquired the associated {@link Subsystem}.
+ *     {@link Subsystem} is simple a special-case {@link Requirement}.
+ *     Default actions will not forcibly attempt to acquire their associated requirements, and will await
+ *     until it is released by other actions.
+ *     The behaviour of such actions which request requirements other then the associated subsystem is
+ *     not defined at the moment, and should be avoided.
  * </p>
  *
  *
@@ -30,6 +125,29 @@ public interface Scheduler {
      *     Starts running an {@link Action}. Generally, this
      *     should be called from {@link Action#start()} implementations
      *     and not directly.
+     * </p>
+     * <p>
+     *     Adds the new instance to execution by the scheduler. Whether the action
+     *     starts execution immediately depends on the implementation of the scheduler.
+     *     But generally, this is influenced by the execution state of the scheduler and
+     *     conflicting actions.
+     * </p>
+     * <p>
+     *     This initiates a conflicts check with other running actions that may share
+     *     the same <em>requirements</em> as this new action. If any running actions
+     *     share at least one requirement with the new action, then conflict resolution
+     *     is attempted.
+     *     <ul>
+     *         <li>
+     *             If one of the conflicting running action is marked with {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS},
+     *             then the new action either becomes pending, waiting for the <em>preferred</em> action to finish
+     *             execution, or the new action is rejected completely and won't be scheduled for execution.
+     *         </li>
+     *         <li>
+     *             Otherwise, the conflicting running actions are cancelled and subsequently removed from execution,
+     *             after which the new action starts execution.
+     *         </li>
+     *     </ul>
      * </p>
      *
      * @param action action to start
@@ -46,7 +164,28 @@ public interface Scheduler {
      *     and not directly.
      * </p>
      * <p>
-     *     It is not guaranteed that the action will stop immediately. This depends on the implementation.
+     *     Requests the scheduler to cancel the instance's execution.
+     *     It is not guaranteed that the action will stop immediately, as it depends
+     *     both on the implementation of the scheduler and the current execution state.
+     * </p>
+     * <p>
+     *     If the cancelled action is pending, it will be removed from the pending queue. However,
+     *     because it did not start execution, it will not be alerted as to this removal.
+     * </p>
+     * <p>
+     *     If the cancelled action is currently executing and {@link Action#initialize(ActionControl)} was called,
+     *     it will receive a chance to exit gracefully, with its {@link Action#end(FinishReason)} invoked
+     *     with {@link FinishReason#CANCELED}. Though, regardless of what the action does during that, it will be removed from
+     *     execution.
+     * </p>
+     * <p>
+     *     Any <em>requirements</em> held by this action will be marked as unused.
+     * </p>
+     * <p>
+     *     If the action is marked with the flag {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS}, and
+     *     there are actions pending to execute with <em>requirements</em> shared with the cancelled actions
+     *     and no other conflicting action has {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS}, then
+     *     the pending action will start its execution as described by {@link #start(Action)}.
      * </p>
      *
      * @param action action to cancel.
@@ -58,15 +197,35 @@ public interface Scheduler {
 
     /**
      * <p>
-     *     Gets whether or not the given {@link Action} is running on this scheduler.
+     *     Questions the scheduler as to the running state of a given action.
      * </p>
      *
      * @param action action to test
      *
-     * @return <b>true</b> if running, <b>false</b> otherwise.
+     * @return <b>true</b> if currently execution or pending execution, <b>false</b> otherwise.
+     * @see #getExecutionStateOf(Action)
      */
     @MainThreadOnly
     boolean isRunning(Action action);
+
+    /**
+     * <p>
+     *     Gets the current execution state for a given action. The returned
+     *     information is a snapshot of the current state and becomes stale after
+     *     call.
+     * </p>
+     * <p>
+     *     If the action is neither currently executing nor is it pending, meaning that
+     *     it has never started execution, or has ended it's execution then
+     *     {@link ExecutionState#isPending()} and {@link ExecutionState#isPending()} will
+     *     both return <b>false</b>.
+     * </p>
+     *
+     * @param action action to get state of
+     * @return state of the execution of an action.
+     */
+    @MainThreadOnly
+    ExecutionState getExecutionStateOf(Action action);
 
     /**
      * <p>
@@ -75,12 +234,11 @@ public interface Scheduler {
      *     that predicate.
      * </p>
      * <p>
-     *     It is not guaranteed that the actions will stop running immediately.
-     *     This highly depends on the implementation.
+     *     Behaviour of cancelled actions is as described in {@link #cancel(Action)}.
      * </p>
      *
-     * @param predicate {@link Predicate} determining whether or not to cancel
-     *                                   an action.
+     * @param predicate {@link Predicate} determining whether to cancel an action.
+     * @see #cancel(Action)
      */
     @MainThreadOnly
     void cancelActionsIf(Predicate<? super Action> predicate);
@@ -91,11 +249,11 @@ public interface Scheduler {
      *     flag configured.
      * </p>
      * <p>
-     *     It is not guaranteed that the actions will stop running immediately.
-     *     This highly depends on the implementation.
+     *     Behaviour of cancelled actions is as described in {@link #cancel(Action)}.
      * </p>
      *
      * @param flag flag, which, if missing from an action, will cause the action to be cancelled.
+     * @see #cancel(Action)
      */
     @MainThreadOnly
     void cancelActionsIfWithoutFlag(ActionFlag flag);
@@ -105,9 +263,9 @@ public interface Scheduler {
      *     Cancels all actions running on this scheduler.
      * </p>
      * <p>
-     *     It is not guaranteed that the actions will stop running immediately.
-     *     This highly depends on the implementation.
+     *     Behaviour of cancelled actions is as described in {@link #cancel(Action)}.
      * </p>
+     * @see #cancel(Action)
      */
     @MainThreadOnly
     void cancelAllActions();
@@ -184,7 +342,7 @@ public interface Scheduler {
     ManualTrigger newManualTrigger();
 
     /**
-     * Creates a new group for executes actions.
+     * Creates a new group for executing a set of actions in a specific order.
      *
      * @param type type of group to create. Influences the execution order and flow.
      * @return action group.
