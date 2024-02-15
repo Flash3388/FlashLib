@@ -30,6 +30,7 @@ public class WatchdogService extends TerminalServiceBase {
     @Override
     protected void startRunning() throws ServiceException {
         mThread = new Thread(new Task(mWatchdogs), "WatchdogThread");
+        mThread.setDaemon(true);
         mThread.start();
     }
 
