@@ -46,7 +46,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
         Set<MessageType> messageTypes = getUsedMessageTypes();
         mMessenger.registerMessageTypes(messageTypes);
-        mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage));
+        mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage, LOGGER));
         mMessenger.addListener(new MessageListenerImpl(mStorage), messageTypes);
     }
 
@@ -89,14 +89,18 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
         private final Messenger mMessenger;
         private final Storage mStorage;
+        private final Logger mLogger;
 
-        private ConnectionListenerImpl(Messenger messenger, Storage storage) {
+        private ConnectionListenerImpl(Messenger messenger, Storage storage, Logger logger) {
             mMessenger = messenger;
             mStorage = storage;
+            mLogger = logger;
         }
 
         @Override
         public void onClientConnected(NewClientEvent event) {
+            mLogger.debug("New client connected to OBSR, sending storage contents");
+
             Message message = mStorage.createContentsMessage();
             mMessenger.send(message);
         }

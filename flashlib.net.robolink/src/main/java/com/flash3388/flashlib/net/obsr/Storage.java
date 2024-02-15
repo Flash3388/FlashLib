@@ -4,8 +4,6 @@ import com.beans.observables.RegisteredListener;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
 import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 
-import java.util.Map;
-
 public interface Storage {
 
     StoredObject getObject(StoragePath path);

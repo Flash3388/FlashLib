@@ -404,6 +404,15 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
             for (SendRequest request : mWriteQueueLocal) {
                 MessageSerializer.SerializedMessage serialized;
+                // TODO: SPLIT MESSAGES THAT ARE TOO BIG IF NECESSARY
+                //  INTO MULTIPLE WRITE PARTS, THEY CAN SHARE AN HEADER THOUGH.
+                //  READING ALREADY HAS AN EXPANDING BUFFER SO IT SHOULD BE FINE
+                //  WRITING DOESN'T HAVE AN EXPANDING BUFFER, AND LET'S AVOID IT.
+                //  THOUGH IN ORDER TO SPLIT WE STILL NEED TO SERIALIZE FIRST?
+                // TODO: FOR READING, DON'T USE AN EXPANDING BUFFER, BUT RATHER USE
+                //     A STREAM THAT ALLOWS READING PARTS OF BYTES ONE BY ONE
+                //     THAT WAY WE DON'T NEED TO STORE ALL DATA AT ONCE?
+                //     HOW TO DO THAT THOUGH?
                 try {
                     if (request.header != null) {
                         serialized = mSerializer.serialize(request.header, request.message);
@@ -425,6 +434,23 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                 }
 
                 try {
+                    // TODO: DON'T SEND ALL REQUESTS AT ONCE AS SOCKET BUFFERS
+                    //  MAY NOT BE ABLE TO HANDLE THIS.
+                    //  WE CAN DETECT NOT FULL WRITE BY RETURN FROM WRITE DATA
+                    //  HOWEVER, FOR DATAGRAM CHANNELS, THIS MAY BE A PROBLEM AS
+                    //  IT SENDS MESSAGES AT BALK AND ALTHOUGH OUR READING CONTEXT
+                    //  HANDLES THIS, THE PROTOCOL DOESN'T ENSURE ORDER OR ARRIVAL.
+                    //  WE CAN LIMIT MESSAGE SIZE FOR DATAGRAM SPECIFICALLY.
+                    //  NEED TO CHANGE WORK WITH QUEUE TO NOT EMPTY IT ALL AT ONCE
+                    //  BUT RATHER ONE BY ONE FOR THIS TO WORK.
+                    //  CREATE A CLASS SHARED WITH OTHER IMPLS THAT IMPLEMENTS ALL OF THIS
+                    //  SAME FOR CLIENTS IMPLS
+                    // TODO: ADD MAGIC TO MESSAGE HEADER. IF FAILING TO PARSE A PART OF THE MESSAGE OR HEADER
+                    //  SKIP TO THE NEXT
+                    // TODO: MAKE SERIALIZABLE WORK WITH A CUSTOM OUT INTERFACE (AND IN)
+                    //      SERIALIZE USING A QUICK WAY (NO SUPPORT FOR AUTO OBJECTS YET)
+                    //      THIS WAY WE CAN SWITCH SERIALIZERS AND SUCH
+                    //      INITIAL IMPL BASED ON SIMPLE WRITING TO ByteBuffer
                     mLogger.debug("Writing data to channel: client={}, size={}", client, serialized.getSize());
                     serialized.writeInto(client.client);
                 } catch (IOException e) {

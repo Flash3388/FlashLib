@@ -12,9 +12,6 @@ import java.util.Map;
 
 public class StorageContentsMessage implements Message {
 
-    // TODO: DEPENDING ON AMOUNT OF DATA, THIS MESSAGE MIGHT BE TOO BIG
-    //      CAN PROBABLY BE BROKEN DOWN INTO PIECES
-
     public static final MessageType TYPE = MessageType.create(100004,
             StorageContentsMessage::readFrom,
             StorageContentsMessage::writeInto);
