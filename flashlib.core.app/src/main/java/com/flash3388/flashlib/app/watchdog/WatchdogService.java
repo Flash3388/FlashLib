@@ -9,22 +9,26 @@ import org.slf4j.Logger;
 
 import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class WatchdogService extends TerminalServiceBase {
 
     private static final Logger LOGGER = Logging.getLogger("Watchdog");
 
-    private final PriorityBlockingQueue<InternalWatchdog> mWatchdogs;
+    private final DelayQueue<Node> mWatchdogs;
     private Thread mThread;
 
     public WatchdogService() {
-        mWatchdogs = new PriorityBlockingQueue<>(3,
-                Comparator.comparing(InternalWatchdog::getTimeout));
+        mWatchdogs = new DelayQueue<>();
     }
 
     public void register(InternalWatchdog watchdog) {
-        mWatchdogs.add(watchdog);
+        Node node = new Node(watchdog);
+        node.reset();
+        mWatchdogs.add(node);
     }
 
     @Override
@@ -44,33 +48,26 @@ public class WatchdogService extends TerminalServiceBase {
 
     private static class Task implements Runnable {
 
-        private final BlockingQueue<InternalWatchdog> mWatchdogs;
-        private final Sleeper mSleeper;
+        private final DelayQueue<Node> mWatchdogs;
 
-        private Task(BlockingQueue<InternalWatchdog> watchdogs) {
+        private Task(DelayQueue<Node> watchdogs) {
             mWatchdogs = watchdogs;
-            mSleeper = new Sleeper();
         }
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
                 try {
-                    InternalWatchdog watchdog = mWatchdogs.take();
+                    Node node = mWatchdogs.take();
                     try {
-                        if (watchdog.isExpired() || !watchdog.isEnabled()) {
+                        if (node.mWatchdog.isExpired() || !node.mWatchdog.isEnabled()) {
                             continue;
                         }
 
-                        // TODO: BETTER WAIT FOR TIMEOUT
-                        Time waitTime = watchdog.getTimeLeftToTimeout();
-                        if (waitTime.isValid()) {
-                            mSleeper.sleep(waitTime);
-                        }
-
-                        watchdog.checkFed();
+                        node.mWatchdog.checkFed();
                     } finally {
-                        mWatchdogs.add(watchdog);
+                        node.reset();
+                        mWatchdogs.add(node);
                     }
                 } catch (InterruptedException e) {
                     break;
@@ -78,6 +75,37 @@ public class WatchdogService extends TerminalServiceBase {
                     LOGGER.error("Error while checking watchdog", t);
                 }
             }
+        }
+    }
+
+    private static class Node implements Delayed {
+
+        public final InternalWatchdog mWatchdog;
+
+        private long expirationTimeMillis;
+
+        private Node(InternalWatchdog watchdog) {
+            mWatchdog = watchdog;
+            expirationTimeMillis = 0;
+        }
+
+        public void reset() {
+            expirationTimeMillis = System.currentTimeMillis() + mWatchdog.getTimeout().valueAsMillis();
+        }
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            long diffMs = expirationTimeMillis - System.currentTimeMillis();
+            return unit.convert(diffMs, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int compareTo(Delayed o) {
+            long diffMillis = getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS);
+            diffMillis = Math.min(diffMillis, 1);
+            diffMillis = Math.max(diffMillis, -1);
+
+            return (int) diffMillis;
         }
     }
 }
