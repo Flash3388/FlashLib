@@ -60,19 +60,25 @@ public interface Action {
 
     /**
      * <p>
-     *     Starts the action.
+     *     Starts the action. Adds this instance to the scheduler for execution.
+     *     Execution may not start at once, and be delayed due to conflicting actions
+     *     and other prevailing conditions.
      * </p>
      *
      * @throws IllegalStateException if the action is already running.
+     * @see Scheduler#start(Action)
      */
     void start();
 
     /**
      * <p>
-     *     Cancels the action.
+     *     Cancels the action. Requests the scheduler to cancel the execution
+     *     of the action. The action may not be cancelled immediately, depending
+     *     on the execution state of the scheduler.
      * </p>
      *
      * @throws IllegalStateException if the action is not running.
+     * @see Scheduler#cancel(Action)
      */
     void cancel();
 
@@ -82,6 +88,7 @@ public interface Action {
      * </p>
      *
      * @return <b>true</b> if the action is running, <b>false</b> otherwise.
+     * @see Scheduler#isRunning(Action)
      */
     boolean isRunning();
 

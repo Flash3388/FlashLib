@@ -3,6 +3,7 @@ package com.flash3388.flashlib.scheduling.impl;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
+import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
@@ -19,6 +20,7 @@ import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Clock;
+import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
@@ -135,7 +137,25 @@ public class SingleThreadedScheduler implements Scheduler {
     public boolean isRunning(Action action) {
         mMainThread.verifyCurrentThread();
 
-        return mPendingActions.containsKey(action) || mRunningActions.containsKey(action);
+        return getExecutionStateOf(action).isRunning();
+    }
+
+    @Override
+    public ExecutionState getExecutionStateOf(Action action) {
+        mMainThread.verifyCurrentThread();
+
+        if (mPendingActions.containsKey(action)) {
+            return ExecutionState.pending();
+        }
+
+        RunningActionContext context = mRunningActions.get(action);
+        if (context != null) {
+            Time runTime = context.getRunTime();
+            Time timeLeft = context.getTimeLeft();
+            return ExecutionState.executing(runTime, timeLeft);
+        }
+
+        return ExecutionState.notRunning();
     }
 
     @Override
@@ -193,6 +213,10 @@ public class SingleThreadedScheduler implements Scheduler {
     @Override
     public void setDefaultAction(Subsystem subsystem, Action action) {
         mMainThread.verifyCurrentThread();
+
+        if (!action.getConfiguration().getRequirements().contains(subsystem)) {
+            throw new IllegalArgumentException("action should have subsystem has requirement");
+        }
 
         mDefaultActions.put(subsystem, action);
     }
@@ -292,6 +316,10 @@ public class SingleThreadedScheduler implements Scheduler {
             for (GenericTrigger trigger : mTriggers) {
                 trigger.update(controller);
             }
+
+            // calls to isRunning prior to cancel or start are valid here
+            // as this scheduler is singlethreaded and thus this info is not
+            // updated behind our backs.
 
             for (Action action : controller.getActionsToStopIfRunning()) {
                 if (isRunning(action)) {
@@ -411,7 +439,7 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     private boolean canStartDefaultAction(Action action) {
-        for(Requirement requirement : action.getConfiguration().getRequirements()) {
+        for (Requirement requirement : action.getConfiguration().getRequirements()) {
             if (mRequirementsUsage.containsKey(requirement)) {
                 return false;
             }

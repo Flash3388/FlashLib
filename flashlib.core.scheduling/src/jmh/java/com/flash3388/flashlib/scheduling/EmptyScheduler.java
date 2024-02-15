@@ -30,6 +30,11 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
+    public ExecutionState getExecutionStateOf(Action action) {
+        return null;
+    }
+
+    @Override
     public void cancelActionsIf(Predicate<? super Action> predicate) {
     }
 
