@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * Provides access to control and status components of the application. An application can only have one instance of this type.
@@ -157,4 +158,14 @@ public interface FlashLibControl {
      * @see #newWatchdog(String, Time, FeedReporter)
      */
     Watchdog newWatchdog(String name, Time timeout);
+
+    /**
+     * Creates a new thread to be used by the application. The created thread is configured
+     * and monitored.
+     *
+     * @param name name of the thread
+     * @param runnable task for the thread to execute
+     * @return a new, un-started thread.
+     */
+    Thread newThread(String name, Consumer<? super FlashLibControl> runnable);
 }

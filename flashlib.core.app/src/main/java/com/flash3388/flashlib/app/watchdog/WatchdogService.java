@@ -2,16 +2,12 @@ package com.flash3388.flashlib.app.watchdog;
 
 import com.castle.concurrent.service.TerminalServiceBase;
 import com.castle.exceptions.ServiceException;
-import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.concurrent.Sleeper;
+import com.flash3388.flashlib.app.concurrent.DefaultFlashLibThreadFactory;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
-import java.util.Comparator;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class WatchdogService extends TerminalServiceBase {
@@ -33,8 +29,7 @@ public class WatchdogService extends TerminalServiceBase {
 
     @Override
     protected void startRunning() throws ServiceException {
-        mThread = new Thread(new Task(mWatchdogs), "WatchdogThread");
-        mThread.setDaemon(true);
+        mThread = DefaultFlashLibThreadFactory.newThread("WatchdogThread", new Task(mWatchdogs));
         mThread.start();
     }
 
