@@ -146,6 +146,21 @@ import java.util.function.Predicate;
  *         </li>
  *     </ul>
  * </p>
+ * <p>
+ *     Actions may be handled from withing other actions. This includes pretty much any call to the scheduler. e.g.
+ *     an action may start another action from within it's code.
+ *     <pre>
+ *          {@literal @}Override
+ *          public void execute() {
+ *              otherAction.start();
+ *          }
+ *     </pre>
+ *
+ *     However, in such a case, <em>otherAction</em> will most likely not start immediately, although that is entirely
+ *     implementation dependent; but generally, there is no guarantee as to the execution of <em>otherAction</em> in relation
+ *     to the action starting it, and as such, one should not rely on <em>otherAction</em> starting (or stopping, depending on the
+ *     specific call) by the next call to <em>execute</em> or even in the lifecycle of the calling action.
+ * </p>
  *
  * @since FlashLib 1.0.0
  */
