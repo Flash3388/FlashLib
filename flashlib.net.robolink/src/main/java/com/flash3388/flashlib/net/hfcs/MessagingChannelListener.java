@@ -33,7 +33,7 @@ class MessagingChannelListener implements MessagingChannel.Listener {
     }
 
     @Override
-    public void onMessageSendingFailed(Message message) {
+    public void onMessageSendingFailed(Message message, Throwable cause) {
 
     }
 }

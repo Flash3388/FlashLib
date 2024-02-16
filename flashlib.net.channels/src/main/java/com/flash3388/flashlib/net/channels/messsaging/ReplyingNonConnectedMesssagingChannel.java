@@ -1,11 +1,9 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.flash3388.flashlib.net.channels.NetAddress;
-import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.RemoteConfigurableChannel;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
-import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
@@ -38,11 +36,6 @@ public class ReplyingNonConnectedMesssagingChannel extends MessagingChannelBase 
         mIsConnected = false;
         mLastReceiveTime = Time.INVALID;
         mAcknowledgedRemote = null;
-    }
-
-    @Override
-    protected ChannelData implCreateChannelWrapper(NetChannel channel, UpdateRegistration registration) {
-        return new ChannelData(channel, registration);
     }
 
     @Override

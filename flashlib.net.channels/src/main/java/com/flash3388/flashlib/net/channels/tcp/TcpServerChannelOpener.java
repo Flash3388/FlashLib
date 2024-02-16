@@ -18,6 +18,11 @@ public class TcpServerChannelOpener implements NetChannelOpener<NetServerChannel
     }
 
     @Override
+    public boolean isTargetChannelStreaming() {
+        return true;
+    }
+
+    @Override
     public NetServerChannel open() throws IOException {
         return new TcpServerChannel(mBindAddress, mLogger);
     }

@@ -22,6 +22,11 @@ public class TcpChannelOpener implements NetChannelOpener<ConnectableNetChannel>
     }
 
     @Override
+    public boolean isTargetChannelStreaming() {
+        return true;
+    }
+
+    @Override
     public ConnectableNetChannel open() throws IOException {
         return new TcpChannel(mBindAddress, mLogger);
     }

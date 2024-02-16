@@ -61,6 +61,11 @@ public class UdpChannelOpener implements NetChannelOpener<RemoteConfigurableChan
     }
 
     @Override
+    public boolean isTargetChannelStreaming() {
+        return false;
+    }
+
+    @Override
     public RemoteConfigurableChannel open() throws IOException {
         UdpChannel channel = new UdpChannel(mBindAddress, mConfigureChannel, mLogger);
         channel.setRemote(new IpNetAddress(mRemoteAddress));

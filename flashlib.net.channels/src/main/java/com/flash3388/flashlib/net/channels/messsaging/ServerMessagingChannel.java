@@ -11,7 +11,7 @@ public interface ServerMessagingChannel extends BaseMessagingChannel {
         void onClientConnected(ChannelId id);
         void onClientDisconnected(ChannelId id);
         void onNewMessage(MessageHeader header, Message message);
-        void onMessageSendingFailed(ChannelId id, Message message);
+        void onMessageSendingFailed(ChannelId id, Message message, Throwable cause);
     }
 
     void setListener(Listener listener);

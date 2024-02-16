@@ -32,13 +32,18 @@ class NetClientImpl implements NetClient {
     }
 
     @Override
+    public boolean isStreamed() {
+        return mChannel.isStreamed();
+    }
+
+    @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         return mChannel.read(buffer);
     }
 
     @Override
-    public void write(ByteBuffer buffer) throws IOException {
-        mChannel.write(buffer);
+    public int write(ByteBuffer buffer) throws IOException {
+        return mChannel.write(buffer);
     }
 
     @Override

@@ -1,7 +1,8 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
 import com.castle.util.closeables.Closeables;
-import com.flash3388.flashlib.net.channels.IncomingData;
+import com.flash3388.flashlib.net.channels.NetAddress;
+import com.flash3388.flashlib.net.channels.NetChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.net.channels.NetClient;
 import com.flash3388.flashlib.net.channels.NetServerChannel;
@@ -12,19 +13,14 @@ import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,14 +28,15 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
     private final NetChannelOpener<? extends NetServerChannel> mChannelOpener;
     private final ChannelUpdater mChannelUpdater;
+    private final KnownMessageTypes mMessageTypes;
     private final ChannelId mOurId;
+    private final Clock mClock;
     private final Logger mLogger;
 
     private final AtomicReference<ChannelData> mChannel;
     private final AtomicReference<Listener> mListener;
     private final Map<SelectionKey, ClientNode> mClients;
     private final ChannelListener mServerChannelListener;
-    private final ChannelListener mClientsChannelListener;
     private final ChannelOpenListener<NetServerChannel> mOpenListener;
     private boolean mStarted;
     private boolean mClosed;
@@ -52,7 +49,9 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                                       Logger logger) {
         mChannelOpener = channelOpener;
         mChannelUpdater = channelUpdater;
+        mMessageTypes = messageTypes;
         mOurId = ourId;
+        mClock = clock;
         mLogger = logger;
 
         messageTypes.put(PingMessage.TYPE);
@@ -61,7 +60,6 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         mListener = new AtomicReference<>();
         mClients = new HashMap<>();
         mServerChannelListener = new ServerChannelListenerImpl(this, logger);
-        mClientsChannelListener = new ClientChannelListenerImpl(this, messageTypes, ourId, clock, logger);
         mOpenListener = new OpenListenerImpl(this, logger);
         mStarted = false;
         mClosed = false;
@@ -103,12 +101,12 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         mLogger.debug("Queuing new message for all clients");
 
-        SendRequest request = new SendRequest(message, null, mOurId);
+        SendRequest request = new SendRequest(message, false);
         synchronized (mClients) {
             for (ClientNode node : mClients.values()) {
                 synchronized (node.outQueue) {
                     node.outQueue.add(request);
-                    node.registration.requestReadWriteUpdates();
+                    node.getRegistration().requestReadWriteUpdates();
                 }
             }
         }
@@ -141,16 +139,28 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private void onNewClient(NetClient client) {
         UpdateRegistration registration = null;
         try {
-            registration = client.register(mChannelUpdater, mClientsChannelListener);
+            ClientNode node = new ClientNode(client);
+            ChannelController channelController = new ClientChannelControllerImpl(this, node, mLogger);
+            ChannelListener channelListener = new BaseChannelListener(
+                    channelController,
+                    mMessageTypes,
+                    mOurId,
+                    mClock,
+                    mLogger,
+                    mChannelOpener.isTargetChannelStreaming());
 
-            ClientNode node = new ClientNode(client, registration);
+            registration = client.register(mChannelUpdater, channelListener);
+            node.registration.set(registration);
+
             mLogger.debug("New client connected {}", node);
 
             synchronized (mClients) {
                 mClients.put(registration.getKey(), node);
             }
 
-            registration.requestReadWriteUpdates();
+            synchronized (node.outQueue) {
+                registration.requestReadWriteUpdates();
+            }
         } catch (Throwable t) {
             mLogger.error("Error while trying to handle new client", t);
             Closeables.silentClose(client);
@@ -171,17 +181,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         Listener listener = mListener.get();
         if (!sender.isRegistered()) {
-            sender.id = header.getSender();
+            sender.id.set(header.getSender());
 
             // client is now registered, handle any queued messages.
-            sender.registration.requestReadWriteUpdates();
+            sender.getRegistration().requestReadWriteUpdates();
 
             mLogger.debug("First message from client {}, setting id={}",
                     sender, header.getSender());
 
             if (listener != null) {
                 try {
-                    listener.onClientConnected(sender.id);
+                    listener.onClientConnected(sender.getId());
                 } catch (Throwable ignored) {}
             }
         }
@@ -191,8 +201,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
             // resend the ping message with the same time
             synchronized (sender.outQueue) {
-                sender.outQueue.add(new SendRequest(message, null, mOurId));
-                sender.registration.requestReadWriteUpdates();
+                sender.outQueue.add(new SendRequest(message, false));
+                sender.getRegistration().requestReadWriteUpdates();
             }
 
             return;
@@ -210,38 +220,41 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         mLogger.debug("Directing new message to all other clients");
 
-        SendRequest request = new SendRequest(message, header, header.getSender());
+        SendRequest request = new SendRequest(header, message);
         synchronized (mClients) {
             for (ClientNode node : mClients.values()) {
-                if (node.registration.getKey().equals(sender.registration.getKey())) {
+                if (node.getRegistration().getKey().equals(sender.getRegistration().getKey())) {
                     continue;
                 }
 
                 synchronized (node.outQueue) {
                     node.outQueue.add(request);
-                    node.registration.requestReadWriteUpdates();
+                    node.getRegistration().requestReadWriteUpdates();
                 }
             }
         }
     }
 
-    private void disconnectClient(SelectionKey key, ClientNode node) {
+    private void disconnectClient(ClientNode node) {
         mLogger.debug("Disconnecting client {}", node);
 
+        // TODO: RACE WITH resetChannel
+
+        SelectionKey key = node.getRegistration().getKey();
         synchronized (mClients) {
             mClients.remove(key);
         }
 
         Closeables.silentClose(node.client);
         try {
-            node.registration.cancel();
+            node.getRegistration().cancel();
         } catch (Throwable ignore) {}
 
         Listener listener = mListener.get();
         if (listener != null && node.isRegistered()) {
             // if id is not null, then we did not report this channel as connected,
             // and such we will not report it as disconnected
-            listener.onClientDisconnected(node.id);
+            listener.onClientDisconnected(node.getId());
         }
     }
 
@@ -298,191 +311,107 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         }
     }
 
-    private static class ClientChannelListenerImpl implements ChannelListener {
+    private static class ClientChannelControllerImpl implements ChannelController {
 
         private final WeakReference<ServerMessagingChannelImpl> mChannel;
-        private final Clock mClock;
+        private final ClientNode mNode; // weak reference?
         private final Logger mLogger;
 
-        private final MessageReadingContext mReadingContext;
-        private final MessageSerializer mSerializer;
-        private final List<SendRequest> mWriteQueueLocal;
-
-        private ClientChannelListenerImpl(ServerMessagingChannelImpl channel,
-                                          KnownMessageTypes messageTypes,
-                                          ChannelId ourId,
-                                          Clock clock,
-                                          Logger logger) {
+        private ClientChannelControllerImpl(ServerMessagingChannelImpl channel, ClientNode node, Logger logger) {
             mChannel = new WeakReference<>(channel);
-            mClock = clock;
+            mNode = node;
             mLogger = logger;
-
-            mReadingContext = new MessageReadingContext(messageTypes, logger);
-            mSerializer = new MessageSerializer(ourId);
-            mWriteQueueLocal = new ArrayList<>();
         }
 
         @Override
-        public void onAcceptable(SelectionKey key) {
-            // unused
+        public NetChannel getChannel() {
+            return mNode.client;
         }
 
         @Override
-        public void onConnectable(SelectionKey key) {
-            // unused
-        }
-
-        @Override
-        public void onReadable(SelectionKey key) {
-            ServerMessagingChannelImpl ourChannel = mChannel.get();
-            if (ourChannel == null) {
-                mLogger.warn("MessagingChannel was garbage collected");
-                return;
+        public SendRequest getNextSendRequest() {
+            if (mNode.getRegistration() == null) {
+                mLogger.warn("next update requested when update registration not initialized");
+                return null;
             }
 
-            ClientNode client;
-            synchronized (ourChannel.mClients) {
-                client = ourChannel.mClients.get(key);
-            }
+            if (!mNode.isRegistered()) {
+                mLogger.warn("next update requested when client not registered");
 
-            if (client == null) {
-                // client was likely closed
-                mLogger.warn("Received read update on non-existing client {}", key);
-                return;
-            }
-
-            try {
-                IncomingData data = mReadingContext.readFromChannel(client.client);
-                if (data.getBytesReceived() >= 1) {
-                    mLogger.debug("New data from remote: {}, size={}",
-                            data.getSender(),
-                            data.getBytesReceived());
-                }
-
-                parseMessages(ourChannel, client);
-            } catch (ClosedChannelException e) {
-                mLogger.debug("Client channel reported closed");
-                ourChannel.disconnectClient(key, client);
-            } catch (IOException e) {
-                mLogger.error("Error while reading and processing new data", e);
-                ourChannel.disconnectClient(key, client);
-            }
-        }
-
-        @Override
-        public void onWritable(SelectionKey key) {
-            ServerMessagingChannelImpl ourChannel = mChannel.get();
-            if (ourChannel == null) {
-                mLogger.warn("MessagingChannel was garbage collected");
-                return;
-            }
-
-            ClientNode client;
-            synchronized (ourChannel.mClients) {
-                client = ourChannel.mClients.get(key);
-            }
-
-            if (client == null) {
-                // client was likely closed
-                mLogger.warn("Received write update on non-existing client {}", key);
-                return;
-            }
-
-            if (!client.isRegistered()) {
                 // not registered yet, don't send anything
-                client.registration.requestReadUpdates();
+                synchronized (mNode.outQueue) {
+                    mNode.getRegistration().requestReadUpdates();
+                }
+
+                return null;
+            }
+
+            SendRequest request;
+            synchronized (mNode.outQueue) {
+                request = mNode.outQueue.poll();
+                if (request == null) {
+                    mNode.getRegistration().requestReadUpdates();
+                    return null;
+                }
+            }
+            // TODO: BASE LISTENER NEEDS TO LOG INFO ABOUT SPECIFIC CHANNEL
+
+            return request;
+        }
+
+        @Override
+        public void resetChannel() {
+            ServerMessagingChannelImpl ourChannel = getBaseChannel();
+            if (ourChannel == null) {
                 return;
             }
 
-            mWriteQueueLocal.clear();
-            synchronized (client.outQueue) {
-                mWriteQueueLocal.addAll(client.outQueue);
-                client.outQueue.clear();
+            ourChannel.disconnectClient(mNode);
+        }
 
-                client.registration.requestReadUpdates();
+        @Override
+        public void onNewMessage(NetAddress address, MessageHeader header, Message message) {
+            ServerMessagingChannelImpl ourChannel = getBaseChannel();
+            if (ourChannel == null) {
+                return;
             }
 
-            for (SendRequest request : mWriteQueueLocal) {
-                MessageSerializer.SerializedMessage serialized;
-                // TODO: SPLIT MESSAGES THAT ARE TOO BIG IF NECESSARY
-                //  INTO MULTIPLE WRITE PARTS, THEY CAN SHARE AN HEADER THOUGH.
-                //  READING ALREADY HAS AN EXPANDING BUFFER SO IT SHOULD BE FINE
-                //  WRITING DOESN'T HAVE AN EXPANDING BUFFER, AND LET'S AVOID IT.
-                //  THOUGH IN ORDER TO SPLIT WE STILL NEED TO SERIALIZE FIRST?
-                // TODO: FOR READING, DON'T USE AN EXPANDING BUFFER, BUT RATHER USE
-                //     A STREAM THAT ALLOWS READING PARTS OF BYTES ONE BY ONE
-                //     THAT WAY WE DON'T NEED TO STORE ALL DATA AT ONCE?
-                //     HOW TO DO THAT THOUGH?
+            ourChannel.onNewMessage(mNode, header, message);
+        }
+
+        @Override
+        public void onMessageSendingFailed(Message message, Throwable cause) {
+            ServerMessagingChannelImpl ourChannel = getBaseChannel();
+            if (ourChannel == null) {
+                return;
+            }
+
+            Listener listener = ourChannel.mListener.get();
+            if (listener != null) {
                 try {
-                    if (request.header != null) {
-                        serialized = mSerializer.serialize(request.header, request.message);
-                    } else {
-                        Time now = mClock.currentTime();
-                        serialized = mSerializer.serialize(now, request.message, false);
-                    }
-                } catch (IOException e) {
-                    mLogger.error("Error serializing message data", e);
-
-                    Listener listener = ourChannel.mListener.get();
-                    if (listener != null) {
-                        try {
-                            listener.onMessageSendingFailed(request.senderId, request.message);
-                        } catch (Throwable ignore) {}
-                    }
-
-                    continue;
-                }
-
-                try {
-                    // TODO: DON'T SEND ALL REQUESTS AT ONCE AS SOCKET BUFFERS
-                    //  MAY NOT BE ABLE TO HANDLE THIS.
-                    //  WE CAN DETECT NOT FULL WRITE BY RETURN FROM WRITE DATA
-                    //  HOWEVER, FOR DATAGRAM CHANNELS, THIS MAY BE A PROBLEM AS
-                    //  IT SENDS MESSAGES AT BALK AND ALTHOUGH OUR READING CONTEXT
-                    //  HANDLES THIS, THE PROTOCOL DOESN'T ENSURE ORDER OR ARRIVAL.
-                    //  WE CAN LIMIT MESSAGE SIZE FOR DATAGRAM SPECIFICALLY.
-                    //  NEED TO CHANGE WORK WITH QUEUE TO NOT EMPTY IT ALL AT ONCE
-                    //  BUT RATHER ONE BY ONE FOR THIS TO WORK.
-                    //  CREATE A CLASS SHARED WITH OTHER IMPLS THAT IMPLEMENTS ALL OF THIS
-                    //  SAME FOR CLIENTS IMPLS
-                    // TODO: ADD MAGIC TO MESSAGE HEADER. IF FAILING TO PARSE A PART OF THE MESSAGE OR HEADER
-                    //  SKIP TO THE NEXT
-                    // TODO: MAKE SERIALIZABLE WORK WITH A CUSTOM OUT INTERFACE (AND IN)
-                    //      SERIALIZE USING A QUICK WAY (NO SUPPORT FOR AUTO OBJECTS YET)
-                    //      THIS WAY WE CAN SWITCH SERIALIZERS AND SUCH
-                    //      INITIAL IMPL BASED ON SIMPLE WRITING TO ByteBuffer
-                    mLogger.debug("Writing data to channel: client={}, size={}", client, serialized.getSize());
-                    serialized.writeInto(client.client);
-                } catch (IOException e) {
-                    mLogger.error("Error while writing data", e);
-                    ourChannel.disconnectClient(key, client);
-                    break;
-                }
+                    listener.onMessageSendingFailed(mNode.getId(), message, cause);
+                } catch (Throwable ignore) {}
             }
         }
 
         @Override
-        public void onRequestedUpdate(SelectionKey key, Object param) {
-            // unused
+        public void onChannelCustomUpdate(Object param) {
+
         }
 
-        private void parseMessages(ServerMessagingChannelImpl ourChannel, ClientNode sender) throws IOException {
-            boolean hasMoreToParse;
-            do {
-                Optional<MessageReadingContext.ParseResult> resultOptional = mReadingContext.parse();
-                if (resultOptional.isPresent()) {
-                    MessageReadingContext.ParseResult parseResult = resultOptional.get();
+        @Override
+        public void onChannelConnectable() {
 
-                    MessageHeader header = parseResult.getHeader();
-                    Message message = parseResult.getMessage();
+        }
 
-                    ourChannel.onNewMessage(sender, header, message);
+        private ServerMessagingChannelImpl getBaseChannel() {
+            ServerMessagingChannelImpl ourChannel = mChannel.get();
+            if (ourChannel == null) {
+                mLogger.warn("MessagingChannel was garbage collected");
+                return null;
+            }
 
-                    hasMoreToParse = true;
-                } else {
-                    hasMoreToParse = false;
-                }
-            } while (hasMoreToParse);
+            return ourChannel;
         }
     }
 
@@ -521,19 +450,27 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
     private static class ClientNode {
         public final NetClient client;
-        public final UpdateRegistration registration;
         public final Queue<SendRequest> outQueue;
-        public ChannelId id;
+        public final AtomicReference<UpdateRegistration> registration;
+        public final AtomicReference<ChannelId> id;
 
-        private ClientNode(NetClient client, UpdateRegistration registration) {
+        private ClientNode(NetClient client) {
             this.client = client;
-            this.registration = registration;
             this.outQueue = new ArrayDeque<>();
-            this.id = null;
+            this.registration = new AtomicReference<>();
+            this.id = new AtomicReference<>();
+        }
+
+        public UpdateRegistration getRegistration() {
+            return registration.get();
+        }
+
+        public ChannelId getId() {
+            return id.get();
         }
 
         public boolean isRegistered() {
-            return id != null;
+            return getId() != null;
         }
 
         @Override
@@ -549,18 +486,6 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         private ChannelData(NetServerChannel channel, UpdateRegistration registration) {
             this.channel = channel;
             this.registration = registration;
-        }
-    }
-
-    private static class SendRequest {
-        public final Message message;
-        public final MessageHeader header;
-        public final ChannelId senderId;
-
-        private SendRequest(Message message, MessageHeader header, ChannelId senderId) {
-            this.message = message;
-            this.header = header;
-            this.senderId = senderId;
         }
     }
 }

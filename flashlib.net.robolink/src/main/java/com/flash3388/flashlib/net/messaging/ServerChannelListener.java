@@ -54,7 +54,7 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
     }
 
     @Override
-    public void onMessageSendingFailed(ChannelId id, Message message) {
+    public void onMessageSendingFailed(ChannelId id, Message message, Throwable cause) {
         mLogger.error("Failed sending message (type={}) to client {}", message.getType().getKey(), id);
     }
 }

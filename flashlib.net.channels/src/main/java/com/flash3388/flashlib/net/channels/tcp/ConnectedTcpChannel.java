@@ -30,6 +30,11 @@ public class ConnectedTcpChannel implements NetChannel {
     }
 
     @Override
+    public boolean isStreamed() {
+        return true;
+    }
+
+    @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         int received = mChannel.read(buffer);
         if (received < 0) {
@@ -43,8 +48,8 @@ public class ConnectedTcpChannel implements NetChannel {
     }
 
     @Override
-    public void write(ByteBuffer buffer) throws IOException {
-        mChannel.write(buffer);
+    public int write(ByteBuffer buffer) throws IOException {
+        return mChannel.write(buffer);
     }
 
     @Override

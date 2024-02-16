@@ -82,6 +82,7 @@ public class MessageReadingContext {
             }
 
             ByteBuffer newBuffer = ByteBuffer.allocateDirect(newCapacity);
+            mDirectReadBuffer.flip();
             newBuffer.put(mDirectReadBuffer);
 
             mDirectReadBuffer = newBuffer;

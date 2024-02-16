@@ -49,6 +49,11 @@ public class UdpChannel implements RemoteConfigurableChannel {
     }
 
     @Override
+    public boolean isStreamed() {
+        return false;
+    }
+
+    @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
         SocketAddress remote = mChannel.receive(buffer);
         if (remote == null) {
@@ -62,13 +67,13 @@ public class UdpChannel implements RemoteConfigurableChannel {
     }
 
     @Override
-    public void write(ByteBuffer buffer) throws IOException {
+    public int write(ByteBuffer buffer) throws IOException {
         if (mRemoteAddress == null) {
             mLogger.warn("Cannot write if remote address not configured");
-            return;
+            return 0;
         }
 
-        mChannel.send(buffer, mRemoteAddress);
+        return mChannel.send(buffer, mRemoteAddress);
     }
 
     @Override

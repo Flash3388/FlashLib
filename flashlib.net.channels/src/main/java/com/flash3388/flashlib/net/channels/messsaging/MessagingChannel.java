@@ -8,7 +8,7 @@ public interface MessagingChannel extends BaseMessagingChannel {
         void onConnect();
         void onDisconnect();
         void onNewMessage(MessageHeader header, Message message);
-        void onMessageSendingFailed(Message message);
+        void onMessageSendingFailed(Message message, Throwable cause);
     }
 
     void setListener(Listener listener);
