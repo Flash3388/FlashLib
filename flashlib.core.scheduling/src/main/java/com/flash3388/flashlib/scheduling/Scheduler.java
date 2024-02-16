@@ -114,7 +114,53 @@ import java.util.function.Predicate;
  *     The behaviour of such actions which request requirements other then the associated subsystem is
  *     not defined at the moment, and should be avoided.
  * </p>
+ * <p>
+ *     {@link ActionGroup ActionGroups} are a combination of multiple different actions under a single action.
+ *     Depending on the specific group, actions may be executed in specific orders and combinations. One example of
+ *     usage is using it to run a set of actions is sequence. Although each group has its own combination and
+ *     order, all actions in a group will be executed in a manner consistent with general execution of actions.
+ *     This includes the different action state. Requirements may be managed differently however, as groups, even
+ *     if not immediately require it, may request to <em>acquire</em> the requirements of all actions attached to them.
+ *     As such, combining the execution of a group, alongside other actions, while sharing requirements, is not possible.
+ *     This is generally caused due to the scheduler observing the group as a single executed action.
+ * </p>
+ * <p>
+ *     {@link Trigger Triggers} are condition-based activators of {@link Action Actions}. One may be created with
+ *     {@link #newTrigger(BooleanSupplier)} or {@link #newManualTrigger()}. Once holding a trigger, actions
+ *     may be attached to it to start or stop at specific situation defined by the associated state of the trigger.
+ *     Generally, trigger can either be active, or inactive, and as such, actions may be scheduled to run
+ *     when the trigger transitions to active (e.g. {@link Trigger#whenActive(Action)} and more.
+ * </p>
+ * <p>
+ *     The scheduler recognized a general run state in {@link SchedulerMode}. This allows defining runtime situations
+ *     to the scheduler, and thus affecting the execution of actions. Schedulers must be supplied with this mode
+ *     during calls to {@link #run(SchedulerMode)}. If this mode has changed after a call to {@link #run(SchedulerMode)},
+ *     a subsequent call to {@link #run(SchedulerMode)} is required to update it.
  *
+ *     The mode has the following affects:
+ *     <ul>
+ *         <li>
+ *             If the mode defines {@link SchedulerMode#isDisabled()} as <b>true</b>
+ *             any actions not defined with {@link ActionFlag#RUN_ON_DISABLED} will be <em>cancelled</em> with
+ *             {@link FinishReason#CANCELED}.
+ *         </li>
+ *     </ul>
+ * </p>
+ * <p>
+ *     Actions may be handled from withing other actions. This includes pretty much any call to the scheduler. e.g.
+ *     an action may start another action from within it's code.
+ *     <pre>
+ *          {@literal @}Override
+ *          public void execute() {
+ *              otherAction.start();
+ *          }
+ *     </pre>
+ *
+ *     However, in such a case, <em>otherAction</em> will most likely not start immediately, although that is entirely
+ *     implementation dependent; but generally, there is no guarantee as to the execution of <em>otherAction</em> in relation
+ *     to the action starting it, and as such, one should not rely on <em>otherAction</em> starting (or stopping, depending on the
+ *     specific call) by the next call to <em>execute</em> or even in the lifecycle of the calling action.
+ * </p>
  *
  * @since FlashLib 1.0.0
  */
@@ -324,7 +370,23 @@ public interface Scheduler {
     void run(SchedulerMode mode);
 
     /**
-     * Creates a new trigger for registering action activation to a condition.
+     * <p>
+     *     Creates a new trigger for registering action activation to a condition. The supplied
+     *     condition determines the <em>active</em> state of the trigger, and is checked automatically.
+     *     Attached actions are started and stopped as defined by their attachment and the condition.
+     * </p>
+     * <p>
+     *     The frequency of checks of the given condition is implementation dependent, and as such
+     *     delays may exist between the change of the condition, and the the trigger's state being changed.
+     * </p>
+     * <p>
+     *     The trigger's initial state is inactive. If the condition is <b>true</b> at creation time,
+     *     the trigger will only be updated at it's next check.
+     * </p>
+     * <p>
+     *     Actions attached to this trigger will be started or cancelled in a manner defined by {@link #start(Action)} and
+     *     {@link #cancel(Action)}.
+     * </p>
      *
      * @param condition when <b>true</b> marks the trigger as <em>active</em>,
      *                  when <b>false</b> marks the trigger as <em>inactive</em>.
@@ -334,7 +396,18 @@ public interface Scheduler {
     Trigger newTrigger(BooleanSupplier condition);
 
     /**
-     * Creates a new trigger which can be activated or deactivated manually.
+     * <p>
+     *     Creates a new trigger which can be activated or deactivated manually. The active/inactive state
+     *     of the trigger is controller by user calls to {@link ManualTrigger#activate()} and {@link ManualTrigger#deactivate()}.
+     *     Associated actions are affected accordingly.
+     * </p>
+     * <p>
+     *     The trigger's initial state is inactive.
+     * </p>
+     * <p>
+     *     Actions attached to this trigger will be started or cancelled in a manner defined by {@link #start(Action)} and
+     *     {@link #cancel(Action)}.
+     * </p>
      *
      * @return {@link ManualTrigger}
      */
@@ -342,7 +415,15 @@ public interface Scheduler {
     ManualTrigger newManualTrigger();
 
     /**
-     * Creates a new group for executing a set of actions in a specific order.
+     * <p>
+     *     Creates a new group for executing a set of actions in a specific order and combination.
+     *     The exact manner of execution is dependent on the behaviour of the group, but generally at least conforms
+     *     to the basic execution manner of normal actions.
+     * </p>
+     * <p>
+     *     When executing actions as part of a group, the scheduler may only recognize the group as the action
+     *     being executed.
+     * </p>
      *
      * @param type type of group to create. Influences the execution order and flow.
      * @return action group.

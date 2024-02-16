@@ -10,6 +10,7 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public class DelegatingAppBase implements FlashLibControl {
 
@@ -62,5 +63,10 @@ public class DelegatingAppBase implements FlashLibControl {
     @Override
     public Watchdog newWatchdog(String name, Time timeout) {
         return mControl.newWatchdog(name, timeout);
+    }
+
+    @Override
+    public Thread newThread(String name, Consumer<? super FlashLibControl> runnable) {
+        return mControl.newThread(name, runnable);
     }
 }

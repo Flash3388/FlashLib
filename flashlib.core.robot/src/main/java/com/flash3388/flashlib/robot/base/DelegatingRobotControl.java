@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.robot.base;
 
+import com.flash3388.flashlib.app.FlashLibControl;
 import com.flash3388.flashlib.app.ServiceRegistry;
 import com.flash3388.flashlib.app.net.NetworkInterface;
 import com.flash3388.flashlib.app.watchdog.FeedReporter;
@@ -17,6 +18,7 @@ import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * A helper class for robot bases to allow them having a more comfortable
@@ -129,5 +131,10 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public Watchdog newWatchdog(String name, Time timeout) {
         return mRobotControl.newWatchdog(name, timeout);
+    }
+
+    @Override
+    public Thread newThread(String name, Consumer<? super FlashLibControl> runnable) {
+        return mRobotControl.newThread(name, runnable);
     }
 }
