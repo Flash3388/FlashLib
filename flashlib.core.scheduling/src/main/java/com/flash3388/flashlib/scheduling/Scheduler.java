@@ -15,12 +15,13 @@ import java.util.function.Predicate;
  * Scheduler is the executor for FlashLib's scheduling component. It is responsible for executing all
  * running actions (as described by {@link Action}) and managing their requirements.
  * <p>
- *     Each action is described by an instance {@link Action}. Different instances of the same class
+ *     Each action is described by an instance of {@link Action}. Different instances of the same class
  *     are seen as different {@link Action Actions}.
  * </p>
  * <p>
- *     Actions have {@link Requirement} being associated to them. These <em>dependencies</em> can be used
- *     to ensure that no two actions use the same requirement at the same time.
+ *     Actions can have {@link Requirement Requirements} associated to them. These <em>dependencies</em> can be used
+ *     to ensure that no two actions use the same requirement at the same time, similarly to how one might want
+ *     to prevent two code segments from using the same resource simultaneously.
  *     Only one executing action may be associated with each one declared {@link Requirement}. One action
  *     may have multiple associated {@link Requirement Requirements} to it. It is no necessary to register
  *     {@link Requirement Requirements} with the scheduler as they are discovered when starting actions.
@@ -28,7 +29,7 @@ import java.util.function.Predicate;
  * <p>
  *     A <em>requirement conflict</em> is a situation wherein two different actions are requesting to run while sharing at
  *     least one requirement. Such situations may occur when a new action is asked to run while an already running action
- *     already has acquired at least one of the requirements requested by the new action, or perhaps when two actions
+ *     has acquired at least one of the requirements requested by the new action, or perhaps when two actions
  *     transition to an execution state while sharing some requirements. It is acceptable for users to intentionally cause
  *     a conflict as a way to change the execution state of actions.
  *
@@ -51,35 +52,38 @@ import java.util.function.Predicate;
  *     Actions have different states in the scheduler:
  *     <ul>
  *         <li>
- *             Pending actions are actions requested to execute, but haven't started execution yet.
- *             This is evident by the action methods not having been called.
- *             Such a state is usually the result of a current execution state that doesn't permit
+ *             <em>Pending</em> actions are actions which the scheduler was requested to execute, but hasn't started execution yet.
+ *             This is evident by the action user methods (e.g. {@link Action#initialize(ActionControl)}) not having been called.
+ *             Such a state is usually the result of either a current execution state that doesn't permit
  *             starting a new action, an implementation preference to delay execution, or
  *             due to a conflict with another actions marked by {@link ActionFlag#PREFERRED_FOR_REQUIREMENTS}.
  *             Actions may be cancelled or terminated during their pending state, meaning that they never got to execute
  *             and no user code ran.
+ *             It is important to note that such actions (and their user-code) will not called no matter the situation,
+ *             unless transferred to an executing state.
  *         </li>
  *         <li>
- *             Executing actions are actions whose code is being run by the scheduler, such that user code is called.
+ *             <em>Executing</em> actions are actions whose code is being currently executed by the scheduler, such that user code is called.
  *             Only running actions really hold onto requirements, so only when actions start their execution do they
  *             acquire their associated requirements. It is guaranteed that {@link Action#end(FinishReason)} will
- *             be called for any running action finished or having been cancelled.
+ *             be called for any executing action has finished or have been cancelled.
  *         </li>
  *         <li>
- *             Not running actions are actions which are not stored in the scheduler as either pending or executing.
+ *             <em>Not running</em> actions are actions which are not stored in the scheduler as either pending or executing.
  *             Such is the case for actions which either finished execution or have not started execution yet.
  *         </li>
  *     </ul>
  * </p>
  * <p>
  *     There are several ways by which an action may end its execution. These are divided into two categories:
- *     <em>finish</em> and <em>interrupt</em>.
+ *     <em>finish</em> and <em>interrupt</em>. When an executing action is ended, {@link Action#end(FinishReason)} is called
+ *     with the reason for the end.
  *     <ul>
  *         <li>
  *             <em>Finish</em> end refers to situations where the action stops by the request of the action itself,
  *             via the invocation of {@link ActionControl#finish()}. These are considered the most graceful
- *             end situations, as these occur by the request of the action and thus are likely due to the action
- *             actually finishing its intended job.
+ *             end situations, as these occur at the request of the action and thus are likely due to the action
+ *             actually finishing its intended job. Leads to {@link FinishReason#FINISHED}.
  *         </li>
  *         <li>
  *             <em>Interrupt</em> end refers to situations where the actions stops at the request of an outside
@@ -90,7 +94,7 @@ import java.util.function.Predicate;
  *                     or via the action invoking {@link ActionControl#cancel()}. Leads to {@link FinishReason#CANCELED}.
  *                 </li>
  *                 <li>
- *                     <em>conflict interrupt</em>, caused when the scheduler detects a conflicts which was determined to
+ *                     <em>conflict interrupt</em>, caused when the scheduler detects a conflicts which were determined to
  *                     be handled by cancelling one of the actions. Leads to {@link FinishReason#CANCELED}.
  *                 </li>
  *                 <li>
@@ -108,19 +112,19 @@ import java.util.function.Predicate;
  * <p>
  *     Default actions are actions associated directly with a {@link Subsystem}. Such actions are special, as in
  *     that they are automatically executed whenever no action has acquired the associated {@link Subsystem}.
- *     {@link Subsystem} is simple a special-case {@link Requirement}.
- *     Default actions will not forcibly attempt to acquire their associated requirements, and will await
- *     until it is released by other actions.
- *     The behaviour of such actions which request requirements other then the associated subsystem is
+ *     {@link Subsystem} is simply a special-case {@link Requirement}.
+ *     Default actions will not forcibly attempt to acquire their wanted requirements, and will await
+ *     until these requirements are released by other actions.
+ *     The behaviour of default actions which request requirements other then the associated subsystem is
  *     not defined at the moment, and should be avoided.
  * </p>
  * <p>
  *     {@link ActionGroup ActionGroups} are a combination of multiple different actions under a single action.
- *     Depending on the specific group, actions may be executed in specific orders and combinations. One example of
- *     usage is using it to run a set of actions is sequence. Although each group has its own combination and
+ *     Depending on the specific group, actions may be executed in different order and in different combinations. One example of
+ *     usage is to run a set of actions in sequence. Although each group has its own combination and
  *     order, all actions in a group will be executed in a manner consistent with general execution of actions.
- *     This includes the different action state. Requirements may be managed differently however, as groups, even
- *     if not immediately require it, may request to <em>acquire</em> the requirements of all actions attached to them.
+ *     This includes the different action states. Requirements may be managed differently however, as even if groups
+ *     do not immediately require them, they may non-the-less request to <em>acquire</em> the requirements of all actions attached to them.
  *     As such, combining the execution of a group, alongside other actions, while sharing requirements, is not possible.
  *     This is generally caused due to the scheduler observing the group as a single executed action.
  * </p>
@@ -128,11 +132,11 @@ import java.util.function.Predicate;
  *     {@link Trigger Triggers} are condition-based activators of {@link Action Actions}. One may be created with
  *     {@link #newTrigger(BooleanSupplier)} or {@link #newManualTrigger()}. Once holding a trigger, actions
  *     may be attached to it to start or stop at specific situation defined by the associated state of the trigger.
- *     Generally, trigger can either be active, or inactive, and as such, actions may be scheduled to run
- *     when the trigger transitions to active (e.g. {@link Trigger#whenActive(Action)} and more.
+ *     Generally, triggers can either be active, or inactive, and as such, actions may be scheduled to run
+ *     when the trigger transitions between the states (e.g. {@link Trigger#whenActive(Action)}.
  * </p>
  * <p>
- *     The scheduler recognized a general run state in {@link SchedulerMode}. This allows defining runtime situations
+ *     The scheduler recognizes a general run state in {@link SchedulerMode}. This allows defining runtime situations
  *     to the scheduler, and thus affecting the execution of actions. Schedulers must be supplied with this mode
  *     during calls to {@link #run(SchedulerMode)}. If this mode has changed after a call to {@link #run(SchedulerMode)},
  *     a subsequent call to {@link #run(SchedulerMode)} is required to update it.
@@ -361,7 +365,9 @@ public interface Scheduler {
      * <p>
      *     Different implementations of the scheduler may use this method more
      *     or less often depending on the execution model of the implementation.
-     *     It is recommended to invoke this method as fast as possible (~ 20ms).
+     *     To keep consistent behaviour and functionality, this method should be
+     *     invoked consistently every few milliseconds (~20 ms), though it is not required; however failing
+     *     to do so, may impact the functionality of the scheduler.
      * </p>
      *
      * @param mode current mode for the scheduler.
