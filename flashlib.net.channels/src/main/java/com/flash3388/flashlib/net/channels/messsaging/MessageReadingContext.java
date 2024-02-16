@@ -11,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class MessageReadingContext {
 
     private final KnownMessageTypes mMessageTypes;
     private final Logger mLogger;
+    private final byte[] mMessageHeaderMagic;
 
     private ByteBuffer mDirectReadBuffer;
     private byte[] mReadBuffer;
@@ -49,6 +51,7 @@ public class MessageReadingContext {
         mMessageTypes = messageTypes;
         mLogger = logger;
 
+        mMessageHeaderMagic = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(MessageHeader.MAGIC).array();
         mDirectReadBuffer = ByteBuffer.allocateDirect(START_READ_BUFFER_CAP);
         mReadBuffer = new byte[START_READ_BUFFER_CAP];
 
@@ -92,6 +95,16 @@ public class MessageReadingContext {
             // need to read header
             if (mDirectReadBuffer.position() >= MessageHeader.SIZE) {
                 mLogger.trace("Enough bytes to read header");
+
+                mDirectReadBuffer.flip();
+                boolean foundMagic = findAndMoveToNextHeader();
+                if (!foundMagic) {
+                    // no header found in data
+                    mLogger.trace("Header magic was not found in data, ignoring data");
+                    mDirectReadBuffer.compact();
+                    return Optional.empty();
+                }
+
                 mLastHeader = readHeader();
             } else {
                 // not enough bytes to read header, so try again later when we have enough
@@ -109,6 +122,8 @@ public class MessageReadingContext {
             } catch (NoSuchElementException e) {
                 // ignore this message and inform
                 mLogger.warn("Received unknown message. Ignoring it");
+            } catch (Throwable t) {
+                mLogger.error("Error parsing message", t);
             } finally {
                 mLastHeader = null;
             }
@@ -120,7 +135,6 @@ public class MessageReadingContext {
     }
 
     private MessageHeader readHeader() throws IOException {
-        mDirectReadBuffer.flip();
         mDirectReadBuffer.get(mReadBuffer, 0, MessageHeader.SIZE);
         mDirectReadBuffer.compact();
 
@@ -155,5 +169,34 @@ public class MessageReadingContext {
 
             return new ParseResult(header, message);
         }
+    }
+
+    private boolean findAndMoveToNextHeader() {
+        // TODO: IMPROVE ALGORITHM
+        // we need to search in a byte granularity, as we can't trust alignment of data received.
+
+        mLogger.trace("Starting search for magic: firstByte={}", mMessageHeaderMagic[0]);
+
+        byte firstByte;
+        do {
+            firstByte = mDirectReadBuffer.get();
+            if (firstByte == mMessageHeaderMagic[0]) {
+                int startPosition = mDirectReadBuffer.position() - 1;
+                mLogger.trace("Found first header byte at {}", startPosition + 1);
+                // possible starting position of the magic
+                // return to starting position
+                mDirectReadBuffer.position(startPosition);
+                int value = mDirectReadBuffer.getInt();
+                // return to starting position
+                mDirectReadBuffer.position(startPosition);
+
+                if (value == MessageHeader.MAGIC) {
+                    mLogger.trace("Found magic at {}", startPosition + 1);
+                    return true;
+                }
+            }
+        } while (firstByte != mMessageHeaderMagic[0] && mDirectReadBuffer.hasRemaining());
+
+        return false;
     }
 }

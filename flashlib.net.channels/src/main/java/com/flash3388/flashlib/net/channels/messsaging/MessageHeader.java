@@ -9,9 +9,10 @@ import java.io.IOException;
 
 public class MessageHeader {
 
-    public static final int SIZE = 1 + Integer.BYTES * 3 + Long.BYTES + ChannelId.SIZE;
+    public static final int SIZE = 1 + Integer.BYTES * 4 + Long.BYTES + ChannelId.SIZE;
 
-    static final int VERSION = 1;
+    public static final int MAGIC = 0x13327132;
+    private static final int VERSION = 1;
 
     private final int mContentSize;
     private final ChannelId mSender;
@@ -28,6 +29,11 @@ public class MessageHeader {
     }
 
     public MessageHeader(DataInput dataInput) throws IOException {
+        int magic = dataInput.readInt();
+        if (magic != MAGIC) {
+            throw new IOException("message header bad magic: " + magic);
+        }
+
         int version = dataInput.readInt();
         if (version != VERSION) {
             throw new IOException("message header version mismatch: " + version);
@@ -62,6 +68,7 @@ public class MessageHeader {
     }
 
     public void writeTo(DataOutput dataOutput) throws IOException {
+        dataOutput.writeInt(MAGIC);
         dataOutput.writeInt(VERSION);
         dataOutput.writeInt(mContentSize);
         mSender.writeInto(dataOutput);
