@@ -138,7 +138,7 @@ public class MessageReadingContext {
         mDirectReadBuffer.get(mReadBuffer, 0, MessageHeader.SIZE);
         mDirectReadBuffer.compact();
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer, 0, MessageHeader.SIZE);
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             return new MessageHeader(dataInputStream);
         }
@@ -158,7 +158,7 @@ public class MessageReadingContext {
         mDirectReadBuffer.get(mReadBuffer, 0, header.getContentSize());
         mDirectReadBuffer.compact();
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer);
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(mReadBuffer, 0, header.getContentSize());
              DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             MessageType type = mMessageTypes.get(header.getMessageType());
             Message message = type.read(dataInputStream);
