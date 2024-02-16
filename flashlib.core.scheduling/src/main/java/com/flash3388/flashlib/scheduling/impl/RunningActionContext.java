@@ -72,6 +72,10 @@ public class RunningActionContext {
         return mExecutionState.getRunTime();
     }
 
+    public Time getTimeLeft() {
+        return mExecutionState.getTimeLeft();
+    }
+
     public void markStarted() {
         mExecutionState.markStarted();
     }
