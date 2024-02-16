@@ -2,7 +2,6 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
-import com.flash3388.flashlib.scheduling.ActionHasPreferredException;
 import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
@@ -14,9 +13,7 @@ import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.ManualBasedTrigger;
-import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionControllerImpl;
-import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Clock;
@@ -386,7 +383,7 @@ public class SingleThreadedScheduler implements Scheduler {
                     LOGGER.warn("Action {} has conflict with (PREFERRED) {} on {}. Not canceling old, must wait for it to finish.",
                             context, current, requirement);
 
-                    throw new ActionHasPreferredException();
+                    return null;
                 }
 
                 conflicts.add(currentContext);
@@ -414,28 +411,28 @@ public class SingleThreadedScheduler implements Scheduler {
             return false;
         }
 
-        try {
-            Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
-            conflicts.forEach((conflict)-> {
-                cancelAndEnd(conflict);
-                mRunningActions.remove(conflict.getAction());
-
-                LOGGER.warn("Action {} has conflict with {}. Canceling old.",
-                        context, conflict);
-            });
-
-            // no conflicts, let's start
-
-            context.markStarted();
-            setOnRequirements(context);
-            mRunningActions.put(context.getAction(), context);
-
-            LOGGER.debug("Action {} started running", context);
-
-            return true;
-        } catch (ActionHasPreferredException e) {
+        Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
+        if (conflicts == null) {
             return false;
         }
+
+        conflicts.forEach((conflict)-> {
+            cancelAndEnd(conflict);
+            mRunningActions.remove(conflict.getAction());
+
+            LOGGER.warn("Action {} has conflict with {}. Canceling old.",
+                    context, conflict);
+        });
+
+        // no conflicts, let's start
+
+        context.markStarted();
+        setOnRequirements(context);
+        mRunningActions.put(context.getAction(), context);
+
+        LOGGER.debug("Action {} started running", context);
+
+        return true;
     }
 
     private boolean canStartDefaultAction(Action action) {
