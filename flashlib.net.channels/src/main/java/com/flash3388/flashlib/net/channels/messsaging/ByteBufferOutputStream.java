@@ -1,5 +1,7 @@
 package com.flash3388.flashlib.net.channels.messsaging;
 
+import com.jmath.ExtendedMath;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -46,7 +48,7 @@ public class ByteBufferOutputStream extends OutputStream {
             return;
         }
 
-        int neededCapacity = mBuffer.capacity() + amountWanted; // TODO: ROUND TO 1024
+        int neededCapacity = (int) ExtendedMath.roundToMultiplier(mBuffer.capacity() + amountWanted, 1024, true);
         int newCapacity = Math.min(Math.max(mBuffer.capacity() * 2, neededCapacity), mMaxCapacity);
         if (newCapacity >= mMaxCapacity || newCapacity < neededCapacity) {
             throw new IOException("buffer has reached maximum allowed capacity");

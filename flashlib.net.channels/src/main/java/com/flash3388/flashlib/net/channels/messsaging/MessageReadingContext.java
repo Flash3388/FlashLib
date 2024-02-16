@@ -173,7 +173,6 @@ public class MessageReadingContext {
     }
 
     private boolean findAndMoveToNextHeader() {
-        // TODO: IMPROVE ALGORITHM
         // we need to search in a byte granularity, as we can't trust alignment of data received.
 
         mLogger.trace("Starting search for magic: firstByte={}", mMessageHeaderMagic[0]);

@@ -238,8 +238,6 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private void disconnectClient(ClientNode node) {
         mLogger.debug("Disconnecting client {}", node);
 
-        // TODO: RACE WITH resetChannel
-
         SelectionKey key = node.getRegistration().getKey();
         synchronized (mClients) {
             mClients.remove(key);
@@ -354,13 +352,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     return null;
                 }
             }
-            // TODO: BASE LISTENER NEEDS TO LOG INFO ABOUT SPECIFIC CHANNEL
 
             return request;
         }
 
         @Override
         public void resetChannel() {
+            if (mNode.getRegistration() == null) {
+                mLogger.warn("reset requested when update registration not initialized");
+                return;
+            }
+
             ServerMessagingChannelImpl ourChannel = getBaseChannel();
             if (ourChannel == null) {
                 return;
