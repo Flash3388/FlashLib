@@ -106,7 +106,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             for (ClientNode node : mClients.values()) {
                 synchronized (node.outQueue) {
                     node.outQueue.add(request);
-                    node.getRegistration().requestReadWriteUpdates();
+                    node.registration.requestReadWriteUpdates();
                 }
             }
         }
@@ -150,7 +150,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
                     mChannelOpener.isTargetChannelStreaming());
 
             registration = client.register(mChannelUpdater, channelListener);
-            node.registration.set(registration);
+            node.registration = registration;
 
             mLogger.debug("New client connected {}", node);
 
@@ -181,17 +181,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         Listener listener = mListener.get();
         if (!sender.isRegistered()) {
-            sender.id.set(header.getSender());
+            sender.id = header.getSender();
 
             // client is now registered, handle any queued messages.
-            sender.getRegistration().requestReadWriteUpdates();
+            sender.registration.requestReadWriteUpdates();
 
             mLogger.debug("First message from client {}, setting id={}",
                     sender, header.getSender());
 
             if (listener != null) {
                 try {
-                    listener.onClientConnected(sender.getId());
+                    listener.onClientConnected(sender.id);
                 } catch (Throwable ignored) {}
             }
         }
@@ -202,7 +202,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             // resend the ping message with the same time
             synchronized (sender.outQueue) {
                 sender.outQueue.add(new SendRequest(message, false));
-                sender.getRegistration().requestReadWriteUpdates();
+                sender.registration.requestReadWriteUpdates();
             }
 
             return;
@@ -223,13 +223,13 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
         SendRequest request = new SendRequest(header, message);
         synchronized (mClients) {
             for (ClientNode node : mClients.values()) {
-                if (node.getRegistration().getKey().equals(sender.getRegistration().getKey())) {
+                if (node.registration.getKey().equals(sender.registration.getKey())) {
                     continue;
                 }
 
                 synchronized (node.outQueue) {
                     node.outQueue.add(request);
-                    node.getRegistration().requestReadWriteUpdates();
+                    node.registration.requestReadWriteUpdates();
                 }
             }
         }
@@ -238,21 +238,21 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private void disconnectClient(ClientNode node) {
         mLogger.debug("Disconnecting client {}", node);
 
-        SelectionKey key = node.getRegistration().getKey();
+        SelectionKey key = node.registration.getKey();
         synchronized (mClients) {
             mClients.remove(key);
         }
 
         Closeables.silentClose(node.client);
         try {
-            node.getRegistration().cancel();
+            node.registration.cancel();
         } catch (Throwable ignore) {}
 
         Listener listener = mListener.get();
         if (listener != null && node.isRegistered()) {
             // if id is not null, then we did not report this channel as connected,
             // and such we will not report it as disconnected
-            listener.onClientDisconnected(node.getId());
+            listener.onClientDisconnected(node.id);
         }
     }
 
@@ -328,7 +328,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         @Override
         public SendRequest getNextSendRequest() {
-            if (mNode.getRegistration() == null) {
+            if (mNode.registration == null) {
                 mLogger.warn("next update requested when update registration not initialized");
                 return null;
             }
@@ -338,7 +338,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
                 // not registered yet, don't send anything
                 synchronized (mNode.outQueue) {
-                    mNode.getRegistration().requestReadUpdates();
+                    mNode.registration.requestReadUpdates();
                 }
 
                 return null;
@@ -348,7 +348,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             synchronized (mNode.outQueue) {
                 request = mNode.outQueue.poll();
                 if (request == null) {
-                    mNode.getRegistration().requestReadUpdates();
+                    mNode.registration.requestReadUpdates();
                     return null;
                 }
             }
@@ -358,7 +358,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         @Override
         public void resetChannel() {
-            if (mNode.getRegistration() == null) {
+            if (mNode.registration == null) {
                 mLogger.warn("reset requested when update registration not initialized");
                 return;
             }
@@ -391,7 +391,7 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             Listener listener = ourChannel.mListener.get();
             if (listener != null) {
                 try {
-                    listener.onMessageSendingFailed(mNode.getId(), message, cause);
+                    listener.onMessageSendingFailed(mNode.id, message, cause);
                 } catch (Throwable ignore) {}
             }
         }
@@ -453,26 +453,18 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
     private static class ClientNode {
         public final NetClient client;
         public final Queue<SendRequest> outQueue;
-        public final AtomicReference<UpdateRegistration> registration;
-        public final AtomicReference<ChannelId> id;
+        public UpdateRegistration registration;
+        public ChannelId id;
 
         private ClientNode(NetClient client) {
             this.client = client;
             this.outQueue = new ArrayDeque<>();
-            this.registration = new AtomicReference<>();
-            this.id = new AtomicReference<>();
-        }
-
-        public UpdateRegistration getRegistration() {
-            return registration.get();
-        }
-
-        public ChannelId getId() {
-            return id.get();
+            this.registration = null;
+            this.id = null;
         }
 
         public boolean isRegistered() {
-            return getId() != null;
+            return id != null;
         }
 
         @Override
