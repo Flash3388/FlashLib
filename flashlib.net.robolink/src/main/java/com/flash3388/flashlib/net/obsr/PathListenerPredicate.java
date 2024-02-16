@@ -1,10 +1,8 @@
 package com.flash3388.flashlib.net.obsr;
 
-import com.notifier.Event;
-
 import java.util.function.Predicate;
 
-public class PathListenerPredicate implements Predicate<Event> {
+public class PathListenerPredicate implements Predicate<EntryModificationEvent> {
 
     private final String mPath;
 
@@ -13,8 +11,7 @@ public class PathListenerPredicate implements Predicate<Event> {
     }
 
     @Override
-    public boolean test(Event event) {
-        return event instanceof EntryModificationEvent &&
-                ((EntryModificationEvent)event).getPath().startsWith(mPath);
+    public boolean test(EntryModificationEvent event) {
+        return event.getPath().startsWith(mPath);
     }
 }

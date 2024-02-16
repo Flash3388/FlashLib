@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.beans.observables.RegisteredListener;
 import com.castle.concurrent.service.Service;
+import com.notifier.RegisteredListener;
 
 import java.util.Collection;
 import java.util.Set;

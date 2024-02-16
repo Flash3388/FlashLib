@@ -1,21 +1,16 @@
 package com.flash3388.flashlib.net.obsr;
 
 import com.beans.observables.ObservableValue;
-import com.beans.observables.RegisteredListener;
 import com.beans.observables.binding.ObservableBinding;
 import com.beans.observables.binding.PropertyBindingController;
 import com.beans.observables.listeners.ChangeEvent;
 import com.beans.observables.listeners.ChangeListener;
 import com.beans.observables.listeners.ObservableEventController;
-import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.beans.observables.properties.ObservableProperty;
 import com.beans.observables.properties.ObservablePropertyBase;
-import com.flash3388.flashlib.net.obsr.Storage;
-import com.flash3388.flashlib.net.obsr.StoragePath;
-import com.flash3388.flashlib.net.obsr.Value;
-import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.notifier.Event;
 import com.notifier.EventController;
+import com.notifier.RegisteredListener;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -92,8 +87,7 @@ public class EntryValueObservableProperty extends ObservablePropertyBase<Value> 
 
         @Override
         public RegisteredListener addListener(ChangeListener<? super Value> listener) {
-            mEventController.registerListener(listener, mEventPredicate);
-            return new RegisteredListenerImpl(mEventController, listener);
+            return mEventController.registerListener(listener, mEventPredicate);
         }
 
         @Override

@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.hfcs;
 
-import com.beans.observables.RegisteredListener;
+import com.notifier.RegisteredListener;
 
 /**
  * Control and management of incoming HFCS data.

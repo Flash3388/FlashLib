@@ -1,8 +1,7 @@
 package com.flash3388.flashlib.net.hfcs;
 
-import com.beans.observables.RegisteredListener;
-import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.notifier.EventController;
+import com.notifier.RegisteredListener;
 
 class RegisteredIncomingImpl<T> implements HfcsRegisteredIncoming<T> {
 
@@ -16,12 +15,9 @@ class RegisteredIncomingImpl<T> implements HfcsRegisteredIncoming<T> {
 
     @Override
     public RegisteredListener addListener(HfcsInListener<T> listener) {
-        mEventController.registerListener(listener, (event)-> {
-            //noinspection rawtypes
-            return event instanceof BaseHfcsInEvent &&
-                    ((BaseHfcsInEvent)event).getType().getKey() == mType.getKey();
-        });
-
-        return new RegisteredListenerImpl(mEventController, listener);
+        return mEventController.registerListenerForEvent(
+                listener,
+                BaseHfcsInEvent.class,
+                (event)-> event.getType().getKey() == mType.getKey());
     }
 }

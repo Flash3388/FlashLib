@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.beans.observables.RegisteredListener;
-import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.castle.util.closeables.Closeables;
@@ -19,6 +17,7 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.notifier.Controllers;
 import com.notifier.EventController;
+import com.notifier.RegisteredListener;
 import org.slf4j.Logger;
 
 import java.net.SocketAddress;
@@ -84,8 +83,7 @@ public class MessengerService extends ServiceBase implements Messenger {
     }
 
     public RegisteredListener addListener(ConnectionListener listener) {
-        mEventController.registerListener(listener);
-        return new RegisteredListenerImpl(mEventController, listener);
+        return mEventController.registerListener(listener);
     }
 
     @Override
@@ -95,14 +93,12 @@ public class MessengerService extends ServiceBase implements Messenger {
 
     @Override
     public RegisteredListener addListener(MessageListener listener) {
-        mEventController.registerListener(listener);
-        return new RegisteredListenerImpl(mEventController, listener);
+        return mEventController.registerListener(listener);
     }
 
     @Override
     public RegisteredListener addListener(MessageListener listener, Set<? extends MessageType> types) {
-        mEventController.registerListener(listener, new MessageTypeListenerPredicate(types));
-        return new RegisteredListenerImpl(mEventController, listener);
+        return mEventController.registerListener(listener, new MessageTypeListenerPredicate(types));
     }
 
     @Override

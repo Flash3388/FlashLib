@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.obsr;
 
-import com.beans.observables.RegisteredListener;
+import com.notifier.RegisteredListener;
 
 import java.lang.ref.WeakReference;
 

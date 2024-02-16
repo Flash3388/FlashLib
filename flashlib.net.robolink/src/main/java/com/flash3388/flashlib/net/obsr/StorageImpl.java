@@ -1,7 +1,5 @@
 package com.flash3388.flashlib.net.obsr;
 
-import com.beans.observables.RegisteredListener;
-import com.beans.observables.listeners.RegisteredListenerImpl;
 import com.flash3388.flashlib.net.messaging.MessageMetadata;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
@@ -10,6 +8,7 @@ import com.flash3388.flashlib.net.obsr.messages.StorageContentsMessage;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.notifier.EventController;
+import com.notifier.RegisteredListener;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -67,8 +66,10 @@ public class StorageImpl implements Storage {
     public RegisteredListener addListener(StoragePath path, EntryListener listener) {
         mLock.lock();
         try {
-            mEventController.registerListener(listener, new PathListenerPredicate(path.toString()));
-            return new RegisteredListenerImpl(mEventController, listener);
+            return mEventController.registerListenerForEvent(
+                    listener,
+                    EntryModificationEvent.class,
+                    new PathListenerPredicate(path.toString()));
         } finally {
             mLock.unlock();
         }
