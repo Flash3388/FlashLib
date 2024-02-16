@@ -75,6 +75,38 @@ import java.util.function.Predicate;
  *     </ul>
  * </p>
  * <p>
+ *     When an action is in an execution state, the scheduler will periodically execute it's user-code, following
+ *     a specific order
+ *     <ul>
+ *         <li>
+ *             When execution first starts, {@link Action#initialize(ActionControl)} will always be called
+ *             first.
+ *         </li>
+ *         <li>
+ *             While the action is still executing, {@link Action#execute(ActionControl)} will be called
+ *             periodically. The specific call period is implementation dependent.
+ *         </li>
+ *         <li>
+ *             When the action ends for whatever reason, {@link Action#end(FinishReason)} is called and the action
+ *             is removed from execution.
+ *         </li>
+ *     </ul>
+ *
+ *     This gives executing actions the following execution flow
+ *     <pre>
+ *         initialize()
+ *         while(stillRunning) {
+ *              execute();
+ *         }
+ *         end();
+ *     </pre>
+ * </p>
+ * <p>
+ *     Using blocking calls, or long-running loops from within actions is absolutely a bad idea, as it would
+ *     potential freeze the entire execution of the scheduler. Instead, rely on the periodic nature of the actions'
+ *     execution.
+ * </p>
+ * <p>
  *     There are several ways by which an action may end its execution. These are divided into two categories:
  *     <em>finish</em> and <em>interrupt</em>. When an executing action is ended, {@link Action#end(FinishReason)} is called
  *     with the reason for the end.
