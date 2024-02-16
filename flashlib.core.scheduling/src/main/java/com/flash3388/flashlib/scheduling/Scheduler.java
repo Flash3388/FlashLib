@@ -299,7 +299,7 @@ public interface Scheduler {
      * <p>
      *     If the action is neither currently executing nor is it pending, meaning that
      *     it has never started execution, or has ended it's execution then
-     *     {@link ExecutionState#isPending()} and {@link ExecutionState#isPending()} will
+     *     {@link ExecutionState#isPending()} and {@link ExecutionState#isRunning()} will
      *     both return <b>false</b>.
      * </p>
      *
