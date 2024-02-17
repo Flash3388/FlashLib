@@ -72,8 +72,8 @@ public interface TankDrive extends Movable, Rotatable {
 
     /**
      * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values
-     * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
-     * rotate value is responsible for the robot rotation.
+     * to move the tank drive. The "move" value is responsible for moving the robot forward and backward while the
+     * "rotate" value is responsible for the robot rotation.
      *
      * @param speed supplier speeds for motors, each indicated in percent v-bus [-1, 1].
      * @return action to perform motion.
@@ -83,7 +83,7 @@ public interface TankDrive extends Movable, Rotatable {
     /**
      * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values
      * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
-     * rotate value is responsible for the robot rotation.
+     * "rotate" value is responsible for the robot rotation.
      *
      * @param speed speeds for motors, each indicated in percent v-bus [-1, 1].
      * @return action to perform motion.
@@ -95,7 +95,7 @@ public interface TankDrive extends Movable, Rotatable {
     /**
      * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values
      * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
-     * rotate value is responsible for the robot rotation.
+     * "rotate" value is responsible for the robot rotation.
      *
      * @param moveValue supplier of value to move forward or backward 1 to -1.
      * @param rotateValue supplier of value to rotate right or left 1 to -1.
@@ -108,7 +108,7 @@ public interface TankDrive extends Movable, Rotatable {
     /**
      * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values
      * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
-     * rotate value is responsible for the robot rotation.
+     * "rotate" value is responsible for the robot rotation.
      *
      * @param moveValue value to move forward or backward 1 to -1.
      * @param rotateValue value to rotate right or left 1 to -1.

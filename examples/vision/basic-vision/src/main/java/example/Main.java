@@ -63,7 +63,7 @@ public class Main {
                 });
             };
 
-            // let's config and start the vision code
+            // lets config and start the vision code
             Future<?> future = startVisionPipeline(source, guiPipeline, executorService);
 
             // when the window is closed, we should stop the vision code
@@ -89,13 +89,13 @@ public class Main {
                 Time.milliseconds(1000), // polling rate
                 guiPipeline.divergeTo(new VisionPipeline.Builder<>()
                         .process((img) -> {
-                            // here we can process the image, modify it, extract features, etc
+                            // here we can process the image, modify it, extract features, etc.
                             // return the result image to be used by the next processor or by the analyzer;
                             return img;
                         })
                         .analyse((original, postProcess) -> {
                             // analyze the image for the information we want
-                            // and return an analysis if possible
+                            // and return an analysis, if possible
                             return Optional.of(Analysis.builder()
                                     .put("somedatakey", "some data")
                                     .build());

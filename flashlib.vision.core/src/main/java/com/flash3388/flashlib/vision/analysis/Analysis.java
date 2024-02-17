@@ -27,7 +27,7 @@ public interface Analysis {
      * Gets whether the analysis has a value for a named property.
      *
      * @param name name of the property.
-     * @return <b>true</b> if has a value, <b>false</b> otherwise.
+     * @return <b>true</b> if such property exists, <b>false</b> otherwise.
      *
      * @see #getProperty(String, Class)
      */

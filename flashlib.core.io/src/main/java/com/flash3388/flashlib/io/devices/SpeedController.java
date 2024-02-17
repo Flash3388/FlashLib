@@ -68,7 +68,7 @@ public interface SpeedController extends Closeable, Stoppable, Invertable {
     void setInverted(boolean inverted);
 
 	/**
-	 * Gets whether or not the directions of the motor are inverted
+	 * Gets whether the directions of the motor are inverted
 	 * @return true if the motor is inverted, false otherwise.
 	 */
 	@Override

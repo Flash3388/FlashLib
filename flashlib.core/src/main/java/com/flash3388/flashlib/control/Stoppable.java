@@ -1,7 +1,7 @@
 package com.flash3388.flashlib.control;
 
 /**
- * Represents an object capable of stopping it's current operation.
+ * Represents an object capable of stopping its current operation.
  *
  * @since FlashLib 2.0.0
  */

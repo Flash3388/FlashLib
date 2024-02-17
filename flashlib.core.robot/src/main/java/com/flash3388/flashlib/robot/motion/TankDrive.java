@@ -51,8 +51,8 @@ public interface TankDrive extends Drive, Movable {
 
 	/**
 	 * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values 
-	 * to move the tank drive. The move value is responsible for moving the robot forward and backward while the 
-	 * rotate value is responsible for the robot rotation.
+	 * to move the tank drive. The "move" value is responsible for moving the robot forward and backward while the
+	 * "rotate" value is responsible for the robot rotation.
 	 * 
 	 * @param moveValue The value to move forward or backward 1 to -1.
 	 * @param rotateValue The value to rotate right or left 1 to -1.
@@ -61,8 +61,8 @@ public interface TankDrive extends Drive, Movable {
 
     /**
      * Arcade drive implements a single joystick tank drive. Given move and rotate speed values, the code sets the values
-     * to move the tank drive. The move value is responsible for moving the robot forward and backward while the
-     * rotate value is responsible for the robot rotation.
+     * to move the tank drive. The "move" value is responsible for moving the robot forward and backward while the
+     * "rotate" value is responsible for the robot rotation.
      *
      * @param driveSpeed speeds for motors.
      */

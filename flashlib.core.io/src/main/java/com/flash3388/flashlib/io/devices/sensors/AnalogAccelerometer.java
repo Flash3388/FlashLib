@@ -13,7 +13,7 @@ import java.io.IOException;
  * <p>
  * Analog accelerometers are capable of measuring acceleration for one axis only. Acceleration from them is read 
  * using an analog input port. The voltage in the port corresponds to and acceleration and is converted to acceleration
- * measured in G by dividing the it by a scale factor of voltage per G. The sensor has a zero G voltage which is
+ * measured in G by dividing it by a scale factor of voltage per G. The sensor has a zero G voltage which is
  * the voltage when acceleration is 0.
  * 
  *

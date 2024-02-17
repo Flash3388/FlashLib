@@ -23,7 +23,7 @@ public class CustomTankDrive extends Subsystem implements TankDrive {
     // Here we need the speed controllers.
     //
     // Note that SpeedController can be either one or multiple speed controllers, this depends on what the creators
-    // of the instance provide us. For us it doesn't really matter, since we move all controllers in the
+    // of the instance provide us. For us, it doesn't really matter, since we move all controllers in the
     // same side, together.
     //
     // DriveAlgorithms is a flashlib utility which provides some motion algorithm calculations.

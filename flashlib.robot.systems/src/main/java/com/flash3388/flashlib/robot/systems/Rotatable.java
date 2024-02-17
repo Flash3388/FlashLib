@@ -72,7 +72,7 @@ public interface Rotatable extends Stoppable, Requirement {
      *
      * <p>Default implementation calls {@link #rotate(double, Direction)} with the given speed
      * and {@link Direction#BACKWARD} for direction.
-     * @param speed suppliers speed speed of motion [0..1] describing percentage of power.
+     * @param speed suppliers speed of motion [0..1] describing percentage of power.
      * @return action to perform motion.
      */
     default Action rotateLeft(DoubleSupplier speed){

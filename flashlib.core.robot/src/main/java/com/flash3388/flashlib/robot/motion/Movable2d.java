@@ -5,7 +5,7 @@ import com.flash3388.flashlib.scheduling.Requirement;
 import com.jmath.vectors.Vector2;
 
 /**
- * Describes a component capable of moving along a 2 axes.
+ * Describes a component capable of moving along 2 axes.
  *
  * @since FlashLib 2.0.0
  */

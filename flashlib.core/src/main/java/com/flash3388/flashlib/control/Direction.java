@@ -16,12 +16,12 @@ package com.flash3388.flashlib.control;
 public enum Direction {
     /**
      * Forward motion direction, i.e. positive speed values.
-     * Also a synonym for motion to the right or clockwise.
+     * Also, a synonym for motion to the right or clockwise.
      */
     FORWARD(true),
     /**
      * Backward motion direction, i.e. negative speed values.
-     * Also a synonym for motion to the left or counter-clockwise.
+     * Also, a synonym for motion to the left or counter-clockwise.
      */
     BACKWARD(false);
 

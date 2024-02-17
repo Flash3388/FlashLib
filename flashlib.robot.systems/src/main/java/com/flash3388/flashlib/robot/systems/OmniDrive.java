@@ -70,10 +70,10 @@ public interface OmniDrive extends Movable2d, Rotatable {
      * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
      * the X value to move the wheels in the front and back.
      *
-     * @param front supplier of speed for the front side (moving right-left along the x axis)
-     * @param right supplier of speed for the right side (moving forward-backward along the y axis)
-     * @param back supplier of speed for the back side (moving right-left along the x axis)
-     * @param left supplier of speed for the left side (moving forward-backward along the y axis)
+     * @param front supplier of speed for the front side (moving right-left along the x-axis)
+     * @param right supplier of speed for the right side (moving forward-backward along the y-axis)
+     * @param back supplier of speed for the back side (moving right-left along the x-axis)
+     * @param left supplier of speed for the left side (moving forward-backward along the y-axis)
      * @return action to perform motion.
      */
     default Action omniDrive(DoubleSupplier front, DoubleSupplier right, DoubleSupplier back, DoubleSupplier left) {
@@ -87,9 +87,9 @@ public interface OmniDrive extends Movable2d, Rotatable {
      * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
      * the X value to move the wheels in the front and back.
      *
-     * @param front speed for the front side (moving right-left along the x axis)
+     * @param front speed for the front side (moving right-left along the x-axis)
      * @param right speed for the right side (moving forward-backward along the y axis)
-     * @param back speed for the back side (moving right-left along the x axis)
+     * @param back speed for the back side (moving right-left along the x-axis)
      * @param left speed for the left side (moving forward-backward along the y axis)
      * @return action to perform motion.
      */
@@ -103,8 +103,8 @@ public interface OmniDrive extends Movable2d, Rotatable {
      * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
      * the X value to move the wheels in the front and back.
      *
-     * @param y supplier of speed for the right and left sides (moving along the y axis)
-     * @param x supplier of speed for the front and back sides (moving along the x axis)
+     * @param y supplier of speed for the right and left sides (moving along the y-axis)
+     * @param x supplier of speed for the front and back sides (moving along the x-axis)
      * @return action to perform motion.
      */
     default Action omniDrive(DoubleSupplier y, DoubleSupplier x) {
@@ -117,8 +117,8 @@ public interface OmniDrive extends Movable2d, Rotatable {
      * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
      * the X value to move the wheels in the front and back.
      *
-     * @param y speed for the right and left sides (moving along the y axis)
-     * @param x speed for the front and back sides (moving along the x axis)
+     * @param y speed for the right and left sides (moving along the y-axis)
+     * @param x speed for the front and back sides (moving along the x-axis)
      * @return action to perform motion.
      */
     default Action omniDrive(double y, double x) {

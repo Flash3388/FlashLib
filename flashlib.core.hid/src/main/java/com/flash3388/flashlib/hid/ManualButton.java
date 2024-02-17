@@ -4,7 +4,6 @@ import com.beans.BooleanProperty;
 import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.impl.triggers.TriggerBaseImpl;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 /**

@@ -82,7 +82,7 @@ public enum CompareResult {
     }
 
     /**
-     * Checks whether or not the given value matches the {@link #value()} of one of the given {@link CompareResult}.
+     * Checks whether the given value matches the {@link #value()} of one of the given {@link CompareResult}.
      * In essence, checking if the given result, is one of the expected possible.
      * <p>
      *     Can be helpful if checking whether or not a compare result matches several options:

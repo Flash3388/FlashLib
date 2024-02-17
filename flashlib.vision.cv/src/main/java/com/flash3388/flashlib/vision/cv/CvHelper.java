@@ -4,13 +4,9 @@ import com.flash3388.flashlib.vision.ImageCodec;
 import com.flash3388.flashlib.vision.color.ColorRange;
 import com.flash3388.flashlib.vision.color.ColorSpace;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -134,7 +130,7 @@ public class CvHelper {
      * @see Imgproc#findContours(Mat, List, Mat, int, int)
      */
     public static List<MatOfPoint> detectContours(CvImage threshold){
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
 
         return detectContours(threshold, contours, hierarchy);

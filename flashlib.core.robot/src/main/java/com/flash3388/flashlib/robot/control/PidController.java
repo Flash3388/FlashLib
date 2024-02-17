@@ -9,7 +9,6 @@ import com.flash3388.flashlib.net.obsr.Value;
 import com.flash3388.flashlib.net.obsr.ValueProperty;
 import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.RunningRobot;
-import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.jmath.ExtendedMath;
 
@@ -126,7 +125,7 @@ public class PidController implements ClosedLoopController {
     }
 
     /**
-     * Resets the controller. This erases the I term buildup, and removes
+     * Resets the controller. This erases the "I" term buildup, and removes
      * D gain on the next loop.
      */
     public void reset() {

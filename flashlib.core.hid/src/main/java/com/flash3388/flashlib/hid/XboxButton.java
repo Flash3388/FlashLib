@@ -46,7 +46,7 @@ public enum XboxButton {
     }
 
     /**
-     * Gets the amount the amount of buttons defined.
+     * Gets the amount of buttons defined.
      * Corresponds to:
      * <pre>
      *     XboxButton.values().length

@@ -81,7 +81,7 @@ public interface HidInterface {
     Joystick newJoystick(HidChannel channel);
 
     /**
-     * Creates a new {@link XboxController} representing a xbox-like controller defined by the given {@link HidChannel}.
+     * Creates a new {@link XboxController} representing an xbox-like controller defined by the given {@link HidChannel}.
      *
      * @param channel the channel describing the connection.
      *

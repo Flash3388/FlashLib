@@ -31,7 +31,7 @@ public class ActionStartSelector<T> {
         }
 
         /**
-         * Create a condition which, when met, will lead to a selection of t he given action.
+         * Create a condition which, when met, will lead to a selection of the given action.
          *
          * @param actionProvider creator of the wanted action
          * @param condition condition to check the input value

@@ -126,7 +126,7 @@ public interface Source<T> {
      */
     @SafeVarargs
     static <T> Source<T> of(T... objects) {
-        return new QueueSource<T>(objects);
+        return new QueueSource<>(objects);
     }
 
     /**
@@ -138,6 +138,6 @@ public interface Source<T> {
      * @return a new source.
      */
     static <T> Source<T> of(Collection<T> objects) {
-        return new QueueSource<T>(new ArrayDeque<>(objects));
+        return new QueueSource<>(new ArrayDeque<>(objects));
     }
 }

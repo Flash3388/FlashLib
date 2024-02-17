@@ -33,13 +33,13 @@ public class CustomTankDriveAction extends ActionBase {
     // This lifecycle will define what the action should do when:
     //
     // initialize: runs once, each time the action is started. We would normally use it to initialize
-    // states/variables/dependencies, in preparation for the execute phase. In our case, we have no need.
+    // states/variables/dependencies, in preparation for the execution phase. In our case, we have no need.
     //
     // execute: the main phase for an action. Runs periodically (timing differs but will likely be around 25ms).
-    // In it we will perform the main logic of the action. In this case, moving the drive system.
+    // In it, we will perform the main logic of the action. In this case, moving the drive system.
     // To stop the action we can use ActionControl, which provides various functionalities to the action.
     //
-    // end: the end phase runs after the execution phase. In this phase we stop and deinitialize anything used during the
+    // end: the end phase runs after the execution phase. In this phase we stop and de-initialize anything used during the
     // action. In our case, that would mean stopping the drive system.
     // Note the wasInterrupted parameter. If the action finished normally, i.e. isFinished returned true, wasInterrupted
     // would be false. If someone canceled the action, it reached a timeout, or was overwritten by another action;

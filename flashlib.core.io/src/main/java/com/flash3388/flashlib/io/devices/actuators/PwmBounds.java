@@ -34,7 +34,7 @@ public class PwmBounds {
      * @param center the center of the Pwm value in milliseconds
      * @param deadbandMin the minimum bound for the deadband
      * @param min the minimum bound of the Pwm value in milliseconds
-     * @param eliminateDeadband whether or not to eliminate the deadband
+     * @param eliminateDeadband whether to eliminate the deadband
      */
     public PwmBounds(double max, double deadbandMax, double center, double deadbandMin, double min,
                      boolean eliminateDeadband) {

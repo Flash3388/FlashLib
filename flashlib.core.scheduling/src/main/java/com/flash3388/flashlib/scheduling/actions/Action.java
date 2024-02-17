@@ -7,7 +7,6 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.time.Time;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -30,7 +29,7 @@ import java.util.Collection;
  * Set the timeout by calling {@link #configure()}.
  * <p>
  * It is possible to define dependencies for scheduling. Basically, if an action is using a {@link Subsystem} object
- * of our robot, it is necessary to insure that no other action will use the same object, so that it won't confuse
+ * of our robot, it is necessary to ensure that no other action will use the same object, so that it won't confuse
  * that system. To do that, users must explicitly call {@link #configure()} and pass a system which is
  * used (multiple systems can be required). By doing so, the {@link Scheduler} now knows to stop any other action
  * with at least one similar system requirement. If an action is running and another starts with a similar system

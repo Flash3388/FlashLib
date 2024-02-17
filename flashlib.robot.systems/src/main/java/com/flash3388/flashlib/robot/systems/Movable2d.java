@@ -34,8 +34,8 @@ public interface Movable2d extends Movable {
     /**
      * Moves along both axes at given speeds.
      *
-     * @param y supplier of speed on y axis to move motors [-1, 1]
-     * @param x supplier of speed on x axis to move motors [-1, 1]
+     * @param y supplier of speed on y-axis to move motors [-1, 1]
+     * @param x supplier of speed on x-axis to move motors [-1, 1]
      * @return action to perform motion.
      */
     default Action move2d(DoubleSupplier y, DoubleSupplier x) {
@@ -45,8 +45,8 @@ public interface Movable2d extends Movable {
     /**
      * Moves along both axes at given speeds.
      *
-     * @param y speed on y axis to move motors [-1, 1]
-     * @param x speed on x axis to move motors [-1, 1]
+     * @param y speed on y-axis to move motors [-1, 1]
+     * @param x speed on x-axis to move motors [-1, 1]
      * @return action to perform motion.
      */
     default Action move2d(double y, double x) {

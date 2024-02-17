@@ -48,7 +48,7 @@ public class CenteroidTracker implements ObjectTracker<ScorableTarget> {
             trackPairs.sort(Comparator.comparingDouble(TrackPair::distance));
             TrackPair pair = trackPairs.get(0);
             updates.put(entry.getKey(), pair.mUpdated);
-            // we found the target so let's remove it from the list so we don't use it anymore
+            // we found the target so let's remove it from the list, so we don't use it anymore
             targetsList.remove(pair.mIndex);
             // mark the id as matched
             knownIds.remove(entry.getKey());

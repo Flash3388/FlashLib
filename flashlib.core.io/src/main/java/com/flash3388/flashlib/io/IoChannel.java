@@ -28,9 +28,9 @@ public interface IoChannel {
      * @param type the wanted class type.
      * @param <T> type parameter indicating the wanted class.
      *
-     * @return a casted {@link IoChannel}.
+     * @return a cast {@link IoChannel}.
      *
-     * @throws ClassCastException if the given instance cannot be casted to the wanted type.
+     * @throws ClassCastException if the given instance cannot be cast to the wanted type.
      */
     static <T extends IoChannel> T cast(IoChannel channel, Class<T> type) {
         if (type.isInstance(channel)) {

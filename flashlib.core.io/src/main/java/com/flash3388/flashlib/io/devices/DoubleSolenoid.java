@@ -50,7 +50,7 @@ public interface DoubleSolenoid extends Closeable {
     /**
      * Gets the current value of the solenoid.
      *
-     * @return {@link Value} indicating which solenoid has current applied to it.
+     * @return {@link Value} indicating which solenoid has currently applied to it.
      */
     Value get();
 

@@ -38,7 +38,7 @@ public enum JoystickButton {
     }
 
     /**
-     * Gets the amount the amount of buttons defined.
+     * Gets the amount of buttons defined.
      * Corresponds to:
      * <pre>
      *     JoystickButton.values().length

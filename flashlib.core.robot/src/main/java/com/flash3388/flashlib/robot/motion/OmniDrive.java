@@ -64,10 +64,10 @@ public interface OmniDrive extends HolonomicDrive {
      * a Y and X value the drive sets the Y value to move the wheels on the sides of the robot(right and left) and
      * the X value to move the wheels in the front and back.
      *
-     * @param front speed for the front side (moving right-left along the x axis)
-     * @param right speed for the right side (moving forward-backward along the y axis)
-     * @param back speed for the back side (moving right-left along the x axis)
-     * @param left speed for the left side (moving forward-backward along the y axis)
+     * @param front speed for the front side (moving right-left along the x-axis)
+     * @param right speed for the right side (moving forward-backward along the y-axis)
+     * @param back speed for the back side (moving right-left along the x-axis)
+     * @param left speed for the left side (moving forward-backward along the y-axis)
      */
     void omniDrive(double front, double right, double back, double left);
 }

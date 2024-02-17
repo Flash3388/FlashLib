@@ -42,7 +42,7 @@ public enum DualshockAxis {
     }
 
     /**
-     * Gets the amount the amount of axes defined.
+     * Gets the amount of axes defined.
      * Corresponds to:
      * <pre>
      *     DualshockAxis.values().length

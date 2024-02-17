@@ -176,7 +176,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not the time value is valid.
+     * Gets whether the time value is valid.
      * <p>
      *      An <em>invalid</em> time
      *      is replacement for using <b>null</b> values to indicate a lack of value, and
@@ -254,7 +254,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time is before the given time.
+     * Gets whether this time is before the given time.
      *
      * @param other time to compare against.
      *
@@ -267,7 +267,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time value is less than the given time if they were the same unit.
+     * Gets whether this time value is less than the given time if they were the same unit.
      * <p>
      *     The resulting time might have a different unit. The select unit for the result
      *     is the smallest unit out of both times, allowing to keep the best precision.
@@ -285,7 +285,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time value is less than or equal to the given time if they were the same unit.
+     * Gets whether this time value is less than or equal to the given time if they were the same unit.
      * <p>
      *     The resulting time might have a different unit. The select unit for the result
      *     is the smallest unit out of both times, allowing to keep the best precision.
@@ -304,7 +304,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time is after the given time.
+     * Gets whether this time is after the given time.
      *
      * @param other time to compare against.
      *
@@ -317,7 +317,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time value is larger than the given time if they were the same unit.
+     * Gets whether this time value is larger than the given time if they were the same unit.
      * <p>
      *     The resulting time might have a different unit. The select unit for the result
      *     is the smallest unit out of both times, allowing to keep the best precision.
@@ -335,7 +335,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time value is larger than or equal to the given time if they were the same unit.
+     * Gets whether this time value is larger than or equal to the given time if they were the same unit.
      * <p>
      *     The resulting time might have a different unit. The select unit for the result
      *     is the smallest unit out of both times, allowing to keep the best precision.
@@ -354,7 +354,7 @@ public class Time implements Comparable<Time> {
     }
 
     /**
-     * Gets whether or not this time equals the given time, if they were the same unit.
+     * Gets whether this time equals the given time, if they were the same unit.
      *
      * @param other time to compare against.
      *

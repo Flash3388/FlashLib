@@ -11,7 +11,7 @@ public class InProcessorJunction<T, R> implements Processor<T, R> {
 
     public InProcessorJunction(Processor<T, R> processor, Pipeline<? super T> pipeline) {
         mProcessor = processor;
-        mPipeline = new SyncPipeJunction<T>(pipeline);
+        mPipeline = new SyncPipeJunction<>(pipeline);
     }
 
     @Override

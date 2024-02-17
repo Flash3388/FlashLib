@@ -54,7 +54,7 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         // in this action. Using this, the Scheduler will prevent two actions from using the
         // drive system at the same time.
         //
-        // It is important to make sure that the action we are using does that.
+        // It is essential to make sure that the action we are using does that.
         // It is something that all actions from FlashLib guarantee.
         mDriveSystem.setDefaultAction(mDriveSystem.tankDrive(
                 mStickRight.getAxis(JoystickAxis.Y),

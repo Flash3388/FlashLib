@@ -59,7 +59,7 @@ public class Subsystem implements Requirement {
     }
 
     /**
-     * Gets whether or not there's an action running which uses this subsystem as a requirement.
+     * Gets whether there's an action running which uses this subsystem as a requirement.
      *
      * @return <b>true</b> if there is, <b>false</b> otherwise.
      *

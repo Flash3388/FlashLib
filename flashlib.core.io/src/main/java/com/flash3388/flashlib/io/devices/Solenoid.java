@@ -17,14 +17,14 @@ import java.io.IOException;
 public interface Solenoid extends Closeable {
 
     /**
-     * Sets whether or not the valve is open.
+     * Sets whether the valve is open.
      *
      * @param open <b>true</b> to open, <b>false</b> otherwise.
      */
     void set(boolean open);
 
     /**
-     * Gets whether or not the valve is open.
+     * Gets whether the valve is open.
      *
      * @return <b>true</b> if open, <b>false</b> otherwise.
      */

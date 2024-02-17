@@ -30,20 +30,20 @@ public interface RobotMode extends SchedulerMode {
     int getKey();
 
     /**
-     * Gets whether or not the current mode is a <em>disabled</em> mode.
+     * Gets whether the current mode is a <em>disabled</em> mode.
      * Such modes require that no motion should be made by the robot. This
      * is entirely a safety concern, that allows users to be certain that when
      * the robot is in <em>disabled</em> they can interact with it directly without
      * concern.
      *
-     * @return <b>true</b> if requires a disable behaviour, <b>false</b>
+     * @return <b>true</b> if the mode requires a "disabled" behaviour, <b>false</b>
      * otherwise.
      */
     @Override
     boolean isDisabled();
 
     /**
-     * Checks whether or not the given mode is equal to this one,
+     * Checks whether the given mode is equal to this one,
      * This is done by checking the unique identifier returned from {@link #getKey()}.
      *
      * @param other mode to check against.
@@ -72,9 +72,9 @@ public interface RobotMode extends SchedulerMode {
      * @param type the wanted class type.
      * @param <T> type parameter indicating the wanted class.
      *
-     * @return a casted {@link RobotMode}.
+     * @return a cast {@link RobotMode}.
      *
-     * @throws ClassCastException if the given instance cannot be casted to the wanted type.
+     * @throws ClassCastException if the given instance cannot be cast to the wanted type.
      */
     static <T extends RobotMode> T cast(RobotMode mode, Class<T> type) {
         if (type.isInstance(mode)) {

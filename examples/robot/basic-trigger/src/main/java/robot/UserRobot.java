@@ -18,9 +18,9 @@ import com.flash3388.flashlib.scheduling.triggers.Triggers;
 public class UserRobot extends DelegatingRobotControl implements IterativeRobot {
 
     // Triggers are boolean-based objects that can be active or inactive.
-    // It is possible to attach actions to triggers, which run depending on the state
+    // It is possible to attach actions to "triggers", which run depending on the state
     // of the trigger.
-    // For example, a button is a type of a trigger.
+    // For example, a button is a type of trigger.
     // It is possible to create custom triggers.
 
     private final BooleanProperty mTriggerActivator;
@@ -59,12 +59,12 @@ public class UserRobot extends DelegatingRobotControl implements IterativeRobot 
         Trigger trigger = Triggers.onCondition(mTriggerActivator);
 
         // Configuring to run a TankDriveAction while the trigger is active. This means that when the property is set
-        // to true, the action will start, but when the property is set to false, the action is be cancelled.
+        // to true, the action will start, but when the property is set to false, the action will be cancelled.
         trigger.whileActive(mDriveSystem.tankDrive(
                 mStickRight.getAxis(JoystickAxis.Y),
                 mStickLeft.getAxis(JoystickAxis.Y)));
         // Configuring to run a ArcadeDriveAction while the trigger is inactive. This means that when the property is set
-        // to false, the action will start, but when the property is set to true, the action is be cancelled.
+        // to false, the action will start, but when the property is set to true, the action will be cancelled.
         trigger.whileInactive(mDriveSystem.arcadeDrive(
                 mStickRight.getAxis(JoystickAxis.Y),
                 mStickRight.getAxis(JoystickAxis.X)));

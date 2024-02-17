@@ -9,8 +9,6 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-import java.util.UUID;
-
 public class ActionControlImpl implements ActionControl {
 
     private final Action mAction;

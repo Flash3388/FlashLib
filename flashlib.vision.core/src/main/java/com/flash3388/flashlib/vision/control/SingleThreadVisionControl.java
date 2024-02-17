@@ -89,7 +89,7 @@ public class SingleThreadVisionControl<S> implements VisionControl {
                 mEventController = Controllers.newSyncExecutionController();
             }
 
-            return new SingleThreadVisionControl<S>(mRunner, mClock, mEventController,
+            return new SingleThreadVisionControl<>(mRunner, mClock, mEventController,
                     mSource,
                     mProcessor.divergeIn(mPreProcessPipeline),
                     mThrowableHandler);
@@ -99,7 +99,7 @@ public class SingleThreadVisionControl<S> implements VisionControl {
     public static <S> Builder<S> withExecutorService(ScheduledExecutorService executorService, Time pollingTime) {
         Function<Runnable, Future<?>> runner = (task)->
                 executorService.scheduleAtFixedRate(task, pollingTime.value(), pollingTime.value(), pollingTime.unit());
-        return new Builder<S>(runner);
+        return new Builder<>(runner);
     }
 
     private final Function<Runnable, Future<?>> mRunner;
@@ -122,7 +122,7 @@ public class SingleThreadVisionControl<S> implements VisionControl {
         mFuture = new AtomicReference<>();
         mLatestResult = new AtomicReference<>();
 
-        mTask = new Task<S>(source,
+        mTask = new Task<>(source,
                 processor.pipeTo(new NewAnalysisHandler(eventController, clock, mLatestResult)),
                 throwableHandler, mVisionOptions);
     }

@@ -11,7 +11,6 @@ import com.flash3388.flashlib.app.watchdog.MultiFeedReporters;
 import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.app.watchdog.WatchdogImpl;
 import com.flash3388.flashlib.app.watchdog.WatchdogService;
-import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.SystemNanoClock;

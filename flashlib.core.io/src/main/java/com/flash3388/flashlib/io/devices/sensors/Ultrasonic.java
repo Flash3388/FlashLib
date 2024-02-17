@@ -58,7 +58,7 @@ public class Ultrasonic implements RangeFinder {
 	}
 
 	/**
-	 * Gets whether or not a range was measured from the ultrasonic. 
+	 * Gets whether a range was measured from the ultrasonic.
 	 * <p>
 	 * This is determined by checking whether at least one pulse was measured by the
 	 * counter.

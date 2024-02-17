@@ -5,7 +5,7 @@ import com.flash3388.flashlib.robot.RobotControl;
 import com.flash3388.flashlib.robot.modes.RobotMode;
 
 /**
- * Defines a specialized robot base based on a looping and modes model.
+ * Defines a specialized robot base on a looping and modes model.
  * Control is separated into control modes, as defined by {@link RobotControl#getMode()}.
  * Based on the mode, the <em>init</em> method for the mode is called once when entering from another
  * mode, and then <em>periodic</em> is called periodically, defined by the specific implementation

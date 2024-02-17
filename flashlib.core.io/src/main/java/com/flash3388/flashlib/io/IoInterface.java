@@ -44,7 +44,7 @@ public interface IoInterface {
     AnalogOutput newAnalogOutput(IoChannel channel);
 
     /**
-     * Creates a new {@link DigitalInput} representing an digital port for input defined by the given
+     * Creates a new {@link DigitalInput} representing a digital port for input defined by the given
      * {@link IoChannel}.
      *
      * @param channel the channel describing the connection.
@@ -58,7 +58,7 @@ public interface IoInterface {
     DigitalInput newDigitalInput(IoChannel channel);
 
     /**
-     * Creates a new {@link DigitalOutput} representing an digital port for output defined by the given
+     * Creates a new {@link DigitalOutput} representing a digital port for output defined by the given
      * {@link IoChannel}.
      *
      * @param channel the channel describing the connection.

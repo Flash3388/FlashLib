@@ -16,7 +16,7 @@ public class DoubleBufferHolder<T> implements Source<T>, Pipeline<T> {
     public DoubleBufferHolder() {
         mBuffer = new DoubleBuffer<>();
         mLock = new ReentrantLock();
-        mNewData = mLock.newCondition();;
+        mNewData = mLock.newCondition();
     }
 
     @Override

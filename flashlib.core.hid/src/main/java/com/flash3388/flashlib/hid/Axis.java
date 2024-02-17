@@ -74,7 +74,7 @@ public interface Axis extends DoubleSupplier, Invertable {
      * </ul>
      *
      * @param threshold minimum value for the axis for the button to be considered <em>activated</em>.
-     * @param isDirectional whether or not the threshold is absolute.
+     * @param isDirectional whether the threshold is absolute.
      *
      * @return a {@link Button} based on this axis.
      */

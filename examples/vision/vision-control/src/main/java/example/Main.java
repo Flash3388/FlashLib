@@ -46,7 +46,7 @@ public class Main {
                 });
             };
 
-            // let's config and start the vision code
+            // lets config and start the vision code
             VisionControl control = createVisionControl(camera, guiPipeline, executorService);
             control.start();
             // when the window is closed, we should stop the vision code

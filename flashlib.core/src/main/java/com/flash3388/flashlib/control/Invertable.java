@@ -8,7 +8,7 @@ package com.flash3388.flashlib.control;
 public interface Invertable {
 
     /**
-     * Sets whether or not invert input/output values.
+     * Sets whether invert input/output values.
      * <p>
      *     If the given <i>inverted</i> is already the same as {@link #isInverted()},
      *     nothing will happen.
@@ -19,7 +19,7 @@ public interface Invertable {
     void setInverted(boolean inverted);
 
     /**
-     * Gets whether or not the data inverted.
+     * Gets whether the data inverted.
      * @return <b>true</b> if inverted, <b>false</b> otherwise.
      */
     boolean isInverted();
