@@ -102,17 +102,32 @@ public class ActionExecutionState {
     }
 
     public void markForFinish() {
+        if (mMarkedForEnd) {
+            // already marked for finish
+            return;
+        }
+
         mMarkedForEnd = true;
         mFinishReason = FinishReason.FINISHED;
     }
 
     public void markForCancellation() {
+        if (mMarkedForEnd) {
+            // already marked for finish
+            return;
+        }
+
         mMarkedForEnd = true;
         mFinishReason = FinishReason.CANCELED;
         updateStatus(ExecutionStatus.CANCELLED);
     }
 
     public void markErrored(Throwable t) {
+        // error marking supersedes all other finish reasons
+        if (mMarkedForEnd) {
+            mLogger.warn("Action already marked for finish but then has encountered an error");
+        }
+
         mMarkedForEnd = true;
         mFinishReason = FinishReason.ERRORED;
         updateStatus(ExecutionStatus.CANCELLED);
@@ -121,6 +136,11 @@ public class ActionExecutionState {
     }
 
     public void markTimedOut() {
+        if (mMarkedForEnd) {
+            // already marked for finish
+            return;
+        }
+
         mMarkedForEnd = true;
         mFinishReason = FinishReason.TIMEDOUT;
         updateStatus(ExecutionStatus.CANCELLED);

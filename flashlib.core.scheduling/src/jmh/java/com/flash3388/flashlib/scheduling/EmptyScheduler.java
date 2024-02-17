@@ -14,8 +14,8 @@ public class EmptyScheduler implements Scheduler {
 
 
     @Override
-    public void start(Action action) {
-
+    public ScheduledAction start(Action action) {
+        return null;
     }
 
     @Override

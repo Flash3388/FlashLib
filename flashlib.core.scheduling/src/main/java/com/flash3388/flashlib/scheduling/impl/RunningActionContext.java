@@ -97,6 +97,10 @@ public class RunningActionContext {
         mExecutionState.markForCancellation();
     }
 
+    public boolean isMarkedForEnd() {
+        return mExecutionState.isMarkedForEnd();
+    }
+
     public boolean iterate() {
         if (mExecutionState.isTimedOut()) {
             mExecutionState.markTimedOut();

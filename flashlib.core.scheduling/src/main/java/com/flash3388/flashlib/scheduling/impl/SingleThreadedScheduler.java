@@ -115,6 +115,7 @@ public class SingleThreadedScheduler implements Scheduler {
 
         RunningActionContext context = mPendingActions.remove(action);
         if (context != null) {
+            context.markForCancellation();
             LOGGER.debug("Action {} removed (from pending)", context);
             return;
         }
@@ -167,7 +168,15 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
         }
 
-        mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
+        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            RunningActionContext context = iterator.next();
+
+            if (predicate.test(context.getAction())) {
+                LOGGER.debug("Action {} removed (from pending)", context);
+                context.markForCancellation();
+                iterator.remove();
+            }
+        }
 
         mCanModifyRunningActions = false;
         try {
@@ -197,7 +206,13 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
         }
 
-        mPendingActions.clear();
+        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            RunningActionContext context = iterator.next();
+
+            LOGGER.debug("Action {} removed (from pending)", context);
+            context.markForCancellation();
+            iterator.remove();
+        }
 
         mCanModifyRunningActions = false;
         try {
@@ -246,9 +261,14 @@ public class SingleThreadedScheduler implements Scheduler {
             iterator.remove();
         }
 
-        //noinspection Java8CollectionRemoveIf
         for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
             RunningActionContext context = iterator.next();
+
+            if (context.isMarkedForEnd()) {
+                LOGGER.debug("Action {} removed (from pending)", context);
+                iterator.remove();
+                continue;
+            }
 
             if (tryStartingAction(context)) {
                 iterator.remove();
