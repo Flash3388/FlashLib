@@ -25,6 +25,7 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class ObsrService extends ServiceBase implements ObjectStorage {
 
@@ -32,35 +33,51 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
     private static final long MESSENGER_ID = 555;
 
     private final InstanceId mOurId;
-    private final MessengerService mMessenger;
-    private final Storage mStorage;
+    private final Clock mClock;
 
-    public ObsrService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
+    private Context mContext;
+
+    public ObsrService(InstanceId ourId, Clock clock) {
         mOurId = ourId;
-
-        mMessenger = new MessengerService(channelUpdater, new ChannelId(ourId, MESSENGER_ID), clock);
-
-        StorageListener storageListener = new StorageListenerImpl(mMessenger);
-        EventController eventController = Controllers.newSyncExecutionController();
-        mStorage = new StorageImpl(storageListener, eventController, clock, LOGGER);
-
-        Set<MessageType> messageTypes = getUsedMessageTypes();
-        mMessenger.registerMessageTypes(messageTypes);
-        mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage, LOGGER));
-        mMessenger.addListener(new MessageListenerImpl(mStorage), messageTypes);
+        mClock = clock;
     }
 
-    public void configurePrimary(SocketAddress bindAddress) {
-        mMessenger.configureServer(bindAddress);
+    public void configurePrimary(ChannelUpdater channelUpdater, SocketAddress bindAddress) {
+        if (isRunning()) {
+            throw new IllegalStateException("running");
+        }
+
+        NetworkedContext context = new NetworkedContext(channelUpdater, mOurId, mClock, LOGGER);
+        context.configurePrimary(bindAddress);
+        mContext = context;
     }
 
-    public void configureSecondary(SocketAddress serverAddress) {
-        mMessenger.configureClient(serverAddress);
+    public void configureSecondary(ChannelUpdater channelUpdater, SocketAddress serverAddress) {
+        if (isRunning()) {
+            throw new IllegalStateException("running");
+        }
+
+        NetworkedContext context = new NetworkedContext(channelUpdater, mOurId, mClock, LOGGER);
+        context.configureSecondary(serverAddress);
+        mContext = context;
+    }
+
+    public void configureLocal() {
+        if (isRunning()) {
+            throw new IllegalStateException("running");
+        }
+
+        mContext = new LocalContext(mOurId, mClock, LOGGER);
     }
 
     @Override
     public StoredObject getRoot() {
-        return mStorage.getObject(StoragePath.root());
+        if (!isRunning()) {
+            throw new IllegalStateException("not running");
+        }
+
+        Storage storage = mContext.getStorage();
+        return storage.getObject(StoragePath.root());
     }
 
     @Override
@@ -70,12 +87,16 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
     @Override
     protected void startRunning() throws ServiceException {
-        mMessenger.start();
+        if (mContext == null) {
+            throw new ServiceException("not configured");
+        }
+
+        mContext.start();
     }
 
     @Override
     protected void stopRunning() {
-        mMessenger.stop();
+        mContext.stop();
     }
 
     private static Set<MessageType> getUsedMessageTypes() {
@@ -83,6 +104,81 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
                 EntryChangeMessage.TYPE,
                 StorageContentsMessage.TYPE
         ));
+    }
+
+    private interface Context {
+
+        Storage getStorage();
+
+        void start() throws ServiceException;
+        void stop();
+    }
+
+    private static class NetworkedContext implements Context {
+        private final MessengerService mMessenger;
+        private final Storage mStorage;
+
+        private NetworkedContext(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock, Logger logger) {
+            mMessenger = new MessengerService(channelUpdater, new ChannelId(ourId, MESSENGER_ID), clock);
+
+            StorageListener storageListener = new StorageListenerImpl(mMessenger);
+            EventController eventController = Controllers.newSyncExecutionController();
+            mStorage = new StorageImpl(storageListener, eventController, clock, logger);
+
+            Set<MessageType> messageTypes = getUsedMessageTypes();
+            mMessenger.registerMessageTypes(messageTypes);
+            mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage, logger));
+            mMessenger.addListener(new MessageListenerImpl(mStorage), messageTypes);
+        }
+
+        public void configurePrimary(SocketAddress bindAddress) {
+            mMessenger.configureServer(bindAddress);
+        }
+
+        public void configureSecondary(SocketAddress serverAddress) {
+            mMessenger.configureClient(serverAddress);
+        }
+
+        @Override
+        public Storage getStorage() {
+            return mStorage;
+        }
+
+        @Override
+        public void start() throws ServiceException {
+            mMessenger.start();
+        }
+
+        @Override
+        public void stop() {
+            mMessenger.stop();
+        }
+    }
+
+    private static class LocalContext implements Context {
+
+        private final Storage mStorage;
+
+        private LocalContext(InstanceId ourId, Clock clock, Logger logger) {
+            StorageListener storageListener = new EmptyStorageListener();
+            EventController eventController = Controllers.newSyncExecutionController();
+            mStorage = new StorageImpl(storageListener, eventController, clock, logger);
+        }
+
+        @Override
+        public Storage getStorage() {
+            return mStorage;
+        }
+
+        @Override
+        public void start() throws ServiceException {
+
+        }
+
+        @Override
+        public void stop() {
+
+        }
     }
 
     private static class ConnectionListenerImpl implements ConnectionListener {

@@ -9,17 +9,19 @@ public class ObsrConfiguration {
     private static final int DEFAULT_SERVER_PORT = 4156;
 
     final boolean isEnabled;
+    final boolean isLocal;
     final boolean isPrimaryMode;
     final SocketAddress serverAddress;
 
-    private ObsrConfiguration(boolean isEnabled, boolean isPrimaryMode, SocketAddress serverAddress) {
+    private ObsrConfiguration(boolean isEnabled, boolean isLocal, boolean isPrimaryMode, SocketAddress serverAddress) {
         this.isEnabled = isEnabled;
+        this.isLocal = isLocal;
         this.isPrimaryMode = isPrimaryMode;
         this.serverAddress = serverAddress;
     }
 
     private ObsrConfiguration() {
-        this(false, false, null);
+        this(false, false, false, null);
     }
 
     public static ObsrConfiguration disabled() {
@@ -28,7 +30,7 @@ public class ObsrConfiguration {
 
     public static ObsrConfiguration primaryNode(SocketAddress bindAddress) {
         Objects.requireNonNull(bindAddress, "bindAddress");
-        return new ObsrConfiguration(true, true, bindAddress);
+        return new ObsrConfiguration(true, false, true, bindAddress);
     }
 
     public static ObsrConfiguration primaryNode() {
@@ -37,10 +39,14 @@ public class ObsrConfiguration {
 
     public static ObsrConfiguration secondaryNode(SocketAddress primaryNodeAddress) {
         Objects.requireNonNull(primaryNodeAddress, "primaryNodeAddress");
-        return new ObsrConfiguration(true, false, primaryNodeAddress);
+        return new ObsrConfiguration(true, false, false, primaryNodeAddress);
     }
 
     public static ObsrConfiguration secondaryNode(String primaryNodeAddress) {
         return secondaryNode(new InetSocketAddress(primaryNodeAddress, DEFAULT_SERVER_PORT));
+    }
+
+    public static ObsrConfiguration localOnly() {
+        return new ObsrConfiguration(true, true, false, null);
     }
 }

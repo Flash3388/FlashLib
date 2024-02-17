@@ -50,11 +50,13 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mChannelUpdater = channelUpdaterService;
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            ObsrService service = new ObsrService(channelUpdaterService, mInstanceId, mClock);
-            if (configuration.mObsrConfiguration.isPrimaryMode) {
-                service.configurePrimary(configuration.mObsrConfiguration.serverAddress);
+            ObsrService service = new ObsrService(mInstanceId, mClock);
+            if (configuration.mObsrConfiguration.isLocal) {
+                service.configureLocal();
+            } else if (configuration.mObsrConfiguration.isPrimaryMode) {
+                service.configurePrimary(mChannelUpdater, configuration.mObsrConfiguration.serverAddress);
             } else {
-                service.configureSecondary(configuration.mObsrConfiguration.serverAddress);
+                service.configureSecondary(mChannelUpdater, configuration.mObsrConfiguration.serverAddress);
             }
 
             mServiceRegistry.register(service);
