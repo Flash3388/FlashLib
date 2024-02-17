@@ -20,6 +20,7 @@ public class RunningActionContext {
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
+    private final ObsrActionContext mObsrContext;
     private final ActionExecutionState mExecutionState;
     private final ActionControl mControl;
 
@@ -34,16 +35,15 @@ public class RunningActionContext {
         mParent = parent;
         mLogger = logger;
 
-        ObsrActionContext obsrContext = new ObsrActionContext(obsrRoot);
-
         mConfiguration = new ActionConfiguration(mAction.getConfiguration());
-        mExecutionState = new ActionExecutionState(mConfiguration, obsrContext, clock, logger);
-        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrContext, clock, logger);
+        mObsrContext = new ObsrActionContext(obsrRoot);
+        mExecutionState = new ActionExecutionState(mConfiguration, mObsrContext, clock, logger);
+        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, mObsrContext, clock, logger);
 
         mIsInitialized = false;
 
-        obsrContext.updateFromAction(action);
-        obsrContext.updateFromConfiguration(mConfiguration);
+        mObsrContext.updateFromAction(action);
+        mObsrContext.updateFromConfiguration(mConfiguration);
     }
 
     public RunningActionContext(Action action,
@@ -59,6 +59,10 @@ public class RunningActionContext {
 
     public ActionConfiguration getConfiguration() {
         return mConfiguration;
+    }
+
+    public ObsrActionContext getObsrContext() {
+        return mObsrContext;
     }
 
     public boolean shouldRunInDisabled() {

@@ -10,9 +10,11 @@ import java.util.Objects;
 public class ScheduledActionImpl implements ScheduledAction {
 
     private final RunningActionContext mContext;
+    private final ObsrActionContext mObsrActionContext;
 
     public ScheduledActionImpl(RunningActionContext context) {
         mContext = context;
+        mObsrActionContext = context.getObsrContext();
     }
 
     @Override
@@ -80,6 +82,56 @@ public class ScheduledActionImpl implements ScheduledAction {
         }
 
         mContext.markForCancellation();
+    }
+
+    @Override
+    public boolean getBooleanProperty(String name, boolean defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getBoolean(defaultValue);
+    }
+
+    @Override
+    public int getIntProperty(String name, int defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getInt(defaultValue);
+    }
+
+    @Override
+    public long getLongProperty(String name, long defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getLong(defaultValue);
+    }
+
+    @Override
+    public double getDoubleProperty(String name, double defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getDouble(defaultValue);
+    }
+
+    @Override
+    public String getStringProperty(String name, String defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getString(defaultValue);
+    }
+
+    @Override
+    public void putBooleanProperty(String name, boolean value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setBoolean(value);
+    }
+
+    @Override
+    public void putIntProperty(String name, int value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setInt(value);
+    }
+
+    @Override
+    public void putLongProperty(String name, long value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setLong(value);
+    }
+
+    @Override
+    public void putDoubleProperty(String name, double value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setDouble(value);
+    }
+
+    @Override
+    public void putStringProperty(String name, String value) {
+        mObsrActionContext.getPropertiesRoot().getEntry(name).setString(value);
     }
 
     @Override

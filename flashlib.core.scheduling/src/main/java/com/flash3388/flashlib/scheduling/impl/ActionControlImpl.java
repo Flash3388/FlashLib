@@ -73,6 +73,31 @@ public class ActionControlImpl implements ActionControl {
     }
 
     @Override
+    public boolean getBooleanProperty(String name, boolean defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getBoolean(defaultValue);
+    }
+
+    @Override
+    public int getIntProperty(String name, int defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getInt(defaultValue);
+    }
+
+    @Override
+    public long getLongProperty(String name, long defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getLong(defaultValue);
+    }
+
+    @Override
+    public double getDoubleProperty(String name, double defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getDouble(defaultValue);
+    }
+
+    @Override
+    public String getStringProperty(String name, String defaultValue) {
+        return mObsrActionContext.getPropertiesRoot().getEntry(name).getString(defaultValue);
+    }
+
+    @Override
     public void putBooleanProperty(String name, boolean value) {
         mObsrActionContext.getPropertiesRoot().getEntry(name).setBoolean(value);
     }
