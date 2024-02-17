@@ -392,6 +392,19 @@ public interface Scheduler {
 
     /**
      * <p>
+     *     Returns the current default action registration for a given subsystem. If no
+     *     default action is registered, {@link Optional#empty()} is returned.
+     * </p>
+     *
+     * @param subsystem subsystem to get registration for.
+     * @return registration of the default action if one is registered, empty otherwise.
+     * @see #setDefaultAction(Subsystem, Action)
+     */
+    @MainThreadOnly
+    Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem);
+
+    /**
+     * <p>
      *     Gets the action currently running on the given {@link Requirement requirement (or subsystem)}.
      * </p>
      *

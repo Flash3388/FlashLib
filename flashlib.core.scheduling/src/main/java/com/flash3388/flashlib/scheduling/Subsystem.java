@@ -39,6 +39,21 @@ public class Subsystem implements Requirement {
     }
 
     /**
+     * Gets the current default action registration for this subsystem.
+     *
+     * @return last {@link DefaultActionRegistration}, or empty if no registration was done.
+     * @see Scheduler#getDefaultActionRegistration(Subsystem)
+     */
+    public Optional<DefaultActionRegistration> getDefaultActionRegistration() {
+        Scheduler scheduler = mScheduler.get();
+        if (scheduler == null) {
+            throw new IllegalStateException("scheduler garbage collected");
+        }
+
+        return scheduler.getDefaultActionRegistration(this);
+    }
+
+    /**
      * Sets the default action of this subsystem.
      * <p>
      *     There can be only one default action for any subsystem. Such that calling this twice

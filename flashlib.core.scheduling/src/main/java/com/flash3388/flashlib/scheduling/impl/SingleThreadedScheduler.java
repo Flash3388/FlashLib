@@ -246,6 +246,18 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
+    public Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem) {
+        mMainThread.verifyCurrentThread();
+
+        RegisteredDefaultAction registered = mDefaultActions.get(subsystem);
+        if (registered == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(registered.getRegistration());
+    }
+
+    @Override
     public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
         mMainThread.verifyCurrentThread();
 

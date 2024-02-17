@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
 import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
@@ -31,6 +32,10 @@ public class RegisteredDefaultAction {
 
     public ObsrActionContext getObsrActionContext() {
         return mObsrActionContext;
+    }
+
+    public DefaultActionRegistration getRegistration() {
+        return mDefaultActionRegistration;
     }
 
     public void updateActionStarted(ScheduledAction action) {

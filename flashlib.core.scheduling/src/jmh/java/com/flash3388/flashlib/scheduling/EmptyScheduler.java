@@ -53,6 +53,11 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
+    public Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Action> getActionRunningOnRequirement(Requirement requirement) {
         return Optional.empty();
     }
