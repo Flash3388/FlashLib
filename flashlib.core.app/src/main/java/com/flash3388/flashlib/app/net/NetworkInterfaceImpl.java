@@ -45,9 +45,13 @@ public class NetworkInterfaceImpl implements NetworkInterface {
 
         mNextMessengerId = 0;
 
-        ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService();
-        mServiceRegistry.register(channelUpdaterService);
-        mChannelUpdater = channelUpdaterService;
+        if (configuration.isNetworkingEnabled()) {
+            ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService();
+            mServiceRegistry.register(channelUpdaterService);
+            mChannelUpdater = channelUpdaterService;
+        } else {
+            mChannelUpdater = null;
+        }
 
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
             ObsrService service = new ObsrService(mInstanceId, mClock);
@@ -66,7 +70,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            HfcsService service = new HfcsService(channelUpdaterService, mInstanceId, mClock);
+            HfcsService service = new HfcsService(mChannelUpdater, mInstanceId, mClock);
             if (configuration.mHfcsConfiguration.isTargeted) {
                 service.configureTargeted(configuration.mHfcsConfiguration.localAddress, configuration.mHfcsConfiguration.remoteAddress);
             } else {
@@ -106,6 +110,10 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     @Override
     public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
+
+        if (!getMode().isNetworkingEnabled()) {
+            throw new IllegalStateException("networking features not enabled");
+        }
 
         int messengerId = ++mNextMessengerId;
         ChannelId channelId = new ChannelId(mInstanceId, messengerId);
