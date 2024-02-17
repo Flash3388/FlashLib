@@ -9,12 +9,10 @@ import java.lang.ref.WeakReference;
 
 class ServerChannelListener implements ServerMessagingChannel.Listener {
 
-    private final WeakReference<ServerMessagingChannel> mChannel;
     private final EventController mEventController;
     private final Logger mLogger;
 
-    ServerChannelListener(ServerMessagingChannel channel, EventController eventController, Logger logger) {
-        mChannel = new WeakReference<>(channel);
+    ServerChannelListener(EventController eventController, Logger logger) {
         mEventController = eventController;
         mLogger = logger;
     }
@@ -33,7 +31,14 @@ class ServerChannelListener implements ServerMessagingChannel.Listener {
 
     @Override
     public void onClientDisconnected(ChannelId clientId) {
+        mLogger.debug("ServerChannel: client disconnected, alerting listeners");
 
+        mEventController.fire(
+                new NewClientEvent(clientId),
+                NewClientEvent.class,
+                ConnectionListener.class,
+                ConnectionListener::onClientDisconnected
+        );
     }
 
     @Override

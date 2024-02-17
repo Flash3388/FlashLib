@@ -17,12 +17,26 @@ class ClientChannelListener implements MessagingChannel.Listener {
 
     @Override
     public void onConnect() {
+        mLogger.debug("ClientChannel: connected, alerting listeners");
 
+        mEventController.fire(
+                new EmptyEvent(),
+                EmptyEvent.class,
+                ConnectionListener.class,
+                ConnectionListener::onConnected
+        );
     }
 
     @Override
     public void onDisconnect() {
+        mLogger.debug("ClientChannel: disconnected, alerting listeners");
 
+        mEventController.fire(
+                new EmptyEvent(),
+                EmptyEvent.class,
+                ConnectionListener.class,
+                ConnectionListener::onDisconnected
+        );
     }
 
     @Override

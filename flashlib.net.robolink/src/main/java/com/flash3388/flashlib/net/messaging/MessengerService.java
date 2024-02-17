@@ -165,7 +165,7 @@ public class MessengerService extends ServiceBase implements Messenger {
                     mClock,
                     mLogger);
 
-            channel.setListener(new ServerChannelListener(channel, mEventController, mLogger));
+            channel.setListener(new ServerChannelListener(mEventController, mLogger));
 
             return channel;
         }

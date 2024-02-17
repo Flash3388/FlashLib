@@ -120,6 +120,8 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
 
         mClosed = true;
 
+        disconnectAllClients();
+
         ChannelData channel = mChannel.getAndSet(null);
         if (channel != null) {
             Closeables.silentClose(channel.channel);
@@ -253,6 +255,17 @@ public class ServerMessagingChannelImpl implements ServerMessagingChannel {
             // if id is not null, then we did not report this channel as connected,
             // and such we will not report it as disconnected
             listener.onClientDisconnected(node.id);
+        }
+    }
+
+    private void disconnectAllClients() {
+        Map<SelectionKey, ClientNode> clients;
+        synchronized (mClients) {
+            clients = new HashMap<>(mClients);
+        }
+
+        for (ClientNode node : clients.values()) {
+            disconnectClient(node);
         }
     }
 

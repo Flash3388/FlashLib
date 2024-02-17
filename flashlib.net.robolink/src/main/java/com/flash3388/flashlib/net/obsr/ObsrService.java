@@ -1,10 +1,13 @@
 package com.flash3388.flashlib.net.obsr;
 
+import com.beans.BooleanProperty;
+import com.beans.properties.atomic.AtomicBooleanProperty;
 import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
 import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
 import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.ConnectionListener;
+import com.flash3388.flashlib.net.messaging.EmptyEvent;
 import com.flash3388.flashlib.net.messaging.Message;
 import com.flash3388.flashlib.net.messaging.MessageListener;
 import com.flash3388.flashlib.net.messaging.MessageType;
@@ -25,7 +28,6 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class ObsrService extends ServiceBase implements ObjectStorage {
 
@@ -34,12 +36,14 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
     private final InstanceId mOurId;
     private final Clock mClock;
+    private final BooleanProperty mIsConnected;
 
     private Context mContext;
 
     public ObsrService(InstanceId ourId, Clock clock) {
         mOurId = ourId;
         mClock = clock;
+        mIsConnected = new AtomicBooleanProperty(false);
     }
 
     public void configurePrimary(ChannelUpdater channelUpdater, SocketAddress bindAddress) {
@@ -47,7 +51,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
             throw new IllegalStateException("running");
         }
 
-        NetworkedContext context = new NetworkedContext(channelUpdater, mOurId, mClock, LOGGER);
+        NetworkedContext context = new NetworkedContext(mIsConnected, channelUpdater, mOurId, mClock, LOGGER);
         context.configurePrimary(bindAddress);
         mContext = context;
     }
@@ -57,7 +61,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
             throw new IllegalStateException("running");
         }
 
-        NetworkedContext context = new NetworkedContext(channelUpdater, mOurId, mClock, LOGGER);
+        NetworkedContext context = new NetworkedContext(mIsConnected, channelUpdater, mOurId, mClock, LOGGER);
         context.configureSecondary(serverAddress);
         mContext = context;
     }
@@ -67,7 +71,16 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
             throw new IllegalStateException("running");
         }
 
-        mContext = new LocalContext(mOurId, mClock, LOGGER);
+        mContext = new LocalContext(mClock, LOGGER);
+    }
+
+    @Override
+    public boolean isLocal() {
+        if (!isRunning()) {
+            return true;
+        }
+
+        return !mIsConnected.getAsBoolean();
     }
 
     @Override
@@ -91,12 +104,14 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
             throw new ServiceException("not configured");
         }
 
+        mIsConnected.setAsBoolean(false);
         mContext.start();
     }
 
     @Override
     protected void stopRunning() {
         mContext.stop();
+        mIsConnected.setAsBoolean(false);
     }
 
     private static Set<MessageType> getUsedMessageTypes() {
@@ -115,10 +130,15 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
     }
 
     private static class NetworkedContext implements Context {
+
         private final MessengerService mMessenger;
         private final Storage mStorage;
 
-        private NetworkedContext(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock, Logger logger) {
+        private NetworkedContext(BooleanProperty isConnected,
+                                 ChannelUpdater channelUpdater,
+                                 InstanceId ourId,
+                                 Clock clock,
+                                 Logger logger) {
             mMessenger = new MessengerService(channelUpdater, new ChannelId(ourId, MESSENGER_ID), clock);
 
             StorageListener storageListener = new StorageListenerImpl(mMessenger);
@@ -127,7 +147,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
             Set<MessageType> messageTypes = getUsedMessageTypes();
             mMessenger.registerMessageTypes(messageTypes);
-            mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage, logger));
+            mMessenger.addListener(new ConnectionListenerImpl(mMessenger, mStorage, logger, isConnected));
             mMessenger.addListener(new MessageListenerImpl(mStorage), messageTypes);
         }
 
@@ -159,7 +179,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
 
         private final Storage mStorage;
 
-        private LocalContext(InstanceId ourId, Clock clock, Logger logger) {
+        private LocalContext(Clock clock, Logger logger) {
             StorageListener storageListener = new EmptyStorageListener();
             EventController eventController = Controllers.newSyncExecutionController();
             mStorage = new StorageImpl(storageListener, eventController, clock, logger);
@@ -186,19 +206,50 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
         private final Messenger mMessenger;
         private final Storage mStorage;
         private final Logger mLogger;
+        private final BooleanProperty mIsConnected;
 
-        private ConnectionListenerImpl(Messenger messenger, Storage storage, Logger logger) {
+        private int mConnectedClients;
+
+        private ConnectionListenerImpl(Messenger messenger,
+                                       Storage storage,
+                                       Logger logger,
+                                       BooleanProperty isConnected) {
             mMessenger = messenger;
             mStorage = storage;
             mLogger = logger;
+            mIsConnected = isConnected;
+
+            mConnectedClients = 0;
+        }
+
+        @Override
+        public void onConnected(EmptyEvent event) {
+            mLogger.debug("OBSR connected");
+            mIsConnected.setAsBoolean(true);
+        }
+
+        @Override
+        public void onDisconnected(EmptyEvent event) {
+            mLogger.debug("OBSR disconnected");
+            mIsConnected.setAsBoolean(true);
         }
 
         @Override
         public void onClientConnected(NewClientEvent event) {
             mLogger.debug("New client connected to OBSR, sending storage contents");
+            mIsConnected.setAsBoolean(true);
+            mConnectedClients++;
 
             Message message = mStorage.createContentsMessage();
             mMessenger.send(message);
+        }
+
+        @Override
+        public void onClientDisconnected(NewClientEvent event) {
+            mConnectedClients--;
+            if (mConnectedClients < 1) {
+                mIsConnected.setAsBoolean(false);
+            }
         }
     }
 
