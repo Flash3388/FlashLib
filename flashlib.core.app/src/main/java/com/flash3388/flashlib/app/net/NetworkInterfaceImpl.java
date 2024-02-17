@@ -13,6 +13,7 @@ import com.flash3388.flashlib.net.obsr.ObjectStorage;
 import com.flash3388.flashlib.net.obsr.ObsrService;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.util.Set;
@@ -24,6 +25,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     private final ServiceRegistry mServiceRegistry;
     private final Clock mClock;
     private final FlashLibMainThread mMainThread;
+    private final NamedThreadFactory mThreadFactory;
 
     private final NetworkingMode mMode;
     private final ObjectStorage mObjectStorage;
@@ -36,17 +38,19 @@ public class NetworkInterfaceImpl implements NetworkInterface {
                                 InstanceId instanceId,
                                 ServiceRegistry serviceRegistry,
                                 Clock clock,
-                                FlashLibMainThread mainThread) {
+                                FlashLibMainThread mainThread,
+                                NamedThreadFactory threadFactory) {
         mMode = configuration;
         mInstanceId = instanceId;
         mServiceRegistry = serviceRegistry;
         mClock = clock;
         mMainThread = mainThread;
+        mThreadFactory = threadFactory;
 
         mNextMessengerId = 0;
 
         if (configuration.isNetworkingEnabled()) {
-            ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService();
+            ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService(threadFactory);
             mServiceRegistry.register(channelUpdaterService);
             mChannelUpdater = channelUpdaterService;
         } else {
@@ -70,7 +74,7 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            HfcsService service = new HfcsService(mChannelUpdater, mInstanceId, mClock);
+            HfcsService service = new HfcsService(threadFactory, mChannelUpdater, mInstanceId, mClock);
             if (configuration.mHfcsConfiguration.isTargeted) {
                 service.configureTargeted(configuration.mHfcsConfiguration.localAddress, configuration.mHfcsConfiguration.remoteAddress);
             } else {

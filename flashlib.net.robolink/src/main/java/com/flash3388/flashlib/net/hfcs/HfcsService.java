@@ -14,6 +14,7 @@ import com.flash3388.flashlib.net.messaging.ChannelId;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
     private static final Logger LOGGER = Logging.getLogger("Comm", "HFCSService");
     private static final long MESSENGER_ID = 777;
 
+    private final NamedThreadFactory mThreadFactory;
     private final ChannelUpdater mChannelUpdater;
     private final ChannelId mOurId;
     private final Clock mClock;
@@ -35,7 +37,11 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
     private MessagingChannel mChannel;
     private Thread mUpdateThread;
 
-    public HfcsService(ChannelUpdater channelUpdater, InstanceId ourId, Clock clock) {
+    public HfcsService(NamedThreadFactory threadFactory,
+                       ChannelUpdater channelUpdater,
+                       InstanceId ourId,
+                       Clock clock) {
+        mThreadFactory = threadFactory;
         mChannelUpdater = channelUpdater;
         mOurId = new ChannelId(ourId, MESSENGER_ID);
         mClock = clock;
@@ -44,10 +50,6 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         mChannel = null;
         mUpdateThread = null;
     }
-
-    // TODO: SUPPORT FOR BROADCAST/MULTICAST MODES
-    //  FOR THIS MODE, CONNECTION DETECTION IS PER "CLIENT"
-    //  SO THESE MODES ARE A BIT MORE COMPLEX
 
     public void configureTargeted(SocketAddress bindAddress, SocketAddress remoteAddress) {
         mChannelSupplier = new TargetedContextSupplier(
@@ -92,8 +94,7 @@ public class HfcsService extends SingleUseService implements HfcsRegistry {
         mChannel.setListener(new MessagingChannelListener(mContext));
         mChannel.start();
 
-        Thread updateThread = new Thread(new UpdateTask(mChannel, mContext), "HFCS-Updater");
-        updateThread.setDaemon(true);
+        Thread updateThread = mThreadFactory.newThread("HFCS-Updater", new UpdateTask(mChannel, mContext));
         updateThread.start();
         mUpdateThread = updateThread;
     }

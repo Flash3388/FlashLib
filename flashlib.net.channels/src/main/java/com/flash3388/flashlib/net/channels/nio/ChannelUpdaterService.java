@@ -6,6 +6,7 @@ import com.castle.util.closeables.Closeables;
 import com.flash3388.flashlib.net.channels.BaseChannel;
 import com.flash3388.flashlib.net.channels.NetChannelOpener;
 import com.flash3388.flashlib.time.Time;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
 
@@ -30,6 +31,7 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
     private static final Logger LOGGER = Logging.getLogger("Comm", "ChannelUpdater");
     private static final Time SELECT_TIMEOUT = Time.milliseconds(100);
 
+    private final NamedThreadFactory mThreadFactory;
     private final Map<SelectionKey, ChannelListener> mListeners;
     private final DelayQueue<OpenRequest<?>> mOpenRequests;
     private final Queue<UpdateRequest> mCustomUpdateRequests;
@@ -37,7 +39,8 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
     private Selector mSelector;
     private Thread mThread;
 
-    public ChannelUpdaterService() {
+    public ChannelUpdaterService(NamedThreadFactory threadFactory) {
+        mThreadFactory = threadFactory;
         mListeners = new HashMap<>();
         mOpenRequests = new DelayQueue<>();
         mCustomUpdateRequests = new ArrayDeque<>();
@@ -72,8 +75,7 @@ public class ChannelUpdaterService extends SingleUseService implements ChannelUp
     protected void startRunning() throws ServiceException {
         try {
             mSelector = Selector.open();
-            mThread = new Thread(new Task(this, LOGGER), "ChannelUpdater");
-            mThread.setDaemon(true);
+            mThread = mThreadFactory.newThread("ChannelUpdater", new Task(this, LOGGER));
             mThread.start();
         } catch (IOException e) {
             throw new ServiceException(e);

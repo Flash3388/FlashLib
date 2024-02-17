@@ -34,6 +34,7 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.FlashLibMainThreadImpl;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.logging.Logging;
 import com.flash3388.flashlib.util.resources.ResourceHolder;
 import com.flash3388.flashlib.util.unique.InstanceId;
@@ -79,6 +80,7 @@ public class GenericRobotControl implements RobotControl {
     private final InstanceId mInstanceId;
     private final ResourceHolder mResourceHolder;
 
+    private final NamedThreadFactory mThreadFactory;
     private final RobotModeSupplier mModeSupplier;
     private final NetworkInterface mNetworkInterface;
     private final IoInterface mIoInterface;
@@ -92,6 +94,7 @@ public class GenericRobotControl implements RobotControl {
 
     public GenericRobotControl(InstanceId instanceId,
                                ResourceHolder resourceHolder,
+                               NamedThreadFactory threadFactory,
                                RobotModeSupplier modeSupplier,
                                NetworkInterface networkInterface,
                                IoInterface ioInterface,
@@ -103,6 +106,7 @@ public class GenericRobotControl implements RobotControl {
                                DeviceInterface deviceInterface) {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
+        mThreadFactory = threadFactory;
         mModeSupplier = modeSupplier;
         mNetworkInterface = networkInterface;
         mIoInterface = ioInterface;
@@ -113,7 +117,7 @@ public class GenericRobotControl implements RobotControl {
         mMainThread = mainThread;
         mDeviceInterface = deviceInterface;
 
-        mWatchdogService = new WatchdogService();
+        mWatchdogService = new WatchdogService(mThreadFactory);
         mServiceRegistry.register(mWatchdogService);
     }
 
@@ -125,13 +129,14 @@ public class GenericRobotControl implements RobotControl {
         mInstanceId = instanceId;
         mResourceHolder = resourceHolder;
 
+        mThreadFactory = new DefaultFlashLibThreadFactory();
         mClock = RobotFactory.newDefaultClock();
         mMainThread = new FlashLibMainThreadImpl();
 
         mServiceRegistry = new BasicServiceRegistry(mMainThread);
         mNetworkInterface = new NetworkInterfaceImpl(networkConfiguration,
                 mInstanceId, mServiceRegistry, mClock,
-                mMainThread);
+                mMainThread, mThreadFactory);
 
         ObjectStorage objectStorage = mNetworkInterface.getMode().isObjectStorageEnabled() ?
                 mNetworkInterface.getObjectStorage() :
@@ -166,7 +171,7 @@ public class GenericRobotControl implements RobotControl {
         mHidInterface = configuration.hidBackend.createInterface(this);
         mIoInterface = configuration.ioBackend.createInterface(this);
 
-        mWatchdogService = new WatchdogService();
+        mWatchdogService = new WatchdogService(mThreadFactory);
         mServiceRegistry.register(mWatchdogService);
     }
 
@@ -261,8 +266,13 @@ public class GenericRobotControl implements RobotControl {
     }
 
     @Override
+    public NamedThreadFactory getThreadFactory() {
+        return mThreadFactory;
+    }
+
+    @Override
     public Thread newThread(String name, Consumer<? super FlashLibControl> runnable) {
-        return DefaultFlashLibThreadFactory.newThread(name, ()-> runnable.accept(this));
+        return mThreadFactory.newThread(name, ()-> runnable.accept(this));
     }
 
     @Override

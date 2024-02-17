@@ -8,6 +8,7 @@ import com.flash3388.flashlib.app.watchdog.Watchdog;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -158,6 +159,15 @@ public interface FlashLibControl {
      * @see #newWatchdog(String, Time, FeedReporter)
      */
     Watchdog newWatchdog(String name, Time timeout);
+
+    /**
+     * Retrieves the {@link NamedThreadFactory} used to create threads for the execution of
+     * different components that make up {@link FlashLibControl}. Use this to create new threads
+     * in your code and have them automatically configured and possibly managed by this interface.
+     *
+     * @return {@link NamedThreadFactory}.
+     */
+    NamedThreadFactory getThreadFactory();
 
     /**
      * Creates a new thread to be used by the application. The created thread is configured
