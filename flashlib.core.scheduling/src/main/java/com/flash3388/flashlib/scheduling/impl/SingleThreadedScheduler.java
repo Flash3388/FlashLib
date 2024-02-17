@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
@@ -89,7 +90,7 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void start(Action action) {
+    public ScheduledAction start(Action action) {
         mMainThread.verifyCurrentThread();
 
         if (mPendingActions.containsKey(action) || mRunningActions.containsKey(action)) {
@@ -98,11 +99,14 @@ public class SingleThreadedScheduler implements Scheduler {
 
         StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
         RunningActionContext context = new RunningActionContext(action, object, mClock, LOGGER);
+        ScheduledAction future = new ScheduledActionImpl(context);
 
         if (!tryStartingAction(context)) {
             mPendingActions.put(action, context);
             LOGGER.debug("Action {} pending", context);
         }
+
+        return future;
     }
 
     @Override

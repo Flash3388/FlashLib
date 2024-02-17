@@ -233,11 +233,12 @@ public interface Scheduler {
      * </p>
      *
      * @param action action to start
+     * @return {@link ScheduledAction} describing and allowing control of the execution and state of the action.
      *
      * @throws IllegalStateException if the action is already running on this scheduler.
      */
     @MainThreadOnly
-    void start(Action action);
+    ScheduledAction start(Action action);
 
     /**
      * <p>

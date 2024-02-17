@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.Scheduler;
@@ -64,10 +65,12 @@ public interface Action {
      *     and other prevailing conditions.
      * </p>
      *
+     * @return {@link ScheduledAction} describing and allowing control of the execution and state of the action.
+     *
      * @throws IllegalStateException if the action is already running.
      * @see Scheduler#start(Action)
      */
-    void start();
+    ScheduledAction start();
 
     /**
      * <p>

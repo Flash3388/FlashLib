@@ -13,6 +13,7 @@ public class ActionExecutionState {
     private final Clock mClock;
     private final Logger mLogger;
 
+    private ExecutionStatus mStatus;
     private Time mStartTime;
     private Time mEndTime;
     private FinishReason mFinishReason;
@@ -28,10 +29,18 @@ public class ActionExecutionState {
         mClock = clock;
         mLogger = logger;
 
+        mStatus = null;
         mStartTime = Time.INVALID;
         mEndTime = Time.INVALID;
         mFinishReason = FinishReason.FINISHED;
         mMarkedForEnd = false;
+
+        updateStatus(ExecutionStatus.PENDING);
+        updatePhase(ExecutionPhase.STARTUP);
+    }
+
+    public ExecutionStatus getStatus() {
+        return mStatus;
     }
 
     public Time getStartTime() {
@@ -59,15 +68,15 @@ public class ActionExecutionState {
     }
 
     public FinishReason getFinishReason() {
+        if (mFinishReason == null) {
+            throw new IllegalStateException("no finish reason as action has not finished");
+        }
+
         return mFinishReason;
     }
 
     public boolean isMarkedForEnd() {
         return mMarkedForEnd;
-    }
-
-    public void updatePhase(ExecutionPhase phase) {
-        mObsrContext.updatePhase(phase);
     }
 
     public void markStarted() {
@@ -80,8 +89,16 @@ public class ActionExecutionState {
             mEndTime = Time.INVALID;
         }
 
-        mObsrContext.updateStatus(ExecutionStatus.RUNNING);
-        mObsrContext.updatePhase(ExecutionPhase.INITIALIZATION);
+        updateStatus(ExecutionStatus.RUNNING);
+        updatePhase(ExecutionPhase.INITIALIZATION);
+    }
+
+    public void markInExecution() {
+        updatePhase(ExecutionPhase.EXECUTION);
+    }
+
+    public void markInEnd() {
+        updatePhase(ExecutionPhase.END);
     }
 
     public void markForFinish() {
@@ -92,13 +109,13 @@ public class ActionExecutionState {
     public void markForCancellation() {
         mMarkedForEnd = true;
         mFinishReason = FinishReason.CANCELED;
-        mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
+        updateStatus(ExecutionStatus.CANCELLED);
     }
 
     public void markErrored(Throwable t) {
         mMarkedForEnd = true;
         mFinishReason = FinishReason.ERRORED;
-        mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
+        updateStatus(ExecutionStatus.CANCELLED);
 
         mLogger.error("Error while running an action", t);
     }
@@ -106,11 +123,20 @@ public class ActionExecutionState {
     public void markTimedOut() {
         mMarkedForEnd = true;
         mFinishReason = FinishReason.TIMEDOUT;
-        mObsrContext.updateStatus(ExecutionStatus.CANCELLED);
+        updateStatus(ExecutionStatus.CANCELLED);
     }
 
     public void markFinishedExecution() {
-        mObsrContext.updateStatus(ExecutionStatus.FINISHED);
+        updateStatus(ExecutionStatus.FINISHED);
         mObsrContext.finished();
+    }
+
+    private void updateStatus(ExecutionStatus status) {
+        mStatus = status;
+        mObsrContext.updateStatus(status);
+    }
+
+    private void updatePhase(ExecutionPhase phase) {
+        mObsrContext.updatePhase(phase);
     }
 }

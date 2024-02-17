@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
@@ -56,6 +57,10 @@ public class RunningActionContext {
         return mAction;
     }
 
+    public ActionConfiguration getConfiguration() {
+        return mConfiguration;
+    }
+
     public boolean shouldRunInDisabled() {
         return mConfiguration.hasFlags(ActionFlag.RUN_ON_DISABLED);
     }
@@ -66,6 +71,14 @@ public class RunningActionContext {
 
     public Set<Requirement> getRequirements() {
         return mConfiguration.getRequirements();
+    }
+
+    public ExecutionStatus getStatus() {
+        return mExecutionState.getStatus();
+    }
+
+    public FinishReason getFinishReason() {
+        return mExecutionState.getFinishReason();
     }
 
     public Time getRunTime() {
@@ -122,7 +135,7 @@ public class RunningActionContext {
             mExecutionState.markErrored(t);
         }
 
-        mExecutionState.updatePhase(ExecutionPhase.EXECUTION);
+        mExecutionState.markInExecution();
     }
 
     private void execute() {
@@ -135,7 +148,7 @@ public class RunningActionContext {
     }
 
     private void finish() {
-        mExecutionState.updatePhase(ExecutionPhase.END);
+        mExecutionState.markInEnd();
 
         try {
             mLogger.trace("Calling end for {}", this);
