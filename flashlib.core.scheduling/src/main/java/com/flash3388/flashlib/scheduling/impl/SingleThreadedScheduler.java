@@ -237,6 +237,8 @@ public class SingleThreadedScheduler implements Scheduler {
         RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(action, configuration, obsrActionContext, registration);
         RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
         if (lastRegistered != null) {
+            LOGGER.warn("Default action {} for subsystem {} was replaced with {}",
+                    lastRegistered.getAction(), subsystem, action);
             lastRegistered.removed();
         }
 
