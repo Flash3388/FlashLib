@@ -25,7 +25,6 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     private final ServiceRegistry mServiceRegistry;
     private final Clock mClock;
     private final FlashLibMainThread mMainThread;
-    private final NamedThreadFactory mThreadFactory;
 
     private final NetworkingMode mMode;
     private final ObjectStorage mObjectStorage;
@@ -45,7 +44,6 @@ public class NetworkInterfaceImpl implements NetworkInterface {
         mServiceRegistry = serviceRegistry;
         mClock = clock;
         mMainThread = mainThread;
-        mThreadFactory = threadFactory;
 
         mNextMessengerId = 0;
 
