@@ -35,7 +35,7 @@ class SingleThreadedSchedulerTest {
     private Map<Action, RunningActionContext> mRunningActions;
     private Collection<GenericTrigger> mTriggers;
     private Map<Requirement, Action> mRequirementsUsage;
-    private Map<Subsystem, Action> mDefaultActions;
+    private Map<Subsystem, RegisteredDefaultAction> mDefaultActions;
 
     private SingleThreadedScheduler mScheduler;
 
@@ -335,7 +335,12 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
-        mDefaultActions.put(subsystem, action);
+        RegisteredDefaultAction registeredDefaultAction = new RegisteredDefaultAction(
+                action,
+                action.getConfiguration(),
+                mock(ObsrActionContext.class),
+                mock(DefaultActionRegistrationImpl.class));
+        mDefaultActions.put(subsystem, registeredDefaultAction);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
@@ -356,7 +361,12 @@ class SingleThreadedSchedulerTest {
         Action defaultAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
-        mDefaultActions.put(subsystem, defaultAction);
+        RegisteredDefaultAction registeredDefaultAction = new RegisteredDefaultAction(
+                action,
+                action.getConfiguration(),
+                mock(ObsrActionContext.class),
+                mock(DefaultActionRegistrationImpl.class));
+        mDefaultActions.put(subsystem, registeredDefaultAction);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 

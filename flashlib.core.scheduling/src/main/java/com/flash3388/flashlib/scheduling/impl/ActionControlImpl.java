@@ -9,7 +9,7 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-public class ActionControlImpl implements ActionControl {
+public class ActionControlImpl extends ActionPropertyAccessorImpl implements ActionControl {
 
     private final Action mAction;
     private final ActionConfiguration mConfiguration;
@@ -26,6 +26,8 @@ public class ActionControlImpl implements ActionControl {
                              ObsrActionContext obsrActionContext,
                              Clock clock,
                              Logger logger) {
+        super(obsrActionContext);
+
         mAction = action;
         mConfiguration = configuration;
         mExecutionState = executionState;
@@ -53,10 +55,13 @@ public class ActionControlImpl implements ActionControl {
 
     @Override
     public ExecutionContext createExecutionContext(Action action) {
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
         StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(++mExecutionContextNextNum));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
         RunningActionContext context = new RunningActionContext(action,
                 mAction,
-                object,
+                configuration,
+                obsrActionContext,
                 mClock,
                 mLogger);
         return new ExecutionContextImpl(mClock, mLogger, context);
@@ -70,55 +75,5 @@ public class ActionControlImpl implements ActionControl {
     @Override
     public void cancel() {
         mExecutionState.markForCancellation();
-    }
-
-    @Override
-    public boolean getBooleanProperty(String name, boolean defaultValue) {
-        return mObsrActionContext.getPropertiesRoot().getEntry(name).getBoolean(defaultValue);
-    }
-
-    @Override
-    public int getIntProperty(String name, int defaultValue) {
-        return mObsrActionContext.getPropertiesRoot().getEntry(name).getInt(defaultValue);
-    }
-
-    @Override
-    public long getLongProperty(String name, long defaultValue) {
-        return mObsrActionContext.getPropertiesRoot().getEntry(name).getLong(defaultValue);
-    }
-
-    @Override
-    public double getDoubleProperty(String name, double defaultValue) {
-        return mObsrActionContext.getPropertiesRoot().getEntry(name).getDouble(defaultValue);
-    }
-
-    @Override
-    public String getStringProperty(String name, String defaultValue) {
-        return mObsrActionContext.getPropertiesRoot().getEntry(name).getString(defaultValue);
-    }
-
-    @Override
-    public void putBooleanProperty(String name, boolean value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setBoolean(value);
-    }
-
-    @Override
-    public void putIntProperty(String name, int value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setInt(value);
-    }
-
-    @Override
-    public void putLongProperty(String name, long value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setLong(value);
-    }
-
-    @Override
-    public void putDoubleProperty(String name, double value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setDouble(value);
-    }
-
-    @Override
-    public void putStringProperty(String name, String value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setString(value);
     }
 }

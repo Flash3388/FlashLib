@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
@@ -20,7 +19,6 @@ public class RunningActionContext {
     private final Logger mLogger;
 
     private final ActionConfiguration mConfiguration;
-    private final ObsrActionContext mObsrContext;
     private final ActionExecutionState mExecutionState;
     private final ActionControl mControl;
 
@@ -28,29 +26,19 @@ public class RunningActionContext {
 
     public RunningActionContext(Action action,
                                 Action parent,
-                                StoredObject obsrRoot,
+                                ActionConfiguration configuration,
+                                ObsrActionContext obsrActionContext,
                                 Clock clock,
                                 Logger logger) {
         mAction = action;
         mParent = parent;
+        mConfiguration = configuration;
         mLogger = logger;
 
-        mConfiguration = new ActionConfiguration(mAction.getConfiguration());
-        mObsrContext = new ObsrActionContext(obsrRoot);
-        mExecutionState = new ActionExecutionState(mConfiguration, mObsrContext, clock, logger);
-        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, mObsrContext, clock, logger);
+        mExecutionState = new ActionExecutionState(mConfiguration, obsrActionContext, clock, logger);
+        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrActionContext, clock, logger);
 
         mIsInitialized = false;
-
-        mObsrContext.updateFromAction(action);
-        mObsrContext.updateFromConfiguration(mConfiguration);
-    }
-
-    public RunningActionContext(Action action,
-                                StoredObject obsrRoot,
-                                Clock clock,
-                                Logger logger) {
-        this(action, null, obsrRoot, clock, logger);
     }
 
     public Action getAction() {
@@ -59,10 +47,6 @@ public class RunningActionContext {
 
     public ActionConfiguration getConfiguration() {
         return mConfiguration;
-    }
-
-    public ObsrActionContext getObsrContext() {
-        return mObsrContext;
     }
 
     public boolean shouldRunInDisabled() {

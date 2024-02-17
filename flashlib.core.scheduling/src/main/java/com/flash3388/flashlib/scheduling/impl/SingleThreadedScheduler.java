@@ -1,6 +1,8 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.ActionRejectedException;
+import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
 import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ExecutionState;
@@ -9,6 +11,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
@@ -49,7 +52,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private final Collection<Action> mActionsToRemove;
     private final Collection<GenericTrigger> mTriggers;
     private final Map<Requirement, Action> mRequirementsUsage;
-    private final Map<Subsystem, Action> mDefaultActions;
+    private final Map<Subsystem, RegisteredDefaultAction> mDefaultActions;
 
     private boolean mCanModifyRunningActions;
     private long mActionIdNext;
@@ -62,7 +65,7 @@ public class SingleThreadedScheduler implements Scheduler {
                             Collection<Action> actionsToRemove,
                             Collection<GenericTrigger> triggers,
                             Map<Requirement, Action> requirementsUsage,
-                            Map<Subsystem, Action> defaultActions) {
+                            Map<Subsystem, RegisteredDefaultAction> defaultActions) {
         mClock = clock;
         mMainThread = mainThread;
         mRootObject = rootObject;
@@ -97,16 +100,7 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalArgumentException("Action already started");
         }
 
-        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
-        RunningActionContext context = new RunningActionContext(action, object, mClock, LOGGER);
-        ScheduledAction future = new ScheduledActionImpl(context);
-
-        if (!tryStartingAction(context)) {
-            mPendingActions.put(action, context);
-            LOGGER.debug("Action {} pending", context);
-        }
-
-        return future;
+        return startAction(action);
     }
 
     @Override
@@ -214,6 +208,7 @@ public class SingleThreadedScheduler implements Scheduler {
             iterator.remove();
         }
 
+        // since we iterate over the running actions, we should allow modifications to them.
         mCanModifyRunningActions = false;
         try {
             for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
@@ -227,14 +222,25 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public DefaultActionRegistration setDefaultAction(Subsystem subsystem, Action action) {
         mMainThread.verifyCurrentThread();
 
-        if (!action.getConfiguration().getRequirements().contains(subsystem)) {
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
+        if (!configuration.getRequirements().contains(subsystem)) {
             throw new IllegalArgumentException("action should have subsystem has requirement");
         }
 
-        mDefaultActions.put(subsystem, action);
+        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, false);
+        DefaultActionRegistrationImpl registration = new DefaultActionRegistrationImpl(obsrActionContext);
+
+        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(action, configuration, obsrActionContext, registration);
+        RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
+        if (lastRegistered != null) {
+            lastRegistered.removed();
+        }
+
+        return registration;
     }
 
     @Override
@@ -264,6 +270,7 @@ public class SingleThreadedScheduler implements Scheduler {
         for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
             RunningActionContext context = iterator.next();
 
+            // the action may have being marked for cancellation from an outside source
             if (context.isMarkedForEnd()) {
                 LOGGER.debug("Action {} removed (from pending)", context);
                 iterator.remove();
@@ -276,9 +283,22 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         if (!mode.isDisabled()) {
-            for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
-                if (canStartDefaultAction(entry.getValue())) {
-                    start(entry.getValue());
+            for (Map.Entry<Subsystem, RegisteredDefaultAction> entry : mDefaultActions.entrySet()) {
+                RegisteredDefaultAction action = entry.getValue();
+                if (canStartDefaultAction(action.getConfiguration())) {
+                    try {
+                        // we shouldn't allow pending here because canStartDefaultAction verifies that we won't
+                        // be pending, and we shouldn't start default actions if they would be pending.
+                        ScheduledAction scheduledAction = startAction(
+                                action.getAction(),
+                                action.getConfiguration(),
+                                action.getObsrActionContext(),
+                                false);
+                        action.updateActionStarted(scheduledAction);
+                    } catch (ActionRejectedException e) {
+                        // this should never occur, but if it did, then it's likely a bug
+                        LOGGER.error("Default action was rejected during start attempt {}", action.getAction(), e);
+                    }
                 }
             }
         }
@@ -324,6 +344,33 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         return new ActionGroupImpl(this, LOGGER, policy);
+    }
+
+    private ScheduledAction startAction(Action action,
+                                        ActionConfiguration configuration,
+                                        ObsrActionContext obsrActionContext,
+                                        boolean allowPending) {
+        RunningActionContext context = new RunningActionContext(action, null, configuration, obsrActionContext, mClock, LOGGER);
+        ScheduledAction future = new ScheduledActionImpl(context, obsrActionContext);
+
+        if (!tryStartingAction(context)) {
+            if (allowPending) {
+                mPendingActions.put(action, context);
+                LOGGER.debug("Action {} pending", context);
+            } else {
+                throw new ActionRejectedException(action, "cannot acquire requirements for action");
+            }
+        }
+
+        return future;
+    }
+
+    private ScheduledAction startAction(Action action) {
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
+        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
+
+        return startAction(action, configuration, obsrActionContext, true);
     }
 
     private void executeTriggers() {
@@ -459,15 +506,15 @@ public class SingleThreadedScheduler implements Scheduler {
         return true;
     }
 
-    private boolean canStartDefaultAction(Action action) {
-        for (Requirement requirement : action.getConfiguration().getRequirements()) {
+    private boolean canStartDefaultAction(ActionConfiguration configuration) {
+        for (Requirement requirement : configuration.getRequirements()) {
             if (mRequirementsUsage.containsKey(requirement)) {
                 return false;
             }
         }
 
         for (RunningActionContext context : mPendingActions.values()) {
-            if (!Collections.disjoint(context.getRequirements(), action.getConfiguration().getRequirements())) {
+            if (!Collections.disjoint(context.getRequirements(), configuration.getRequirements())) {
                 return false;
             }
         }
