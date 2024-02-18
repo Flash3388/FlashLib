@@ -54,6 +54,7 @@ public class SingleThreadedScheduler implements Scheduler {
     private final Map<Requirement, Action> mRequirementsUsage;
     private final Map<Subsystem, RegisteredDefaultAction> mDefaultActions;
 
+    private final TriggerActionControllerImpl mTriggerActionController;
     private boolean mCanModifyRunningActions;
     private long mActionIdNext;
 
@@ -76,6 +77,7 @@ public class SingleThreadedScheduler implements Scheduler {
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
 
+        mTriggerActionController = new TriggerActionControllerImpl();
         mCanModifyRunningActions = true;
         mActionIdNext = 0;
     }
@@ -394,31 +396,35 @@ public class SingleThreadedScheduler implements Scheduler {
         // can only occur from within other actions.
         mCanModifyRunningActions = false;
         try {
-            TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
+            mTriggerActionController.clear();
             for (GenericTrigger trigger : mTriggers) {
-                trigger.update(controller);
+                trigger.update(mTriggerActionController);
             }
 
             // calls to isRunning prior to cancel or start are valid here
             // as this scheduler is singlethreaded and thus this info is not
             // updated behind our backs.
 
-            for (Action action : controller.getActionsToStopIfRunning()) {
+            for (Action action : mTriggerActionController.getActionsToStopIfRunning()) {
                 if (isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to cancel action {}, which is running, cancelling", action);
                     cancel(action);
                 }
             }
 
-            for (Action action : controller.getActionsToToggle()) {
+            for (Action action : mTriggerActionController.getActionsToToggle()) {
                 if (!isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to toggle action {}, which is not running, starting", action);
                     start(action);
                 } else {
+                    LOGGER.debug("A trigger has requested to toggle action {}, which is running, cancelling", action);
                     cancel(action);
                 }
             }
 
-            for (Action action : controller.getActionsToStartIfRunning()) {
+            for (Action action : mTriggerActionController.getActionsToStartIfNotRunning()) {
                 if (!isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to start action {}, which is not running, starting", action);
                     start(action);
                 }
             }

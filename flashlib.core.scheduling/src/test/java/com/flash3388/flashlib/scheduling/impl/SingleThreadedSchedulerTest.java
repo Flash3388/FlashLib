@@ -11,7 +11,6 @@ import com.flash3388.flashlib.scheduling.actions.ActionBase;
 import com.flash3388.flashlib.scheduling.actions.ActionsMock;
 import com.flash3388.flashlib.scheduling.impl.triggers.GenericTrigger;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionController;
-import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.ClockMock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import org.hamcrest.collection.IsMapContaining;
@@ -408,7 +407,7 @@ class SingleThreadedSchedulerTest {
         GenericTrigger trigger = new GenericTrigger() {
             @Override
             public void update(TriggerActionController controller) {
-                controller.addActionToStartIfRunning(action);
+                controller.addActionToStartIfNotRunning(action);
             }
         };
         mTriggers.add(trigger);
@@ -428,7 +427,7 @@ class SingleThreadedSchedulerTest {
         GenericTrigger trigger = new GenericTrigger() {
             @Override
             public void update(TriggerActionController controller) {
-                controller.addActionToStartIfRunning(action);
+                controller.addActionToStartIfNotRunning(action);
             }
         };
         mTriggers.add(trigger);

@@ -26,7 +26,7 @@ public class StartOnState implements TriggerStateListener {
     public void onStateChange(TriggerState newState, TriggerState lastState, TriggerActionController controller) {
         if (mTriggerState == newState) {
             Action action = mAction.get();
-            controller.addActionToStartIfRunning(action);
+            controller.addActionToStartIfNotRunning(action);
         }
     }
 }
