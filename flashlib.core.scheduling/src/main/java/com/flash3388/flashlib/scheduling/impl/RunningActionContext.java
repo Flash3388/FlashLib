@@ -141,10 +141,17 @@ public class RunningActionContext {
 
     private void finish() {
         mExecutionState.markInEnd();
+        if (!mIsInitialized) {
+            // did not initialize and as such end should not be called
+            mLogger.debug("{} was marked for end before initializing, not calling end", this);
+            mExecutionState.markFinishedExecution();
+            return;
+        }
 
         try {
-            mLogger.trace("Calling end for {}", this);
-            mAction.end(mExecutionState.getFinishReason());
+            FinishReason finishReason = mExecutionState.getFinishReason();
+            mLogger.trace("Calling end for {} with reason={}", this, finishReason);
+            mAction.end(finishReason);
             mExecutionState.markFinishedExecution();
         } catch (Throwable t) {
             mLogger.warn("Error occurred in action during the end phase. Calling again.");
@@ -152,8 +159,9 @@ public class RunningActionContext {
 
             // try doing it again, so we can maybe make sure end runs.
             try {
-                mLogger.debug("Re-Calling end for {}", this);
-                mAction.end(mExecutionState.getFinishReason());
+                FinishReason finishReason = mExecutionState.getFinishReason();
+                mLogger.debug("Re-Calling end for {} with reason={}", this, finishReason);
+                mAction.end(finishReason);
             } catch (Throwable t1) {
                 mLogger.warn("Error occurred AGAIN in action during end phase." +
                         "It is likely the action has not finished it's teardown properly");
