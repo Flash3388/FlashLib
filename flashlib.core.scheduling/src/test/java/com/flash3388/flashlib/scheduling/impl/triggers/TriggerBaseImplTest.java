@@ -101,8 +101,9 @@ public class TriggerBaseImplTest {
                 .mockIsRunning(true)
                 .build();
 
-        TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.ACTIVE);
+        TriggerBaseImpl trigger = new TriggerBaseImpl(TriggerState.INACTIVE);
         trigger.whileActive(mockAction);
+        trigger.setState(TriggerState.ACTIVE, mock(TriggerActionController.class));
 
         TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
         trigger.setState(TriggerState.INACTIVE, controller);
