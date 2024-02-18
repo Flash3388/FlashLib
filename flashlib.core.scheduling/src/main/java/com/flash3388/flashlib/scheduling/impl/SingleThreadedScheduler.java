@@ -232,11 +232,12 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalArgumentException("action should have subsystem has requirement");
         }
 
-        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
+        long id = ++mActionIdNext;
+        StoredObject object = mRootObject.getChild(String.valueOf(id));
         ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, false);
         DefaultActionRegistrationImpl registration = new DefaultActionRegistrationImpl(obsrActionContext);
 
-        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(action, configuration, obsrActionContext, registration);
+        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(id, action, configuration, obsrActionContext, registration);
         RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
         if (lastRegistered != null) {
             LOGGER.warn("Default action {} for subsystem {} was replaced with {}",
@@ -306,6 +307,7 @@ public class SingleThreadedScheduler implements Scheduler {
                         // we shouldn't allow pending here because canStartDefaultAction verifies that we won't
                         // be pending, and we shouldn't start default actions if they would be pending.
                         ScheduledAction scheduledAction = startAction(
+                                action.getId(),
                                 action.getAction(),
                                 action.getConfiguration(),
                                 action.getObsrActionContext(),
@@ -362,11 +364,18 @@ public class SingleThreadedScheduler implements Scheduler {
         return new ActionGroupImpl(this, LOGGER, policy);
     }
 
-    private ScheduledAction startAction(Action action,
+    private ScheduledAction startAction(long id,
+                                        Action action,
                                         ActionConfiguration configuration,
                                         ObsrActionContext obsrActionContext,
                                         boolean allowPending) {
-        RunningActionContext context = new RunningActionContext(action, null, configuration, obsrActionContext, mClock, LOGGER);
+        RunningActionContext context = new RunningActionContext(
+                id,
+                action,
+                configuration,
+                obsrActionContext,
+                mClock,
+                LOGGER);
         ScheduledAction future = new ScheduledActionImpl(context, obsrActionContext);
 
         if (!tryStartingAction(context)) {
@@ -382,11 +391,12 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     private ScheduledAction startAction(Action action) {
+        long id = ++mActionIdNext;
         ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
-        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
+        StoredObject object = mRootObject.getChild(String.valueOf(id));
         ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
 
-        return startAction(action, configuration, obsrActionContext, true);
+        return startAction(id, action, configuration, obsrActionContext, true);
     }
 
     private void executeTriggers() {

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 
 public class ActionControlImpl extends ActionPropertyAccessorImpl implements ActionControl {
 
+    private final long mId;
     private final Action mAction;
     private final ActionConfiguration mConfiguration;
     private final ActionExecutionState mExecutionState;
@@ -20,13 +21,15 @@ public class ActionControlImpl extends ActionPropertyAccessorImpl implements Act
 
     private int mExecutionContextNextNum;
 
-    public ActionControlImpl(Action action,
+    public ActionControlImpl(long id,
+                             Action action,
                              ActionConfiguration configuration,
                              ActionExecutionState executionState,
                              ObsrActionContext obsrActionContext,
                              Clock clock,
                              Logger logger) {
         super(obsrActionContext);
+        mId = id;
 
         mAction = action;
         mConfiguration = configuration;
@@ -55,10 +58,14 @@ public class ActionControlImpl extends ActionPropertyAccessorImpl implements Act
 
     @Override
     public ExecutionContext createExecutionContext(Action action) {
+        long id = ++mExecutionContextNextNum;
         ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
-        StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(++mExecutionContextNextNum));
+        StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(id));
         ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
-        RunningActionContext context = new RunningActionContext(action,
+        RunningActionContext context = new RunningActionContext(
+                id,
+                action,
+                mId,
                 mAction,
                 configuration,
                 obsrActionContext,

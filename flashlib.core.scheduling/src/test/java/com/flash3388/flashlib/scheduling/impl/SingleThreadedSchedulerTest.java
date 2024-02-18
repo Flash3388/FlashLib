@@ -335,6 +335,7 @@ class SingleThreadedSchedulerTest {
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
         RegisteredDefaultAction registeredDefaultAction = new RegisteredDefaultAction(
+                0,
                 action,
                 action.getConfiguration(),
                 mock(ObsrActionContext.class),
@@ -361,6 +362,7 @@ class SingleThreadedSchedulerTest {
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
         RegisteredDefaultAction registeredDefaultAction = new RegisteredDefaultAction(
+                0,
                 action,
                 action.getConfiguration(),
                 mock(ObsrActionContext.class),

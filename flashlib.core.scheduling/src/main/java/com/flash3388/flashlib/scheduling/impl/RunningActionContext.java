@@ -14,7 +14,9 @@ import java.util.Set;
 
 public class RunningActionContext {
 
+    private final long mId;
     private final Action mAction;
+    private final long mParentId;
     private final Action mParent;
     private final Logger mLogger;
 
@@ -24,21 +26,38 @@ public class RunningActionContext {
 
     private boolean mIsInitialized;
 
-    public RunningActionContext(Action action,
+    public RunningActionContext(long id,
+                                Action action,
+                                long parentId,
                                 Action parent,
                                 ActionConfiguration configuration,
                                 ObsrActionContext obsrActionContext,
                                 Clock clock,
                                 Logger logger) {
+        mId = id;
         mAction = action;
+        mParentId = parentId;
         mParent = parent;
         mConfiguration = configuration;
         mLogger = logger;
 
         mExecutionState = new ActionExecutionState(mConfiguration, obsrActionContext, clock, logger);
-        mControl = new ActionControlImpl(action, mConfiguration, mExecutionState, obsrActionContext, clock, logger);
+        mControl = new ActionControlImpl(id, action, mConfiguration, mExecutionState, obsrActionContext, clock, logger);
 
         mIsInitialized = false;
+    }
+
+    public RunningActionContext(long id,
+                                Action action,
+                                ActionConfiguration configuration,
+                                ObsrActionContext obsrActionContext,
+                                Clock clock,
+                                Logger logger) {
+        this(id, action, -1, null, configuration, obsrActionContext, clock, logger);
+    }
+
+    public long getId() {
+        return mId;
     }
 
     public Action getAction() {
@@ -173,16 +192,25 @@ public class RunningActionContext {
 
     @Override
     public String toString() {
-        if (mParent == null) {
-            return mAction.toString();
-        } else {
-            //noinspection StringBufferReplaceableByString
-            StringBuilder builder = new StringBuilder();
-            builder.append(mAction.toString());
+        StringBuilder builder = new StringBuilder();
+        builder.append(mAction.getClass().getSimpleName());
+        builder.append('{');
+        builder.append("scheduleId=");
+        builder.append(mId);
+        builder.append(", name=");
+        builder.append(mConfiguration.getName());
+        builder.append('}');
+
+        if (mParent != null) {
             builder.append(" (IN GROUP ");
-            builder.append(mParent);
-            builder.append(")");
-            return builder.toString();
+            builder.append(mParent.getClass().getSimpleName());
+            builder.append('{');
+            builder.append("scheduleId=");
+            builder.append(mParentId);
+            builder.append('}');
+            builder.append(')');
         }
+
+        return builder.toString();
     }
 }

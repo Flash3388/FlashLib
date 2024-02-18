@@ -7,19 +7,26 @@ import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 
 public class RegisteredDefaultAction {
 
+    private final long mId;
     private final Action mAction;
     private final ActionConfiguration mConfiguration;
     private final ObsrActionContext mObsrActionContext;
     private final DefaultActionRegistrationImpl mDefaultActionRegistration;
 
-    public RegisteredDefaultAction(Action action,
+    public RegisteredDefaultAction(long id,
+                                   Action action,
                                    ActionConfiguration configuration,
                                    ObsrActionContext obsrActionContext,
                                    DefaultActionRegistrationImpl defaultActionRegistration) {
+        mId = id;
         mAction = action;
         mConfiguration = configuration;
         mObsrActionContext = obsrActionContext;
         mDefaultActionRegistration = defaultActionRegistration;
+    }
+
+    public long getId() {
+        return mId;
     }
 
     public Action getAction() {
