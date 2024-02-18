@@ -390,10 +390,6 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     private void executeTriggers() {
-        // while in this method, calls to start and cancel methods cannot occur due
-        // to modifications of the collections.
-        // since this implementation is meant for single-thread, then such calls
-        // can only occur from within other actions.
         mCanModifyRunningActions = false;
         try {
             mTriggerActionController.clear();
@@ -504,15 +500,16 @@ public class SingleThreadedScheduler implements Scheduler {
 
         Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
         if (conflicts == null) {
+            LOGGER.debug("New action is unable to supersede running conflicts");
             return false;
         }
 
         conflicts.forEach((conflict)-> {
-            cancelAndEnd(conflict);
-            mRunningActions.remove(conflict.getAction());
-
             LOGGER.warn("Action {} has conflict with {}. Canceling old.",
                     context, conflict);
+
+            cancelAndEnd(conflict);
+            mRunningActions.remove(conflict.getAction());
         });
 
         // no conflicts, let's start
