@@ -71,8 +71,8 @@ public abstract class ActionBase implements Action {
 
         mConfiguration = configuration;
 
-        if (mConfiguration.getName() == null || mConfiguration.getName().isEmpty()) {
-            mConfiguration.setName(String.valueOf(hashCode()));
+        if (mConfiguration.getName() == null) {
+            mConfiguration.setName("");
         }
     }
 
