@@ -2,50 +2,66 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
 import com.flash3388.flashlib.scheduling.ScheduledAction;
+import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class DefaultActionRegistrationImpl extends ActionPropertyAccessorImpl implements DefaultActionRegistration {
 
-    private boolean mIsRegistered;
-    private ScheduledAction mScheduledAction;
+    private final RegisteredDefaultAction mAction;
 
-    public DefaultActionRegistrationImpl(ObsrActionContext obsrActionContext) {
-        super(obsrActionContext);
-
-        mIsRegistered = true;
-        mScheduledAction = null;
+    public DefaultActionRegistrationImpl(RegisteredDefaultAction action) {
+        super(action.getObsrActionContext());
+        mAction = action;
     }
 
     @Override
     public boolean isRegistered() {
-        return mIsRegistered;
+        return mAction.isRegistered();
+    }
+
+    @Override
+    public ActionConfiguration getConfiguration() {
+        return mAction.getConfiguration();
     }
 
     @Override
     public boolean isRunning() {
-        if (!mIsRegistered) {
+        if (!isRegistered()) {
             throw new IllegalStateException("action is no longer registered");
         }
 
-        return mScheduledAction != null && mScheduledAction.isRunning();
+        ScheduledAction scheduledAction = mAction.getScheduledAction();
+        return scheduledAction != null && scheduledAction.isRunning();
     }
 
     @Override
     public Optional<ScheduledAction> getLastScheduled() {
-        if (!mIsRegistered) {
+        if (!isRegistered()) {
             throw new IllegalStateException("action is no longer registered");
         }
 
-        return Optional.of(mScheduledAction);
+        return Optional.of(mAction.getScheduledAction());
     }
 
-    void updateStarted(ScheduledAction scheduledAction) {
-        mScheduledAction = scheduledAction;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultActionRegistrationImpl that = (DefaultActionRegistrationImpl) o;
+        return Objects.equals(mAction, that.mAction);
     }
 
-    void removed() {
-        mIsRegistered = false;
-        mScheduledAction = null;
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAction);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("DefaultActionRegistration for %s on %s",
+                mAction.getAction().toString(),
+                mAction.getTargetSubsystem());
     }
 }

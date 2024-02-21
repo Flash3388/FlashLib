@@ -1,12 +1,12 @@
 package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ActionRejectedException;
 import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
-import com.flash3388.flashlib.scheduling.ScheduledAction;
-import com.flash3388.flashlib.scheduling.ActionGroupType;
 import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
@@ -235,9 +235,8 @@ public class SingleThreadedScheduler implements Scheduler {
         long id = ++mActionIdNext;
         StoredObject object = mRootObject.getChild(String.valueOf(id));
         ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, false);
-        DefaultActionRegistrationImpl registration = new DefaultActionRegistrationImpl(obsrActionContext);
 
-        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(id, action, configuration, obsrActionContext, registration);
+        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(id, action, configuration, obsrActionContext, subsystem);
         RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
         if (lastRegistered != null) {
             LOGGER.warn("Default action {} for subsystem {} was replaced with {}",
@@ -245,7 +244,7 @@ public class SingleThreadedScheduler implements Scheduler {
             lastRegistered.removed();
         }
 
-        return registration;
+        return new DefaultActionRegistrationImpl(registeredAction);
     }
 
     @Override
@@ -257,7 +256,7 @@ public class SingleThreadedScheduler implements Scheduler {
             return Optional.empty();
         }
 
-        return Optional.of(registered.getRegistration());
+        return Optional.of(new DefaultActionRegistrationImpl(registered));
     }
 
     @Override
@@ -312,7 +311,7 @@ public class SingleThreadedScheduler implements Scheduler {
                                 action.getConfiguration(),
                                 action.getObsrActionContext(),
                                 false);
-                        action.updateActionStarted(scheduledAction);
+                        action.updateStarted(scheduledAction);
                     } catch (ActionRejectedException e) {
                         // this should never occur, but if it did, then it's likely a bug
                         LOGGER.error("Default action was rejected during start attempt {}", action.getAction(), e);

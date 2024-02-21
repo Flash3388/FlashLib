@@ -1,9 +1,11 @@
 package com.flash3388.flashlib.scheduling.impl;
 
-import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
 import com.flash3388.flashlib.scheduling.ScheduledAction;
+import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
+
+import java.util.Objects;
 
 public class RegisteredDefaultAction {
 
@@ -11,22 +13,32 @@ public class RegisteredDefaultAction {
     private final Action mAction;
     private final ActionConfiguration mConfiguration;
     private final ObsrActionContext mObsrActionContext;
-    private final DefaultActionRegistrationImpl mDefaultActionRegistration;
+    private final Subsystem mSubsystem;
+
+    private boolean mIsRegistered;
+    private ScheduledAction mScheduledAction;
 
     public RegisteredDefaultAction(long id,
                                    Action action,
                                    ActionConfiguration configuration,
                                    ObsrActionContext obsrActionContext,
-                                   DefaultActionRegistrationImpl defaultActionRegistration) {
+                                   Subsystem subsystem) {
         mId = id;
         mAction = action;
         mConfiguration = configuration;
         mObsrActionContext = obsrActionContext;
-        mDefaultActionRegistration = defaultActionRegistration;
+        mSubsystem = subsystem;
+
+        mIsRegistered = true;
+        mScheduledAction = null;
     }
 
     public long getId() {
         return mId;
+    }
+
+    public boolean isRegistered() {
+        return mIsRegistered;
     }
 
     public Action getAction() {
@@ -41,16 +53,34 @@ public class RegisteredDefaultAction {
         return mObsrActionContext;
     }
 
-    public DefaultActionRegistration getRegistration() {
-        return mDefaultActionRegistration;
+    public Subsystem getTargetSubsystem() {
+        return mSubsystem;
     }
 
-    public void updateActionStarted(ScheduledAction action) {
-        mDefaultActionRegistration.updateStarted(action);
+    public ScheduledAction getScheduledAction() {
+        return mScheduledAction;
     }
 
-    public void removed() {
+    void updateStarted(ScheduledAction scheduledAction) {
+        mScheduledAction = scheduledAction;
+    }
+
+    void removed() {
         mObsrActionContext.delete();
-        mDefaultActionRegistration.removed();
+        mScheduledAction = null;
+        mIsRegistered = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegisteredDefaultAction that = (RegisteredDefaultAction) o;
+        return mId == that.mId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mId);
     }
 }

@@ -339,7 +339,7 @@ class SingleThreadedSchedulerTest {
                 action,
                 action.getConfiguration(),
                 mock(ObsrActionContext.class),
-                mock(DefaultActionRegistrationImpl.class));
+                subsystem);
         mDefaultActions.put(subsystem, registeredDefaultAction);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
@@ -366,7 +366,7 @@ class SingleThreadedSchedulerTest {
                 action,
                 action.getConfiguration(),
                 mock(ObsrActionContext.class),
-                mock(DefaultActionRegistrationImpl.class));
+                subsystem);
         mDefaultActions.put(subsystem, registeredDefaultAction);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());

@@ -1,6 +1,7 @@
 package com.flash3388.flashlib.scheduling;
 
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 
 import java.util.Optional;
 
@@ -25,6 +26,14 @@ public interface DefaultActionRegistration extends ActionPropertyAccessor { //TO
      * @return <b>true</b> if action is still registered, <b>false</b> otherwise.
      */
     boolean isRegistered();
+
+    /**
+     * Retrieves the configuration registered with the associated action. This is the configuration
+     * at the time of the registration and is immutable.
+     *
+     * @return configuration of the registered action.
+     */
+    ActionConfiguration getConfiguration();
 
     /**
      * Indicates that the action is currently running.

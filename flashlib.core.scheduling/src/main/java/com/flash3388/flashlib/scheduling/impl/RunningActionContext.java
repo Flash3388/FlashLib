@@ -56,10 +56,6 @@ public class RunningActionContext {
         this(id, action, -1, null, configuration, obsrActionContext, clock, logger);
     }
 
-    public long getId() {
-        return mId;
-    }
-
     public Action getAction() {
         return mAction;
     }
