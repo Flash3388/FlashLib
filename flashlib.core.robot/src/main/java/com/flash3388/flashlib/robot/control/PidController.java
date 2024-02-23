@@ -260,6 +260,18 @@ public class PidController implements ClosedLoopController {
     }
 
     /**
+     * Sets the error tolerance.
+     * This determines the result of {@link #isInTolerance()}, read there for more info.
+     * <p>
+     * Equivalent to {@link #setTolerance(double, double) setTolerance(tolerance, Double.POSITIVE_INFINITY)}.
+     *
+     * @param tolerance tolerance for error, in <em>error units</em>.
+     */
+    public void setTolerance(double tolerance) {
+        setTolerance(mTolerance, Double.POSITIVE_INFINITY);
+    }
+
+    /**
      * Calculates the output to the system to compensate for the error.
      * <p>
      * The output is composed of multiple components: Proportional, Integral, Derivative and Feed-Forward.
