@@ -9,7 +9,6 @@ import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class TriggerBaseImpl implements Trigger {
