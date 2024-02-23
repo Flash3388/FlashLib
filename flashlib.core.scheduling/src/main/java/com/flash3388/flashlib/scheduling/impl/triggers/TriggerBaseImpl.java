@@ -91,13 +91,6 @@ public class TriggerBaseImpl implements Trigger {
         addStateListener(new RunOnState(TriggerState.INACTIVE, supplier));
     }
 
-    void update(BooleanSupplier supplier, TriggerActionController controller) {
-        boolean isConditionMet = supplier.getAsBoolean();
-        TriggerState newState = isConditionMet ? TriggerState.ACTIVE : TriggerState.INACTIVE;
-
-        setState(newState, controller);
-    }
-
     void setState(TriggerState newState, TriggerActionController controller) {
         TriggerState lastState = mCurrentState;
         if (lastState != newState) {
