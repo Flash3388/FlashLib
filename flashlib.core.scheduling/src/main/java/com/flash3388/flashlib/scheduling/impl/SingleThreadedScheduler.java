@@ -232,7 +232,12 @@ public class SingleThreadedScheduler implements Scheduler {
 
         long id = ++mActionIdNext;
         StoredObject object = mRootObject.getChild(String.valueOf(id));
-        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, false);
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
+                object,
+                id,
+                action,
+                configuration,
+                false);
 
         RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(id, action, configuration, obsrActionContext, subsystem);
         RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
@@ -394,7 +399,12 @@ public class SingleThreadedScheduler implements Scheduler {
         long id = ++mActionIdNext;
         ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
         StoredObject object = mRootObject.getChild(String.valueOf(id));
-        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
+                object,
+                id,
+                action,
+                configuration,
+                true);
 
         return startAction(id, action, configuration, obsrActionContext, true);
     }

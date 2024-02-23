@@ -61,7 +61,13 @@ public class ActionControlImpl extends ActionPropertyAccessorImpl implements Act
         long id = ++mExecutionContextNextNum;
         ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
         StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(id));
-        ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
+                object,
+                id,
+                mId,
+                action,
+                configuration,
+                true);
 
         return new ExecutionContextImpl(
                 id,

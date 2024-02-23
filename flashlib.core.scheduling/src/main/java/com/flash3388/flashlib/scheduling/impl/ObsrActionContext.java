@@ -17,6 +17,8 @@ public class ObsrActionContext {
 
     private final StoredEntry mStatus;
     private final StoredEntry mPhase;
+    private final StoredEntry mId;
+    private final StoredEntry mParentId;
     private final StoredEntry mClass;
     private final StoredEntry mName;
     private final StoredEntry mTimeout;
@@ -25,7 +27,12 @@ public class ObsrActionContext {
 
     private boolean mIsDeleted;
 
-    public ObsrActionContext(StoredObject object, Action action, ActionConfiguration configuration, boolean deleteOnFinish) {
+    public ObsrActionContext(StoredObject object,
+                             long id,
+                             long parentId,
+                             Action action,
+                             ActionConfiguration configuration,
+                             boolean deleteOnFinish) {
         mRootObject = object;
         mDeleteOnFinish = deleteOnFinish;
 
@@ -34,6 +41,12 @@ public class ObsrActionContext {
 
         mPhase = object.getEntry("phase");
         mPhase.setString(ExecutionPhase.STARTUP.name());
+
+        mId = object.getEntry("scheduleId");
+        mId.setLong(id);
+
+        mParentId = object.getEntry("parentScheduleId");
+        mParentId.setLong(parentId);
 
         mClass = object.getEntry("class");
         mClass.setString(action.getClass().getName());
@@ -51,6 +64,14 @@ public class ObsrActionContext {
         mPropertiesRoot = mRootObject.getChild("properties");
 
         mIsDeleted = false;
+    }
+
+    public ObsrActionContext(StoredObject object,
+                             long id,
+                             Action action,
+                             ActionConfiguration configuration,
+                             boolean deleteOnFinish) {
+        this(object, id, -1, action, configuration, deleteOnFinish);
     }
 
     public boolean isActive() {
