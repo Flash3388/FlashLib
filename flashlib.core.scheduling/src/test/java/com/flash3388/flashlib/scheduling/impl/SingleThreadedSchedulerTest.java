@@ -2,8 +2,10 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.SchedulerModeMock;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
@@ -30,8 +32,8 @@ import static org.mockito.Mockito.*;
 
 class SingleThreadedSchedulerTest {
 
-    private Map<Action, RunningActionContext> mPendingActions;
-    private Map<Action, RunningActionContext> mRunningActions;
+    private Map<Action, ExecutionContext> mPendingActions;
+    private Map<Action, ExecutionContext> mRunningActions;
     private Collection<GenericTrigger> mTriggers;
     private Map<Requirement, Action> mRequirementsUsage;
     private Map<Subsystem, RegisteredDefaultAction> mDefaultActions;
@@ -78,17 +80,16 @@ class SingleThreadedSchedulerTest {
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mRequirementsUsage.put(requirement, action);
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.getAction()).thenReturn(action);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         Action newAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(newAction);
 
-        verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).interrupt();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRunningActions, IsMapContaining.hasKey(newAction));
@@ -101,22 +102,24 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
         mRequirementsUsage.put(requirement, action);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(requirement)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         Action newAction = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
         mScheduler.start(newAction);
 
-        verify(context, times(1)).markForCancellation();
+        verify(executionContext, times(1)).interrupt();
     }
 
     @Test
     public void start_actionIsRunning_throwsIllegalArgumentException() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        mRunningActions.put(action, mock(RunningActionContext.class));
+        mRunningActions.put(action, mock(ExecutionContext.class));
 
         assertThrows(IllegalArgumentException.class, ()-> {
             mScheduler.start(action);
@@ -126,7 +129,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void start_actionIsPending_throwsIllegalArgumentException() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        mPendingActions.put(action, mock(RunningActionContext.class));
+        mPendingActions.put(action, mock(ExecutionContext.class));
 
         assertThrows(IllegalArgumentException.class, ()-> {
             mScheduler.start(action);
@@ -139,13 +142,14 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(requirement)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.cancel(action);
 
-        verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).interrupt();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -154,12 +158,14 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancel_actionIsPending_removesAction() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        mPendingActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mPendingActions.put(action, executionContext);
 
         mScheduler.cancel(action);
 
         assertThat(mPendingActions, not(IsMapContaining.hasKey(action)));
+        verify(executionContext, times(1)).interrupt();
     }
 
     @Test
@@ -181,7 +187,8 @@ class SingleThreadedSchedulerTest {
     @Test
     public void isRunning_actionIsRunning_returnsTrue() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        mRunningActions.put(action, mock(RunningActionContext.class));
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action).build();
+        mRunningActions.put(action, executionContext);
 
         assertTrue(mScheduler.isRunning(action));
     }
@@ -189,7 +196,7 @@ class SingleThreadedSchedulerTest {
     @Test
     public void isRunning_actionIsPending_returnsTrue() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        mPendingActions.put(action, mock(RunningActionContext.class));
+        mPendingActions.put(action, mock(ExecutionContext.class));
 
         assertTrue(mScheduler.isRunning(action));
     }
@@ -200,14 +207,14 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.getAction()).thenReturn(action);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(requirement)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.cancelActionsIf((a)-> a.equals(action));
 
-        verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).interrupt();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -216,9 +223,9 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancelActionsIf_predicateMatchesOnPendingAction_removesAction() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.getAction()).thenReturn(action);
-        mPendingActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mPendingActions.put(action, executionContext);
 
         mScheduler.cancelActionsIf((a)-> a.equals(action));
 
@@ -231,14 +238,14 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.getAction()).thenReturn(action);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(requirement)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.cancelAllActions();
 
-        verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).interrupt();
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -247,9 +254,9 @@ class SingleThreadedSchedulerTest {
     @Test
     public void cancelAllActions_hasPendingAction_removesAction() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.getAction()).thenReturn(action);
-        mPendingActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mPendingActions.put(action, executionContext);
 
         mScheduler.cancelAllActions();
 
@@ -259,13 +266,13 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_hasRunningActionNotFinishing_iteratesOnContextAndKeepsAction() {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(false);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).execute(any(SchedulerMode.class));
 
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
     }
@@ -276,33 +283,34 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(true);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithResult(ExecutionContext.ExecutionResult.FINISHED)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.run(SchedulerModeMock.mockNotDisabledMode());
 
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).execute(any(SchedulerMode.class));
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
     }
 
     @Test
-    public void run_hasRunningActionDisabledModeWhenShouldNot_cancelsIteratesOnActionAndRemoves() {
+    public void run_hasRunningActionButFinished_removed() {
         Requirement requirement = mock(Requirement.class);
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(requirement))
-                .mockRunWhenDisabled(false)
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(true);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(requirement)
+                .mockWithResult(ExecutionContext.ExecutionResult.FINISHED)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
 
-        verify(context, times(1)).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, times(1)).execute(any(SchedulerMode.class));
 
         assertThat(mRunningActions, not(IsMapContaining.hasKey(action)));
         assertThat(mRequirementsUsage, not(IsMapContaining.hasKey(requirement)));
@@ -315,15 +323,15 @@ class SingleThreadedSchedulerTest {
                 .mockWithRequirements(Collections.singleton(requirement))
                 .mockRunWhenDisabled(true)
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(false);
-        when(context.shouldRunInDisabled()).thenReturn(true);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockShouldRunInDisabled(true)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         mScheduler.run(SchedulerModeMock.mockDisabledMode());
 
-        verify(context, never()).markForCancellation();
-        verify(context, times(1)).iterate();
+        verify(executionContext, never()).interrupt();
+        verify(executionContext, times(1)).execute(any(SchedulerMode.class));
 
         assertThat(mRunningActions, IsMapContaining.hasKey(action));
     }
@@ -354,8 +362,10 @@ class SingleThreadedSchedulerTest {
         Action action = ActionsMock.actionMocker()
                 .mockWithRequirements(Collections.singleton(subsystem))
                 .build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .mockWithRequirements(subsystem)
+                .build();
+        mRunningActions.put(action, executionContext);
         mRequirementsUsage.put(subsystem, action);
 
         Action defaultAction = ActionsMock.actionMocker()
@@ -422,9 +432,9 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_withTriggersWithActionRunning_notStartsActionFromTrigger() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(false);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         GenericTrigger trigger = new GenericTrigger() {
             @Override
@@ -442,9 +452,9 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_withTriggersAndActionRunning_stopsActionFromTrigger() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(false);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                .build();
+        mRunningActions.put(action, executionContext);
 
         GenericTrigger trigger = new GenericTrigger() {
             @Override
@@ -496,9 +506,9 @@ class SingleThreadedSchedulerTest {
     @Test
     public void run_withTriggersAndActionRunning_toggleToStopActionFromTrigger() throws Exception {
         Action action = ActionsMock.actionMocker().build();
-        RunningActionContext context = mock(RunningActionContext.class);
-        when(context.iterate()).thenReturn(false);
-        mRunningActions.put(action, context);
+        ExecutionContext executionContext = ActionsMock.executionContextMocker(action)
+                        .build();
+        mRunningActions.put(action, executionContext);
 
         GenericTrigger trigger = new GenericTrigger() {
             @Override

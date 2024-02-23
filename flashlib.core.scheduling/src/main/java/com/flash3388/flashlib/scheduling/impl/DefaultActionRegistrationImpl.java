@@ -33,7 +33,7 @@ public class DefaultActionRegistrationImpl extends ActionPropertyAccessorImpl im
         }
 
         ScheduledAction scheduledAction = mAction.getScheduledAction();
-        return scheduledAction != null && scheduledAction.isRunning();
+        return scheduledAction != null && scheduledAction.getState().isRunning();
     }
 
     @Override

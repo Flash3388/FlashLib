@@ -62,7 +62,8 @@ public class ActionControlImpl extends ActionPropertyAccessorImpl implements Act
         ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
         StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(id));
         ObsrActionContext obsrActionContext = new ObsrActionContext(object, action, configuration, true);
-        RunningActionContext context = new RunningActionContext(
+
+        return new ExecutionContextImpl(
                 id,
                 action,
                 mId,
@@ -71,7 +72,6 @@ public class ActionControlImpl extends ActionPropertyAccessorImpl implements Act
                 obsrActionContext,
                 mClock,
                 mLogger);
-        return new ExecutionContextImpl(mClock, mLogger, context);
     }
 
     @Override

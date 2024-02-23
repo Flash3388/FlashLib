@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ExecutionStatus;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Clock;
@@ -43,10 +44,6 @@ public class ActionExecutionState {
         return mStatus;
     }
 
-    public Time getStartTime() {
-        return mStartTime;
-    }
-
     public Time getRunTime() {
         return mClock.currentTime().sub(mStartTime);
     }
@@ -75,6 +72,10 @@ public class ActionExecutionState {
         return mFinishReason;
     }
 
+    public boolean isMarkedAsStarted() {
+        return mStatus != ExecutionStatus.PENDING;
+    }
+
     public boolean isMarkedForEnd() {
         return mMarkedForEnd;
     }
@@ -89,7 +90,7 @@ public class ActionExecutionState {
             mEndTime = Time.INVALID;
         }
 
-        updateStatus(ExecutionStatus.RUNNING);
+        updateStatus(ExecutionStatus.EXECUTING);
         updatePhase(ExecutionPhase.INITIALIZATION);
     }
 

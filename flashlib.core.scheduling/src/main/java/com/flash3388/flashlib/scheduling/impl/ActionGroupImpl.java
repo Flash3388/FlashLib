@@ -195,6 +195,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
         Action action = mActionsToExecute.poll();
         ExecutionContext context = control.createExecutionContext(action);
+        context.start();
         mRunningActions.add(context);
 
         return true;

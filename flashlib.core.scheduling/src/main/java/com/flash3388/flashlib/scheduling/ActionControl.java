@@ -41,6 +41,7 @@ public interface ActionControl extends ActionPropertyAccessor {
      * Creates a context for running actions. Can be used to manually execute actions. Should be
      * used carefully as no requirements checks are made on the action.
      * Generally used by groups to run actions.
+     * The returned context is not started.
      *
      * @param action action to use.
      * @return execution context.

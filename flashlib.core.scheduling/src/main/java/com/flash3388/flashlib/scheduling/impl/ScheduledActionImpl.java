@@ -1,5 +1,8 @@
 package com.flash3388.flashlib.scheduling.impl;
 
+import com.flash3388.flashlib.scheduling.ExecutionContext;
+import com.flash3388.flashlib.scheduling.ExecutionState;
+import com.flash3388.flashlib.scheduling.ExecutionStatus;
 import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.FinishReason;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
@@ -9,32 +12,11 @@ import java.util.Objects;
 
 public class ScheduledActionImpl extends ActionPropertyAccessorImpl implements ScheduledAction {
 
-    private final RunningActionContext mContext;
+    private final ExecutionContext mContext;
 
-    public ScheduledActionImpl(RunningActionContext context, ObsrActionContext obsrActionContext) {
+    public ScheduledActionImpl(ExecutionContext context, ObsrActionContext obsrActionContext) {
         super(obsrActionContext);
         mContext = context;
-    }
-
-    @Override
-    public boolean isPending() {
-        return mContext.getStatus() == ExecutionStatus.PENDING;
-    }
-
-    @Override
-    public boolean isExecuting() {
-        return mContext.getStatus() == ExecutionStatus.RUNNING;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return isPending() || isExecuting();
-    }
-
-    @Override
-    public boolean isFinished() {
-        ExecutionStatus status = mContext.getStatus();
-        return status == ExecutionStatus.FINISHED || status == ExecutionStatus.CANCELLED;
     }
 
     @Override
@@ -48,39 +30,17 @@ public class ScheduledActionImpl extends ActionPropertyAccessorImpl implements S
     }
 
     @Override
-    public Time getRunTime() {
-        if (!isExecuting()) {
-            return Time.INVALID;
-        }
-
-        return mContext.getRunTime();
-    }
-
-    @Override
-    public Time getTimeLeft() {
-        if (!isExecuting() || !hasTimeoutConfigured()) {
-            return Time.INVALID;
-        }
-
-        return mContext.getTimeLeft();
-    }
-
-    @Override
-    public FinishReason getFinishReason() {
-        if (!isFinished()) {
-            throw new IllegalStateException("action has not finished, and does not have a finish reason");
-        }
-
-        return mContext.getFinishReason();
+    public ExecutionState getState() {
+        return mContext.getState();
     }
 
     @Override
     public void cancel() {
-        if (!isRunning()) {
+        if (!getState().isRunning()) {
             throw new IllegalStateException("action is not running and cannot be cancelled");
         }
 
-        mContext.markForCancellation();
+        mContext.markInterrupted();
     }
 
     @Override
