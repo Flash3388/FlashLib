@@ -7,18 +7,18 @@ import java.util.List;
 
 public class TriggerActionControllerImpl implements TriggerActionController {
 
-    private final List<Action> mActionsToStartIfRunning;
+    private final List<Action> mActionsToStartIfNotRunning;
     private final List<Action> mActionsToStopIfRunning;
     private final List<Action> mActionsToToggle;
 
     public TriggerActionControllerImpl() {
-        mActionsToStartIfRunning = new ArrayList<>(2);
+        mActionsToStartIfNotRunning = new ArrayList<>(2);
         mActionsToStopIfRunning = new ArrayList<>(2);
         mActionsToToggle = new ArrayList<>(2);
     }
 
-    public List<Action> getActionsToStartIfRunning() {
-        return mActionsToStartIfRunning;
+    public List<Action> getActionsToStartIfNotRunning() {
+        return mActionsToStartIfNotRunning;
     }
 
     public List<Action> getActionsToStopIfRunning() {
@@ -29,9 +29,15 @@ public class TriggerActionControllerImpl implements TriggerActionController {
         return mActionsToToggle;
     }
 
+    public void clear() {
+        mActionsToStartIfNotRunning.clear();
+        mActionsToStopIfRunning.clear();
+        mActionsToToggle.clear();
+    }
+
     @Override
-    public void addActionToStartIfRunning(Action action) {
-        mActionsToStartIfRunning.add(action);
+    public void addActionToStartIfNotRunning(Action action) {
+        mActionsToStartIfNotRunning.add(action);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.flash3388.flashlib.scheduling.triggers;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.impl.triggers.TriggerState;
 
+import java.util.function.Supplier;
+
 /**
  * A trigger is an object which can be either active or inactive. It is possible
  * to link {@link Action Actions} to be done depending on the state of a trigger.
@@ -23,6 +25,20 @@ public interface Trigger {
      * @param action action to register
      */
     void whenActive(Action action);
+
+    /**
+     * <p>
+     *     Registers a supplier for an {@link Action} to run when this trigger is activated, i.e. when
+     *     this trigger goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
+     *     the action is not running, {@link Action#start()} is called.
+     * </p>
+     * <p>
+     *     The supplier is only queried for the action when the trigger reaches the wanted state.
+     * </p>
+     *
+     * @param supplier supplier to register
+     */
+    void whenActive(Supplier<Action> supplier);
 
     /**
      * <p>
@@ -61,6 +77,21 @@ public interface Trigger {
 
     /**
      * <p>
+     *     Registers an {@link Action} to run while this trigger is active, i.e. when
+     *     this action goes from {@link TriggerState#INACTIVE} to {@link TriggerState#ACTIVE}, if
+     *     the action is not running, {@link Action#start()} is called. When the state goes back to {@link TriggerState#INACTIVE},
+     *     {@link Action#cancel()} is called.
+     * </p>
+     * <p>
+     *     The supplier is only queried for the action when the trigger reaches the wanted state.
+     * </p>
+     *
+     * @param supplier supplier to register
+     */
+    void whileActive(Supplier<Action> supplier);
+
+    /**
+     * <p>
      *     Registers an {@link Action} to run when this trigger is inactivated, i.e. when
      *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
      *     the action is not running, {@link Action#start()} is called.
@@ -69,6 +100,20 @@ public interface Trigger {
      * @param action action to register
      */
     void whenInactive(Action action);
+
+    /**
+     * <p>
+     *     Registers an {@link Action} to run when this trigger is inactivated, i.e. when
+     *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
+     *     the action is not running, {@link Action#start()} is called.
+     * </p>
+     * <p>
+     *     The supplier is only queried for the action when the trigger reaches the wanted state.
+     * </p>
+     *
+     * @param supplier supplier to register
+     */
+    void whenInactive(Supplier<Action> supplier);
 
     /**
      * <p>
@@ -104,4 +149,19 @@ public interface Trigger {
      * @param action action to register
      */
     void whileInactive(Action action);
+
+    /**
+     * <p>
+     *     Registers an {@link Action} to run while this trigger is inactive, i.e. when
+     *     this action goes from {@link TriggerState#ACTIVE} to {@link TriggerState#INACTIVE}, if
+     *     the action is not running, {@link Action#start()} is called. When the state goes back to {@link TriggerState#ACTIVE},
+     *     {@link Action#cancel()} is called.
+     * </p>
+     * <p>
+     *     The supplier is only queried for the action when the trigger reaches the wanted state.
+     * </p>
+     *
+     * @param supplier supplier to register
+     */
+    void whileInactive(Supplier<Action> supplier);
 }

@@ -1,10 +1,9 @@
 package com.flash3388.flashlib.hid;
 
 import com.beans.BooleanProperty;
+import com.flash3388.flashlib.hid.generic.GenericButtonBase;
 import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Scheduler;
-import com.flash3388.flashlib.scheduling.actions.Action;
-import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 /**
  * A {@link Button} implementation which is modified directly from user code and has to be
@@ -12,14 +11,13 @@ import com.flash3388.flashlib.scheduling.triggers.Trigger;
  *
  * @since FlashLib 3.0.0
  */
-public class ManualButton implements Button, BooleanProperty {
+public class ManualButton extends GenericButtonBase implements Button, BooleanProperty {
 
-    private final Trigger mTrigger;
     private boolean mValue;
     private boolean mIsInverted;
 
     public ManualButton(Scheduler scheduler) {
-        mTrigger = scheduler.newTrigger(this);
+        super(scheduler);
         mValue = false;
         mIsInverted = false;
     }
@@ -57,45 +55,5 @@ public class ManualButton implements Button, BooleanProperty {
     @Override
     public boolean isInverted() {
         return mIsInverted;
-    }
-
-    @Override
-    public void whenActive(Action action) {
-        mTrigger.whenActive(action);
-    }
-
-    @Override
-    public void cancelWhenActive(Action action) {
-        mTrigger.cancelWhenActive(action);
-    }
-
-    @Override
-    public void toggleWhenActive(Action action) {
-        mTrigger.toggleWhenActive(action);
-    }
-
-    @Override
-    public void whileActive(Action action) {
-        mTrigger.whileActive(action);
-    }
-
-    @Override
-    public void whenInactive(Action action) {
-        mTrigger.whenInactive(action);
-    }
-
-    @Override
-    public void cancelWhenInactive(Action action) {
-        mTrigger.cancelWhenInactive(action);
-    }
-
-    @Override
-    public void toggleWhenInactive(Action action) {
-        mTrigger.toggleWhenInactive(action);
-    }
-
-    @Override
-    public void whileInactive(Action action) {
-        mTrigger.whileInactive(action);
     }
 }

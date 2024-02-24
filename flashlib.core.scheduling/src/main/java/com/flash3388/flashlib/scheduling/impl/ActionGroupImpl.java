@@ -110,7 +110,8 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
     @Override
     public ActionGroup alongWith(Action... actions) {
-        if (mGroupPolicy.shouldExecuteActionsInParallel()) {
+        if (mGroupPolicy.shouldExecuteActionsInParallel() &&
+                !mGroupPolicy.shouldStopOnFirstActionFinished()) {
             return add(actions);
         } else {
             return super.alongWith(actions);
@@ -130,7 +131,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
     @Override
     public ActionGroup whenInterrupted(Runnable runnable) {
         if (mWhenInterrupted != null) {
-            mLogger.debug("whenInterrupted callback overridden for ActionGroup: {}", getConfiguration().getName());
+            mLogger.debug("whenInterrupted callback overridden for ActionGroup: {}", this);
         }
 
         mWhenInterrupted = runnable;
@@ -195,6 +196,7 @@ public class ActionGroupImpl extends ActionBase implements ActionGroup {
 
         Action action = mActionsToExecute.poll();
         ExecutionContext context = control.createExecutionContext(action);
+        context.start();
         mRunningActions.add(context);
 
         return true;

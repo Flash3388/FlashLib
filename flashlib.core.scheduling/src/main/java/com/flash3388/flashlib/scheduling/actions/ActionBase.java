@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.scheduling.GlobalScheduler;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Time;
 
@@ -31,12 +32,12 @@ public abstract class ActionBase implements Action {
     }
 
     @Override
-    public final void start() {
+    public final ScheduledAction start() {
         Scheduler scheduler = mScheduler.get();
         if (scheduler == null) {
             throw new IllegalStateException("scheduler was garbage collected");
         }
-        scheduler.start(this);
+        return scheduler.start(this);
     }
 
     @Override
@@ -70,8 +71,8 @@ public abstract class ActionBase implements Action {
 
         mConfiguration = configuration;
 
-        if (mConfiguration.getName() == null || mConfiguration.getName().isEmpty()) {
-            mConfiguration.setName(String.valueOf(hashCode()));
+        if (mConfiguration.getName() == null) {
+            mConfiguration.setName("");
         }
     }
 

@@ -231,13 +231,20 @@ public interface Scheduler {
      *         </li>
      *     </ul>
      * </p>
+     * <p>
+     *     The configuration used for the execution of the action is a snapshot of {@link Action#getConfiguration()} during
+     *     the start of this call, and cannot be changed during the execution of the action. Direct changes to the configuration
+     *     stored by the action will not be reflect in the current execution, but only the next.
+     * </p>
      *
      * @param action action to start
+     * @return {@link ScheduledAction} describing and allowing control of the execution and state of the action.
      *
      * @throws IllegalStateException if the action is already running on this scheduler.
+     * @throws ActionRejectedException if the action was rejected.
      */
     @MainThreadOnly
-    void start(Action action);
+    ScheduledAction start(Action action);
 
     /**
      * <p>
@@ -366,15 +373,35 @@ public interface Scheduler {
      * <p>
      *     The given subsystem must be part of the requirements of the given action.
      * </p>
+     * <p>
+     *     The configuration used for the execution of the action is a snapshot of {@link Action#getConfiguration()} during
+     *     the start of this call, and cannot be changed at all, regardless if the action is running or not.
+     *     Direct changes to the configuration stored by the action will not affect the actual configuration used.
+     * </p>
      *
      * @param subsystem subsystem to set default action for.
      * @param action action to use as default
+     *
+     * @return {@link DefaultActionRegistration} describing the registration of the action.
      *
      * @throws IllegalArgumentException if the given action does not require the given
      *      subsystem.
      */
     @MainThreadOnly
-    void setDefaultAction(Subsystem subsystem, Action action);
+    DefaultActionRegistration setDefaultAction(Subsystem subsystem, Action action);
+
+    /**
+     * <p>
+     *     Returns the current default action registration for a given subsystem. If no
+     *     default action is registered, {@link Optional#empty()} is returned.
+     * </p>
+     *
+     * @param subsystem subsystem to get registration for.
+     * @return registration of the default action if one is registered, empty otherwise.
+     * @see #setDefaultAction(Subsystem, Action)
+     */
+    @MainThreadOnly
+    Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem);
 
     /**
      * <p>

@@ -4,7 +4,16 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.time.Time;
 
-public interface ActionControl {
+/**
+ * Provides control and status information about an executing action. Can be used
+ * by the action itself to query information about itself, or to control its execution.
+ * <p>
+ * Properties defined during the execution of this action will generally not remain after this action
+ * has finished execution.
+ *
+ * @since FlashLib 3.2.0
+ */
+public interface ActionControl extends ActionPropertyAccessor {
 
     /**
      * Gets the configuration associated with the action.
@@ -32,6 +41,7 @@ public interface ActionControl {
      * Creates a context for running actions. Can be used to manually execute actions. Should be
      * used carefully as no requirements checks are made on the action.
      * Generally used by groups to run actions.
+     * The returned context is not started.
      *
      * @param action action to use.
      * @return execution context.
@@ -47,64 +57,4 @@ public interface ActionControl {
      * Marks the associated action as cancelled.
      */
     void cancel();
-
-    /**
-     * Puts a typed-property if a specified name and value.
-     * If the property does not exist, it is created, otherwise its value
-     * is updated.
-     *
-     * Use this to debug and track data about the execution of your action.
-     *
-     * @param name name of the property
-     * @param value value to set
-     */
-    void putBooleanProperty(String name, boolean value);
-
-    /**
-     * Puts a typed-property if a specified name and value.
-     * If the property does not exist, it is created, otherwise its value
-     * is updated.
-     *
-     * Use this to debug and track data about the execution of your action.
-     *
-     * @param name name of the property
-     * @param value value to set
-     */
-    void putIntProperty(String name,  int value);
-
-    /**
-     * Puts a typed-property if a specified name and value.
-     * If the property does not exist, it is created, otherwise its value
-     * is updated.
-     *
-     * Use this to debug and track data about the execution of your action.
-     *
-     * @param name name of the property
-     * @param value value to set
-     */
-    void putLongProperty(String name, long value);
-
-    /**
-     * Puts a typed-property if a specified name and value.
-     * If the property does not exist, it is created, otherwise its value
-     * is updated.
-     *
-     * Use this to debug and track data about the execution of your action.
-     *
-     * @param name name of the property
-     * @param value value to set
-     */
-    void putDoubleProperty(String name, double value);
-
-    /**
-     * Puts a typed-property if a specified name and value.
-     * If the property does not exist, it is created, otherwise its value
-     * is updated.
-     *
-     * Use this to debug and track data about the execution of your action.
-     *
-     * @param name name of the property
-     * @param value value to set
-     */
-    void putStringProperty(String name, String value);
 }

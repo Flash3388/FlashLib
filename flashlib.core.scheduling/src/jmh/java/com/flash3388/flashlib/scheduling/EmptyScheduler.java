@@ -14,8 +14,8 @@ public class EmptyScheduler implements Scheduler {
 
 
     @Override
-    public void start(Action action) {
-
+    public ScheduledAction start(Action action) {
+        return null;
     }
 
     @Override
@@ -48,8 +48,13 @@ public class EmptyScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public DefaultActionRegistration setDefaultAction(Subsystem subsystem, Action action) {
+        return null;
+    }
 
+    @Override
+    public Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem) {
+        return Optional.empty();
     }
 
     @Override
