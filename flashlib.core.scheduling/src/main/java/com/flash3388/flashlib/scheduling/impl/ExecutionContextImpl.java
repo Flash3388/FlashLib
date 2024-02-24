@@ -174,7 +174,7 @@ public class ExecutionContextImpl implements ExecutionContext {
     }
 
     private boolean iterate() {
-        if (mExecutionState.isTimedOut()) {
+        if (!mExecutionState.isMarkedForEnd() && mExecutionState.isTimedOut()) {
             mExecutionState.markTimedOut();
         }
 
