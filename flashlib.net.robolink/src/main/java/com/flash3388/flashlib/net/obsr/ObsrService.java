@@ -231,7 +231,7 @@ public class ObsrService extends ServiceBase implements ObjectStorage {
         @Override
         public void onDisconnected(EmptyEvent event) {
             mLogger.debug("OBSR disconnected");
-            mIsConnected.setAsBoolean(true);
+            mIsConnected.setAsBoolean(false);
         }
 
         @Override
