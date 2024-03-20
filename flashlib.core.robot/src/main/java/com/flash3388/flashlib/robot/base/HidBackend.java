@@ -17,7 +17,7 @@ public enum HidBackend {
     SDL2 {
         @Override
         HidInterface createInterface(FlashLibControl control) {
-            control.registerCloseables(Sdl2Hid.initialize());
+            control.registerCloseables(Sdl2Hid.initialize(control.getThreadFactory()));
             return new WeakHidInterface(new Sdl2HidInterface(), control.getMainThread());
         }
     },

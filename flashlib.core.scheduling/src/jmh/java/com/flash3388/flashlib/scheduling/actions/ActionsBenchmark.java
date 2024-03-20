@@ -36,7 +36,7 @@ public class ActionsBenchmark {
         };
 
         mAction = mActionType.create(new TestActionParams(scheduler, consumer));
-        mAction.initialize();
+        mAction.initialize(new TestActionControl());
     }
 
     @Benchmark
@@ -44,6 +44,6 @@ public class ActionsBenchmark {
     public void execute_forTestAction(Blackhole blackhole) {
         mBlackholeProperty.set(blackhole);
 
-        mAction.execute();
+        mAction.execute(new TestActionControl());
     }
 }

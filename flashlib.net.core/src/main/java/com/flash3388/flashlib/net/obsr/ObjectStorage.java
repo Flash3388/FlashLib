@@ -12,6 +12,18 @@ package com.flash3388.flashlib.net.obsr;
 public interface ObjectStorage {
 
     /**
+     * Gets whether the storage is only local. Meaning that the values
+     * in it are not shared with other instances, and thus can not be
+     * modified by other instances.
+     * <p>
+     * This can be caused by a connectivity problem with other instances,
+     * or if the storage is configured as local-only.
+     *
+     * @return <b>true</b> if local only, <b>false</b> otherwise.
+     */
+    boolean isLocal();
+
+    /**
      * Get the root object in the storage.
      *
      * @return root object
@@ -28,6 +40,11 @@ public interface ObjectStorage {
     StoredObject getInstanceRoot();
 
     class Stub implements ObjectStorage {
+
+        @Override
+        public boolean isLocal() {
+            return false;
+        }
 
         @Override
         public StoredObject getRoot() {

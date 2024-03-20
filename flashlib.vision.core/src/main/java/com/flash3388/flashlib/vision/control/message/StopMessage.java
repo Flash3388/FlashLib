@@ -9,19 +9,20 @@ import java.io.IOException;
 
 public class StopMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(1122, StopMessage::readFrom);
+    public static final MessageType TYPE = MessageType.create(1122,
+            StopMessage::readFrom,
+            StopMessage::writeInto);
 
     @Override
     public MessageType getType() {
         return TYPE;
     }
 
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-
-    }
-
     private static StopMessage readFrom(DataInput dataInput) throws IOException {
         return new StopMessage();
+    }
+
+    private static void writeInto(Message message, DataOutput dataOutput) throws IOException {
+
     }
 }

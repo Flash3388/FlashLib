@@ -1,5 +1,6 @@
 package com.flash3388.flashlib.net.hfcs;
 
+import com.flash3388.flashlib.io.Serializable;
 import com.flash3388.flashlib.time.Time;
 
 import java.util.function.Supplier;
@@ -21,9 +22,9 @@ public interface HfcsRegistry {
      * @param period period for sending the data
      * @param supplier supplier of the data. Should be updated in real-time with changes.
      */
-    void registerOutgoing(Type type,
+    void registerOutgoing(HfcsType type,
                           Time period,
-                          Supplier<? extends OutData> supplier);
+                          Supplier<? extends Serializable> supplier);
 
     /**
      * Registers an incoming packet receiver. This receiver will listen for packets of the given type
@@ -35,7 +36,7 @@ public interface HfcsRegistry {
      * @return a control class for incoming data management.
      * @param <T> type of incoming data.
      */
-    <T> RegisteredIncoming<T> registerIncoming(InType<T> type, Time receiveTimeout);
+    <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type, Time receiveTimeout);
 
 
     /**
@@ -47,7 +48,7 @@ public interface HfcsRegistry {
      * @return a control class for incoming data management.
      * @param <T> type of incoming data.
      */
-    default <T> RegisteredIncoming<T> registerIncoming(InType<T> type) {
+    default <T> HfcsRegisteredIncoming<T> registerIncoming(HfcsInType<T> type) {
         return registerIncoming(type, Time.INVALID);
     }
 }

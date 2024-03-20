@@ -3,6 +3,7 @@ package com.flash3388.flashlib.hid.sdl2;
 import com.castle.exceptions.ServiceException;
 import com.flash3388.flashlib.hid.HidChannel;
 import com.flash3388.flashlib.hid.generic.GenericHidChannel;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 
 import java.io.Closeable;
 
@@ -17,8 +18,8 @@ public class Sdl2Hid {
         sHidData = new Sdl2HidData();
     }
 
-    public static Closeable initialize() {
-        sUpdateService = new Sdl2UpdateService(sHidData);
+    public static Closeable initialize(NamedThreadFactory threadFactory) {
+        sUpdateService = new Sdl2UpdateService(sHidData, threadFactory);
         try {
             sUpdateService.start();
         } catch (ServiceException e) {

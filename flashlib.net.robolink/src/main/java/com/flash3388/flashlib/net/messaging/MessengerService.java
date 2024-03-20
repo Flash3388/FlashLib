@@ -1,92 +1,218 @@
 package com.flash3388.flashlib.net.messaging;
 
-import com.beans.observables.RegisteredListener;
-import com.beans.observables.listeners.RegisteredListenerImpl;
-import com.castle.concurrent.service.SingleUseService;
+import com.castle.concurrent.service.ServiceBase;
 import com.castle.exceptions.ServiceException;
-import com.flash3388.flashlib.net.channels.messsaging.BasicMessagingChannel;
-import com.flash3388.flashlib.net.channels.messsaging.MessagingChannel;
-import com.flash3388.flashlib.net.channels.tcp.TcpClientConnector;
+import com.castle.util.closeables.Closeables;
+import com.flash3388.flashlib.net.channels.messsaging.BaseMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.ClientMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.channels.messsaging.PingMessage;
+import com.flash3388.flashlib.net.channels.messsaging.ServerClock;
+import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannel;
+import com.flash3388.flashlib.net.channels.messsaging.ServerMessagingChannelImpl;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.tcp.TcpChannelOpener;
+import com.flash3388.flashlib.net.channels.tcp.TcpServerChannelOpener;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.logging.Logging;
-import com.flash3388.flashlib.util.unique.InstanceId;
 import com.notifier.Controllers;
 import com.notifier.EventController;
+import com.notifier.RegisteredListener;
 import org.slf4j.Logger;
 
 import java.net.SocketAddress;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.Supplier;
 
-public class MessengerService extends SingleUseService implements Messenger {
+public class MessengerService extends ServiceBase implements Messenger {
 
-    private static final Logger LOGGER = Logging.getLogger("Comm", "MessengerService");
+    private static final Logger LOGGER = Logging.getLogger("Comm", "Messenger");
 
-    private final MessagingChannel mChannel;
+    private final ChannelUpdater mChannelUpdater;
+    private final ChannelId mOurId;
     private final Clock mClock;
     private final EventController mEventController;
-    private final BlockingQueue<PendingWriteMessage> mWriteQueue;
+    private final KnownMessageTypes mKnownMessageTypes;
 
-    private Thread mReadThread;
-    private Thread mWriteThread;
+    private Supplier<BaseMessagingChannel> mContextSupplier;
+    private BaseMessagingChannel mChannel;
 
-    public MessengerService(InstanceId instanceId, Clock clock,
-                            KnownMessageTypes messageTypes,
-                            SocketAddress serverAddress) {
+    public MessengerService(ChannelUpdater channelUpdater, ChannelId ourId, Clock clock) {
+        mChannelUpdater = channelUpdater;
+        mOurId = ourId;
         mClock = clock;
+
         mEventController = Controllers.newSyncExecutionController();
-        mWriteQueue = new LinkedBlockingQueue<>();
+        mKnownMessageTypes = new KnownMessageTypes();
 
-        mChannel = new BasicMessagingChannel(new TcpClientConnector(LOGGER),
-                serverAddress, instanceId, LOGGER, messageTypes);
+        mKnownMessageTypes.put(PingMessage.TYPE);
 
-        mReadThread = null;
-        mWriteThread = null;
+        mContextSupplier = null;
+        mChannel = null;
+    }
+
+    public void configureServer(SocketAddress bindAddress) {
+        if (isRunning()) {
+            throw new IllegalStateException("cannot reconfigure while running");
+        }
+
+        mContextSupplier = new ServerContextCreator(
+                mOurId,
+                mClock,
+                bindAddress,
+                LOGGER,
+                mEventController,
+                mKnownMessageTypes,
+                mChannelUpdater);
+    }
+
+    public void configureClient(SocketAddress serverAddress) {
+        if (isRunning()) {
+            throw new IllegalStateException("cannot reconfigure while running");
+        }
+
+        mContextSupplier = new ClientContextSupplier(
+                mOurId,
+                mClock,
+                serverAddress,
+                LOGGER,
+                mEventController,
+                mKnownMessageTypes,
+                mChannelUpdater);
+    }
+
+    public RegisteredListener addListener(ConnectionListener listener) {
+        return mEventController.registerListener(listener);
+    }
+
+    @Override
+    public void registerMessageTypes(Collection<? extends MessageType> types) {
+        mKnownMessageTypes.putAll(types);
     }
 
     @Override
     public RegisteredListener addListener(MessageListener listener) {
-        mEventController.registerListener(listener);
-        return new RegisteredListenerImpl(mEventController, listener);
+        return mEventController.registerListener(listener);
     }
 
     @Override
-    public RegisteredListener addListener(MessageListener listener, MessageType type) {
-        mEventController.registerListener(listener, (event) -> {
-            return event instanceof NewMessageEvent &&
-                    ((NewMessageEvent) event).getMetadata().getType().equals(type);
-        });
-        return new RegisteredListenerImpl(mEventController, listener);
+    public RegisteredListener addListener(MessageListener listener, Set<? extends MessageType> types) {
+        return mEventController.registerListener(listener, new MessageTypeListenerPredicate(types));
     }
 
     @Override
     public void send(Message message) {
+        if (mChannel == null) {
+            throw new IllegalStateException("no channel to queue messages");
+        }
+
         LOGGER.debug("Queueing message of type {}", message.getType().getKey());
-        mWriteQueue.add(new PendingWriteMessage(message.getType(), message));
+        mChannel.queue(message);
     }
 
     @Override
     protected void startRunning() throws ServiceException {
-        mReadThread = new Thread(
-                new ReadTask(mChannel, LOGGER, mEventController, mClock),
-                "MessengerService-ReadTask");
-        mReadThread.setDaemon(true);
-        mReadThread.start();
+        if (mContextSupplier == null) {
+            throw new IllegalStateException("not configured");
+        }
 
-        mWriteThread = new Thread(
-                new WriteTask(mChannel, mWriteQueue, LOGGER),
-                "MessengerService-WriteTask");
-        mWriteThread.setDaemon(true);
-        mWriteThread.start();
+        mChannel = mContextSupplier.get();
+        mChannel.start();
     }
 
     @Override
     protected void stopRunning() {
-        mReadThread.interrupt();
-        mReadThread = null;
-
-        mWriteThread.interrupt();
-        mWriteThread = null;
-
+        if (mChannel != null) {
+            Closeables.silentClose(mChannel);
+            mChannel = null;
+        }
     }
+
+    private static class ServerContextCreator implements Supplier<BaseMessagingChannel> {
+
+        private final ChannelId mId;
+        private final Clock mClock;
+        private final SocketAddress mBindAddress;
+        private final Logger mLogger;
+        private final EventController mEventController;
+        private final KnownMessageTypes mKnownMessageTypes;
+        private final ChannelUpdater mChannelUpdater;
+
+        private ServerContextCreator(ChannelId id,
+                                     Clock clock,
+                                     SocketAddress bindAddress,
+                                     Logger logger,
+                                     EventController eventController,
+                                     KnownMessageTypes knownMessageTypes,
+                                     ChannelUpdater channelUpdater) {
+            mId = id;
+            mClock = clock;
+            mBindAddress = bindAddress;
+            mLogger = logger;
+            mEventController = eventController;
+            mKnownMessageTypes = knownMessageTypes;
+            mChannelUpdater = channelUpdater;
+        }
+
+        @Override
+        public BaseMessagingChannel get() {
+            ServerMessagingChannel channel = new ServerMessagingChannelImpl(
+                    new TcpServerChannelOpener(mBindAddress, mLogger),
+                    mChannelUpdater,
+                    mKnownMessageTypes,
+                    mId,
+                    mClock,
+                    mLogger);
+
+            channel.setListener(new ServerChannelListener(mEventController, mLogger));
+
+            return channel;
+        }
+    }
+
+    private static class ClientContextSupplier implements Supplier<BaseMessagingChannel> {
+
+        private final ChannelId mId;
+        private final Clock mClock;
+        private final SocketAddress mServerAddress;
+        private final Logger mLogger;
+        private final EventController mEventController;
+        private final KnownMessageTypes mKnownMessageTypes;
+        private final ChannelUpdater mChannelUpdater;
+
+        private ClientContextSupplier(ChannelId id,
+                                      Clock clock,
+                                      SocketAddress serverAddress,
+                                      Logger logger,
+                                      EventController eventController,
+                                      KnownMessageTypes knownMessageTypes,
+                                      ChannelUpdater channelUpdater) {
+            mId = id;
+            mClock = clock;
+            mServerAddress = serverAddress;
+            mLogger = logger;
+            mEventController = eventController;
+            mKnownMessageTypes = knownMessageTypes;
+            mChannelUpdater = channelUpdater;
+        }
+
+        @Override
+        public BaseMessagingChannel get() {
+            ClientMessagingChannel channel = new ClientMessagingChannel(
+                    new TcpChannelOpener(mLogger),
+                    mChannelUpdater,
+                    mKnownMessageTypes,
+                    mId,
+                    new ServerClock(mClock, mLogger),
+                    mLogger,
+                    mServerAddress);
+
+            channel.setListener(new ClientChannelListener(mEventController, mLogger));
+            channel.enableKeepAlive();
+
+            return channel;
+        }
+    }
+
 }

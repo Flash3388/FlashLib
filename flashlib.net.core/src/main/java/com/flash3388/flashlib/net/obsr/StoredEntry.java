@@ -267,7 +267,7 @@ public interface StoredEntry {
 
         @Override
         public Value getValue() {
-            return new Value(ValueType.EMPTY, null);
+            return Value.empty();
         }
 
         @Override

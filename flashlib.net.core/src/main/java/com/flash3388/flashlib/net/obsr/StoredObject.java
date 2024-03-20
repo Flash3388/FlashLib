@@ -1,6 +1,6 @@
 package com.flash3388.flashlib.net.obsr;
 
-import com.beans.observables.RegisteredListener;
+import com.notifier.RegisteredListener;
 
 /**
  * Represents an object stored in memory and shared across connected instance.

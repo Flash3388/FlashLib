@@ -11,7 +11,9 @@ import java.io.IOException;
 
 public class NewAnalysisMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(1155, NewAnalysisMessage::readFrom);
+    public static final MessageType TYPE = MessageType.create(1155,
+            NewAnalysisMessage::readFrom,
+            NewAnalysisMessage::writeInto);
 
     private final Analysis mAnalysis;
 
@@ -28,13 +30,13 @@ public class NewAnalysisMessage implements Message {
         return mAnalysis;
     }
 
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-        mAnalysis.serializeTo(output);
-    }
-
     private static NewAnalysisMessage readFrom(DataInput dataInput) throws IOException {
         Analysis analysis = new JsonAnalysis(dataInput);
         return new NewAnalysisMessage(analysis);
+    }
+
+    private static void writeInto(Message message, DataOutput dataOutput) throws IOException {
+        NewAnalysisMessage actualMessage = (NewAnalysisMessage) message;
+        actualMessage.mAnalysis.serializeTo(dataOutput);
     }
 }

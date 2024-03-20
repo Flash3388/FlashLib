@@ -1,17 +1,22 @@
 package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.app.ServiceRegistry;
-import com.flash3388.flashlib.net.channels.tcp.TcpRoutingService;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdaterService;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.hfcs.HfcsService;
+import com.flash3388.flashlib.net.messaging.ChannelId;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.MessengerService;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
-import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
+import com.flash3388.flashlib.net.obsr.ObsrService;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.unique.InstanceId;
+
+import java.util.Set;
 
 public class NetworkInterfaceImpl implements NetworkInterface {
 
@@ -24,46 +29,58 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     private final NetworkingMode mMode;
     private final ObjectStorage mObjectStorage;
     private final HfcsRegistry mHfcsRegistry;
+    private final ChannelUpdater mChannelUpdater;
+
+    private int mNextMessengerId;
 
     public NetworkInterfaceImpl(NetworkConfiguration configuration,
                                 InstanceId instanceId,
                                 ServiceRegistry serviceRegistry,
                                 Clock clock,
-                                FlashLibMainThread mainThread) {
+                                FlashLibMainThread mainThread,
+                                NamedThreadFactory threadFactory) {
         mMode = configuration;
         mInstanceId = instanceId;
         mServiceRegistry = serviceRegistry;
         mClock = clock;
         mMainThread = mainThread;
 
+        mNextMessengerId = 0;
+
+        if (configuration.isNetworkingEnabled()) {
+            ChannelUpdaterService channelUpdaterService = new ChannelUpdaterService(threadFactory);
+            mServiceRegistry.register(channelUpdaterService);
+            mChannelUpdater = channelUpdaterService;
+        } else {
+            mChannelUpdater = null;
+        }
+
         if (configuration.isNetworkingEnabled() && configuration.isObjectStorageEnabled()) {
-            try {
-                ObsrConfiguration.Creator creator = configuration.getObsrConfiguration().creator;
-                assert creator != null;
-
-                ObsrNodeServiceBase service = creator.create(instanceId, clock);
-                serviceRegistry.register(service);
-
-                mObjectStorage = service;
-            } catch (Exception e) {
-                throw new Error(e);
+            ObsrService service = new ObsrService(mInstanceId, mClock);
+            if (configuration.mObsrConfiguration.isLocal) {
+                service.configureLocal();
+            } else if (configuration.mObsrConfiguration.isPrimaryMode) {
+                service.configurePrimary(mChannelUpdater, configuration.mObsrConfiguration.serverAddress);
+            } else {
+                service.configureSecondary(mChannelUpdater, configuration.mObsrConfiguration.serverAddress);
             }
+
+            mServiceRegistry.register(service);
+            mObjectStorage = service;
         } else {
             mObjectStorage = null;
         }
 
         if (configuration.isNetworkingEnabled() && configuration.isHfcsEnabled()) {
-            try {
-                HfcsConfiguration.Creator creator = configuration.getHfcsConfiguration().creator;
-                assert creator != null;
-
-                HfcsServiceBase service = creator.create(instanceId, clock);
-                serviceRegistry.register(service);
-
-                mHfcsRegistry = service;
-            } catch (Exception e) {
-                throw new Error(e);
+            HfcsService service = new HfcsService(threadFactory, mChannelUpdater, mInstanceId, mClock);
+            if (configuration.mHfcsConfiguration.isTargeted) {
+                service.configureTargeted(configuration.mHfcsConfiguration.localAddress, configuration.mHfcsConfiguration.remoteAddress);
+            } else {
+                service.configureReplying(configuration.mHfcsConfiguration.localAddress);
             }
+
+            mServiceRegistry.register(service);
+            mHfcsRegistry = service;
         } else {
             mHfcsRegistry = null;
         }
@@ -93,16 +110,26 @@ public class NetworkInterfaceImpl implements NetworkInterface {
     }
 
     @Override
-    public Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration) {
+    public Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration) {
         mMainThread.verifyCurrentThread();
 
-        if (configuration.serverMode) {
-            TcpRoutingService routingService = new TcpRoutingService(configuration.serverAddress);
-            mServiceRegistry.register(routingService);
+        if (!getMode().isNetworkingEnabled()) {
+            throw new IllegalStateException("networking features not enabled");
         }
 
-        MessengerService service = new MessengerService(mInstanceId, mClock, messageTypes, configuration.serverAddress);
+        int messengerId = ++mNextMessengerId;
+        ChannelId channelId = new ChannelId(mInstanceId, messengerId);
+
+        MessengerService service = new MessengerService(mChannelUpdater, channelId, mClock);
+        if (configuration.serverMode) {
+            service.configureServer(configuration.serverAddress);
+        } else {
+            service.configureClient(configuration.serverAddress);
+        }
+
+        service.registerMessageTypes(messageTypes);
         mServiceRegistry.register(service);
+
         return service;
     }
 }

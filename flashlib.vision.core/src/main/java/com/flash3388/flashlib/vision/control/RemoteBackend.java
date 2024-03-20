@@ -1,6 +1,5 @@
 package com.flash3388.flashlib.vision.control;
 
-import com.beans.observables.RegisteredListener;
 import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.messaging.NewMessageEvent;
@@ -9,6 +8,7 @@ import com.flash3388.flashlib.vision.control.message.OptionChangeMessage;
 import com.flash3388.flashlib.vision.control.message.RunStatusMessage;
 import com.flash3388.flashlib.vision.control.message.StartMessage;
 import com.flash3388.flashlib.vision.control.message.StopMessage;
+import com.notifier.RegisteredListener;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +53,7 @@ public class RemoteBackend implements VisionBackend {
 
     @Override
     public void close() throws Exception {
-        mMessengerListener.remove();
+        mMessengerListener.unregister();
     }
 
     private static class MessageListener implements com.flash3388.flashlib.net.messaging.MessageListener {

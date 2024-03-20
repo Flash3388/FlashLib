@@ -1,10 +1,10 @@
 package com.flash3388.flashlib.net.obsr;
 
-import com.beans.observables.RegisteredListener;
+import com.notifier.RegisteredListener;
 
 import java.lang.ref.WeakReference;
 
-public class StorageBasedObject implements StoredObject {
+class StorageBasedObject implements StoredObject {
 
     private final StoragePath mPath;
     private final WeakReference<Storage> mStorage;

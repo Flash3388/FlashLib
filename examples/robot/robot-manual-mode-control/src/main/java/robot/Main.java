@@ -2,6 +2,7 @@ package robot;
 
 import com.flash3388.flashlib.app.BasicServiceRegistry;
 import com.flash3388.flashlib.app.ServiceRegistry;
+import com.flash3388.flashlib.app.concurrent.DefaultFlashLibThreadFactory;
 import com.flash3388.flashlib.app.net.NetworkConfiguration;
 import com.flash3388.flashlib.app.net.NetworkInterfaceImpl;
 import com.flash3388.flashlib.hid.HidInterface;
@@ -19,6 +20,7 @@ import com.flash3388.flashlib.robot.modes.RobotMode;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.FlashLibMainThreadImpl;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 
 public class Main {
 
@@ -34,11 +36,14 @@ public class Main {
             Clock clock = RobotFactory.newDefaultClock();
             ServiceRegistry serviceRegistry = new BasicServiceRegistry(mainThread);
 
+            NamedThreadFactory threadFactory = new DefaultFlashLibThreadFactory();
             RobotControl robotControl = new GenericRobotControl(
-                    instanceId, resourceHolder,
+                    instanceId,
+                    resourceHolder,
+                    threadFactory,
                     manualRobotModeSupplier,
                     new NetworkInterfaceImpl(NetworkConfiguration.disabled(),
-                            instanceId, serviceRegistry, clock, mainThread),
+                            instanceId, serviceRegistry, clock, mainThread, threadFactory),
                     new IoInterface.Stub(),
                     new HidInterface.Stub(),
                     RobotFactory.newDefaultScheduler(clock),

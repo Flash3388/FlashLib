@@ -4,16 +4,19 @@ import java.util.Objects;
 
 public class Value {
 
+    private static final Value EMPTY = new Value();
+
     private final ValueType mType;
     private final Object mValue;
 
-    public Value() {
+    private Value() {
         mType = ValueType.EMPTY;
         mValue = null;
     }
 
     public Value(ValueType type, Object value) {
         Objects.requireNonNull(type, "type should not be null");
+        Objects.requireNonNull(value, "value should not be null");
         ensureTypeValid(type, value);
 
         mType = type;
@@ -58,6 +61,10 @@ public class Value {
 
     public static Value newStringArray(String[] value) {
         return new Value(ValueType.STRING_ARRAY, value);
+    }
+
+    public static Value empty() {
+        return EMPTY;
     }
 
     /**

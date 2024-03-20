@@ -10,7 +10,9 @@ import java.io.IOException;
 
 public class OptionChangeMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(1144, OptionChangeMessage::readFrom);
+    public static final MessageType TYPE = MessageType.create(1144,
+            OptionChangeMessage::readFrom,
+            OptionChangeMessage::writeInto);
 
     private final String mName;
     private final Object mValue;
@@ -33,14 +35,6 @@ public class OptionChangeMessage implements Message {
         return mValue;
     }
 
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-        output.writeUTF(mName);
-
-        TypedSerializer serializer = new TypedSerializer();
-        serializer.writeTyped(output, mValue);
-    }
-
     private static OptionChangeMessage readFrom(DataInput dataInput) throws IOException {
         String name = dataInput.readUTF();
 
@@ -48,5 +42,13 @@ public class OptionChangeMessage implements Message {
         Object value = serializer.readTyped(dataInput);
 
         return new OptionChangeMessage(name, value);
+    }
+
+    private static void writeInto(Message message, DataOutput dataOutput) throws IOException {
+        OptionChangeMessage actualMessage = (OptionChangeMessage) message;
+        dataOutput.writeUTF(actualMessage.mName);
+
+        TypedSerializer serializer = new TypedSerializer();
+        serializer.writeTyped(dataOutput, actualMessage.mValue);
     }
 }
