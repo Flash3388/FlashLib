@@ -1,159 +1,108 @@
 package com.flash3388.flashlib.net.channels.udp;
 
 import com.castle.util.closeables.Closeables;
-import com.castle.util.function.ThrowingFunction;
+import com.castle.util.function.ThrowingConsumer;
 import com.flash3388.flashlib.net.channels.IncomingData;
-import com.flash3388.flashlib.net.channels.NetChannel;
+import com.flash3388.flashlib.net.channels.IpNetAddress;
+import com.flash3388.flashlib.net.channels.NetAddress;
+import com.flash3388.flashlib.net.channels.RemoteConfigurableChannel;
+import com.flash3388.flashlib.net.channels.nio.ChannelListener;
+import com.flash3388.flashlib.net.channels.nio.ChannelUpdater;
+import com.flash3388.flashlib.net.channels.nio.UpdateRegistration;
 import org.slf4j.Logger;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.nio.channels.SelectionKey;
 
-public class UdpChannel implements NetChannel {
+public class UdpChannel implements RemoteConfigurableChannel {
 
-    private final SocketAddress mBindAddress;
-    protected final Logger mLogger;
-    private final Runnable mOnOpen;
-    private final ThrowingFunction<DatagramChannel, Closeable, IOException> mConfigureChannel;
+    private final Logger mLogger;
+    private final DatagramChannel mChannel;
 
-    private final AtomicReference<DatagramChannel> mUnderlyingChannel;
-    private final AtomicReference<SocketAddress> mRemoteAddress;
-    private Closeable mCustomCloseable;
-    private final Lock mChannelLock;
+    private SocketAddress mRemoteAddress;
 
-    public UdpChannel(SocketAddress remote,
-                      SocketAddress bindAddress,
-                      Logger logger,
-                      Runnable onOpen,
-                      ThrowingFunction<DatagramChannel, Closeable, IOException> configureChannel) {
-        mBindAddress = bindAddress;
+    public UdpChannel(SocketAddress bindAddress,
+                      ThrowingConsumer<DatagramChannel, IOException> configureChannel,
+                      Logger logger) throws IOException {
         mLogger = logger;
-        mOnOpen = onOpen;
-        mConfigureChannel = configureChannel;
+        mChannel = openChannel(bindAddress, configureChannel);
 
-        mUnderlyingChannel = new AtomicReference<>();
-        mRemoteAddress = new AtomicReference<>(remote);
-        mCustomCloseable = null;
-        mChannelLock = new ReentrantLock();
+        mRemoteAddress = null;
     }
 
-    public UdpChannel(SocketAddress remote, SocketAddress bindAddress, Logger logger, Runnable onOpen) {
-        this(remote, bindAddress, logger, onOpen, null);
-    }
-
-    public UdpChannel(SocketAddress bindAddress, Logger logger, Runnable onOpen) {
-        this(null, bindAddress, logger, onOpen);
-    }
-
-    public UdpChannel(SocketAddress bindAddress, Logger logger, Runnable onOpen,
-                      ThrowingFunction<DatagramChannel, Closeable, IOException> configureChannel) {
-        this(null, bindAddress, logger, onOpen, configureChannel);
-    }
-
-    public void setRemoteAddress(SocketAddress remoteAddress) {
-        if (remoteAddress == null || remoteAddress.equals(mRemoteAddress.get())) {
-            return;
+    @Override
+    public void setRemote(NetAddress info) {
+        if (!(info instanceof IpNetAddress)) {
+            throw new IllegalArgumentException("expected IpNetInfo");
         }
 
-        mLogger.debug("Configuring remote address to {}", remoteAddress);
-        mRemoteAddress.set(remoteAddress);
+        mRemoteAddress = ((IpNetAddress)info).getAddress();
+    }
+
+    @Override
+    public UpdateRegistration register(ChannelUpdater updater, ChannelListener listener) throws IOException {
+        return updater.register(mChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, listener);
+    }
+
+    @Override
+    public boolean isStreamed() {
+        return false;
     }
 
     @Override
     public IncomingData read(ByteBuffer buffer) throws IOException {
-        try {
-            //noinspection resource
-            DatagramChannel channel = openChannel();
-            SocketAddress remote = channel.receive(buffer);
-            if (remote == null) {
-                return new IncomingData(null, 0);
-            }
-            if (remote.equals(channel.getLocalAddress())) {
-                mLogger.debug("Received data from self");
-                return new IncomingData(null, 0);
-            }
-
-            mLogger.debug("Received data from {}", remote);
-            return new IncomingData(remote, buffer.position());
-        } catch (IOException e) {
-            close();
-            throw e;
+        SocketAddress remote = mChannel.receive(buffer);
+        if (remote == null) {
+            return new IncomingData(null, 0);
         }
+        if (remote.equals(mChannel.getLocalAddress())) {
+            return new IncomingData(null, 0);
+        }
+
+        return new IncomingData(new IpNetAddress(remote), buffer.position());
     }
 
     @Override
-    public void write(ByteBuffer buffer) throws IOException {
-        SocketAddress remote = mRemoteAddress.get();
-        if (remote == null) {
-            mLogger.debug("Remote address not configured");
-            return;
+    public int write(ByteBuffer buffer) throws IOException {
+        if (mRemoteAddress == null) {
+            mLogger.warn("Cannot write if remote address not configured");
+            return 0;
         }
 
-        try {
-            mLogger.debug("Sending data to {}", remote);
-
-            //noinspection resource
-            DatagramChannel channel = openChannel();
-            channel.send(buffer, remote);
-        } catch (IOException e) {
-            close();
-            throw e;
-        }
+        return mChannel.send(buffer, mRemoteAddress);
     }
 
     @Override
     public void close() throws IOException {
-        mChannelLock.lock();
-        try {
-            DatagramChannel channel = mUnderlyingChannel.getAndSet(null);
-            if (mCustomCloseable != null) {
-                Closeables.silentClose(mCustomCloseable);
-            }
-            Closeables.silentClose(channel);
-        } finally {
-            mChannelLock.unlock();
-        }
+        mChannel.close();
     }
 
-    private DatagramChannel openChannel() throws IOException {
-        DatagramChannel channel = mUnderlyingChannel.get();
-        if (channel == null) {
-            mChannelLock.lock();
-            try {
-                channel = mUnderlyingChannel.get();
-                if (channel != null) {
-                    return channel;
-                }
+    private DatagramChannel openChannel(SocketAddress bindAddress,
+                                        ThrowingConsumer<DatagramChannel, IOException> configureChannel) throws IOException {
+        DatagramChannel channel = null;
+        try {
+            mLogger.debug("Opening new UDP socket in non-blocking mode");
 
-                mLogger.debug("Opening new UDP socket in non-blocking mode");
+            channel = DatagramChannel.open();
+            channel.configureBlocking(false);
+            channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
 
-                channel = DatagramChannel.open();
-                channel.configureBlocking(false);
-                channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-                if (mConfigureChannel != null) {
-                    mCustomCloseable = mConfigureChannel.apply(channel);
-                }
-
-                channel.bind(mBindAddress);
-                mLogger.debug("UDP socket bound at {}", mBindAddress);
-
-                mOnOpen.run();
-                mUnderlyingChannel.set(channel);
-            } catch (IOException e) {
-                if (channel != null) {
-                    Closeables.silentClose(channel);
-                }
-                throw e;
-            } finally {
-                mChannelLock.unlock();
+            if (configureChannel != null) {
+                configureChannel.accept(channel);
             }
+
+            channel.bind(bindAddress);
+            mLogger.debug("UDP socket bound at {}", bindAddress);
+        } catch (IOException e) {
+            if (channel != null) {
+                Closeables.silentClose(channel);
+            }
+
+            throw e;
         }
 
         return channel;

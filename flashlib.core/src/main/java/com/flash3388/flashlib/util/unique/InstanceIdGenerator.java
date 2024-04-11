@@ -91,8 +91,12 @@ public class InstanceIdGenerator {
             // although not fool-proof, we'll use MAC address from the machine.
             // MAC addresses can actually change, but for now this will do.
             LOGGER.debug("Using MAC address for machine-id");
-            return NetInterfaces.getMacAddress();
-        } catch (IOException e) {
+            byte[] macAddress = NetInterfaces.getMacAddress();
+
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.update(macAddress);
+            return digest.digest();
+        } catch (IOException | NoSuchAlgorithmException e) {
             throw new IdGenerationException("failed retrieving MAC address", e);
         }
     }

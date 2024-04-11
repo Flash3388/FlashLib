@@ -2,12 +2,13 @@ package com.flash3388.flashlib.app.net;
 
 import com.flash3388.flashlib.annotations.MainThreadOnly;
 import com.flash3388.flashlib.net.hfcs.HfcsRegistry;
-import com.flash3388.flashlib.net.messaging.KnownMessageTypes;
+import com.flash3388.flashlib.net.messaging.MessageType;
 import com.flash3388.flashlib.net.messaging.Messenger;
 import com.flash3388.flashlib.net.obsr.ObjectStorage;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Set;
 
 /**
  * A packaged module allowing access to network functionalities to be used by the application.
@@ -60,7 +61,7 @@ public interface NetworkInterface {
      * @return new {@link Messenger}
      */
     @MainThreadOnly
-    Messenger newMessenger(KnownMessageTypes messageTypes, MessengerConfiguration configuration);
+    Messenger newMessenger(Set<? extends MessageType> messageTypes, MessengerConfiguration configuration);
 
     class MessengerConfiguration {
         public final boolean serverMode;

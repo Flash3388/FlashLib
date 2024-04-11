@@ -1,22 +1,21 @@
 package com.flash3388.flashlib.net.messaging;
 
 import com.flash3388.flashlib.time.Time;
-import com.flash3388.flashlib.util.unique.InstanceId;
 
-public class MessageMetadataImpl implements MessageMetadata {
+class MessageMetadataImpl implements MessageMetadata {
 
-    private final InstanceId mSender;
+    private final ChannelId mSender;
     private final Time mTimestamp;
     private final MessageType mType;
 
-    public MessageMetadataImpl(InstanceId sender, Time timestamp, MessageType type) {
+    MessageMetadataImpl(ChannelId sender, Time timestamp, MessageType type) {
         mSender = sender;
         mTimestamp = timestamp;
         mType = type;
     }
 
     @Override
-    public InstanceId getSender() {
+    public ChannelId getSender() {
         return mSender;
     }
 

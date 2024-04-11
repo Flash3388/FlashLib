@@ -14,6 +14,7 @@ import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
+import com.flash3388.flashlib.util.concurrent.NamedThreadFactory;
 import com.flash3388.flashlib.util.unique.InstanceId;
 import org.slf4j.Logger;
 
@@ -131,6 +132,11 @@ public class DelegatingRobotControl implements RobotControl {
     @Override
     public Watchdog newWatchdog(String name, Time timeout) {
         return mRobotControl.newWatchdog(name, timeout);
+    }
+
+    @Override
+    public NamedThreadFactory getThreadFactory() {
+        return mRobotControl.getThreadFactory();
     }
 
     @Override

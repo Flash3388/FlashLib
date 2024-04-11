@@ -1,94 +1,34 @@
 package com.flash3388.flashlib.app.net;
 
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServiceBase;
-import com.flash3388.flashlib.net.hfcs.impl.HfcsServices;
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.unique.InstanceId;
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.util.Objects;
 
 public class HfcsConfiguration {
 
-    interface Creator {
-        HfcsServiceBase create(InstanceId ourId, Clock clock) throws Exception;
-    }
+    final boolean isEnabled;
+    final boolean isTargeted;
+    final SocketAddress localAddress;
+    final SocketAddress remoteAddress;
 
-    final HfcsConfiguration.Creator creator;
-
-    private HfcsConfiguration(HfcsConfiguration.Creator creator) {
-        this.creator = creator;
+    private HfcsConfiguration(boolean isEnabled, boolean isTargeted, SocketAddress localAddress, SocketAddress remoteAddress) {
+        this.isEnabled = isEnabled;
+        this.isTargeted = isTargeted;
+        this.localAddress = localAddress;
+        this.remoteAddress = remoteAddress;
     }
 
     public static HfcsConfiguration disabled() {
-        return new HfcsConfiguration(null);
+        return new HfcsConfiguration(false, false, null, null);
     }
 
-    public static HfcsConfiguration replyToSenderMode(int bindPort) {
-        return new HfcsConfiguration((
-                ourId, clock)-> HfcsServices.autoReplyTarget(ourId, clock, new InetSocketAddress(bindPort)));
+    public static HfcsConfiguration targeted(SocketAddress localAddress, SocketAddress remoteAddress) {
+        Objects.requireNonNull(localAddress, "localAddress");
+        Objects.requireNonNull(remoteAddress, "remoteAddress");
+        return new HfcsConfiguration(true, true, localAddress, remoteAddress);
     }
 
-    public static HfcsConfiguration replyToSenderMode() {
-        return replyToSenderMode(HfcsServices.DEFAULT_PORT);
+    public static HfcsConfiguration replying(SocketAddress localAddress) {
+        Objects.requireNonNull(localAddress, "localAddress");
+        return new HfcsConfiguration(true, false, localAddress, null);
     }
-
-    public static HfcsConfiguration specificTargetMode(int bindPort, SocketAddress remote) {
-        return new HfcsConfiguration((
-                ourId, clock)-> HfcsServices.unicast(ourId, clock,
-                new InetSocketAddress(bindPort),
-                remote));
-    }
-
-    public static HfcsConfiguration specificTargetMode(SocketAddress remote) {
-        return specificTargetMode(HfcsServices.DEFAULT_PORT, remote);
-    }
-
-    public static HfcsConfiguration multicastMode(int bindPort,
-                                                  NetworkInterface networkInterface,
-                                                  InetAddress group,
-                                                  int remotePort) {
-        return new HfcsConfiguration((
-                ourId, clock)-> {
-            assert networkInterface.supportsMulticast();
-            return HfcsServices.multicast(ourId, clock,
-                    new InetSocketAddress(bindPort),
-                    remotePort,
-                    networkInterface,
-                    group);
-        });
-    }
-
-    public static HfcsConfiguration broadcastMode(SocketAddress bindAddress,
-                                                                       InetAddress broadcastAddress,
-                                                                       int remotePort) {
-        return new HfcsConfiguration((
-                ourId, clock)-> HfcsServices.broadcast(ourId, clock,
-                bindAddress,
-                broadcastAddress,
-                remotePort));
-    }
-
-    public static HfcsConfiguration broadcastMode(SocketAddress bindAddress,
-                                                                       int remotePort) {
-        return new HfcsConfiguration((
-                ourId, clock)-> HfcsServices.broadcast(ourId, clock,
-                bindAddress,
-                remotePort));
-    }
-
-    public static HfcsConfiguration broadcastMode(InterfaceAddress interfaceAddress, int bindPort, int remotePort) {
-        return broadcastMode(
-                new InetSocketAddress(interfaceAddress.getAddress(), bindPort),
-                interfaceAddress.getBroadcast(),
-                remotePort);
-    }
-
-    public static HfcsConfiguration broadcastMode(int bindPort, int remotePort) {
-        return broadcastMode(new InetSocketAddress(bindPort), remotePort);
-    }
-    
 }

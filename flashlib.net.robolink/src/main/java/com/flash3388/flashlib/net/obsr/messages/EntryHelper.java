@@ -18,6 +18,10 @@ public class EntryHelper {
 
     public static Value readValueFrom(DataInput input) throws IOException {
         ValueType type = readTypeFrom(input);
+        if (type == ValueType.EMPTY) {
+            return Value.empty();
+        }
+
         Object rawValue = readRawValueFrom(input, type);
         return new Value(type, rawValue);
     }

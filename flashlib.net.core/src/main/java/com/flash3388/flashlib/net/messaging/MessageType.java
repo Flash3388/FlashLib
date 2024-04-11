@@ -1,8 +1,10 @@
 package com.flash3388.flashlib.net.messaging;
 
 import com.castle.util.function.ThrowingFunction;
+import com.flash3388.flashlib.util.function.ThrowingBiConsumer;
 
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 
 /**
@@ -24,24 +26,42 @@ public interface MessageType {
     int getKey();
 
     /**
-     * Parse the given stream into message data.
-     * @return parsed message
+     * Read the given stream into message data.
+     *
+     * @return message from the stream.
+     * @throws IOException if an I/O error occurs.
      */
-    InMessage parse(DataInput dataInput) throws IOException;
+    Message read(DataInput dataInput) throws IOException;
+
+    /**
+     * Write the given message into a given stream.
+     *
+     * @param message message to write. Must be a message of the type represented by this object,
+     *                incompatible message will lead to undefined behaviour.
+     * @param dataOutput stream to write into.
+     * @throws IOException if an I/O error occurs.
+     */
+    void write(Message message, DataOutput dataOutput) throws IOException;
 
 
-    static MessageType create(int key, ThrowingFunction<DataInput, ? extends InMessage, IOException> parseFunction) {
-        return new Impl(key, parseFunction);
+    static <T extends Message> MessageType create(int key,
+                              ThrowingFunction<DataInput, T, IOException> readFunction,
+                              ThrowingBiConsumer<T, DataOutput, IOException> writeFunction) {
+        return new Impl<>(key, readFunction, writeFunction);
     }
 
-    class Impl implements MessageType {
+    class Impl<T extends Message> implements MessageType {
 
         private final int mKey;
-        private final ThrowingFunction<DataInput, ? extends InMessage, IOException> mParseFunction;
+        private final ThrowingFunction<DataInput, T, IOException> mReadFunction;
+        private final ThrowingBiConsumer<T, DataOutput, IOException> mWriteFunction;
 
-        public Impl(int key, ThrowingFunction<DataInput, ? extends InMessage, IOException> parseFunction) {
+        public Impl(int key,
+                    ThrowingFunction<DataInput, T, IOException> readFunction,
+                    ThrowingBiConsumer<T, DataOutput, IOException> writeFunction) {
             mKey = key;
-            mParseFunction = parseFunction;
+            mReadFunction = readFunction;
+            mWriteFunction = writeFunction;
         }
 
         @Override
@@ -50,8 +70,15 @@ public interface MessageType {
         }
 
         @Override
-        public InMessage parse(DataInput dataInput) throws IOException {
-            return mParseFunction.apply(dataInput);
+        public Message read(DataInput dataInput) throws IOException {
+            return mReadFunction.apply(dataInput);
+        }
+
+        @Override
+        public void write(Message message, DataOutput dataOutput) throws IOException {
+            //noinspection unchecked
+            T t = (T) message;
+            mWriteFunction.consume(t, dataOutput);
         }
     }
 }
