@@ -9,7 +9,7 @@ import com.flash3388.flashlib.scheduling.triggers.Trigger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public class TriggerBaseImpl implements Trigger {
 
@@ -36,6 +36,11 @@ public class TriggerBaseImpl implements Trigger {
     }
 
     @Override
+    public void whenActive(Supplier<Action> supplier) {
+        addStateListener(new StartOnState(TriggerState.ACTIVE, supplier));
+    }
+
+    @Override
     public void cancelWhenActive(Action action) {
         addStateListener(new CancelOnState(TriggerState.ACTIVE, action));
     }
@@ -51,8 +56,18 @@ public class TriggerBaseImpl implements Trigger {
     }
 
     @Override
+    public void whileActive(Supplier<Action> supplier) {
+        addStateListener(new RunOnState(TriggerState.ACTIVE, supplier));
+    }
+
+    @Override
     public void whenInactive(Action action) {
         addStateListener(new StartOnState(TriggerState.INACTIVE, action));
+    }
+
+    @Override
+    public void whenInactive(Supplier<Action> supplier) {
+        addStateListener(new StartOnState(TriggerState.INACTIVE, supplier));
     }
 
     @Override
@@ -70,11 +85,9 @@ public class TriggerBaseImpl implements Trigger {
         addStateListener(new RunOnState(TriggerState.INACTIVE, action));
     }
 
-    void update(BooleanSupplier supplier, TriggerActionController controller) {
-        boolean isConditionMet = supplier.getAsBoolean();
-        TriggerState newState = isConditionMet ? TriggerState.ACTIVE : TriggerState.INACTIVE;
-
-        setState(newState, controller);
+    @Override
+    public void whileInactive(Supplier<Action> supplier) {
+        addStateListener(new RunOnState(TriggerState.INACTIVE, supplier));
     }
 
     void setState(TriggerState newState, TriggerActionController controller) {

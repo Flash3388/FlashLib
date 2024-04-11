@@ -2,6 +2,7 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredEntry;
 import com.flash3388.flashlib.net.obsr.StoredObject;
+import com.flash3388.flashlib.scheduling.ExecutionStatus;
 import com.flash3388.flashlib.scheduling.Requirement;
 import com.flash3388.flashlib.scheduling.actions.Action;
 import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
@@ -12,16 +13,28 @@ import java.util.Arrays;
 public class ObsrActionContext {
 
     private final StoredObject mRootObject;
+    private final boolean mDeleteOnFinish;
+
     private final StoredEntry mStatus;
     private final StoredEntry mPhase;
+    private final StoredEntry mId;
+    private final StoredEntry mParentId;
     private final StoredEntry mClass;
     private final StoredEntry mName;
     private final StoredEntry mTimeout;
     private final StoredEntry mRequirements;
     private final StoredObject mPropertiesRoot;
 
-    public ObsrActionContext(StoredObject object) {
+    private boolean mIsDeleted;
+
+    public ObsrActionContext(StoredObject object,
+                             long id,
+                             long parentId,
+                             Action action,
+                             ActionConfiguration configuration,
+                             boolean deleteOnFinish) {
         mRootObject = object;
+        mDeleteOnFinish = deleteOnFinish;
 
         mStatus = object.getEntry("status");
         mStatus.setString(ExecutionStatus.PENDING.name());
@@ -29,19 +42,40 @@ public class ObsrActionContext {
         mPhase = object.getEntry("phase");
         mPhase.setString(ExecutionPhase.STARTUP.name());
 
+        mId = object.getEntry("scheduleId");
+        mId.setLong(id);
+
+        mParentId = object.getEntry("parentScheduleId");
+        mParentId.setLong(parentId);
+
         mClass = object.getEntry("class");
-        mClass.setString("");
+        mClass.setString(action.getClass().getName());
 
         mName = object.getEntry("name");
-        mName.setString("");
+        mName.setString(configuration.getName());
 
         mTimeout = object.getEntry("timeout");
-        mTimeout.setDouble(-1);
+        Time timeout = configuration.getTimeout();
+        mTimeout.setDouble(timeout.isValid() ? timeout.valueAsSeconds() : -1);
 
         mRequirements = object.getEntry("requirements");
-        mRequirements.setString("");
+        mRequirements.setString(Arrays.toString(configuration.getRequirements().toArray(new Requirement[0])));
 
         mPropertiesRoot = mRootObject.getChild("properties");
+
+        mIsDeleted = false;
+    }
+
+    public ObsrActionContext(StoredObject object,
+                             long id,
+                             Action action,
+                             ActionConfiguration configuration,
+                             boolean deleteOnFinish) {
+        this(object, id, -1, action, configuration, deleteOnFinish);
+    }
+
+    public boolean isActive() {
+        return !mIsDeleted;
     }
 
     public StoredObject getRootObject() {
@@ -50,19 +84,6 @@ public class ObsrActionContext {
 
     public StoredObject getPropertiesRoot() {
         return mPropertiesRoot;
-    }
-
-    public void updateFromAction(Action action) {
-        mClass.setString(action.getClass().getName());
-    }
-
-    public void updateFromConfiguration(ActionConfiguration configuration) {
-        mName.setString(configuration.getName());
-
-        Time timeout = configuration.getTimeout();
-        mTimeout.setDouble(timeout.isValid() ? timeout.valueAsSeconds() : -1);
-
-        mRequirements.setString(Arrays.toString(configuration.getRequirements().toArray(new Requirement[0])));
     }
 
     public void updateStatus(ExecutionStatus status) {
@@ -74,6 +95,13 @@ public class ObsrActionContext {
     }
 
     public void finished() {
+        if (mDeleteOnFinish) {
+            delete();
+        }
+    }
+
+    public void delete() {
+        mIsDeleted = true;
         mRootObject.delete();
     }
 }

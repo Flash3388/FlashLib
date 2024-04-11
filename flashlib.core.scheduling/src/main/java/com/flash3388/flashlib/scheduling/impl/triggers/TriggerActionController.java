@@ -4,7 +4,7 @@ import com.flash3388.flashlib.scheduling.actions.Action;
 
 public interface TriggerActionController {
 
-    void addActionToStartIfRunning(Action action);
+    void addActionToStartIfNotRunning(Action action);
     void addActionToStopIfRunning(Action action);
     void addActionToToggle(Action action);
 }

@@ -9,8 +9,9 @@ import com.flash3388.flashlib.time.Clock;
 import com.flash3388.flashlib.time.Time;
 import org.slf4j.Logger;
 
-public class ActionControlImpl implements ActionControl {
+public class ActionControlImpl extends ActionPropertyAccessorImpl implements ActionControl {
 
+    private final long mId;
     private final Action mAction;
     private final ActionConfiguration mConfiguration;
     private final ActionExecutionState mExecutionState;
@@ -20,12 +21,16 @@ public class ActionControlImpl implements ActionControl {
 
     private int mExecutionContextNextNum;
 
-    public ActionControlImpl(Action action,
+    public ActionControlImpl(long id,
+                             Action action,
                              ActionConfiguration configuration,
                              ActionExecutionState executionState,
                              ObsrActionContext obsrActionContext,
                              Clock clock,
                              Logger logger) {
+        super(obsrActionContext);
+        mId = id;
+
         mAction = action;
         mConfiguration = configuration;
         mExecutionState = executionState;
@@ -53,13 +58,26 @@ public class ActionControlImpl implements ActionControl {
 
     @Override
     public ExecutionContext createExecutionContext(Action action) {
-        StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(++mExecutionContextNextNum));
-        RunningActionContext context = new RunningActionContext(action,
-                mAction,
+        long id = ++mExecutionContextNextNum;
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
+        StoredObject object = mObsrActionContext.getRootObject().getChild(String.valueOf(id));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
                 object,
+                id,
+                mId,
+                action,
+                configuration,
+                true);
+
+        return new ExecutionContextImpl(
+                id,
+                action,
+                mId,
+                mAction,
+                configuration,
+                obsrActionContext,
                 mClock,
                 mLogger);
-        return new ExecutionContextImpl(mClock, mLogger, context);
     }
 
     @Override
@@ -70,30 +88,5 @@ public class ActionControlImpl implements ActionControl {
     @Override
     public void cancel() {
         mExecutionState.markForCancellation();
-    }
-
-    @Override
-    public void putBooleanProperty(String name, boolean value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setBoolean(value);
-    }
-
-    @Override
-    public void putIntProperty(String name, int value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setInt(value);
-    }
-
-    @Override
-    public void putLongProperty(String name, long value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setLong(value);
-    }
-
-    @Override
-    public void putDoubleProperty(String name, double value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setDouble(value);
-    }
-
-    @Override
-    public void putStringProperty(String name, String value) {
-        mObsrActionContext.getPropertiesRoot().getEntry(name).setString(value);
     }
 }

@@ -1,10 +1,15 @@
 package com.flash3388.flashlib.scheduling.actions;
 
 import com.flash3388.flashlib.scheduling.ActionControl;
+import com.flash3388.flashlib.scheduling.ExecutionContext;
+import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.SchedulerMode;
+import com.flash3388.flashlib.time.Time;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -84,7 +89,60 @@ public final class ActionsMock {
         }
     }
 
+    public static class ExecutionContextMocker {
+
+        private final Action mAction;
+        private ActionConfiguration mConfiguration;
+        private ExecutionContext.ExecutionResult mResult;
+
+        public ExecutionContextMocker(Action action) {
+            mAction = action;
+            mConfiguration = new ActionConfiguration();
+            mResult = ExecutionContext.ExecutionResult.STILL_RUNNING;
+        }
+
+        public ExecutionContextMocker mockWithConfiguration(ActionConfiguration configuration) {
+            mConfiguration = configuration;
+            return this;
+        }
+
+        public ExecutionContextMocker mockWithRequirements(Requirement... requirements) {
+            mConfiguration.requires(Arrays.asList(requirements));
+            return this;
+        }
+
+        public ExecutionContextMocker mockShouldRunInDisabled(boolean shouldRun) {
+            if (shouldRun) {
+                mConfiguration.addFlags(ActionFlag.RUN_ON_DISABLED);
+            } else {
+                mConfiguration.removeFlags(ActionFlag.RUN_ON_DISABLED);
+            }
+
+            return this;
+        }
+
+        public ExecutionContextMocker mockWithResult(ExecutionContext.ExecutionResult result) {
+            mResult = result;
+            return this;
+        }
+
+        public ExecutionContext build() {
+            ExecutionContext mock = mock(ExecutionContext.class);
+            when(mock.getAction()).thenReturn(mAction);
+            when(mock.getConfiguration()).thenReturn(mConfiguration);
+            when(mock.execute(any(SchedulerMode.class))).thenReturn(mResult);
+            when(mock.execute()).thenReturn(mResult);
+            when(mock.getState()).thenReturn(ExecutionState.executing(Time.INVALID, Time.INVALID));
+
+            return mock;
+        }
+    }
+
     public static ActionMocker actionMocker() {
         return new ActionMocker();
+    }
+
+    public static ExecutionContextMocker executionContextMocker(Action action) {
+        return new ExecutionContextMocker(action);
     }
 }

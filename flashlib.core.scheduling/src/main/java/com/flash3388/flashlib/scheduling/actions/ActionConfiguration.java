@@ -136,6 +136,10 @@ public class ActionConfiguration {
         return true;
     }
 
+    public boolean isPreferred() {
+        return hasFlags(ActionFlag.PREFERRED_FOR_REQUIREMENTS);
+    }
+
     public boolean shouldRunWhenDisabled() {
         return hasFlags(ActionFlag.RUN_ON_DISABLED);
     }

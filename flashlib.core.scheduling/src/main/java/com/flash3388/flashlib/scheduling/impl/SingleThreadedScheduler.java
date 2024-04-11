@@ -2,12 +2,17 @@ package com.flash3388.flashlib.scheduling.impl;
 
 import com.flash3388.flashlib.net.obsr.StoredObject;
 import com.flash3388.flashlib.scheduling.ActionGroupType;
+import com.flash3388.flashlib.scheduling.ActionRejectedException;
+import com.flash3388.flashlib.scheduling.DefaultActionRegistration;
+import com.flash3388.flashlib.scheduling.ExecutionContext;
 import com.flash3388.flashlib.scheduling.ExecutionState;
 import com.flash3388.flashlib.scheduling.Requirement;
+import com.flash3388.flashlib.scheduling.ScheduledAction;
 import com.flash3388.flashlib.scheduling.Scheduler;
 import com.flash3388.flashlib.scheduling.SchedulerMode;
 import com.flash3388.flashlib.scheduling.Subsystem;
 import com.flash3388.flashlib.scheduling.actions.Action;
+import com.flash3388.flashlib.scheduling.actions.ActionConfiguration;
 import com.flash3388.flashlib.scheduling.actions.ActionFlag;
 import com.flash3388.flashlib.scheduling.actions.ActionGroup;
 import com.flash3388.flashlib.scheduling.impl.triggers.ConditionBasedTrigger;
@@ -17,7 +22,6 @@ import com.flash3388.flashlib.scheduling.impl.triggers.TriggerActionControllerIm
 import com.flash3388.flashlib.scheduling.triggers.ManualTrigger;
 import com.flash3388.flashlib.scheduling.triggers.Trigger;
 import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.time.Time;
 import com.flash3388.flashlib.util.FlashLibMainThread;
 import com.flash3388.flashlib.util.logging.Logging;
 import org.slf4j.Logger;
@@ -43,25 +47,26 @@ public class SingleThreadedScheduler implements Scheduler {
     private final FlashLibMainThread mMainThread;
 
     private final StoredObject mRootObject;
-    private final Map<Action, RunningActionContext> mPendingActions;
-    private final Map<Action, RunningActionContext> mRunningActions;
+    private final Map<Action, ExecutionContext> mPendingActions;
+    private final Map<Action, ExecutionContext> mRunningActions;
     private final Collection<Action> mActionsToRemove;
     private final Collection<GenericTrigger> mTriggers;
     private final Map<Requirement, Action> mRequirementsUsage;
-    private final Map<Subsystem, Action> mDefaultActions;
+    private final Map<Subsystem, RegisteredDefaultAction> mDefaultActions;
 
+    private final TriggerActionControllerImpl mTriggerActionController;
     private boolean mCanModifyRunningActions;
     private long mActionIdNext;
 
     SingleThreadedScheduler(Clock clock,
                             FlashLibMainThread mainThread,
                             StoredObject rootObject,
-                            Map<Action, RunningActionContext> pendingActions,
-                            Map<Action, RunningActionContext> runningActions,
+                            Map<Action, ExecutionContext> pendingActions,
+                            Map<Action, ExecutionContext> runningActions,
                             Collection<Action> actionsToRemove,
                             Collection<GenericTrigger> triggers,
                             Map<Requirement, Action> requirementsUsage,
-                            Map<Subsystem, Action> defaultActions) {
+                            Map<Subsystem, RegisteredDefaultAction> defaultActions) {
         mClock = clock;
         mMainThread = mainThread;
         mRootObject = rootObject;
@@ -72,6 +77,7 @@ public class SingleThreadedScheduler implements Scheduler {
         mRequirementsUsage = requirementsUsage;
         mDefaultActions = defaultActions;
 
+        mTriggerActionController = new TriggerActionControllerImpl();
         mCanModifyRunningActions = true;
         mActionIdNext = 0;
     }
@@ -89,28 +95,23 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void start(Action action) {
+    public ScheduledAction start(Action action) {
         mMainThread.verifyCurrentThread();
 
         if (mPendingActions.containsKey(action) || mRunningActions.containsKey(action)) {
             throw new IllegalArgumentException("Action already started");
         }
 
-        StoredObject object = mRootObject.getChild(String.valueOf(++mActionIdNext));
-        RunningActionContext context = new RunningActionContext(action, object, mClock, LOGGER);
-
-        if (!tryStartingAction(context)) {
-            mPendingActions.put(action, context);
-            LOGGER.debug("Action {} pending", context);
-        }
+        return startAction(action);
     }
 
     @Override
     public void cancel(Action action) {
         mMainThread.verifyCurrentThread();
 
-        RunningActionContext context = mPendingActions.remove(action);
+        ExecutionContext context = mPendingActions.remove(action);
         if (context != null) {
+            context.interrupt();
             LOGGER.debug("Action {} removed (from pending)", context);
             return;
         }
@@ -145,11 +146,9 @@ public class SingleThreadedScheduler implements Scheduler {
             return ExecutionState.pending();
         }
 
-        RunningActionContext context = mRunningActions.get(action);
+        ExecutionContext context = mRunningActions.get(action);
         if (context != null) {
-            Time runTime = context.getRunTime();
-            Time timeLeft = context.getTimeLeft();
-            return ExecutionState.executing(runTime, timeLeft);
+            return context.getState();
         }
 
         return ExecutionState.notRunning();
@@ -163,16 +162,24 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
         }
 
-        mPendingActions.values().removeIf(context -> predicate.test(context.getAction()));
+        for (Iterator<ExecutionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            ExecutionContext context = iterator.next();
+
+            if (predicate.test(context.getAction())) {
+                iterator.remove();
+                context.interrupt();
+                LOGGER.debug("Action {} removed (from pending)", context);
+            }
+        }
 
         mCanModifyRunningActions = false;
         try {
-            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-                RunningActionContext context = iterator.next();
+            for (Iterator<ExecutionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                ExecutionContext context = iterator.next();
 
                 if (predicate.test(context.getAction())) {
-                    cancelAndEnd(context);
                     iterator.remove();
+                    cancelAndEnd(context);
                 }
             }
         } finally {
@@ -193,14 +200,21 @@ public class SingleThreadedScheduler implements Scheduler {
             throw new IllegalStateException("cannot cancel actions in bulk while action modification is disabled");
         }
 
-        mPendingActions.clear();
+        for (Iterator<ExecutionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            ExecutionContext context = iterator.next();
 
+            iterator.remove();
+            context.interrupt();
+            LOGGER.debug("Action {} removed (from pending)", context);
+        }
+
+        // since we iterate over the running actions, we should allow modifications to them.
         mCanModifyRunningActions = false;
         try {
-            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-                RunningActionContext context = iterator.next();
-                cancelAndEnd(context);
+            for (Iterator<ExecutionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                ExecutionContext context = iterator.next();
                 iterator.remove();
+                cancelAndEnd(context);
             }
         } finally {
             mCanModifyRunningActions = true;
@@ -208,14 +222,44 @@ public class SingleThreadedScheduler implements Scheduler {
     }
 
     @Override
-    public void setDefaultAction(Subsystem subsystem, Action action) {
+    public DefaultActionRegistration setDefaultAction(Subsystem subsystem, Action action) {
         mMainThread.verifyCurrentThread();
 
-        if (!action.getConfiguration().getRequirements().contains(subsystem)) {
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
+        if (!configuration.getRequirements().contains(subsystem)) {
             throw new IllegalArgumentException("action should have subsystem has requirement");
         }
 
-        mDefaultActions.put(subsystem, action);
+        long id = ++mActionIdNext;
+        StoredObject object = mRootObject.getChild(String.valueOf(id));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
+                object,
+                id,
+                action,
+                configuration,
+                false);
+
+        RegisteredDefaultAction registeredAction = new RegisteredDefaultAction(id, action, configuration, obsrActionContext, subsystem);
+        RegisteredDefaultAction lastRegistered = mDefaultActions.put(subsystem, registeredAction);
+        if (lastRegistered != null) {
+            LOGGER.warn("Default action {} for subsystem {} was replaced with {}",
+                    lastRegistered.getAction(), subsystem, action);
+            lastRegistered.removed();
+        }
+
+        return new DefaultActionRegistrationImpl(registeredAction);
+    }
+
+    @Override
+    public Optional<DefaultActionRegistration> getDefaultActionRegistration(Subsystem subsystem) {
+        mMainThread.verifyCurrentThread();
+
+        RegisteredDefaultAction registered = mDefaultActions.get(subsystem);
+        if (registered == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new DefaultActionRegistrationImpl(registered));
     }
 
     @Override
@@ -234,17 +278,25 @@ public class SingleThreadedScheduler implements Scheduler {
 
         for (Iterator<Action> iterator = mActionsToRemove.iterator(); iterator.hasNext();) {
             Action action = iterator.next();
-            RunningActionContext context = mRunningActions.remove(action);
+            ExecutionContext context = mRunningActions.remove(action);
+
+            iterator.remove();
+
             if (context != null) {
                 cancelAndEnd(context);
             }
-
-            iterator.remove();
         }
 
-        //noinspection Java8CollectionRemoveIf
-        for (Iterator<RunningActionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
-            RunningActionContext context = iterator.next();
+        for (Iterator<ExecutionContext> iterator = mPendingActions.values().iterator(); iterator.hasNext();) {
+            ExecutionContext context = iterator.next();
+
+            // the action may have being marked for cancellation from an outside source
+            ExecutionState state = context.getState();
+            if (state.isFinished()) {
+                iterator.remove();
+                LOGGER.debug("Action {} removed (from pending)", context);
+                continue;
+            }
 
             if (tryStartingAction(context)) {
                 iterator.remove();
@@ -252,9 +304,23 @@ public class SingleThreadedScheduler implements Scheduler {
         }
 
         if (!mode.isDisabled()) {
-            for (Map.Entry<Subsystem, Action> entry : mDefaultActions.entrySet()) {
-                if (canStartDefaultAction(entry.getValue())) {
-                    start(entry.getValue());
+            for (Map.Entry<Subsystem, RegisteredDefaultAction> entry : mDefaultActions.entrySet()) {
+                RegisteredDefaultAction action = entry.getValue();
+                if (canStartDefaultAction(action.getConfiguration())) {
+                    try {
+                        // we shouldn't allow pending here because canStartDefaultAction verifies that we won't
+                        // be pending, and we shouldn't start default actions if they would be pending.
+                        ScheduledAction scheduledAction = startAction(
+                                action.getId(),
+                                action.getAction(),
+                                action.getConfiguration(),
+                                action.getObsrActionContext(),
+                                false);
+                        action.updateStarted(scheduledAction);
+                    } catch (ActionRejectedException e) {
+                        // this should never occur, but if it did, then it's likely a bug
+                        LOGGER.error("Default action was rejected during start attempt {}", action.getAction(), e);
+                    }
                 }
             }
         }
@@ -302,38 +368,79 @@ public class SingleThreadedScheduler implements Scheduler {
         return new ActionGroupImpl(this, LOGGER, policy);
     }
 
+    private ScheduledAction startAction(long id,
+                                        Action action,
+                                        ActionConfiguration configuration,
+                                        ObsrActionContext obsrActionContext,
+                                        boolean allowPending) {
+        ExecutionContext context = new ExecutionContextImpl(
+                id,
+                action,
+                configuration,
+                obsrActionContext,
+                mClock,
+                LOGGER);
+        ScheduledAction future = new ScheduledActionImpl(context, obsrActionContext);
+
+
+        if (!tryStartingAction(context)) {
+            if (allowPending) {
+                mPendingActions.put(action, context);
+                LOGGER.debug("Action {} pending", context);
+            } else {
+                throw new ActionRejectedException(action, "cannot acquire requirements for action");
+            }
+        }
+
+        return future;
+    }
+
+    private ScheduledAction startAction(Action action) {
+        long id = ++mActionIdNext;
+        ActionConfiguration configuration = new ActionConfiguration(action.getConfiguration());
+        StoredObject object = mRootObject.getChild(String.valueOf(id));
+        ObsrActionContext obsrActionContext = new ObsrActionContext(
+                object,
+                id,
+                action,
+                configuration,
+                true);
+
+        return startAction(id, action, configuration, obsrActionContext, true);
+    }
+
     private void executeTriggers() {
-        // while in this method, calls to start and cancel methods cannot occur due
-        // to modifications of the collections.
-        // since this implementation is meant for single-thread, then such calls
-        // can only occur from within other actions.
         mCanModifyRunningActions = false;
         try {
-            TriggerActionControllerImpl controller = new TriggerActionControllerImpl();
+            mTriggerActionController.clear();
             for (GenericTrigger trigger : mTriggers) {
-                trigger.update(controller);
+                trigger.update(mTriggerActionController);
             }
 
             // calls to isRunning prior to cancel or start are valid here
             // as this scheduler is singlethreaded and thus this info is not
             // updated behind our backs.
 
-            for (Action action : controller.getActionsToStopIfRunning()) {
+            for (Action action : mTriggerActionController.getActionsToStopIfRunning()) {
                 if (isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to cancel action {}, which is running, cancelling", action);
                     cancel(action);
                 }
             }
 
-            for (Action action : controller.getActionsToToggle()) {
+            for (Action action : mTriggerActionController.getActionsToToggle()) {
                 if (!isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to toggle action {}, which is not running, starting", action);
                     start(action);
                 } else {
+                    LOGGER.debug("A trigger has requested to toggle action {}, which is running, cancelling", action);
                     cancel(action);
                 }
             }
 
-            for (Action action : controller.getActionsToStartIfRunning()) {
+            for (Action action : mTriggerActionController.getActionsToStartIfNotRunning()) {
                 if (!isRunning(action)) {
+                    LOGGER.debug("A trigger has requested to start action {}, which is not running, starting", action);
                     start(action);
                 }
             }
@@ -349,20 +456,15 @@ public class SingleThreadedScheduler implements Scheduler {
         // can only occur from within other actions.
         mCanModifyRunningActions = false;
         try {
-            for (Iterator<RunningActionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
-                RunningActionContext context = iterator.next();
+            for (Iterator<ExecutionContext> iterator = mRunningActions.values().iterator(); iterator.hasNext();) {
+                ExecutionContext context = iterator.next();
+                ExecutionContext.ExecutionResult result = context.execute(mode);
 
-                if (mode.isDisabled() && !context.shouldRunInDisabled()) {
-                    context.markForCancellation();
-                    LOGGER.warn("Action {} is not allowed to run in disabled. Cancelling", context);
-                }
-
-                if (context.iterate()) {
-                    // finished execution
-                    removeFromRequirements(context);
+                if (result == ExecutionContext.ExecutionResult.FINISHED) {
                     iterator.remove();
 
-                    LOGGER.debug("Action {} finished", context);
+                    // finished execution
+                    onActionEnd(context);
                 }
             }
         } finally {
@@ -370,13 +472,13 @@ public class SingleThreadedScheduler implements Scheduler {
         }
     }
 
-    private Set<RunningActionContext> getConflictingOnRequirements(RunningActionContext context) {
-        Set<RunningActionContext> conflicts = new HashSet<>();
-        for (Requirement requirement : context.getRequirements()) {
+    private Set<ExecutionContext> getConflictingOnRequirements(ExecutionContext context) {
+        Set<ExecutionContext> conflicts = new HashSet<>();
+        for (Requirement requirement : context.getConfiguration().getRequirements()) {
             Action current = mRequirementsUsage.get(requirement);
             if (current != null) {
-                RunningActionContext currentContext = mRunningActions.get(current);
-                if (currentContext.isPreferred()) {
+                ExecutionContext currentContext = mRunningActions.get(current);
+                if (currentContext.getConfiguration().isPreferred()) {
                     // cannot cancel it as it is the preferred one.
                     // will have to wait for it to finish
 
@@ -393,57 +495,56 @@ public class SingleThreadedScheduler implements Scheduler {
         return conflicts;
     }
 
-    private void setOnRequirements(RunningActionContext context) {
-        for (Requirement requirement : context.getRequirements()) {
+    private void setOnRequirements(ExecutionContext context) {
+        for (Requirement requirement : context.getConfiguration().getRequirements()) {
             mRequirementsUsage.put(requirement, context.getAction());
         }
     }
 
-    private void removeFromRequirements(RunningActionContext context) {
-        for (Requirement requirement : context.getRequirements()) {
+    private void removeFromRequirements(ExecutionContext context) {
+        for (Requirement requirement : context.getConfiguration().getRequirements()) {
             mRequirementsUsage.remove(requirement);
         }
     }
 
-    private boolean tryStartingAction(RunningActionContext context) {
+    private boolean tryStartingAction(ExecutionContext context) {
         if (!mCanModifyRunningActions) {
             LOGGER.debug("Cannot modify running actions");
             return false;
         }
 
-        Set<RunningActionContext> conflicts = getConflictingOnRequirements(context);
+        Set<ExecutionContext> conflicts = getConflictingOnRequirements(context);
         if (conflicts == null) {
+            LOGGER.debug("New action is unable to supersede running conflicts");
             return false;
         }
 
         conflicts.forEach((conflict)-> {
-            cancelAndEnd(conflict);
-            mRunningActions.remove(conflict.getAction());
-
             LOGGER.warn("Action {} has conflict with {}. Canceling old.",
                     context, conflict);
+
+            cancelAndEnd(conflict);
+            mRunningActions.remove(conflict.getAction());
         });
 
         // no conflicts, let's start
 
-        context.markStarted();
         setOnRequirements(context);
         mRunningActions.put(context.getAction(), context);
-
-        LOGGER.debug("Action {} started running", context);
+        context.start();
 
         return true;
     }
 
-    private boolean canStartDefaultAction(Action action) {
-        for (Requirement requirement : action.getConfiguration().getRequirements()) {
+    private boolean canStartDefaultAction(ActionConfiguration configuration) {
+        for (Requirement requirement : configuration.getRequirements()) {
             if (mRequirementsUsage.containsKey(requirement)) {
                 return false;
             }
         }
 
-        for (RunningActionContext context : mPendingActions.values()) {
-            if (!Collections.disjoint(context.getRequirements(), action.getConfiguration().getRequirements())) {
+        for (ExecutionContext context : mPendingActions.values()) {
+            if (!Collections.disjoint(context.getConfiguration().getRequirements(), configuration.getRequirements())) {
                 return false;
             }
         }
@@ -451,11 +552,12 @@ public class SingleThreadedScheduler implements Scheduler {
         return true;
     }
 
-    private void cancelAndEnd(RunningActionContext context) {
-        context.markForCancellation();
-        context.iterate();
-        removeFromRequirements(context);
+    private void cancelAndEnd(ExecutionContext context) {
+        context.interrupt();
+        onActionEnd(context);
+    }
 
-        LOGGER.debug("Action {} finished", context);
+    private void onActionEnd(ExecutionContext context) {
+        removeFromRequirements(context);
     }
 }
