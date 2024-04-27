@@ -6,7 +6,7 @@ package com.flash3388.flashlib.net.messaging;
  *
  * @since FlashLib 3.2.0
  */
-public interface Message extends InMessage, OutMessage {
+public interface Message {
 
     MessageType getType();
 }

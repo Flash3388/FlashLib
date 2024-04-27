@@ -1,12 +1,12 @@
 package com.flash3388.flashlib.robot.hfcs.control;
 
-import com.flash3388.flashlib.net.hfcs.OutData;
+import com.flash3388.flashlib.io.Serializable;
 import com.flash3388.flashlib.util.unique.InstanceId;
 
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class TargetedControlData implements OutData {
+public class TargetedControlData implements Serializable {
 
     private final InstanceId mTargetId;
     private final RobotControlData mData;

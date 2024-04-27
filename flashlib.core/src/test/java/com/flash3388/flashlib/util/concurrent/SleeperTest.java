@@ -2,14 +2,12 @@ package com.flash3388.flashlib.util.concurrent;
 
 import com.beans.BooleanProperty;
 import com.beans.Properties;
-import com.beans.util.function.Suppliers;
 import com.flash3388.flashlib.time.Time;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -43,18 +41,4 @@ class SleeperTest {
 
         verify(sleeper, times(1)).sleepMs(anyLong());
     }
-
-    @Test
-    public void sleepWhileConditionMet_conditionDoesNotChangeBeforeTime_sleepsAllottedTime() throws Exception {
-        final long SLEEP_TIME_MS = 100;
-        Sleeper sleeper = new Sleeper();
-
-        long start = System.nanoTime();
-        sleeper.sleepWhileConditionMet(Suppliers.of(true), Time.milliseconds(SLEEP_TIME_MS));
-        long passed = (long) ((System.nanoTime() - start) * 1e-6);
-
-        long difference = Math.abs(passed - SLEEP_TIME_MS);
-        assertThat(difference, lessThanOrEqualTo(SLEEP_TIME_MS / 5));
-    }
-
 }

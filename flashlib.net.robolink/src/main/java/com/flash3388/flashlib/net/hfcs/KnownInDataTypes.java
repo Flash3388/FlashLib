@@ -4,20 +4,20 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KnownInDataTypes {
+class KnownInDataTypes {
 
-    private final Map<Integer, InType<?>> mTypeMap;
+    private final Map<Integer, HfcsInType<?>> mTypeMap;
 
-    public KnownInDataTypes() {
+    KnownInDataTypes() {
         mTypeMap = new ConcurrentHashMap<>();
     }
 
-    public void put(InType<?> type) {
+    public void put(HfcsInType<?> type) {
         mTypeMap.put(type.getKey(), type);
     }
 
-    public InType<?> get(int key) {
-        InType<?> type = mTypeMap.get(key);
+    public HfcsInType<?> get(int key) {
+        HfcsInType<?> type = mTypeMap.get(key);
         if (type == null) {
             throw new NoSuchElementException(String.valueOf(key));
         }

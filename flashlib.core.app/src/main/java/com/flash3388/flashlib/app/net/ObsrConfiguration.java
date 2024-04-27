@@ -1,36 +1,52 @@
 package com.flash3388.flashlib.app.net;
 
-import com.flash3388.flashlib.net.obsr.impl.ObsrNodeServiceBase;
-import com.flash3388.flashlib.net.obsr.impl.ObsrPrimaryNodeService;
-import com.flash3388.flashlib.net.obsr.impl.ObsrSecondaryNodeService;
-import com.flash3388.flashlib.time.Clock;
-import com.flash3388.flashlib.util.unique.InstanceId;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Objects;
 
 public class ObsrConfiguration {
 
-    interface Creator {
-        ObsrNodeServiceBase create(InstanceId ourId, Clock clock) throws Exception;
+    private static final int DEFAULT_SERVER_PORT = 4156;
+
+    final boolean isEnabled;
+    final boolean isLocal;
+    final boolean isPrimaryMode;
+    final SocketAddress serverAddress;
+
+    private ObsrConfiguration(boolean isEnabled, boolean isLocal, boolean isPrimaryMode, SocketAddress serverAddress) {
+        this.isEnabled = isEnabled;
+        this.isLocal = isLocal;
+        this.isPrimaryMode = isPrimaryMode;
+        this.serverAddress = serverAddress;
     }
 
-    final Creator creator;
-
-    public ObsrConfiguration(Creator creator) {
-        this.creator = creator;
+    private ObsrConfiguration() {
+        this(false, false, false, null);
     }
 
     public static ObsrConfiguration disabled() {
-        return new ObsrConfiguration(null);
+        return new ObsrConfiguration();
+    }
+
+    public static ObsrConfiguration primaryNode(SocketAddress bindAddress) {
+        Objects.requireNonNull(bindAddress, "bindAddress");
+        return new ObsrConfiguration(true, false, true, bindAddress);
     }
 
     public static ObsrConfiguration primaryNode() {
-        return new ObsrConfiguration(ObsrPrimaryNodeService::new);
+        return primaryNode(new InetSocketAddress("0.0.0.0", DEFAULT_SERVER_PORT));
     }
 
-    public static ObsrConfiguration primaryNode(String bindAddress) {
-        return new ObsrConfiguration((ourId, clock)-> new ObsrPrimaryNodeService(ourId, clock, bindAddress));
+    public static ObsrConfiguration secondaryNode(SocketAddress primaryNodeAddress) {
+        Objects.requireNonNull(primaryNodeAddress, "primaryNodeAddress");
+        return new ObsrConfiguration(true, false, false, primaryNodeAddress);
     }
 
     public static ObsrConfiguration secondaryNode(String primaryNodeAddress) {
-        return new ObsrConfiguration((ourId, clock)-> new ObsrSecondaryNodeService(ourId, clock, primaryNodeAddress));
+        return secondaryNode(new InetSocketAddress(primaryNodeAddress, DEFAULT_SERVER_PORT));
+    }
+
+    public static ObsrConfiguration localOnly() {
+        return new ObsrConfiguration(true, true, false, null);
     }
 }

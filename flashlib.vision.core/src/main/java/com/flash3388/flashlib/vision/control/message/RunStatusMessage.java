@@ -9,7 +9,9 @@ import java.io.IOException;
 
 public class RunStatusMessage implements Message {
 
-    public static final MessageType TYPE = MessageType.create(1133, RunStatusMessage::readFrom);
+    public static final MessageType TYPE = MessageType.create(1133,
+            RunStatusMessage::readFrom,
+            RunStatusMessage::writeInto);
 
     private final boolean mStatus;
 
@@ -26,14 +28,14 @@ public class RunStatusMessage implements Message {
         return mStatus;
     }
 
-    @Override
-    public void writeInto(DataOutput output) throws IOException {
-        output.writeBoolean(mStatus);
-    }
-
     private static RunStatusMessage readFrom(DataInput dataInput) throws IOException {
         return new RunStatusMessage(
                 dataInput.readBoolean()
         );
+    }
+
+    private static void writeInto(Message message, DataOutput dataOutput) throws IOException {
+        RunStatusMessage actualMessage = (RunStatusMessage) message;
+        dataOutput.writeBoolean(actualMessage.mStatus);
     }
 }
